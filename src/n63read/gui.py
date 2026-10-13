@@ -194,14 +194,15 @@ class App(tk.Tk):
         right = ttk.Frame(body)
         body.add(right, weight=2)
 
-        self.tree = ttk.Treeview(right, columns=("v", "u", "id", "note"),
+        self.tree = ttk.Treeview(right, columns=("v", "u", "arg", "id", "note"),
                                  show="tree headings", height=10)
         self.tree.heading("#0", text="Channel")
-        for c, t, w in (("v", "Value", 110), ("u", "Unit", 70),
-                        ("id", "DID", 80), ("note", "Status", 150)):
+        for c, t, w in (("v", "Value", 100), ("u", "Unit", 60),
+                        ("arg", "Name", 150), ("id", "DID", 70),
+                        ("note", "Status", 140)):
             self.tree.heading(c, text=t)
             self.tree.column(c, width=w, anchor="w")
-        self.tree.column("#0", width=250)
+        self.tree.column("#0", width=260)
         self.tree.pack(fill="both", expand=True)
 
         row = ttk.Frame(right)
@@ -220,17 +221,31 @@ class App(tk.Tk):
 
     # -- picker ----------------------------------------------------------
 
+    @staticmethod
+    def _english(meta):
+        """English description, falling back to BMW's German where it's blank."""
+        text = (meta.get("INFO_EN") or "").strip()
+        if text in ("", "-"):
+            text = (meta.get("INFO") or "").strip()
+        return "" if text == "-" else text
+
     def _refilter(self):
         term = self.filter_var.get().lower().strip()
         self.picker.delete(0, "end")
         self._visible = []
-        for name, meta in sorted(self.catalog.items()):
-            label = "%s  -  %s" % (name, meta["INFO"][:60])
-            if not term or term in label.lower():
+        # Undescribed channels sort last and show just their code name.
+        rows = sorted(self.catalog.items(),
+                      key=lambda kv: (not self._english(kv[1]),
+                                      self._english(kv[1]).lower(), kv[0]))
+        for name, meta in rows:
+            english = self._english(meta)
+            label = "%s  -  %s" % (english[:70], name) if english else name
+            # Search the German and the code name too: the English is a
+            # glossary translation and sometimes leaves words untranslated.
+            haystack = " ".join((label, meta.get("INFO") or "")).lower()
+            if not term or term in haystack:
                 self.picker.insert("end", label)
                 self._visible.append(name)
-                if len(self._visible) >= 800:
-                    break
 
     def _add(self):
         for i in self.picker.curselection():
@@ -240,8 +255,8 @@ class App(tk.Tk):
             meta = self.catalog[name]
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
-            self.tree.insert("", "end", iid=name, text=name,
-                             values=("", meta["EINHEIT"], meta["ID"], ""))
+            self.tree.insert("", "end", iid=name, text=self._english(meta) or name,
+                             values=("", meta["EINHEIT"], name, meta["ID"], ""))
         self._push_channels()
 
     def _remove(self):
