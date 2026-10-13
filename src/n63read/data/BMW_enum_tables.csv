@@ -1,0 +1,1449 @@
+﻿table_name,value,text_de,text_en
+DTCSNAPSHOTIDENTIFIER,0x00,ISO_RESERVED,ISO_RESERVED
+DTCSNAPSHOTIDENTIFIER,0x01,CONDITION_BYTE,CONDITION_BYTE
+DTCSNAPSHOTIDENTIFIER,0x02,HFK,HFK
+DTCSNAPSHOTIDENTIFIER,0x03,HLZ,HLZ
+DTCSNAPSHOTIDENTIFIER,0xFF,RECORD_UNKNOWN,RECORD_UNKNOWN
+TAB_ZEIT_USER_INFO,0x00,Combi-Time,Combi-Tin thee
+TAB_ZEIT_USER_INFO,0x01,DMCS,DMCS
+TAB_ZEIT_USER_INFO,0x02,IEEE802.1AS,IEEE802.1AS
+TAB_ZEIT_USER_INFO,0x03,invalid,Invalid
+FEHLERKLASSE,0x00,"out of sync, no time available","Out of sync, no time available"
+FEHLERKLASSE,0x01,"insync, ms ECU overall, not comparable","Insync, ms ECU overall, not comparable"
+FEHLERKLASSE,0x02,"ms ECU overall, not comparable","Ms ECU overall, not comparable"
+FEHLERKLASSE,0x03,"ms ECU overall, comparable","Ms ECU overall, comparable"
+FEHLERKLASSE,0x04,"ms ECU overall, not comparable","Ms ECU overall, not comparable"
+FEHLERKLASSE,0x05,"ms ECU overall, comparable","Ms ECU overall, comparable"
+FEHLERKLASSE,0x06,invalid,Invalid
+FEHLERKLASSE,0x07,invalid,Invalid
+TAB_CBS_STATUS,0x00,%,%
+TAB_CBS_STATUS,0x01,Weg,Distance
+TAB_CBS_STATUS,0x02,Tage,Days
+TAB_CBS_STATUS,0x0F,Signal ungültig,Signal invalid
+TAB_CBS_STATUS,0xFF,nicht erlaubt,Not erlaubt
+TAB_CBS_MONAT,0x00,Status ok,Status ok
+TAB_CBS_MONAT,0x10,Messung basiert auf Ersatzwerten,Messung basiert on Ersatzwerten
+TAB_CBS_MONAT,0x20,Status ok und Baukasten Client,Status ok and Baukasten Client
+TAB_CBS_MONAT,0x30,Baukasten Client und Messung basiert auf Ersatzwerten,Baukasten Client and Messung basiert on Ersatzwerten
+TAB_CBS_MONAT,0x40,CBS Daten manipuliert,CBS data manipuliert
+TAB_CBS_MONAT,0x50,CBS Daten manipuliert und Messung basiert auf Ersatzwerten,CBS data manipuliert and Messung basiert on Ersatzwerten
+TAB_CBS_MONAT,0x60,CBS Daten manipuliert und Baukasten Client,CBS data manipuliert and Baukasten Client
+TAB_CBS_MONAT,0x70,"CBS Daten manipuliert, Messung basiert auf Ersatzwerten und Baukasten Client","CBS data manipuliert, Messung basiert on Ersatzwerten and Baukasten Client"
+TAB_CBS_MONAT,0x80,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0x90,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xA0,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xB0,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xC0,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xD0,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xE0,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xF0,Signal ungültig,Signal invalid
+TAB_CBS_MONAT,0xFF,nicht erlaubt,Not erlaubt
+TAB_RUECK_GRUND,0x00,nicht relevant,Not relevant
+TAB_RUECK_GRUND,0x01,Januar,Januar
+TAB_RUECK_GRUND,0x02,Februar,Februar
+TAB_RUECK_GRUND,0x03,März,März
+TAB_RUECK_GRUND,0x04,April,April
+TAB_RUECK_GRUND,0x05,Mai,Mai
+TAB_RUECK_GRUND,0x06,Juni,Juni
+TAB_RUECK_GRUND,0x07,Juli,Juli
+TAB_RUECK_GRUND,0x08,August,August
+TAB_RUECK_GRUND,0x09,September,September
+TAB_RUECK_GRUND,0x0A,Oktober,Oktober
+TAB_RUECK_GRUND,0x0B,November,November
+TAB_RUECK_GRUND,0x0C,Dezember,Dezember
+TAB_RUECK_GRUND,0x0E,Neues Steuergerät,Neues control unit
+TAB_RUECK_GRUND,0x0F,"Wert ungültig, Datum nicht verfügbar","Value invalid, Datum not available"
+TAB_RUECK_GRUND,0xFF,nicht erlaubt,Not erlaubt
+ARG_0X5F74_D,0x00,keine Verhinderungsgründe,No Verhinderungsgründe
+ARG_0X5F74_D,0x01,ungültiger km-Stand,Invalider km-Stand
+ARG_0X5F74_D,0x02,ungültiges Borddatum,Invalides Borddatum
+ARG_0X5F74_D,0x03,ungültige Codierung,Invalide coding
+ARG_0X5F74_D,0x04,SG nicht initialisiert oder im falschen Zustand,SG not initialisiert or in the incorrecten state
+ARG_0X5F74_D,0x05,Fahrzeug im fahrenden Zustand,Vehicle in the fahrenden state
+ARG_0X5F74_D,0x06,Reset beim CBR nicht erlaubt,Reset during CBR not erlaubt
+ARG_0X5F74_D,0x07,Reset bei aktivem Ersatzwert nicht erlaubt,Reset at activeem Ersatzwert not erlaubt
+ARG_0X5F74_D,0x08,Fahrzeug im Zustand Wohnen,Vehicle in the state Wwithoutn
+ARG_0X5F74_D,0xFE,keine Angabe,No Angabe
+ARG_0X5F74_D,0xFF,ungültig,Invalid
+BF_0X4002_0,0x007B,Vmax Slave,Vmax Slave
+BF_0X4002_0,0x0095,Vmax Master,Vmax Master
+BF_0X4002_0,0x0097,Pmax Slave,Pmax Slave
+BF_0X4002_0,0x0098,Pmax Master,Pmax Master
+BF_0X4002_0,0xFFFF,unbekannt,Unknown
+BF_DISC_3BIT,0,0,0
+BF_DISC_3BIT,1,1,1
+BF_DISC_3BIT,2,2,2
+BF_DISC_3BIT,3,3,3
+BF_DISC_3BIT,0xFF,Wert ungültig,Value invalid
+BF_DISC_BYTE_28,0x0,0,0
+BF_DISC_BYTE_28,0x2,1,1
+BF_DISC_BYTE_28,0x4,2,2
+BF_DISC_BYTE_28,0x6,3,3
+BF_DISC_BYTE_28,0x8,4,4
+BF_DISC_BYTE_28,0xA,5,5
+BF_DISC_BYTE_28,0xC,6,6
+BF_DISC_BYTE_28,0xE,7,7
+BF_DISC_BYTE_28,0xFF,Wert ungültig,Value invalid
+BF_DISC_NIBBLE_HIGH,0,0,0
+BF_DISC_NIBBLE_HIGH,1,1,1
+BF_DISC_NIBBLE_HIGH,2,2,2
+BF_DISC_NIBBLE_HIGH,3,3,3
+BF_DISC_NIBBLE_HIGH,4,4,4
+BF_DISC_NIBBLE_HIGH,5,5,5
+BF_DISC_NIBBLE_HIGH,6,6,6
+BF_DISC_NIBBLE_HIGH,7,7,7
+BF_DISC_NIBBLE_HIGH,8,8,8
+BF_DISC_NIBBLE_HIGH,9,9,9
+BF_DISC_NIBBLE_HIGH,10,A,A
+BF_DISC_NIBBLE_HIGH,11,B,B
+BF_DISC_NIBBLE_HIGH,12,C,C
+BF_DISC_NIBBLE_HIGH,13,D,D
+BF_DISC_NIBBLE_HIGH,14,E,E
+BF_DISC_NIBBLE_HIGH,15,F,F
+BF_DISC_NIBBLE_HIGH,0xFF,Wert ungültig,Value invalid
+BF_DISC_NIBBLE_HIGH_E0,0x00,0,0
+BF_DISC_NIBBLE_HIGH_E0,0x10,1,1
+BF_DISC_NIBBLE_HIGH_E0,0x20,2,2
+BF_DISC_NIBBLE_HIGH_E0,0x30,3,3
+BF_DISC_NIBBLE_HIGH_E0,0x40,4,4
+BF_DISC_NIBBLE_HIGH_E0,0x50,5,5
+BF_DISC_NIBBLE_HIGH_E0,0x60,6,6
+BF_DISC_NIBBLE_HIGH_E0,0x70,7,7
+BF_DISC_NIBBLE_HIGH_E0,0x80,8,8
+BF_DISC_NIBBLE_HIGH_E0,0x90,9,9
+BF_DISC_NIBBLE_HIGH_E0,0xA0,A,A
+BF_DISC_NIBBLE_HIGH_E0,0xB0,B,B
+BF_DISC_NIBBLE_HIGH_E0,0xC0,C,C
+BF_DISC_NIBBLE_HIGH_E0,0xD0,D,D
+BF_DISC_NIBBLE_HIGH_E0,0xE0,E,E
+BF_DISC_NIBBLE_HIGH_E0,0xF0,F,F
+BF_DISC_NIBBLE_HIGH_E0,0xFF,Wert ungültig,Value invalid
+BETRIEBSMODE,0,0,0
+BETRIEBSMODE,0x20,1,1
+BETRIEBSMODE,0x40,2,2
+BETRIEBSMODE,0x60,3,3
+BETRIEBSMODE,0x80,4,4
+BETRIEBSMODE,0xA0,5,5
+BETRIEBSMODE,0xC0,6,6
+BETRIEBSMODE,0xE0,7,7
+BETRIEBSMODE,0xFF,Wert ungültig,Value invalid
+CBS_6_LESEN_CHOV_CBS_CBR,0x00,Allgemeiner Fertigungs- und Energiesparmode,Allgemeiner Fertigungs- and Energiesparmode
+CBS_6_LESEN_CHOV_CBS_CBR,0x01,Spezieller Energiesparmode,Spezieller Energiesparmode
+CBS_6_LESEN_CHOV_CBS_CBR,0x02,ECOS-Mode,ECOS-Mode
+CBS_6_LESEN_CHOV_CBS_CBR,0x03,MOST-Mode,MOST-Mode
+CBS_6_LESEN_CHOV_CBS_CBR,0x04,Rollenmode,Rollenmode
+CBS_6_LESEN_CHOV_CBS_CBR,0xFF,ungültiger Betriebsmode,Invalider Betriebsmode
+F2XXBLACKLIST,0x0,CBR; CBS Service nicht anzeigen,CBR; CBS Service not anzeigen
+F2XXBLACKLIST,0x1,CBR; CBx Service anzeigen,CBR; CBx Service anzeigen
+F2XXBLACKLIST,0x2,CBS; CBS Service nicht anzeigen,CBS; CBS Service not anzeigen
+F2XXBLACKLIST,0x3,CBS; CBx Service anzeigen,CBS; CBx Service anzeigen
+FSCTYP1RET,0x00,nicht vorhanden,Not present
+FSCTYP1RET,0x01,SWT Classic light,SWT Classic light
+FSCTYP1RET,0x02,SWT Classic full,SWT Classic full
+FSCTYP1RET,0x03,SWT pre-enable light,SWT pre-enable light
+FSCTYP1RET,0x04,SWT pre-enable full,SWT pre-enable full
+FSCTYP1RET,0x05,SWT short,SWT short
+FSCTYP1RET,0xFF,unbekannt,Unknown
+FUMWELTTEXTE,0x00,FSC nicht auslesen,FSC not offlesen
+FUMWELTTEXTE,0x01,FSC retten,FSC retten
+FUMWELTTEXTE,0xFF,unbekannt,Unknown
+OBD_RADAR_DIAGKANID_3_TAB,0x0001,HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heizleistungsdiagnose fuer Zweipunktlambdasonden,HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heizleistungsdiagnose for Zweipunktlambdasonden
+OBD_RADAR_DIAGKANID_3_TAB,0x0002,MisfDet_nrFltIdCat_C Katalysatorschaedigende Aussetzer,MisfDet_nrFltIdCat_C catalytic converterschaedigende misfire
+OBD_RADAR_DIAGKANID_3_TAB,0x0003,MisfDet_nrFltIdEmi_C Emissionsrelevante Aussetzer,MisfDet_nrFltIdEmi_C Emissionsrelevante misfire
+OBD_RADAR_DIAGKANID_3_TAB,0x0004,"EGSDO2_nrFltIdS1B1RdrTran_C LSU Dynamic diagnosis, Transition Time Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrTran_C LSU Dynamic diagnosis, Transition Tin thee Sensor1 Bank1"
+OBD_RADAR_DIAGKANID_3_TAB,0x0005,"EGSDO2_nrFltIdS1B1RdrIdn_C LSU Dynamic  diagnosis, Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrIdn_C LSU Dynamic diagnosis, Sensor1 Bank1"
+OBD_RADAR_DIAGKANID_3_TAB,0x0006,UEGO_nrFltIdHeatrS1B1_C Diagnose Heizungsregelung LSU,UEGO_nrFltIdHeatrS1B1_C Diagnose heatingsregelung LSU
+OBD_RADAR_DIAGKANID_3_TAB,0x0007,"EGSDO2_nrFltIdS1B1RdrDly_C LSU Dynamic diagnosis, Delay Time,Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrDly_C LSU Dynamic diagnosis, Delay Tin thee,Sensor1 Bank1"
+OBD_RADAR_DIAGKANID_3_TAB,0x0008,"PFltMon_nrObdPfilDmgTotPBasdB1_C Ausbaudiagnose Otto-Partikelfilter (OPF), P-Basiert","PFltMon_nrObdPfilDmgTotPBasdB1_C Ausbaudiagnose Otto-particulate filter (OPF), P-Basiert"
+OBD_RADAR_DIAGKANID_3_TAB,0x0009,CIb_nrRawFltId_C Zylinderindividuelle Lambda-Fehler auf einer Roh-Lambda Schnittstelle,CIb_nrRawFltId_C cylinderindividuelle Lambda-fault on ar Roh-Lambda interface
+OBD_RADAR_DIAGKANID_3_TAB,0x000A,FlMA_FRAId_C Gemischadaption Diagnose,FlMA_FRAId_C mixtureadaption Diagnose
+OBD_RADAR_DIAGKANID_3_TAB,0x000B,TWCD_nrFltldObdRdrB1 Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfaehigkeit,TWCD_nrFltldObdRdrB1 catalytic converterdiagnose by Bestimmung the Sauerstoffspeicherfaehigkeit
+OBD_RADAR_DIAGKANID_3_TAB,0x000C,FlSply_nrFltIdObdRdrId57_C Diagnose Plausibilitaetspruefung Kraftstoffversorgungssystem BDE (rail pressure control during cold start strategie),FlSply_nrFltIdObdRdrId57_C Diagnose plausibilityspruefung Kraftstoffversorgungssystem BDE (rail pressure control during cold start strategie)
+OBD_RADAR_DIAGKANID_3_TAB,0x000D,FlSply_nrFltIdObdRdrId58_C Diagnose Plausibilitaetspruefung Kraftstoffversorgungssystem BDE(rail pressure control ),FlSply_nrFltIdObdRdrId58_C Diagnose plausibilityspruefung Kraftstoffversorgungssystem BDE(rail pressure control )
+OBD_RADAR_DIAGKANID_3_TAB,0x000E,GEVlv_nrFltIdObdRdrIntk_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrIntk_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_3_TAB,0x000F,GEVlv_nrFltIdObdRdrOutl_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrOutl_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_3_TAB,0x0010,SwSABMW_nrFltIdBMWchdiag_fac_ObdNormTot_C Lastpunktdiagnose Kaltstart für Hybridfahrzeuge,SwSABMW_nrFltIdBMWchdiag_fac_ObdNormTot_C loadpunktdiagnose cold start for Hybridfahrzeuge
+OBD_RADAR_DIAGKANID_3_TAB,0x0011,"EGSDO2_nrFltIdS1B1RdrOffsTrip_C LSU Offseterkennung nach Tested Flag, Sonde 1 Bank1","EGSDO2_nrFltIdS1B1RdrOffsTrip_C LSU offseterkennung to Tested Flag, Sonde 1 Bank1"
+OBD_RADAR_DIAGKANID_3_TAB,0x0012,EGSDU_nrFltIdS2B1RdrTar_C LSF Hubprüfung Sensor 2 Bank 1,EGSDU_nrFltIdS2B1RdrTar_C LSF Hubprüfung Sensor 2 Bank 1
+OBD_RADAR_DIAGKANID_3_TAB,0x0013,"EGSDU_nrFltIdS2B1RdrTran_C LSF Dynamic diagnosis, Transition Time Sensor 2 Bank 1","EGSDU_nrFltIdS2B1RdrTran_C LSF Dynamic diagnosis, Transition Tin thee Sensor 2 Bank 1"
+OBD_RADAR_DIAGKANID_3_TAB,0x0014,"EGSDU_nrFltIdS2B1RdrDly_C LSF Dynamic diagnosis, Delay Time Sensor 2 Bank 1","EGSDU_nrFltIdS2B1RdrDly_C LSF Dynamic diagnosis, Delay Tin thee Sensor 2 Bank 1"
+OBD_RADAR_DIAGKANID_3_TAB,0x0015,FlSply_nrFltIdObdRdrId59_C Diagnose Plausibilitaetspruefung Kraftstoffversorgungssystem BDE(rail pressure control ),FlSply_nrFltIdObdRdrId59_C Diagnose plausibilityspruefung Kraftstoffversorgungssystem BDE(rail pressure control )
+OBD_RADAR_DIAGKANID_3_TAB,0x0016,CEngDsT_nrFltIdObdRdr_C OBD-Radar fuer Kuehlmitteltemperatursensor,CEngDsT_nrFltIdObdRdr_C OBD-Radar for coolanttemperatursensor
+OBD_RADAR_DIAGKANID_3_TAB,0x0017,GEVlv_nrFltIdObdRdrColdStrtIntk_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrColdStrtIntk_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_3_TAB,0x0018,GEVlv_nrFltIdObdRdrColdStrtOutl_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrColdStrtOutl_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_3_TAB,0x0019,ExhMgT_nrFltIdCSERSCatH_C Normierter Diagnosewert fuer die Sekundaerluftdiagnose und die CSERS-Diagnose,ExhMgT_nrFltIdCSERSCatH_C Normierter Diagnosewert for the Sekundaerluftdiagnose and the CSERS-Diagnose
+OBD_RADAR_DIAGKANID_3_TAB,0x001A,MisfDet_nrFltIdEmiStrt_C Emissionsrelevante Aussetzer nach Start,MisfDet_nrFltIdEmiStrt_C Emissionsrelevante misfire to Start
+OBD_RADAR_DIAGKANID_3_TAB,0x001B,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Diagnose Kurbelgehäuseentlüftung (PCV) Leckage,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Diagnose Kurbelgehäuseentlüftung (PCV) Leckage
+OBD_RADAR_DIAGKANID_3_TAB,0x001C,AirMon_nrFltIdObdRdrCrkcsRatyDiag_C Diagnose Kurbelgehäuseentlüftung (PCV) Plausibilität,AirMon_nrFltIdObdRdrCrkcsRatyDiag_C Diagnose Kurbelgehäuseentlüftung (PCV) plausibility
+OBD_RADAR_DIAGKANID_3_TAB,0x001D,InjSys_nrInjrFlowDiag_C Diagnose Injektor Kleinstmengenadaption (CVO),InjSys_nrInjrFlowDiag_C Diagnose injector small quantity adaptation (CVO)
+OBD_RADAR_DIAGKANID_3_TAB,0x001E,"PFltMon_nrObdPfilDmgTotTBasdB1_C Ausbaudiagnose OPF Bank1, T-Basiert","PFltMon_nrObdPfilDmgTotTBasdB1_C Ausbaudiagnose OPF Bank1, T-Basiert"
+OBD_RADAR_DIAGKANID_3_TAB,0x001F,"PFltMon_nrObdPfilDmgTotTBasdB2_C Ausbaudiagnose OPF Bank2, T-Basiert","PFltMon_nrObdPfilDmgTotTBasdB2_C Ausbaudiagnose OPF Bank2, T-Basiert"
+OBD_RADAR_DIAGKANID_3_TAB,0x0020,CstrPurg_nrFltIdRatLoLoad_C Ratio i.O. Counts zu Gesamtcounts bzgl. DTEV 1. ELS Druckprüfung VVT,CstrPurg_nrFltIdRatLoLoad_C Ratio i.O. Counts to Gesamtcounts bzgl. DTEV 1. ELS pressureprüfung VVT
+OBD_RADAR_DIAGKANID_3_TAB,0x0021,CstrPurg_nrFltIdRatLoLoadGd_C Ratio i.O. Counts zu Gesamtcounts bzgl. DTEV 1. ELS Druckprüfung GD,CstrPurg_nrFltIdRatLoLoadGd_C Ratio i.O. Counts to Gesamtcounts bzgl. DTEV 1. ELS pressureprüfung GD
+OBD_RADAR_DIAGKANID_3_TAB,0x0022,CstrPurg_nrFltIdRatHiLoad_C Ratio i.O. Counts zu Gesamtcounts bzgl. DTEV 2. ELS,CstrPurg_nrFltIdRatHiLoad_C Ratio i.O. Counts to Gesamtcounts bzgl. DTEV 2. ELS
+OBD_RADAR_DIAGKANID_3_TAB,0x0023,CstrPurg_nrFltIdRatSSPDynChk_C Ratio i.O. Counts zu Gesamtcounts bzgl. DDSSSP,CstrPurg_nrFltIdRatSSPDynChk_C Ratio i.O. Counts to Gesamtcounts bzgl. DDSSSP
+OBD_RADAR_DIAGKANID_3_TAB,0x0024,CstrPurg_nrFltIdRatDurnLoLoad_C Durchschnittliche Öffnungszeit bzgl. DTEV 1. ELS Druckprüfung VVT,CstrPurg_nrFltIdRatDurnLoLoad_C Durchschnittliche Öffnungszeit bzgl. DTEV 1. ELS pressureprüfung VVT
+OBD_RADAR_DIAGKANID_3_TAB,0x0025,CstrPurg_nrFltIdRatDurnLoLoadGd_C Durchschnittliche Öffnungszeit bzgl. DTEV 1. ELS Druckprüfung GD,CstrPurg_nrFltIdRatDurnLoLoadGd_C Durchschnittliche Öffnungszeit bzgl. DTEV 1. ELS pressureprüfung GD
+OBD_RADAR_DIAGKANID_3_TAB,0x0026,CstrPurg_nrFltIdRatDurnHiLoad_C Durchschnittliche Öffnungszeit bzgl. DTEV 2. ELS,CstrPurg_nrFltIdRatDurnHiLoad_C Durchschnittliche Öffnungszeit bzgl. DTEV 2. ELS
+OBD_RADAR_DIAGKANID_3_TAB,0x0027,ExhMgT_nrFltIdCSERSCatHIdleLoad_C Zündwinkeldiagnose während Katheizen (Leerlauf),ExhMgT_nrFltIdCSERSCatHIdleLoad_C Zündwinkeldiagnose during Katheizen (idle)
+OBD_RADAR_DIAGKANID_3_TAB,0x0028,ExhMgT_nrFltIdCSERSCatHPartLoad_C Zündwinkeldiagnose während Katheizen (Teillast),ExhMgT_nrFltIdCSERSCatHPartLoad_C Zündwinkeldiagnose during Katheizen (Teillast)
+OBD_RADAR_DIAGKANID_3_TAB,0x0029,DLLR_nrCatHeatgMaxSpdErr_C Leerlauf-Drehzahlfehler Max während Katheizen,DLLR_nrCatHeatgMaxSpdErr_C idle-speedfehler Max during Katheizen
+OBD_RADAR_DIAGKANID_3_TAB,0x002A,DLLR_nrCatHeatgMinSpdErr_C Leerlauf-Drehzahlfehler Min während Katheizen,DLLR_nrCatHeatgMinSpdErr_C idle-speedfehler Min during Katheizen
+OBD_RADAR_DIAGKANID_3_TAB,0x002B,DLLR_nrHomMaxSpdErr_C Leerlauf-Drehzahlfehler Max Warmlauf,DLLR_nrHomMaxSpdErr_C idle-speedfehler Max Warmlauf
+OBD_RADAR_DIAGKANID_3_TAB,0x002C,DLLR_nrHomMinSpdErr_C Leerlauf-Drehzahlfehler Min Warmlauf,DLLR_nrHomMinSpdErr_C idle-speedfehler Min Warmlauf
+OBD_RADAR_DIAGKANID_3_TAB,0x002D,InjSys_nrCatHeatgDiag_C Diagnose DOE während Katheizen Fehlerrate,InjSys_nrCatHeatgDiag_C Diagnose DOE during Katheizen faultrate
+OBD_RADAR_DIAGKANID_3_TAB,0x002E,InjSys_nrCmbCatHeatgDiagMn_C Diagnose der Einspritzausgabe im Katheizen DSM Anbindung,InjSys_nrCmbCatHeatgDiagMn_C Diagnose the injectionausgabe in the Katheizen DSM Anbindung
+OBD_RADAR_DIAGKANID_3_TAB,0x0064,HEGO_nrFltIdS2B2RiDHtgObdRdr_C Heizleistungsdiagnose fuer Zweipunktlambdasonden Bank2,HEGO_nrFltIdS2B2RiDHtgObdRdr_C Heizleistungsdiagnose for Zweipunktlambdasonden Bank2
+OBD_RADAR_DIAGKANID_3_TAB,0x0065,"EGSDO2_nrFltIdS1B2RdrTran_C LSU Dynamic diagnosis, Transition Time Sensor1 Bank2","EGSDO2_nrFltIdS1B2RdrTran_C LSU Dynamic diagnosis, Transition Tin thee Sensor1 Bank2"
+OBD_RADAR_DIAGKANID_3_TAB,0x0066,"EGSDO2_nrFltIdS1B2RdrIdn_C LSU Dynamic diagnosis, Sensor1 Bank2","EGSDO2_nrFltIdS1B2RdrIdn_C LSU Dynamic diagnosis, Sensor1 Bank2"
+OBD_RADAR_DIAGKANID_3_TAB,0x0067,UEGO_nrFltIdHeatrS1B2_C Diagnose Heizungsregelung LSU Bank2,UEGO_nrFltIdHeatrS1B2_C Diagnose heatingsregelung LSU Bank2
+OBD_RADAR_DIAGKANID_3_TAB,0x0068,"EGSDO2_nrFltIdS1B2RdrDly_C LSU Dynamic diagnosis, Delay Time,Sensor1 Bank2","EGSDO2_nrFltIdS1B2RdrDly_C LSU Dynamic diagnosis, Delay Tin thee,Sensor1 Bank2"
+OBD_RADAR_DIAGKANID_3_TAB,0x0069,"PFltMon_nrObdPfilDmgTotPBasdB2_C Ausbaudiagnose Otto-Partikelfilter (OPF) Bank2, P-Basiert","PFltMon_nrObdPfilDmgTotPBasdB2_C Ausbaudiagnose Otto-particulate filter (OPF) Bank2, P-Basiert"
+OBD_RADAR_DIAGKANID_3_TAB,0x006A,TWCD_nrFltldObdRdrB2 Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfaehigkeit Bank2,TWCD_nrFltldObdRdrB2 catalytic converterdiagnose by Bestimmung the Sauerstoffspeicherfaehigkeit Bank2
+OBD_RADAR_DIAGKANID_3_TAB,0x006B,"EGSDO2_nrFltIdS1B2RdrOffsTrip_C Offseterkennung nach Tested Flag, Sonde 1 Bank2","EGSDO2_nrFltIdS1B2RdrOffsTrip_C offseterkennung to Tested Flag, Sonde 1 Bank2"
+OBD_RADAR_DIAGKANID_3_TAB,0x006C,EGSDU_nrFltIdS2B2RdrTar_C LSF Hubprüfung Sensor 2 Bank 2,EGSDU_nrFltIdS2B2RdrTar_C LSF Hubprüfung Sensor 2 Bank 2
+OBD_RADAR_DIAGKANID_3_TAB,0x006D,"EGSDU_nrFltIdS2B2RdrTran_C LSF Dynamic diagnosis, Transition Time Sensor 2 Bank 2","EGSDU_nrFltIdS2B2RdrTran_C LSF Dynamic diagnosis, Transition Tin thee Sensor 2 Bank 2"
+OBD_RADAR_DIAGKANID_3_TAB,0x006E,"EGSDU_nrFltIdS2B2RdrDly_C LSF Dynamic diagnosis, Delay Time,Sensor2 Bank2","EGSDU_nrFltIdS2B2RdrDly_C LSF Dynamic diagnosis, Delay Tin thee,Sensor2 Bank2"
+OBD_RADAR_DIAGKANID_3_TAB,0xFFFF,Kanal-ID nicht Definiert,Kanal-ID not Definiert
+OBD_RADAR_DIAGKANID_TAB,0x0001,HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heizleistungsdiagnose fuer Zweipunktlambdasonden,HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heizleistungsdiagnose for Zweipunktlambdasonden
+OBD_RADAR_DIAGKANID_TAB,0x0002,MisfDet_nrFltIdCat_C Katalysatorschaedigende Aussetzer,MisfDet_nrFltIdCat_C catalytic converterschaedigende misfire
+OBD_RADAR_DIAGKANID_TAB,0x0003,MisfDet_nrFltIdEmi_C Emissionsrelevante Aussetzer,MisfDet_nrFltIdEmi_C Emissionsrelevante misfire
+OBD_RADAR_DIAGKANID_TAB,0x0004,"EGSDO2_nrFltIdS1B1RdrTran_C LSU Dynamic diagnosis, Transition Time Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrTran_C LSU Dynamic diagnosis, Transition Tin thee Sensor1 Bank1"
+OBD_RADAR_DIAGKANID_TAB,0x0005,"EGSDO2_nrFltIdS1B1RdrIdn_C LSU Dynamic  diagnosis, Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrIdn_C LSU Dynamic diagnosis, Sensor1 Bank1"
+OBD_RADAR_DIAGKANID_TAB,0x0006,UEGO_nrFltIdHeatrS1B1_C Diagnose Heizungsregelung LSU,UEGO_nrFltIdHeatrS1B1_C Diagnose heatingsregelung LSU
+OBD_RADAR_DIAGKANID_TAB,0x0007,"EGSDO2_nrFltIdS1B1RdrDly_C LSF Dynamic diagnosis, Delay Time,Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrDly_C LSF Dynamic diagnosis, Delay Tin thee,Sensor1 Bank1"
+OBD_RADAR_DIAGKANID_TAB,0x0008,PFltMon_nrObdPfilDmgTotPBasdB1_C Ausbaudiagnose Otto-Partikelfilter (OPF),PFltMon_nrObdPfilDmgTotPBasdB1_C Ausbaudiagnose Otto-particulate filter (OPF)
+OBD_RADAR_DIAGKANID_TAB,0x0009,CIb_nrRawFltId_C Zylinderindividuelle Lambda-Fehler auf einer Roh-Lambda Schnittstelle,CIb_nrRawFltId_C cylinderindividuelle Lambda-fault on ar Roh-Lambda interface
+OBD_RADAR_DIAGKANID_TAB,0x000A,FlMA_FRAId_C Gemischadaption Diagnose,FlMA_FRAId_C mixtureadaption Diagnose
+OBD_RADAR_DIAGKANID_TAB,0x000B,TWCD_nrFltldObdRdrB1 Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfaehigkeit,TWCD_nrFltldObdRdrB1 catalytic converterdiagnose by Bestimmung the Sauerstoffspeicherfaehigkeit
+OBD_RADAR_DIAGKANID_TAB,0x000C,FlSply_nrFltIdObdRdrId57_C Diagnose Plausibilitaetspruefung Kraftstoffversorgungssystem BDE (rail pressure control during cold start strategie),FlSply_nrFltIdObdRdrId57_C Diagnose plausibilityspruefung Kraftstoffversorgungssystem BDE (rail pressure control during cold start strategie)
+OBD_RADAR_DIAGKANID_TAB,0x000D,FlSply_nrFltIdObdRdrId58_C Diagnose Plausibilitaetspruefung Kraftstoffversorgungssystem BDE(rail pressure control ),FlSply_nrFltIdObdRdrId58_C Diagnose plausibilityspruefung Kraftstoffversorgungssystem BDE(rail pressure control )
+OBD_RADAR_DIAGKANID_TAB,0x000E,GEVlv_nrFltIdObdRdrIntk_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrIntk_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_TAB,0x000F,GEVlv_nrFltIdObdRdrOutl_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrOutl_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_TAB,0x0010,SwSABMW_nrFltIdBMWchdiag_fac_ObdNormTot_C Lastpunktdiagnose Kaltstart fuer Hybridfahrzeuge,SwSABMW_nrFltIdBMWchdiag_fac_ObdNormTot_C loadpunktdiagnose cold start for Hybridfahrzeuge
+OBD_RADAR_DIAGKANID_TAB,0x0011,"EGSDO2_nrFltIdS1B1RdrOffsTrip_C LSU Offseterkennung nach Tested Flag, Sonde 1 Bank1","EGSDO2_nrFltIdS1B1RdrOffsTrip_C LSU offseterkennung to Tested Flag, Sonde 1 Bank1"
+OBD_RADAR_DIAGKANID_TAB,0x0012,"EGSDU_nrFltIdS2B1RdrTar_C LSF Dynamic diagnosis, Delay Time Sensor 2 Bank 1","EGSDU_nrFltIdS2B1RdrTar_C LSF Dynamic diagnosis, Delay Tin thee Sensor 2 Bank 1"
+OBD_RADAR_DIAGKANID_TAB,0x0013,EGSDU_nrFltIdS2B1RdrTran_C LSF Hubpruefung Sensor 2 Bank 1,EGSDU_nrFltIdS2B1RdrTran_C LSF Hubpruefung Sensor 2 Bank 1
+OBD_RADAR_DIAGKANID_TAB,0x0014,"EGSDU_nrFltIdS2B1RdrDly_C LSF Dynamic diagnosis, Transition Time Sensor 2 Bank 1","EGSDU_nrFltIdS2B1RdrDly_C LSF Dynamic diagnosis, Transition Tin thee Sensor 2 Bank 1"
+OBD_RADAR_DIAGKANID_TAB,0x0015,FlSply_nrFltIdObdRdrId59_C Diagnose Plausibilitaetspruefung Kraftstoffversorgungssystem BDE(rail pressure control ),FlSply_nrFltIdObdRdrId59_C Diagnose plausibilityspruefung Kraftstoffversorgungssystem BDE(rail pressure control )
+OBD_RADAR_DIAGKANID_TAB,0x0016,CEngDsT_nrFltIdObdRdr_C OBD-Radar fuer Kuehlmitteltemperatursensor,CEngDsT_nrFltIdObdRdr_C OBD-Radar for coolanttemperatursensor
+OBD_RADAR_DIAGKANID_TAB,0x0017,GEVlv_nrFltIdObdRdrColdStrtIntk_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrColdStrtIntk_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_TAB,0x0018,GEVlv_nrFltIdObdRdrColdStrtOutl_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose fuer OBD-Radar,GEVlv_nrFltIdObdRdrColdStrtOutl_C Ausgabe the Ergebnisse the camshaftnstellerdiagnose for OBD-Radar
+OBD_RADAR_DIAGKANID_TAB,0x0019,ExhMgT_nrFltIdCSERSCatH_C Normierter Diagnosewert fuer die Sekundaerluftdiagnose und die CSERS-Diagnose,ExhMgT_nrFltIdCSERSCatH_C Normierter Diagnosewert for the Sekundaerluftdiagnose and the CSERS-Diagnose
+OBD_RADAR_DIAGKANID_TAB,0x001A,MisfDet_nrFltIdEmiStrt_C Emissionsrelevante Aussetzer nach Start,MisfDet_nrFltIdEmiStrt_C Emissionsrelevante misfire to Start
+OBD_RADAR_DIAGKANID_TAB,0x001B,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Diagnose Kurbelgehaeuseentlueftung (PCV) Leckage,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Diagnose Kurbelgehaeuseentlueftung (PCV) Leckage
+OBD_RADAR_DIAGKANID_TAB,0x001C,AirMon_nrFltIdObdRdrCrkcsRatyDiag_C Diagnose Kurbelgehaeuseentlueftung (PCV) Plausibilitaet,AirMon_nrFltIdObdRdrCrkcsRatyDiag_C Diagnose Kurbelgehaeuseentlueftung (PCV) plausibility
+OBD_RADAR_DIAGKANID_TAB,0x001D,InjSys_nrInjrFlowDiag_C Diagnose Injektor Kleinstmengenadaption (CVO),InjSys_nrInjrFlowDiag_C Diagnose injector small quantity adaptation (CVO)
+OBD_RADAR_DIAGKANID_TAB,0xFFFF,Kanal-ID nicht Definiert,Kanal-ID not Definiert
+RDBI_ADS_DOP,0x0001,HEGO_nrFltIdS2B1RiDHtgObdRdr_C   Heizleistungsdiagnose für Zweipunktlambdasonden,HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heizleistungsdiagnose for Zweipunktlambdasonden
+RDBI_ADS_DOP,0x0002,MisfDet_nrFltIdCat_C   Katalysatorschädigende Aussetzer,MisfDet_nrFltIdCat_C catalytic converterschädigende misfire
+RDBI_ADS_DOP,0x0003,MisfDet_nrFltIdEmi_C   Emissionsrelevante Aussetzer,MisfDet_nrFltIdEmi_C Emissionsrelevante misfire
+RDBI_ADS_DOP,0x0004,UEGO_nrFltIdDynArB1_C   Diagnose Dynamikverhalten der LSU Flächenprüfung,UEGO_nrFltIdDynArB1_C Diagnose Dynamikverhalten the LSU Flächenprüfung
+RDBI_ADS_DOP,0x0005,UEGO_nrFltIdDynSlopB1_C   Diagnose Dynamikverhalten der LSU Steigungsprüfung,UEGO_nrFltIdDynSlopB1_C Diagnose Dynamikverhalten the LSU Steigungsprüfung
+RDBI_ADS_DOP,0x0006,UEGO_nrFltIdHeatrB1_C   Diagnose Heizungsregelung LSU,UEGO_nrFltIdHeatrB1_C Diagnose heatingsregelung LSU
+RDBI_ADS_DOP,0x0007,UEGO_nrFltIdPlausB1_C   Plausibilitätsdiagnose LSU,UEGO_nrFltIdPlausB1_C plausibilitysdiagnose LSU
+RDBI_ADS_DOP,0x0008,CIb_nrFltId_C   Zylinderindividuelle Fehler Lambda Schnittstelle,CIb_nrFltId_C cylinderindividuelle fault Lambda interface
+RDBI_ADS_DOP,0x0009,CIb_nrRawFltId_C   Zylinderindividuelle Lambda-Fehler Roh-Lambda Schnittstelle,CIb_nrRawFltId_C cylinderindividuelle Lambda-fault Roh-Lambda interface
+RDBI_ADS_DOP,0x000A,FlMA_FRAId_C   Gemischadaption Diagnose,FlMA_FRAId_C mixtureadaption Diagnose
+RDBI_ADS_DOP,0x000B,TWCD_nrFltldObdRdrB1   Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfähigkeit,TWCD_nrFltldObdRdrB1 catalytic converterdiagnose by Bestimmung the Sauerstoffspeicherfähigkeit
+RDBI_ADS_DOP,0x000C,FlSply_nrFltIdObdRdrId57_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR Kalt,FlSply_nrFltIdObdRdrId57_C Diagnose plausibilitysprüfung Kraftstoffversorgungssystem BDE HDR Kalt
+RDBI_ADS_DOP,0x000D,FlSply_nrFltIdObdRdrId58_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR,FlSply_nrFltIdObdRdrId58_C Diagnose plausibilitysprüfung Kraftstoffversorgungssystem BDE HDR
+RDBI_ADS_DOP,0x000E,CtT_nrFltIdObdRdr_C   Diagnose Thermostat Motor-Kühlmittel,CtT_nrFltIdObdRdr_C Diagnose Thermostat engine-coolant
+RDBI_ADS_DOP,0x000F,GEVlv_nrFltIdObdRdrIntk_C   Einlass Nockenwellenstellerdiagnose für OBD-Radar,GEVlv_nrFltIdObdRdrIntk_C Einlass camshaftnstellerdiagnose for OBD-Radar
+RDBI_ADS_DOP,0x0010,GEVlv_nrFltIdObdRdrOutl_C   Auslass Nockenwellenstellerdiagnose für OBD-Radar,GEVlv_nrFltIdObdRdrOutl_C Auslass camshaftnstellerdiagnose for OBD-Radar
+RDBI_ADS_DOP,0x0011,HEGOD_nrFltIdS2B1RdrRLTran_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Schaltzeit Bank1,HEGOD_nrFltIdS2B1RdrRLTran_C Dynamik Diagnose Sonde hinter catalytic converter Fett-Mager-Schaltzeit Bank1
+RDBI_ADS_DOP,0x0012,HEGOD_nrFltIdS2B1RdrLRTran_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Schaltzeit Bank1,HEGOD_nrFltIdS2B1RdrLRTran_C Dynamik Diagnose Sonde hinter catalytic converter Mager-Fett-Schaltzeit Bank1
+RDBI_ADS_DOP,0x0013,HEGOD_nrFltIdS2B1RdrRLDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Bank1,HEGOD_nrFltIdS2B1RdrRLDly_C Dynamik Diagnose Sonde hinter catalytic converter Fett-Mager-Verzögerung Bank1
+RDBI_ADS_DOP,0x0014,HEGOD_nrFltIdS2B1RdrRLRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Rohwert Bank1,HEGOD_nrFltIdS2B1RdrRLRawDly_C Dynamik Diagnose Sonde hinter catalytic converter Fett-Mager-Verzögerung Rohwert Bank1
+RDBI_ADS_DOP,0x0015,HEGOD_nrFltIdS2B1RdrLRDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Bank1,HEGOD_nrFltIdS2B1RdrLRDly_C Dynamik Diagnose Sonde hinter catalytic converter Mager-Fett-Verzögerung Bank1
+RDBI_ADS_DOP,0x0016,HEGOD_nrFltIdS2B1RdrLRRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Rohwert Bank1,HEGOD_nrFltIdS2B1RdrLRRawDly_C Dynamik Diagnose Sonde hinter catalytic converter Mager-Fett-Verzögerung Rohwert Bank1
+RDBI_ADS_DOP,0x0017,CEngDsT_nrFltIdObdRdr_C   Kühlmitteltemperatursensor,CEngDsT_nrFltIdObdRdr_C coolanttemperatursensor
+RDBI_ADS_DOP,0x0018,GEVlv_nrFltIdObdRdrColdStrtIntk_C   Einlass Nockenwellenstellerdiagnose Kaltstart,GEVlv_nrFltIdObdRdrColdStrtIntk_C Einlass camshaftnstellerdiagnose cold start
+RDBI_ADS_DOP,0x0019,GEVlv_nrFltIdObdRdrColdStrtOutl_C   Auslass Nockenwellenstellerdiagnose Kaltstart,GEVlv_nrFltIdObdRdrColdStrtOutl_C Auslass camshaftnstellerdiagnose cold start
+RDBI_ADS_DOP,0x001A,ExhMgT_nrFltIdCSERSCatH_C   Sekundärluftdiagnose für CSERS-Diagnose,ExhMgT_nrFltIdCSERSCatH_C Sekundärluftdiagnose for CSERS-Diagnose
+RDBI_ADS_DOP,0x001B,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C  Diagnose Kurbelgehäuseentlueftung (PCV) Leckage,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Diagnose Kurbelgehäuseentlueftung (PCV) Leckage
+RDBI_ADS_DOP,0xFFFF,Kanal-ID nicht Definiert,Kanal-ID not Definiert
+RDBI_PC_PCS_DOP,0x00,ISOSAEReserved_00,ISOSAEReserved_00
+RDBI_PC_PCS_DOP,0x01,defaultSession,DefaultSession
+RDBI_PC_PCS_DOP,0x02,programmingSession,ProgrammingSession
+RDBI_PC_PCS_DOP,0x03,extendedDiagnosticSession,ExtendedDiagnosticSession
+RDBI_PC_PCS_DOP,0x04,safetySystemDiagnosticSession,SafetySystemDiagnosticSession
+RDBI_PC_PCS_DOP,0x40,vehicleManufacturerSpecific_40,VehicleManufacturerSpecific_40
+RDBI_PC_PCS_DOP,0x41,codingSession,CodingSession
+RDBI_PC_PCS_DOP,0x42,SWTSession,SWTSession
+RDBI_PC_PCS_DOP,0x43,HDDUpdateSession,HDDUpdateSession
+RDBI_PC_PCS_DOP,0xff,ungültig,Invalid
+RES_0X1061_R,0x00,ECU mehrmals programmierbar,ECU mehrmals programmierbar
+RES_0X1061_R,0x01,ECU mindestens einmal vollstaendig programmierbar,ECU mindestens amal vollstaendig programmierbar
+RES_0X1061_R,0x02,ECU nicht mehr programmierbar,ECU not mehr programmierbar
+RES_0X1061_R,0xff,ungültig,Invalid
+SWSIGSTATUS,0x00,Schreiben erfolgreich,Schreiben erfolgreich
+SWSIGSTATUS,0x01,Schreiben  fehlgeschlagen,Schreiben fehlgeschlagen
+SWSIGSTATUS,0x02,Schreiben läuft,Schreiben läuft
+SWSIGSTATUS,0x03,Schreiben noch nicht angestoßen (Routine nicht gestartet),Schreiben yet not angestoßen (Routine not gestartet)
+TABLE_STATUS_BATTERIEZUSTAND,0x00,nicht vorhanden,Not present
+TABLE_STATUS_BATTERIEZUSTAND,0x01,eingespielt,Agespielt
+TABLE_STATUS_BATTERIEZUSTAND,0x02,akzeptiert,Akzeptiert
+TABLE_STATUS_BATTERIEZUSTAND,0x03,abgelehnt,Abgelehnt
+TABLE_STATUS_BATTERIEZUSTAND,0xFF,unbekannt,Unknown
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,4,--,--
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,5,Funktion laeuft,Funktion laeuft
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,6,Funktion beendet (ohne Ergebnis),Funktion beendet (without Ergebnis)
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,7,Funktion abgebrochen (kein Zyklusflag/Readiness gesetzt),Funktion abgebrochen (no Zyklusflag/Readiness gesetzt)
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT0_DOP,255,ungueltiger Wert,Invalider value
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT1_DOP,0,Bordnetzkonfiguration Bordnetzunterstuetzungsmassnahme nicht codiert,Electrical systemkonfiguration electrical systemunterstuetzungsmassnahme not codiert
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT1_DOP,1,Bordnetzkonfiguration Bordnetzunterstuetzungsmassnahme codiert,Electrical systemkonfiguration electrical systemunterstuetzungsmassnahme codiert
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT2_DOP,0,Bordnetzkonfiguration Zustarteinheit nicht codiert,Electrical systemkonfiguration Zustarteinheit not codiert
+T_1BIT_FEPM_COD_BORDNETZKONF_BIT2_DOP,2,Bordnetzkonfiguration Zustarteinheit codiert,Electrical systemkonfiguration Zustarteinheit codiert
+T_1BYTE_0X59C7_TEXTTAB_SIGDOP,0,Bordnetzkonfiguration Hochvoltsystem nicht codiert,Electrical systemkonfiguration Hochvoltsystem not codiert
+T_1BYTE_0X59C7_TEXTTAB_SIGDOP,4,Bordnetzkonfiguration Hochvoltsystem codiert,Electrical systemkonfiguration Hochvoltsystem codiert
+T_1BYTE_ADAP_AGK_DOP,0,Erfolgreich,Erfolgreich
+T_1BYTE_ADAP_AGK_DOP,209,Beim Parsen des FSCs ist ein Strukturfehler erkannt worden,Beim Parsen of the FSCs is a Strukturfehler detected worden
+T_1BYTE_ADAP_AGK_DOP,211,Kein Speicherplatz mehr vorhanden,Ka Speicherplatz mehr beforehanden
+T_1BYTE_ADAP_AGK_DOP,214,Falsche(r) Parameter,Fasche(r) Parameter
+T_1BYTE_ADAP_AGK_DOP,216,Keine Daten zum SG vorhanden,Ka data to SG beforehanden
+T_1BYTE_ADAP_AGK_DOP,217,Keine Authentisierung,Ka authentication
+T_1BYTE_ADAP_AGK_DOP,220,Gueltigkeits-Pruefung schlug fehl,Gueltigkeits-check schlug fehl
+T_1BYTE_ADAP_AGK_DOP,221,Fahrgestellnummer fehlerhaft,Fahrgestellnummer faulty
+T_1BYTE_ADAP_AGK_DOP,222,FGN-Pruefung schlug fehl,FGN-check schlug fehl
+T_1BYTE_ADAP_AGK_DOP,223,Flash-Lesefehler,Flash-Lesefehler
+T_1BYTE_ADAP_AGK_DOP,224,Flash-Schreibfehler,Flash-Schreibfehler
+T_1BYTE_ADAP_AGK_DOP,243,FSC Prüfung schlug fehl,FSC check schlug fehl
+T_1BYTE_ADAP_AGK_DOP,244,FSC storniert,FSC storniert
+T_1BYTE_ADAP_AGK_DOP,245,FSC-Status  abgelehnt ,FSC-status abgelehnt
+T_1BYTE_ADAP_AGK_DOP,246,FSC nicht vorhanden,FSC not present
+T_1BYTE_ADAP_AGK_DOP,247,Falsche FSCS-ID im FSC,Fasche FSCS-ID in the FSC
+T_1BYTE_ADAP_AGK_DOP,248,Ungültiges FSC-Erstellungsdatum,Ungültiges FSC-Erstellungsdatum
+T_1BYTE_ADAP_AGK_DOP,249,Signaturpruefung schlug fehl,Signaturpruefung schlug fehl
+T_1BYTE_ADAP_AGK_DOP,250,SW- Signaturprüfung schlug fehl,SW- Signaturprüfung schlug fehl
+T_1BYTE_ADAP_AGK_DOP,251,SW Signaturstatus  abgelehnt ,SW Signaturstatus abgelehnt
+T_1BYTE_ADAP_AGK_DOP,252,SW-ID Pruefung schlug fehl,SW-ID check schlug fehl
+T_1BYTE_ADAP_AGK_DOP,253,SW nicht aktiviert,SW not activated
+T_1BYTE_ADAP_AGK_DOP,254,SW-ID nicht vorhanden,SW-ID not present
+T_1BYTE_ADAP_AGK_DOP,255,Unbekannter Fehler,Unknown error
+T_1BYTE_BZELISB_OEFGRD_DOP,60,Default Satz AGK (60%),Default Satz AGK (60%)
+T_1BYTE_BZELISB_OEFGRD_DOP,80,Auto-Adaption AGK (80%),Auto-adaptation AGK (80%)
+T_1BYTE_BZELISB_OEFGRD_DOP,20,Feedback AGK (20%),Feedback AGK (20%)
+T_1BYTE_BZELISB_OEFGRD_DOP,40,AGK (40%),AGK (40%)
+T_1BYTE_CVODEMO_1_DOP,0,Letzter Oeffnungsgrund: keiner,Letzter Oeffnungsgrund: nor
+T_1BYTE_CVODEMO_1_DOP,1,Letzter Oeffnungsgrund: Ueberspannung,Letzter Oeffnungsgrund: overvoltage
+T_1BYTE_CVODEMO_1_DOP,2,Letzter Oeffnungsgrund: Unterspannung,Letzter Oeffnungsgrund: undervoltage
+T_1BYTE_CVODEMO_1_DOP,3,Letzter Oeffnungsgrund: Kurzschluss,Letzter Oeffnungsgrund: short circuit
+T_1BYTE_CVODEMO_1_DOP,4,Letzter Oeffnungsgrund: Ladestrom zu hoch,Letzter Oeffnungsgrund: Ladestrom too high
+T_1BYTE_CVODEMO_1_DOP,5,Letzter Oeffnungsgrund: Ueberhitzung,Letzter Oeffnungsgrund: Ueberhitzung
+T_1BYTE_CVODEMO_1_DOP,6,Letzter Oeffnungsgrund: SoC zu niedrig,Letzter Oeffnungsgrund: SoC too low
+T_1BYTE_CVODEMO_1_DOP,255,Signal unbefuellt,Signal unbefuellt
+T_1BYTE_ECOS_DOP,1,Signalplausibilisierungsfehler,Signalplausibilisierungsfehler
+T_1BYTE_ECOS_DOP,2,Kein Tab Vollhub gefunden,Ka Tab Vollhub gefunden
+T_1BYTE_ECOS_DOP,0,keine Auswahl Grundzustand,No Auswahl reasonzustand
+T_1BYTE_FS_CVO_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_CVO_DOP,1,Startbedingung nicht erfuellt,Startbedingung not erfuellt
+T_1BYTE_FS_CVO_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_CVO_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BYTE_FS_CVO_DOP,4,--,--
+T_1BYTE_FS_CVO_DOP,5,Funktion laeuft,Funktion laeuft
+T_1BYTE_FS_CVO_DOP,6,Funktion beendet,Funktion beendet
+T_1BYTE_FS_CVO_DOP,7,Funktion abgebrochen,Funktion abgebrochen
+T_1BYTE_FS_CVO_DOP,8,Funktion vollstaendig durchlaufen und kein Fehler erkannt,Funktion vollstaendig bylaufen and no fault detected
+T_1BYTE_FS_CVO_DOP,9,Funktion vollstaendig durchlaufen und Fehler erkannt,Funktion vollstaendig bylaufen and fault detected
+T_1BYTE_FS_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BYTE_FS_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BYTE_FS_DOP,4,--,--
+T_1BYTE_FS_DOP,5,Funktion laeuft,Funktion laeuft
+T_1BYTE_FS_DOP,6,Funktion beendet (ohne Ergebnis),Funktion beendet (without Ergebnis)
+T_1BYTE_FS_DOP,7,Funktion abgebrochen (kein Zyklusflag/Readiness gesetzt),Funktion abgebrochen (no Zyklusflag/Readiness gesetzt)
+T_1BYTE_FS_DOP,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_1BYTE_FS_DOP,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_1BYTE_FS_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_EWG_SYSTEST_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_EWG_SYSTEST_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BYTE_FS_EWG_SYSTEST_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_EWG_SYSTEST_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BYTE_FS_EWG_SYSTEST_DOP,4,--,--
+T_1BYTE_FS_EWG_SYSTEST_DOP,5,Funktion laeuft,Funktion laeuft
+T_1BYTE_FS_EWG_SYSTEST_DOP,6,Funktion beendet (ohne Ergebnis),Funktion beendet (without Ergebnis)
+T_1BYTE_FS_EWG_SYSTEST_DOP,7,Funktion abgebrochen (kein Zyklusflag/Readiness gesetzt),Funktion abgebrochen (no Zyklusflag/Readiness gesetzt)
+T_1BYTE_FS_EWG_SYSTEST_DOP,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_1BYTE_FS_EWG_SYSTEST_DOP,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_1BYTE_FS_EWG_SYSTEST_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_L_SONDE_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_L_SONDE_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BYTE_FS_L_SONDE_DOP,2,Lernen unterer mechanischer Anschlag,Lernen underer mechanischer Anschlag
+T_1BYTE_FS_L_SONDE_DOP,3,Lernen oberer mechanischer Anschlag,Lernen oberer mechanischer Anschlag
+T_1BYTE_FS_L_SONDE_DOP,4,Verstellzeitentest,Verstellzeitentest
+T_1BYTE_FS_L_SONDE_DOP,5,Funktion fehlerfrei beendet,Funktion fehlerfrei beendet
+T_1BYTE_FS_L_SONDE_DOP,6,Funktion beendet ohne Ergebnis,Funktion beendet without Ergebnis
+T_1BYTE_FS_L_SONDE_DOP,7,Funktion mit Fehler beendet Fehler unterer mechanischer Anschlag Lernen,Funktion with fault beendet fault underer mechanischer Anschlag Lernen
+T_1BYTE_FS_L_SONDE_DOP,8,Funktion mit Fehler beendet Fehler oberer mechanischer Anschlag,Funktion with fault beendet fault oberer mechanischer Anschlag
+T_1BYTE_FS_L_SONDE_DOP,9,Funktion mit Fehler beendet Fehler Timeout Verstellzeitentest,Funktion with fault beendet fault timeout Verstellzeitentest
+T_1BYTE_FS_L_SONDE_DOP,10,Funktion mit Fehler beendet Fehler Verstellzeiten zu gross,Funktion with fault beendet fault Verstellzeiten too large
+T_1BYTE_FS_L_SONDE_DOP,11,Funktion mit Fehler beendet Fehler allgemein,Funktion with fault beendet fault allgemein
+T_1BYTE_FS_L_SONDE_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_MIL_CCM_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_MIL_CCM_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BYTE_FS_MIL_CCM_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_MIL_CCM_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BYTE_FS_MIL_CCM_DOP,4,--,--
+T_1BYTE_FS_MIL_CCM_DOP,5,Funktion laeuft,Funktion laeuft
+T_1BYTE_FS_MIL_CCM_DOP,6,Funktion beendet (ohne Ergebnis),Funktion beendet (without Ergebnis)
+T_1BYTE_FS_MIL_CCM_DOP,7,Funktion abgebrochen (kein Zyklusflag/Readiness gesetzt),Funktion abgebrochen (no Zyklusflag/Readiness gesetzt)
+T_1BYTE_FS_MIL_CCM_DOP,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_1BYTE_FS_MIL_CCM_DOP,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_1BYTE_FS_MIL_CCM_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_OBD_DEMO_NOCKENWELLE_DOP,0,momentan nicht aktiv,Momentan not active
+T_1BYTE_FS_OBD_DEMO_NOCKENWELLE_DOP,1,momentan aktiv,Momentan active
+T_1BYTE_FS_OBD_DEMO_NOCKENWELLE_DOP,2,momentan blinkend,Momentan blinkend
+T_1BYTE_FS_OBD_DEMO_NOCKENWELLE_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_ODRSPUELFUNKT,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_ODRSPUELFUNKT,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BYTE_FS_ODRSPUELFUNKT,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_ODRSPUELFUNKT,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BYTE_FS_ODRSPUELFUNKT,4,--,--
+T_1BYTE_FS_ODRSPUELFUNKT,5,Funktion laeuft,Funktion laeuft
+T_1BYTE_FS_ODRSPUELFUNKT,6,Funktion beendet (ohne Ergebnis),Funktion beendet (without Ergebnis)
+T_1BYTE_FS_ODRSPUELFUNKT,7,Funktion abgebrochen (kein Zyklusflag/Readiness gesetzt),Funktion abgebrochen (no Zyklusflag/Readiness gesetzt)
+T_1BYTE_FS_ODRSPUELFUNKT,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_1BYTE_FS_ODRSPUELFUNKT,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_1BYTE_FS_ODRSPUELFUNKT,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_OPF_DOP,0,Default keine Zusatzinformationen,Default no Zusatzinformationen
+T_1BYTE_FS_OPF_DOP,1,Ansteuerroutine laeuft,Ansteuerroutine laeuft
+T_1BYTE_FS_OPF_DOP,2,Abbruch/Verhinderung aufgrund zu geringer Oeltemperatur,Abbruch/Verhinderung due to to geringer oiltemperatur
+T_1BYTE_FS_OPF_DOP,3,Abbruch/Verhinderung aufgrund zu hoher Oeltemperatur,Abbruch/Verhinderung due to to hoher oiltemperatur
+T_1BYTE_FS_OPF_DOP,4,Abbruch/Verhinderung aufgrund zu hoher Lastanforderung ueber PWG,Abbruch/Verhinderung due to to hoher loadanforderung via PWG
+T_1BYTE_FS_OPF_DOP,5,Abbruch/Verhinderung aufgrund zu geringer Motordrehzahl,Abbruch/Verhinderung due to to geringer enginedrehzahl
+T_1BYTE_FS_OPF_DOP,6,Abbruch/Verhinderung aufgrund zu hoher Motordrehzahl,Abbruch/Verhinderung due to to hoher enginedrehzahl
+T_1BYTE_FS_OPF_DOP,7,Abbruch/Verhinderung aufgrund zu geringer Geschwindigkeit,Abbruch/Verhinderung due to to geringer speed
+T_1BYTE_FS_OPF_DOP,8,Abbruch/Verhinderung aufgrund zu hoher Geschwindigkeit,Abbruch/Verhinderung due to to hoher speed
+T_1BYTE_FS_OPF_DOP,9,Abbruch/Verhinderung aufgrund fehlender Reglerfreigabe,Abbruch/Verhinderung due to missing Reglerfreigabe
+T_1BYTE_FS_OPF_DOP,10,Abbruch durch Timeout,Abbruch by timeout
+T_1BYTE_FS_OPF_DOP,11,Abbruch durch Tester (extern),Abbruch by Tester (extern)
+T_1BYTE_FS_OPF_ERW_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_1BYTE_FS_OPF_ERW_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_1BYTE_FS_OPF_ERW_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_OPF_ERW_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_1BYTE_FS_OPF_ERW_DOP,4,--,--
+T_1BYTE_FS_OPF_ERW_DOP,5,Funktion laeuft,Funktion laeuft
+T_1BYTE_FS_OPF_ERW_DOP,6,Funktion beendet (ohne Ergebnis),Funktion beendet (without Ergebnis)
+T_1BYTE_FS_OPF_ERW_DOP,7,Funktion abgebrochen (kein Zyklusflag/Readiness gesetzt),Funktion abgebrochen (no Zyklusflag/Readiness gesetzt)
+T_1BYTE_FS_OPF_ERW_DOP,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_1BYTE_FS_OPF_ERW_DOP,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_1BYTE_FS_OPF_ERW_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_FS_STARTSYSTEM_DOP,0,Keine Service Regeneration moeglich,Ka Service Regeneration moeglich
+T_1BYTE_FS_STARTSYSTEM_DOP,1,Service Regeneration kann gestartet werden,Service Regeneration kann gestartet be
+T_1BYTE_FS_STARTSYSTEM_DOP,5,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_1BYTE_FS_STARTSYSTEM_DOP,10,Partikelfilter aufheizen,Particulate filter onheizen
+T_1BYTE_FS_STARTSYSTEM_DOP,15,Druckabfallmessung am Filter vor Regeneration,Pressureabfallmessung am Filter before Regeneration
+T_1BYTE_FS_STARTSYSTEM_DOP,20,Russabbrand,Russabbrand
+T_1BYTE_FS_STARTSYSTEM_DOP,25,Druckabfallmessung am Filter nach Regeneration,Pressureabfallmessung am Filter to Regeneration
+T_1BYTE_FS_STARTSYSTEM_DOP,30,Warten auf Ende Russabbrand,Warten on Ende Russabbrand
+T_1BYTE_FS_STARTSYSTEM_DOP,255,ungueltig,Invalid
+T_1BYTE_FS_VORGABE_STARTSYSTEM_DOP,0,Startsystem nicht vorhanden,Starting system not present
+T_1BYTE_FS_VORGABE_STARTSYSTEM_DOP,1,Startsystem verfuegbar,Starting system available
+T_1BYTE_FS_VORGABE_STARTSYSTEM_DOP,2,Startsystem nicht verfuegbar  ausserhalb Betriebsbereich,Starting system not available offserhalb Betriebsbereich
+T_1BYTE_FS_VORGABE_STARTSYSTEM_DOP,3,Startsystem nicht verfuegbar  Fehlerspeichereintraege pruefen,Starting system not available fault memoryeintraege pruefen
+T_1BYTE_FS_VORGABE_STARTSYSTEM_DOP,4,Startsystem nicht verfuegbar - Startsystem nicht bereit,Starting system not available - starting system not bereit
+T_1BYTE_FS_VORGABE_STARTSYSTEM_DOP,255,Ungueltig/Init,Ungueltig/Init
+T_1BYTE_KATHEIZFUNKTION_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,0,Keine Anforderung,Ka request
+T_1BYTE_KATHEIZFUNKTION_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,1,Startergenerator,Startergenerator
+T_1BYTE_KATHEIZFUNKTION_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,2,E-Maschine,E-Maschine
+T_1BYTE_KATHEIZFUNKTION_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,3,Startergenerator und E-Maschine,Startergenerator and E-Maschine
+T_1BYTE_KATHEIZFUNKTION_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,4,Ritzelstarter,Ritzelstarter
+T_1BYTE_KATHEIZFUNKTION_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,5,Zahnriehmenstarter,Zahnriehmenstarter
+T_1BYTE_LERNVAR_GETRIEBE_DOP,0,Deaktivierung der Katheizfunktion inaktiv,Deaktivierung the Katheizfunktion inaktiv
+T_1BYTE_LERNVAR_GETRIEBE_DOP,1,Deaktivierung der Katheizfunktion aktiv,Deaktivierung the Katheizfunktion active
+T_1BYTE_MSA_KUP_DOP,0,nicht aktiv,Not active
+T_1BYTE_MSA_KUP_DOP,1,EGS aktiv,EGS active
+T_1BYTE_MSA_KUP_DOP,2,DKG aktiv,DKG active
+T_1BYTE_MSA_KUP_DOP,255,nicht gueltig,Not gueltig
+T_1BYTE_MSA_LED_DOP,0,Kupplung nicht oder zu weniger als 10% betaetigt,Kupplung not or to weniger as 10% betaetigt
+T_1BYTE_MSA_LED_DOP,1,Kupplung zu mindestens 10% betaetigt,Kupplung to mindestens 10% betaetigt
+T_1BYTE_MSA_LED_DOP,2,Kupplungssensorsignal unplausibel,Kupplungssensorsignal implausible
+T_1BYTE_MSA_LED_DOP,3,Kupplung zu mindestens 90% betaetigt,Kupplung to mindestens 90% betaetigt
+T_1BYTE_NOCKENWELLE_WAHL,0,"Taster-LED aus , Signal pausibel","Button-LED off , Signal pausibel"
+T_1BYTE_NOCKENWELLE_WAHL,1,"Taster-LED an , Signal pausibel","Button-LED an , Signal pausibel"
+T_1BYTE_NOCKENWELLE_WAHL,2,"Taster-LED aus , Signal unplausibel","Button-LED off , signal implausible"
+T_1BYTE_NOCKENWELLE_WAHL,3,"Taster-LED an , SignalunpPlausibel","Button-LED an , SignalunpPlausibel"
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,0,Alle Inaktiv Offset,Alle Inaktiv offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,1,Einlassnockenwelle Offset,Einlassnockenwelle offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,2,Auslassnockenwelle Offset,Auslassnockenwelle offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,3,Ein_und_Auslassnockenwelle Offset,Ein_and_Auslassnockenwelle offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,4,Alle Inaktiv non-CERS,Alle Inaktiv non-CERS
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,5,Einlassnockenwelle non-CERS,Einlassnockenwelle non-CERS
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,6,Auslassnockenwelle non-CERS,Auslassnockenwelle non-CERS
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,7,Ein_und_Auslassnockenwelle non-CERS,Ein_and_Auslassnockenwelle non-CERS
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,9,Einlassnockenwelle CSERS Offset,Einlassnockenwelle CSERS offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,10,Auslassnockenwelle CSERS Offset,Auslassnockenwelle CSERS offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,11,Ein_und_Auslassnockenwelle CSERS Offset,Ein_and_Auslassnockenwelle CSERS offset
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,13,Einlassnockenwelle Slow Response,Einlassnockenwelle Slow Response
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,14,Auslassnockenwelle Slow Response,Auslassnockenwelle Slow Response
+T_1BYTE_NOCKENWELLE_WAHL_ERWEITERT,15,Ein_und_Auslassnockenwelle Slow Response,Ein_and_Auslassnockenwelle Slow Response
+T_1BYTE_OPF_REG_FS_DOP,0,Alle Inaktiv Offset,Alle Inaktiv offset
+T_1BYTE_OPF_REG_FS_DOP,1,Einlassnockenwelle Offset,Einlassnockenwelle offset
+T_1BYTE_OPF_REG_FS_DOP,2,Auslassnockenwelle Offset,Auslassnockenwelle offset
+T_1BYTE_OPF_REG_FS_DOP,3,Ein_und_Auslassnockenwelle Offset,Ein_and_Auslassnockenwelle offset
+T_1BYTE_OPF_REG_FS_DOP,4,Alle Inaktiv non-CERS,Alle Inaktiv non-CERS
+T_1BYTE_OPF_REG_FS_DOP,5,Einlassnockenwelle non-CERS,Einlassnockenwelle non-CERS
+T_1BYTE_OPF_REG_FS_DOP,6,Auslassnockenwelle non-CERS,Auslassnockenwelle non-CERS
+T_1BYTE_OPF_REG_FS_DOP,7,Ein_und_Auslassnockenwelle non-CERS,Ein_and_Auslassnockenwelle non-CERS
+T_1BYTE_OPF_REG_FS_DOP,9,Einlassnockenwelle CSERS Offset,Einlassnockenwelle CSERS offset
+T_1BYTE_OPF_REG_FS_DOP,10,Auslassnockenwelle CSERS Offset,Auslassnockenwelle CSERS offset
+T_1BYTE_OPF_REG_FS_DOP,11,Ein_und_Auslassnockenwelle CSERS Offset,Ein_and_Auslassnockenwelle CSERS offset
+T_1BYTE_OPF_REG_FS_DOP,13,Einlassnockenwelle Slow Response,Einlassnockenwelle Slow Response
+T_1BYTE_OPF_REG_FS_DOP,14,Auslassnockenwelle Slow Response,Auslassnockenwelle Slow Response
+T_1BYTE_OPF_REG_FS_DOP,15,Ein_und_Auslassnockenwelle Slow Response,Ein_and_Auslassnockenwelle Slow Response
+T_1BYTE_OPF_REG_FS_DOP,17,Einlassnockenwelle Offset nach KH,Einlassnockenwelle offset to KH
+T_1BYTE_OPF_REG_FS_DOP,18,Auslassnockenwelle Offset nach KH,Auslassnockenwelle offset to KH
+T_1BYTE_OPF_REG_FS_DOP,19,Ein_und_Auslassnockenwelle Offset nach KH,Ein_and_Auslassnockenwelle offset to KH
+T_1BYTE_SG_ID,0,Keine Serviceregeneration angefordert,Ka Serviceregeneration angefordert
+T_1BYTE_SG_ID,1,Serviceregeneration laeuft,Serviceregeneration laeuft
+T_1BYTE_SG_ID,2,Serviceregeneration wurde komplett durchgefuehrt,Serviceregeneration was komplett carried out
+T_1BYTE_SG_ID,3,Serviceregeneration wurde abgebrochen,Serviceregeneration was abgebrochen
+T_1BYTE_SG_ID,4,Serviceregeneration wurde komplett durchgefuehrt und reduzierte Russbeladung bestaetigt,Serviceregeneration was komplett carried out and reduzierte Russbeladung bestaetigt
+T_1BYTE_SG_ID,255,ungueltig,Invalid
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,0,DME Fehlerspeicher vorl.,DME fault memory beforel.
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,1,DME Fehlerspeicher,DME fault memory
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,2,DME Zuendaussetzererkennung,DME Zuendaussetzererkennung
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,3,DME Fehlerspeicher und Zuendaussetzererkennun,DME fault memory and Zuendaussetzererkennun
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,4,Getriebe-Steuergeraet,Transmission-control unit
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,8,Getriebe-Steuergeraet,Transmission-control unit
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,16,Ailinger-Steuergerät,Ailinger-control unit
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,32,anderes externes SG 1,Anderes externes SG 1
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,64,nicht belegt,Not belegt
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,128,Slave DME,Slave DME
+T_1BYTE_SOUNDTUNING_DEAKTIVIERUNG_AKTIV_INAKTIV_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_STAT_LERN_AGK_ADAP_DOP,0,Deaktivierung des Sound-Tuning inaktiv,Deaktivierung of the Sound-Tuning inaktiv
+T_1BYTE_STAT_LERN_AGK_ADAP_DOP,1,Deaktivierung des Sound-Tuning aktiv,Deaktivierung of the Sound-Tuning active
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,0,"Keine Massetaktung oder nicht gleich 1s, 2s, 3s","Ka groundtaktung or not gleich 1s, 2s, 3s"
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,2,1s - Abgasklappe angelernt,1s - exhaustklappe angelernt
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,4,2s - Abgasklappe nicht angelernt (Default Werte Einbauabgleich auf Klappe),2s - exhaustklappe not angelernt (Default values Einbauabgleich on Klappe)
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,8,3s - Notlaufmodus (verhaelt sich wie Gen I),3s - limp homemodus (verhaelt sich wie Gen I)
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,16,Anlernvorgang Abgasklappe: nicht erfolgreich,Anlernvorgang exhaustklappe: not erfolgreich
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,32,Anlernvorgang Abgasklappe: erfolgreich,Anlernvorgang exhaustklappe: erfolgreich
+T_1BYTE_ST_FPC_MONTAGE_MODUS_DOP,255,Ungueltiger Wert,Ungueltiger value
+T_1BYTE_ST_MONTAGE_MODUS_DOP,0,Montage-Modus ist inaktiv,Montage-Modus is inaktiv
+T_1BYTE_ST_MONTAGE_MODUS_DOP,5,Montage-Modus ist aktiv,Montage-Modus is active
+T_1BYTE_ST_MONTAGE_MODUS_DOP,255,ungueltiger Wert,Invalider value
+T_1BYTE_SW_HDP_EIN_DOP,0,Montage-Modus ist inaktiv,Montage-Modus is inaktiv
+T_1BYTE_SW_HDP_EIN_DOP,1,Montage-Modus ist aktiv,Montage-Modus is active
+T_1BYTE_TEXT_48V_SYS_STATUS_DOP,0,keine HDP aktiv,No HDP active
+T_1BYTE_TEXT_48V_SYS_STATUS_DOP,1,HDP 1 aktiv,HDP 1 active
+T_1BYTE_TEXT_48V_SYS_STATUS_DOP,2,HDP 2 aktiv,HDP 2 active
+T_1BYTE_TEXT_48V_SYS_STATUS_DOP,3,HDP 1 und HDP 2 aktiv,HDP 1 and HDP 2 active
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,0,INIT (nur nach Aufstart),INIT (nur to Aufstart)
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,1,OFF,OFF
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,2,PRELOAD,PRELOAD
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,3,TN_REQUEST,TN_REQUEST
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,4,SYSST_BATT_CLOSE_CONTACTS,SYSST_BATT_CLOSE_CONTACTS
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,5,SYSST_PCU_STANDBY_ACTIVE,SYSST_PCU_STANDBY_ACTIVE
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,6,SYSST_BATT_CLOSE_CONTACTS_URGENT,SYSST_BATT_CLOSE_CONTACTS_URGENT
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,7,READY,READY
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,8,SHUTDOWN,SHUTDOWN
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,9,SHUTDOWN_URGENT,SHUTDOWN_URGENT
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,10,SYSST_PCU_STANDBY_PASSIVE,SYSST_PCU_STANDBY_PASSIVE
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,11,SYSST_BATT_OPEN_CONTACTS,SYSST_BATT_OPEN_CONTACTS
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,12,SYSST_BATT_OPEN_CONTACTS_URGENT,SYSST_BATT_OPEN_CONTACTS_URGENT
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,13,TN_QUIT,TN_QUIT
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,14,Ungueltig oder Undefiniert,Ungueltig or Undefiniert
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,15,Ungueltig oder Undefiniert,Ungueltig or Undefiniert
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,16,FAILURE,FAILURE
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,17,FAILURE_PRELOAD,FAILURE_PRELOAD
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,18,FAILURE_CLOSE_CONTACTS,FAILURE_CLOSE_CONTACTS
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,19,FAILURE_OPEN_CONTACTS,FAILURE_OPEN_CONTACTS
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,20,Ungueltig oder Undefiniert,Ungueltig or Undefiniert
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,21,FAILURE_PCU_BUCK,FAILURE_PCU_BUCK
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,22,FAILURE_PCU_BOOST,FAILURE_PCU_BOOST
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,23,FAILURE_TN,FAILURE_TN
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,24,FAILURE_PCU_STARTUP,FAILURE_PCU_STARTUP
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,25,Ungueltig oder Undefiniert,Ungueltig or Undefiniert
+T_1BYTE_TEXT_ADAPTIONSFUNKTION_DOP,255,Ungueltig oder Undefiniert,Ungueltig or Undefiniert
+T_1BYTE_TEXT_AKTIV_ANZEIGE_DOP,1,VORHANDEN,VORHANDEN
+T_1BYTE_TEXT_AKTIV_ANZEIGE_DOP,0,NICHT VORHANDEN,NICHT VORHANDEN
+T_1BYTE_TEXT_BCU_DATEN_DOP,0,ADAPTION_INAKTIV,ADAPTION_INAKTIV
+T_1BYTE_TEXT_BCU_DATEN_DOP,1,ADAPTION_AKTIV,ADAPTION_AKTIV
+T_1BYTE_TEXT_BCU_DATEN_DOP,255,Funktion nicht vorhanden,Funktion not present
+T_1BYTE_TEXT_BCU_ERR_DOP,0,KEIN_BNE_WANDLER_VERBAUT,KEIN_BNE_WANDLER_VERBAUT
+T_1BYTE_TEXT_BCU_ERR_DOP,4,BCU_MIT_150W_VERBAUT,BCU_MIT_150W_VERBAUT
+T_1BYTE_TEXT_BCU_ERR_DOP,5,PCU (POWER CONTROL UNIT) VERBAUT,PCU (POWER CONTROL UNIT) VERBAUT
+T_1BYTE_TEXT_BCU_ERR_DOP,15,SIGNAL UNGUELTIG,SIGNAL UNGUELTIG
+T_1BYTE_TEXT_BCU_ERR_DOP,255,Undefined,Undefined
+T_1BYTE_TEXT_CBSOPMODE_DOP,0,Fehler Status Ausfall BCU: Kein Fehler,Fault status Ausfall BCU: Ka fault
+T_1BYTE_TEXT_CBSOPMODE_DOP,1,Fehler Status Ausfall BCU: Fehler aktiv,Fault status Ausfall BCU: fault active
+T_1BYTE_TEXT_CBSOPMODE_DOP,2,Fehler Status Ausfall BCU: Diagnose noch nicht durchgefuehrt,Fault status Ausfall BCU: Diagnose yet not carried out
+T_1BYTE_TEXT_CBSOPMODE_DOP,3,Fehler Status Ausfall BCU: Signal ungueltig,Fault status Ausfall BCU: signal invalid
+T_1BYTE_TEXT_CBSOPMODE_DOP,255,Undefined,Undefined
+T_1BYTE_TEXT_EA_DOP,0,INIT,INIT
+T_1BYTE_TEXT_EA_DOP,1,Read Data Acces,Read Data Acces
+T_1BYTE_TEXT_EA_DOP,2,RUN,RUN
+T_1BYTE_TEXT_EA_DOP,3,STOP,STOP
+T_1BYTE_TEXT_EA_DOP,4,TRANSITION,TRANSITION
+T_1BYTE_TEXT_EA_DOP,255,Undefiniert,Undefiniert
+T_1BYTE_TEXT_FUSI_A5_DOP,0,Abschaltgruende sind aktiviert,Abschaltgruende sind activated
+T_1BYTE_TEXT_FUSI_A5_DOP,1,Abschaltgruende sind deaktiviert,Abschaltgruende sind deactivated
+T_1BYTE_TEXT_FUSI_A5_DOP,255,Ungueltig,Ungueltig
+T_1BYTE_TEXT_MEDIENQUALITAET_DOP,165,165,165
+T_1BYTE_TEXT_OBD_CERS_AUSW_DOP,0,In Ordnung,In Ordnung
+T_1BYTE_TEXT_OBD_CERS_AUSW_DOP,1,Warnstufe 1,Warnstufe 1
+T_1BYTE_TEXT_OBD_CERS_AUSW_DOP,2,Warnstufe 2,Warnstufe 2
+T_1BYTE_TEXT_OBD_CERS_AUSW_DOP,3,Signal Ungueltig,Signal Ungueltig
+T_1BYTE_TEXT_OBD_CERS_AUSW_DOP,255,Ungueltig,Ungueltig
+T_1BYTE_TEXT_OBD_MEHRFACH_EINSPRITZ_AUSW_DOP,0,Lastpunktabsenkung aktivieren BMWdgt_b_TqLimInc_bo wird  gesetzt,Loadpunktabsenkung activeieren BMWdgt_b_TqLin theInc_bo is gesetzt
+T_1BYTE_TEXT_OBD_MEHRFACH_EINSPRITZ_AUSW_DOP,1,Lastpunktanhebung  aktivieren BMWdgt_b_TqLimDec_bo wird gesetzt,Loadpunktanhebung activeieren BMWdgt_b_TqLin theDec_bo is gesetzt
+T_1BYTE_TEXT_RUECKSETZANFORDERUNG_DOP,2,Deaktivierung EinspritzImpuls 2,Deaktivierung injectionImpuls 2
+T_1BYTE_TEXT_STATISTIK_WASSSER_RESET_DOP,0,INAKTIV,INAKTIV
+T_1BYTE_TEXT_STATISTIK_WASSSER_RESET_DOP,1,RUECKSETZEN_ERFOLGREICH,RUECKSETZEN_ERFOLGREICH
+T_1BYTE_TEXT_STATISTIK_WASSSER_RESET_DOP,255,UNGUELTIG,UNGUELTIG
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,0,Belueftungsventil,Belueftungsventil
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,1,Motorabsperrventil,Engineabsperrventil
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,2,Dosierventil 1,Dosierventil 1
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,3,Dosierventil 2,Dosierventil 2
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,4,Wasserraten,Wasserraten
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,5,Statistik Medienqualität,Statistik Medienqualität
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,6,Frostzähler,Frostzähler
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,165,Gesamt,Gesamt
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,8,Statistik DiagGra,Statistik DiagGra
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,9,Statistik DiagSetComp,Statistik DiagSetComp
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,10,Statistik DiagInjAcv,Statistik DiagInjAcv
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,11,Statistik DiagMfBal,Statistik DiagMfBal
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,12,Statistik Zähler Wasserdrucksensor max,Statistik Zähler Wasserdrucksensor max
+T_1BYTE_TEXT_ST_BCU_BIT01_DOP,13,Statistik Zähler Wasserdrucksensor min,Statistik Zähler Wasserdrucksensor min
+T_1BYTE_TEXT_ST_BCU_BIT23_DOP,0,Status Notstartschalter: Offen,Status Notstartschalter: Offen
+T_1BYTE_TEXT_ST_BCU_BIT23_DOP,1,Status Notstartschalter: Geschlossen,Status Notstartschalter: Geschlossen
+T_1BYTE_TEXT_ST_BCU_BIT23_DOP,3,Status Notstartschalter: Signal ungueltig,Status Notstartschalter: signal invalid
+T_1BYTE_TEXT_ST_BCU_BIT23_DOP,2,Nicht definiert,Nicht definiert
+T_1BYTE_TEXT_ST_BCU_BIT47_DOP,0,Zustand Fremdladeerkennung: keine Fremdladung,State Fremdladeerkennung: no Fremdladung
+T_1BYTE_TEXT_ST_BCU_BIT47_DOP,1,Zustand Fremdladeerkennung: Fremdladung erkannt,State Fremdladeerkennung: Fremdladung detected
+T_1BYTE_TEXT_ST_BCU_BIT47_DOP,3,Zustand Fremdladeerkennung: Signal ungueltig,State Fremdladeerkennung: signal invalid
+T_1BYTE_TEXT_ST_BCU_BIT47_DOP,2,Nicht definiert,Nicht definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,0,Diagnose Steuerpin Relais: OK,Diagnose Steuerpin relay: OK
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,1,Diagnose Steuerpin Relais: Leitung offen,Diagnose Steuerpin relay: Leitung offen
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,2,Diagnose Steuerpin Relais: Leitung Kurzschluss Masse,Diagnose Steuerpin relay: Leitung short circuit ground
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,3,Diagnose Steuerpin Relais: Leitung Kurzschluss U_Batt,Diagnose Steuerpin relay: Leitung short circuit U_Batt
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,15,Diagnose Steuerpin Relais:Signal ungueltig,Diagnose Steuerpin relay:signal invalid
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,4,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,5,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,6,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,7,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,8,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,9,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,10,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,11,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,12,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,13,nicht definiert,Not definiert
+T_1BYTE_TEXT_ST_BCU_CMD_DOP,14,nicht definiert,Not definiert
+T_1BYTE_TEXT_TRIPKONF_DOP,0,Sollvorgabe Position Schalter 2: Aus,Targetvorgabe Position switch 2: Aus
+T_1BYTE_TEXT_TRIPKONF_DOP,1,Sollvorgabe Position Schalter 2: Ein,Targetvorgabe Position switch 2: Ein
+T_1BYTE_TEXT_TRIPKONF_DOP,3,Sollvorgabe Position Schalter 2: Signal ungueltig,Targetvorgabe Position switch 2: signal invalid
+T_1BYTE_TEXT_TRIPKONF_DOP,255,Undefined,Undefined
+T_1BYTE_TEXT_TRIPREC_ERW_KONF_DOP,0,Standard-Konfiguration,Standard-Konfiguration
+T_1BYTE_TEXT_TRIPREC_ERW_KONF_DOP,1,Alternative Konfiguration,Alternative Konfiguration
+T_1BYTE_TEXT_TRIPREC_ERW_KONF_DOP,255,Undefiniert,Undefiniert
+T_1BYTE_TEXT_VORGABE_ADAPTIONSANPASSUNG_DOP,0,Daten nicht in Ordnung,Data not in Ordnung
+T_1BYTE_TEXT_VORGABE_ADAPTIONSANPASSUNG_DOP,1,Daten in Ordnung,Data in Ordnung
+T_1BYTE_TEXT_VORGABE_ADAPTIONSANPASSUNG_DOP,255,Undefiniert,Undefiniert
+T_2BYTE_CVODEMO2_DOP,1,TEMPORAER_SOLLWERT_VORGEBEN,TEMPORAER_SOLLWERT_VORGEBEN
+T_2BYTE_CVODEMO2_DOP,0,URZUSTAND KEINE AENDERUNG,URZUSTAND KEINE AENDERUNG
+T_2BYTE_CVODEMO2_DOP,2,TEMPORAER_STANDART_INITWERT_VORGEBEN,TEMPORAER_STANDART_INITWERT_VORGEBEN
+T_2BYTE_CVODEMO2_DOP,3,TEMPORAER_ADAPTION_SPERREN,TEMPORAER_ADAPTION_SPERREN
+T_2BYTE_CVODEMO_DOP,1,Tantot,Tantot
+T_2BYTE_CVODEMO_DOP,2,unbenutzt,Unbenutzt
+T_2BYTE_CVODEMO_DOP,4,Plateauhoehe,Plateauhoehe
+T_2BYTE_CVODEMO_DOP,8,Tab Vollhub,Tab Vollhub
+T_2BYTE_CVODEMO_DOP,16,Tab Ballistik,Tab Ballistik
+T_2BYTE_CVODEMO_DOP,32,delta Ti Vollhub,Delta Ti Vollhub
+T_2BYTE_CVODEMO_DOP,64,delta Ti Ballistik,Delta Ti Ballistik
+T_2BYTE_CVODEMO_DOP,128,delta Ti Vollhub (nur fuer Diagnosefunktion verstellt),Delta Ti Vollhub (nur for Diagnosefunktion verstellt)
+T_2BYTE_CVODEMO_DOP,256,unbenutzt,Unbenutzt
+T_2BYTE_CVODEMO_DOP,0,keine Auswahl Grundzustand,No Auswahl reasonzustand
+T_2BYTE_CVODEMO_DOP,512,delta Ti-Adaptionswert Ballistik,Delta Ti-adaptationswert Ballistik
+T_2BYTE_CVODEMO_DOP,1024,unbenutzt,Unbenutzt
+T_2BYTE_CVODEMO_DOP,40,Demo Fett,Demo Fett
+T_2BYTE_CVODEMO_DOP,576,Demo Mager,Demo Mager
+T_2BYTE_TEXT_CBS_ID_DOP,1,Tantot,Tantot
+T_2BYTE_TEXT_CBS_ID_DOP,2,unbenutzt,Unbenutzt
+T_2BYTE_TEXT_CBS_ID_DOP,4,Plateauhoehe,Plateauhoehe
+T_2BYTE_TEXT_CBS_ID_DOP,8,Tab Vollhub,Tab Vollhub
+T_2BYTE_TEXT_CBS_ID_DOP,16,Tab Ballistik,Tab Ballistik
+T_2BYTE_TEXT_CBS_ID_DOP,32,delta Ti Vollhub,Delta Ti Vollhub
+T_2BYTE_TEXT_CBS_ID_DOP,64,delta Ti Ballistik,Delta Ti Ballistik
+T_2BYTE_TEXT_CBS_ID_DOP,128,delta Ti Vollhub (nur fuer Diagnosefunktion verstellt),Delta Ti Vollhub (nur for Diagnosefunktion verstellt)
+T_2BYTE_TEXT_CBS_ID_DOP,256,delta Ti Ballistik (nur fuer Diagnosefunktion verstellt),Delta Ti Ballistik (nur for Diagnosefunktion verstellt)
+T_2BYTE_TEXT_CBS_ID_DOP,0,keine Auswahl Grundzustand,No Auswahl reasonzustand
+T_2BYTE_TEXT_CBS_ID_DOP,512,delta Ti-Adaptionswert Ballistik,Delta Ti-adaptationswert Ballistik
+T_2BYTE_TEXT_CBS_ID_DOP,1024,delta Ti-Adaptionswert Ballistik (nur fuer Diagnosefunktion verstellt),Delta Ti-adaptationswert Ballistik (nur for Diagnosefunktion verstellt)
+T_2BYTE_TEXT_OPF_GRUND_HIGH_DOP,0,NOT_DEFINED,NOT_DEFINED
+T_2BYTE_TEXT_OPF_GRUND_HIGH_DOP,1,ENGINE_OIL,ENGINE_OIL
+T_2BYTE_TEXT_OPF_GRUND_HIGH_DOP,7,CBR_DPF,CBR_DPF
+T_2BYTE_TEXT_OPF_GRUND_HIGH_DOP,65535,Undefiniert,Undefiniert
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,1,Die Service Regeneration ist nicht freigegeben durch die Applikation,Die Service Regeneration is not freigegeben by the Applikation
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,2,Der Motor laeuft nicht,Der engine laeuft not
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,4,Regeneration des Partikelfilter laeuft gerade,Regeneration of the particulate filter laeuft gerade
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,16,Ein Gang ist eingelegt,Ein Gang is agelegt
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,32,Das Fahrpedal ist betaetigt,Das Fahrpedal is betaetigt
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,64,Die Bremse ist betaetigt,Die Bremse is betaetigt
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,128,Das Fahrzeug bewegt sich,Das vehicle bewegt sich
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,2048,Die Motorhaube ist nicht offen,Die enginehaube is not offen
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,4096,Ein Systemfehler wurde erkannt,Ein Systemfehler was detected
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,8192,Eine hoeherpriore Lambda-Anforderung unterbricht die Regeneration,Eine hoeherpriore Lambda-request underbricht the Regeneration
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,16384,"Wenn die Service Regeneration zu lang dauert, wird sie unterbrochen und fuer die Dauer PFltSrv_tiIntrptRgnLockd_C gesperrt","Wenn the Service Regeneration too long dauert, is sie underbrochen and for the duration PFltSrv_tiIntrptRgnLockd_C blocked"
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,32768,Eine Abgaskomponente ist zu heiß,Eine exhaustkomponente is to heiß
+T_2BYTE_TEXT_OPF_GRUND_LOW_DOP,65535,Ungueltig,Ungueltig
+T_2BYTE_TEXT_SOLLWERT_ANZEIGE_DOP,1024,Immer false,Immer false
+T_2BYTE_TEXT_SOLLWERT_ANZEIGE_DOP,2048,Der Partikelfilter ist zu heiß,Der particulate filter is to heiß
+T_2BYTE_TEXT_SOLLWERT_ANZEIGE_DOP,32768,Eine externer Befehl zum Stoppen der Service Regeneration wurde empfangen,Eine externer Befehl to Stoppen the Service Regeneration was empfangen
+T_2BYTE_TEXT_SOLLWERT_ANZEIGE_DOP,65535,Ungueltig,Ungueltig
+T_4BYTE_TEXT_ST_KSU_DOP,65535,Funktion nicht vorhanden,Funktion not present
+T_ATS_60FD_TV_TXT_DOP,0,KSU deaktiviert,KSU deactivated
+T_ATS_60FD_TV_TXT_DOP,1,KSU aktiviert,KSU activated
+T_ATS_6113_TT_DOP,1000,10%,10%
+T_ATS_6113_TT_DOP,3000,30%,30%
+T_ATS_6113_TT_DOP,5000,50%,50%
+T_ATS_6113_TT_DOP,9000,90%,90%
+T_BAWIST_W_MSG_TEXT_DOP,0,0,0
+T_BAWIST_W_MSG_TEXT_DOP,8192,1,1
+T_BA_IST_DOP,4098,"VT (ungedrosselt), - , HOM (Homogen)","VT (ungedrosselt), - , HOM (Homogen)"
+T_BA_IST_DOP,4114,"VT (ungedrosselt), Optimal , HOM (Homogen)","VT (ungedrosselt), Optimal , HOM (Homogen)"
+T_BA_IST_DOP,4130,"VT (ungedrosselt), Lambda_1 , HOM (Homogen)","VT (ungedrosselt), Lambda_1 , HOM (Homogen)"
+T_BA_IST_DOP,4146,"VT (ungedrosselt), Test_O2 , HOM (Homogen)","VT (ungedrosselt), Test_O2 , HOM (Homogen)"
+T_BA_IST_DOP,4162,"VT (ungedrosselt), KHM_DOE_LR , HOM (Homogen)","VT (ungedrosselt), KHM_DOE_LR , HOM (Homogen)"
+T_BA_IST_DOP,4178,"VT (ungedrosselt), KHM_DOE_EM , HOM (Homogen)","VT (ungedrosselt), KHM_DOE_EM , HOM (Homogen)"
+T_BA_IST_DOP,4194,"VT (ungedrosselt), Bauteilschutz , HOM (Homogen)","VT (ungedrosselt), Bauteilschutz , HOM (Homogen)"
+T_BA_IST_DOP,4210,"VT (ungedrosselt), KHM_ZW , HOM (Homogen)","VT (ungedrosselt), KHM_ZW , HOM (Homogen)"
+T_BA_IST_DOP,4226,"VT (ungedrosselt), DESU_PULS , HOM (Homogen)","VT (ungedrosselt), DESU_PULS , HOM (Homogen)"
+T_BA_IST_DOP,4242,"VT (ungedrosselt), NOxKat_reg , HOM (Homogen)","VT (ungedrosselt), NOxKat_reg , HOM (Homogen)"
+T_BA_IST_DOP,4258,"VT (ungedrosselt), KHM_LR , HOM (Homogen)","VT (ungedrosselt), KHM_LR , HOM (Homogen)"
+T_BA_IST_DOP,4274,"VT (ungedrosselt), KHM_EM , HOM (Homogen)","VT (ungedrosselt), KHM_EM , HOM (Homogen)"
+T_BA_IST_DOP,4290,"VT (ungedrosselt), KHM_ZW_DESU , HOM (Homogen)","VT (ungedrosselt), KHM_ZW_DESU , HOM (Homogen)"
+T_BA_IST_DOP,4306,"VT (ungedrosselt), KHM_LR_DESU , HOM (Homogen)","VT (ungedrosselt), KHM_LR_DESU , HOM (Homogen)"
+T_BA_IST_DOP,4322,"VT (ungedrosselt), KHM_DOE_LR_DESU , HOM (Homogen)","VT (ungedrosselt), KHM_DOE_LR_DESU , HOM (Homogen)"
+T_BA_IST_DOP,4338,"VT (ungedrosselt), NOTLAUF , HOM (Homogen)","VT (ungedrosselt), NOTLAUF , HOM (Homogen)"
+T_BA_IST_DOP,4354,"VT (ungedrosselt), LAMTEST , HOM (Homogen)","VT (ungedrosselt), LAMTEST , HOM (Homogen)"
+T_BA_IST_DOP,4370,"VT (ungedrosselt), GL_ZSK , HOM (Homogen)","VT (ungedrosselt), GL_ZSK , HOM (Homogen)"
+T_BA_IST_DOP,4386,"VT (ungedrosselt), DESU_FETT , HOM (Homogen)","VT (ungedrosselt), DESU_FETT , HOM (Homogen)"
+T_BA_IST_DOP,4402,"VT (ungedrosselt), ZWAD , HOM (Homogen)","VT (ungedrosselt), ZWAD , HOM (Homogen)"
+T_BA_IST_DOP,4418,"VT (ungedrosselt), UESP , HOM (Homogen)","VT (ungedrosselt), UESP , HOM (Homogen)"
+T_BA_IST_DOP,4434,"VT (ungedrosselt), VL , HOM (Homogen)","VT (ungedrosselt), VL , HOM (Homogen)"
+T_BA_IST_DOP,4450,"VT (ungedrosselt), INJAD , HOM (Homogen)","VT (ungedrosselt), INJAD , HOM (Homogen)"
+T_BA_IST_DOP,8194,"GD (gedrosselt), - , HOM (Homogen)","GD (gedrosselt), - , HOM (Homogen)"
+T_BA_IST_DOP,8210,"GD (gedrosselt), Optimal , HOM (Homogen)","GD (gedrosselt), Optimal , HOM (Homogen)"
+T_BA_IST_DOP,8226,"GD (gedrosselt), Lambda_1 , HOM (Homogen)","GD (gedrosselt), Lambda_1 , HOM (Homogen)"
+T_BA_IST_DOP,8242,"GD (gedrosselt), Test_O2 , HOM (Homogen)","GD (gedrosselt), Test_O2 , HOM (Homogen)"
+T_BA_IST_DOP,8258,"GD (gedrosselt), KHM_DOE_LR , HOM (Homogen)","GD (gedrosselt), KHM_DOE_LR , HOM (Homogen)"
+T_BA_IST_DOP,8274,"GD (gedrosselt), KHM_DOE_EM , HOM (Homogen)","GD (gedrosselt), KHM_DOE_EM , HOM (Homogen)"
+T_BA_IST_DOP,8290,"GD (gedrosselt), Bauteilschutz , HOM (Homogen)","GD (gedrosselt), Bauteilschutz , HOM (Homogen)"
+T_BA_IST_DOP,8306,"GD (gedrosselt), KHM_ZW , HOM (Homogen)","GD (gedrosselt), KHM_ZW , HOM (Homogen)"
+T_BA_IST_DOP,8322,"GD (gedrosselt), DESU_PULS , HOM (Homogen)","GD (gedrosselt), DESU_PULS , HOM (Homogen)"
+T_BA_IST_DOP,8338,"GD (gedrosselt), NOxKat_reg , HOM (Homogen)","GD (gedrosselt), NOxKat_reg , HOM (Homogen)"
+T_BA_IST_DOP,8354,"GD (gedrosselt), KHM_LR , HOM (Homogen)","GD (gedrosselt), KHM_LR , HOM (Homogen)"
+T_BA_IST_DOP,8370,"GD (gedrosselt), KHM_EM , HOM (Homogen)","GD (gedrosselt), KHM_EM , HOM (Homogen)"
+T_BA_IST_DOP,8386,"GD (gedrosselt), KHM_ZW_DESU , HOM (Homogen)","GD (gedrosselt), KHM_ZW_DESU , HOM (Homogen)"
+T_BA_IST_DOP,8402,"GD (gedrosselt), KHM_LR_DESU , HOM (Homogen)","GD (gedrosselt), KHM_LR_DESU , HOM (Homogen)"
+T_BA_IST_DOP,8418,"GD (gedrosselt), KHM_DOE_LR_DESU , HOM (Homogen)","GD (gedrosselt), KHM_DOE_LR_DESU , HOM (Homogen)"
+T_BA_IST_DOP,8434,"GD (gedrosselt), NOTLAUF , HOM (Homogen)","GD (gedrosselt), NOTLAUF , HOM (Homogen)"
+T_BA_IST_DOP,8450,"GD (gedrosselt), LAMTEST , HOM (Homogen)","GD (gedrosselt), LAMTEST , HOM (Homogen)"
+T_BA_IST_DOP,8466,"GD (gedrosselt), GL_ZSK , HOM (Homogen)","GD (gedrosselt), GL_ZSK , HOM (Homogen)"
+T_BA_IST_DOP,8482,"GD (gedrosselt), DESU_FETT , HOM (Homogen)","GD (gedrosselt), DESU_FETT , HOM (Homogen)"
+T_BA_IST_DOP,8498,"GD (gedrosselt), ZWAD , HOM (Homogen)","GD (gedrosselt), ZWAD , HOM (Homogen)"
+T_BA_IST_DOP,8514,"GD (gedrosselt), UESP , HOM (Homogen)","GD (gedrosselt), UESP , HOM (Homogen)"
+T_BA_IST_DOP,8530,"GD (gedrosselt), VL , HOM (Homogen)","GD (gedrosselt), VL , HOM (Homogen)"
+T_BA_IST_DOP,8546,"GD (gedrosselt), INJAD , HOM (Homogen)","GD (gedrosselt), INJAD , HOM (Homogen)"
+T_BA_IST_DOP,12290,"GK (gedrosselt kleiner Hub), - , HOM (Homogen)","GK (gedrosselt kleiner Hub), - , HOM (Homogen)"
+T_BA_IST_DOP,12306,"GK (gedrosselt kleiner Hub), Optimal , HOM (Homogen)","GK (gedrosselt kleiner Hub), Optimal , HOM (Homogen)"
+T_BA_IST_DOP,12322,"GK (gedrosselt kleiner Hub), Lambda_1 , HOM (Homogen)","GK (gedrosselt kleiner Hub), Lambda_1 , HOM (Homogen)"
+T_BA_IST_DOP,12338,"GK (gedrosselt kleiner Hub), Test_O2 , HOM (Homogen)","GK (gedrosselt kleiner Hub), Test_O2 , HOM (Homogen)"
+T_BA_IST_DOP,12354,"GK (gedrosselt kleiner Hub), KHM_DOE_LR , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_DOE_LR , HOM (Homogen)"
+T_BA_IST_DOP,12370,"GK (gedrosselt kleiner Hub), KHM_DOE_EM , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_DOE_EM , HOM (Homogen)"
+T_BA_IST_DOP,12386,"GK (gedrosselt kleiner Hub), Bauteilschutz , HOM (Homogen)","GK (gedrosselt kleiner Hub), Bauteilschutz , HOM (Homogen)"
+T_BA_IST_DOP,12402,"GK (gedrosselt kleiner Hub), KHM_ZW , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_ZW , HOM (Homogen)"
+T_BA_IST_DOP,12418,"GK (gedrosselt kleiner Hub), DESU_PULS, HOM (Homogen)","GK (gedrosselt kleiner Hub), DESU_PULS, HOM (Homogen)"
+T_BA_IST_DOP,12434,"GK (gedrosselt kleiner Hub), NOxKat_reg , HOM (Homogen)","GK (gedrosselt kleiner Hub), NOxKat_reg , HOM (Homogen)"
+T_BA_IST_DOP,12450,"GK (gedrosselt kleiner Hub), KHM_LR , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_LR , HOM (Homogen)"
+T_BA_IST_DOP,12466,"GK (gedrosselt kleiner Hub), KHM_EM , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_EM , HOM (Homogen)"
+T_BA_IST_DOP,12482,"GK (gedrosselt kleiner Hub), KHM_ZW_DESU , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_ZW_DESU , HOM (Homogen)"
+T_BA_IST_DOP,12498,"GK (gedrosselt kleiner Hub), KHM_LR_DESU , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_LR_DESU , HOM (Homogen)"
+T_BA_IST_DOP,12514,"GK (gedrosselt kleiner Hub), KHM_DOE_LR_DESU , HOM (Homogen)","GK (gedrosselt kleiner Hub), KHM_DOE_LR_DESU , HOM (Homogen)"
+T_BA_IST_DOP,12530,"GK (gedrosselt kleiner Hub), NOTLAUF , HOM (Homogen)","GK (gedrosselt kleiner Hub), NOTLAUF , HOM (Homogen)"
+T_BA_IST_DOP,12546,"GK (gedrosselt kleiner Hub), LAMTEST , HOM (Homogen)","GK (gedrosselt kleiner Hub), LAMTEST , HOM (Homogen)"
+T_BA_IST_DOP,12562,"GK (gedrosselt kleiner Hub), GL_ZSK , HOM (Homogen)","GK (gedrosselt kleiner Hub), GL_ZSK , HOM (Homogen)"
+T_BA_IST_DOP,12578,"GK (gedrosselt kleiner Hub), DESU_FETT, HOM (Homogen)","GK (gedrosselt kleiner Hub), DESU_FETT, HOM (Homogen)"
+T_BA_IST_DOP,12594,"GK (gedrosselt kleiner Hub), ZWAD , HOM (Homogen)","GK (gedrosselt kleiner Hub), ZWAD , HOM (Homogen)"
+T_BA_IST_DOP,12610,"GK (gedrosselt kleiner Hub), UESP, HOM (Homogen)","GK (gedrosselt kleiner Hub), UESP, HOM (Homogen)"
+T_BA_IST_DOP,12626,"GK (gedrosselt kleiner Hub), VL , HOM (Homogen)","GK (gedrosselt kleiner Hub), VL , HOM (Homogen)"
+T_BA_IST_DOP,12642,"GK (gedrosselt kleiner Hub), INJAD , HOM (Homogen)","GK (gedrosselt kleiner Hub), INJAD , HOM (Homogen)"
+T_BA_IST_DOP,4530,"VT (ungedrosselt), OPFHEIZ , HOM (Homogen)","VT (ungedrosselt), OPFHEIZ , HOM (Homogen)"
+T_BA_IST_DOP,8626,"GD (gedrosselt), OPFHEIZ , HOM (Homogen)","GD (gedrosselt), OPFHEIZ , HOM (Homogen)"
+T_BA_IST_DOP,12722,"GK (gedrosselt kleiner Hub), OPFHEIZ , HOM (Homogen)","GK (gedrosselt kleiner Hub), OPFHEIZ , HOM (Homogen)"
+T_BA_IST_DOP,65535,Ungueltig,Ungueltig
+T_BETRIEBSART_EM_DOP,0,Keine,Ka
+T_BETRIEBSART_EM_DOP,1,Schicht,Schicht
+T_BETRIEBSART_EM_DOP,2,Homogen,Homogen
+T_BETRIEBSART_EM_DOP,3,Homogen_Schicht,Homogen_Schicht
+T_BETRIEBSART_EM_DOP,8,Notlauf,Limp home
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,0,Standby,Standby
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,3,DC-Spannungsregelung,DC-voltagesregelung
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,5,Drehzahlregelung mit Momentenvorsteuerung,Speedregelung with Momentenvorsteuerung
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,6,IHVBCTL - mit Momentenvorsteuerung,IHVBCTL - with Momentenvorsteuerung
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,10,Freilauf,Freilauf
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,13,Signal nicht verfuegbar,Signal not available
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,14,Fehler,Fault
+T_BMWFANLIN1_PWR_CLAS_UB_TEXTTABLE_DOP,15,Signal ungueltig,Signal invalid
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,6,300 W,300 W
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,8,400 W,400 W
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,18,600 W,600 W
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,19,600 W,600 W
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,23,850 W,850 W
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,32,1000 W,1000 W
+T_BMWFANLIN1_ST_READBYIDTSTR_UB_TEXTTABLE_DOP,255,ungueltiger Wert,Invalider value
+T_BMWESV_B_ENACRBYLIM1_BO_DOP,0,Fehler,Fault
+T_BMWESV_B_ENACRBYLIM1_BO_DOP,1,Metadaten i.O.,Metadaten i.O.
+T_BMWESV_B_ENACRBYLIM1_BO_DOP,2,Metadaten n.i.O.,Metadaten n.i.O.
+T_BMWESV_B_ENACRBYLIM1_BO_DOP,255,ungueltiger Wert,Invalider value
+T_BMWESV_B_ENACRBYLIM2_BO_DOP,0,false,False
+T_BMWESV_B_ENACRBYLIM2_BO_DOP,1,true,True
+T_BMWESV_B_ENACRBYLIM3_BO_DOP,0,false,False
+T_BMWESV_B_ENACRBYLIM3_BO_DOP,1,true,True
+T_BZD_BTZUST_BK_DOP,0,false,False
+T_BZD_BTZUST_BK_DOP,1,true,True
+T_B_1BYTE_LESEN_0_1,0,Batterie i.O.,Battery i.O.
+T_B_1BYTE_LESEN_0_1,1,Batterie pruefen,Battery pruefen
+T_B_1BYTE_LESEN_0_1,2,Batterie nicht i.O.,Battery not i.O.
+T_B_1BYTE_LESEN_0_1,3,ungueltig,Invalid
+T_B_BZDON_BK_DOP,0,0,0
+T_B_BZDON_BK_DOP,1,1,1
+T_B_BZD_TE_BK_DOP,0,keine BZE3,No BZE3
+T_B_BZD_TE_BK_DOP,1,BZE3,BZE3
+T_B_BZD_WRGBAT_DOP,0,Batterie i.O.,Battery i.O.
+T_B_BZD_WRGBAT_DOP,1,Batterie tiefentladen,Battery tiefentladen
+T_B_EFRAMAX_DOP,0,Wechsel zulaessig,Wechsel tolaessig
+T_B_EFRAMAX_DOP,1,Wechsel unzulaessig,Wechsel unzulaessig
+T_B_FRASTAB_DOP,0,----,----
+T_B_FRASTAB_DOP,1,TRUE,TRUE
+T_B_ISGSKT_MSAAKT_DOP,0,----,----
+T_B_ISGSKT_MSAAKT_DOP,1,TRUE,TRUE
+T_B_MOLAET_DOP,0,FALSE,FALSE
+T_B_MOLAET_DOP,1,TRUE,TRUE
+T_B_MSRDKAD_DOP,0,0,0
+T_B_MSRDKAD_DOP,1,1,1
+T_B_MSRDKAD_DOP,2,1,1
+T_B_MSRDKAD_DOP,3,1,1
+T_B_MSRDKAD_DOP,4,1,1
+T_B_MSRDKAD_DOP,5,1,1
+T_B_MSRDKAD_DOP,6,1,1
+T_B_MSRDKAD_DOP,7,1,1
+T_B_MSRDKAD_DOP,8,1,1
+T_B_MSRDKAD_DOP,9,1,1
+T_B_MSRDKAD_DOP,10,1,1
+T_B_MSRDKAD_DOP,11,1,1
+T_B_MSRDKAD_DOP,12,1,1
+T_B_MSRDKAD_DOP,13,1,1
+T_B_MSRDKAD_DOP,14,1,1
+T_B_MSRDKAD_DOP,15,1,1
+T_B_MSRDKAD_DOP,16,1,1
+T_B_MSRDKAD_DOP,17,1,1
+T_B_MSRDKAD_DOP,18,1,1
+T_B_MSRDKAD_DOP,19,1,1
+T_B_MSRDKAD_DOP,20,1,1
+T_B_MSRDKAD_DOP,21,1,1
+T_B_MSRDKAD_DOP,22,1,1
+T_B_MSRDKAD_DOP,23,1,1
+T_B_MSRDKAD_DOP,24,1,1
+T_B_MSRDKAD_DOP,25,1,1
+T_B_MSRDKAD_DOP,26,1,1
+T_B_MSRDKAD_DOP,27,1,1
+T_B_MSRDKAD_DOP,28,1,1
+T_B_MSRDKAD_DOP,29,1,1
+T_B_MSRDKAD_DOP,30,1,1
+T_B_MSRDKAD_DOP,31,1,1
+T_B_MSRDKAD_DOP,32,1,1
+T_B_MSRDKAD_DOP,33,1,1
+T_B_MSRDKAD_DOP,34,1,1
+T_B_MSRDKAD_DOP,35,1,1
+T_B_MSRDKAD_DOP,36,1,1
+T_B_MSRDKAD_DOP,37,1,1
+T_B_MSRDKAD_DOP,38,1,1
+T_B_MSRDKAD_DOP,39,1,1
+T_B_MSRDKAD_DOP,40,1,1
+T_B_MSRDKAD_DOP,41,1,1
+T_B_MSRDKAD_DOP,42,1,1
+T_B_MSRDKAD_DOP,43,1,1
+T_B_MSRDKAD_DOP,44,1,1
+T_B_MSRDKAD_DOP,45,1,1
+T_B_MSRDKAD_DOP,46,1,1
+T_B_MSRDKAD_DOP,47,1,1
+T_B_MSRDKAD_DOP,48,1,1
+T_B_MSRDKAD_DOP,49,1,1
+T_B_MSRDKAD_DOP,50,1,1
+T_B_MSRDKAD_DOP,51,1,1
+T_B_MSRDKAD_DOP,52,1,1
+T_B_MSRDKAD_DOP,53,1,1
+T_B_MSRDKAD_DOP,54,1,1
+T_B_MSRDKAD_DOP,55,1,1
+T_B_MSRDKAD_DOP,56,1,1
+T_B_MSRDKAD_DOP,57,1,1
+T_B_MSRDKAD_DOP,58,1,1
+T_B_MSRDKAD_DOP,59,1,1
+T_B_MSRDKAD_DOP,60,1,1
+T_B_MSRDKAD_DOP,61,1,1
+T_B_MSRDKAD_DOP,62,1,1
+T_B_MSRDKAD_DOP,63,1,1
+T_B_MSRDKAD_DOP,64,1,1
+T_B_MSRDKAD_DOP,65,1,1
+T_B_MSRDKAD_DOP,66,1,1
+T_B_MSRDKAD_DOP,67,1,1
+T_B_MSRDKAD_DOP,68,1,1
+T_B_MSRDKAD_DOP,69,1,1
+T_B_MSRDKAD_DOP,70,1,1
+T_B_MSRDKAD_DOP,71,1,1
+T_B_MSRDKAD_DOP,72,1,1
+T_B_MSRDKAD_DOP,73,1,1
+T_B_MSRDKAD_DOP,74,1,1
+T_B_MSRDKAD_DOP,75,1,1
+T_B_MSRDKAD_DOP,76,1,1
+T_B_MSRDKAD_DOP,77,1,1
+T_B_MSRDKAD_DOP,78,1,1
+T_B_MSRDKAD_DOP,79,1,1
+T_B_MSRDKAD_DOP,80,1,1
+T_B_MSRDKAD_DOP,81,1,1
+T_B_MSRDKAD_DOP,82,1,1
+T_B_MSRDKAD_DOP,83,1,1
+T_B_MSRDKAD_DOP,84,1,1
+T_B_MSRDKAD_DOP,85,1,1
+T_B_MSRDKAD_DOP,86,1,1
+T_B_MSRDKAD_DOP,87,1,1
+T_B_MSRDKAD_DOP,88,1,1
+T_B_MSRDKAD_DOP,89,1,1
+T_B_MSRDKAD_DOP,90,1,1
+T_B_MSRDKAD_DOP,91,1,1
+T_B_MSRDKAD_DOP,92,1,1
+T_B_MSRDKAD_DOP,93,1,1
+T_B_MSRDKAD_DOP,94,1,1
+T_B_MSRDKAD_DOP,95,1,1
+T_B_MSRDKAD_DOP,96,1,1
+T_B_MSRDKAD_DOP,97,1,1
+T_B_MSRDKAD_DOP,98,1,1
+T_B_MSRDKAD_DOP,99,1,1
+T_B_MSRDKAD_DOP,100,1,1
+T_B_MSRDKAD_DOP,101,1,1
+T_B_MSRDKAD_DOP,102,1,1
+T_B_MSRDKAD_DOP,103,1,1
+T_B_MSRDKAD_DOP,104,1,1
+T_B_MSRDKAD_DOP,105,1,1
+T_B_MSRDKAD_DOP,106,1,1
+T_B_MSRDKAD_DOP,107,1,1
+T_B_MSRDKAD_DOP,108,1,1
+T_B_MSRDKAD_DOP,109,1,1
+T_B_MSRDKAD_DOP,110,1,1
+T_B_MSRDKAD_DOP,111,1,1
+T_B_MSRDKAD_DOP,112,1,1
+T_B_MSRDKAD_DOP,113,1,1
+T_B_MSRDKAD_DOP,114,1,1
+T_B_MSRDKAD_DOP,115,1,1
+T_B_MSRDKAD_DOP,116,1,1
+T_B_MSRDKAD_DOP,117,1,1
+T_B_MSRDKAD_DOP,118,1,1
+T_B_MSRDKAD_DOP,119,1,1
+T_B_MSRDKAD_DOP,120,1,1
+T_B_MSRDKAD_DOP,121,1,1
+T_B_MSRDKAD_DOP,122,1,1
+T_B_MSRDKAD_DOP,123,1,1
+T_B_MSRDKAD_DOP,124,1,1
+T_B_MSRDKAD_DOP,125,1,1
+T_B_MSRDKAD_DOP,126,1,1
+T_B_MSRDKAD_DOP,127,1,1
+T_B_MSRDKAD_DOP,128,1,1
+T_B_MSRDKAD_DOP,129,1,1
+T_B_MSRDKAD_DOP,130,1,1
+T_B_MSRDKAD_DOP,131,1,1
+T_B_MSRDKAD_DOP,132,1,1
+T_B_MSRDKAD_DOP,133,1,1
+T_B_MSRDKAD_DOP,134,1,1
+T_B_MSRDKAD_DOP,135,1,1
+T_B_MSRDKAD_DOP,136,1,1
+T_B_MSRDKAD_DOP,137,1,1
+T_B_MSRDKAD_DOP,138,1,1
+T_B_MSRDKAD_DOP,139,1,1
+T_B_MSRDKAD_DOP,140,1,1
+T_B_MSRDKAD_DOP,141,1,1
+T_B_MSRDKAD_DOP,142,1,1
+T_B_MSRDKAD_DOP,143,1,1
+T_B_MSRDKAD_DOP,144,1,1
+T_B_MSRDKAD_DOP,145,1,1
+T_B_MSRDKAD_DOP,146,1,1
+T_B_MSRDKAD_DOP,147,1,1
+T_B_MSRDKAD_DOP,148,1,1
+T_B_MSRDKAD_DOP,149,1,1
+T_B_MSRDKAD_DOP,150,1,1
+T_B_MSRDKAD_DOP,151,1,1
+T_B_MSRDKAD_DOP,152,1,1
+T_B_MSRDKAD_DOP,153,1,1
+T_B_MSRDKAD_DOP,154,1,1
+T_B_MSRDKAD_DOP,155,1,1
+T_B_MSRDKAD_DOP,156,1,1
+T_B_MSRDKAD_DOP,157,1,1
+T_B_MSRDKAD_DOP,158,1,1
+T_B_MSRDKAD_DOP,159,1,1
+T_B_MSRDKAD_DOP,160,1,1
+T_B_MSRDKAD_DOP,161,1,1
+T_B_MSRDKAD_DOP,162,1,1
+T_B_MSRDKAD_DOP,163,1,1
+T_B_MSRDKAD_DOP,164,1,1
+T_B_MSRDKAD_DOP,165,1,1
+T_B_MSRDKAD_DOP,166,1,1
+T_B_MSRDKAD_DOP,167,1,1
+T_B_MSRDKAD_DOP,168,1,1
+T_B_MSRDKAD_DOP,169,1,1
+T_B_MSRDKAD_DOP,170,1,1
+T_B_MSRDKAD_DOP,171,1,1
+T_B_MSRDKAD_DOP,172,1,1
+T_B_MSRDKAD_DOP,173,1,1
+T_B_MSRDKAD_DOP,174,1,1
+T_B_MSRDKAD_DOP,175,1,1
+T_B_MSRDKAD_DOP,176,1,1
+T_B_MSRDKAD_DOP,177,1,1
+T_B_MSRDKAD_DOP,178,1,1
+T_B_MSRDKAD_DOP,179,1,1
+T_B_MSRDKAD_DOP,180,1,1
+T_B_MSRDKAD_DOP,181,1,1
+T_B_MSRDKAD_DOP,182,1,1
+T_B_MSRDKAD_DOP,183,1,1
+T_B_MSRDKAD_DOP,184,1,1
+T_B_MSRDKAD_DOP,185,1,1
+T_B_MSRDKAD_DOP,186,1,1
+T_B_MSRDKAD_DOP,187,1,1
+T_B_MSRDKAD_DOP,188,1,1
+T_B_MSRDKAD_DOP,189,1,1
+T_B_MSRDKAD_DOP,190,1,1
+T_B_MSRDKAD_DOP,191,1,1
+T_B_MSRDKAD_DOP,192,1,1
+T_B_MSRDKAD_DOP,193,1,1
+T_B_MSRDKAD_DOP,194,1,1
+T_B_MSRDKAD_DOP,195,1,1
+T_B_MSRDKAD_DOP,196,1,1
+T_B_MSRDKAD_DOP,197,1,1
+T_B_MSRDKAD_DOP,198,1,1
+T_B_MSRDKAD_DOP,199,1,1
+T_B_MSRDKAD_DOP,200,1,1
+T_B_MSRDKAD_DOP,201,1,1
+T_B_MSRDKAD_DOP,202,1,1
+T_B_MSRDKAD_DOP,203,1,1
+T_B_MSRDKAD_DOP,204,1,1
+T_B_MSRDKAD_DOP,205,1,1
+T_B_MSRDKAD_DOP,206,1,1
+T_B_MSRDKAD_DOP,207,1,1
+T_B_MSRDKAD_DOP,208,1,1
+T_B_MSRDKAD_DOP,209,1,1
+T_B_MSRDKAD_DOP,210,1,1
+T_B_MSRDKAD_DOP,211,1,1
+T_B_MSRDKAD_DOP,212,1,1
+T_B_MSRDKAD_DOP,213,1,1
+T_B_MSRDKAD_DOP,214,1,1
+T_B_MSRDKAD_DOP,215,1,1
+T_B_MSRDKAD_DOP,216,1,1
+T_B_MSRDKAD_DOP,217,1,1
+T_B_MSRDKAD_DOP,218,1,1
+T_B_MSRDKAD_DOP,219,1,1
+T_B_MSRDKAD_DOP,220,1,1
+T_B_MSRDKAD_DOP,221,1,1
+T_B_MSRDKAD_DOP,222,1,1
+T_B_MSRDKAD_DOP,223,1,1
+T_B_MSRDKAD_DOP,224,1,1
+T_B_MSRDKAD_DOP,225,1,1
+T_B_MSRDKAD_DOP,226,1,1
+T_B_MSRDKAD_DOP,227,1,1
+T_B_MSRDKAD_DOP,228,1,1
+T_B_MSRDKAD_DOP,229,1,1
+T_B_MSRDKAD_DOP,230,1,1
+T_B_MSRDKAD_DOP,231,1,1
+T_B_MSRDKAD_DOP,232,1,1
+T_B_MSRDKAD_DOP,233,1,1
+T_B_MSRDKAD_DOP,234,1,1
+T_B_MSRDKAD_DOP,235,1,1
+T_B_MSRDKAD_DOP,236,1,1
+T_B_MSRDKAD_DOP,237,1,1
+T_B_MSRDKAD_DOP,238,1,1
+T_B_MSRDKAD_DOP,239,1,1
+T_B_MSRDKAD_DOP,240,1,1
+T_B_MSRDKAD_DOP,241,1,1
+T_B_MSRDKAD_DOP,242,1,1
+T_B_MSRDKAD_DOP,243,1,1
+T_B_MSRDKAD_DOP,244,1,1
+T_B_MSRDKAD_DOP,245,1,1
+T_B_MSRDKAD_DOP,246,1,1
+T_B_MSRDKAD_DOP,247,1,1
+T_B_MSRDKAD_DOP,248,1,1
+T_B_MSRDKAD_DOP,249,1,1
+T_B_MSRDKAD_DOP,250,1,1
+T_B_MSRDKAD_DOP,251,1,1
+T_B_MSRDKAD_DOP,252,1,1
+T_B_MSRDKAD_DOP,253,1,1
+T_B_MSRDKAD_DOP,254,1,1
+T_B_MSRDKAD_DOP,255,1,1
+T_B_MSRHUBAD_DOP,0,Adaption nicht erfolgt,Adaptation not erfolgt
+T_B_MSRHUBAD_DOP,1,Adaption erfolgt,Adaptation erfolgt
+T_B_ONABK_OZDEAKTIV_DOP,0,Adaption nicht erfolgt,Adaptation not erfolgt
+T_B_ONABK_OZDEAKTIV_DOP,1,Adaption erfolgt,Adaptation erfolgt
+T_B_PHADA_JOB_DOP,0,----,----
+T_B_PHADA_JOB_DOP,1,TRUE,TRUE
+T_B_PHADE_JOB_DOP,0,0,0
+T_B_PHADE_JOB_DOP,1,1,1
+T_B_QVCH2O_BK_DOP,0,0,0
+T_B_QVCH2O_BK_DOP,1,1,1
+T_B_SGRHWL_SIKO_DOP,0,Wasserverbrauch i.O.,Wasserverbrauch i.O.
+T_B_SGRHWL_SIKO_DOP,1,Wasserverbrauch nicht i.O.,Wasserverbrauch not i.O.
+T_B_STANDARD_1BYTE_LESEN_0_1,0,FALSE,FALSE
+T_B_STANDARD_1BYTE_LESEN_0_1,1,TRUE,TRUE
+T_B_TEAKT_DOP,0,0,0
+T_B_TEAKT_DOP,1,1,1
+T_B_TEAKT_DOP,255,Undefined,Undefined
+T_B_TEAKT_L_SONDE_DOP,0,----,----
+T_B_TEAKT_L_SONDE_DOP,1,TRUE,TRUE
+T_B_VVTNOTL_DOP,0,----,----
+T_B_VVTNOTL_DOP,1,TRUE,TRUE
+T_CILCN_STDIAGTSTR_TEXT_DOP,0,0,0
+T_CILCN_STDIAGTSTR_TEXT_DOP,1,1,1
+T_CILCN_STTSTR_DOP,1,Bedingung fuer mind. 1 Fehler (E_abc) im System erkannt,Bedingung for mind. 1 fault (E_abc) in the System detected
+T_CILCN_STTSTR_DOP,2,Bedingung Summenfehler durch DAFIM gesetzt,Bedingung Summenfehler by DAFIM gesetzt
+T_CILCN_STTSTR_DOP,4,Bedingung Summenfehler durch DAFIM gesetzt (ungefilterte Adaptionswerte),Bedingung Summenfehler by DAFIM gesetzt (ungefilterte adaptationswerte)
+T_CILCN_STTSTR_DOP,6,Bedingung Summenfehler durch DAFIM gesetzt gefiltert und ungefiltert,Bedingung Summenfehler by DAFIM gesetzt gefiltert and ungefiltert
+T_CILCN_STTSTR_DOP,16,Adaption abgeschlossen,Adaptation abgeschlossen
+T_CILCN_STTSTR_DOP,18,Adaption abgeschlossen und Bedingung Summenfehler durch DAFIM gesetzt,Adaptation abgeschlossen and Bedingung Summenfehler by DAFIM gesetzt
+T_CILCN_STTSTR_DOP,20,Adaption abgeschlossen und Bedingung Summenfehler durch DAFIM ungefiltert gesetzt,Adaptation abgeschlossen and Bedingung Summenfehler by DAFIM ungefiltert gesetzt
+T_CILCN_STTSTR_DOP,32,Erkennung eines Fehlers waehrend der Diagnose,Erkennung as faults during the Diagnose
+T_CILCN_STTSTR_DOP,64,Lambda-Imbalance Diagnose aktiv,Lambda-Imbalance Diagnose active
+T_CILCN_STTSTR_DOP,128,Lambda-Imbalance Diagnose ist freigegeben,Lambda-Imbalance Diagnose is freigegeben
+T_CILCN_STTSTR_DOP,192,Lambda-Imbalance Diagnose ist freigegeben und aktiv,Lambda-Imbalance Diagnose is freigegeben and active
+T_CILCN_STTSTR_DOP,255,Zustand nicht definiert,State not definiert
+T_COM_STCOMMSTATE_FA_DOP,0,Adaption laeuft,Adaptation laeuft
+T_COM_STCOMMSTATE_FA_DOP,1,"Adaption blockiert, Motor ausserhalb Drehzahl-/Lastbereich","Adaptation blockiert, engine offserhalb speed-/loadbereich"
+T_COM_STCOMMSTATE_FA_DOP,2,"Adaption blockiert, Motortemperatur ausserhalb zul. Bereich","Adaptation blockiert, enginetemperatur offserhalb tol. Bereich"
+T_COM_STCOMMSTATE_FA_DOP,3,"Adaption blockiert, KAT-Temperatur ausserhalb zul. Bereich","Adaptation blockiert, KAT-temperature offserhalb tol. Bereich"
+T_COM_STCOMMSTATE_FA_DOP,4,Adaption blockiert wegen Fehlerspeichereintrag,Adaptation blockiert due to fault memoryeintrag
+T_COM_STCOMMSTATE_FA_DOP,5,"Adaption blockiert, weil Lambdawert nicht 1, Kraftstoffversorgungssystem nicht i.O., KAT-Heizen aktiv oder Bauteileschutz aktiv","Adaptation blockiert, weil Lambdawert not 1, Kraftstoffversorgungssystem not i.O., KAT-Heizen active or Bauteileschutz active"
+T_COM_STCOMMSTATE_FA_DOP,6,"Adaption blockiert, weil Tankentlueftung oder Gemischadaption aktiv","Adaptation blockiert, weil Tankentlueftung or mixtureadaption active"
+T_COM_STCOMMSTATE_FA_DOP,255,Adaption ist blockiert (sonstige Freigabebedingung nicht erfuellt),Adaptation is blockiert (sonstige Freigabebedingung not erfuellt)
+T_COM_STCOMMSTATE_LIN_DOP,0,COMM_NO_COMMUNICATION,COMM_NO_COMMUNICATION
+T_COM_STCOMMSTATE_LIN_DOP,1,COMM_SILENT_COMMUNICATION,COMM_SILENT_COMMUNICATION
+T_COM_STCOMMSTATE_LIN_DOP,2,COMM_FULL_COMMUNICATION,COMM_FULL_COMMUNICATION
+T_EGSDCMN_FLGSEG1B1RELDPARL_DOP,0,COMM_NO_COMMUNICATION,COMM_NO_COMMUNICATION
+T_EGSDCMN_FLGSEG1B1RELDPARL_DOP,1,COMM_SILENT_COMMUNICATION,COMM_SILENT_COMMUNICATION
+T_EGSDCMN_FLGSEG1B1RELDPARL_DOP,2,COMM_FULL_COMMUNICATION,COMM_FULL_COMMUNICATION
+T_EGSDCMN_FLGSEG1B2RELDPARL_DOP,0,----,----
+T_EGSDCMN_FLGSEG1B2RELDPARL_DOP,128,TRUE,TRUE
+T_EGSDU_FLGS2B1RESLTRDLYEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B1RESLTRDLYEVLN_DOP,128,TRUE,TRUE
+T_EGSDU_FLGS2B1RESLTRTRANEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B1RESLTRTRANEVLN_DOP,2,TRUE,TRUE
+T_EGSDU_FLGS2B1RESRTLDLYEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B1RESRTLDLYEVLN_DOP,2,TRUE,TRUE
+T_EGSDU_FLGS2B1RESRTLTRANEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B1RESRTLTRANEVLN_DOP,32,TRUE,TRUE
+T_EGSDU_FLGS2B2RESLTRDLYEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B2RESLTRDLYEVLN_DOP,4,TRUE,TRUE
+T_EGSDU_FLGS2B2RESLTRTRANEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B2RESLTRTRANEVLN_DOP,8,TRUE,TRUE
+T_EGSDU_FLGS2B2RESRTLDLYEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B2RESRTLDLYEVLN_DOP,4,TRUE,TRUE
+T_EGSDU_FLGS2B2RESRTLTRANEVLN_DOP,0,----,----
+T_EGSDU_FLGS2B2RESRTLTRANEVLN_DOP,8,TRUE,TRUE
+T_EOL_RAM_1__DOP,0,----,----
+T_EOL_RAM_1__DOP,32,TRUE,TRUE
+T_EPM_STSYNC_SIGDOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_EPM_STSYNC_SIGDOP,1,Startbedingungen nicht erfuellt,Startbedingungen not erfuellt
+T_EPM_STSYNC_SIGDOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_EPM_STSYNC_SIGDOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_EPM_STSYNC_SIGDOP,4,Undefinierter Zustand,Undefinierter state
+T_EPM_STSYNC_SIGDOP,5,Funktionstest laeuft,Funktionstest laeuft
+T_EPM_STSYNC_SIGDOP,6,Funktion ergebnislos beendet,Funktion ergebnislos beendet
+T_EPM_STSYNC_SIGDOP,7,Funktion abgebrochen,Funktion abgebrochen
+T_EPM_STSYNC_SIGDOP,8,Funktion durchlaufen und kein Fehler erkannt,Funktion bylaufen and no fault detected
+T_EPM_STSYNC_SIGDOP,9,Funktion durchlaufen und Fehler erkannt,Funktion bylaufen and fault detected
+T_FPC_FS_DOP,0,EPM_NO_SYNC,EPM_NO_SYNC
+T_FPC_FS_DOP,10,EPM_ALE_SYNC,EPM_ALE_SYNC
+T_FPC_FS_DOP,20,EPM_CAS_SYNC,EPM_CAS_SYNC
+T_FPC_FS_DOP,21,EPM_DIRSTALE_SYNC,EPM_DIRSTALE_SYNC
+T_FPC_FS_DOP,30,EPM_FULL_SYNC,EPM_FULL_SYNC
+T_FVVM_ZUST_TABELLE_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_FVVM_ZUST_TABELLE_DOP,1,Start-/Ansteuerbedingung nicht erfuellt,Start-/Ansteuerbedingung not erfuellt
+T_FVVM_ZUST_TABELLE_DOP,5,Funktion laeuft,Funktion laeuft
+T_FVVM_ZUST_TABELLE_DOP,8,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und kein Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and no fault detected
+T_FVVM_ZUST_TABELLE_DOP,9,Funktion vollstaendig durchlaufen (Zyklusflag/Readiness gesetzt) und Fehler erkannt,Funktion vollstaendig bylaufen (Zyklusflag/Readiness gesetzt) and fault detected
+T_FVVM_ZUST_TABELLE_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,0,Ungültig,Ungültig
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,1,Deaktiviert,Deaktiviert
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,2,Aktiv Aufzeichnung nicht gestartet,Aktiv Aufzeichnung not gestartet
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,4,Aktiv Aufzeichnung laeuft,Aktiv Aufzeichnung laeuft
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,8,Aktiv Aufzeichnung beendet,Aktiv Aufzeichnung beendet
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,16,Daten ausgelesen,Data offgelesen
+T_GBXPOS_NUMLVRPOS_TEXT_DOP,255,Ungültig,Ungültig
+T_IKCTL_FLGKNKDETN_SIGDOP,1,Gang 1 Synchronisiert,Gang 1 Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,2,Gang 2 Synchronisiert,Gang 2 Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,3,Neutral 12,Neutral 12
+T_IKCTL_FLGKNKDETN_SIGDOP,4,Gang 3 Synchronisiert,Gang 3 Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,8,Gang 4 Synchronisiert,Gang 4 Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,12,Neutral 34,Neutral 34
+T_IKCTL_FLGKNKDETN_SIGDOP,16,Gang 5 Synchronisiert,Gang 5 Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,32,Gang 6 Synchronisiert,Gang 6 Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,48,Neutral 56,Neutral 56
+T_IKCTL_FLGKNKDETN_SIGDOP,64,Rueckwaertsgang Synchronisiert,Rueckwaertsgang Synchronisiert
+T_IKCTL_FLGKNKDETN_SIGDOP,65,Neutral Rueckwaerts,Neutral Rueckwaerts
+T_IKCTL_FLGKNKDETN_SIGDOP,129,Gang 1,Gang 1
+T_IKCTL_FLGKNKDETN_SIGDOP,130,Gang 2,Gang 2
+T_IKCTL_FLGKNKDETN_SIGDOP,132,Gang 3,Gang 3
+T_IKCTL_FLGKNKDETN_SIGDOP,136,Gang 4,Gang 4
+T_IKCTL_FLGKNKDETN_SIGDOP,144,Gang 5,Gang 5
+T_IKCTL_FLGKNKDETN_SIGDOP,160,Gang 6,Gang 6
+T_IKCTL_FLGKNKDETN_SIGDOP,192,Rueckwaertsgang,Rueckwaertsgang
+T_IKCTL_FLGKNKDETN_SIGDOP,255,Ungueltig,Ungueltig
+T_INFO_MOTORAUSGEHER_DOP,0,----,----
+T_INFO_MOTORAUSGEHER_DOP,1,TRUE,TRUE
+T_INMRST_STCOMMSTATE_FA_DOP,0,Kein Ausgeher,Ka Ausgeher
+T_INMRST_STCOMMSTATE_FA_DOP,1,Abstellvorgang MSA- oder SST- Stop,Abstellvorgang MSA- or SST- Stop
+T_INMRST_STCOMMSTATE_FA_DOP,2,Startvorgang abgebrochen (Verlassen Bremse/Kupplung),Startvorgang abgebrochen (Verlassen Bremse/Kupplung)
+T_INMRST_STCOMMSTATE_FA_DOP,3,Nichtstarter bei SST- Start,Nichtstarter at SST- Start
+T_INMRST_STCOMMSTATE_FA_DOP,4,Nichtstarter MSA- Start,Nichtstarter MSA- Start
+T_INMRST_STCOMMSTATE_FA_DOP,5,Ausgeher während Betrieb (nach SST- Start),Ausgeher during Betrieb (to SST- Start)
+T_INMRST_STCOMMSTATE_FA_DOP,6,Ausgeher während Betrieb (nach MSA- Start),Ausgeher during Betrieb (to MSA- Start)
+T_INMRST_STCOMMSTATE_FA_DOP,7,Ausgeher nach CoM,Ausgeher to CoM
+T_INMRST_STCOMMSTATE_LIN_DOP,0,COMM_NO_COMMUNICATION,COMM_NO_COMMUNICATION
+T_INMRST_STCOMMSTATE_LIN_DOP,1,COMM_SILENT_COMMUNICATION,COMM_SILENT_COMMUNICATION
+T_INMRST_STCOMMSTATE_LIN_DOP,2,COMM_FULL_COMMUNICATION,COMM_FULL_COMMUNICATION
+T_INMRST_SYCSTPOSTDRV_DOP,0,COMM_NO_COMMUNICATION,COMM_NO_COMMUNICATION
+T_INMRST_SYCSTPOSTDRV_DOP,1,COMM_SILENT_COMMUNICATION,COMM_SILENT_COMMUNICATION
+T_INMRST_SYCSTPOSTDRV_DOP,2,COMM_FULL_COMMUNICATION,COMM_FULL_COMMUNICATION
+T_INMRST_SYCSTPREDRV_DOP,0,SYC_POSTDRV_INACTV,SYC_POSTDRV_INACTV
+T_INMRST_SYCSTPREDRV_DOP,1,SYC_POSTDRV_DSM_BGN,SYC_POSTDRV_DSM_BGN
+T_INMRST_SYCSTPREDRV_DOP,2,SYC_POSTDRV_EEP_BGN,SYC_POSTDRV_EEP_BGN
+T_INMRST_SYCSTPREDRV_DOP,3,SYC_POSTDRV_WAIT,SYC_POSTDRV_WAIT
+T_INMRST_SYCSTPREDRV_DOP,4,SYC_POSTDRV_NWM,SYC_POSTDRV_NWM
+T_INMRST_SYCSTPREDRV_DOP,5,SYC_POSTDRV_DSM_END,SYC_POSTDRV_DSM_END
+T_INMRST_SYCSTPREDRV_DOP,6,SYC_POSTDRV_EEP_END,SYC_POSTDRV_EEP_END
+T_INMRST_SYCSTPREDRV_DOP,7,SYC_POSTDRV_MIN_TIME,SYC_POSTDRV_MIN_TIME
+T_INMRST_SYCSTPREDRV_DOP,8,SYC_POSTDRV_DONE,SYC_POSTDRV_DONE
+T_ISGUSM_CHIPHERST_DOP,0,SYC_PREDRV_INI_DRV,SYC_PREDRV_INI_DRV
+T_ISGUSM_CHIPHERST_DOP,1,SYC_PREDRV_DONE,SYC_PREDRV_DONE
+T_ISGUSM_CHIPHERST_DOP,2,SYC_PREDRV_INI_SHDWN,SYC_PREDRV_INI_SHDWN
+T_ISGUSM_CHIPHERST_DOP,3,SYC_PREDRV_PROLONG,SYC_PREDRV_PROLONG
+T_ISGUSM_CHIPHERST_DOP,4,SYC_PREDRV_NWM,SYC_PREDRV_NWM
+T_ISGUSM_CHIPHERST_DOP,5,SYC_PREDRV_EEP,SYC_PREDRV_EEP
+T_ISGUSM_CHIPHERST_DOP,6,SYC_PREDRV_DSM,SYC_PREDRV_DSM
+T_ISGUSM_CHIPHERST_DOP,7,SYC_PREDRV_MR,SYC_PREDRV_MR
+T_ISGUSM_CHIPHERST_DOP,8,SYC_PREDRV_MOM,SYC_PREDRV_MOM
+T_ISGUSM_CHIPHERST_DOP,9,SYC_PREDRV_EXIT,SYC_PREDRV_EXIT
+T_ISGUSM_HERST_DOP,0,Bosch,Bosch
+T_ISGUSM_HERST_DOP,1,Infineon,Infineon
+T_ISGUSM_HERST_DOP,2,Freescale,Freescale
+T_ISGUSM_HERST_DOP,3,ST,ST
+T_ISGUSM_HERST_DOP,4,Elmos,Elmos
+T_ISGUSM_HERST_DOP,5,Sanken,Sanken
+T_ISGUSM_HERST_DOP,6,Denso,Denso
+T_ISGUSM_HERST_DOP,7,(Reserve),(Reserve)
+T_ISGUSM_HERST_DOP,255,nicht Definiert,Not Definiert
+T_ISGUSM_MAKENN_DOP,0,Bosch,Bosch
+T_ISGUSM_MAKENN_DOP,1,Valeo,Valeo
+T_ISGUSM_MAKENN_DOP,2,Denso/Delphi,Denso/Delphi
+T_ISGUSM_MAKENN_DOP,3,Hitachi,Hitachi
+T_ISGUSM_MAKENN_DOP,4,Denso,Denso
+T_ISGUSM_MAKENN_DOP,5,Melco,Melco
+T_ISGUSM_MAKENN_DOP,6,Visteon,Viseon
+T_ISGUSM_MAKENN_DOP,255,nicht Definiert,Not Definiert
+T_LIN_STISGTYP_TEXTTABLE_DOP,0,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,1,C2.1 / SC1,C2.1 / SC1
+T_LIN_STISGTYP_TEXTTABLE_DOP,2,C2.4 / SC2,C2.4 / SC2
+T_LIN_STISGTYP_TEXTTABLE_DOP,3,TG23 / H3.1 / SC3,TG23 / H3.1 / SC3
+T_LIN_STISGTYP_TEXTTABLE_DOP,4,SG9 / LIF150 / SC4,SG9 / LIF150 / SC4
+T_LIN_STISGTYP_TEXTTABLE_DOP,5,SC5,SC5
+T_LIN_STISGTYP_TEXTTABLE_DOP,6,M2.5 / SC6,M2.5 / SC6
+T_LIN_STISGTYP_TEXTTABLE_DOP,7,CL8+ / EL7-150,CL8+ / EL7-150
+T_LIN_STISGTYP_TEXTTABLE_DOP,8,SG12 / TG12 /LIF180 / EL7-150 HED,SG12 / TG12 /LIF180 / EL7-150 HED
+T_LIN_STISGTYP_TEXTTABLE_DOP,9,C1.9 / EL7-175,C1.9 / EL7-175
+T_LIN_STISGTYP_TEXTTABLE_DOP,10,M2.3 / EL7-175 HED,M2.3 / EL7-175 HED
+T_LIN_STISGTYP_TEXTTABLE_DOP,11,H3.8 / EL8-180,H3.8 / EL8-180
+T_LIN_STISGTYP_TEXTTABLE_DOP,12,E4 / SG11 / EL8-180 HED,E4 / SG11 / EL8-180 HED
+T_LIN_STISGTYP_TEXTTABLE_DOP,13,M3.0 / EL8-210,M3.0 / EL8-210
+T_LIN_STISGTYP_TEXTTABLE_DOP,14,EL8-210 HED,EL8-210 HED
+T_LIN_STISGTYP_TEXTTABLE_DOP,15,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,16,TG17,TG17
+T_LIN_STISGTYP_TEXTTABLE_DOP,17,TG17 (mit Bosch),TG17 (with Bosch)
+T_LIN_STISGTYP_TEXTTABLE_DOP,18,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,19,CL 12+ Prince,CL 12+ Prince
+T_LIN_STISGTYP_TEXTTABLE_DOP,20,E8 / SG14 / FG18D,E8 / SG14 / FG18D
+T_LIN_STISGTYP_TEXTTABLE_DOP,21,FG18,FG18
+T_LIN_STISGTYP_TEXTTABLE_DOP,22,FG18D,FG18D
+T_LIN_STISGTYP_TEXTTABLE_DOP,23,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,24,TG15,TG15
+T_LIN_STISGTYP_TEXTTABLE_DOP,25,FG23,FG23
+T_LIN_STISGTYP_TEXTTABLE_DOP,26,CG25,CG25
+T_LIN_STISGTYP_TEXTTABLE_DOP,27,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,28,E8+ (mit BSD I),E8+ (with BSD I)
+T_LIN_STISGTYP_TEXTTABLE_DOP,29,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,30,-,-
+T_LIN_STISGTYP_TEXTTABLE_DOP,31,E8+ (mit BSD II),E8+ (with BSD II)
+T_LIN_STISGTYP_TEXTTABLE_DOP,255,nicht Definiert,Not Definiert
+T_PSPDIA_STFPCENFGND_SIGDOP,0,unbekannt,Unknown
+T_PSPDIA_STFPCENFGND_SIGDOP,1,BSD-Generator,BSD-alternator
+T_PSPDIA_STFPCENFGND_SIGDOP,2,VDA-LIN-Generator,VDA-LIN-alternator
+T_PSPDIA_STFPCENFGND_SIGDOP,3,Starter-Generator SGR,Starter-alternator SGR
+T_PSPDIA_STFPCENFGND_SIGDOP,255,nicht Definiert,Not Definiert
+T_STATE_DMTL_DOP,0,NOINFO,NOINFO
+T_STATE_DMTL_DOP,1,FLTHEATR,FLTHEATR
+T_STATE_DMTL_DOP,2,FUPMPIHI,FUPMPIHI
+T_STATE_DMTL_DOP,3,FUPMPUHI,FUPMPUHI
+T_STATE_DMTL_DOP,4,FUPMPILO,FUPMPILO
+T_STATE_DMTL_DOP,5,TEXSLVL2,TEXSLVL2
+T_STATE_DMTL_DOP,6,FUPMPSHOCIRC,FUPMPSHOCIRC
+T_STATE_DMTL_DOP,7,TEXSLVL3,TEXSLVL3
+T_STATE_DMTL_DOP,8,INTFLT,INTFLT
+T_STATE_DMTL_DOP,9,NOPRMACTV,NOPRMACTV
+T_STATE_DMTL_DOP,10,NOCRASHSIGRX,NOCRASHSIGRX
+T_STATE_DMTL_DOP,11,RESD,RESD
+T_STATE_ENG_SIGDOP,0,START,START
+T_STATE_ENG_SIGDOP,1,Referenzleck Messung,Referenzleck Messung
+T_STATE_ENG_SIGDOP,2,Grobleck Messung,Grobleck Messung
+T_STATE_ENG_SIGDOP,3,Feinleck Messung,Faleck Messung
+T_STATE_ENG_SIGDOP,4,Zweite Referenzleck Messung,Zweite Referenzleck Messung
+T_STATE_ENG_SIGDOP,6,Diagnose beendet,Diagnose beendet
+T_STATE_ENG_SIGDOP,10,Funktion nicht Startbar,Funktion not Startbar
+T_STATE_ENG_SIGDOP,11,Batteriespannung ausserhalb Bereich,Battery voltage offserhalb Bereich
+T_STATE_ENG_SIGDOP,12,Schwankung von Referenzstrom zu gross,Schwankung of Referenzstrom too large
+T_STATE_ENG_SIGDOP,13,Elektrischer Fehler vorhanden,Electrical fault beforehanden
+T_STATE_ENG_SIGDOP,14,Max. Diagnosezeit erreicht/ueberschritten,Max. Diagnosezeit erreicht/exceeded
+T_STATE_ENG_SIGDOP,15,Kein Freigabe TEV Aktiv,Ka Freigabe TEV Aktiv
+T_STATE_ENG_SIGDOP,20,Funktion wurde Abgebrochen,Funktion was Abgebrochen
+T_STATE_ENG_SIGDOP,23,Spannungsschwankung zu gross,Voltagesschwankung too large
+T_STATE_ENG_SIGDOP,24,Zuendung an,Ignition an
+T_STATE_ENG_SIGDOP,30,Funktion beendet: Tank Dicht,Funktion beendet: Tank Dicht
+T_STATE_ENG_SIGDOP,31,Funktion beendet: Feinleck erkannt,Funktion beendet: Faleck detected
+T_STATE_ENG_SIGDOP,32,Funktion beendet: Grobleck erkannt,Funktion beendet: Grobleck detected
+T_STATE_ENG_SIGDOP,33,Funktion beendet: Modulfehler,Funktion beendet: Modulfehler
+T_STATE_ENG_SIGDOP,34,Funktion beendet: Kein Grobleck erkannt,Funktion beendet: Ka Grobleck detected
+T_STATE_ENG_SIGDOP,255,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_STATE_HAL_INTERN_DOP,0,COENG_STANDBY - Initialisierungszustand,COENG_STANDBY - Initialisierungszustand
+T_STATE_HAL_INTERN_DOP,1,COENG_READY - Warten auf Drehzahl,COENG_READY - Warten on speed
+T_STATE_HAL_INTERN_DOP,2,COENG_CRANKING - Warten auf Startabwurf,COENG_CRANKING - Warten on Startabwurf
+T_STATE_HAL_INTERN_DOP,3,COENG_RUNNING - Motor läuft,COENG_RUNNING - engine läuft
+T_STATE_HAL_INTERN_DOP,4,"COENG_STOPPING - Nachlauf, Drehzahl noch vorhanden oder direkte Abschaltung aus stehendem Motor","COENG_STOPPING - Nachlauf, speed yet beforehanden or direkte shutdown off stehendem engine"
+T_STATE_HAL_INTERN_DOP,5,"COENG_FINISH - Nachlauf, Motor steht","COENG_FINISH - Nachlauf, engine steht"
+T_STATE_KSU_INTERN_DOP,0,HAL_RESET,HAL_RESET
+T_STATE_KSU_INTERN_DOP,1,HAL_INITIALES_LERNEN,HAL_INITIALES_LERNEN
+T_STATE_KSU_INTERN_DOP,2,HAL_INITIAL_GELERNT,HAL_INITIAL_GELERNT
+T_STATE_KSU_INTERN_DOP,3,HAL_VERIFIKATION_FEHLGESCHLAGEN (1-mal),HAL_VERIFIKATION_FEHLGESCHLAGEN (1-mal)
+T_STATE_KSU_INTERN_DOP,4,HAL_VERIFIKATION_FEHLGESCHLAGEN (2-mal),HAL_VERIFIKATION_FEHLGESCHLAGEN (2-mal)
+T_STATE_KSU_INTERN_DOP,5,HAL_VERIFIKATION_FEHLGESCHLAGEN (3-mal),HAL_VERIFIKATION_FEHLGESCHLAGEN (3-mal)
+T_STATE_KSU_INTERN_DOP,6,HAL_VERIFIKATION_FEHLGESCHLAGEN (4-mal),HAL_VERIFIKATION_FEHLGESCHLAGEN (4-mal)
+T_STATE_KSU_INTERN_DOP,7,HAL_VERIFIKATION_FEHLERHAFT,HAL_VERIFIKATION_FEHLERHAFT
+T_STATE_KSU_INTERN_DOP,8,HAL_ADAPTION_LERNEN,HAL_ADAPTION_LERNEN
+T_STATE_KSU_INTERN_DOP,9,HAL_VERIFIKATION_OK,HAL_VERIFIKATION_OK
+T_STATE_PWM_VCV_SIGDOP,0,HAL_HA_UNPLAUSIBEL,HAL_HA_UNPLAUSIBEL
+T_STATE_PWM_VCV_SIGDOP,1,HAL_INT_STATUS_NDIFF,HAL_INT_STATUS_NDIFF
+T_STATE_PWM_VCV_SIGDOP,2,HAL_INT_STATUS_PLAUSFREIGABE_DME,HAL_INT_STATUS_PLAUSFREIGABE_DME
+T_STAT_EWG_DOP,0,VCV_TEST,VCV_TEST
+T_STAT_EWG_DOP,1,START,START
+T_STAT_EWG_DOP,2,MFP_CTL,MFP_CTL
+T_STAT_EWG_DOP,3,VCV_CLOSE,VCV_CLOSE
+T_STAT_EWG_DOP,4,VCV_CRASH,VCV_CRASH
+T_STAT_EWG_DOP,5,MFP_MAX,MFP_MAX
+T_STAT_EWG_DOP,6,VCV_LIH,VCV_LIH
+T_ST_ATLSVC_DOP,0,Start,Start
+T_ST_ATLSVC_DOP,1,geregelter Betrieb,Geregelter Betrieb
+T_ST_ATLSVC_DOP,2,Zuhaltebetrieb,Zuhaltebetrieb
+T_ST_ATLSVC_DOP,3,unteren Anschlag lernen (WG geschlossen),Underen Anschlag lernen (WG geschlossen)
+T_ST_ATLSVC_DOP,4,oberen Anschlag lernen (WG offen),Oberen Anschlag lernen (WG offen)
+T_ST_ATLSVC_DOP,5,"Notbetrieb, Abschaltung","Notbetrieb, shutdown"
+T_ST_ATLSVC_DOP,6,"Notbetrieb, gesteuert Auffahren","Notbetrieb, gesteuert Auffahren"
+T_ST_ATLSVC_DOP,7,Abschaltung im Nachlauf,Shutdown in the Nachlauf
+T_ST_ATLSVC_DOP,8,Standby wegen nicht gueltigem Sensor,Standby due to not gueltigem Sensor
+T_ST_ATLSVC_DOP,255,Status nicht Definiert,Status not Definiert
+T_ST_ATLSVC_PVDK_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_ST_ATLSVC_PVDK_DOP,1,Startbedingung nicht erfuellt,Startbedingung not erfuellt
+T_ST_ATLSVC_PVDK_DOP,2,Uebergabeparameter nicht plausibel,Uebergabeparameter not plausible
+T_ST_ATLSVC_PVDK_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_ST_ATLSVC_PVDK_DOP,5,Funktionstest laeuft,Funktionstest laeuft
+T_ST_ATLSVC_PVDK_DOP,6,Funktion beendet,Funktion beendet
+T_ST_ATLSVC_PVDK_DOP,7,Funktion abgebrochen,Funktion abgebrochen
+T_ST_ATLSVC_PVDK_DOP,8,Funktion vollstaendig durchlaufen und kein Fehler erkannt,Funktion vollstaendig bylaufen and no fault detected
+T_ST_ATLSVC_PVDK_DOP,9,Funktion vollstaendig durchlaufen und Fehler erkannt,Funktion vollstaendig bylaufen and fault detected
+T_ST_TESTPOELSYS2_DOP,0,Ladedruckdiagnose ohne Ergebnis,Boost pressurediagnose without Ergebnis
+T_ST_TESTPOELSYS2_DOP,1,Ladedruck fehlerfrei,Boost pressure fehlerfrei
+T_ST_TESTPOELSYS2_DOP,2,Gesamtladedruck zu niedrig,Gesamtladedruck too low
+T_ST_TESTPOELSYS2_DOP,3,Turbolader 1 mit Ladedruckfehler,Turbolader 1 with boost pressurefehler
+T_ST_TESTPOELSYS2_DOP,4,Turbolader 2 mit Ladedruckfehler,Turbolader 2 with boost pressurefehler
+T_ST_TESTPOELSYS2_DOP,5,"Gesamtladedruck zu niedrig, Bank nicht identifiziert","Gesamtladedruck too low, Bank not identifiziert"
+T_ST_TESTPOELSYS_DOP,0,--,--
+T_ST_TESTPOELSYS_DOP,1,Abbruch durch Tester,Abbruch by Tester
+T_ST_TESTPOELSYS_DOP,2,Warmlauf (Oeltemperatur zu niedrig),Warmlauf (oiltemperatur too low)
+T_ST_TESTPOELSYS_DOP,3,Abbruch aufgrund zu hoher Oeltemperatur,Abbruch due to to hoher oiltemperatur
+T_ST_TESTPOELSYS_DOP,4,Abbruch aufgrund fehlender Reglerfreigabe,Abbruch due to missing Reglerfreigabe
+T_ST_TESTPOELSYS_DOP,5,Abbruch der Diagnosefunktion nach Schritt 1 (Fehlerspeicher auslesen),Abbruch the Diagnosefunktion to Schritt 1 (fault memory offlesen)
+T_ST_TESTPOELSYS_DOP,6,Abbruch der Diagnosefunktion nach Schritt 2 (Fehlerspeicher auslesen),Abbruch the Diagnosefunktion to Schritt 2 (fault memory offlesen)
+T_ST_TESTPOELSYS_DOP,7,Abbruch der Diagnosefunktion nach Schritt 3 (Fehlerspeicher auslesen),Abbruch the Diagnosefunktion to Schritt 3 (fault memory offlesen)
+T_ST_TESTPOELSYS_DOP,8,"Testfunktion 1 laeuft (konstante Drehzahl, Solldruck-Spruenge)","Testfunktion 1 laeuft (konstante speed, targetdruck-Spruenge)"
+T_ST_TESTPOELSYS_DOP,9,"Testfunktion 2 laeuft (konstante Drehzahl, Solldruck-Rampen)","Testfunktion 2 laeuft (konstante speed, targetdruck-Rampen)"
+T_ST_TESTPOELSYS_DOP,10,"Testfunktion 3 laeuft (Drehzahl-Rampen, konstanter Solloeldruck)","Testfunktion 3 laeuft (speed-Rampen, konstanter targetoeldruck)"
+T_SW_5F7E_DOP,0,Funktion noch nicht gestartet,Funktion yet not gestartet
+T_SW_5F7E_DOP,3,Funktion wartet auf Freigabe,Funktion wartet on Freigabe
+T_SW_5F7E_DOP,4,--,--
+T_SW_5F7E_DOP,5,Funktionstest laeuft,Funktionstest laeuft
+T_SW_5F7E_DOP,6,Funktion beendet,Funktion beendet
+T_SW_5F7E_DOP,7,Funktion abgebrochen,Funktion abgebrochen
+T_SW_5F7E_DOP,8,Funktion vollstaendig durchlaufen und kein Fehler erkannt,Funktion vollstaendig bylaufen and no fault detected
+T_SW_5F7E_DOP,9,Funktion vollstaendig durchlaufen und Fehler erkannt,Funktion vollstaendig bylaufen and fault detected
+T_SW_5FF5_DOP,1,Verriegelung Kodierbereich,Verriegelung Kodierbereich
+T_SYC_STMNCOORD_DOP,4,Powermanagement Histogramm loeschen.,Power management Hisogramm loeschen.
+T_SYC_STPOSTDRV_DOP,0,ECU_OFF,ECU_OFF
+T_SYC_STPOSTDRV_DOP,1,BOOT,BOOT
+T_SYC_STPOSTDRV_DOP,2,INITIALIZATION,INITIALIZATION
+T_SYC_STPOSTDRV_DOP,3,PREDRIVE,PREDRIVE
+T_SYC_STPOSTDRV_DOP,20,BASIC_OPERATION,BASIC_OPERATION
+T_SYC_STPOSTDRV_DOP,277,NM_MESSAGES_ACTIV,NM_MESSAGES_ACTIV
+T_SYC_STPOSTDRV_DOP,292,DRIVE_STANDBY,DRIVE_STANDBY
+T_SYC_STPOSTDRV_DOP,293,FUNCTION_POSTDRIVE,FUNCTION_POSTDRIVE
+T_SYC_STPOSTDRV_DOP,533,NM_READY_SLEEP,NM_READY_SLEEP
+T_SYC_STPOSTDRV_DOP,548,PREPARE_DRIVE_OPERATION,PREPARE_DRIVE_OPERATION
+T_SYC_STPOSTDRV_DOP,549,FINALIZE,FINALIZE
+T_SYC_STPOSTDRV_DOP,804,DRIVE_OPERATION,DRIVE_OPERATION
+T_SYC_STPREDRV_DOP,0,SYC_POSTDRV_INACTV,SYC_POSTDRV_INACTV
+T_SYC_STPREDRV_DOP,1,SYC_POSTDRV_DSM_BGN,SYC_POSTDRV_DSM_BGN
+T_SYC_STPREDRV_DOP,2,SYC_POSTDRV_EEP_BGN,SYC_POSTDRV_EEP_BGN
+T_SYC_STPREDRV_DOP,3,SYC_POSTDRV_WAIT,SYC_POSTDRV_WAIT
+T_SYC_STPREDRV_DOP,4,SYC_POSTDRV_NWM,SYC_POSTDRV_NWM
+T_SYC_STPREDRV_DOP,5,SYC_POSTDRV_DSM_END,SYC_POSTDRV_DSM_END
+T_SYC_STPREDRV_DOP,6,SYC_POSTDRV_EEP_END,SYC_POSTDRV_EEP_END
+T_SYC_STPREDRV_DOP,7,SYC_POSTDRV_MIN_TIME,SYC_POSTDRV_MIN_TIME
+T_SYC_STPREDRV_DOP,8,SYC_POSTDRV_DONE,SYC_POSTDRV_DONE
+T_SYC_STSUBOLD_DOP,0,SYC_PREDRV_INI_DRV,SYC_PREDRV_INI_DRV
+T_SYC_STSUBOLD_DOP,1,SYC_PREDRV_DONE,SYC_PREDRV_DONE
+T_SYC_STSUBOLD_DOP,2,SYC_PREDRV_INI_SHDWN,SYC_PREDRV_INI_SHDWN
+T_SYC_STSUBOLD_DOP,3,SYC_PREDRV_PROLONG,SYC_PREDRV_PROLONG
+T_SYC_STSUBOLD_DOP,4,SYC_PREDRV_NWM,SYC_PREDRV_NWM
+T_SYC_STSUBOLD_DOP,5,SYC_PREDRV_EEP,SYC_PREDRV_EEP
+T_SYC_STSUBOLD_DOP,6,SYC_PREDRV_DSM,SYC_PREDRV_DSM
+T_SYC_STSUBOLD_DOP,7,SYC_PREDRV_MR,SYC_PREDRV_MR
+T_SYC_STSUBOLD_DOP,8,SYC_PREDRV_MOM,SYC_PREDRV_MOM
+T_SYC_STSUBOLD_DOP,9,SYC_PREDRV_EXIT,SYC_PREDRV_EXIT
+T_SYC_STSUB_DOP,0,SYC_INI,SYC_INI
+T_SYC_STSUB_DOP,1,SYC_INISYN,SYC_INISYN
+T_SYC_STSUB_DOP,2,SYC_INIEND,SYC_INIEND
+T_SYC_STSUB_DOP,3,SYC_PREDRIVE,SYC_PREDRIVE
+T_SYC_STSUB_DOP,4,SYC_DRIVE,SYC_DRIVE
+T_SYC_STSUB_DOP,5,SYC_POSTDRIVE,SYC_POSTDRIVE
+T_SYC_STSUB_DOP,6,SYC_POST_OS_EXIT,SYC_POST_OS_EXIT
+T_VVLVLFTACTR_STCPT_DOP,0,SYC_INI,SYC_INI
+T_VVLVLFTACTR_STCPT_DOP,1,SYC_INISYN,SYC_INISYN
+T_VVLVLFTACTR_STCPT_DOP,2,SYC_INIEND,SYC_INIEND
+T_VVLVLFTACTR_STCPT_DOP,3,SYC_PREDRIVE,SYC_PREDRIVE
+T_VVLVLFTACTR_STCPT_DOP,4,SYC_DRIVE,SYC_DRIVE
+T_VVLVLFTACTR_STCPT_DOP,5,SYC_POSTDRIVE,SYC_POSTDRIVE
+T_VVLVLFTACTR_STCPT_DOP,6,SYC_POST_OS_EXIT,SYC_POST_OS_EXIT
+ZYLINDERZUORDNUNG_12_M,0,INIT,INIT
+ZYLINDERZUORDNUNG_12_M,1,STANDBY,STANDBY
+ZYLINDERZUORDNUNG_12_M,2,RUNNING,RUNNING
+ZYLINDERZUORDNUNG_12_M,3,ERROR_STOP,ERROR_STOP
+ZYLINDERZUORDNUNG_12_M,4,ERROR_PROCEED,ERROR_PROCEED
+ZYLINDERZUORDNUNG_12_M,5,ERROR_OFF,ERROR_OFF

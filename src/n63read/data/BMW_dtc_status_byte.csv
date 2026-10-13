@@ -1,0 +1,93 @@
+﻿status_byte,text_de,text_en
+0x00,keine Fehlerart verfügbar,No fault type available
+0x04,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x05,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x08,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x09,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x0C,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x0D,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x20,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x21,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x24,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x25,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x28,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x29,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x2C,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
+0x2D,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
+0x40,unbekannte Fehlerart,Unknowne fault type
+0x44,Fehler gespeichert,Fault stored
+0x45,Fehler gespeichert,Fault stored
+0x48,Fehler gespeichert,Fault stored
+0x49,Fehler gespeichert,Fault stored
+0x4C,Fehler gespeichert,Fault stored
+0x4D,Fehler gespeichert,Fault stored
+0x60,Fehler gespeichert,Fault stored
+0x61,Fehler gespeichert,Fault stored
+0x64,Fehler gespeichert,Fault stored
+0x65,Fehler gespeichert,Fault stored
+0x68,Fehler gespeichert,Fault stored
+0x69,Fehler gespeichert,Fault stored
+0x6C,Fehler gespeichert,Fault stored
+0x6D,Fehler gespeichert,Fault stored
+0x10,Testbedingungen erfüllt,Testbedingungen erfüllt
+0x11,Testbedingungen noch nicht erfüllt,Testbedingungen yet not erfüllt
+0x80,Fehler würde kein Aufleuchten einer Warnlampe verursachen,Fault would no illumination ar warning lamp cause
+0x81,Fehler würde das Aufleuchten einer Warnlampe verursachen,Fault would the illumination ar warning lamp cause
+0xFF,unbekannte Fehlerart,Unknowne fault type
+0x01,HWEL,HWEL
+0x02,HWAP,HWAP
+0x03,HWFR,HWFR
+0x06,BTLD,BTLD
+0x0A,SWPF,SWPF
+0x0B,ONPS,ONPS
+0x0F,FAFP,FAFP
+0x1A,TLRT,TLRT
+0x1B,TPRG,TPRG
+0x07,FLSL,FLSL
+0x1C,BLUP,BLUP
+0x1D,FLUP,FLUP
+0xC0,SWUP,SWUP
+0xC1,SWIP,SWIP
+0xA0,ENTD,ENTD
+0xA1,NAVD,NAVD
+0xA2,FCFN,FCFN
+0x0E,SVK_BACKUP_11,SVK_BACKUP_11
+0x12,SVK_BACKUP_15,SVK_BACKUP_15
+0x13,SVK_BACKUP_16,SVK_BACKUP_16
+0x14,SVK_BACKUP_17,SVK_BACKUP_17
+0x15,SVK_BACKUP_18,SVK_BACKUP_18
+0x16,SVK_BACKUP_19,SVK_BACKUP_19
+0x17,SVK_BACKUP_20,SVK_BACKUP_20
+0x18,SVK_BACKUP_21,SVK_BACKUP_21
+0x19,SVK_BACKUP_22,SVK_BACKUP_22
+0x1E,SVK_BACKUP_27,SVK_BACKUP_27
+0x1F,SVK_BACKUP_28,SVK_BACKUP_28
+0x22,SVK_BACKUP_31,SVK_BACKUP_31
+0x23,SVK_BACKUP_32,SVK_BACKUP_32
+0x26,SVK_BACKUP_35,SVK_BACKUP_35
+0x27,SVK_BACKUP_36,SVK_BACKUP_36
+0x2A,SVK_BACKUP_39,SVK_BACKUP_39
+0x2B,SVK_BACKUP_40,SVK_BACKUP_40
+0x2E,SVK_BACKUP_43,SVK_BACKUP_43
+0x2F,SVK_BACKUP_44,SVK_BACKUP_44
+0x30,SVK_BACKUP_45,SVK_BACKUP_45
+0x31,SVK_BACKUP_46,SVK_BACKUP_46
+0x32,SVK_BACKUP_47,SVK_BACKUP_47
+0x33,SVK_BACKUP_48,SVK_BACKUP_48
+0x34,SVK_BACKUP_49,SVK_BACKUP_49
+0x35,SVK_BACKUP_50,SVK_BACKUP_50
+0x36,SVK_BACKUP_51,SVK_BACKUP_51
+0x37,SVK_BACKUP_52,SVK_BACKUP_52
+0x38,SVK_BACKUP_53,SVK_BACKUP_53
+0x39,SVK_BACKUP_54,SVK_BACKUP_54
+0x3A,SVK_BACKUP_55,SVK_BACKUP_55
+0x3B,SVK_BACKUP_56,SVK_BACKUP_56
+0x3C,SVK_BACKUP_57,SVK_BACKUP_57
+0x3D,SVK_BACKUP_58,SVK_BACKUP_58
+0x3E,SVK_BACKUP_59,SVK_BACKUP_59
+0x3F,SVK_BACKUP_60,SVK_BACKUP_60
+0x41,ECUCODE,ECUCODE
+0x42,ECUSWT,ECUSWT
+0x43,ECUHDD,ECUHDD
+0x4F,ECUDEVELOP,ECUDEVELOP
+0x5F,ECUGDM,ECUGDM
