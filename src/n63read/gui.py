@@ -1,31 +1,22 @@
-#!/usr/bin/env python3
 """
-n63gui.py - Windows-friendly GUI for reading N63TU2 DME measurements over ENET.
+n63read.gui - Windows-friendly GUI for reading N63TU2 DME measurements over ENET.
 
 Requires: Python 3 only. Tkinter ships with the standard Windows installer.
-Keep n63read.py and the BMW_*.csv / N63TU2_*.csv data files in the same folder.
 
-Run:  python n63gui.py
+Run:  n63read-gui   (or: python -m n63read.gui)
 """
 
 import csv
 import os
 import queue
-import sys
 import threading
 import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+from n63read import core
 
-try:
-    import n63read as core
-except ImportError:
-    raise SystemExit("n63read.py must be in the same folder as n63gui.py")
-
-CSV_NAME = n63read.DEFAULT_CSV      # resolved via n63read.resource_path()
+CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
 COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 
@@ -43,7 +34,9 @@ class Poller(threading.Thread):
         self.channels = []          # [(name, did, meta)]
         self.lock = threading.Lock()
         self.interval = 0.25
-        self._stop = threading.Event()
+        # Not `_stop`: that name is a threading.Thread internal, and
+        # shadowing it with an Event breaks join()/is_alive().
+        self._stop_event = threading.Event()
         self.logfile = None
         self.logwriter = None
         self.log_header = None
@@ -65,14 +58,14 @@ class Poller(threading.Thread):
             self.logfile = self.logwriter = self.log_header = None
 
     def stop(self):
-        self._stop.set()
+        self._stop_event.set()
 
     def run(self):
         t0 = time.time()
         try:
             with core.Hsfz(self.ip, source=self.source, timeout=self.timeout) as h:
                 self.out_q.put(("status", "connected"))
-                while not self._stop.is_set():
+                while not self._stop_event.is_set():
                     with self.lock:
                         chans = list(self.channels)
                     if not chans:
@@ -133,7 +126,7 @@ class App(tk.Tk):
     # -- data ------------------------------------------------------------
 
     def _load_catalog(self):
-        path = n63read.resource_path(CSV_NAME)
+        path = core.resource_path(CSV_NAME)
         if not os.path.exists(path):
             messagebox.showerror(
                 "Missing catalog",
@@ -311,6 +304,11 @@ class App(tk.Tk):
         box.pack(fill="both", expand=True)
         box.insert("end", "Sweeping 0x00-0x60 with TesterPresent...\n\n")
 
+        # Tk widgets may only be touched from the main thread, so the worker
+        # hands lines to the event pump instead of calling box.after itself.
+        def emit(text):
+            self.q.put(("scanline", box, text))
+
         def work():
             try:
                 with core.Hsfz(ip, source=0xF4, timeout=1.0) as h:
@@ -326,10 +324,10 @@ class App(tk.Tk):
                             continue
                         else:
                             line = "0x%02X  responds\n" % t
-                        box.after(0, lambda l=line: (box.insert("end", l), box.see("end")))
-                box.after(0, lambda: box.insert("end", "\nDone.\n"))
+                        emit(line)
+                emit("\nDone.\n")
             except Exception as e:                                  # noqa: BLE001
-                box.after(0, lambda: box.insert("end", "\nError: %s\n" % e))
+                emit("\nError: %s\n" % e)
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -428,6 +426,12 @@ class App(tk.Tk):
                         self.status.config(
                             text="\u25cf found %d" % len(hits), foreground="#2a9d3f")
 
+                elif kind == "scanline":
+                    _, box, text = msg
+                    if box.winfo_exists():
+                        box.insert("end", text)
+                        box.see("end")
+
                 elif kind == "error":
                     self.status.config(text="\u25cf error", foreground="#c0392b")
                     messagebox.showerror("Connection", msg[1])
@@ -483,5 +487,9 @@ class App(tk.Tk):
         self.destroy()
 
 
-if __name__ == "__main__":
+def main():
     App().mainloop()
+
+
+if __name__ == "__main__":
+    main()

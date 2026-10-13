@@ -16,3 +16,6 @@ build/
 captures/
 logs/
 *.log
+
+# PyInstaller
+*.spec

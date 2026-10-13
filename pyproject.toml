@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "n63read"
+version = "0.1.0"
+description = "Read-only BMW N63TU2 DME reader over ENET (HSFZ)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+build = ["pyinstaller"]
+
+[project.scripts]
+n63read = "n63read.cli:main"
+
+[project.gui-scripts]
+n63read-gui = "n63read.gui:main"
+
+[tool.setuptools.package-data]
+n63read = ["data/*.csv"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

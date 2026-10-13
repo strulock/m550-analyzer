@@ -68,17 +68,27 @@ fault against a drive.
 Status and mode channels return bare integers; these tables carry the text.
 162 tables, 1,448 entries, each with its real SGBD name.
 
-A measurement's `RES_TABELLE` column names its table directly, so the decoder
-can resolve a raw value to text with a dictionary lookup. All 168
-table-referencing measurements in the catalog resolve.
+A scalar measurement's `NAME` column names its value→text table, so the
+decoder can resolve a raw value to text with a dictionary lookup. 27
+measurements reference a table this way; 24 resolve. The other three are
+`BITFIELD` channels (`BF_0x4002_0`, `BF_0x4044_0`, `BF_0x40EF_0`), which
+need bit masks rather than a value lookup and are returned as hex.
+
+`RES_TABELLE` is a different thing: it names a multi-field result record
+(`RES_0x2502_D`) for the 168 channels whose `DATENTYP` is `-`. None of those
+record layouts are in `BMW_enum_tables.csv`, so none of the 168 resolve, and
+an earlier version of this brief that said they all did was wrong.
 
 **Match table names case-insensitively.** The SGBD directory stores them
 uppercased (`RES_0X1061_R`) while `SG_Funktionen` references them in mixed
 case (`RES_0x1061_R`). A case-sensitive lookup silently resolves nothing.
+Values appear both as decimal (`1`) and hex (`0x0001`), so compare them as
+integers.
 
-Decode order for a measurement with a `RES_TABELLE`: apply MUL/DIV/ADD as
+Decode order for a measurement with a `NAME` table: apply MUL/DIV/ADD as
 usual, then look the result up in the table; fall back to the number if
-there is no matching row.
+there is no matching row. The CSV logger skips the lookup so log columns
+stay numeric.
 
 `sgbd_tables.py` carries the directory parser — see *SGBD table directory*.
 
@@ -112,6 +122,13 @@ State-changing — keep blocked:
 
 `STATUS_BLOCK_LESEN` is worth implementing: it reads several channels per
 round trip instead of one, which matters for live logging rates.
+
+Caution: the catalog's `SERVICE` column reads `22;2C` for every channel.
+`0x2C` is DynamicallyDefineDataIdentifier, which is how BMW's block read
+defines its block in the ECU. It writes a definition into ECU RAM and is
+outside `ALLOWED_SERVICES`. Try a multi-identifier `0x22` request first
+(`22 5889 588A ...`, allowed by ISO 14229 and still read-only); only consider
+`0x2C` behind the explicit opt-in described under *Safety constraints*.
 
 ## Existing files (already written — do not regenerate)
 

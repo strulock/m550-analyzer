@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 """
-n63read.py - read BMW N63TU2 DME measurements over ENET using BMW's HSFZ protocol.
+n63read.core - read BMW N63TU2 DME measurements over ENET using BMW's HSFZ protocol.
 
 Pure standard library. No dependencies. Read-only: this tool will only ever
 send UDS services 0x22 (ReadDataByIdentifier), 0x19 (ReadDTCInformation) and
@@ -16,30 +15,8 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   BMW_enum_tables.csv                    value -> text enumerations
   BMW_freeze_frame_fields.csv            FS_LESEN_DETAIL field catalog
   G30_module_sgbd_map.csv                module address -> SGBD variant
-
-Usage
------
-  # 1. Find the car on the network
-  python3 n63read.py discover
-
-  # 2. Find which modules answer (this is how you locate the slave DME)
-  python3 n63read.py scan --ip 169.254.x.x
-
-  # 3. Read one or more channels once
-  python3 n63read.py read --ip 169.254.x.x ILAG1 ILAG2
-
-  # 4. Log channels to CSV until Ctrl-C
-  python3 n63read.py log --ip 169.254.x.x --interval 0.2 \
-      --out bank2_test.csv ILAG1 ILAG2 ILUZ5 ILUZ7
-
-  # 5. Read fault memory, decoded against the SGBD text catalog
-  python3 n63read.py faults --ip 169.254.x.x --target 0x12
-
-  # Target a module other than the master DME (0x12)
-  python3 n63read.py read --ip 169.254.x.x --target 0x13 ILAG2
 """
 
-import argparse
 import csv
 import os
 import socket
@@ -72,7 +49,7 @@ NRC = {
 # Read-only services. 0x19 reports fault memory; it cannot clear it (that is
 # 0x14) and cannot write or command anything. Do not widen this set - see
 # PROJECT.md, "Safety constraints".
-ALLOWED_SERVICES = {0x19, 0x22, 0x3E}
+ALLOWED_SERVICES = frozenset({0x19, 0x22, 0x3E})
 
 DEFAULT_CSV = "N63TU2_DME_readable_measurements.csv"
 FAULT_CSV = "BMW_fault_code_texts.csv"
@@ -88,13 +65,15 @@ DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
 def resource_path(name):
     """Locate a bundled data file.
 
-    Search order: PyInstaller's unpack dir, the directory holding this module,
-    the executable's own folder, then the working directory. The last two let
-    a user drop an updated CSV next to the exe without rebuilding.
+    Search order: PyInstaller's unpack dir, the package's data/ directory,
+    the directory holding this module, the executable's own folder, then the
+    working directory. The last two let a user drop an updated CSV next to
+    the exe without rebuilding.
     """
     here = os.path.dirname(os.path.abspath(__file__))
     candidates = [
         os.path.join(getattr(sys, "_MEIPASS", here), name),
+        os.path.join(here, "data", name),
         os.path.join(here, name),
         os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), name),
         os.path.join(os.getcwd(), name),
@@ -163,7 +142,12 @@ class Hsfz:
     def _recv_exact(self, n):
         buf = b""
         while len(buf) < n:
-            chunk = self.sock.recv(n - len(buf))
+            try:
+                chunk = self.sock.recv(n - len(buf))
+            except socket.timeout:
+                # Surface as HsfzError so callers (scan especially) can treat
+                # a silent address as "nothing there" rather than a crash.
+                raise HsfzError("timed out waiting for response") from None
             if not chunk:
                 raise HsfzError("connection closed by ECU")
             buf += chunk
@@ -199,8 +183,14 @@ class Hsfz:
                 continue
             if control != CTRL_DIAG or not data:
                 continue
+            # A late reply from an earlier request (e.g. the previous address
+            # in a scan) must not be credited to this target.
+            if src != target or dst != self.source:
+                continue
 
             if data[0] == 0x7F and len(data) >= 3:
+                if data[1] != service:
+                    continue
                 code = data[2]
                 if code == 0x78:          # responsePending - ECU is working
                     continue
@@ -230,21 +220,62 @@ class Hsfz:
 
         Returns [(code, status)] where code is the 6-hex-digit BMW fault code
         (3 bytes, matching BMW_fault_code_texts.csv) and status is the raw
-        statusOfDTC byte (see BMW_dtc_status_byte.csv).
+        statusOfDTC byte (decode with dtc_status_flags()).
 
         A mask of 0xFF asks for every DTC the module holds regardless of
         state. Narrow it if you only want currently-present faults.
         """
         resp = self.request(target, bytes([0x19, 0x02, status_mask & 0xFF]))
-        # 59 02 <availabilityMask> then 4-byte records: DTC[3] + status[1]
-        if len(resp) < 3:
-            return []
-        body = resp[3:]
-        out = []
-        for i in range(0, len(body) - 3, 4):
-            code = "%02X%02X%02X" % (body[i], body[i + 1], body[i + 2])
-            out.append((code, body[i + 3]))
-        return out
+        return parse_dtc_records(resp)
+
+
+def parse_dtc_records(resp):
+    """Split a 59 02 response into [(code, status)].
+
+    Layout: 59 02 <availabilityMask> then 4-byte records: DTC[3] + status[1].
+    """
+    body = resp[3:]
+    out = []
+    for i in range(0, len(body) - 3, 4):
+        code = "%02X%02X%02X" % (body[i], body[i + 1], body[i + 2])
+        out.append((code, body[i + 3]))
+    return out
+
+
+# ISO 14229-1 statusOfDTC bits, LSB first. BMW's own texts are combinations of
+# these: "currently present" is testFailed, "stored" is pending or confirmed.
+DTC_STATUS_BITS = (
+    "testFailed",
+    "testFailedThisOperationCycle",
+    "pendingDTC",
+    "confirmedDTC",
+    "testNotCompletedSinceLastClear",
+    "testFailedSinceLastClear",
+    "testNotCompletedThisOperationCycle",
+    "warningIndicatorRequested",
+)
+
+
+def dtc_status_flags(status):
+    """statusOfDTC byte -> list of the ISO bit names that are set."""
+    return [name for bit, name in enumerate(DTC_STATUS_BITS) if status & (1 << bit)]
+
+
+def dtc_status_summary(status):
+    """One-line reading of a statusOfDTC byte: is the fault active, is it stored."""
+    present = bool(status & 0x01)
+    stored = bool(status & 0x0C)
+    if present and stored:
+        text = "present, stored"
+    elif present:
+        text = "present, not yet stored"
+    elif stored:
+        text = "not present, stored"
+    else:
+        text = "not present"
+    if status & 0x80:
+        text += ", warning lamp requested"
+    return text
 
 
 # --------------------------------------------------------------- discovery
@@ -299,14 +330,14 @@ def discover(timeout=3.0, bind_ip=None):
 
 # ------------------------------------------------------------ measurements
 
-def load_catalog(path):
+def load_catalog(path=DEFAULT_CSV):
     """ARG name -> metadata dict, from the SGBD-derived CSV."""
     if not os.path.exists(path):
         path = resource_path(os.path.basename(path))
     if not os.path.exists(path):
-        sys.exit("measurement CSV not found: %s\n"
-                 "Pass --csv with the path to "
-                 "N63TU2_DME_readable_measurements.csv" % path)
+        raise FileNotFoundError(
+            "measurement CSV not found: %s\n"
+            "Pass --csv with the path to %s" % (path, DEFAULT_CSV))
     cat = {}
     with open(path, encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
@@ -340,11 +371,21 @@ def load_status_texts():
     return _load_lookup(STATUS_CSV, "status_byte", ("text_de", "text_en"))
 
 
+def _enum_key(value):
+    """Normalise an enum value so '0x01', '0x0001' and '1' all match."""
+    try:
+        return int(str(value).strip(), 0)
+    except ValueError:
+        return str(value).strip().lower()
+
+
 def load_enum_tables():
     """Table name (upper-cased) -> {value: {text_de, text_en}}.
 
     The SGBD directory stores table names upper-cased while SG_Funktionen
     references them in mixed case, so every lookup here is case-insensitive.
+    Values are stored both as decimal and hex in the source, so they are
+    keyed by integer.
     """
     path = resource_path(ENUM_CSV)
     if not os.path.exists(path):
@@ -356,7 +397,7 @@ def load_enum_tables():
             val = (row.get("value") or "").strip()
             if not name or not val:
                 continue
-            tables.setdefault(name, {})[val.lower()] = {
+            tables.setdefault(name, {})[_enum_key(val)] = {
                 "text_de": (row.get("text_de") or "").strip(),
                 "text_en": (row.get("text_en") or "").strip(),
             }
@@ -370,8 +411,13 @@ _WIDTH = {
 }
 
 
-def decode(raw, meta):
-    """Apply data type and MUL/DIV/ADD scaling. Returns (value, unit)."""
+def decode(raw, meta, enums=None, lang="text_en"):
+    """Apply data type and MUL/DIV/ADD scaling. Returns (value, unit).
+
+    If `enums` (from load_enum_tables()) is given and the channel names a
+    value->text table in its NAME column, the scaled value is looked up and
+    the text returned instead; unmatched values fall back to the number.
+    """
     dtype = (meta.get("DATENTYP") or "").strip().lower()
     unit = (meta.get("EINHEIT") or "").strip()
     if unit == "-":
@@ -399,216 +445,14 @@ def decode(raw, meta):
     mul, div, add = num("MUL", 1.0), num("DIV", 1.0), num("ADD", 0.0)
     if div == 0:
         div = 1.0
-    return value * mul / div + add, unit
+    scaled = value * mul / div + add
 
-
-# -------------------------------------------------------------- operations
-
-def op_discover(args):
-    if args.list_interfaces:
-        print("Local IPv4 addresses (link-local first):")
-        for a in local_ipv4s():
-            print("   ", a)
-        return
-    hits = discover(args.timeout, args.bind)
-    if not hits:
-        print("No response. Check you're on the adapter's network and the "
-              "ignition is on (position 2).")
-        return
-    for ip, payload in hits:
-        print("%-16s %s" % (ip, payload.hex()))
-        tail = payload[6:]
-        printable = bytes(c if 32 <= c < 127 else 0x2E for c in tail)
-        print(" " * 17 + printable.decode("ascii", "replace"))
-
-
-def op_faults(args):
-    """Read fault memory via 0x19 and decode it against the SGBD catalogs."""
-    texts = load_fault_texts()
-    statuses = load_status_texts()
-    lang = "text_de" if args.german else "text_en"
-
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
-        try:
-            dtcs = h.read_dtcs(args.target, args.mask)
-        except NegativeResponse as e:
-            sys.exit("module 0x%02X refused 0x19: %s"
-                     % (args.target, NRC.get(e.code, "nrc 0x%02X" % e.code)))
-
-    if not dtcs:
-        print("No fault codes reported by module 0x%02X." % args.target)
-        return
-
-    if not texts:
-        print("(%s not found - showing raw codes)\n" % FAULT_CSV)
-
-    print("%d fault code(s) from module 0x%02X:\n" % (len(dtcs), args.target))
-    unknown = 0
-    for code, status in sorted(dtcs):
-        entry = texts.get(code.upper())
+    # The enum table for a scalar channel is in NAME. RES_TABELLE names a
+    # multi-field result record, which is a different thing entirely.
+    table_name = (meta.get("NAME") or "").strip().upper()
+    if enums and table_name not in ("", "-") and scaled == int(scaled):
+        entry = enums.get(table_name, {}).get(int(scaled))
         if entry:
-            desc = entry.get(lang) or entry.get("text_de") or ""
-        else:
-            desc = "(not in catalog)"
-            unknown += 1
-        skey = "0x%02X" % status
-        sentry = statuses.get(skey.upper())
-        stext = (sentry.get(lang) or sentry.get("text_de")) if sentry else ""
-        print("  %-8s %s" % (code, desc))
-        print("  %-8s status %s%s" % ("", skey, " - " + stext if stext else ""))
-    if unknown:
-        print("\n%d code(s) had no catalog entry. The SGBD for this module "
-              "may not be among those extracted - see PROJECT.md." % unknown)
+            return entry.get(lang) or entry.get("text_de") or scaled, unit
 
-
-def op_scan(args):
-    """
-    Sweep target addresses with TesterPresent and report which answer.
-
-    This is how you find the slave DME. Known: 0x12 master DME, 0x40 BDC,
-    0x10 gateway. An unexpected responder near 0x12 is the candidate.
-    """
-    lo, hi = args.range
-    print("Scanning targets 0x%02X-0x%02X (ignition on, engine off)...\n" % (lo, hi))
-    alive = []
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
-        for target in range(lo, hi + 1):
-            try:
-                h.tester_present(target)
-            except NegativeResponse as e:
-                # A negative response still proves something is listening.
-                alive.append((target, "responds (%s)" % NRC.get(e.code, "nrc 0x%02X" % e.code)))
-                print("  0x%02X  responds (negative: %s)" % (target, NRC.get(e.code, "0x%02X" % e.code)))
-            except HsfzError:
-                pass
-            except Exception as e:                      # noqa: BLE001
-                print("  0x%02X  error: %s" % (target, e), file=sys.stderr)
-            else:
-                alive.append((target, "responds"))
-                print("  0x%02X  responds" % target)
-    print("\n%d module(s) answered." % len(alive))
-
-
-def op_read(args):
-    cat = load_catalog(args.csv)
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
-        for name in args.names:
-            meta = cat.get(name)
-            if not meta:
-                print("%-34s UNKNOWN (not in catalog)" % name)
-                continue
-            did = int(meta["ID"], 16)
-            try:
-                raw = h.read_did(args.target, did)
-            except NegativeResponse as e:
-                print("%-34s %s  <- %s" % (name, meta["ID"], e))
-                continue
-            except HsfzError as e:
-                print("%-34s %s  <- %s" % (name, meta["ID"], e))
-                continue
-            value, unit = decode(raw, meta)
-            print("%-34s %s  %-14s %-8s raw=%s   %s"
-                  % (name, meta["ID"], value, unit, raw.hex(), meta["INFO"][:40]))
-
-
-def op_log(args):
-    cat = load_catalog(args.csv)
-    chans = []
-    for name in args.names:
-        meta = cat.get(name)
-        if not meta:
-            sys.exit("unknown channel: %s" % name)
-        chans.append((name, int(meta["ID"], 16), meta))
-
-    out = open(args.out, "w", newline="", encoding="utf-8")
-    w = csv.writer(out)
-    w.writerow(["Time"] + [n for n, _, _ in chans])
-    print("Logging %d channel(s) to %s - Ctrl-C to stop" % (len(chans), args.out))
-
-    t0 = time.time()
-    n = 0
-    try:
-        with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
-            while True:
-                row = [round(time.time() - t0, 3)]
-                for _, did, meta in chans:
-                    try:
-                        value, _ = decode(h.read_did(args.target, did), meta)
-                    except Exception:                   # noqa: BLE001
-                        value = ""
-                    row.append(value)
-                w.writerow(row)
-                n += 1
-                if n % 25 == 0:
-                    out.flush()
-                    print("\r%d samples, %.1f s" % (n, time.time() - t0), end="")
-                time.sleep(args.interval)
-    except KeyboardInterrupt:
-        print("\nstopped")
-    finally:
-        out.close()
-        print("wrote %d samples to %s" % (n, args.out))
-
-
-# --------------------------------------------------------------------- CLI
-
-def hexint(s):
-    return int(s, 0)
-
-
-def main():
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    sub = p.add_subparsers(dest="cmd", required=True)
-
-    def common(sp, need_ip=True):
-        if need_ip:
-            sp.add_argument("--ip", required=True, help="ECU/gateway IP (see `discover`)")
-        sp.add_argument("--source", type=hexint, default=TESTER_ADDR,
-                        help="tester address (default 0xF4)")
-        sp.add_argument("--timeout", type=float, default=2.0)
-        sp.add_argument("--csv", default=DEFAULT_CSV,
-                        help="measurement catalog CSV")
-
-    sp = sub.add_parser("discover", help="find the car via UDP broadcast")
-    sp.add_argument("--timeout", type=float, default=3.0)
-    sp.add_argument("--bind", help="local IP of the ENET adapter (169.254.x.x)")
-    sp.add_argument("--list-interfaces", action="store_true",
-                    help="show local IPv4 addresses and exit")
-    sp.set_defaults(func=op_discover)
-
-    sp = sub.add_parser("scan", help="sweep target addresses to find modules")
-    common(sp)
-    sp.add_argument("--range", type=hexint, nargs=2, default=[0x00, 0x60],
-                    metavar=("LO", "HI"))
-    sp.set_defaults(func=op_scan)
-
-    sp = sub.add_parser("read", help="read channels once")
-    common(sp)
-    sp.add_argument("--target", type=hexint, default=DME_MASTER)
-    sp.add_argument("names", nargs="+", help="ARG names, e.g. ILAG1 ILAG2")
-    sp.set_defaults(func=op_read)
-
-    sp = sub.add_parser("faults", help="read and decode fault memory (0x19)")
-    common(sp)
-    sp.add_argument("--target", type=hexint, default=DME_MASTER)
-    sp.add_argument("--mask", type=hexint, default=0xFF,
-                    help="statusOfDTC mask (default 0xFF = all stored DTCs)")
-    sp.add_argument("--german", action="store_true",
-                    help="show BMW's German text instead of the translation")
-    sp.set_defaults(func=op_faults)
-
-    sp = sub.add_parser("log", help="poll channels into a CSV")
-    common(sp)
-    sp.add_argument("--target", type=hexint, default=DME_MASTER)
-    sp.add_argument("--interval", type=float, default=0.2)
-    sp.add_argument("--out", default="n63log.csv")
-    sp.add_argument("names", nargs="+")
-    sp.set_defaults(func=op_log)
-
-    args = p.parse_args()
-    args.func(args)
-
-
-if __name__ == "__main__":
-    main()
+    return scaled, unit
