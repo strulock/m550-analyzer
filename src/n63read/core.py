@@ -31,6 +31,11 @@ HSFZ_CONTROL_PORT = 6811       # UDP, discovery broadcast
 TESTER_ADDR = 0xF4             # standard tester source address
 DME_MASTER = 0x12              # master DME, confirmed from CarData fault memory
 
+PROBE_TIMEOUT = 0.5            # seconds to wait at an empty address in a sweep
+# Module addresses to sweep. The G30 map has modules up to 0x65 (ELV), so
+# this runs past the 0x60 that scan started with.
+SWEEP_RANGE = (0x00, 0x7F)
+
 CTRL_DIAG = 0x0001             # diagnostic request / response
 CTRL_ACK = 0x0002              # acknowledge transfer (ECU echoes the request)
 CTRL_IDENT = 0x0011            # vehicle identification data
@@ -215,6 +220,26 @@ class Hsfz:
     def tester_present(self, target):
         return self.request(target, bytes([0x3E, 0x00]))
 
+    def probe(self, target, timeout=PROBE_TIMEOUT):
+        """True if anything answers TesterPresent at `target`, even negatively.
+
+        Uses a short timeout: a present module answers in milliseconds, and
+        a sweep spends most of its time waiting on empty addresses.
+        """
+        saved = self.timeout
+        self.timeout = timeout
+        self.sock.settimeout(timeout)
+        try:
+            self.request(target, bytes([0x3E, 0x00]), retries=0)
+            return True
+        except NegativeResponse:
+            return True
+        except HsfzError:
+            return False
+        finally:
+            self.timeout = saved
+            self.sock.settimeout(saved)
+
     def read_dtcs(self, target, status_mask=0xFF):
         """UDS 0x19 sub-function 0x02 (reportDTCByStatusMask).
 
@@ -276,6 +301,131 @@ def dtc_status_summary(status):
     if status & 0x80:
         text += ", warning lamp requested"
     return text
+
+
+# ------------------------------------------------------------- fault sweep
+
+# Addresses confirmed for this car (PROJECT.md). Others are named from
+# G30_module_sgbd_map.csv where it has exactly one module at that address.
+KNOWN_MODULES = {
+    0x10: "Central gateway (ZGW)",
+    0x12: "Engine, master DME",
+    0x40: "Body domain controller (BDC)",
+    0x60: "Instrument cluster (KOMBI)",
+}
+
+FAULT_CSV_HEADER = ("read_at", "module", "module_name", "code", "status",
+                    "state", "text_en", "text_de", "catalog_source")
+
+
+def load_module_names():
+    """Module address -> name, from KNOWN_MODULES and the G30 module map."""
+    names = {}
+    path = resource_path(MODULE_MAP_CSV)
+    if os.path.exists(path):
+        seen = {}
+        with open(path, encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                try:
+                    addr = int((row.get("ecu_addr_hex") or "").strip(), 16)
+                except ValueError:
+                    continue
+                seen.setdefault(addr, []).append((row.get("description") or "").strip())
+        # Several rows at one address are variants for other engines; don't guess.
+        names = {a: d[0] for a, d in seen.items() if len(d) == 1 and d[0]}
+    names.update(KNOWN_MODULES)
+    return names
+
+
+def fault_steps(h, modules=None, texts=None, names=None):
+    """Sweep for modules (unless given) and read their faults, one step at a time.
+
+    A generator that does one network round trip per step and yields
+    ("finding", addr), ("found", addr) or ("reading", addr) after each, then
+    ("done", rows). The GUI advances it between samples so a running log
+    keeps recording during the read.
+    """
+    if modules is None:
+        lo, hi = SWEEP_RANGE
+        modules = []
+        for addr in range(lo, hi + 1):
+            present = h.probe(addr)
+            if present:
+                modules.append(addr)
+                yield ("found", addr)
+            else:
+                yield ("finding", addr)
+
+    texts = load_fault_texts() if texts is None else texts
+    names = load_module_names() if names is None else names
+    read_at = time.strftime("%Y-%m-%d %H:%M:%S")
+    rows = []
+    for addr in modules:
+        rows.extend(_module_fault_rows(h, addr, texts, names, read_at))
+        yield ("reading", addr)
+    yield ("done", rows)
+
+
+def sweep_modules(h, lo=None, hi=None, progress=None):
+    """Addresses in lo..hi (default SWEEP_RANGE) that answer TesterPresent."""
+    lo = SWEEP_RANGE[0] if lo is None else lo
+    hi = SWEEP_RANGE[1] if hi is None else hi
+    found = []
+    for addr in range(lo, hi + 1):
+        if progress:
+            progress(addr)
+        if h.probe(addr):
+            found.append(addr)
+    return found
+
+
+def read_all_faults(h, modules, texts=None, names=None, progress=None):
+    """Read fault memory (0x19) from each module. Returns rows for a fault CSV.
+
+    Every module gets at least one row, so the file shows what was checked:
+    one per fault, or a single row saying "no faults" or why it refused.
+    """
+    texts = load_fault_texts() if texts is None else texts
+    names = load_module_names() if names is None else names
+    read_at = time.strftime("%Y-%m-%d %H:%M:%S")
+    rows = []
+    for addr in modules:
+        if progress:
+            progress(addr)
+        rows.extend(_module_fault_rows(h, addr, texts, names, read_at))
+    return rows
+
+
+def _module_fault_rows(h, addr, texts, names, read_at):
+    """Fault CSV rows for one module: one per fault, or one saying why none."""
+    base = {"read_at": read_at, "module": "0x%02X" % addr,
+            "module_name": names.get(addr, ""), "code": "", "status": "",
+            "state": "", "text_en": "", "text_de": "", "catalog_source": ""}
+    try:
+        dtcs = h.read_dtcs(addr)
+    except NegativeResponse as e:
+        return [dict(base, state="refused (%s)" % NRC.get(e.code, "nrc 0x%02X" % e.code))]
+    except HsfzError as e:
+        return [dict(base, state="no reply (%s)" % e)]
+    if not dtcs:
+        return [dict(base, state="no faults")]
+    rows = []
+    for code, status in sorted(dtcs):
+        entry = texts.get(code.upper(), {})
+        rows.append(dict(base, code=code, status="0x%02X" % status,
+                         state=dtc_status_summary(status),
+                         text_en=entry.get("text_en", "") or "(not in catalog)",
+                         text_de=entry.get("text_de", ""),
+                         catalog_source=entry.get("source_module", "")))
+    return rows
+
+
+def write_fault_csv(path, rows):
+    """Write read_all_faults() rows. utf-8-sig so Excel shows umlauts."""
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=FAULT_CSV_HEADER)
+        w.writeheader()
+        w.writerows(rows)
 
 
 # --------------------------------------------------------------- discovery

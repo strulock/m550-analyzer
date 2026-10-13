@@ -54,8 +54,20 @@ with a loud warning — not a wider allow-list.
 
 Run `n63read.exe`. Choose the `169.254.x.x` interface under **via**, press
 **Discover**, then **Connect**. Filter the channel list, add channels to the
-watch table, and press **Start logging** to write a CSV. **Scan modules**
-sweeps addresses `0x00`–`0x60` with TesterPresent.
+watch table, and press **Start logging** to write a CSV.
+
+- **Scan modules** sweeps addresses `0x00`–`0x7F` with TesterPresent and
+  lists the modules that answer.
+- **Faults** reads the fault memory of every module and shows it. It uses the
+  modules from the last scan, or sweeps first if there wasn't one (about a
+  minute). While logging, the fault list is saved next to the log as
+  `<log>_faults_<time>.csv`; otherwise you're asked where to save it.
+
+The log is written to disk about once a second, so a crash or flat battery
+loses at most a second. Changing the watched channels while logging starts a
+new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in
+one file. A fault read while connected shares the connection: logging slows
+down during it but doesn't stop.
 
 ### CLI
 
@@ -63,9 +75,15 @@ sweeps addresses `0x00`–`0x60` with TesterPresent.
 n63read discover --bind 169.254.x.x          find the car
 n63read scan --ip 169.254.x.x                which modules answer
 n63read read --ip 169.254.x.x ILAG1 ILAG2    read channels once
-n63read faults --ip 169.254.x.x -v           fault memory, decoded
+n63read faults --ip 169.254.x.x -v           DME fault memory, decoded
+n63read faults --ip 169.254.x.x --all --out faults.csv
+                                             every module, saved to CSV
 n63read log --ip 169.254.x.x --out run.csv ILAG1 ILAG2 ILUZ5 ILUZ7
 ```
+
+The fault CSV has one row per fault, plus a row for each module that had no
+faults, refused, or didn't reply, so the file shows everything that was
+checked.
 
 `--target` selects a module (default `0x12`, master DME). The log CSV is
 `Time` plus one column per channel, the same shape as a BimmerLink export.
