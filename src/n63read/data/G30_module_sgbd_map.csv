@@ -1,0 +1,14 @@
+﻿ecu_addr_hex,sgbd_index,sgbd_file,group_file,chassis,description
+02,0F2810,BATT48,G_BATT48,G30,Batteriesteuergerät 48V
+06,0F2128,ICAM2,G_TRSVC,G30,ICAM2 Surround View System/Rückfahrkamera Standalone
+0B,0F22B0,SCR03,G_SCR,G30,Selective Catalytic Reduction
+12,0F1FF0,D83BX7C0,G_MOTOR,G30,Dieselelektronik DDE 8.02 35up
+12,0F2678,D83BX7C0,G_MOTOR,G30,Dieselelektronik DDE 8.03 35up NeMo
+12,0F26E0,DME8FF_R,G_MOTOR,G30,Motorelektronik DME8.4T.0 B48TÜ SP2018
+1B,0F2430,CPM_G30,G_CPM,G30,Car Pad Modul
+29,0F2850,DSC_G30N,G_DSC,G30,Dynamische Stabilitätskontrolle EBC460 SP2018
+39,0F2860,VIP_G30N,G_VIP,G30,Dynamische Stabilitätskontrolle EBC460 SP2018 (Virtuelle Integrationsplattform)
+55,0F2840,SGE48V,G_SGE48,G30,48V Startergenerator
+60,0F24C0,KOMB_G11,G_KOMBI,G30,Instrumentenkombi JCI Mid (OABR)
+63,0F2330,ENAVEVO,G_MMI,G30,Entry Nav Evolution ENAVevo (Entry Nav Nachfolger)
+65,0F2370,ELV_G30,G_ELV,G30,Elektrische Lenksäulenverriegelung
