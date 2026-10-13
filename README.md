@@ -109,8 +109,10 @@ They hold identifier numbers, units and scaling factors: the interface facts
 you need to talk to hardware you own. BMW's `.prg` files and SP-Daten are not
 in this repo and must not be committed.
 
-The English text columns are a mechanical glossary translation
-(`tools/glossary.py`). German is the source of truth.
+The English text columns are a mechanical glossary translation, generated
+by `tools/translate.py` from `tools/glossary.py`. German is the source of
+truth. To fix a translation, add the term to the glossary and run
+`python tools/translate.py`; don't edit the English columns by hand.
 
 ## License
 

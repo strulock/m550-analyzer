@@ -1,5 +1,5 @@
 ﻿status_byte,text_de,text_en
-0x00,keine Fehlerart verfügbar,No fault type available
+0x00,keine Fehlerart verfügbar,no fault type available
 0x04,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
 0x05,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
 0x08,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
@@ -14,7 +14,7 @@
 0x29,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
 0x2C,"Fehler momentan nicht vorhanden, aber bereits gespeichert","Fault not currently present, but already stored"
 0x2D,Fehler momentan vorhanden und bereits gespeichert,Fault currently present and already stored
-0x40,unbekannte Fehlerart,Unknowne fault type
+0x40,unbekannte Fehlerart,unknown fault type
 0x44,Fehler gespeichert,Fault stored
 0x45,Fehler gespeichert,Fault stored
 0x48,Fehler gespeichert,Fault stored
@@ -29,11 +29,11 @@
 0x69,Fehler gespeichert,Fault stored
 0x6C,Fehler gespeichert,Fault stored
 0x6D,Fehler gespeichert,Fault stored
-0x10,Testbedingungen erfüllt,Testbedingungen erfüllt
-0x11,Testbedingungen noch nicht erfüllt,Testbedingungen yet not erfüllt
-0x80,Fehler würde kein Aufleuchten einer Warnlampe verursachen,Fault would no illumination ar warning lamp cause
-0x81,Fehler würde das Aufleuchten einer Warnlampe verursachen,Fault would the illumination ar warning lamp cause
-0xFF,unbekannte Fehlerart,Unknowne fault type
+0x10,Testbedingungen erfüllt,Test conditions met
+0x11,Testbedingungen noch nicht erfüllt,Test conditions not yet met
+0x80,Fehler würde kein Aufleuchten einer Warnlampe verursachen,Fault would not light a warning lamp
+0x81,Fehler würde das Aufleuchten einer Warnlampe verursachen,Fault would light a warning lamp
+0xFF,unbekannte Fehlerart,unknown fault type
 0x01,HWEL,HWEL
 0x02,HWAP,HWAP
 0x03,HWFR,HWFR
