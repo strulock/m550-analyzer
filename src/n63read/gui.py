@@ -18,6 +18,7 @@ from n63read import core
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
+LOG_FLUSH_SECONDS = 1.0
 COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 
 
@@ -37,19 +38,39 @@ class Poller(threading.Thread):
         # Not `_stop`: that name is a threading.Thread internal, and
         # shadowing it with an Event breaks join()/is_alive().
         self._stop_event = threading.Event()
+        self.jobs = queue.Queue()   # callables run on this thread with the socket
+        self.steppers = []          # generator jobs, advanced one step per cycle
         self.logfile = None
         self.logwriter = None
         self.log_header = None
+        self.log_path = None        # file the user picked
+        self.log_part = 1           # >1 once a channel change has split the log
+        self.last_flush = 0.0
 
     def set_channels(self, chans):
         with self.lock:
             self.channels = list(chans)
 
+    def submit(self, job):
+        """Run job(hsfz) on the poll thread, between samples.
+
+        The car gets one connection, so anything else that needs to talk to
+        it while connected (the fault reader) goes through here. If the job
+        returns a generator, it is advanced one step per poll cycle, so a
+        long job slows logging down but never stops it.
+        """
+        self.jobs.put(job)
+
     def start_log(self, path):
         with self.lock:
-            self.logfile = open(path, "w", newline="", encoding="utf-8")
-            self.logwriter = csv.writer(self.logfile)
-            self.log_header = None
+            self.log_path, self.log_part = path, 1
+            self._open_log(path)
+
+    def _open_log(self, path):
+        self.logfile = open(path, "w", newline="", encoding="utf-8")
+        self.logwriter = csv.writer(self.logfile)
+        self.log_header = None
+        self.last_flush = time.time()
 
     def stop_log(self):
         with self.lock:
@@ -60,12 +81,36 @@ class Poller(threading.Thread):
     def stop(self):
         self._stop_event.set()
 
+    def _run_jobs(self, h):
+        while True:
+            try:
+                job = self.jobs.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                result = job(h)
+            except Exception as e:                                  # noqa: BLE001
+                self.out_q.put(("error", "background read failed: %s" % e))
+                continue
+            if hasattr(result, "__next__"):
+                self.steppers.append(result)
+        # One step of each stepped job per cycle.
+        for gen in list(self.steppers):
+            try:
+                next(gen)
+            except StopIteration:
+                self.steppers.remove(gen)
+            except Exception as e:                                  # noqa: BLE001
+                self.steppers.remove(gen)
+                self.out_q.put(("error", "background read failed: %s" % e))
+
     def run(self):
         t0 = time.time()
         try:
             with core.Hsfz(self.ip, source=self.source, timeout=self.timeout) as h:
                 self.out_q.put(("status", "connected"))
                 while not self._stop_event.is_set():
+                    self._run_jobs(h)
                     with self.lock:
                         chans = list(self.channels)
                     if not chans:
@@ -96,12 +141,28 @@ class Poller(threading.Thread):
             if not self.logwriter:
                 return
             names = [c[0] for c in chans]
-            if self.log_header != names:
+            if self.log_header is not None and self.log_header != names:
+                # The channel list changed mid-log. A second header row in
+                # the same file breaks Excel and pandas, so start a new file.
+                self.logfile.close()
+                self.log_part += 1
+                root, ext = os.path.splitext(self.log_path)
+                path = "%s_%d%s" % (root, self.log_part, ext or ".csv")
+                self._open_log(path)
+                self.out_q.put(("logfile", path))
+            if self.log_header is None:
                 self.logwriter.writerow(["Time"] + names)
                 self.log_header = names
             self.logwriter.writerow(
                 [elapsed] + [("" if sample[n][0] is None else sample[n][0]) for n in names]
             )
+            # Push to disk about once a second, so a crash, sleep or flat
+            # battery loses at most that much of the drive.
+            now = time.time()
+            if now - self.last_flush >= LOG_FLUSH_SECONDS:
+                self.logfile.flush()
+                os.fsync(self.logfile.fileno())
+                self.last_flush = now
 
 
 # ---------------------------------------------------------------------- app
@@ -118,6 +179,8 @@ class App(tk.Tk):
         self.series = {}                     # name -> [values]
         self.q = queue.Queue()
         self.poller = None
+        self.modules = []                    # addresses found by the last scan
+        self.logging_to = None
 
         self._build()
         self.after(60, self._drain)
@@ -174,6 +237,7 @@ class App(tk.Tk):
         self.status = ttk.Label(bar, text="\u25cf not connected", foreground="#999")
         self.status.pack(side="left")
 
+        ttk.Button(bar, text="Faults", command=self._faults).pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Scan modules", command=self._scan).pack(side="right")
 
         # --- body: picker | watch
@@ -317,7 +381,9 @@ class App(tk.Tk):
         win.title("Module scan")
         box = tk.Text(win, width=56, height=22)
         box.pack(fill="both", expand=True)
-        box.insert("end", "Sweeping 0x00-0x60 with TesterPresent...\n\n")
+        lo, hi = core.SWEEP_RANGE
+        box.insert("end", "Sweeping 0x%02X-0x%02X with TesterPresent...\n\n" % (lo, hi))
+        self.modules = []
 
         # Tk widgets may only be touched from the main thread, so the worker
         # hands lines to the event pump instead of calling box.after itself.
@@ -326,8 +392,8 @@ class App(tk.Tk):
 
         def work():
             try:
-                with core.Hsfz(ip, source=0xF4, timeout=1.0) as h:
-                    for t in range(0x00, 0x61):
+                with core.Hsfz(ip, source=0xF4, timeout=core.PROBE_TIMEOUT) as h:
+                    for t in range(lo, hi + 1):
                         try:
                             h.tester_present(t)
                         except core.NegativeResponse as e:
@@ -340,7 +406,8 @@ class App(tk.Tk):
                         else:
                             line = "0x%02X  responds\n" % t
                         emit(line)
-                emit("\nDone.\n")
+                        self.q.put(("module", t))
+                emit("\nDone. Faults will read these modules.\n")
             except Exception as e:                                  # noqa: BLE001
                 emit("\nError: %s\n" % e)
 
@@ -370,6 +437,104 @@ class App(tk.Tk):
         self.poller.set_channels(self.watch)
         self.poller.start()
         self.connect_btn.config(text="Disconnect")
+
+    # -- faults ----------------------------------------------------------
+
+    def _faults(self):
+        """Read fault memory from every module, show it, and save it to CSV."""
+        ip = self.ip_var.get().strip()
+        if not ip and not self.poller:
+            messagebox.showinfo("Faults", "Enter or discover an IP first.")
+            return
+
+        win = tk.Toplevel(self)
+        win.title("Fault memory")
+        win.geometry("980x460")
+        msg = ttk.Label(win, padding=6)
+        msg.pack(fill="x")
+        cols = (("module", "Module", 60), ("name", "Name", 190), ("code", "Code", 70),
+                ("state", "State", 190), ("text", "Description", 440))
+        tree = ttk.Treeview(win, columns=[c[0] for c in cols], show="headings")
+        for c, t, w in cols:
+            tree.heading(c, text=t)
+            tree.column(c, width=w, anchor="w")
+        tree.pack(fill="both", expand=True, padx=6)
+        row = ttk.Frame(win, padding=6)
+        row.pack(fill="x")
+        save_btn = ttk.Button(row, text="Save CSV...", state="disabled")
+        save_btn.pack(side="right")
+        win.fault_rows = []
+        save_btn.config(command=lambda: self._save_faults(win, ask=True))
+        win.parts = {"msg": msg, "tree": tree, "save": save_btn}
+
+        modules = list(self.modules)
+        if modules:
+            msg.config(text="Reading %d module(s) found by the last scan..." % len(modules))
+        else:
+            msg.config(text="Finding modules first (about a minute)...")
+
+        def job(h):
+            """Generator: one round trip per step, reporting as it goes."""
+            for kind, value in core.fault_steps(h, modules or None):
+                if kind == "found":
+                    self.q.put(("module", value))
+                elif kind == "finding":
+                    self.q.put(("faultmsg", win, "Finding modules... 0x%02X" % value))
+                elif kind == "reading":
+                    self.q.put(("faultmsg", win, "Read faults from 0x%02X" % value))
+                elif kind == "done":
+                    self.q.put(("faults_done", win, value))
+                yield
+
+        if self.poller:
+            # Share the live connection, a step at a time between samples,
+            # so a running log keeps recording (more slowly) during the read.
+            self.poller.submit(job)
+            return
+
+        def work():
+            try:
+                with core.Hsfz(ip, source=0xF4, timeout=2.0) as h:
+                    for _ in job(h):
+                        pass
+            except Exception as e:                                  # noqa: BLE001
+                self.q.put(("faultmsg", win, "Error: %s" % e))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _show_faults(self, win, rows):
+        parts = win.parts
+        win.fault_rows = rows
+        tree = parts["tree"]
+        for r in rows:
+            tree.insert("", "end", values=(r["module"], r["module_name"], r["code"],
+                                           r["state"], r["text_en"] or r["text_de"]))
+        n_faults = sum(1 for r in rows if r["code"])
+        n_mods = len({r["module"] for r in rows})
+        parts["msg"].config(text="%d fault(s) across %d module(s)." % (n_faults, n_mods))
+        parts["save"].config(state="normal")
+        self._save_faults(win, ask=not self.logging_to)
+
+    def _save_faults(self, win, ask):
+        """Save next to the drive log when logging; otherwise ask where."""
+        stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        if not ask and self.logging_to:
+            root, _ = os.path.splitext(self.logging_to)
+            path = "%s_faults_%s.csv" % (root, stamp)
+        else:
+            path = filedialog.asksaveasfilename(
+                parent=win, defaultextension=".csv", filetypes=[("CSV", "*.csv")],
+                initialdir=os.path.dirname(self.logging_to) if self.logging_to else None,
+                initialfile="n63_faults_%s.csv" % stamp)
+            if not path:
+                return
+        try:
+            core.write_fault_csv(path, win.fault_rows)
+        except OSError as e:
+            messagebox.showerror("Faults", "Could not save: %s" % e, parent=win)
+            return
+        msg = win.parts["msg"]
+        msg.config(text=msg.cget("text").split("  Saved")[0] + "  Saved to %s" % path)
 
     # -- logging ---------------------------------------------------------
 
@@ -440,6 +605,25 @@ class App(tk.Tk):
                         self.ip_var.set(hits[0][0])
                         self.status.config(
                             text="\u25cf found %d" % len(hits), foreground="#2a9d3f")
+
+                elif kind == "module":
+                    if msg[1] not in self.modules:
+                        self.modules.append(msg[1])
+
+                elif kind == "faultmsg":
+                    _, win, text = msg
+                    if win.winfo_exists():
+                        win.parts["msg"].config(text=text)
+
+                elif kind == "faults_done":
+                    _, win, rows = msg
+                    if win.winfo_exists():
+                        self._show_faults(win, rows)
+
+                elif kind == "logfile":
+                    self.logging_to = msg[1]
+                    self.status.config(text="● channels changed - logging to %s"
+                                       % os.path.basename(msg[1]), foreground="#2a9d3f")
 
                 elif kind == "scanline":
                     _, box, text = msg

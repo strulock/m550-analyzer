@@ -25,6 +25,7 @@ Usage
 
 import argparse
 import csv
+import os
 import sys
 import time
 
@@ -62,6 +63,9 @@ def op_discover(args):
 
 def op_faults(args):
     """Read fault memory via 0x19 and decode it against the SGBD catalogs."""
+    if args.all or args.out:
+        return _faults_report(args)
+
     texts = core.load_fault_texts()
     lang = "text_de" if args.german else "text_en"
 
@@ -95,6 +99,39 @@ def op_faults(args):
     if unknown:
         print("\n%d code(s) had no catalog entry. The SGBD for this module "
               "may not be among those extracted - see PROJECT.md." % unknown)
+
+
+def _faults_report(args):
+    """faults --all / --out: every module (or one), printed and optionally saved."""
+    lang = "text_de" if args.german else "text_en"
+    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+        if args.all:
+            lo, hi = core.SWEEP_RANGE
+            print("Finding modules 0x%02X-0x%02X..." % (lo, hi))
+            modules = core.sweep_modules(
+                h, lo, hi, progress=lambda a: print("\r  0x%02X" % a, end="", flush=True))
+            print("\r%d module(s) answered.\n" % len(modules))
+        else:
+            modules = [args.target]
+        rows = core.read_all_faults(
+            h, modules, progress=lambda a: print("Reading 0x%02X..." % a, end="\r", flush=True))
+
+    current = None
+    for r in rows:
+        if r["module"] != current:
+            current = r["module"]
+            print("\n%s  %s" % (r["module"], r["module_name"]))
+        if r["code"]:
+            print("  %-8s %s" % (r["code"], r[lang] or r["text_de"]))
+            print("  %-8s status %s - %s" % ("", r["status"], r["state"]))
+        else:
+            print("  %s" % r["state"])
+
+    faults = sum(1 for r in rows if r["code"])
+    print("\n%d fault(s) across %d module(s)." % (faults, len(modules)))
+    if args.out:
+        core.write_fault_csv(args.out, rows)
+        print("Saved to %s" % args.out)
 
 
 def op_scan(args):
@@ -160,7 +197,7 @@ def op_log(args):
     w.writerow(["Time"] + [n for n, _, _ in chans])
     print("Logging %d channel(s) to %s - Ctrl-C to stop" % (len(chans), args.out))
 
-    t0 = time.time()
+    t0 = last_flush = time.time()
     n = 0
     try:
         with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
@@ -174,8 +211,11 @@ def op_log(args):
                     row.append(value)
                 w.writerow(row)
                 n += 1
-                if n % 25 == 0:
+                # Push to disk about once a second; a crash loses at most that.
+                if time.time() - last_flush >= 1.0:
                     out.flush()
+                    os.fsync(out.fileno())
+                    last_flush = time.time()
                     print("\r%d samples, %.1f s" % (n, time.time() - t0), end="")
                 time.sleep(args.interval)
     except KeyboardInterrupt:
@@ -235,6 +275,10 @@ def build_parser():
                     help="show BMW's German text instead of the translation")
     sp.add_argument("-v", "--verbose", action="store_true",
                     help="also list the individual statusOfDTC bits")
+    sp.add_argument("--all", action="store_true",
+                    help="find every module that answers and read them all")
+    sp.add_argument("--out", metavar="CSV",
+                    help="also save the faults to a CSV file")
     sp.set_defaults(func=op_faults)
 
     sp = sub.add_parser("log", help="poll channels into a CSV")
