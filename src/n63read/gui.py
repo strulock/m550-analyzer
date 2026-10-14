@@ -14,10 +14,14 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-from n63read import core, diag, playback
+import subprocess
+import webbrowser
+
+from n63read import __version__, core, diag, playback, update
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
+UPDATE_FIRST_CHECK_MS = 10000       # first update check after start
 CHART_LINES = 6                     # lines drawn at once; select rows to choose
 DME_LABEL = "Engine (DME)"
 CHECK_BATCH = 10                    # identifiers checked per poll cycle while logging
@@ -208,6 +212,10 @@ class App(tk.Tk):
         self.minsize(900, 560)
 
         self.settings = core.load_settings()
+        self._updating = False
+        self._update_ready = None       # version installed, waiting for a restart
+        self._update_url = None
+        self._updated_from = update.tidy()   # we are the new version: keep the old
         diag.enabled = self.settings.get("diagnostics", True)
         threading.Thread(target=diag.prune, daemon=True).start()
         self._capture = None
@@ -234,6 +242,10 @@ class App(tk.Tk):
         self._start_demo()
         self.after(60, self._drain)
         self.after(10000, self._save_answers)
+        self.after(UPDATE_FIRST_CHECK_MS, self._update_tick)
+        if self._updated_from:
+            diag.record("update", state="running", version=__version__,
+                        previous=self._updated_from)
         self.protocol("WM_DELETE_WINDOW", self._close)
 
     # -- data ------------------------------------------------------------
@@ -319,6 +331,27 @@ class App(tk.Tk):
         self.replay_btn = ttk.Button(bar, text="Open log...", command=self._toggle_replay)
         self.replay_btn.pack(side="right", padx=(0, 4))
 
+        # --- footer: version and updates, small, bottom right
+        foot = ttk.Frame(self)
+        foot.pack(side="bottom", fill="x", padx=8, pady=(0, 2))
+        self.version_btn = ttk.Menubutton(foot, text=self._version_text(),
+                                          style="Footer.TMenubutton")
+        ttk.Style(self).configure("Footer.TMenubutton", foreground="#888",
+                                  font=("TkDefaultFont", 8), padding=(2, 0))
+        vmenu = tk.Menu(self.version_btn, tearoff=False)
+        vmenu.add_command(label="Check for updates now", command=self._check_updates_now)
+        self.autoupdate_var = tk.BooleanVar(value=self.settings.get("auto_update", True))
+        vmenu.add_checkbutton(label="Automatic updates", variable=self.autoupdate_var,
+                              command=self._set_auto_update)
+        vmenu.add_command(label="Release notes", command=lambda: webbrowser.open(
+            self._update_url or update.RELEASES_PAGE))
+        vmenu.add_separator()
+        vmenu.add_command(label="Restart to update", command=self._restart_to_update,
+                          state="disabled")
+        self.version_menu = vmenu
+        self.version_btn["menu"] = vmenu
+        self.version_btn.pack(side="right")
+
         # --- body: picker | watch
         body = ttk.Panedwindow(self, orient="horizontal")
         body.pack(fill="both", expand=True, padx=8, pady=(0, 8))
@@ -397,6 +430,103 @@ class App(tk.Tk):
         self.canvas.pack(fill="x", pady=(6, 0))
 
         self._refilter()
+
+    # -- updates ---------------------------------------------------------
+
+    def _version_text(self):
+        where = "" if update.running_exe() else " (source)"
+        return "n63read %s%s" % (__version__, where)
+
+    def _set_auto_update(self):
+        self.settings["auto_update"] = self.autoupdate_var.get()
+        try:
+            core.save_settings(self.settings)
+        except OSError:
+            pass
+
+    def _update_tick(self):
+        """Check now and then; never while connected (try again soon)."""
+        if self.autoupdate_var.get() and not self._update_ready:
+            if self.poller:
+                self.after(5 * 60 * 1000, self._update_tick)
+                return
+            self._start_update(manual=False)
+        self.after(update.CHECK_EVERY * 1000, self._update_tick)
+
+    def _check_updates_now(self):
+        if self._update_ready:
+            self._restart_to_update()
+            return
+        self._start_update(manual=True)
+
+    def _start_update(self, manual):
+        if self._updating:
+            return
+        self._updating = True
+        self.version_btn.config(text=self._version_text() + " \u00b7 checking...")
+
+        def work():
+            try:
+                if update.running_exe():
+                    info = update.update()
+                else:                           # from source: report only
+                    info = update.check()
+                    info["installed"] = False
+                diag.record("update", state="installed" if info["installed"] else "checked",
+                            current=info["current"], latest=info["latest"])
+                self.q.put(("update", "installed" if info["installed"] else
+                            "newer" if info["newer"] else "current",
+                            info["latest"], info.get("url"), manual))
+            except Exception as e:                                  # noqa: BLE001
+                diag.record("update", state="failed", error=str(e))
+                self.q.put(("update", "failed", str(e), None, manual))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _show_update(self, state, detail, url, manual):
+        """Footer (and, for a manual check, a message) for an update result."""
+        self._updating = False
+        self._update_url = url or self._update_url
+        text = self._version_text()
+        if state == "installed":
+            self._update_ready = detail
+            text += " \u00b7 %s ready \u2014 restart to update" % detail
+            self.version_menu.entryconfig("Restart to update", state="normal")
+            self.version_btn.configure(style="FooterReady.TMenubutton")
+            ttk.Style(self).configure("FooterReady.TMenubutton", foreground="#2d7dd2",
+                                      font=("TkDefaultFont", 8), padding=(2, 0))
+        elif state == "newer":
+            text += " \u00b7 %s available" % detail
+        elif state == "failed":
+            text += " \u00b7 update check failed"
+        self.version_btn.config(text=text)
+        if manual:
+            if state == "current":
+                messagebox.showinfo("Updates", "n63read %s is the latest version." % __version__)
+            elif state == "installed":
+                if messagebox.askyesno("Updates", "Version %s is downloaded and verified.\n\n"
+                                       "Restart n63read now to use it?" % detail):
+                    self._restart_to_update()
+            elif state == "newer":
+                messagebox.showinfo("Updates", "Version %s is available:\n%s"
+                                    % (detail, url or update.RELEASES_PAGE))
+            else:
+                messagebox.showerror("Updates", "Could not update: %s" % detail)
+
+    def _restart_to_update(self):
+        exe = update.running_exe()
+        if not exe or not self._update_ready:
+            return
+        if self.poller and not messagebox.askyesno(
+                "Restart", "This disconnects from the car%s. Restart now?"
+                % (" and stops logging" if self.logging_to else "")):
+            return
+        try:
+            subprocess.Popen([exe], close_fds=True)
+        except OSError as e:
+            messagebox.showerror("Restart", "Could not start the new version: %s\n\n"
+                                 "Start n63read again yourself." % e)
+            return
+        self._close()
 
     # -- diagnostics -----------------------------------------------------
 
@@ -1319,6 +1449,9 @@ class App(tk.Tk):
                     if box.winfo_exists():
                         box.insert("end", text)
                         box.see("end")
+
+                elif kind == "update":
+                    self._show_update(*msg[1:])
 
                 elif kind == "note":
                     # Information for the status line only; not a state change.

@@ -11,6 +11,8 @@ src/n63read/
   playback.py   demo data and log replay (no Tk, testable)
   diag.py       connection diagnostics: journal, network snapshot, verdicts,
                 packet capture, the `n63read diag` check
+  update.py     self-update from GitHub releases: check, download, verify
+                SHA-256, swap the running exe by renaming
   data/         catalogs and lookup CSVs (see data-sources.md)
 tools/
   module_catalog.py   .prg -> module catalogs + fault texts

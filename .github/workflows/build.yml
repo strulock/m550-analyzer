@@ -35,12 +35,21 @@ jobs:
         shell: cmd
         run: dist\n63read-cli.exe selftest
 
+      # Checksums for the app's self-update, which also uses GitHub's own
+      # asset digests when they are there.
+      - name: Checksums
+        run: >
+          python -c "import hashlib; open('dist/SHA256SUMS.txt', 'w').write(''.join(
+          '%s  %s\n' % (hashlib.sha256(open('dist/' + n, 'rb').read()).hexdigest(), n)
+          for n in ('n63read.exe', 'n63read-cli.exe')))"
+
       - uses: actions/upload-artifact@v4
         with:
           name: n63read
           path: |
             dist/n63read.exe
             dist/n63read-cli.exe
+            dist/SHA256SUMS.txt
 
       - name: Attach to release
         if: startsWith(github.ref, 'refs/tags/')
@@ -49,3 +58,4 @@ jobs:
           files: |
             dist/n63read.exe
             dist/n63read-cli.exe
+            dist/SHA256SUMS.txt

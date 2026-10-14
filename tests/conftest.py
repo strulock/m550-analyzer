@@ -15,6 +15,12 @@ def quick_diagnostics(tmp_path, monkeypatch):
     monkeypatch.setattr(diag, "journal_dir", lambda: journal)
     monkeypatch.setattr(diag, "windows_snapshot", lambda timeout=30: {"stub": True})
     monkeypatch.setattr(diag, "enabled", True)
+    # Never reach the real GitHub from a test.
+    from n63read import update
+
+    def offline():
+        raise update.UpdateError("no network in tests")
+    monkeypatch.setattr(update, "latest_release", offline)
     return journal
 
 
@@ -36,6 +42,7 @@ def shared_app(tmp_path_factory):
         core.availability_path = saved
         pytest.skip("no display: %s" % e)
     a._stop_feed()
+    a.autoupdate_var.set(False)             # no update checks during tests
     a.avail_file = avail
     yield a
     if a.poller:

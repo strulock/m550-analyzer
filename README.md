@@ -192,6 +192,31 @@ on every module (the DME too) and compares each reply's size with what the
 file predicts, then says per module whether the file fits. It only reads
 (0x22). With `--out`, every reply goes to a CSV, except private values.
 
+### Updates
+
+The app keeps itself up to date from this repository's GitHub releases.
+About 10 seconds after it starts, and every 6 hours while it's open, it
+checks for a newer release. If there is one:
+
+1. It downloads the matching exe into its own folder as `.new`, and checks
+   its SHA-256 against the digest GitHub publishes (or the release's
+   `SHA256SUMS.txt`). A mismatch discards the download and changes nothing.
+2. It renames itself to `.old` (Windows allows that while running) and puts
+   the new exe in its place. The version you're running carries on.
+3. The next start runs the new version, which keeps the one before as
+   `n63read.exe.previous`. To roll back, rename that back.
+
+It only takes a strictly newer version, never downloads while connected to
+the car, and stays quiet when there's no internet (the car's network has
+none). The footer, bottom right, shows the version; when an update is ready
+it says so, and its menu has **Restart to update**, **Check for updates
+now**, **Automatic updates** (on/off) and **Release notes**. The folder the
+exe is in must be writable, so keep it somewhere like `Downloads` or
+`%LOCALAPPDATA%`, not `Program Files`.
+
+From a terminal: `n63read update --check`, `n63read update` and
+`n63read --version`.
+
 ### Connection diagnostics
 
 Every Discover, Connect, session and car check is recorded to a journal in
@@ -242,6 +267,8 @@ n63read selftest                             every data file bundled and loading
 n63read diag                                 connection check, step by step, recorded
 n63read diag --capture                       ...and record the packets (administrator)
 n63read diag --report report.jsonl           save the recent journal to send
+n63read update                               update this exe from the latest release
+n63read update --check                       only say whether there is one
 ```
 
 `read` and `log` take the other modules' channels (`HU_...`, `EGS_...`...)
