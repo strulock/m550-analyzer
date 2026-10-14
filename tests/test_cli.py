@@ -127,3 +127,33 @@ def test_selftest_fails_on_an_empty_catalog(monkeypatch, tmp_path):
     with pytest.raises(SystemExit) as e:
         run(["selftest"])
     assert core.DEFAULT_CSV + ": no rows" in str(e.value)
+
+
+def test_scan_uses_the_probe_timeout(car, monkeypatch, capsys):
+    t = time.time()
+    run(["scan", "--ip", "127.0.0.1", "--range", "0x0E", "0x14", "--probe-timeout", "0.1"])
+    out = capsys.readouterr().out
+    assert "0x10  responds" in out and "0x12  responds" in out
+    assert "waiting 0.1 s per address" in out
+    assert time.time() - t < 3                        # 5 empty addresses at 0.1 s
+
+
+def test_scan_defaults_to_the_full_sweep_range():
+    args = cli.build_parser().parse_args(["scan", "--ip", "x"])
+    assert tuple(args.range) == core.SWEEP_RANGE
+    assert args.probe_timeout == core.PROBE_TIMEOUT
+
+
+def test_faults_all_takes_a_probe_timeout(car, monkeypatch, capsys):
+    monkeypatch.setattr(core, "SWEEP_RANGE", (0x0E, 0x14))
+    run(["faults", "--ip", "127.0.0.1", "--all", "--probe-timeout", "0.1"])
+    out = capsys.readouterr().out
+    assert "waiting 0.1 s per address" in out
+    assert "fault(s) across" in out
+
+
+@pytest.mark.parametrize("value", ["0", "abc", "60"])
+def test_probe_timeout_is_validated(value, capsys):
+    with pytest.raises(SystemExit):
+        cli.build_parser().parse_args(["scan", "--ip", "x", "--probe-timeout", value])
+    assert "probe" in capsys.readouterr().err

@@ -250,6 +250,12 @@ class App(tk.Tk):
         self.interval_var = tk.StringVar(value="0.25")
         ttk.Entry(bar, textvariable=self.interval_var, width=6).pack(side="left")
 
+        # How long Scan modules and Faults wait at each address. Raise it at
+        # the car if modules that should be there are missed.
+        ttk.Label(bar, text="Probe wait s").pack(side="left", padx=(14, 2))
+        self.probe_var = tk.StringVar(value="%g" % core.PROBE_TIMEOUT)
+        ttk.Entry(bar, textvariable=self.probe_var, width=5).pack(side="left")
+
         self.connect_btn = ttk.Button(bar, text="Connect", command=self._toggle)
         self.connect_btn.pack(side="left", padx=12)
 
@@ -834,17 +840,32 @@ class App(tk.Tk):
 
         threading.Thread(target=work, daemon=True).start()
 
+    def _probe_wait(self, title):
+        """The Probe wait box as seconds, or None after telling the user why not."""
+        try:
+            return core.parse_probe_timeout(self.probe_var.get())
+        except ValueError:
+            lo, hi = core.PROBE_TIMEOUT_RANGE
+            messagebox.showerror(title, "Probe wait must be a number of seconds "
+                                        "between %g and %g." % (lo, hi))
+            return None
+
     def _scan(self):
         ip = self.ip_var.get().strip()
         if not ip:
             messagebox.showinfo("Scan", "Enter or discover an IP first.")
+            return
+        wait = self._probe_wait("Scan")
+        if wait is None:
             return
         win = tk.Toplevel(self)
         win.title("Module scan")
         box = tk.Text(win, width=56, height=22)
         box.pack(fill="both", expand=True)
         lo, hi = core.SWEEP_RANGE
-        box.insert("end", "Sweeping 0x%02X-0x%02X with TesterPresent...\n\n" % (lo, hi))
+        box.insert("end", "Sweeping 0x%02X-0x%02X with TesterPresent, waiting %g s "
+                          "per address (up to %d s)...\n\n"
+                   % (lo, hi, wait, round(core.sweep_seconds(wait))))
         self.modules = []
 
         # Tk widgets may only be touched from the main thread, so the worker
@@ -854,7 +875,7 @@ class App(tk.Tk):
 
         def work():
             try:
-                with core.Hsfz(ip, source=0xF4, timeout=core.PROBE_TIMEOUT) as h:
+                with core.Hsfz(ip, source=0xF4, timeout=wait) as h:
                     for t in range(lo, hi + 1):
                         try:
                             h.tester_present(t)
@@ -909,6 +930,9 @@ class App(tk.Tk):
         if not ip and not self.poller:
             messagebox.showinfo("Faults", "Enter or discover an IP first.")
             return
+        wait = self._probe_wait("Faults")
+        if wait is None:
+            return
 
         win = tk.Toplevel(self)
         win.title("Fault memory")
@@ -934,11 +958,12 @@ class App(tk.Tk):
         if modules:
             msg.config(text="Reading %d module(s) found by the last scan..." % len(modules))
         else:
-            msg.config(text="Finding modules first (about a minute)...")
+            msg.config(text="Finding modules first (up to %d s at %g s per address)..."
+                       % (round(core.sweep_seconds(wait)), wait))
 
         def job(h):
             """Generator: one round trip per step, reporting as it goes."""
-            for kind, value in core.fault_steps(h, modules or None):
+            for kind, value in core.fault_steps(h, modules or None, probe_timeout=wait):
                 if kind == "found":
                     self.q.put(("module", value))
                 elif kind == "finding":

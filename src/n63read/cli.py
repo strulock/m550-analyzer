@@ -116,9 +116,11 @@ def _faults_report(args):
     with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
         if args.all:
             lo, hi = core.SWEEP_RANGE
-            print("Finding modules 0x%02X-0x%02X..." % (lo, hi))
+            print("Finding modules 0x%02X-0x%02X, waiting %g s per address..."
+                  % (lo, hi, args.probe_timeout))
             modules = core.sweep_modules(
-                h, lo, hi, progress=lambda a: print("\r  0x%02X" % a, end="", flush=True))
+                h, lo, hi, progress=lambda a: print("\r  0x%02X" % a, end="", flush=True),
+                probe_timeout=args.probe_timeout)
             print("\r%d module(s) answered.\n" % len(modules))
         else:
             modules = [args.target]
@@ -151,9 +153,12 @@ def op_scan(args):
     0x10 gateway. An unexpected responder near 0x12 is the candidate.
     """
     lo, hi = args.range
-    print("Scanning targets 0x%02X-0x%02X (ignition on, engine off)...\n" % (lo, hi))
+    print("Scanning targets 0x%02X-0x%02X, waiting %g s per address "
+          "(ignition on, engine off)...\n" % (lo, hi, args.probe_timeout))
     alive = []
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+    # The per-address wait is the probe timeout, not --timeout: most
+    # addresses are empty and each one costs the full wait.
+    with Hsfz(args.ip, source=args.source, timeout=args.probe_timeout) as h:
         for target in range(lo, hi + 1):
             try:
                 h.tester_present(target)
@@ -360,6 +365,20 @@ def hexint(s):
     return int(s, 0)
 
 
+def probe_seconds(s):
+    try:
+        return core.parse_probe_timeout(s)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(str(e)) from None
+
+
+def probe_arg(sp):
+    sp.add_argument("--probe-timeout", type=probe_seconds, default=core.PROBE_TIMEOUT,
+                    metavar="SECONDS",
+                    help="wait at each address when looking for modules (default "
+                         "%g; raise it if modules are missed)" % core.PROBE_TIMEOUT)
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog="n63read", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -383,8 +402,9 @@ def build_parser():
 
     sp = sub.add_parser("scan", help="sweep target addresses to find modules")
     common(sp)
-    sp.add_argument("--range", type=hexint, nargs=2, default=[0x00, 0x60],
+    sp.add_argument("--range", type=hexint, nargs=2, default=list(core.SWEEP_RANGE),
                     metavar=("LO", "HI"))
+    probe_arg(sp)
     sp.set_defaults(func=op_scan)
 
     sp = sub.add_parser("read", help="read channels once")
@@ -406,6 +426,7 @@ def build_parser():
                     help="also list the individual statusOfDTC bits")
     sp.add_argument("--all", action="store_true",
                     help="find every module that answers and read them all")
+    probe_arg(sp)
     sp.add_argument("--out", metavar="CSV",
                     help="also save the faults to a CSV file")
     sp.set_defaults(func=op_faults)
