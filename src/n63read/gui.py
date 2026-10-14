@@ -9,6 +9,7 @@ Run:  n63read-gui   (or: python -m n63read.gui)
 import csv
 import os
 import queue
+import subprocess
 import sys
 import threading
 import time
@@ -335,6 +336,8 @@ class App(tk.Tk):
         dmenu.add_separator()
         dmenu.add_command(label="Save report...", command=self._save_diag_report)
         dmenu.add_command(label="Open diagnostics folder", command=self._open_diag_folder)
+        dmenu.add_separator()
+        dmenu.add_command(label="Connect to Claude...", command=self._connect_claude)
         self.diag_btn["menu"] = dmenu
         self.diag_btn.pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Faults", command=self._faults).pack(side="right", padx=(4, 0))
@@ -604,6 +607,51 @@ class App(tk.Tk):
             os.startfile(folder)                                    # Windows
         except (AttributeError, OSError):
             messagebox.showinfo("Diagnostics", folder)
+
+    def _connect_claude(self):
+        """Add n63read's MCP server to Claude Code and Claude Desktop."""
+        from n63read import mcp
+        self.status.config(text="\u25cf setting up Claude...", foreground="#2d7dd2")
+
+        def work():
+            try:
+                done = mcp.register()
+            except Exception as e:                                  # noqa: BLE001
+                done = [("Claude", False, str(e))]
+            self.q.put(("claude", done))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _show_claude(self, done):
+        from n63read import mcp
+        self.status.config(text="\u25cf Claude set up" if any(ok for _, ok, _ in done)
+                           else "\u25cf Claude not set up", foreground="#2d7dd2")
+        if not done:
+            messagebox.showinfo(
+                "Connect to Claude",
+                "Neither Claude Code nor Claude Desktop is installed on this PC.\n\n"
+                "Install one (claude.ai/download), sign in, and choose Connect to "
+                "Claude again. Claude will then be able to check the connection to "
+                "the car, read it, and review your logs, read-only.")
+            return
+        lines = ["%s: %s%s" % (where, "" if ok else "FAILED - ", message)
+                 for where, ok, message in done]
+        diag.record("claude", state="registered", result=lines)
+        claude = mcp._claude_code()
+        ok_code = any(ok for where, ok, _ in done if where == "Claude Code")
+        text = "\n".join(lines) + "\n\nRestart Claude Desktop to pick it up."
+        if ok_code and claude and messagebox.askyesno(
+                "Connect to Claude", text + "\n\nStart Claude Code now, in the logs folder?"):
+            try:
+                subprocess.Popen(
+                    [claude, "Use the n63read tools: check the status, then review the "
+                             "recent diagnostics and logs, and tell me what you find."],
+                    cwd=core.logs_dir(),
+                    creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0))
+            except OSError as e:
+                messagebox.showerror("Connect to Claude", "Could not start Claude Code: %s" % e)
+        elif not ok_code:
+            (messagebox.showinfo if any(ok for _, ok, _ in done)
+             else messagebox.showerror)("Connect to Claude", text)
 
     # -- picker ----------------------------------------------------------
 
@@ -1471,6 +1519,9 @@ class App(tk.Tk):
 
                 elif kind == "update":
                     self._show_update(*msg[1:])
+
+                elif kind == "claude":
+                    self._show_claude(msg[1])
 
                 elif kind == "note":
                     # Information for the status line only; not a state change.

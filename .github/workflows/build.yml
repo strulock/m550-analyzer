@@ -35,6 +35,16 @@ jobs:
         shell: cmd
         run: '"dist\BMW Analyzer\n63read-cli.exe" selftest'
 
+      # Claude talks to `n63read-cli mcp` over stdin/stdout: nothing but
+      # protocol may come out, and the handshake must work in the built exe.
+      - name: Check the built exe's MCP server
+        shell: pwsh
+        run: |
+          $out = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}' | & "dist\BMW Analyzer\n63read-cli.exe" mcp
+          $reply = $out | ConvertFrom-Json
+          if ($reply.result.serverInfo.name -ne "n63read") { throw "no MCP handshake: $out" }
+          "MCP ok: $($reply.result.protocolVersion)"
+
       # The same folder, zipped, for running without installing.
       - name: Portable zip
         shell: pwsh

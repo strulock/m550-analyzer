@@ -68,6 +68,10 @@ Name: "{group}\BMW Analyzer command prompt"; Filename: "{cmd}"; Parameters: "/k 
 Name: "{group}\Uninstall BMW Analyzer"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\BMW Analyzer"; Filename: "{app}\n63read.exe"; Tasks: desktopicon
 
+[UninstallRun]
+; Take n63read out of Claude Code / Claude Desktop, if it was added.
+Filename: "{app}\n63read-cli.exe"; Parameters: "mcp --unregister"; Flags: runhidden waituntilterminated; RunOnceId: "UnregisterClaude"
+
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\_internal"
 Type: filesandordirs; Name: "{localappdata}\n63read\updates"

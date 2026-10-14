@@ -435,6 +435,12 @@ def op_gps(args):
 
 # --------------------------------------------------------------------- CLI
 
+def op_mcp(args):
+    """Serve Claude over MCP, or set Claude up to use it."""
+    from n63read import mcp
+    mcp.main(args)
+
+
 def hexint(s):
     return int(s, 0)
 
@@ -546,6 +552,12 @@ def build_parser():
     sp.add_argument("-v", "--verbose", action="store_true",
                     help="print every identifier, not just size mismatches")
     sp.set_defaults(func=op_check)
+
+    sp = sub.add_parser("mcp", help="let Claude use n63read (an MCP server on stdin/stdout)")
+    sp.add_argument("--register", action="store_true",
+                    help="instead: add it to Claude Code and Claude Desktop")
+    sp.add_argument("--unregister", action="store_true", help="instead: remove it from them")
+    sp.set_defaults(func=op_mcp)
 
     sp = sub.add_parser("gps", help="read GPS position from the head unit (NBT Evo)")
     common(sp)
