@@ -59,37 +59,6 @@ def test_check_steps_skips_a_silent_module():
 gui = pytest.importorskip("n63read.gui")
 
 
-@pytest.fixture(scope="module")
-def shared_app(tmp_path_factory):
-    # One window for all of these: creating Tk roots back to back is flaky
-    # on some Windows Pythons ("Can't find a usable init.tcl").
-    avail = str(tmp_path_factory.mktemp("answers") / "avail.json")
-    saved = core.availability_path
-    core.availability_path = lambda: avail
-    try:
-        a = gui.App()
-    except Exception as e:                                  # noqa: BLE001
-        core.availability_path = saved
-        pytest.skip("no display: %s" % e)
-    a._stop_feed()
-    a.avail_file = avail
-    yield a
-    a.destroy()
-    core.availability_path = saved
-
-
-@pytest.fixture
-def app(shared_app):
-    a = shared_app
-    a._clear()
-    a.avail.clear()
-    a.filter_var.set("")
-    a.group_var.set("Module")
-    a.only_var.set(False)
-    a._refilter()
-    return a
-
-
 def tops(app):
     return [app.picker.item(i, "text").rsplit("  (", 1)[0] for i in app.picker.get_children()]
 

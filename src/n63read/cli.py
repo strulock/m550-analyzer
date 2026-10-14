@@ -242,6 +242,46 @@ def op_log(args):
         print("wrote %d samples to %s" % (n, args.out))
 
 
+def op_selftest(args):
+    """Check every data file is bundled and loads; exit non-zero if not.
+
+    A missing module catalog is not an error at runtime (that module's
+    channels just don't appear), so a build that forgot one would pass
+    unnoticed. CI runs this against the built exe.
+    """
+    names = list(core.DATA_FILES)
+    for name in core.MODULE_CATALOGS:
+        names += [name + "_measurements.csv", name + "_enum_tables.csv"]
+    problems = []
+    for name in names:
+        path = core.resource_path(name)
+        if not os.path.exists(path):
+            problems.append("%s: not found" % name)
+            print("  %-42s MISSING" % name)
+            continue
+        with open(path, newline="", encoding="utf-8-sig") as f:
+            rows = sum(1 for _ in csv.reader(f)) - 1
+        print("  %-42s %6d rows" % (name, rows))
+        # A module may have no enum tables (the fuel pump has none), so
+        # those only have to exist; everything else must have rows.
+        if rows <= 0 and not name.endswith("_enum_tables.csv"):
+            problems.append("%s: no rows" % name)
+    loaded = {
+        "DME channels": len(core.load_catalog()),
+        "module channels": len(core.load_module_catalogs()),
+        "enum tables": len(core.load_enum_tables()),
+        "fault texts": len(core.load_fault_texts()),
+        "status texts": len(core.load_status_texts()),
+    }
+    for what, n in loaded.items():
+        print("  %-42s %6d" % (what, n))
+        if not n:
+            problems.append("%s: none loaded" % what)
+    if problems:
+        sys.exit("selftest failed:\n  " + "\n  ".join(problems))
+    print("selftest ok")
+
+
 def op_check(args):
     """Read every catalogued identifier and check its reply size against the file.
 
@@ -377,6 +417,10 @@ def build_parser():
     sp.add_argument("--out", default="n63log.csv")
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("selftest", help="check every data file is bundled and loads "
+                                         "(no car needed)")
+    sp.set_defaults(func=op_selftest)
 
     sp = sub.add_parser("check", help="check each module's catalog against the car "
                                       "(reply sizes)")

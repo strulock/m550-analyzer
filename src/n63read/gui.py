@@ -100,7 +100,7 @@ class Poller(threading.Thread):
             try:
                 result = job(h)
             except Exception as e:                                  # noqa: BLE001
-                self.out_q.put(("error", "background read failed: %s" % e))
+                self.out_q.put(("joberror", "background read failed: %s" % e))
                 continue
             if hasattr(result, "__next__"):
                 self.steppers.append(result)
@@ -112,7 +112,7 @@ class Poller(threading.Thread):
                 self.steppers.remove(gen)
             except Exception as e:                                  # noqa: BLE001
                 self.steppers.remove(gen)
-                self.out_q.put(("error", "background read failed: %s" % e))
+                self.out_q.put(("joberror", "background read failed: %s" % e))
 
     def run(self):
         t0 = time.time()
@@ -612,14 +612,23 @@ class App(tk.Tk):
         stop = self._checking = {"stop": False}
         total = len(layouts)
 
+        reported = []
+
         def job(h):
-            for i, (key, status) in enumerate(core.check_steps(h, layouts), 1):
-                self.q.put(("checkres", key, status, i, total))
-                if stop["stop"]:
-                    break
-                if i % CHECK_BATCH == 0:
-                    yield                   # let a sample through
-            self.q.put(("checkdone", stop["stop"]))
+            finished = False
+            try:
+                for i, (key, status) in enumerate(core.check_steps(h, layouts), 1):
+                    self.q.put(("checkres", key, status, i, total))
+                    if stop["stop"]:
+                        break
+                    if i % CHECK_BATCH == 0:
+                        yield               # let a sample through
+                finished = True
+            finally:
+                # Also on a failed read or a disconnect mid-check, or the
+                # next "Check car now" would say one is still running.
+                reported.append(True)
+                self.q.put(("checkdone", stop["stop"] or not finished))
 
         if self.poller:
             self.poller.submit(job)
@@ -631,8 +640,9 @@ class App(tk.Tk):
                     for _ in job(h):
                         pass
             except Exception as e:                                  # noqa: BLE001
-                self.q.put(("error", "check failed: %s" % e))
-                self.q.put(("checkdone", True))
+                self.q.put(("joberror", "check failed: %s" % e))
+                if not reported:                # never got as far as the job
+                    self.q.put(("checkdone", True))
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -788,7 +798,7 @@ class App(tk.Tk):
             try:
                 hits = core.discover(3.0, bind)
             except Exception as e:                                  # noqa: BLE001
-                self.q.put(("error", str(e)))
+                self.q.put(("joberror", "discover failed: %s" % e))
                 return
             self.q.put(("discovered", hits))
 
@@ -1075,6 +1085,13 @@ class App(tk.Tk):
                     if box.winfo_exists():
                         box.insert("end", text)
                         box.see("end")
+
+                elif kind == "joberror":
+                    # A failed fault read, check or discovery: say so, but
+                    # it is not a lost connection, so leave the poller be.
+                    if not self.poller:
+                        self.status.config(text="● error", foreground="#c0392b")
+                    messagebox.showerror("Error", msg[1])
 
                 elif kind == "error":
                     self.status.config(text="\u25cf error", foreground="#c0392b")

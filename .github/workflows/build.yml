@@ -29,6 +29,12 @@ jobs:
         shell: cmd
         run: build.bat
 
+      # A data file missing from the bundle only hides that module's
+      # channels at runtime, so check the built exe has them all.
+      - name: Self-test the built exe
+        shell: cmd
+        run: dist\n63read-cli.exe selftest
+
       - uses: actions/upload-artifact@v4
         with:
           name: n63read

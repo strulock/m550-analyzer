@@ -19,3 +19,7 @@ logs/
 
 # PyInstaller
 *.spec
+
+# coverage.py
+.coverage
+htmlcov/
