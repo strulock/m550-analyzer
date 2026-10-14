@@ -9,6 +9,8 @@ src/n63read/
   cli.py        n63read / n63read-cli.exe: discover, scan, read, log, faults, check, gps, selftest
   gui.py        n63read.exe: Tkinter app
   playback.py   demo data and log replay (no Tk, testable)
+  diag.py       connection diagnostics: journal, network snapshot, verdicts,
+                packet capture, the `n63read diag` check
   data/         catalogs and lookup CSVs (see data-sources.md)
 tools/
   module_catalog.py   .prg -> module catalogs + fault texts

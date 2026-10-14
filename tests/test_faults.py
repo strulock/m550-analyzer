@@ -101,8 +101,8 @@ def poller_for(car, q):
     real = core.Hsfz
 
     # Point the poller's connection at the fake car.
-    def hsfz(ip, source, timeout):
-        return real(ip, port=car.port, source=source, timeout=timeout)
+    def hsfz(ip, source, timeout, **kw):
+        return real(ip, port=car.port, source=source, timeout=timeout, **kw)
     gui.core = type("C", (), dict(vars(core), Hsfz=staticmethod(hsfz)))
     return p
 

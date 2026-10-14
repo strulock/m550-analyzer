@@ -192,6 +192,39 @@ on every module (the DME too) and compares each reply's size with what the
 file predicts, then says per module whether the file fits. It only reads
 (0x22). With `--out`, every reply goes to a CSV, except private values.
 
+### Connection diagnostics
+
+Every Discover, Connect, session and car check is recorded to a journal in
+`%APPDATA%\n63read\diagnostics\` (one file a day, kept 30 days), so a
+connection that doesn't work can be diagnosed afterwards:
+
+- **Snapshot:** the PC's network adapters and drivers, interfaces,
+  addresses, network profiles (Private/Public), firewall profiles and
+  n63read's firewall rules, plus `ipconfig /all`, `arp -a` and `route print`.
+- **Discover:** every request sent and every reply received, with timing,
+  plus the devices seen on the car's link.
+- **Failed connect:** the exact error, and whether anything listens on 6801
+  (HSFZ) or 13400 (DoIP) at that address.
+- **Session:** how long it ran, samples read, refused identifiers, silent
+  modules, why it ended, and the first 400 frames on the wire, raw.
+- **Verdict:** what most likely went wrong, in plain words.
+
+**Diagnostics ▾** in the toolbar switches recording on or off, saves a
+report of the last 7 days to send on, and opens the folder. Run n63read as
+administrator and **Capture packets for 60 s** records the traffic itself
+(Windows' `pktmon`) as a `.pcapng` beside the journal. It captures all
+traffic on the PC for that minute, so close other apps first.
+
+From a terminal, `n63read diag` does the whole check step by step: it finds
+the PC's ENET address, takes the snapshot, runs Discover, tests the ports on
+whatever answers or is seen on the link, says hello (`3E 00`) to the gateway
+and the DME if HSFZ answers, prints a verdict and records it all. Add
+`--capture` (as administrator) to record the packets too, or
+`--report FILE` to save the journal for sending.
+
+The journal holds addresses, MAC addresses and the car's identification
+reply, which includes its VIN. It stays on this PC unless you send it.
+
 ### CLI
 
 ```
@@ -206,6 +239,9 @@ n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?
 n63read selftest                             every data file bundled and loading
+n63read diag                                 connection check, step by step, recorded
+n63read diag --capture                       ...and record the packets (administrator)
+n63read diag --report report.jsonl           save the recent journal to send
 ```
 
 `read` and `log` take the other modules' channels (`HU_...`, `EGS_...`...)

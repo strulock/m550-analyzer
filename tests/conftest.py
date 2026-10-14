@@ -6,6 +6,18 @@ import pytest
 from n63read import core
 
 
+@pytest.fixture(autouse=True)
+def quick_diagnostics(tmp_path, monkeypatch):
+    """Diagnostics write to a temp journal, and the Windows snapshot (a ~10 s
+    PowerShell call) is a stub: tests stay fast and never touch %APPDATA%."""
+    from n63read import diag
+    journal = str(tmp_path / "diagnostics")
+    monkeypatch.setattr(diag, "journal_dir", lambda: journal)
+    monkeypatch.setattr(diag, "windows_snapshot", lambda timeout=30: {"stub": True})
+    monkeypatch.setattr(diag, "enabled", True)
+    return journal
+
+
 @pytest.fixture(scope="session")
 def shared_app(tmp_path_factory):
     """One GUI window for every GUI test.

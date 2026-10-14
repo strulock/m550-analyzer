@@ -14,7 +14,7 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-from n63read import core, playback
+from n63read import core, diag, playback
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
@@ -35,11 +35,13 @@ COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 class Poller(threading.Thread):
     """Owns the socket. Polls watched channels and pushes samples to a queue."""
 
-    def __init__(self, ip, target, source, timeout, out_q, layouts=None):
+    def __init__(self, ip, target, source, timeout, out_q, layouts=None, bind=None):
         super().__init__(daemon=True)
         self.ip, self.target = ip, target
         # DME channels go to `target`; other modules' channels to their own.
         self.reader = core.ChannelReader(layouts or {}, target)
+        self.bind = bind                # the 'via' address, for diagnostics
+        self.trace = []                 # first frames on the wire, for diagnostics
         self.source, self.timeout = source, timeout
         self.out_q = out_q
         self.channels = []          # [(name, did, meta)]
@@ -117,9 +119,13 @@ class Poller(threading.Thread):
     def run(self):
         t0 = time.time()
         connected = False
+        samples, reason = 0, "stopped"
         try:
-            with core.Hsfz(self.ip, source=self.source, timeout=self.timeout) as h:
+            with core.Hsfz(self.ip, source=self.source, timeout=self.timeout,
+                           trace=self.trace) as h:
                 connected = True
+                diag.record_later("connect", ip=self.ip, result="ok",
+                                  seconds=round(time.time() - t0, 3), bind=self.bind)
                 self.out_q.put(("status", "connected"))
                 while not self._stop_event.is_set():
                     self._run_jobs(h)
@@ -133,15 +139,25 @@ class Poller(threading.Thread):
                     sample = self.reader.read(h, chans)
 
                     self.out_q.put(("sample", elapsed, sample))
+                    samples += 1
                     self._write_log(elapsed, chans, sample)
                     time.sleep(self.interval)
         except Exception as e:                                      # noqa: BLE001
+            reason = "%s: %s" % (type(e).__name__, e)
             if connected:
                 self.out_q.put(("error", str(e)))
             else:
                 self.out_q.put(("error", no_answer_text(self.ip, e)))
+                diag.connect_failed(self.ip, e, self.bind)
         finally:
             self.stop_log()
+            if connected:
+                r = self.reader
+                diag.record("session", ip=self.ip, seconds=round(time.time() - t0, 1),
+                            samples=samples, channels=len(self.channels), reason=reason,
+                            refused={"0x%02X:0x%04X" % k: v for k, v in r.refused.items()},
+                            silent_modules=["0x%02X" % m for m in r.quiet_until],
+                            log=self.log_path, trace=self.trace)
             self.out_q.put(("status", "disconnected"))
 
     def _write_log(self, elapsed, chans, sample):
@@ -192,6 +208,9 @@ class App(tk.Tk):
         self.minsize(900, 560)
 
         self.settings = core.load_settings()
+        diag.enabled = self.settings.get("diagnostics", True)
+        threading.Thread(target=diag.prune, daemon=True).start()
+        self._capture = None
         self.lang = self.settings.get("language", "en")
         if self.lang not in core.LANGUAGES:
             self.lang = "en"
@@ -282,6 +301,19 @@ class App(tk.Tk):
                             values=list(core.LANGUAGES.values()))
         lang.pack(side="right", padx=(8, 0))
         lang.bind("<<ComboboxSelected>>", lambda e: self._set_language())
+        self.diag_btn = ttk.Menubutton(bar, text="Diagnostics \u25be")
+        dmenu = tk.Menu(self.diag_btn, tearoff=False)
+        self.diag_var = tk.BooleanVar(value=diag.enabled)
+        dmenu.add_checkbutton(label="Record connection diagnostics", variable=self.diag_var,
+                              command=self._set_diagnostics)
+        dmenu.add_command(label="Capture packets for 60 s (administrator)",
+                          command=self._capture_packets,
+                          state="normal" if diag.is_admin() else "disabled")
+        dmenu.add_separator()
+        dmenu.add_command(label="Save report...", command=self._save_diag_report)
+        dmenu.add_command(label="Open diagnostics folder", command=self._open_diag_folder)
+        self.diag_btn["menu"] = dmenu
+        self.diag_btn.pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Faults", command=self._faults).pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Scan modules", command=self._scan).pack(side="right")
         self.replay_btn = ttk.Button(bar, text="Open log...", command=self._toggle_replay)
@@ -365,6 +397,68 @@ class App(tk.Tk):
         self.canvas.pack(fill="x", pady=(6, 0))
 
         self._refilter()
+
+    # -- diagnostics -----------------------------------------------------
+
+    def _set_diagnostics(self):
+        diag.enabled = self.diag_var.get()
+        self.settings["diagnostics"] = diag.enabled
+        try:
+            core.save_settings(self.settings)
+        except OSError:
+            pass
+
+    def _capture_packets(self):
+        """Record the packets themselves (pktmon) for the next minute."""
+        if self._capture and not self._capture.done.is_set():
+            messagebox.showinfo("Capture", "A capture is already running.")
+            return
+        cap = diag.Capture(60)
+        try:
+            cap.start()
+        except Exception as e:                                      # noqa: BLE001
+            messagebox.showerror("Capture", "Could not start the capture: %s" % e)
+            return
+        self._capture = cap
+        self.status.config(text="\u25cf capturing packets for 60 s: Discover and "
+                                "Connect now", foreground="#b8860b")
+        messagebox.showinfo(
+            "Capture", "Recording all network traffic on this PC for 60 seconds.\n\n"
+            "Now press Discover, then Connect. The capture is saved to the "
+            "diagnostics folder; send it with a report (Diagnostics > Save report).")
+
+        def finish():
+            cap.done.wait()
+            if cap.result:
+                self.q.put(("note", "capture saved: %s" % os.path.basename(cap.result)))
+            else:
+                self.q.put(("joberror", "The packet capture could not be saved; see "
+                                        "the diagnostics journal for pktmon's output."))
+        threading.Thread(target=finish, daemon=True).start()
+
+    def _save_diag_report(self):
+        path = filedialog.asksaveasfilename(
+            defaultextension=".jsonl", filetypes=[("Diagnostics report", "*.jsonl")],
+            initialfile=time.strftime("n63read_diagnostics_%Y-%m-%d_%H-%M.jsonl"))
+        if not path:
+            return
+        try:
+            n = diag.report(path)
+        except OSError as e:
+            messagebox.showerror("Diagnostics", "Could not save: %s" % e)
+            return
+        messagebox.showinfo(
+            "Diagnostics", "Saved %d entries from the last 7 days to\n%s\n\n"
+            "Packet captures, if any, are .pcapng files in the diagnostics folder.\n"
+            "The report includes addresses and the car's VIN." % (n, path))
+
+    def _open_diag_folder(self):
+        folder = diag.journal_dir()
+        os.makedirs(folder, exist_ok=True)
+        try:
+            os.startfile(folder)                                    # Windows
+        except (AttributeError, OSError):
+            messagebox.showinfo("Diagnostics", folder)
 
     # -- picker ----------------------------------------------------------
 
@@ -860,13 +954,14 @@ class App(tk.Tk):
         self.update_idletasks()
 
         def work():
+            # The answer goes to the window at once; the slow network
+            # snapshot for the diagnostics journal is taken after.
             try:
-                hits = core.discover(3.0, None if bind == "auto" else bind)
+                diag.discover(3.0, None if bind == "auto" else bind,
+                              on_result=lambda hits, near:
+                              self.q.put(("discovered", hits, near)))
             except Exception as e:                                  # noqa: BLE001
                 self.q.put(("joberror", "discover failed: %s" % e))
-                return
-            near = [] if hits or bind == "auto" else core.link_neighbours(bind)
-            self.q.put(("discovered", hits, near))
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -965,7 +1060,9 @@ class App(tk.Tk):
 
         self._stop_feed()
         self.status.config(text="\u25cf connecting...", foreground="#b8860b")
-        self.poller = Poller(ip, target, 0xF4, 2.0, self.q, self.layouts)
+        via = self.bind_var.get()
+        self.poller = Poller(ip, target, 0xF4, 2.0, self.q, self.layouts,
+                             bind=None if via == "auto" else via)
         self.poller.interval = max(0.05, interval)
         self.poller.set_channels(self.watch)
         self.poller.start()
@@ -1120,6 +1217,11 @@ class App(tk.Tk):
 
                 elif kind == "checkdone":
                     self._checking = None
+                    by_module = {}
+                    for (module, _did), status in self.avail.items():
+                        counts = by_module.setdefault("0x%02X" % module, {})
+                        counts[status] = counts.get(status, 0) + 1
+                    diag.record("check", stopped=msg[1], modules=by_module)
                     answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
                     self._answers_changed("check %s: %d identifiers answer"
                                           % ("stopped" if msg[1] else "done", answered))
@@ -1217,6 +1319,10 @@ class App(tk.Tk):
                     if box.winfo_exists():
                         box.insert("end", text)
                         box.see("end")
+
+                elif kind == "note":
+                    # Information for the status line only; not a state change.
+                    self.status.config(text="● " + msg[1], foreground="#2d7dd2")
 
                 elif kind == "joberror":
                     # A failed fault read, check or discovery: say so, but

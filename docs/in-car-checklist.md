@@ -23,6 +23,13 @@ settles it. Record results at the bottom.
 Ignition on (position 2), parked, ENET adapter connected, on battery charger
 if possible (a full check takes a few minutes).
 
+0. **If anything won't connect: run the connection check.** In a terminal
+   (as administrator, for the packet capture):
+   `n63read-cli.exe diag --capture`. It says step by step what it found and
+   ends with a verdict. Then `n63read-cli.exe diag --report report.jsonl`
+   and send `report.jsonl` plus the `.pcapng` from
+   `%APPDATA%\n63read\diagnostics\`. The GUI records the same journal on
+   every Discover and Connect anyway (Diagnostics ▾ → Save report...).
 1. **Check every catalog.**
    `n63read check --ip 169.254.x.x --out check.csv`, or in the GUI:
    connect, then *Answers ▾ > Check car now*. Note each module's verdict:
