@@ -309,7 +309,7 @@ T_1BYTE_ADAP_AGK_DOP,211,Kein Speicherplatz mehr vorhanden,No Speicherplatz mehr
 T_1BYTE_ADAP_AGK_DOP,214,Falsche(r) Parameter,Incorrect(r) Parameter
 T_1BYTE_ADAP_AGK_DOP,216,Keine Daten zum SG vorhanden,No data to SG present
 T_1BYTE_ADAP_AGK_DOP,217,Keine Authentisierung,No authentication
-T_1BYTE_ADAP_AGK_DOP,220,Gueltigkeits-Pruefung schlug fehl,Gueltigkeits-check schlug fehl
+T_1BYTE_ADAP_AGK_DOP,220,Gueltigkeits-Pruefung schlug fehl,Validity-check schlug fehl
 T_1BYTE_ADAP_AGK_DOP,221,Fahrgestellnummer fehlerhaft,Fahrgestellnummer faulty
 T_1BYTE_ADAP_AGK_DOP,222,FGN-Pruefung schlug fehl,FGN-check schlug fehl
 T_1BYTE_ADAP_AGK_DOP,223,Flash-Lesefehler,Flash-Lesefehler

@@ -38,10 +38,13 @@ from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
 
 
 def _catalog(path):
+    """DME channels from `path`, plus the head unit's (HU_...)."""
     try:
-        return core.load_catalog(path)
+        cat = core.load_catalog(path)
     except FileNotFoundError as e:
         sys.exit(str(e))
+    cat.update(core.load_head_unit_catalog())
+    return cat
 
 
 # -------------------------------------------------------------- operations
@@ -167,6 +170,7 @@ def op_scan(args):
 
 def op_read(args):
     cat = _catalog(args.csv)
+    layouts = core.record_layouts(cat)
     enums = core.load_enum_tables()
     lang = "text_de" if args.german else "text_en"
     with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
@@ -176,12 +180,20 @@ def op_read(args):
                 print("%-34s UNKNOWN (not in catalog)" % name)
                 continue
             did = int(meta["ID"], 16)
+            module = int(meta["MODULE"], 16) if meta.get("MODULE") else args.target
             try:
-                raw = h.read_did(args.target, did)
+                raw = h.read_did(module, did)
             except HsfzError as e:
                 print("%-34s %s  <- %s" % (name, meta["ID"], e))
                 continue
-            value, unit = decode(raw, meta, enums, lang)
+            if meta.get("MODULE"):
+                # Head unit: the reply is a record; this channel is one field.
+                value, unit, note = core.decode_record(
+                    raw, layouts[(module, did)])[name]
+                value = core.enum_text(value, meta, enums, lang) or (
+                    note if value is None else value)
+            else:
+                value, unit = decode(raw, meta, enums, lang)
             print("%-34s %s  %-14s %-8s raw=%s   %s"
                   % (name, meta["ID"], value, unit, raw.hex(), meta["INFO"][:40]))
 
@@ -203,15 +215,14 @@ def op_log(args):
     t0 = last_flush = time.time()
     n = 0
     try:
+        reader = core.ChannelReader(core.record_layouts(cat), args.target)
         with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
             while True:
                 row = [round(time.time() - t0, 3)]
-                for _, did, meta in chans:
-                    try:
-                        value, _ = decode(h.read_did(args.target, did), meta)
-                    except Exception:                   # noqa: BLE001
-                        value = ""
-                    row.append(value)
+                sample = reader.read(h, chans)
+                for name, _, _ in chans:
+                    value = sample[name][0]
+                    row.append("" if value is None else value)
                 w.writerow(row)
                 n += 1
                 # Push to disk about once a second; a crash loses at most that.

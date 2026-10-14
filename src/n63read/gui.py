@@ -18,6 +18,7 @@ from n63read import core, playback
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
+CHART_LINES = 6                     # lines drawn at once; select rows to choose
 LOG_FLUSH_SECONDS = 1.0
 COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 
@@ -27,9 +28,11 @@ COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 class Poller(threading.Thread):
     """Owns the socket. Polls watched channels and pushes samples to a queue."""
 
-    def __init__(self, ip, target, source, timeout, out_q):
+    def __init__(self, ip, target, source, timeout, out_q, layouts=None):
         super().__init__(daemon=True)
         self.ip, self.target = ip, target
+        # DME channels go to `target`; head unit channels to their own module.
+        self.reader = core.ChannelReader(layouts or {}, target)
         self.source, self.timeout = source, timeout
         self.out_q = out_q
         self.channels = []          # [(name, did, meta)]
@@ -117,15 +120,8 @@ class Poller(threading.Thread):
                         time.sleep(0.15)
                         continue
 
-                    sample, elapsed = {}, round(time.time() - t0, 3)
-                    for name, did, meta in chans:
-                        try:
-                            value, unit = core.decode(h.read_did(self.target, did), meta)
-                            sample[name] = (value, unit, "")
-                        except core.NegativeResponse as e:
-                            sample[name] = (None, "", core.NRC.get(e.code, "0x%02X" % e.code))
-                        except Exception as e:                      # noqa: BLE001
-                            sample[name] = (None, "", str(e)[:28])
+                    elapsed = round(time.time() - t0, 3)
+                    sample = self.reader.read(h, chans)
 
                     self.out_q.put(("sample", elapsed, sample))
                     self._write_log(elapsed, chans, sample)
@@ -175,6 +171,8 @@ class App(tk.Tk):
         self.minsize(900, 560)
 
         self.catalog = self._load_catalog()
+        self.layouts = core.record_layouts(self.catalog)
+        self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
         self.series = {}                     # name -> [values]
         self.q = queue.Queue()
@@ -202,6 +200,8 @@ class App(tk.Tk):
         with open(path, encoding="utf-8-sig") as f:
             for row in csv.DictReader(f):
                 cat[row["ARG"].strip()] = row
+        # Head unit (GPS etc.): optional, so a missing file only hides them.
+        cat.update(core.load_head_unit_catalog())
         return cat
 
     # -- layout ----------------------------------------------------------
@@ -257,7 +257,12 @@ class App(tk.Tk):
         self.picker = tk.Listbox(left, selectmode="extended", activestyle="none")
         self.picker.pack(fill="both", expand=True)
         self.picker.bind("<Double-Button-1>", lambda e: self._add())
-        ttk.Button(left, text="Add to watch  \u2192", command=self._add).pack(fill="x", pady=4)
+        btns = ttk.Frame(left)
+        btns.pack(fill="x", pady=4)
+        ttk.Button(btns, text="Add to watch  \u2192", command=self._add).pack(
+            side="left", fill="x", expand=True)
+        ttk.Button(btns, text="Add all shown", command=self._add_all).pack(
+            side="left", padx=(4, 0))
 
         right = ttk.Frame(body)
         body.add(right, weight=2)
@@ -308,6 +313,8 @@ class App(tk.Tk):
         for name, meta in rows:
             english = self._english(meta)
             label = "%s  -  %s" % (english[:70], name) if english else name
+            if meta.get("MODULE"):
+                label = "Head unit: " + label
             # Search the German and the code name too: the English is a
             # glossary translation and sometimes leaves words untranslated.
             haystack = " ".join((label, meta.get("INFO") or "")).lower()
@@ -316,8 +323,26 @@ class App(tk.Tk):
                 self._visible.append(name)
 
     def _add(self):
-        for i in self.picker.curselection():
-            name = self._visible[i]
+        self._add_names([self._visible[i] for i in self.picker.curselection()])
+
+    def _add_all(self):
+        """Every channel the filter shows, minus the private ones."""
+        names = [n for n in self._visible if not core.is_sensitive(n)]
+        skipped = len(self._visible) - len(names)
+        if len(names) > 40 and not messagebox.askyesno(
+                "Add all", "Add %d channels to the watch list?\n\n"
+                "Head unit channels refresh every 1-10 s, a few per cycle, so "
+                "DME channels keep their rate." % len(names)):
+            return
+        self._add_names(names)
+        if skipped:
+            messagebox.showinfo(
+                "Add all", "Skipped %d private channel(s): Wi-Fi password and PIN, "
+                "SIM identity, previous destinations, paired devices. Add them "
+                "one at a time if you need them." % skipped)
+
+    def _add_names(self, names):
+        for name in names:
             if any(n == name for n, _, _ in self.watch):
                 continue
             meta = self.catalog[name]
@@ -509,7 +534,7 @@ class App(tk.Tk):
 
         self._stop_feed()
         self.status.config(text="\u25cf connecting...", foreground="#b8860b")
-        self.poller = Poller(ip, target, 0xF4, 2.0, self.q)
+        self.poller = Poller(ip, target, 0xF4, 2.0, self.q, self.layouts)
         self.poller.interval = max(0.05, interval)
         self.poller.set_channels(self.watch)
         self.poller.start()
@@ -727,8 +752,15 @@ class App(tk.Tk):
         for name, (value, unit, note) in sample.items():
             if not self.tree.exists(name):
                 continue
+            meta = self.catalog.get(name, {})
             shown = "" if value is None else (
                 "%.4g" % value if isinstance(value, float) else value)
+            if isinstance(value, float) and meta.get("EINHEIT") == "deg":
+                shown = "%.6f" % value          # %.4g would round a coordinate to ~10 km
+            if not note:
+                # Enumerated values stay numbers (they log and plot); the
+                # words go in Status.
+                note = core.enum_text(value, meta, self.enums) or ""
             self.tree.set(name, "v", shown)
             self.tree.set(name, "note", note)
             if isinstance(value, (int, float)):
@@ -751,25 +783,29 @@ class App(tk.Tk):
                           font=("TkDefaultFont", 9, "bold"),
                           text="DEMO DATA" if self.feed.kind == "demo" else "REPLAY")
 
-        active = [(n, v) for n, v in self.series.items() if len(v) > 1]
+        # Chart the rows selected in the table, else the first few numeric
+        # ones. Each line has its own scale, so engine speed (thousands),
+        # lambda (about 1) and latitude can share the chart; the legend gives
+        # each line's range.
+        chosen = [n for n in self.tree.selection() if len(self.series.get(n, [])) > 1]
+        if not chosen:
+            chosen = [n for n, v in self.series.items() if len(v) > 1]
+        active = [(n, self.series[n]) for n in chosen[:CHART_LINES]]
         if not active:
             c.create_text(w // 2, h // 2, text="no numeric data yet", fill="#aaa")
             return
 
-        lo = min(min(v) for _, v in active)
-        hi = max(max(v) for _, v in active)
-        if hi - lo < 1e-9:
-            lo, hi = lo - 1, hi + 1
-        span = hi - lo
-
         for frac in (0.0, 0.5, 1.0):
             y = pad + (h - 2 * pad) * frac
             c.create_line(pad, y, w - pad, y, fill="#e8e8e8")
-            c.create_text(pad - 4, y, anchor="e", font=("TkDefaultFont", 7),
-                          fill="#888", text="%.3g" % (hi - span * frac))
 
+        col_w = max(150, (w - 2 * pad) // 3)
         for i, (name, vals) in enumerate(active):
             color = COLORS[i % len(COLORS)]
+            lo, hi = min(vals), max(vals)
+            if hi - lo < 1e-9:
+                lo, hi = lo - 1, hi + 1
+            span = hi - lo
             step = (w - 2 * pad) / max(1, PLOT_POINTS - 1)
             pts = []
             start = PLOT_POINTS - len(vals)
@@ -779,8 +815,9 @@ class App(tk.Tk):
                 pts += [x, y]
             if len(pts) >= 4:
                 c.create_line(*pts, fill=color, width=2, smooth=False)
-            c.create_text(pad + 6 + i * 130, 12, anchor="w", fill=color,
-                          font=("TkDefaultFont", 8), text=name[:16])
+            label = "%s  %.5g–%.5g" % (name.split(".")[-1][:18], lo, hi)
+            c.create_text(pad + (i % 3) * col_w, 8 + (i // 3) * 11, anchor="w",
+                          fill=color, font=("TkDefaultFont", 7), text=label)
 
     def _close(self):
         if self.poller:

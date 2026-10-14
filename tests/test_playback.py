@@ -8,6 +8,7 @@ from n63read import core, playback
 
 def test_demo_channels_are_real_catalog_channels():
     catalog = core.load_catalog(core.resource_path(core.DEFAULT_CSV))
+    catalog.update(core.load_head_unit_catalog())
     for name in playback.DEMO_CHANNELS:
         assert name in catalog
 

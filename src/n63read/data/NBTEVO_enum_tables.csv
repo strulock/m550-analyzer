@@ -1,0 +1,379 @@
+﻿table_name,value,text_de,text_en
+NBTEVO.ETH_LEARN_PORT_CONFIGURATION,0x0,Lernen erfolgreich,Learning erfolgreich
+NBTEVO.ETH_LEARN_PORT_CONFIGURATION,0x1,Lernen nicht erfolgreich oder noch nicht gelernt,Learning not erfolgreich or yet not learned
+NBTEVO.STATUS_LIFECYCLE_DOP,0,Application Mode,Application Mode
+NBTEVO.STATUS_LIFECYCLE_DOP,1,Flash Mode,Flash Mode
+NBTEVO.STATUS_LIFECYCLE_DOP,2,Coding Mode,Coding Mode
+NBTEVO.TAB_APPLICATION,0x00,Sprachverarbeitung,Sprachverarbeitung
+NBTEVO.TAB_APPLICATION,0x01,Navi Applikation,Navi Applikation
+NBTEVO.TAB_APPLICATION,0x02,Navi Karte,Navi Karte
+NBTEVO.TAB_APPLICATION,0x03,Online Browser,Online Browser
+NBTEVO.TAB_APPLICATION,0x04,AudioPlayer,AudioPlayer
+NBTEVO.TAB_APPLICATION,0x05,Telefon Applikation,Telefon Applikation
+NBTEVO.TAB_APPLICATION,0x06,SDARS,SDARS
+NBTEVO.TAB_APPLICATION,0x07,A4A,A4A
+NBTEVO.TAB_APPLICATION,0x08,Driver update (KISU),Driver update (KISU)
+NBTEVO.TAB_APPLICATION,0x09,DAB,DAB
+NBTEVO.TAB_APPLICATION,0x0A,Video_in,Video_in
+NBTEVO.TAB_APPLICATION,0x0B,Sprachpaket Arabisch,Sprachpaket Arabisch
+NBTEVO.TAB_APPLICATION,0x0C,TextToSpeech,TextToSpeech
+NBTEVO.TAB_APPLICATION,0x0D,M Laptimer,M Laptimer
+NBTEVO.TAB_APPLICATION,0x0E,Log & Trace,Log & Trace
+NBTEVO.TAB_APPLICATION,0x0F,CarPlay,CarPlay
+NBTEVO.TAB_APPLICATION,0x10,Navi Permanent SLI Display ECE,Navi Permanent SLI Display ECE
+NBTEVO.TAB_APPLICATION,0x11,Reinitialisation,Reinitialisation
+NBTEVO.TAB_APPLICATION,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x01,Deaktiviert durch Codierung,Deactivated by coding
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x02,Aktiviert durch Codierung,Activated by coding
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x04,Deaktiviert durch SWT,Deactivated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x05,Deaktiviert durch Codierung und  Deaktiviert durch SWT,Deactivated by coding and  deactivated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x06,Aktiviert durch Codierung und Deaktiviert durch SWT,Activated by coding and deactivated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x08,Aktiviert durch SWT,Activated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x09,Deaktiviert durch Codierung und Aktiviert durch SWT,Deactivated by coding and activated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x0A,Aktiviert durch Codierung und Aktiviert durch SWT,Activated by coding and activated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x10,Teilweise Aktiviert durch SWT,Teilweise activated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x12,Aktiviert durch Codierung und Teilweise Aktiviert durch SWT,Activated by coding and Teilweise activated by SWT
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x20,SWT Freischaltcode eingespielt,SWT Freischaltcode eingespielt
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0x22,Aktiviert durch Codierung und SWT Freischaltcode eingespielt,Activated by coding and SWT Freischaltcode eingespielt
+NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAB_APPLICATION_RUNNING_STATUS,0x00,Applikation nicht gestartet,Applikation not gestartet
+NBTEVO.TAB_APPLICATION_RUNNING_STATUS,0x01,Applikation gestartet,Applikation gestartet
+NBTEVO.TAB_APPLICATION_RUNNING_STATUS,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAB_AUTO_MAN,0x00,automatic,automatic
+NBTEVO.TAB_AUTO_MAN,0x01,manual,manual
+NBTEVO.TAB_AUTO_MAN,0xFF,not defined,not defined
+NBTEVO.TAB_CIDDISPLAYREADY,0x00,not ready,not ready
+NBTEVO.TAB_CIDDISPLAYREADY,0x01,ready,ready
+NBTEVO.TAB_CIDDISPLAYREADY,0xFF,not defined,not defined
+NBTEVO.TAB_CID_VERBINDUNG,0x00,"CID-Verbindung in Ordnung, Bild wird angezeigt","CID-Verbindung in Ordnung, Bild is angezeigt"
+NBTEVO.TAB_CID_VERBINDUNG,0x01,Keine Aktivierung der Bildausgabe,No activation the Bildausgabe
+NBTEVO.TAB_CID_VERBINDUNG,0x02,Anzeigegerät nicht anzeigebereit,Display device not anzeigebereit
+NBTEVO.TAB_CID_VERBINDUNG,0x03,Keine Kommunikation mit Anzeigegerät,No communication with display device
+NBTEVO.TAB_CID_VERBINDUNG,0x04,Bilddaten ungültig,Bilddaten invalid
+NBTEVO.TAB_CID_VERBINDUNG,0xFF,Ungültigkeitswert,Ungültigkeitswert
+NBTEVO.TAB_HU_DEMUTESTATUS,0x00,Head-Unit aus,Head-Unit from
+NBTEVO.TAB_HU_DEMUTESTATUS,0x01,Head-Unit ein,Head-Unit a
+NBTEVO.TAB_HU_DEMUTESTATUS,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAB_INITIALISIERUNG,0x00,nicht initialisiert,not initialisiert
+NBTEVO.TAB_INITIALISIERUNG,0x01,IO initialisiert,IO initialisiert
+NBTEVO.TAB_INITIALISIERUNG,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_INSERTEDMEDIUM,0x00,No medium inserted,No medium inserted
+NBTEVO.TAB_INSERTEDMEDIUM,0x01,Medium recognition in progress,Medium recognition in progress
+NBTEVO.TAB_INSERTEDMEDIUM,0x02,CD medium inserted,CD medium inserted
+NBTEVO.TAB_INSERTEDMEDIUM,0x03,DVD medium inserted,DVD medium inserted
+NBTEVO.TAB_INSERTEDMEDIUM,0x04,Flash memory medium inserted,Flash memory medium inserted
+NBTEVO.TAB_INSERTEDMEDIUM,0x05,Blu-ray medium inserted,Blu-ray medium inserted
+NBTEVO.TAB_INSERTEDMEDIUM,0xF0,"Medium ejected, but not removed","Medium ejected, but not removed"
+NBTEVO.TAB_INSERTEDMEDIUM,0xF1,Medium blocked,Medium blocked
+NBTEVO.TAB_INSERTEDMEDIUM,0xFF,Not defined,Not defined
+NBTEVO.TAB_NO_YES,0x00,no,no
+NBTEVO.TAB_NO_YES,0x01,yes,yes
+NBTEVO.TAB_NO_YES,0xFF,not defined,not defined
+NBTEVO.TAB_OKNOK,0x00,OK,OK
+NBTEVO.TAB_OKNOK,0x01,NOK,NOK
+NBTEVO.TAB_OKNOK,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAB_ONOFF,0x00,AUS,OFF
+NBTEVO.TAB_ONOFF,0x01,EIN,ON
+NBTEVO.TAB_ONOFF,0xFF,NICHT DEFINIERT,NICHT DEFINIERT
+NBTEVO.TAB_STATEFMPHASANTENNA,0x00,offene Leitung (Verbindung Radio - Antennenverstärker.),open line (Verbindung Radio - Antennenverstärker.)
+NBTEVO.TAB_STATEFMPHASANTENNA,0x01,Antenne fehlt (Verbindung Antennenverstärker - Antenne),Antenna missing (Verbindung Antennenverstärker - antenna)
+NBTEVO.TAB_STATEFMPHASANTENNA,0x02,Antenne Ok mit passiver FM Antenne,Antenna Ok with passiver FM antenna
+NBTEVO.TAB_STATEFMPHASANTENNA,0x03,Antenne Ok mit aktiver FM Antenne,Antenna Ok with active FM antenna
+NBTEVO.TAB_STATEFMPHASANTENNA,0x04,Kurzschluss nach Masse (Verbindung HU - Antennenverstärker),Short circuit to ground (Verbindung HU - Antennenverstärker)
+NBTEVO.TAB_STATEFMPHASANTENNA,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_STATUSCIDCOMSTATE,0x00,CIDCOM_OK,CIDCOM_OK
+NBTEVO.TAB_STATUSCIDCOMSTATE,0x01,CIDCOM_CRC_ERROR,CIDCOM_CRC_ERROR
+NBTEVO.TAB_STATUSCIDCOMSTATE,0x02,CIDCOM_NO_SYNC,CIDCOM_NO_SYNC
+NBTEVO.TAB_STATUSCIDCOMSTATE,0x03,CIDCOM_NO_COM,CIDCOM_NO_COM
+NBTEVO.TAB_STATUSCIDCOMSTATE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDFADESTATE,0x00,CIDDIM_FADE_DISPLAY_OFF,CIDDIM_FADE_DISPLAY_OFF
+NBTEVO.TAB_STATUSCIDFADESTATE,0x01,CIDDIM_FADE_DISPLAY_T0,CIDDIM_FADE_DISPLAY_T0
+NBTEVO.TAB_STATUSCIDFADESTATE,0x02,CIDDIM_FADE_DISPLAY_T1,CIDDIM_FADE_DISPLAY_T1
+NBTEVO.TAB_STATUSCIDFADESTATE,0x03,CIDDIM_FADE_DISPLAY_ON,CIDDIM_FADE_DISPLAY_ON
+NBTEVO.TAB_STATUSCIDFADESTATE,0x04,CIDDIM_FADE_DISPLAY_T2,CIDDIM_FADE_DISPLAY_T2
+NBTEVO.TAB_STATUSCIDFADESTATE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDFLASHDATACHANGE,0x00,not changed,not changed
+NBTEVO.TAB_STATUSCIDFLASHDATACHANGE,0x01,changed,changed
+NBTEVO.TAB_STATUSCIDFLASHDATACHANGE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDFLASHSTATE,0x00,CIDGDC_FLASH_IDLE,CIDGDC_FLASH_IDLE
+NBTEVO.TAB_STATUSCIDFLASHSTATE,0x01,CIDGDC_FLASH_BUSY,CIDGDC_FLASH_BUSY
+NBTEVO.TAB_STATUSCIDFLASHSTATE,0x02,CIDGDC_FLASH_READY,CIDGDC_FLASH_READY
+NBTEVO.TAB_STATUSCIDFLASHSTATE,0x03,CIDGDC_FLASH_CRC_OK,CIDGDC_FLASH_CRC_OK
+NBTEVO.TAB_STATUSCIDFLASHSTATE,0x04,CIDGDC_FLASH_CRC_NOK,CIDGDC_FLASH_CRC_NOK
+NBTEVO.TAB_STATUSCIDFLASHSTATE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDINITSTATE,0x00,CIDMAIN_SYNC_INITSTATE,CIDMAIN_SYNC_INITSTATE
+NBTEVO.TAB_STATUSCIDINITSTATE,0x01,CIDMAIN_UNLOCK_INITSTATE,CIDMAIN_UNLOCK_INITSTATE
+NBTEVO.TAB_STATUSCIDINITSTATE,0x02,CIDMAIN_READ_BASICFLASHDATA_INITSTATE,CIDMAIN_READ_BASICFLASHDATA_INITSTATE
+NBTEVO.TAB_STATUSCIDINITSTATE,0x03,CIDMAIN_READ_ALLFLASHDATA_INITSTATE,CIDMAIN_READ_ALLFLASHDATA_INITSTATE
+NBTEVO.TAB_STATUSCIDINITSTATE,0x04,CIDMAIN_WAIT_FOR_TIMING_INITSTATE,CIDMAIN_WAIT_FOR_TIMING_INITSTATE
+NBTEVO.TAB_STATUSCIDINITSTATE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDMAINSTATE,0x00,CIDMAIN_STARTUP_STATE,CIDMAIN_STARTUP_STATE
+NBTEVO.TAB_STATUSCIDMAINSTATE,0x01,CIDMAIN_CID_OFF_STATE,CIDMAIN_CID_OFF_STATE
+NBTEVO.TAB_STATUSCIDMAINSTATE,0x02,CIDMAIN_CID_ON_STATE,CIDMAIN_CID_ON_STATE
+NBTEVO.TAB_STATUSCIDMAINSTATE,0x03,CIDMAIN_FLASHDATA_ERROR_STATE,CIDMAIN_FLASHDATA_ERROR_STATE
+NBTEVO.TAB_STATUSCIDMAINSTATE,0x04,CIDMAIN_COMM_FAIL_STATE,CIDMAIN_COMM_FAIL_STATE
+NBTEVO.TAB_STATUSCIDMAINSTATE,0x05,CIDMAIN_DIAGFLASH_STATE,CIDMAIN_DIAGFLASH_STATE
+NBTEVO.TAB_STATUSCIDMAINSTATE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDOPERATIONSTATE,0x00,CIDMAIN_VIDEO_OPSTATE,CIDMAIN_VIDEO_OPSTATE
+NBTEVO.TAB_STATUSCIDOPERATIONSTATE,0x01,CIDMAIN_TESTPIC_OPSTATE,CIDMAIN_TESTPIC_OPSTATE
+NBTEVO.TAB_STATUSCIDOPERATIONSTATE,0x02,CIDMAIN_BLACK_PANEL_OPSTATE,CIDMAIN_BLACK_PANEL_OPSTATE
+NBTEVO.TAB_STATUSCIDOPERATIONSTATE,0x03,CIDMAIN_DISPLAY_ON_OPSTATE,CIDMAIN_DISPLAY_ON_OPSTATE
+NBTEVO.TAB_STATUSCIDOPERATIONSTATE,0x04,CIDMAIN_DISPLAY_OFF_OPSTATE,CIDMAIN_DISPLAY_OFF_OPSTATE
+NBTEVO.TAB_STATUSCIDOPERATIONSTATE,0xFF,not defined,not defined
+NBTEVO.TAB_STATUSCIDPOWERMODE,0x00,Off,Off
+NBTEVO.TAB_STATUSCIDPOWERMODE,0x01,Standby,Standby
+NBTEVO.TAB_STATUSCIDPOWERMODE,0x02,On,On
+NBTEVO.TAB_STATUSCIDPOWERMODE,0xFF,Invalid,Invalid
+NBTEVO.TAB_STATUSCIDSCHEDULEID,0x00,CIDCOM_SCHEDULE_READ_FLASH,CIDCOM_SCHEDULE_READ_FLASH
+NBTEVO.TAB_STATUSCIDSCHEDULEID,0x01,CIDCOM_SCHEDULE_SYNC,CIDCOM_SCHEDULE_SYNC
+NBTEVO.TAB_STATUSCIDSCHEDULEID,0x02,CIDCOM_SCHEDULE_CHECK_COM,CIDCOM_SCHEDULE_CHECK_COM
+NBTEVO.TAB_STATUSCIDSCHEDULEID,0x03,CIDCOM_SCHEDULE_READ_SENSORS,CIDCOM_SCHEDULE_READ_SENSORS
+NBTEVO.TAB_STATUSCIDSCHEDULEID,0x04,CIDCOM_SCHEDULE_ON,CIDCOM_SCHEDULE_ON
+NBTEVO.TAB_STATUS_USBHUB,0x00,kein USB HUB codiert,no USB HUB codiert
+NBTEVO.TAB_STATUS_USBHUB,0x01,USB HUB codiert,USB HUB codiert
+NBTEVO.TAB_STATUS_USBHUB,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_TDAACTIVATIONSTATE,0x01,"Leerlauf, derzeit nicht aktiv","Idle, derzeit not active"
+NBTEVO.TAB_TDAACTIVATIONSTATE,0x02,Aktivierung läuft,Activation läuft
+NBTEVO.TAB_TDAACTIVATIONSTATE,0x03,Aktivierung fehlgeschlagen,Activation fehlgeschlagen
+NBTEVO.TAB_TDAACTIVATIONSTATE,0x04,Aktivierung erfolgreich,Activation erfolgreich
+NBTEVO.TAB_TDAACTIVATIONSTATE,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_USBTEST_STATUS,0x00,kein Gerät verbunden,no device verbunden
+NBTEVO.TAB_USBTEST_STATUS,0x01,"Gerät angeschlossen, Erkennung im Gange","Device angeschlossen, detection in the gear"
+NBTEVO.TAB_USBTEST_STATUS,0x02,erkanntes Gerät ist ein Massenspeicher,detected device is a ground memory
+NBTEVO.TAB_USBTEST_STATUS,0x03,erkanntes Gerät ist ein HUB,detected device is a HUB
+NBTEVO.TAB_USBTEST_STATUS,0xFE,"Gerät erkannt, aber weder Massenspeicher noch HUB","Device detected, but weder ground memory yet HUB"
+NBTEVO.TAB_USBTEST_STATUS,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_WLAN_ENCRYPTION,0x00,keine Verschlüsselung,no Verschlüsselung
+NBTEVO.TAB_WLAN_ENCRYPTION,0x01,WEP,WEP
+NBTEVO.TAB_WLAN_ENCRYPTION,0x02,WPA,WPA
+NBTEVO.TAB_WLAN_ENCRYPTION,0x03,WPA2,WPA2
+NBTEVO.TAB_WLAN_ENCRYPTION,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_WLAN_PAIRABLE,0x00,AP_MODE,AP_MODE
+NBTEVO.TAB_WLAN_PAIRABLE,0x01,WIFI_DIRECT_MODE,WIFI_DIRECT_MODE
+NBTEVO.TAB_WLAN_PAIRABLE,0x02,beide,beide
+NBTEVO.TAB_WLAN_PAIRABLE,0xFF,nicht definiert,not definiert
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0x0A,Kein ZIN Fehler und kein Kommunikationsfehler,No ZIN fault and no communication error
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0x0B,ZIN Kommunikationsfehler,ZIN communication error
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0x1A,"ZIN interner Fehler, Selbsttest vom ZIN fehlgeschlagen","ZIN internal error, self test vom ZIN fehlgeschlagen"
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0x2A,tbd,tbd
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0x4A,tbd,tbd
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0x8A,tbd,tbd
+NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG,0xFF,ungültig,invalid
+NBTEVO.TAB_ZIN_VARIANT,0x00,kein ZIN,no ZIN
+NBTEVO.TAB_ZIN_VARIANT,0x01,"6,5  ZIN","6,5  ZIN"
+NBTEVO.TAB_ZIN_VARIANT,0x02,"8,8  ZIN","8,8  ZIN"
+NBTEVO.TAB_ZIN_VARIANT,0x03,Radio ZIN,Radio ZIN
+NBTEVO.TAF,0x00,AF aus,AF from
+NBTEVO.TAF,0x01,AF ein,AF a
+NBTEVO.TAF,0x02,AF keine Änderung,AF no Änderung
+NBTEVO.TAF,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAKTIVEANTENNEDAB,0x00,Keine Antenne,No antenna
+NBTEVO.TAKTIVEANTENNEDAB,0x01,L-Band Antenne,L-Band antenna
+NBTEVO.TAKTIVEANTENNEDAB,0x02,Band III Antenne,Band III antenna
+NBTEVO.TAKTIVEANTENNEDAB,0x03,Beide Antennen,Beide antenna
+NBTEVO.TAKTIVEANTENNEDAB,0xFF,Nicht definiert,Not definiert
+NBTEVO.TAUDIOKANAL,0x00000000,Alle Kanäle,Alle Kanäle
+NBTEVO.TAUDIOKANAL,0x00000001,"Links vorne (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Left front (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000002,"Rechts vorne (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Right front (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000004,"Center vorne (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Center front (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000008,"Seite links (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Side left (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000010,"Seite rechts (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Side right (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000020,"Links hinten (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Left rear (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000040,"Rechts hinten (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Right rear (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00000080,Links vorne Bass (Erweiterter Kanal),Left front Bass (Erweiterter channel)
+NBTEVO.TAUDIOKANAL,0x00000100,Rechts vorne Bass (Erweiterter Kanal),Right front Bass (Erweiterter channel)
+NBTEVO.TAUDIOKANAL,0x00000200,Links hinten Bass (Erweiterter Kanal),Left rear Bass (Erweiterter channel)
+NBTEVO.TAUDIOKANAL,0x00000400,Rechts hinten Bass (Erweiterter Kanal),Right rear Bass (Erweiterter channel)
+NBTEVO.TAUDIOKANAL,0x00000800,"Center hinten (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner)","Center rear (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00001000,Linker Kopfhörer links,Left Kopfhörer left
+NBTEVO.TAUDIOKANAL,0x00002000,Linker Kopfhörer rechts,Left Kopfhörer right
+NBTEVO.TAUDIOKANAL,0x00004000,Rechter Kopfhörer links,Right Kopfhörer left
+NBTEVO.TAUDIOKANAL,0x00008000,Rechter Kopfhörer rechts,Right Kopfhörer right
+NBTEVO.TAUDIOKANAL,0x00010000,"Links vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Left front (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00020000,"Rechts vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Right front (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00040000,"Center vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Center front (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00080000,"Seite links (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Side left (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00100000,"Seite rechts (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Side right (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00200000,"Links hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Left rear (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00400000,"Rechts hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Right rear (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0x00800000,"Center hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner)","Center rear (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner)"
+NBTEVO.TAUDIOKANAL,0xFFFFFFFF,Nicht definiert,Not definiert
+NBTEVO.TAUDIOSYSTEM,0x00,STEREO,STEREO
+NBTEVO.TAUDIOSYSTEM,0x01,HIFI,HIFI
+NBTEVO.TAUDIOSYSTEM,0x02,TOP-HIFI,TOP-HIFI
+NBTEVO.TAUDIOSYSTEM,0x03,M INDIVIDUAL SOUND,M INDIVIDUAL SOUND
+NBTEVO.TAUDIOSYSTEM,0x04,HK-SURROUND,HK-SURROUND
+NBTEVO.TAUDIOSYSTEM,0x05,HIGH PREMIUM,HIGH PREMIUM
+NBTEVO.TAUDIOSYSTEM,0x06,HIFI-SYSTEM HARMAN KARDON,HIFI-SYSTEM HARMAN KARDON
+NBTEVO.TAUDIOSYSTEM,0xFF,Nicht definiert,Not definiert
+NBTEVO.TCIDONOFFACTION,0x00,Off,Off
+NBTEVO.TCIDONOFFACTION,0x01,On,On
+NBTEVO.TCIDONOFFACTION,0xFF,not defined,not defined
+NBTEVO.TDIRECTIONSOURCE,0x00,Getriebe,Transmission
+NBTEVO.TDIRECTIONSOURCE,0xFF,nicht definiert,not definiert
+NBTEVO.TEXTGYROSIGNAL,0x00,Signal verfügbar,Signal available
+NBTEVO.TEXTGYROSIGNAL,0x01,Signal nicht verfügbar,Signal not available
+NBTEVO.TEXTGYROSIGNAL,0xFF,Nicht definiert,Not definiert
+NBTEVO.TFOLLOWINGDABDAB,0x00,DAB DAB Following aus,DAB DAB Following from
+NBTEVO.TFOLLOWINGDABDAB,0x01,DAB DAB Following ein,DAB DAB Following a
+NBTEVO.TFOLLOWINGDABDAB,0x02,DAB DAB Following keine Änderung,DAB DAB Following no Änderung
+NBTEVO.TFOLLOWINGDABDAB,0xFF,Nicht definiert,Not definiert
+NBTEVO.TFOLLOWINGDABFM,0x00,DAB FM Following aus,DAB FM Following from
+NBTEVO.TFOLLOWINGDABFM,0x01,DAB FM Following ein,DAB FM Following a
+NBTEVO.TFOLLOWINGDABFM,0x02,DAB FM Following keine Änderung,DAB FM Following no Änderung
+NBTEVO.TFOLLOWINGDABFM,0xFF,Nicht definiert,Not definiert
+NBTEVO.TGEARTYPE,0x00,Rückwärts-Gang,Rückwärts-gear
+NBTEVO.TGEARTYPE,0x01,Vorwärts-Gang,Vorwärts-gear
+NBTEVO.TGEARTYPE,0x02,Leerlauf,Idle
+NBTEVO.TGEARTYPE,0xFF,Nicht definiert,Not definiert
+NBTEVO.TGPSPOSITIONVALIDITY,0x00,GPS Position ist gueltig,GPS position is valid
+NBTEVO.TGPSPOSITIONVALIDITY,0x01,GPS Position ist nicht gueltig,GPS position is not valid
+NBTEVO.TGPSPOSITIONVALIDITY,0xFF,Nicht definiert,Not definiert
+NBTEVO.TGPSSTATUS,0x00,Nicht unterstuetzt: Kein GPS,Not unterstuetzt: no GPS
+NBTEVO.TGPSSTATUS,0x01,Nicht unterstuetzt: Kommunikationsfehler,Not unterstuetzt: communication error
+NBTEVO.TGPSSTATUS,0x02,Receiverfehler,Receiverfehler
+NBTEVO.TGPSSTATUS,0x03,Kein almanac,No almanac
+NBTEVO.TGPSSTATUS,0x04,Suche Satelliten,Suche satellites
+NBTEVO.TGPSSTATUS,0x05,Ortung Satellit 1,Ortung satellite 1
+NBTEVO.TGPSSTATUS,0x06,Ortung Satellit 2,Ortung satellite 2
+NBTEVO.TGPSSTATUS,0x07,Ortung Satellit 3,Ortung satellite 3
+NBTEVO.TGPSSTATUS,0x08,Ortung Satellit 4,Ortung satellite 4
+NBTEVO.TGPSSTATUS,0x09,Ortung Satellit 5,Ortung satellite 5
+NBTEVO.TGPSSTATUS,0x0A,Ortung Satellit 6,Ortung satellite 6
+NBTEVO.TGPSSTATUS,0x0B,2D Position,2D position
+NBTEVO.TGPSSTATUS,0x0C,3D Position,3D position
+NBTEVO.TGPSSTATUS,0xFF,Nicht definiert,Not definiert
+NBTEVO.THUBCONNECTIONSTATE,0x00,HUB angeschlossen,HUB angeschlossen
+NBTEVO.THUBCONNECTIONSTATE,0x01,HUB nicht angeschlossen,HUB not angeschlossen
+NBTEVO.THUBCONNECTIONSTATE,0x04,HUB nicht codiert,HUB not codiert
+NBTEVO.THUBCONNECTIONSTATE,0xFF,nicht definiert,not definiert
+NBTEVO.TLAUFWERK,0x0000,Kein Laufwerk,No Laufwerk
+NBTEVO.TLAUFWERK,0x0001,Kassette,Kassette
+NBTEVO.TLAUFWERK,0x0002,CD,CD
+NBTEVO.TLAUFWERK,0x0004,DVD,DVD
+NBTEVO.TLAUFWERK,0x0008,MD,MD
+NBTEVO.TLAUFWERK,0x0010,HDD,HDD
+NBTEVO.TLAUFWERK,0x0012,CD und HDD,CD and HDD
+NBTEVO.TLAUFWERK,0x0014,DVD und HDD,DVD and HDD
+NBTEVO.TLAUFWERK,0x0020,USB,USB
+NBTEVO.TLAUFWERK,0x0022,CD und USB,CD and USB
+NBTEVO.TLAUFWERK,0x0024,DVD und USB,DVD and USB
+NBTEVO.TLAUFWERK,0x0032,"CD, HDD und USB","CD, HDD and USB"
+NBTEVO.TLAUFWERK,0x0034,"DVD, HDD und USB","DVD, HDD and USB"
+NBTEVO.TLAUFWERK,0x0040,Flash Speicher,Flash memory
+NBTEVO.TLAUFWERK,0x0042,CD und Flash Speicher,CD and Flash memory
+NBTEVO.TLAUFWERK,0x0044,DVD und Flash Speicher,DVD and Flash memory
+NBTEVO.TLAUFWERK,0x0050,HDD und Flash Speicher,HDD and Flash memory
+NBTEVO.TLAUFWERK,0x0054,"DVD, HDD und Flash Speicher","DVD, HDD and Flash memory"
+NBTEVO.TLAUFWERK,0x0062,"CD, USB und Flash Speicher","CD, USB and Flash memory"
+NBTEVO.TLAUFWERK,0x0064,"DVD, USB und Flash Speicher","DVD, USB and Flash memory"
+NBTEVO.TLAUFWERK,0x0080,Blu-Ray,Blu-Ray
+NBTEVO.TLAUFWERK,0x0090,Blu-Ray und HDD,Blu-Ray and HDD
+NBTEVO.TLAUFWERK,0x00A0,Blu-Ray und USB,Blu-Ray and USB
+NBTEVO.TLAUFWERK,0x00B0,"Blu-Ray, HDD und USB","Blu-Ray, HDD and USB"
+NBTEVO.TLAUFWERK,0x00C0,Blu-Ray und Flash Speicher,Blu-Ray and Flash memory
+NBTEVO.TLAUFWERK,0x00D0,"Blu-Ray, HDD und Flash Speicher","Blu-Ray, HDD and Flash memory"
+NBTEVO.TLAUFWERK,0x00E0,"Blu-Ray, USB und Flash Speicher","Blu-Ray, USB and Flash memory"
+NBTEVO.TLAUFWERK,0xFFFF,Nicht definiert,Not definiert
+NBTEVO.TNAVICALIBRATION,0x00,Positionierprozess kalibriert,Positionierprozess kalibriert
+NBTEVO.TNAVICALIBRATION,0x01,Positionierprozess nicht kalibriert,Positionierprozess not kalibriert
+NBTEVO.TNAVICALIBRATION,0xFF,Nicht definiert,Not definiert
+NBTEVO.TRADONLEAD,0x00,aus,off
+NBTEVO.TRADONLEAD,0x01,ein,on
+NBTEVO.TRADONLEAD,0xFF,Nicht definiert,Not definiert
+NBTEVO.TRDS,0x00,RDS aus,RDS from
+NBTEVO.TRDS,0x01,RDS ein,RDS a
+NBTEVO.TRDS,0x02,RDS keine Änderung,RDS no Änderung
+NBTEVO.TRDS,0xFF,Nicht definiert,Not definiert
+NBTEVO.TROUTEDOWNLOAD,0x00,Route download nicht gestartet,Route download not gestartet
+NBTEVO.TROUTEDOWNLOAD,0x01,Route download läuft,Route download läuft
+NBTEVO.TROUTEDOWNLOAD,0x02,Route download beendet ohne Fehler,Route download beendet without fault
+NBTEVO.TROUTEDOWNLOAD,0x03,Route download beendet mit Fehler,Route download beendet with fault
+NBTEVO.TROUTEDOWNLOAD,0x04,Route download unterbrochen,Route download interrupted
+NBTEVO.TROUTEDOWNLOAD,0xFF,nicht definiert,not definiert
+NBTEVO.TSATELLITSTATUS,0x00,Erkennbar,Erkennbar
+NBTEVO.TSATELLITSTATUS,0x01,Aufgestoebert,Aufgestoebert
+NBTEVO.TSATELLITSTATUS,0xFF,Nicht definiert,Not definiert
+NBTEVO.TSDARSCHANNELTUNESUCCESS,0,Kanaleinstellung erfolgreich,Kanaleinstellung erfolgreich
+NBTEVO.TSDARSCHANNELTUNESUCCESS,1,Kanal nicht aboniert,Channel not aboniert
+NBTEVO.TSDARSCHANNELTUNESUCCESS,2,Kanal ungueltig,Channel invalid
+NBTEVO.TSDARSCHANNELTUNESUCCESS,3,Kanaleinstellung läuft,Kanaleinstellung läuft
+NBTEVO.TSDARSCHANNELTUNESUCCESS,255,nicht definiert,not definiert
+NBTEVO.TSDARSSIGNALQUALITY,0,kein Signal,no signal
+NBTEVO.TSDARSSIGNALQUALITY,1,schwaches Signal,schwaches signal
+NBTEVO.TSDARSSIGNALQUALITY,2,gutes Signal,gutes signal
+NBTEVO.TSDARSSIGNALQUALITY,3,exzellentes Signal,exzellentes signal
+NBTEVO.TSDARSSIGNALQUALITY,255,nicht definiert,not definiert
+NBTEVO.TSDARSSIGNALQUALITYGLOBALSTATUS,0,Mute,Mute
+NBTEVO.TSDARSSIGNALQUALITYGLOBALSTATUS,1,Audio,Audio
+NBTEVO.TSDARSSIGNALQUALITYGLOBALSTATUS,255,nicht definiert,not definiert
+NBTEVO.TSIGNALDAB,0x00,Kein Signal,No signal
+NBTEVO.TSIGNALDAB,0x01,gueltiges Signal,valid signal
+NBTEVO.TSIGNALDAB,0xFF,Nicht definiert,Not definiert
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x00,Kein Fehler,No fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x01,Fahrzeug während Update nicht in Stillstand,Vehicle during Update not in standstill
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x02,Update Abbruch,Update abort
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x03,MOST Kommunikationsfehler,MOST communication error
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x04,SWUP Quelle antwortet nicht,SWUP Quelle antwortet not
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x05,Gerät ausgelastet,Device ausgelastet
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x0F,Unspezifizierter Umwelt-Fehler,Unspezifizierter Umwelt-fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x10,Neueste Version schon installiert,Neueste Version schon installiert
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x11,SWUP Package Container veraltet,SWUP Package Container veraltet
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x1F,Unspezifizierter Versions-Fehler,Unspezifizierter Versions-fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x20,Neue I-Stufe nötig,Neue I-stage nötig
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x21,SWUP - Zielgerät nicht verfügbar,SWUP - Zielgerät not available
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x22,Abhängigkeiten nicht erfüllt,Abhängigkeiten not met
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x23,Betroffene SWE nicht gefunden,Betroffene SWE not gefunden
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x24,Pre-Installation Skripte Fehler,Pre-Installation Skripte fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x25,Post-Installation Skripte Fehler,Post-Installation Skripte fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x26,Fahrgestellnummer stimmt nicht,Fahrgestellnummer stimmt not
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x2F,Unspezifizierbarer Fehler: Updatekompatibiliät,Unspezifizierbarer fault: Updatekompatibiliät
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x30,SWUP Weiterleitung nicht unterstützt,SWUP Weiterleitung not unterstützt
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x31,Nicht genug RAM,Not genug RAM
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x32,Nicht genug Flashspeicher,Not genug Flashspeicher
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x33,System überlastet,System überlastet
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x34,SWUP-Paket zu groß,SWUP-Paket too large
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x3F,Unspezifizierbarer Fehler: Ressourcebeschränkungen,Unspezifizierbarer fault: Ressourcebeschränkungen
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x40,SWIP Signaturverifikation fehlgeschlagen,SWIP Signaturverifikation fehlgeschlagen
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x41,SWIP XML-Datei korrupt,SWIP XML-Datei korrupt
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x42,SWUP Hash Value stimmt nicht,SWUP Hash Value stimmt not
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x43,SGBM korrupt oder unerwartetes Format,SGBM korrupt or unexpected Format
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x44,SWUP Signaturverifikation fehlgeschlagen,SWUP Signaturverifikation fehlgeschlagen
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x4F,Unspezifizierter Fehler: Integrität oder Authentisierung,Unspezifizierter fault: Integrität or authentication
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x50,SWUP Download abgebrochen,SWUP Download abgebrochen
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x5F,Unspezifizierter Over-The-Air-Fehler,Unspezifizierter Over-The-Air-fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x60,Keine Deinstallationinformationen verfügbar,No Deinstallationinformationen available
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x61,Pre-Deinstallation Skripte Fehler,Pre-Deinstallation Skripte fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x62,Post-Deinstallation Skripte Fehler,Post-Deinstallation Skripte fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x6F,Unspezifierter Deinstallationfehler,Unspezifierter Deinstallationfehler
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x70,Keine Update-Datei verfügbar,No Update-Datei available
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x71,Update läuft,Update läuft
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x72,USB Gerät nicht angeschlossen,USB device not angeschlossen
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0x7F,Unspezifierter Betriebsystemfehler,Unspezifierter operation system fault
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0xE0,Speicher oder Filesystem defekt,Memory or Filesystem defective
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0xE1,Inkonsistenter System Status,Inkonsistenter system status
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0xEF,Unspezifierter Systemdefekt oder inkonsistenter Systemstatus,Unspezifierter system defective or inkonsistenter system status
+NBTEVO.TSOFTWAREUPDATEERRORCODE,0xFF,Unspezifizierter Fehler,Unspezifizierter fault
+NBTEVO.TSOFTWAREUPDATETYP,0x00,-,-
+NBTEVO.TSOFTWAREUPDATETYP,0x01,USB Installation,USB Installation
+NBTEVO.TSOFTWAREUPDATETYP,0x02,OTA Installation,OTA Installation
+NBTEVO.TSOFTWAREUPDATETYP,0x03,Auto-Reinstallation,Auto-Reinstallation
+NBTEVO.TSOFTWAREUPDATETYP,0x04,Entfernen des letzten Update,Entfernen of the letzten Update
+NBTEVO.TSOFTWAREUPDATETYP,0x05,Entfernen aller Benutzerupdates per Diagnose,Entfernen aller Benutzerupdates per diagnosis
+NBTEVO.TSOFTWAREUPDATETYP,0x06,Auto-Deinstallation,Auto-Deinstallation
+NBTEVO.TSOFTWAREUPDATETYP,0x07,Entfernung aller Updates durch den Kunden,Entfernung aller Updates by the customer
+NBTEVO.TSOFTWAREUPDATETYP,0xFF,undefiniert,undefiniert
+NBTEVO.TSTATUSDISPLAYACTIVATIONMODE,0x00,CID aus,CID from
+NBTEVO.TSTATUSDISPLAYACTIVATIONMODE,0x01,CID an,CID an
+NBTEVO.TSTATUSDISPLAYACTIVATIONMODE,0xFF,nicht definiert,not definiert
+NBTEVO.TTMCACTIVATIONSTATE,0x00,Nicht aktiviert,Not activated
+NBTEVO.TTMCACTIVATIONSTATE,0x01,Aktiviert,Activated
+NBTEVO.TTMCACTIVATIONSTATE,0xFF,Nicht definiert,Not definiert
+NBTEVO.TTP,0x00,TP aus,TP from
+NBTEVO.TTP,0x01,TP ein,TP a
+NBTEVO.TTP,0x02,TP keine Änderung,TP no Änderung
+NBTEVO.TTP,0xFF,Nicht definiert,Not definiert
+NBTEVO.TTPDAB,0,TP DAB aus,TP DAB from
+NBTEVO.TTPDAB,1,TP DAB ein,TP DAB a
+NBTEVO.TTPDAB,2,TP DAB keine Änderung,TP DAB no Änderung
+NBTEVO.TTPDAB,255,Nicht definiert,Not definiert

@@ -55,16 +55,16 @@
 0x6760,Diskrete Klima Erweiterung,Diskrete climate Erweiterung,1,0x5000,PMA Sensor links,1,0x5100,PMA Sensor rechts,1
 0x5200,CID-Klappe,CID-flap,-,0x5300,Schaltzentrum Lenksäule,1,0x5400,Multifunktionslenkrad,1
 0x5500,Lenkradelektronik,Steering wheel electronics,1,0x5600,CID,-,0x5700,Satellit Upfront links,0
-0x5708,Satellit Upfront rechts,Satellit Upfront right,0,0x570C,Satellit Upfront mitte,0,0x5710,Satellit Tür links,0
-0x5718,Satellit Tür rechts,Satellit door right,0,0x5720,Satellit B-Säule links X,0,0x5728,Satellit B-Säule rechts X,0
-0x5730,Satellit B-Säule links Y,Satellit B-pillar left Y,0,0x5738,Satellit B-Säule rechts Y,0,0x5740,Satellit Zentralsensor X,0
-0x5748,Satellit Zentralsensor Y,Satellit Zentralsensor Y,0,0x5750,Satellit Zentralsensor Low g Y,0,0x5758,Satellit Zentralsensor Low g Z,0
-0x5760,Satellit Zentralsensor Roll Achse,Satellit Zentralsensor Roll axle,0,0x5768,Fussgängerschutz Sensor vorne links,0,0x5770,Fussgängerschutz Sensor vorne rechts,0
+0x5708,Satellit Upfront rechts,Satellite Upfront right,0,0x570C,Satellit Upfront mitte,0,0x5710,Satellit Tür links,0
+0x5718,Satellit Tür rechts,Satellite door right,0,0x5720,Satellit B-Säule links X,0,0x5728,Satellit B-Säule rechts X,0
+0x5730,Satellit B-Säule links Y,Satellite B-pillar left Y,0,0x5738,Satellit B-Säule rechts Y,0,0x5740,Satellit Zentralsensor X,0
+0x5748,Satellit Zentralsensor Y,Satellite Zentralsensor Y,0,0x5750,Satellit Zentralsensor Low g Y,0,0x5758,Satellit Zentralsensor Low g Z,0
+0x5760,Satellit Zentralsensor Roll Achse,Satellite Zentralsensor Roll axle,0,0x5768,Fussgängerschutz Sensor vorne links,0,0x5770,Fussgängerschutz Sensor vorne rechts,0
 0x5778,Fussgängerschutz Sensor vorne mitte,Fussgängerschutz sensor front center,0,0x5780,Fussgängerschutzsensor statisch,0,0x5782,Fussgängerschutz Zusatzsensor Beschleunigung links,0
 0x5784,Fussgängerschutz Zusatzsensor Beschleunigung rechts,Fussgängerschutz Zusatzsensor acceleration right,0,0x5788,Satellit C-Säule links Y,0,0x5790,Satellit C-Säule rechts Y,0
-0x5798,Satellit Zentrale Körperschall,Satellit Zentrale Körperschall,0,0x57A0,Kapazitive Insassen- Sensorik CIS,1,0x57A8,Sitzbelegungserkennung Beifahrer SBR,1
+0x5798,Satellit Zentrale Körperschall,Satellite Zentrale Körperschall,0,0x57A0,Kapazitive Insassen- Sensorik CIS,1,0x57A8,Sitzbelegungserkennung Beifahrer SBR,1
 0x57B0,Fussgängerschutzsensor dynamisch 1,Fussgängerschutzsensor dynamic 1,0,0x57B8,Fussgängerschutzsensor dynamisch 2,0,0x57C0,Satellit Drucksensor Schlauch PTS 1 vorne links p,0
-0x57C4,Satellit Drucksensor Schlauch PTS 1 vorne rechts p,Satellit pressure sensor Schlauch PTS 1 front right p,0,0x57C8,Satellit Drucksensor Schlauch PTS 2 vorne links p,0,0x57CC,Satellit Drucksensor Schlauch PTS 2 vorne rechts p,0
+0x57C4,Satellit Drucksensor Schlauch PTS 1 vorne rechts p,Satellite pressure sensor Schlauch PTS 1 front right p,0,0x57C8,Satellit Drucksensor Schlauch PTS 2 vorne links p,0,0x57CC,Satellit Drucksensor Schlauch PTS 2 vorne rechts p,0
 0x57D0,Beschleunigungssensor vorne links X,Acceleration sensor front left X,0,0x57D4,Beschleunigungssensor vorne mitte X,0,0x57D8,Beschleunigungssensor vorne rechts X,0
 0x57DC,Beschleunigungssensor hinten mitte X,Acceleration sensor rear center X,0,0x57E0,Sitzbelegungserkennung Beifahrer CIS/Bladder,1,0x57E4,Sitzbelegungserkennung 2. Sitzreihe links CIS/Bladder,1
 0x57E8,Sitzbelegungserkennung 2. Sitzreihe rechts CIS/Bladder,Sitzbelegungserkennung 2. Sitzreihe right CIS/Bladder,1,0x5800,HUD,1,0x5900,Audio-Bedienteil,1

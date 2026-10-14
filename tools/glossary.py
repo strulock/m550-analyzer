@@ -493,4 +493,13 @@ GLOSSARY = [
 ("geführt", "controlled"), ("Ober", "upper"),
 ("Dreh", "rotary"), ("Alive", "alive"),
 ("unterhalb", "below"), ("oberhalb", "above"),
+# --- head unit (NBT Evo): navigation and GPS ---
+("Breitengrad", "latitude"), ("Laengengrad", "longitude"), ("Längengrad", "longitude"),
+("Hoehe", "height"), ("Höhe", "height"),
+("Gueltigkeit", "validity"), ("Gültigkeit", "validity"),
+("Nord", "north"), ("Ost", "east"), ("positiv", "positive"),
+("basierend", "based"), ("Liest", "reads"), ("Siehe", "see"), ("Tabelle", "table"),
+("aufgespuerten", "tracked"), ("Satellit", "satellite"), ("Satelliten", "satellites"),
+("Genauigkeit", "accuracy"), ("horizontale", "horizontal"), ("vertikale", "vertical"),
+("Empfaenger", "receiver"), ("Empfänger", "receiver"),
 ]

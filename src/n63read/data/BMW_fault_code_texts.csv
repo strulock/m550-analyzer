@@ -447,7 +447,7 @@
 101005,"PLL Fehler: PLL-Lock ging verloren, bevor PLL-Routine aufgerufen wurde","PLL fault: PLL-Lock ging verloren, bevor PLL-Routine aufgerufen was",ZGW
 101006,PLL Fehler: PLL lockt nicht bei Umstellen,PLL fault: PLL lockt not at Umstellen,ZGW-SP18
 101007,PLL Fehler: SW lauft im Normalbetrieb und PLL Lock geht verloren,PLL fault: SW lauft in the Normalbetrieb and PLL Lock geht verloren,ZGW
-101008,nicht auflösbares uneindeutiges Routing - SG nicht in der SVT Soll Tabelle,not auflösbares uneindeutiges routing - SG not in the SVT target Tabelle,ZGW-SP18
+101008,nicht auflösbares uneindeutiges Routing - SG nicht in der SVT Soll Tabelle,not auflösbares uneindeutiges routing - SG not in the SVT target table,ZGW-SP18
 101010,SIF Error,SIF Error,ZGW
 101012,TM Error,TM Error,ZGW
 101014,VMM Error,VMM Error,ZGW
