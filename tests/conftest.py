@@ -70,7 +70,23 @@ def reset_app(a):
 
 
 @pytest.fixture
-def app(shared_app):
+def app(shared_app, monkeypatch):
+    # A real dialog blocks forever on a headless CI runner. Make any dialog
+    # a test didn't stub fail at once instead; tests that expect one stub it
+    # themselves (their monkeypatch runs after this one and wins).
+    gui = pytest.importorskip("n63read.gui")
+
+    def unexpected(name):
+        def fail(*a, **k):
+            raise AssertionError("unstubbed dialog %s(%r) would hang CI" % (name, a or k))
+        return fail
+    for name in ("asksaveasfilename", "askopenfilename", "askopenfilenames",
+                 "askdirectory"):
+        monkeypatch.setattr(gui.filedialog, name, unexpected(name))
+    for name in ("showinfo", "showerror", "showwarning", "askyesno",
+                 "askokcancel", "askquestion", "askretrycancel", "askyesnocancel"):
+        monkeypatch.setattr(gui.messagebox, name, unexpected(name))
+
     reset_app(shared_app)
     yield shared_app
     reset_app(shared_app)

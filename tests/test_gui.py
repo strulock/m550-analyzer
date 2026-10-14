@@ -288,6 +288,11 @@ def test_bad_probe_wait_stops_scan_and_faults(app, dialogs, value):
 
 def test_scan_and_faults_use_the_probe_wait(app, car, monkeypatch):
     monkeypatch.setattr(core, "SWEEP_RANGE", (0x0E, 0x14))
+    # Faults asks where to save when not logging. Unstubbed, that native
+    # dialog waits forever on a headless CI runner. Answer "cancel".
+    asked = []
+    monkeypatch.setattr(gui.filedialog, "asksaveasfilename",
+                        lambda **k: asked.append(k) or "")
     app.ip_var.set("127.0.0.1")
     app.probe_var.set("0.1")
 
@@ -304,3 +309,13 @@ def test_scan_and_faults_use_the_probe_wait(app, car, monkeypatch):
     win = next(w for w in app.winfo_children() if w not in before)
     assert "0.1 s per address" in win.parts["msg"].cget("text")
     assert pump(app, lambda: "fault(s) across" in win.parts["msg"].cget("text"), timeout=4)
+    assert len(asked) == 1                            # offered to save, once
+
+
+def test_an_unstubbed_dialog_fails_instead_of_hanging(app):
+    # conftest's guard: a test that forgets to stub a dialog must fail fast,
+    # not sit waiting for a click that never comes on a CI runner.
+    with pytest.raises(AssertionError, match="unstubbed dialog"):
+        gui.filedialog.asksaveasfilename()
+    with pytest.raises(AssertionError, match="unstubbed dialog"):
+        gui.messagebox.showinfo("x", "y")
