@@ -47,6 +47,8 @@ COLUMNS = {
     "BMW_dtc_status_byte.csv": ("text_de", "text_en"),
     "BMW_enum_tables.csv": ("text_de", "text_en"),
     "BMW_freeze_frame_fields.csv": ("name_de", "name_en"),
+    "NBTEVO_head_unit_measurements.csv": ("INFO", "INFO_EN"),
+    "NBTEVO_enum_tables.csv": ("text_de", "text_en"),
 }
 
 # Glossary words that must never be a piece of a compound: articles,

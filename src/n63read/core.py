@@ -15,10 +15,13 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   BMW_enum_tables.csv                    value -> text enumerations
   BMW_freeze_frame_fields.csv            FS_LESEN_DETAIL field catalog
   G30_module_sgbd_map.csv                module address -> SGBD variant
+  NBTEVO_head_unit_measurements.csv      head unit (0x63) channels, GPS etc.
+  NBTEVO_enum_tables.csv                 head unit value -> text enumerations
 """
 
 import csv
 import os
+import re
 import socket
 import struct
 import sys
@@ -62,6 +65,8 @@ STATUS_CSV = "BMW_dtc_status_byte.csv"
 ENUM_CSV = "BMW_enum_tables.csv"
 FREEZE_CSV = "BMW_freeze_frame_fields.csv"
 MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
+HU_CSV = "NBTEVO_head_unit_measurements.csv"
+HU_ENUM_CSV = "NBTEVO_enum_tables.csv"
 
 DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
               MODULE_MAP_CSV)
@@ -93,6 +98,10 @@ def resource_path(name):
 
 class HsfzError(Exception):
     pass
+
+
+class HsfzTimeout(HsfzError):
+    """Nothing answered in time: an empty address, or a module asleep."""
 
 
 class NegativeResponse(HsfzError):
@@ -152,7 +161,7 @@ class Hsfz:
             except socket.timeout:
                 # Surface as HsfzError so callers (scan especially) can treat
                 # a silent address as "nothing there" rather than a crash.
-                raise HsfzError("timed out waiting for response") from None
+                raise HsfzTimeout("timed out waiting for response") from None
             if not chunk:
                 raise HsfzError("connection closed by ECU")
             buf += chunk
@@ -205,7 +214,7 @@ class Hsfz:
                 return data
             # Not ours (another module chattering) - keep waiting.
 
-        raise HsfzError("timed out waiting for response")
+        raise HsfzTimeout("timed out waiting for response")
 
     def read_did(self, target, did):
         """UDS 0x22. Returns the raw payload bytes after the echoed identifier."""
@@ -428,6 +437,49 @@ def write_fault_csv(path, rows):
         w.writerows(rows)
 
 
+# --------------------------------------------------------- head unit GPS
+#
+# From the NBT Evo SGBD (nbtevo.prg). Its STATUS_GPS_POSITION job is
+# hand-coded rather than table-driven, so the layout below comes from
+# disassembling that job: it sends 22 D0 39 and reads, after the echoed DID,
+#   [0]      validity, 0x00 = valid, 0x01 = not valid
+#   [1..5]   latitude:  0x00 N / 0x01 S, degrees, minutes, seconds, 1/100 s
+#   [6..10]  longitude: 0x00 E / 0x01 W, degrees, minutes, seconds, 1/100 s
+#   [11..12] height, unsigned big-endian, unit not stated (presumably m)
+
+HEAD_UNIT = 0x63
+GPS_POSITION_DID = 0xD039
+GPS_DMS = "gps_dms"            # catalog data type for the 5-byte coordinates
+GPS_STATUS_DID = 0xD038        # one byte, see GPS_FIX below
+
+GPS_FIX = {
+    0x00: "not supported: no GPS", 0x01: "not supported: communication error",
+    0x02: "receiver error", 0x03: "no almanac", 0x04: "searching for satellites",
+    0x05: "tracking 1 satellite", 0x06: "tracking 2 satellites",
+    0x07: "tracking 3 satellites", 0x08: "tracking 4 satellites",
+    0x09: "tracking 5 satellites", 0x0A: "tracking 6 satellites",
+    0x0B: "2D position", 0x0C: "3D position",
+}
+
+
+def _dms(b):
+    """5 bytes (hemisphere, deg, min, sec, 1/100 s) to signed decimal degrees."""
+    deg = b[1] + b[2] / 60 + (b[3] + b[4] / 100) / 3600
+    return -deg if b[0] == 0x01 else deg
+
+
+def parse_gps_position(payload):
+    """Decode a 0xD039 payload. Returns a dict, or raises ValueError if short."""
+    if len(payload) < 13:
+        raise ValueError("GPS position needs 13 bytes, got %d" % len(payload))
+    return {
+        "valid": payload[0] == 0x00,
+        "lat": round(_dms(payload[1:6]), 7),
+        "lon": round(_dms(payload[6:11]), 7),
+        "height": (payload[11] << 8) | payload[12],
+    }
+
+
 # --------------------------------------------------------------- discovery
 
 def local_ipv4s():
@@ -537,21 +589,35 @@ def load_enum_tables():
     Values are stored both as decimal and hex in the source, so they are
     keyed by integer.
     """
-    path = resource_path(ENUM_CSV)
-    if not os.path.exists(path):
-        return {}
     tables = {}
-    with open(path, encoding="utf-8-sig") as f:
-        for row in csv.DictReader(f):
-            name = (row.get("table_name") or "").strip().upper()
-            val = (row.get("value") or "").strip()
-            if not name or not val:
-                continue
-            tables.setdefault(name, {})[_enum_key(val)] = {
-                "text_de": (row.get("text_de") or "").strip(),
-                "text_en": (row.get("text_en") or "").strip(),
-            }
+    # The head unit's tables are prefixed NBTEVO., so they never collide.
+    for name in (ENUM_CSV, HU_ENUM_CSV):
+        path = resource_path(name)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                table = (row.get("table_name") or "").strip().upper()
+                val = (row.get("value") or "").strip()
+                if not table or not val:
+                    continue
+                tables.setdefault(table, {})[_enum_key(val)] = {
+                    "text_de": (row.get("text_de") or "").strip(),
+                    "text_en": (row.get("text_en") or "").strip(),
+                }
     return tables
+
+
+def enum_text(value, meta, enums, lang="text_en"):
+    """Text for a scaled value from the table in the channel's NAME, or None."""
+    table_name = (meta.get("NAME") or "").strip().upper()
+    if not enums or table_name in ("", "-") or not isinstance(value, (int, float)) \
+            or value != int(value):
+        return None
+    entry = enums.get(table_name, {}).get(int(value))
+    if not entry:
+        return None
+    return entry.get(lang) or entry.get("text_de") or None
 
 
 _WIDTH = {
@@ -572,6 +638,11 @@ def decode(raw, meta, enums=None, lang="text_en"):
     unit = (meta.get("EINHEIT") or "").strip()
     if unit == "-":
         unit = ""
+
+    if dtype == "string" or dtype.startswith("string["):
+        return raw.split(b"\x00")[0].decode("latin-1").strip(), unit
+    if dtype == GPS_DMS:
+        return (round(_dms(raw), 7), unit) if len(raw) >= 5 else (raw.hex(), unit)
 
     if dtype not in _WIDTH:
         # data[n], strings, bitfields - hand back hex, don't guess.
@@ -599,10 +670,174 @@ def decode(raw, meta, enums=None, lang="text_en"):
 
     # The enum table for a scalar channel is in NAME. RES_TABELLE names a
     # multi-field result record, which is a different thing entirely.
-    table_name = (meta.get("NAME") or "").strip().upper()
-    if enums and table_name not in ("", "-") and scaled == int(scaled):
-        entry = enums.get(table_name, {}).get(int(scaled))
-        if entry:
-            return entry.get(lang) or entry.get("text_de") or scaled, unit
+    text = enum_text(scaled, meta, enums, lang)
+    return (text if text is not None else scaled), unit
 
-    return scaled, unit
+
+# ----------------------------------------------------------- head unit catalog
+
+# Channels on another module (the head unit) are refreshed on these periods
+# rather than every cycle: it answers slowly, most of what it reports
+# changes slowly, and the DME channels must keep their rate.
+FAST_PERIOD = 1.0              # GPS, speeds, direction
+SLOW_PERIOD = 10.0             # everything else
+FAST_DIDS = frozenset({0xD030, 0xD031, 0xD032, 0xD034, 0xD038, 0xD039})
+SLOW_READS_PER_CYCLE = 4       # head unit reads allowed per DME cycle
+NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
+
+# Values a log should not carry by default: credentials, SIM identity,
+# where the car has been, and paired devices. Still in the catalog, so
+# they can be added one by one; "add all" skips them.
+SENSITIVE = re.compile(
+    r"NETWORK_KEY|LABEL_PIN|IMEI|ICC_ID|COOKIES|LAST_DESTINATIONS|"
+    r"BT_ADR_DEV|BT_GERAETEADRESSE|DEVICELIST|WLAN_ADDRESS|SERVICE_PARTNER")
+
+
+def is_sensitive(name):
+    return bool(SENSITIVE.search(name))
+
+
+def load_head_unit_catalog():
+    """ARG -> row for the head unit channels, or {} if the CSV is missing."""
+    path = resource_path(HU_CSV)
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8-sig") as f:
+        return {row["ARG"].strip(): row for row in csv.DictReader(f)}
+
+
+def record_layouts(catalog):
+    """(module, DID) -> that identifier's fields in reply order.
+
+    Only channels with a MODULE (the head unit) are records; DME channels
+    are single values and are left out.
+    """
+    layouts = {}
+    for row in catalog.values():
+        if (row.get("MODULE") or "").strip():
+            key = (int(row["MODULE"], 16), int(row["ID"], 16))
+            layouts.setdefault(key, []).append(row)
+    for fields in layouts.values():
+        fields.sort(key=lambda r: int(r["FIELD"]))
+    return layouts
+
+
+def field_size(dtype, raw, pos):
+    """Bytes a record field takes at `pos`, or None if it cannot be known."""
+    if dtype in _WIDTH:
+        return _WIDTH[dtype][0]
+    m = re.fullmatch(r"(?:data|string)\[(\d+)\]", dtype)
+    if m:
+        return int(m.group(1))
+    if dtype == "string":
+        # Unsized: up to and including a NUL, or the rest of the reply.
+        end = raw.find(b"\x00", pos)
+        return len(raw) - pos if end < 0 else end - pos + 1
+    if dtype == GPS_DMS:
+        return 5
+    return None
+
+
+def decode_record(raw, fields):
+    """Split one identifier's reply into its fields, in order.
+
+    Returns {ARG: (value, unit, note)}. Values are numbers or text, never
+    enum text, so they log and plot; enum_text() gives the words. A field
+    whose size is unknown (a bitfield) ends what can be decoded.
+    """
+    out, pos = {}, 0
+    for i, meta in enumerate(fields):
+        dtype = (meta.get("DATENTYP") or "").strip().lower()
+        size = field_size(dtype, raw, pos)
+        if size is None:
+            for rest in fields[i:]:
+                out[rest["ARG"]] = (None, "", "layout unknown")
+            break
+        chunk = raw[pos:pos + size]
+        if len(chunk) < size and not dtype.startswith("string"):
+            out[meta["ARG"]] = (None, "", "short reply")
+        else:
+            value, unit = decode(chunk, meta)
+            out[meta["ARG"]] = (value, unit, "")
+        pos += size
+    return out
+
+
+class ChannelReader:
+    """Reads a watch list from the DME and the head unit, one request per DID.
+
+    DME channels (no MODULE) are read from `target` every cycle, as before.
+    Head unit channels are records: one read fills every field of that
+    identifier. They are refreshed on FAST_PERIOD / SLOW_PERIOD, at most
+    SLOW_READS_PER_CYCLE per cycle, stalest first, and the last values are
+    reused in between, so every sample and log row is complete.
+    """
+
+    def __init__(self, layouts, target):
+        self.layouts, self.target = layouts, target
+        self.cache = {}         # (module, did) -> {ARG: (value, unit, note)}
+        self.last = {}          # (module, did) -> time of last read
+        self.refused = {}       # (module, did) -> reason; not asked again
+        self.quiet_until = {}   # module -> time; it did not answer
+
+    @staticmethod
+    def period(key):
+        return FAST_PERIOD if key[1] in FAST_DIDS else SLOW_PERIOD
+
+    def read(self, h, chans, now=None):
+        now = time.time() if now is None else now
+        sample, records = {}, {}
+        for name, did, meta in chans:
+            module = (meta.get("MODULE") or "").strip()
+            if module:
+                records.setdefault((int(module, 16), did), []).append(name)
+            else:
+                sample[name] = self._read_value(h, did, meta)
+
+        due = [k for k in records
+               if k not in self.refused and k in self.layouts
+               and now >= self.quiet_until.get(k[0], 0)
+               and now - self.last.get(k, -1e9) >= self.period(k)]
+        due.sort(key=lambda k: self.last.get(k, -1e9))
+        for key in due[:SLOW_READS_PER_CYCLE]:
+            self._read_record(h, key, now)
+
+        for key, names in records.items():
+            got = self.cache.get(key, {})
+            if key not in self.layouts:
+                note = "not in catalog"
+            elif key in self.refused:
+                note = self.refused[key]
+            elif now < self.quiet_until.get(key[0], 0):
+                note = "module not answering"
+            else:
+                note = "waiting"
+            for name in names:
+                sample[name] = got.get(name) or (None, "", note)
+        return sample
+
+    def _read_value(self, h, did, meta):
+        try:
+            value, unit = decode(h.read_did(self.target, did), meta)
+            return (value, unit, "")
+        except NegativeResponse as e:
+            return (None, "", NRC.get(e.code, "0x%02X" % e.code))
+        except Exception as e:                                      # noqa: BLE001
+            return (None, "", str(e)[:28])
+
+    def _read_record(self, h, key, now):
+        module, did = key
+        self.last[key] = now
+        try:
+            raw = h.read_did(module, did)
+        except NegativeResponse as e:
+            reason = NRC.get(e.code, "0x%02X" % e.code)
+            if e.code in (0x11, 0x12, 0x31):
+                self.refused[key] = reason          # will never work: stop asking
+            self.cache[key] = {f["ARG"]: (None, "", reason) for f in self.layouts[key]}
+            return
+        except HsfzTimeout:
+            self.quiet_until[module] = now + NO_ANSWER_BACKOFF
+            self.cache.pop(key, None)
+            return
+        self.cache[key] = decode_record(raw, self.layouts[key])

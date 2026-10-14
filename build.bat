@@ -9,7 +9,9 @@ set ADD=--add-data "%DATA%\N63TU2_DME_readable_measurements.csv;." ^
  --add-data "%DATA%\BMW_dtc_status_byte.csv;." ^
  --add-data "%DATA%\BMW_enum_tables.csv;." ^
  --add-data "%DATA%\BMW_freeze_frame_fields.csv;." ^
- --add-data "%DATA%\G30_module_sgbd_map.csv;."
+ --add-data "%DATA%\G30_module_sgbd_map.csv;." ^
+ --add-data "%DATA%\NBTEVO_head_unit_measurements.csv;." ^
+ --add-data "%DATA%\NBTEVO_enum_tables.csv;."
 
 python -m PyInstaller --noconfirm --onefile --windowed --name n63read --paths src %ADD% src\n63read\gui.py || exit /b 1
 

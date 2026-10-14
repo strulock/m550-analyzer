@@ -19,6 +19,9 @@ Usage
   # 5. Read fault memory, decoded against the SGBD text catalog
   n63read faults --ip 169.254.x.x --target 0x12
 
+  # 6. GPS position from the head unit (0x63); --watch to keep reading
+  n63read gps --ip 169.254.x.x --watch
+
   # Target a module other than the master DME (0x12)
   n63read read --ip 169.254.x.x --target 0x13 ILAG2
 """
@@ -35,10 +38,13 @@ from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
 
 
 def _catalog(path):
+    """DME channels from `path`, plus the head unit's (HU_...)."""
     try:
-        return core.load_catalog(path)
+        cat = core.load_catalog(path)
     except FileNotFoundError as e:
         sys.exit(str(e))
+    cat.update(core.load_head_unit_catalog())
+    return cat
 
 
 # -------------------------------------------------------------- operations
@@ -164,6 +170,7 @@ def op_scan(args):
 
 def op_read(args):
     cat = _catalog(args.csv)
+    layouts = core.record_layouts(cat)
     enums = core.load_enum_tables()
     lang = "text_de" if args.german else "text_en"
     with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
@@ -173,12 +180,20 @@ def op_read(args):
                 print("%-34s UNKNOWN (not in catalog)" % name)
                 continue
             did = int(meta["ID"], 16)
+            module = int(meta["MODULE"], 16) if meta.get("MODULE") else args.target
             try:
-                raw = h.read_did(args.target, did)
+                raw = h.read_did(module, did)
             except HsfzError as e:
                 print("%-34s %s  <- %s" % (name, meta["ID"], e))
                 continue
-            value, unit = decode(raw, meta, enums, lang)
+            if meta.get("MODULE"):
+                # Head unit: the reply is a record; this channel is one field.
+                value, unit, note = core.decode_record(
+                    raw, layouts[(module, did)])[name]
+                value = core.enum_text(value, meta, enums, lang) or (
+                    note if value is None else value)
+            else:
+                value, unit = decode(raw, meta, enums, lang)
             print("%-34s %s  %-14s %-8s raw=%s   %s"
                   % (name, meta["ID"], value, unit, raw.hex(), meta["INFO"][:40]))
 
@@ -200,15 +215,14 @@ def op_log(args):
     t0 = last_flush = time.time()
     n = 0
     try:
+        reader = core.ChannelReader(core.record_layouts(cat), args.target)
         with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
             while True:
                 row = [round(time.time() - t0, 3)]
-                for _, did, meta in chans:
-                    try:
-                        value, _ = decode(h.read_did(args.target, did), meta)
-                    except Exception:                   # noqa: BLE001
-                        value = ""
-                    row.append(value)
+                sample = reader.read(h, chans)
+                for name, _, _ in chans:
+                    value = sample[name][0]
+                    row.append("" if value is None else value)
                 w.writerow(row)
                 n += 1
                 # Push to disk about once a second; a crash loses at most that.
@@ -223,6 +237,29 @@ def op_log(args):
     finally:
         out.close()
         print("wrote %d samples to %s" % (n, args.out))
+
+
+def op_gps(args):
+    """Read the head unit's GPS fix and position. Raw bytes shown for checking."""
+    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+        while True:
+            try:
+                status = h.read_did(args.target, core.GPS_STATUS_DID)
+                fix = core.GPS_FIX.get(status[0], "0x%02X" % status[0]) if status else "?"
+                raw = h.read_did(args.target, core.GPS_POSITION_DID)
+            except NegativeResponse as e:
+                sys.exit("module 0x%02X refused: %s"
+                         % (args.target, NRC.get(e.code, "nrc 0x%02X" % e.code)))
+            try:
+                p = core.parse_gps_position(raw)
+                print("%-24s %s  lat %.6f  lon %.6f  height %d   raw=%s"
+                      % (fix, "valid  " if p["valid"] else "INVALID", p["lat"], p["lon"],
+                         p["height"], raw.hex()))
+            except ValueError as e:
+                print("%-24s %s   raw=%s" % (fix, e, raw.hex()))
+            if not args.watch:
+                return
+            time.sleep(args.interval)
 
 
 # --------------------------------------------------------------------- CLI
@@ -288,6 +325,13 @@ def build_parser():
     sp.add_argument("--out", default="n63log.csv")
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("gps", help="read GPS position from the head unit (NBT Evo)")
+    common(sp)
+    sp.add_argument("--target", type=hexint, default=core.HEAD_UNIT)
+    sp.add_argument("--watch", action="store_true", help="keep reading until Ctrl-C")
+    sp.add_argument("--interval", type=float, default=1.0)
+    sp.set_defaults(func=op_gps)
     return p
 
 

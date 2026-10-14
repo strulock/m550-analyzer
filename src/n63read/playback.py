@@ -22,7 +22,18 @@ DEMO_CHANNELS = [
     "S_LADEDRUCK",                          # boost setpoint, hPa absolute
     "LAMBDA_ISTWERT_SENSOR1_BANK2_2",       # lambda sensor 1, bank 2
     "ITOEL",                                # oil temperature, deg C
+    # Head unit (0x63)
+    "HU_STATUS_GPS",                        # fix: 12 = 3D position
+    "HU_STATUS_GPS_SATINFO.NUMBER_TRACKED_SATS",
+    "HU_STATUS_SPEED.GPS_SPEED",            # km/h
+    "HU_STATUS_GPS_POSITION.LATITUDE",      # degrees, north positive
+    "HU_STATUS_GPS_POSITION.LONGITUDE",     # degrees, east positive
+    "HU_STATUS_GPS_POSITION.HEIGHT",        # m
 ]
+
+# Laps of a 1 km circle at Circuit of the Americas - a public place, not
+# anyone's driveway.
+DEMO_LAT, DEMO_LON, DEMO_RADIUS_DEG, DEMO_LAP = 30.1346, -97.6359, 0.009, 120.0
 
 DEMO_CYCLE = 30.0       # seconds per idle / pull / cruise / lift loop
 MAX_REPLAY_GAP = 2.0    # longest pause honoured between replayed rows
@@ -79,6 +90,16 @@ def demo_sample(t, rng=random):
         "S_LADEDRUCK": round(jitter(boost, 0.01)),
         "LAMBDA_ISTWERT_SENSOR1_BANK2_2": round(jitter(lam, 0.01), 3),
         "ITOEL": round(oil, 1),
+        "HU_STATUS_GPS": 12,
+        "HU_STATUS_GPS_SATINFO.NUMBER_TRACKED_SATS": 9 + int(t / 7) % 3,
+        # GPS reads a touch under the speedometer, as it does in a real car.
+        "HU_STATUS_SPEED.GPS_SPEED": round(speed * 0.97),
+        "HU_STATUS_GPS_POSITION.LATITUDE": round(
+            DEMO_LAT + DEMO_RADIUS_DEG * math.cos(2 * math.pi * t / DEMO_LAP), 7),
+        "HU_STATUS_GPS_POSITION.LONGITUDE": round(
+            DEMO_LON + DEMO_RADIUS_DEG * math.sin(2 * math.pi * t / DEMO_LAP)
+            / math.cos(math.radians(DEMO_LAT)), 7),
+        "HU_STATUS_GPS_POSITION.HEIGHT": round(160 + 8 * math.sin(2 * math.pi * t / DEMO_LAP)),
     }
 
 

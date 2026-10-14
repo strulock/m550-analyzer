@@ -65,8 +65,18 @@ watch table, and press **Start logging** to write a CSV.
 - **Open log...** replays a CSV the GUI logged earlier through the table and
   chart at the speed it was recorded (pauses over 2 s are shortened).
 
+- **Add all shown** adds every channel the filter shows, except private head
+  unit values (Wi-Fi password and PIN, SIM identity, previous destinations,
+  paired devices), which can still be added one at a time.
+
+The chart draws the rows selected in the table, or the first six numeric
+channels if none are, each on its own scale; the legend gives each line's
+range. Enumerated values (GPS fix, gear) are logged and charted as numbers,
+with their meaning in the Status column.
+
 Until you connect, the table and chart run on made-up **demo data** (engine
-speed, pedal, road speed, boost setpoint, bank 2 lambda, oil temperature),
+speed, pedal, road speed, boost setpoint, bank 2 lambda, oil temperature,
+and GPS fix, satellites, speed, latitude, longitude and height),
 marked "DEMO DATA" on the chart. It stops the moment you press **Connect** or
 open a log, and its points are dropped so they never mix with real ones.
 
@@ -75,6 +85,38 @@ loses at most a second. Changing the watched channels while logging starts a
 new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in
 one file. A fault read while connected shares the connection: logging slows
 down during it but doesn't stop.
+
+### Head unit and GPS
+
+The channel list also holds the head unit's (NBT Evo, address `0x63`)
+readable values, named `HU_...` and labelled "Head unit:" in the picker:
+717 values from 100 identifiers, generated from `nbtevo.prg` by
+`tools/hu_catalog.py`. The useful ones for driving:
+
+| What | Channel |
+|---|---|
+| Latitude, longitude (degrees), height (m) | `HU_STATUS_GPS_POSITION.LATITUDE` / `.LONGITUDE` / `.HEIGHT` |
+| Position valid | `HU_STATUS_GPS_POSITION.VALIDITY` (0 = valid) |
+| GPS fix (searching, 2D, 3D...) | `HU_STATUS_GPS` |
+| GPS speed; four wheel speeds | `HU_STATUS_SPEED.GPS_SPEED`; `.WHEEL1_SENSOR_SPEED`... |
+| Satellites tracked / visible, per-satellite signal | `HU_STATUS_GPS_SATINFO.*` |
+| Position accuracy (PDOP / HDOP / VDOP) | `HU_STATUS_GPS_DILUTION_OF_POSITION.*` |
+| Gear direction (reverse / forward / neutral) | `HU_STATUS_DIRECTION.DIRECTION` |
+| Head unit temperatures (amplifier, gyro, drive...) | `HU_STATUS_ANALOG_TEMPERATUR.*` |
+| Display light sensor, backlight temperature, brightness | `HU_CID_*`, `HU_STATUS_SENSOR_WERTE.*` |
+| Radio frequency, signal quality, field strength | `HU_FREQUENZ.FREQUENZ`, `HU_STATUS_ANT_QFS.*` |
+
+Head unit channels are read alongside the DME on one connection, but not
+every cycle: GPS, speed and direction refresh every second, everything else
+every 10 seconds, at most four head unit reads per cycle, and the last value
+fills the log in between. That keeps the DME rate up. An identifier the head
+unit refuses as unsupported is not asked for again, and if the head unit
+stops answering it is left alone for 30 seconds.
+
+The GPS position comes from a hand-coded job, not a table, so its layout was
+worked out by disassembling `STATUS_GPS_POSITION`; see `core.py`. It has not
+been checked against the car yet: `n63read gps --watch` prints the raw bytes
+next to the decoded position for that.
 
 ### CLI
 
@@ -86,7 +128,11 @@ n63read faults --ip 169.254.x.x -v           DME fault memory, decoded
 n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
 n63read log --ip 169.254.x.x --out run.csv ILAG1 ILAG2 ILUZ5 ILUZ7
+n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 ```
+
+`read` and `log` take head unit channels (`HU_...`) too; they go to `0x63`
+whatever `--target` says.
 
 The fault CSV has one row per fault, plus a row for each module that had no
 faults, refused, or didn't reply, so the file shows everything that was
@@ -120,7 +166,7 @@ CLI is built without `--windowed`, or it would have no stdout. CI builds both
 on every push and attaches them to the release when a `v*` tag is pushed.
 Expect a SmartScreen warning: the binary is unsigned.
 
-The six data CSVs live in `src/n63read/data/`. At runtime they are found in
+The eight data CSVs live in `src/n63read/data/`. At runtime they are found in
 the PyInstaller bundle, the package, next to the exe, or the working
 directory, so an updated CSV can be dropped next to the exe without
 rebuilding.
@@ -129,7 +175,8 @@ rebuilding.
 
 ## Data provenance
 
-The CSVs were extracted from BMW SGBD (`.prg`) files, mainly `dme8ff_r.prg`.
+The CSVs were extracted from BMW SGBD (`.prg`) files, mainly `dme8ff_r.prg`;
+the two `NBTEVO_*` files from `nbtevo.prg`, by `tools/hu_catalog.py`.
 They hold identifier numbers, units and scaling factors: the interface facts
 you need to talk to hardware you own. BMW's `.prg` files and SP-Daten are not
 in this repo and must not be committed.

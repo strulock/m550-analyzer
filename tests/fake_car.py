@@ -16,9 +16,16 @@ MODULES = {
     0x10: [],                                   # gateway: no faults
     0x12: [("021200", 0x05), ("ABCDEF", 0x08)], # DME: one known code, one not
     0x40: 0x11,                                 # BDC: refuses 0x19
+    0x63: [],                                   # head unit (NBT Evo)
 }
+# Head unit GPS position (0xD039): valid, 30 08' 04.56" N, 97 38' 09.24" W, 160 m
+HU_GPS = bytes([0x00, 0x00, 30, 8, 4, 56, 0x01, 97, 38, 9, 24, 0x00, 160])
+# Head unit speeds (0xD030): wheels 1-4, combined, GPS (signed int), diff % (unsigned int)
+HU_SPEED = b"".join(v.to_bytes(2, "big", signed=True) for v in (101, 102, 100, 101, 101, 98)) \
+    + (3).to_bytes(2, "big")
 # (address, DID) -> raw value
-DIDS = {(0x12, 0x588A): b"\x10\x00", (0x12, 0x5889): b"\x0F\xA0"}
+DIDS = {(0x12, 0x588A): b"\x10\x00", (0x12, 0x5889): b"\x0F\xA0",
+        (0x63, 0xD039): HU_GPS, (0x63, 0xD030): HU_SPEED, (0x63, 0xD038): b"\x0C"}
 
 
 def _frame(control, src, dst, payload):
