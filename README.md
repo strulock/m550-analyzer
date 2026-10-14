@@ -76,7 +76,8 @@ with their meaning in the Status column.
 
 Until you connect, the table and chart run on made-up **demo data** (engine
 speed, pedal, road speed, boost setpoint, bank 2 lambda, oil temperature,
-and GPS fix, satellites, speed, latitude, longitude and height),
+GPS fix, satellites, speed, latitude, longitude and height, gear,
+transmission oil temperature, a tire pressure and lateral acceleration),
 marked "DEMO DATA" on the chart. It stops the moment you press **Connect** or
 open a log, and its points are dropped so they never mix with real ones.
 
@@ -86,37 +87,67 @@ new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in
 one file. A fault read while connected shares the connection: logging slows
 down during it but doesn't stop.
 
-### Head unit and GPS
+### Other modules: head unit, transmission, chassis, body, climate
 
-The channel list also holds the head unit's (NBT Evo, address `0x63`)
-readable values, named `HU_...` and labelled "Head unit:" in the picker:
-717 values from 100 identifiers, generated from `nbtevo.prg` by
-`tools/hu_catalog.py`. The useful ones for driving:
+Besides the DME, the channel list holds the readable values of ten more
+modules, generated from their SGBD files by `tools/module_catalog.py` and
+labelled by module in the picker:
+
+| Module (address) | File | Prefix | Values | Highlights |
+|---|---|---|---|---|
+| Head unit (0x63) | `nbtevo` | `HU_` | 717 | GPS position, fix, satellites, GPS speed |
+| Transmission, ZF 8HP (0x18) | `gszfb1` | `EGS_` | 3,526 | gear, oil temperature, input/output speed, converter lock-up, selector, paddles |
+| DSC (0x29) | `dsc_g30n` | `DSC_` | 868 | tire pressure and temperature per wheel, wheel speeds, brake pressures, pedal travel |
+| Airbag module (0x01) | `acsm5` | `ACSM_` | 565 | acceleration and yaw rate (`ACSM__IMU_WERTE.*`), seat occupancy |
+| Body controller (0x40) | `bdc_g11` | `BDC_` | 1,357 | fuel tank levels, ride height, drive mode, rain and light sensors |
+| Steering, EPS (0x30) | `eps_g11` | `EPS_` | 66 | pinion / steering angle, steering torque, rack travel |
+| Suspension, VDP (0x76) | `vdp_g11` | `VDP_` | 538 | ride height per corner, damper valve currents, wheel acceleration, roll stabilisation |
+| Transfer case, xDrive (0x19) | `lmv_g11` | `LMV_` | 224 | clutch torque and status, clutch temperature model |
+| Climate, IHKA (0x78) | `ihka_g11` | `IHKA_` | 154 | climate temperature sensors, A/C compressor speed and state |
+| Fuel pump, EKP (0x17) | `ekp301` | `EKP_` | 13 | pump motor voltages and currents, battery voltage, tank senders, temperatures |
+
+Most of the transmission's values are shift adaptation tables. Their fault
+texts are in the fault file too, so their codes now come with a description.
+
+Useful channels for a drive log:
 
 | What | Channel |
 |---|---|
 | Latitude, longitude (degrees), height (m) | `HU_STATUS_GPS_POSITION.LATITUDE` / `.LONGITUDE` / `.HEIGHT` |
-| Position valid | `HU_STATUS_GPS_POSITION.VALIDITY` (0 = valid) |
-| GPS fix (searching, 2D, 3D...) | `HU_STATUS_GPS` |
-| GPS speed; four wheel speeds | `HU_STATUS_SPEED.GPS_SPEED`; `.WHEEL1_SENSOR_SPEED`... |
-| Satellites tracked / visible, per-satellite signal | `HU_STATUS_GPS_SATINFO.*` |
-| Position accuracy (PDOP / HDOP / VDOP) | `HU_STATUS_GPS_DILUTION_OF_POSITION.*` |
-| Gear direction (reverse / forward / neutral) | `HU_STATUS_DIRECTION.DIRECTION` |
-| Head unit temperatures (amplifier, gyro, drive...) | `HU_STATUS_ANALOG_TEMPERATUR.*` |
-| Display light sensor, backlight temperature, brightness | `HU_CID_*`, `HU_STATUS_SENSOR_WERTE.*` |
-| Radio frequency, signal quality, field strength | `HU_FREQUENZ.FREQUENZ`, `HU_STATUS_ANT_QFS.*` |
+| GPS fix (searching, 2D, 3D...); position valid | `HU_STATUS_GPS`; `HU_STATUS_GPS_POSITION.VALIDITY` |
+| GPS speed vs. wheel speeds | `HU_STATUS_SPEED.GPS_SPEED`; `DSC_GESCHWINDIGKEIT_RAD.*` |
+| Satellites, accuracy (PDOP / HDOP / VDOP) | `HU_STATUS_GPS_SATINFO.*`, `HU_STATUS_GPS_DILUTION_OF_POSITION.*` |
+| Gear; transmission oil temperature | `EGS_ISTGANG.ISTGANG`; `EGS_GETRIEBEOELTMEPERATUR` |
+| Transmission input / output speed; converter lock-up | `EGS_EINAUSGANG_DREHZAHL.*`; `EGS_WANDLERKUPPLUNG` |
+| Lateral / longitudinal acceleration, yaw rate | `ACSM__IMU_WERTE.Y_ACC_SCAL` / `.X_ACC_SCAL` / `.Z_RATE_SCAL` |
+| Tire pressure and temperature, per wheel | `DSC_RDC_MESSDATENBLOCK_1`...`_4.LETZTER_REIFENDRUCKWERT` / `...TEMPERATURWERT` |
+| Brake pressure; brake pedal travel | `DSC_DSC_DRUCKSENSOREN.*`; `DSC_BREMSPEDALWEGSENSOR.WEG_IST` |
+| Fuel level, left / right tank (Ohm) | `BDC_TANK_FUELLSTAND_LINKS` / `_RECHTS` |
+| Steering angle; steering torque | `EPS_EPS_RITZELWINKELSENSOR.*`; `EPS_EPS_MOMENTENSENSOR.*` |
+| Ride height per corner; damper currents | `VDP_STATUS_HOEHENSTAENDE_LESEN.*`; `VDP_VDC_2_VENTILE_STROM.*` |
+| xDrive front clutch torque | `LMV_LMV_MOMENT.*` |
+| Fuel pump current; voltage at the pump | `EKP_STATUS_ADC_BEWERTET.MOTOR_STROM_A`...; `.SPANNUNG_KL30` |
 
-Head unit channels are read alongside the DME on one connection, but not
-every cycle: GPS, speed and direction refresh every second, everything else
-every 10 seconds, at most four head unit reads per cycle, and the last value
-fills the log in between. That keeps the DME rate up. An identifier the head
-unit refuses as unsupported is not asked for again, and if the head unit
-stops answering it is left alone for 30 seconds.
+These channels are read alongside the DME on one connection, but not every
+cycle. What moves while driving (GPS, speeds, gear, brakes, acceleration)
+refreshes every second, everything else every 10 seconds, at most six module
+reads per cycle, and the last value fills the log in between. That keeps the
+DME rate up. A module read waits at most half a second, an identifier the
+module refuses as unsupported is not asked for again, and a module that
+stops answering is left alone for 30 seconds.
 
-The GPS position comes from a hand-coded job, not a table, so its layout was
-worked out by disassembling `STATUS_GPS_POSITION`; see `core.py`. It has not
-been checked against the car yet: `n63read gps --watch` prints the raw bytes
-next to the decoded position for that.
+The GPS position and the fuel pump's values come from hand-coded jobs, not
+tables, so their layouts were worked out by disassembling
+`STATUS_GPS_POSITION` (see `core.py`) and `STATUS_ADC_BEWERTET` (see
+`tools/module_catalog.py`).
+`n63read gps --watch` prints the raw bytes next to the decoded position.
+
+**None of these catalogs has been checked against the car yet.** BMW ships
+several variants of each module's file, and a wrong one decodes plausible
+nonsense. `n63read check` settles it: it reads every catalogued identifier
+on every module (the DME too) and compares each reply's size with what the
+file predicts, then says per module whether the file fits. It only reads
+(0x22). With `--out`, every reply goes to a CSV, except private values.
 
 ### CLI
 
@@ -129,10 +160,12 @@ n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
 n63read log --ip 169.254.x.x --out run.csv ILAG1 ILAG2 ILUZ5 ILUZ7
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
+n63read check --ip 169.254.x.x --out check.csv
+                                             does each module's catalog fit?
 ```
 
-`read` and `log` take head unit channels (`HU_...`) too; they go to `0x63`
-whatever `--target` says.
+`read` and `log` take the other modules' channels (`HU_...`, `EGS_...`...)
+too; they go to their own module whatever `--target` says.
 
 The fault CSV has one row per fault, plus a row for each module that had no
 faults, refused, or didn't reply, so the file shows everything that was
@@ -166,7 +199,7 @@ CLI is built without `--windowed`, or it would have no stdout. CI builds both
 on every push and attaches them to the release when a `v*` tag is pushed.
 Expect a SmartScreen warning: the binary is unsigned.
 
-The eight data CSVs live in `src/n63read/data/`. At runtime they are found in
+The data CSVs live in `src/n63read/data/`. At runtime they are found in
 the PyInstaller bundle, the package, next to the exe, or the working
 directory, so an updated CSV can be dropped next to the exe without
 rebuilding.
@@ -176,7 +209,10 @@ rebuilding.
 ## Data provenance
 
 The CSVs were extracted from BMW SGBD (`.prg`) files, mainly `dme8ff_r.prg`;
-the two `NBTEVO_*` files from `nbtevo.prg`, by `tools/hu_catalog.py`.
+the module catalogs (`<MODULE>_measurements.csv`, `<MODULE>_enum_tables.csv`)
+and their fault texts from `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`,
+`bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11` and `ekp301.prg`, by
+`tools/module_catalog.py`.
 They hold identifier numbers, units and scaling factors: the interface facts
 you need to talk to hardware you own. BMW's `.prg` files and SP-Daten are not
 in this repo and must not be committed.

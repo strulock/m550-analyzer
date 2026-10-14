@@ -1,0 +1,169 @@
+﻿table_name,value,text_de,text_en
+VDP_G11.RDBI_ADS_DOP,0,ISOSAEReserved_00,ISOSAEReserved_00
+VDP_G11.RDBI_ADS_DOP,1,defaultSession,defaultSession
+VDP_G11.RDBI_ADS_DOP,2,programmingSession,programmingSession
+VDP_G11.RDBI_ADS_DOP,3,extendedDiagnosticSession,extendedDiagnosticSession
+VDP_G11.RDBI_ADS_DOP,4,safetySystemDiagnosticSession,safetySystemDiagnosticSession
+VDP_G11.RDBI_ADS_DOP,64,vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
+VDP_G11.RDBI_ADS_DOP,65,codingSession,codingSession
+VDP_G11.RDBI_ADS_DOP,66,SWTSession,SWTSession
+VDP_G11.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
+VDP_G11.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
+VDP_G11.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,1,normaler Beobachter,normaler Beobachter
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,2,"normaler Beobachter, temporaerer Offset im Querbeschleunigungssignal","normaler Beobachter, temporaerer offset in the lateral acceleration signal"
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,3,"normaler Beobachter, Querbeschleunigung nicht abgesichert","normaler Beobachter, lateral acceleration not fused"
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,6,Beobachterwert nicht berechenbar (Querbeschleunigung und Lenkwinkel oder Geschwindigkeit nicht vorhanden),Beobachterwert not berechenbar (lateral acceleration and Lenkwinkel or speed not present)
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,9,"Beobachter ohne Lenkwinkel, Querbeschleunigung IO","Beobachter without Lenkwinkel, lateral acceleration IO"
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,10,"Beobachter ohne Lenkwinkel, Querbeschleunigung mit temporaerem Offset","Beobachter without Lenkwinkel, lateral acceleration with temporaerem offset"
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,11,"Beobachter ohne lenkwinkel, Querbeschleunigung nicht abgesichert","Beobachter without lenkwinkel, lateral acceleration not fused"
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,12,Beobachter ohne Querbeschleunigung (nur Lenkwinkel und Geschwindigkeit),Beobachter without lateral acceleration (nur Lenkwinkel and speed)
+VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS,0xFF,Wert ungültig,Value invalid
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,0,kein Fehler,no fault
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,1,Ist-Moment zu klein,Is-torque too small
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,2,Ist-Moment zu groß,Is-torque too large
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,4,Ist-Moment schwere Abweichung,Is-torque schwere deviation
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,8,Kommunikationsfehler bei Aktor-Signalen,Communication error at Aktor-signal
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,16,Aktor Fehler - Motor ansteuerbar,Aktor fault - engine ansteuerbar
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,32,Keine Reaktion Aktor,No Reaktion Aktor
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,64,Aktor Fehler - Motor nicht ansteuerbar,Aktor fault - engine not ansteuerbar
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,128,Aktor temporäre Volldegradation - Motor nicht ansteuerbar,Aktor temporäre Volldegradation - engine not ansteuerbar
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,256,Aktor eingeschränkter Regler  - Vorsteuersignale fehlen,Aktor eingeschränkter controller  - Vorsteuersignale fehlen
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,512,Aktor degradiert zur Nullpositionregelung,Aktor degradiert to Nullpositionregelung
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,1024,Aktor Regler Abschaltung aufgrund Signalfehler,Aktor controller shutdown due to signal fault
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,2048,Aktor Regler unplausible Reaktion auf  Befehl  Umsetzen,Aktor controller unplausible Reaktion on  Befehl  Umsetzen
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,4096,Aktor Regler unplausible Reaktion auf Befehl  Nullpositionsregelung,Aktor controller unplausible Reaktion on Befehl  Nullpositionsregelung
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,8192,Aktor Momentensignal außerhalb Toleranz,Aktor Momentensignal outside tolerance
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,16384,Aktor Momentensignal temporär ungültig,Aktor Momentensignal temporär invalid
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,32768,Aktor Momentensignal dauerhaft ungültig,Aktor Momentensignal permanent invalid
+VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG,65535,Mehrere Fehlerbits gesetzt,Mehrere Fehlerbits set
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,0,Unterspannung inaktiv,Undervoltage inaktiv
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,1,Unterspannung aktiv,Undervoltage active
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,2,"Unterspannung inaktiv, Entprellzeit >0%","Undervoltage inaktiv, Entprellzeit >0%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,3,Unterspannung aktiv; Entprellzeit >0%,Undervoltage active; Entprellzeit >0%
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,4,Entprellzeit >25%,Entprellzeit >25%
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,6,"Unterspannung inaktiv, Entprellzeit >25%","Undervoltage inaktiv, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,7,"Unterspannung aktiv, Entprellzeit >25%","Undervoltage active, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,8,Entprellzeit >50%,Entprellzeit >50%
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,14,"Unterspannung inaktiv, Entprellzeit >50%","Undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,15,"Unterspannung inaktiv, Entprellzeit >50%","Undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,16,Entprellzeit >75%,Entprellzeit >75%
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,30,"Unterspannung inaktiv, Entprellzeit >75%","Undervoltage inaktiv, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,31,"Unterspannung aktiv, Entprellzeit >75%","Undervoltage active, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,32,Entprellzeit >=100%,Entprellzeit >=100%
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,62,"Unterspannung inaktiv, Entprellzeit >=100%","Undervoltage inaktiv, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,63,"Unterspannung aktiv, Entprellzeit >=100%","Undervoltage active, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,64,"Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit =0%","Run-on active; undervoltage inaktiv, Entprellzeit =0%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,67,"Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >0%","Run-on active; undervoltage active, Entprellzeit >0%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,70,"Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >25%","Run-on active; undervoltage inaktiv, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,71,"Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >25%","Run-on active; undervoltage active, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,78,"Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50%","Run-on active; undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,79,"Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50%","Run-on active; undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,94,"Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >75%","Run-on active; undervoltage inaktiv, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,95,"Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >75%","Run-on active; undervoltage active, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,126,"Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >=100%","Run-on active; undervoltage inaktiv, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,127,"Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >=100%","Run-on active; undervoltage active, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,128,Ummapping Momenten-DTC auf Uspang-DTC,Ummapping torque-DTC on Uspang-DTC
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,130,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >0%","Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >0%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,131,Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv; Entprellzeit >0%,Ummapping torque-DTC on Uspang-DTC; undervoltage active; Entprellzeit >0%
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,134,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >25%","Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,135,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >25%","Ummapping torque-DTC on Uspang-DTC; undervoltage active, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,142,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >50%","Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,143,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >50%","Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,158,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >75%","Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,159,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >75%","Ummapping torque-DTC on Uspang-DTC; undervoltage active, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,190,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >=100%","Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,191,"Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >=100%","Ummapping torque-DTC on Uspang-DTC; undervoltage active, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,192,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit =0%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit =0%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,195,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >0%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >0%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,198,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >25%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,199,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >25%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >25%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,206,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,207,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >50%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,222,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >75%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,223,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >75%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >75%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,254,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >=100%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,255,"Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >=100%","Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >=100%"
+VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG,0xFFFF,Wert ungültig,Value invalid
+VDP_G11.TAB_EHC_VEHICLE_HEIGHT,0x0002,Tiefniveau,Tiefniveau
+VDP_G11.TAB_EHC_VEHICLE_HEIGHT,0x0008,Standardniveau,Standardniveau
+VDP_G11.TAB_EHC_VEHICLE_HEIGHT,0x0010,Hochniveau,Hochniveau
+VDP_G11.TAB_HOEHENSTAND_ZUSTAND,0,Kalibrierung Offset nicht erfolgreich,Kalibrierung offset not erfolgreich
+VDP_G11.TAB_HOEHENSTAND_ZUSTAND,1,Kalibrierung Offset erfolgreich,Kalibrierung offset erfolgreich
+VDP_G11.TAB_HOEHENSTAND_ZUSTAND,2,Sensor ausstattungsbedingt (Codierung) nicht verbaut,Sensor ausstattungsbedingt (coding) not verbaut
+VDP_G11.TAB_HOEHENSTAND_ZUSTAND,255,unbekannter Zustand,unknown state
+VDP_G11.TAB_HOHENSTAND_SENSOR,0,Sensor in Ordnung,Sensor in Ordnung
+VDP_G11.TAB_HOHENSTAND_SENSOR,1,Sensor fehlerhaft,Sensor faulty
+VDP_G11.TAB_HOHENSTAND_SENSOR,255,Sensor fehlerhaft,Sensor faulty
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE10,Slow Offset Compensation Error,Slow offset Compensation Error
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE11,Fast Offset Compensation Error,Fast offset Compensation Error
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE12,Self Test Failure: Pos. Test,Self test Failure: Pos. test
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE13,Self Test Failure: Neg. Test,Self test Failure: Neg. test
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE14,PROM Parity Bit P1 Error,PROM Parity Bit P1 Error
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE15,PROM Parity Bit P2 Error,PROM Parity Bit P2 Error
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE16,PROM Parity Bit P3 Error,PROM Parity Bit P3 Error
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE17,Lock bit Failure,Lock bit Failure
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFE18,PROM P00-P02 CRC Bits Error,PROM P00-P02 CRC Bits Error
+VDP_G11.TAB_PSI5_ERRORSTATE,0xFFFF,Ungültiger Wert,Invalid value
+VDP_G11.TAB_PSI5_INITSTATE,0x00,Sensordaten noch nicht gelesen/nicht fertig,Sensor data yet not gelesen/not fertig
+VDP_G11.TAB_PSI5_INITSTATE,0x01,Sensordaten werden gelesen,Sensor data be gelesen
+VDP_G11.TAB_PSI5_INITSTATE,0x02,Sensordaten lesen abgeschlossen und OK,Sensor data reading abgeschlossen and OK
+VDP_G11.TAB_PSI5_INITSTATE,0x03,Sensordaten lesen abgeschlossen und nicht OK,Sensor data reading abgeschlossen and not OK
+VDP_G11.TAB_PSI5_INITSTATE,0xFF,Ungültiger Wert,Invalid value
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x00,No Error,No Error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x0A,Channel over current,Channel over current
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x0B,Leakage to GND,Leakage to GND
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x0C,Leakage to VBAT (soft short) / open load,Leakage to VBAT (soft short) / open load
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x0D,Reverse current detected,Reverse current detected
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x0E,More as one error,More as one error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x14,Manchester Decoder parity/CRC error,Manchester Decoder parity/CRC error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x15,Manchester Decoder frame error,Manchester Decoder frame error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x16,Manchester Decoder no frame received,Manchester Decoder no frame received
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x17,Manchester Decoder unexpected frame received,Manchester Decoder unexpected frame received
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x18,More as one error,More as one error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x19,Parity error from software check,Parity error from software check
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x1E,General sensor defect response (retval = 500),General sensor defect response (retval = 500)
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x1F,Group error codes (Error collection of 9 errors),Group error codes (Error collection of 9 errors)
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x20,Unknown Sensor Error,Unknown sensor Error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0x21,DWS protocol error,DWS protocol error
+VDP_G11.TAB_PSI5_INTERNAL_ERROR,0xFF,Ungültiger Wert,Invalid value
+VDP_G11.TAB_PSI5_MAINSTATE,0x00,Sensor OK,Sensor OK
+VDP_G11.TAB_PSI5_MAINSTATE,0x01,Sensor Warnung,Sensor Warnung
+VDP_G11.TAB_PSI5_MAINSTATE,0x03,Sensor Fehler,Sensor fault
+VDP_G11.TAB_PSI5_MAINSTATE,0xFF,Ungültiger Wert,Invalid value
+VDP_G11.TAB_PSI5_STATE,0x01F4,Sensor defekt,Sensor defective
+VDP_G11.TAB_PSI5_STATE,0x01E7,Sensor in Ordnung,Sensor in Ordnung
+VDP_G11.TAB_PSI5_STATE,0x01E6,"Sensor in Ordnung, ungelockt (lock bits L0-2 set)","Sensor in Ordnung, ungelockt (lock bits L0-2 set)"
+VDP_G11.TAB_PSI5_STATE,0x01E5,"Sensor in Ordnung, ungelockt (lock bit L0-1 set)","Sensor in Ordnung, ungelockt (lock bit L0-1 set)"
+VDP_G11.TAB_PSI5_STATE,0xFFFF,Ungültiger Wert,Invalid value
+VDP_G11.TAB_RADBESCHLEUNIGUNG_SENSOR,0x00,Sensor in Ordnung,Sensor in Ordnung
+VDP_G11.TAB_RADBESCHLEUNIGUNG_SENSOR,0x01,Sensor fehlerhaft,Sensor faulty
+VDP_G11.TAB_RADBESCHLEUNIGUNG_SENSOR,0xFF,Ungültiger Wert,Invalid value
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0000,kein Fehler festgestellt,no fault festgestellt
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0001,Ventil Kurzschluss nach KL30,Valve short circuit to KL30
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0002,Ventil Kurzschluss nach KL31,Valve short circuit to KL31
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0004,Ventil offene Leitung,Valve open line
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0008,Ventil Kurzschluss,Valve short circuit
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0010,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0020,Ventilstrommessung nicht kalibriert,Valve current measurement not kalibriert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0040,keine Endstufenfreigabe über Watchdog,no output stage enable via Watchdog
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0080,Signal unplausibel,Signal implausible
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0100,allgemeiner Ventilfehler bei Onlinepruefung,allgemeiner valve fault at Onlinepruefung
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0200,Hochlaufpruefung nicht durchgefuehrt,Hochlaufpruefung not carried out
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0400,Stromplausibilitaetsfehler,Current plausibility fault
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x0800,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x1000,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x2000,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x4000,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0x8000,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_STATUS,0xFFFF,manuell auswerten,manuell auswerten
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x00,Zustand Regeln soll verlassen werden,State Regeln target verlassen be
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x01,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x02,Initialisierung,Initialisierung
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x04,Verwende Sollstrom,Verwende target current
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x08,Verwende Soll-PWM,Verwende target-PWM
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x10,Endstufe abschalten,Output stage abschalten
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x20,Hochlaufprüfung starten,Hochlaufprüfung start
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x40,reserviert,reserviert
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0x80,Vorgaben invalid,Vorgaben invalid
+VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE,0xFF,nicht definiert,not definiert

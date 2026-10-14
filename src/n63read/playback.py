@@ -29,7 +29,14 @@ DEMO_CHANNELS = [
     "HU_STATUS_GPS_POSITION.LATITUDE",      # degrees, north positive
     "HU_STATUS_GPS_POSITION.LONGITUDE",     # degrees, east positive
     "HU_STATUS_GPS_POSITION.HEIGHT",        # m
+    # Transmission (0x18), DSC (0x29), airbag module's motion sensor (0x01)
+    "EGS_ISTGANG.ISTGANG",                  # 3 = gear 1 ... 9 = gear 7, 16 = gear 8
+    "EGS_GETRIEBEOELTMEPERATUR",            # deg C
+    "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT",   # bar
+    "ACSM__IMU_WERTE.Y_ACC_SCAL",           # lateral acceleration, m/s^2
 ]
+
+GEAR_CODES = {1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 16}   # TAB_ISTGANG
 
 # Laps of a 1 km circle at Circuit of the Americas - a public place, not
 # anyone's driveway.
@@ -83,6 +90,10 @@ def demo_sample(t, rng=random):
     def jitter(v, frac):
         return v * (1 + rng.uniform(-frac, frac))
 
+    gear = min(8, 1 + int(speed // 18))
+    # Cornering on the 1 km lap circle: v^2 / r.
+    lateral = (speed / 3.6) ** 2 / (DEMO_RADIUS_DEG * 111_000)
+
     return {
         "MITTL_MOTORDREHZAHL_PRO_ZYLSEGM": round(jitter(rpm, 0.01)),
         "BUS_FAHRPEDALWERT": round(pedal, 1),
@@ -100,6 +111,11 @@ def demo_sample(t, rng=random):
             DEMO_LON + DEMO_RADIUS_DEG * math.sin(2 * math.pi * t / DEMO_LAP)
             / math.cos(math.radians(DEMO_LAT)), 7),
         "HU_STATUS_GPS_POSITION.HEIGHT": round(160 + 8 * math.sin(2 * math.pi * t / DEMO_LAP)),
+        "EGS_ISTGANG.ISTGANG": GEAR_CODES[gear],
+        "EGS_GETRIEBEOELTMEPERATUR": round(85 - 50 * math.exp(-t / 150.0)),
+        "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT": round(
+            2.40 + 0.15 * (1 - math.exp(-t / 300.0)), 3),
+        "ACSM__IMU_WERTE.Y_ACC_SCAL": round(jitter(lateral, 0.05) + rng.uniform(-0.05, 0.05), 2),
     }
 
 

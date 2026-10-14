@@ -47,9 +47,12 @@ COLUMNS = {
     "BMW_dtc_status_byte.csv": ("text_de", "text_en"),
     "BMW_enum_tables.csv": ("text_de", "text_en"),
     "BMW_freeze_frame_fields.csv": ("name_de", "name_en"),
-    "NBTEVO_head_unit_measurements.csv": ("INFO", "INFO_EN"),
-    "NBTEVO_enum_tables.csv": ("text_de", "text_en"),
 }
+# Module catalogs from tools/module_catalog.py.
+for _name in ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
+              "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301"):
+    COLUMNS[_name + "_measurements.csv"] = ("INFO", "INFO_EN")
+    COLUMNS[_name + "_enum_tables.csv"] = ("text_de", "text_en")
 
 # Glossary words that must never be a piece of a compound: articles,
 # prepositions and conjunctions. Without this, "Austria" would split into

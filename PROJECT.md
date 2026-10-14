@@ -45,8 +45,13 @@ Merged from `dme8ff_r`, `dme8ff_l`, `BDC`, `BDC_G05`, `BDC_G11`, `ZGW_01`,
 which file(s) a code came from. Where variants disagree, prefer the one
 matching the G30 map.
 
-Coverage gaps: ACSM (0x01), ARS (0x04 / 0x25), transfer box (0x19),
-PMA (0x2C), headunit (0x63). Those SGBDs have not been extracted.
+Since added by `tools/module_catalog.py`: ACSM5 (0x01), GSZFB1 transmission
+(0x18), LMV_G11 transfer box (0x19), DSC_G30N (0x29), EPS_G11 (0x30),
+NBTEVO head unit (0x63), VDP_G11 (0x76), IHKA_G11 (0x78), EKP301 fuel pump
+(0x17), and BDC_G11, whose
+wording now wins where BDC variants disagree. A code another module already
+uses keeps its first text, since the file is keyed by code alone. Remaining
+gaps: ARS (0x04 / 0x25), PMA (0x2C).
 
 ### DTC status byte
 

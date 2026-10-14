@@ -19,7 +19,10 @@ Usage
   # 5. Read fault memory, decoded against the SGBD text catalog
   n63read faults --ip 169.254.x.x --target 0x12
 
-  # 6. GPS position from the head unit (0x63); --watch to keep reading
+  # 6. Check every module's catalog against the car (which files fit)
+  n63read check --ip 169.254.x.x --out check.csv
+
+  # 7. GPS position from the head unit (0x63); --watch to keep reading
   n63read gps --ip 169.254.x.x --watch
 
   # Target a module other than the master DME (0x12)
@@ -38,12 +41,12 @@ from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
 
 
 def _catalog(path):
-    """DME channels from `path`, plus the head unit's (HU_...)."""
+    """DME channels from `path`, plus the other modules' (HU_, EGS_, DSC_...)."""
     try:
         cat = core.load_catalog(path)
     except FileNotFoundError as e:
         sys.exit(str(e))
-    cat.update(core.load_head_unit_catalog())
+    cat.update(core.load_module_catalogs())
     return cat
 
 
@@ -187,7 +190,7 @@ def op_read(args):
                 print("%-34s %s  <- %s" % (name, meta["ID"], e))
                 continue
             if meta.get("MODULE"):
-                # Head unit: the reply is a record; this channel is one field.
+                # Another module: the reply is a record; this channel is one field.
                 value, unit, note = core.decode_record(
                     raw, layouts[(module, did)])[name]
                 value = core.enum_text(value, meta, enums, lang) or (
@@ -237,6 +240,55 @@ def op_log(args):
     finally:
         out.close()
         print("wrote %d samples to %s" % (n, args.out))
+
+
+def op_check(args):
+    """Read every catalogued identifier and check its reply size against the file.
+
+    This is how to tell whether an SGBD-derived catalog matches the car: a
+    module whose replies are nearly all the predicted size has the right
+    file. Read-only (0x22). Raw bytes go to --out, except for private values.
+    """
+    cat = _catalog(args.csv)
+    layouts = core.check_layouts(cat, args.target)
+    modules = sorted({k[0] for k in layouts}) if not args.module else args.module
+    out = None
+    if args.out:
+        out = open(args.out, "w", newline="", encoding="utf-8")
+        w = csv.writer(out)
+        w.writerow(["module", "did", "job", "status", "detail", "reply_bytes", "raw"])
+    try:
+        with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+            for module in modules:
+                keys = sorted(k for k in layouts if k[0] == module)
+                name = core.MODULE_LABELS.get(module, "DME" if module == args.target
+                                              else "0x%02X" % module)
+                print("\n%s (0x%02X): %d identifiers" % (name, module, len(keys)))
+                counts, silent = {}, 0
+                for i, key in enumerate(keys, 1):
+                    fields = layouts[key]
+                    status, detail, raw = core.check_identifier(h, key, fields)
+                    counts[status] = counts.get(status, 0) + 1
+                    silent = silent + 1 if status == "no answer" else 0
+                    job = fields[0].get("JOB") or fields[0]["ARG"]
+                    if args.verbose or status == "size":
+                        print("  0x%04X %-40s %-9s %s" % (key[1], job[:40], status, detail))
+                    else:
+                        print("\r  %d/%d" % (i, len(keys)), end="", flush=True)
+                    if out:
+                        private = any(core.is_sensitive(f["ARG"]) for f in fields)
+                        w.writerow(["0x%02X" % module, "0x%04X" % key[1], job, status,
+                                    detail, len(raw), "(private)" if private else raw.hex()])
+                    if silent >= 3:
+                        print("\n  three identifiers in a row went unanswered; skipping the rest")
+                        counts["no answer"] += len(keys) - i
+                        break
+                print("\r  " + ", ".join("%s %d" % kv for kv in sorted(counts.items())))
+                print("  -> " + core.check_verdict(counts))
+    finally:
+        if out:
+            out.close()
+            print("\nSaved to %s" % args.out)
 
 
 def op_gps(args):
@@ -325,6 +377,18 @@ def build_parser():
     sp.add_argument("--out", default="n63log.csv")
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("check", help="check each module's catalog against the car "
+                                      "(reply sizes)")
+    common(sp)
+    sp.add_argument("--target", type=hexint, default=DME_MASTER,
+                    help="DME address for the DME catalog (default 0x12)")
+    sp.add_argument("--module", type=hexint, action="append",
+                    help="only this module address; repeatable (default: all)")
+    sp.add_argument("--out", metavar="CSV", help="save every reply to a CSV")
+    sp.add_argument("-v", "--verbose", action="store_true",
+                    help="print every identifier, not just size mismatches")
+    sp.set_defaults(func=op_check)
 
     sp = sub.add_parser("gps", help="read GPS position from the head unit (NBT Evo)")
     common(sp)

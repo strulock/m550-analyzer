@@ -1,0 +1,232 @@
+﻿table_name,value,text_de,text_en
+GSZFB1.RDBI_ADS_DOP,0,ISOSAEReserved_00,ISOSAEReserved_00
+GSZFB1.RDBI_ADS_DOP,1,defaultSession,defaultSession
+GSZFB1.RDBI_ADS_DOP,2,programmingSession,programmingSession
+GSZFB1.RDBI_ADS_DOP,3,extendedDiagnosticSession,extendedDiagnosticSession
+GSZFB1.RDBI_ADS_DOP,4,safetySystemDiagnosticSession,safetySystemDiagnosticSession
+GSZFB1.RDBI_ADS_DOP,64,vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
+GSZFB1.RDBI_ADS_DOP,65,codingSession,codingSession
+GSZFB1.RDBI_ADS_DOP,66,SWTSession,SWTSession
+GSZFB1.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
+GSZFB1.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
+GSZFB1.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x00,Segeln nicht möglich,Segeln not possible
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x01,"Segeln möglich, passiv","Segeln möglich, passiv"
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x02,Übergang in Segeln,Übergang in Segeln
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x03,Segeln aktiv,Segeln active
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x04,Übergang aus Segeln,Übergang from Segeln
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x0D,Nicht verfügbar,Not available
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x0E,Fehler,Fault
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0x0F,Signal ungültig,Signal invalid
+GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE,0xFF,undefiniert,undefiniert
+GSZFB1.TAB_ANHAENGERBETRIEB,0x0000,Anhängerbetrieb inaktiv,Anhängerbetrieb inaktiv
+GSZFB1.TAB_ANHAENGERBETRIEB,0x0001,Anhängerbetrieb aktiv,Anhängerbetrieb active
+GSZFB1.TAB_ANHAENGERBETRIEB,0xFFFF,Signal ungültig,Signal invalid
+GSZFB1.TAB_EE_UPDATE,0x00,idle / update done,idle / update done
+GSZFB1.TAB_EE_UPDATE,0x01,pending / update running,pending / update running
+GSZFB1.TAB_EE_UPDATE,0xFF,Ungültiger Wert,Invalid value
+GSZFB1.TAB_FAHRSTUFE,0x00,P - parken,P - parken
+GSZFB1.TAB_FAHRSTUFE,0x01,R - rückwärts,R - rückwärts
+GSZFB1.TAB_FAHRSTUFE,0x02,N - neutral,N - neutral
+GSZFB1.TAB_FAHRSTUFE,0x03,D - dauer,D - duration
+GSZFB1.TAB_FAHRSTUFE,0x04,M - manuelle Schaltgasse,M - manuelle Schaltgasse
+GSZFB1.TAB_FAHRSTUFE,0xFF,ungültiger Wert,invalid value
+GSZFB1.TAB_FESTSTELLBREMSE,0x0000,Feststellbremse inaktiv,Feststellbremse inaktiv
+GSZFB1.TAB_FESTSTELLBREMSE,0x0001,Feststellbremse aktiv,Feststellbremse active
+GSZFB1.TAB_FESTSTELLBREMSE,0xFFFF,Signal ungültig,Signal invalid
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x00,Routine nicht aktiv,Routine not active
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x01,alle Bedingungen erfüllt,alle condition met
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x02,Stillstandsadaption erfolgreich durchgeführt,Standstill adaptation erfolgreich carried out
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x03,Getriebeöltemperatur zu klein,Transmission oil temperature too small
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x04,Getriebeöltemperatur zu groß,Transmission oil temperature too large
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x05,Fußbremse nicht betätigt,Fußbremse not betätigt
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x06,Position D nicht eingelegt,Position D not eingelegt
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x07,Fahrpedal betätigt,Fahrpedal betätigt
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x08,Fahrzeug nicht im Stillstand,Vehicle not in the standstill
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x09,Motordrehzahl außerhalb Fenster,Engine speed outside window
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x10,Parkbremse/EMF nicht aktiv,Parkbremse/EMF not active
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x11,Allgemeine Abbruchkriterien für Adaptionen nicht erfüllt (Notprogramme oder auch Sonderzustände die Adaptionsgüte beeinflussen),Allgemeine Abbruchkriterien for adaptation not met (Notprogramme or auch Sonderzustände the Adaptionsgüte beeinflussen)
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0x12,"Nicht alle Kupplungen konnten adaptiert werden. Da wo es möglich war, werden die Adaptionswerte gesichert.","Not alle clutch konnten adaptiert be. Da wo es möglich war, be the adaptation values gesichert."
+GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND,0xFF,Notgang oder andere nicht definierte Zustände,Notgang or andere not definierte Zustände
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0x00,Stillstandsadaption nicht gestartet,Standstill adaptation not gestartet
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0x10,Stillstandsadaption beendet,Standstill adaptation beendet
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0x40,Stillstandsadaption wegen Sicherheitskriterien abgebrochen,Standstill adaptation due to Sicherheitskriterien abgebrochen
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0x60,Stillstandsadaption wegen erkanntem Fehler abgebrochen,Standstill adaptation due to detected fault abgebrochen
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0x80,Stillstandsadaption konnte nicht gestoppt werden,Standstill adaptation konnte not gestoppt be
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0xC0,Stillstandsadaption läuft,Standstill adaptation läuft
+GSZFB1.TAB_GETRIEBVORADA_STATUS,0xFF,undefiniert,undefiniert
+GSZFB1.TAB_ISTGANG,0x00,P - parken,P - parken
+GSZFB1.TAB_ISTGANG,0x01,R - rückwärts,R - rückwärts
+GSZFB1.TAB_ISTGANG,0x02,N - neutral,N - neutral
+GSZFB1.TAB_ISTGANG,0x03,Gang 1,Gear 1
+GSZFB1.TAB_ISTGANG,0x04,Gang 2,Gear 2
+GSZFB1.TAB_ISTGANG,0x05,Gang 3,Gear 3
+GSZFB1.TAB_ISTGANG,0x06,Gang 4,Gear 4
+GSZFB1.TAB_ISTGANG,0x07,Gang 5,Gear 5
+GSZFB1.TAB_ISTGANG,0x08,Gang 6,Gear 6
+GSZFB1.TAB_ISTGANG,0x09,Gang 7,Gear 7
+GSZFB1.TAB_ISTGANG,0x10,Gang 8,Gear 8
+GSZFB1.TAB_ISTGANG,0xFF,ungültiger Wert,invalid value
+GSZFB1.TAB_LERNFLAG_HA,0x00,nicht gelernt,not learned
+GSZFB1.TAB_LERNFLAG_HA,0x01,eingelernt,eingelernt
+GSZFB1.TAB_LERNFLAG_HA,0xFF,nicht definiert,not definiert
+GSZFB1.TAB_MIL,0x00,MIL aus,MIL from
+GSZFB1.TAB_MIL,0x01,MIL ein,MIL a
+GSZFB1.TAB_MIL,0xFF,ungültig,invalid
+GSZFB1.TAB_MSA_EGS,0x01,Abschaltverhinderer_Retry,Abschaltverhinderer_Retry
+GSZFB1.TAB_MSA_EGS,0x02,Abschaltverhinderer_Getriebetemperatur,Abschaltverhinderer_Getriebetemperatur
+GSZFB1.TAB_MSA_EGS,0x03,Abschaltverhinderer_fehlende_Druckversorgung,Abschaltverhinderer_fehlende_Druckversorgung
+GSZFB1.TAB_MSA_EGS,0x04,Abschaltverhinderer_Gang,Abschaltverhinderer_Gang
+GSZFB1.TAB_MSA_EGS,0x05,Abschaltverhinderer_vnab,Abschaltverhinderer_vnab
+GSZFB1.TAB_MSA_EGS,0x06,Abschaltverhinderer_PosR,Abschaltverhinderer_PosR
+GSZFB1.TAB_MSA_EGS,0x07,Freigabe_Motorstopp,Freigabe_Motorstopp
+GSZFB1.TAB_MSA_EGS,0x08,Freigabe_Motorstopp_mit_Teilentkopplung,Freigabe_Motorstopp_mit_Teilentkopplung
+GSZFB1.TAB_MSA_EGS,0x09,Freigabe_Motorstopp_und_Start_Kraftschlussfrei,Freigabe_Motorstopp_und_Start_Kraftschlussfrei
+GSZFB1.TAB_MSA_EGS,0x0A,Einschaltaufforderer_PosP,Einschaltaufforderer_PosP
+GSZFB1.TAB_MSA_EGS,0x0B,Einschaltaufforderer_PosR,Einschaltaufforderer_PosR
+GSZFB1.TAB_MSA_EGS,0x0C,MSA_Getriebe_Systemfehler,MSA_Getriebe_Systemfehler
+GSZFB1.TAB_MSA_EGS,0x0D,Abschaltverhinderer_AGS,Abschaltverhinderer_AGS
+GSZFB1.TAB_MSA_EGS,0x0E,Abschaltverhinderer_MSA_passiv,Abschaltverhinderer_MSA_passiv
+GSZFB1.TAB_MSA_EGS,0x0F,ungültig,invalid
+GSZFB1.TAB_MSA_EGS,0xFF,ungültig,invalid
+GSZFB1.TAB_NIC,0x00,NIC eingeschaltet,NIC switched on
+GSZFB1.TAB_NIC,0x01,NIC ausgeschaltet,NIC ausgeschaltet
+GSZFB1.TAB_NIC,0x02,NIC applikativ eingeschaltet,NIC applikativ switched on
+GSZFB1.TAB_NIC,0xFF,ungültig,invalid
+GSZFB1.TAB_SCANTOOL,0x00,Kommunikation aus,Communication from
+GSZFB1.TAB_SCANTOOL,0x01,Kommunikation ein,Communication a
+GSZFB1.TAB_SCANTOOL,0xFF,ungültig,invalid
+GSZFB1.TAB_SCHALTWIPPE2,0x0000,Schaltwippe nicht betätigt,Schaltwippe not betätigt
+GSZFB1.TAB_SCHALTWIPPE2,0x0001,Schaltwippe betätigt,Schaltwippe betätigt
+GSZFB1.TAB_SCHALTWIPPE2,0xFFFF,Signal ungültig,Signal invalid
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x00,Kein Segelverhinderer außerhalb Antrieb,No Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x01,Segelverhinderer außerhalb Antrieb,Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x02,DME-interner Segelverhinderer 1,DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x03,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1,Segelverhinderer outside drive and DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x04,DME- interner Segelverhinderer  2,DME- internal Segelverhinderer  2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x05,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x06,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x07,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x08,DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x09,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x10,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x11,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x12,DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x13,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x14,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x15,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x16,Kein Segelverhinderer außerhalb Antrieb,No Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x17,Segelverhinderer außerhalb Antrieb,Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x18,DME-interner Segelverhinderer 1,DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x19,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1,Segelverhinderer outside drive and DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x20,DME- interner Segelverhinderer  2,DME- internal Segelverhinderer  2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x21,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x22,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x23,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x24,DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x25,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x26,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x27,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x28,DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x29,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x30,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x31,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x32,Kein Segelverhinderer außerhalb Antrieb,No Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x33,Segelverhinderer außerhalb Antrieb,Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x34,DME-interner Segelverhinderer 1,DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x35,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1,Segelverhinderer outside drive and DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x36,DME- interner Segelverhinderer  2,DME- internal Segelverhinderer  2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x37,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x38,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x39,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x40,DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x41,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x42,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x43,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x44,DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x45,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x46,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x47,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x48,Kein Segelverhinderer außerhalb Antrieb,No Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x49,Segelverhinderer außerhalb Antrieb,Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x50,DME-interner Segelverhinderer 1,DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x51,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1,Segelverhinderer outside drive and DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x52,DME- interner Segelverhinderer  2,DME- internal Segelverhinderer  2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x53,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x54,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x55,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x56,DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x57,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x58,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x59,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x60,DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x61,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x62,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x63,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x64,Kein Segelverhinderer außerhalb Antrieb,No Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x65,Segelverhinderer außerhalb Antrieb,Segelverhinderer outside drive
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x66,DME-interner Segelverhinderer 1,DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x67,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1,Segelverhinderer outside drive and DME-internal Segelverhinderer 1
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x68,DME- interner Segelverhinderer  2,DME- internal Segelverhinderer  2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x69,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x70,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x71,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x72,DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x73,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x74,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x75,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x76,DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x77,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x78,DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3,DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x79,Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3,Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3
+GSZFB1.TAB_SEGELVERHINDERER_DME,0x80,undefiniert,undefiniert
+GSZFB1.TAB_SEGELVERHINDERER_DME,0xFD,Nicht verfügbar,Not available
+GSZFB1.TAB_SEGELVERHINDERER_DME,0xFE,Fehler,Fault
+GSZFB1.TAB_SEGELVERHINDERER_DME,0xFF,ungültig,invalid
+GSZFB1.TAB_SEGEL_FKT,0x00,Segelfunktion fest deaktiviert,Segelfunktion fest deactivated
+GSZFB1.TAB_SEGEL_FKT,0x02,"Segel-Lernfunktion aktiviert, aber nicht gelernt","Segel-Lernfunktion activated, but not learned"
+GSZFB1.TAB_SEGEL_FKT,0x03,"Segel-Codierfunktion aktiviert, aber nicht codiert","Segel-Codierfunktion activated, but not codiert"
+GSZFB1.TAB_SEGEL_FKT,0x41,Segelfunktion fest eingeschaltet und nicht per Diagnosetester deaktivert,Segelfunktion fest switched on and not per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0x42,Segelfunktion über Lernfunktion aktiviert und nicht per Diagnosetester deaktivert,Segelfunktion via Lernfunktion activated and not per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0x43,Segelfunktion per Codierung eingeschaltet und nicht per Diagnosetester deaktivert,Segelfunktion per coding switched on and not per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0x80,Segelfunktion fest deaktiviert und per Diagnosetester deaktivert,Segelfunktion fest deactivated and per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0x82,"Segel-Lernfunktion aktiviert, aber nicht gelernt und per Diagnosetester deaktivert","Segel-Lernfunktion activated, but not learned and per diagnosis tester deaktivert"
+GSZFB1.TAB_SEGEL_FKT,0x83,"Segel-Codierfunktion aktiviert, aber nicht codiert und per Diagnosetester deaktivert","Segel-Codierfunktion activated, but not codiert and per diagnosis tester deaktivert"
+GSZFB1.TAB_SEGEL_FKT,0xC1,Segelfunktion fest eingeschaltet aber per Diagnosetester deaktivert,Segelfunktion fest switched on but per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0xC2,Segelfunktion über Lernfunktion aktiviert aber per Diagnosetester deaktivert,Segelfunktion via Lernfunktion activated but per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0xC3,Segelfunktion per Codierung eingeschaltet aber per Diagnosetester deaktivert,Segelfunktion per coding switched on but per diagnosis tester deaktivert
+GSZFB1.TAB_SEGEL_FKT,0xFF,undefiniert,undefiniert
+GSZFB1.TAB_SEGEL_RUECKMELDUNG_AGS,0x00,keine Segelanforderung seitens AGS bzw. Segelverbot durch AGS,no Segelanforderung seitens AGS resp. Segelverbot by AGS
+GSZFB1.TAB_SEGEL_RUECKMELDUNG_AGS,0x01,Segelanforderung AGS (die AGS sieht Segeln als sinnvoll an und es liegt kein Verhinderer vor),Segelanforderung AGS (the AGS sieht Segeln as sinnvoll an and es liegt no Verhinderer before)
+GSZFB1.TAB_SEGEL_RUECKMELDUNG_AGS,0xFF,undefiniert,undefiniert
+GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS,0x00,Segeln nicht verfügbar (aus Getriebesicht Segeln nicht möglich),Segeln not available (from Getriebesicht Segeln not possible)
+GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS,0x01,"Segeln verfügbar (nicht aktiv) (aus Getriebesicht Segeln möglich, aber keine Segel-Anforderung durch AGS  bzw. Segelverbot durch AGS)","Segeln available (not active) (from Getriebesicht Segeln möglich, but no Segel-request by AGS  resp. Segelverbot by AGS)"
+GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS,0x02,Segeln Einstieg,Segeln Einstieg
+GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS,0x03,Segeln aktiv,Segeln active
+GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS,0x04,Segeln Ausstieg,Segeln Ausstieg
+GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS,0xFF,undefiniert,undefiniert
+GSZFB1.TAB_SPORTTASTER,0x00,Sporttaster ausgeschaltet,Sporttaster ausgeschaltet
+GSZFB1.TAB_SPORTTASTER,0x01,Sporttaster eingeschaltet,Sporttaster switched on
+GSZFB1.TAB_SPORTTASTER,0xFF,ungültig,invalid
+GSZFB1.TAB_STATUS_BLS,0x0000,Bremslichtschalter nicht betätigt,Bremslichtschalter not betätigt
+GSZFB1.TAB_STATUS_BLS,0x0001,Bremslichtschalter betätigt,Bremslichtschalter betätigt
+GSZFB1.TAB_STATUS_BLS,0xFFFF,Ungültiger Wert,Invalid value
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x00,Grundstellung,Reason position
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x01,P-Taster,P-button
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x02,R - rückwärts,R - rückwärts
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x03,N - neutral,N - neutral
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x04,D - dauer,D - duration
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x05,M-,M-
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x06,M+,M+
+GSZFB1.TAB_WAEHLHEBELPOSITION,0x07,M/S,M/S
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0000,Wandlerkupplung geöffnet,Converter clutch open
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0001,Wandlerkupplung geregelt low,Converter clutch geregelt low
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0002,Wandlerkupplung geregelt high,Converter clutch geregelt high
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0003,Wandlerkupplung geschlossen low,Converter clutch closed low
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0004,Wandlerkupplung geschlossen high,Converter clutch closed high
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0008,Wandlerkupplung Übergang nach auf,Converter clutch Übergang to on
+GSZFB1.TAB_WANDLERKUPPLUNG,0x0009,Wandlerkupplung Übergang nach geregelt low,Converter clutch Übergang to geregelt low
+GSZFB1.TAB_WANDLERKUPPLUNG,0x000A,Wandlerkupplung Übergang nach geregelt high,Converter clutch Übergang to geregelt high
+GSZFB1.TAB_WANDLERKUPPLUNG,0x000B,Wandlerkupplung Übergang nach zu low,Converter clutch Übergang to to low
+GSZFB1.TAB_WANDLERKUPPLUNG,0x000C,Wandlerkupplung Übergang nach zu high,Converter clutch Übergang to to high
+GSZFB1.TAB_WANDLERKUPPLUNG,0xFFFF,Signal ungültig,Signal invalid
