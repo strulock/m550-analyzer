@@ -14,8 +14,9 @@ and merges the module's fault texts (FORTTEXTE) into BMW_fault_code_texts.csv,
 adding codes it lacks and the module's tag to codes it already has. Where
 another variant of the same module (another car's BDC) words a code
 differently, this car's variant wins; a code another module already uses
-for something else is left as it is. Run
-tools/translate.py afterwards to fill the English columns of the fault file.
+for something else is left as it is. Run tools/translate.py afterwards to
+fill the English columns of the fault file, then tools/channel_docs.py to
+update the channel lookup in docs/channels/. See docs/sgbd-format.md.
 
 Every identifier in SG_FUNKTIONEN that service 0x22 can read is included.
 Many return a record of several values (a RES_ table); each value becomes
