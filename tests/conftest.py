@@ -54,6 +54,7 @@ def reset_app(a):
     a.ip_var.set("")
     a.target_var.set("0x12")
     a.interval_var.set("0.25")
+    a.probe_var.set("%g" % core.PROBE_TIMEOUT)
     a.filter_var.set("")
     a.group_var.set("Module")
     a.only_var.set(False)

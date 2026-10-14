@@ -69,6 +69,11 @@ watch table, and press **Start logging** to write a CSV.
   modules from the last scan, or sweeps first if there wasn't one (about a
   minute). While logging, the fault list is saved next to the log as
   `<log>_faults_<time>.csv`; otherwise you're asked where to save it.
+- **Probe wait s** (default 0.5) is how long Scan modules and Faults wait at
+  each address before deciding nothing is there. A sweep costs about this
+  times 128 seconds. If a module you expect is missing from a scan, raise it
+  to 1 or 2 and scan again. The CLI equivalent is `--probe-timeout` on
+  `scan` and `faults --all`.
 - **Open log...** replays a CSV the GUI logged earlier through the table and
   chart at the speed it was recorded (pauses over 2 s are shortened).
 

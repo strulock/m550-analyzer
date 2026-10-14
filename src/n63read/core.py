@@ -38,6 +38,7 @@ TESTER_ADDR = 0xF4             # standard tester source address
 DME_MASTER = 0x12              # master DME, confirmed from CarData fault memory
 
 PROBE_TIMEOUT = 0.5            # seconds to wait at an empty address in a sweep
+PROBE_TIMEOUT_RANGE = (0.05, 10.0)   # accepted from the GUI and CLI
 # Module addresses to sweep. The G30 map has modules up to 0x65 (ELV), so
 # this runs past the 0x60 that scan started with.
 SWEEP_RANGE = (0x00, 0x7F)
@@ -248,12 +249,14 @@ class Hsfz:
     def tester_present(self, target):
         return self.request(target, bytes([0x3E, 0x00]))
 
-    def probe(self, target, timeout=PROBE_TIMEOUT):
+    def probe(self, target, timeout=None):
         """True if anything answers TesterPresent at `target`, even negatively.
 
-        Uses a short timeout: a present module answers in milliseconds, and
-        a sweep spends most of its time waiting on empty addresses.
+        Uses a short timeout (default PROBE_TIMEOUT): a present module answers
+        in milliseconds, and a sweep spends most of its time waiting on empty
+        addresses. Raise it if real modules are being missed.
         """
+        timeout = PROBE_TIMEOUT if timeout is None else timeout
         saved = self.timeout
         self.timeout = timeout
         self.sock.settimeout(timeout)
@@ -333,6 +336,21 @@ def dtc_status_summary(status):
 
 # ------------------------------------------------------------- fault sweep
 
+def parse_probe_timeout(text):
+    """Validate a user-entered probe wait in seconds. Raises ValueError."""
+    value = float(text)
+    lo, hi = PROBE_TIMEOUT_RANGE
+    if not lo <= value <= hi:
+        raise ValueError("probe wait must be between %g and %g seconds" % (lo, hi))
+    return value
+
+
+def sweep_seconds(probe_timeout=None):
+    """Worst-case time to sweep SWEEP_RANGE if every address is empty."""
+    lo, hi = SWEEP_RANGE
+    return (hi - lo + 1) * (PROBE_TIMEOUT if probe_timeout is None else probe_timeout)
+
+
 # Addresses confirmed for this car (PROJECT.md). Others are named from
 # G30_module_sgbd_map.csv where it has exactly one module at that address.
 KNOWN_MODULES = {
@@ -374,7 +392,7 @@ def load_module_names():
     return names
 
 
-def fault_steps(h, modules=None, texts=None, names=None):
+def fault_steps(h, modules=None, texts=None, names=None, probe_timeout=None):
     """Sweep for modules (unless given) and read their faults, one step at a time.
 
     A generator that does one network round trip per step and yields
@@ -386,7 +404,7 @@ def fault_steps(h, modules=None, texts=None, names=None):
         lo, hi = SWEEP_RANGE
         modules = []
         for addr in range(lo, hi + 1):
-            present = h.probe(addr)
+            present = h.probe(addr, probe_timeout)
             if present:
                 modules.append(addr)
                 yield ("found", addr)
@@ -403,7 +421,7 @@ def fault_steps(h, modules=None, texts=None, names=None):
     yield ("done", rows)
 
 
-def sweep_modules(h, lo=None, hi=None, progress=None):
+def sweep_modules(h, lo=None, hi=None, progress=None, probe_timeout=None):
     """Addresses in lo..hi (default SWEEP_RANGE) that answer TesterPresent."""
     lo = SWEEP_RANGE[0] if lo is None else lo
     hi = SWEEP_RANGE[1] if hi is None else hi
@@ -411,7 +429,7 @@ def sweep_modules(h, lo=None, hi=None, progress=None):
     for addr in range(lo, hi + 1):
         if progress:
             progress(addr)
-        if h.probe(addr):
+        if h.probe(addr, probe_timeout):
             found.append(addr)
     return found
 

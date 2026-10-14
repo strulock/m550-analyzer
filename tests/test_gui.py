@@ -267,3 +267,40 @@ def test_import_and_forget_answers(app, tmp_path, monkeypatch, dialogs):
 
     app._forget_answers()
     assert app.avail == {} and core.load_availability(app.avail_file) == {}
+
+
+# ------------------------------------------------------------ probe wait
+
+def test_probe_wait_box_starts_at_the_default(app):
+    assert float(app.probe_var.get()) == core.PROBE_TIMEOUT
+
+
+@pytest.mark.parametrize("value", ["abc", "0", "99"])
+def test_bad_probe_wait_stops_scan_and_faults(app, dialogs, value):
+    app.ip_var.set("127.0.0.1")
+    app.probe_var.set(value)
+    before = set(app.winfo_children())
+    app._scan()
+    app._faults()
+    assert set(app.winfo_children()) == before        # no window opened
+    assert [d[:2] for d in dialogs] == [("showerror", "Scan"), ("showerror", "Faults")]
+
+
+def test_scan_and_faults_use_the_probe_wait(app, car, monkeypatch):
+    monkeypatch.setattr(core, "SWEEP_RANGE", (0x0E, 0x14))
+    app.ip_var.set("127.0.0.1")
+    app.probe_var.set("0.1")
+
+    before = set(app.winfo_children())
+    app._scan()
+    box = next(w for w in app.winfo_children() if w not in before).winfo_children()[0]
+    assert pump(app, lambda: "Done." in box.get("1.0", "end"), timeout=4)
+    assert "waiting 0.1 s per address" in box.get("1.0", "end")
+    assert app.modules == [0x10, 0x12]
+
+    app.modules = []                                  # make Faults sweep too
+    before = set(app.winfo_children())
+    app._faults()
+    win = next(w for w in app.winfo_children() if w not in before)
+    assert "0.1 s per address" in win.parts["msg"].cget("text")
+    assert pump(app, lambda: "fault(s) across" in win.parts["msg"].cget("text"), timeout=4)

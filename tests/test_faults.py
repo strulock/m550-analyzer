@@ -224,3 +224,44 @@ def test_logging_continues_during_a_fault_sweep(tmp_path, car, monkeypatch, rest
         assert wait_for(lambda: done, timeout=60)
     finally:
         p.stop()
+
+
+# ------------------------------------------------------------ probe wait
+
+def test_probe_waits_only_as_long_as_asked(car):
+    with connect(car, timeout=2.0) as h:
+        t = time.time()
+        assert not h.probe(0x55, timeout=0.2)
+        assert time.time() - t < 0.45                 # not the 0.5 s default
+
+
+def test_probe_default_is_read_when_called(car, monkeypatch):
+    # Changing PROBE_TIMEOUT at run time must take effect, not the value at import.
+    monkeypatch.setattr(core, "PROBE_TIMEOUT", 0.1)
+    with connect(car) as h:
+        t = time.time()
+        h.probe(0x55)
+        assert time.time() - t < 0.4
+
+
+def test_sweep_and_fault_steps_take_a_probe_timeout(car, monkeypatch):
+    monkeypatch.setattr(core, "SWEEP_RANGE", (0x10, 0x16))
+    with connect(car) as h:
+        t = time.time()
+        found = core.sweep_modules(h, probe_timeout=0.1)
+        steps = list(core.fault_steps(h, probe_timeout=0.1))
+    assert found == [0x10, 0x12]
+    assert steps[-1][0] == "done"
+    assert time.time() - t < 2.5                      # 10 empty probes at 0.1 s
+
+
+@pytest.mark.parametrize("text", ["0", "0.01", "11", "abc", ""])
+def test_parse_probe_timeout_rejects_bad_values(text):
+    with pytest.raises(ValueError):
+        core.parse_probe_timeout(text)
+
+
+def test_parse_probe_timeout_and_sweep_estimate():
+    assert core.parse_probe_timeout("1.5") == 1.5
+    lo, hi = core.SWEEP_RANGE
+    assert core.sweep_seconds(1.0) == hi - lo + 1

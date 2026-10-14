@@ -10,7 +10,7 @@ settles it. Record results at the bottom.
 | ENET connection and DME reads | working on the car |
 | DME catalog (`dme8ff_r`) | verified: lambda bank 1/2, uneven running, misfire counters |
 | Instrument cluster identification (`22 F1 50` at `0x60` → `KOMB_G11`) | confirmed on the car |
-| Module scan and fault read across modules | worth a run; tested against the simulator |
+| Module scan and fault read across modules | worth a run; tested against the simulator. If an expected module is missed, raise **Probe wait s** (CLI `--probe-timeout`) and record the value that works |
 | Head unit catalog and GPS position layout | **unverified**: decoded from the SGBD's bytecode |
 | Transmission, transfer case, DSC, steering, body, suspension, climate, airbag, fuel pump catalogs | **unverified**: right family by name and address; reply sizes not yet checked |
 | Fuel pump byte layout | **unverified**: decoded from bytecode |

@@ -108,7 +108,7 @@ is how a module file's address was confirmed, see
 | Normal read (DME) | 2 s socket timeout, up to 5 attempts' worth of wait for pending replies | the DME is the priority |
 | Read from another module | **0.5 s** (`core.MODULE_TIMEOUT`) | a missing or sleeping module would otherwise hold up every DME sample for 2 s |
 | Module that didn't answer | left alone for **30 s** (`NO_ANSWER_BACKOFF`) | it may be asleep; try again later |
-| Module scan (`3E 00`) | 0.5 s per address (`PROBE_TIMEOUT`), no retries | most addresses are empty |
+| Module scan (`3E 00`) | 0.5 s per address (`PROBE_TIMEOUT`), no retries; adjustable as **Probe wait s** in the GUI and `--probe-timeout` in the CLI (0.05–10 s) | most addresses are empty |
 
 ## Identifying a module's software
 
