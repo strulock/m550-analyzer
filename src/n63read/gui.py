@@ -187,6 +187,7 @@ class App(tk.Tk):
         self.avail = core.load_availability()   # (module, DID) -> what the car said
         self._avail_dirty = False
         self._checking = None                    # stop flag of a running check
+        self._no_enet_address = False            # last Discover found no 169.254.x.x
         self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
         self.series = {}                     # name -> [values]
@@ -811,28 +812,40 @@ class App(tk.Tk):
     # -- connection ------------------------------------------------------
 
     def _refresh_interfaces(self):
-        """List local IPv4s. The ENET adapter self-assigns 169.254.x.x."""
+        """List local IPv4s and keep 'via' on one that exists. Returns them.
+
+        The ENET adapter self-assigns 169.254.x.x, and picks a new one when
+        the link resets (unplugged, ignition cycled), so a remembered
+        address can vanish. Then, as for "auto", take the adapter's current
+        address; only with no adapter address at all fall back to "auto".
+        """
         try:
             addrs = core.local_ipv4s()
         except Exception:                                           # noqa: BLE001
             addrs = []
         self.bind_combo["values"] = ["auto"] + addrs
-        if self.bind_var.get() not in (["auto"] + addrs):
-            self.bind_var.set("auto")
-        elif addrs and self.bind_var.get() == "auto":
-            link = [a for a in addrs if a.startswith("169.254.")]
-            if link:
-                self.bind_var.set(link[0])
+        link = core.link_local(addrs)
+        if self.bind_var.get() not in addrs:
+            self.bind_var.set(link[0] if link else "auto")
+        return addrs
 
     def _discover(self):
-        self.status.config(text="\u25cf searching...", foreground="#b8860b")
+        # Re-read the addresses first: the one in 'via' may have gone since
+        # start-up (WinError 10049 when sending from it).
+        before = self.bind_var.get()
+        addrs = self._refresh_interfaces()
+        bind = self.bind_var.get()
+        self._no_enet_address = not core.link_local(addrs)
+        if before not in ("auto", bind):
+            note = "\u25cf %s is gone; searching via %s..." % (before, bind)
+        else:
+            note = "\u25cf searching..."
+        self.status.config(text=note, foreground="#b8860b")
         self.update_idletasks()
 
         def work():
-            bind = self.bind_var.get()
-            bind = None if bind == "auto" else bind
             try:
-                hits = core.discover(3.0, bind)
+                hits = core.discover(3.0, None if bind == "auto" else bind)
             except Exception as e:                                  # noqa: BLE001
                 self.q.put(("joberror", "discover failed: %s" % e))
                 return
@@ -1106,7 +1119,11 @@ class App(tk.Tk):
                         messagebox.showinfo(
                             "Discover",
                             "No reply.\n\n"
-                            "1. Ignition on (position 2)\n"
+                            + ("This PC has no 169.254.x.x (ENET) address yet: "
+                               "the adapter isn't connected or Windows hasn't "
+                               "set it up (it takes 30-60 s after plugging in).\n\n"
+                               if self._no_enet_address else "")
+                            + "1. Ignition on (position 2)\n"
                             "2. USB ENET adapter plugged into car and PC\n"
                             "3. Pick the 169.254.x.x address in 'via' - an "
                             "auto broadcast leaves over WiFi instead\n"

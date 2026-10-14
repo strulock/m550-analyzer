@@ -542,6 +542,15 @@ def local_ipv4s():
     return sorted(addrs, key=lambda a: (not a.startswith("169.254."), a))
 
 
+class AddressNotAvailable(OSError):
+    """The local address to send from isn't on this PC (WinError 10049)."""
+
+
+def link_local(addrs):
+    """The ENET side: 169.254.x.x addresses, in order."""
+    return [a for a in addrs if a.startswith("169.254.")]
+
+
 def discover(timeout=3.0, bind_ip=None):
     """
     UDP broadcast on 6811. Returns [(ip, payload_bytes), ...].
@@ -554,7 +563,18 @@ def discover(timeout=3.0, bind_ip=None):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if bind_ip:
-        s.bind((bind_ip, 0))
+        try:
+            s.bind((bind_ip, 0))
+        except OSError as e:
+            s.close()
+            # WinError 10049 / EADDRNOTAVAIL: the address isn't on this PC
+            # (any more). The adapter is unplugged or not up yet, or it has
+            # given itself a new 169.254.x.x after the link reset.
+            raise AddressNotAvailable(
+                "%s is not an address of this PC right now (%s). Plug in the "
+                "ENET adapter, switch the ignition on, wait for Windows to "
+                "give it a 169.254.x.x address, then pick that address."
+                % (bind_ip, e.strerror or e)) from None
     s.settimeout(timeout)
     # Vehicle identification request: length 2, control 0x0011, no payload.
     probe = struct.pack(">IH", 2, CTRL_IDENT) + b"\x00\x00"
