@@ -116,8 +116,10 @@ class Poller(threading.Thread):
 
     def run(self):
         t0 = time.time()
+        connected = False
         try:
             with core.Hsfz(self.ip, source=self.source, timeout=self.timeout) as h:
+                connected = True
                 self.out_q.put(("status", "connected"))
                 while not self._stop_event.is_set():
                     self._run_jobs(h)
@@ -134,7 +136,10 @@ class Poller(threading.Thread):
                     self._write_log(elapsed, chans, sample)
                     time.sleep(self.interval)
         except Exception as e:                                      # noqa: BLE001
-            self.out_q.put(("error", str(e)))
+            if connected:
+                self.out_q.put(("error", str(e)))
+            else:
+                self.out_q.put(("error", no_answer_text(self.ip, e)))
         finally:
             self.stop_log()
             self.out_q.put(("status", "disconnected"))
@@ -166,6 +171,15 @@ class Poller(threading.Thread):
                 self.logfile.flush()
                 os.fsync(self.logfile.fileno())
                 self.last_flush = now
+
+
+def no_answer_text(ip, error):
+    """What a failed connect means, for someone at the car."""
+    return ("Nothing answered at %s (port %d): %s.\n\n"
+            "Check that the IP box holds the car's address, not this PC's "
+            "(press Discover to find it), that the ignition is on, and that "
+            "Windows Firewall allows n63read on this network."
+            % (ip, core.HSFZ_DIAG_PORT, error))
 
 
 # ---------------------------------------------------------------------- app
@@ -639,6 +653,8 @@ class App(tk.Tk):
         if not ip and not self.poller:
             messagebox.showinfo("Check car", "Enter or discover an IP first.")
             return
+        if not self.poller and self._own_address(ip, "Check car"):
+            return
         layouts = core.check_layouts(self.catalog, self._dme_target())
         if not messagebox.askyesno(
                 "Check car", "Ask the car for all %d identifiers?\n\n"
@@ -909,6 +925,23 @@ class App(tk.Tk):
 
         threading.Thread(target=work, daemon=True).start()
 
+    def _own_address(self, ip, title):
+        """True (after saying so) if `ip` is this PC's, not the car's.
+
+        Easy to do: ipconfig shows the adapter's 169.254.x.x, and the car's
+        address looks just the same.
+        """
+        try:
+            mine = ip in core.local_ipv4s()
+        except Exception:                                           # noqa: BLE001
+            return False
+        if mine:
+            messagebox.showinfo(
+                title, "%s is this PC's own address (the ENET adapter).\n\n"
+                "The car has its own 169.254.x.x address. Pick this one under "
+                "'via' and press Discover to find the car's." % ip)
+        return mine
+
     def _toggle(self):
         if self.poller:
             self.poller.stop()
@@ -919,6 +952,8 @@ class App(tk.Tk):
         ip = self.ip_var.get().strip()
         if not ip:
             messagebox.showinfo("Connect", "Enter an IP, or press Discover.")
+            return
+        if self._own_address(ip, "Connect"):
             return
         try:
             target = int(self.target_var.get(), 0)
@@ -942,6 +977,8 @@ class App(tk.Tk):
         ip = self.ip_var.get().strip()
         if not ip and not self.poller:
             messagebox.showinfo("Faults", "Enter or discover an IP first.")
+            return
+        if not self.poller and self._own_address(ip, "Faults"):
             return
         wait = self._probe_wait("Faults")
         if wait is None:

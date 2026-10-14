@@ -104,3 +104,30 @@ def test_cli_discover_from_a_vanished_address_is_a_message_not_a_traceback(capsy
     with pytest.raises(SystemExit) as e:
         cli.main(["discover", "--bind", GONE, "--timeout", "0.2"])
     assert GONE in str(e.value.code) and "169.254" in str(e.value.code)
+
+
+# ------------------------------------------------- this PC's own address
+
+def test_connect_to_this_pcs_own_address_is_caught(app, addrs, dialogs):
+    app.ip_var.set("169.254.33.7")                  # what ipconfig shows: the PC's
+    app._toggle()
+    assert app.poller is None
+    assert "this PC's own address" in dialogs.info[-1]
+
+
+@pytest.mark.parametrize("action", ["_faults", "_check_car"])
+def test_faults_and_check_catch_it_too(app, addrs, dialogs, action):
+    app.ip_var.set("169.254.33.7")
+    getattr(app, action)()
+    assert "this PC's own address" in dialogs.info[-1]
+
+
+def test_no_answer_explains_itself(app, dialogs, monkeypatch):
+    # Nothing listens on the diagnostic port here, as at a wrong address.
+    monkeypatch.setattr(core, "local_ipv4s", lambda: ["192.168.1.20"])
+    app.ip_var.set("127.0.0.1")
+    app._toggle()
+    assert pump(app, lambda: dialogs.errors, timeout=10)
+    text = dialogs.errors[-1]
+    assert "Nothing answered at 127.0.0.1" in text and "Discover" in text
+    assert app.poller is None
