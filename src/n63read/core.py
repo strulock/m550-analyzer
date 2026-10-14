@@ -101,6 +101,10 @@ def resource_path(name):
     return candidates[0]
 
 
+# The logo (tools/make_icon.py): .ico for Windows, .png for Tk elsewhere.
+ICON_FILES = ("n63read.ico", "n63read.png")
+
+
 # ------------------------------------------------------------- HSFZ framing
 
 class HsfzError(Exception):

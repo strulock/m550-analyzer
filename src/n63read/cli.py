@@ -337,6 +337,11 @@ def op_selftest(args):
         # those only have to exist; everything else must have rows.
         if rows <= 0 and not name.endswith("_enum_tables.csv"):
             problems.append("%s: no rows" % name)
+    for name in core.ICON_FILES:
+        found = os.path.exists(core.resource_path(name))
+        print("  %-42s %s" % (name, "ok" if found else "MISSING"))
+        if not found:
+            problems.append("%s: not found" % name)
     loaded = {
         "DME channels": len(core.load_catalog()),
         "module channels": len(core.load_module_catalogs()),

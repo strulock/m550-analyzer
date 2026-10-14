@@ -9,6 +9,7 @@ Run:  n63read-gui   (or: python -m n63read.gui)
 import csv
 import os
 import queue
+import sys
 import threading
 import time
 import tkinter as tk
@@ -205,9 +206,21 @@ def no_answer_text(ip, error):
 # ---------------------------------------------------------------------- app
 
 class App(tk.Tk):
+    def _set_icon(self):
+        """The logo in the title bar and taskbar; no logo is no error."""
+        try:
+            if sys.platform == "win32":
+                self.iconbitmap(default=core.resource_path("n63read.ico"))
+            else:
+                self._icon = tk.PhotoImage(file=core.resource_path("n63read.png"))
+                self.iconphoto(True, self._icon)
+        except (tk.TclError, OSError):
+            pass
+
     def __init__(self):
         super().__init__()
         self.title("N63TU2 DME Reader")
+        self._set_icon()
         self.geometry("1060x680")
         self.minsize(900, 560)
 

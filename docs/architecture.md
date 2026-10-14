@@ -22,6 +22,7 @@ tools/
   module_catalog.py   .prg -> module catalogs + fault texts
   translate.py, glossary.py   German -> English columns
   channel_docs.py     catalogs -> docs/channels/
+  make_icon.py        draws the logo -> data/n63read.ico, .png (needs Pillow)
   sgbd_tables.py      the original directory reader (DME)
 tests/          pytest; fake_car.py is an HSFZ stand-in for the car
 ```
