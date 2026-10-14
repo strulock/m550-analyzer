@@ -23,3 +23,6 @@ logs/
 # coverage.py
 .coverage
 htmlcov/
+
+# ...except the build itself
+!/BMW-Analyzer.spec

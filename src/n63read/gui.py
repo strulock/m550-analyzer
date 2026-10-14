@@ -15,7 +15,6 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-import subprocess
 import webbrowser
 
 from n63read import __version__, core, diag, playback, update
@@ -226,11 +225,10 @@ class App(tk.Tk):
 
         self.settings = core.load_settings()
         self._updating = False
-        self._update_ready = None       # version installed, waiting for a restart
+        self._update_ready = None       # version downloaded, waiting for a restart
+        self._update_setup = None       # ...and its verified installer
         self._update_url = None
-        self._updated_from = update.tidy()   # we are the new version: keep the old
-        if self._updated_from:
-            update.set_installed_version()  # keep Settings > Apps in step
+        threading.Thread(target=update.tidy, daemon=True).start()
         threading.Thread(target=core.logs_dir, daemon=True).start()
         diag.enabled = self.settings.get("diagnostics", True)
         threading.Thread(target=diag.prune, daemon=True).start()
@@ -259,9 +257,6 @@ class App(tk.Tk):
         self.after(60, self._drain)
         self.after(10000, self._save_answers)
         self.after(UPDATE_FIRST_CHECK_MS, self._update_tick)
-        if self._updated_from:
-            diag.record("update", state="running", version=__version__,
-                        previous=self._updated_from)
         self.protocol("WM_DELETE_WINDOW", self._close)
 
     # -- data ------------------------------------------------------------
@@ -450,7 +445,8 @@ class App(tk.Tk):
     # -- updates ---------------------------------------------------------
 
     def _version_text(self):
-        where = "" if update.running_exe() else " (source)"
+        where = (" (source)" if not update.running_exe()
+                 else "" if update.installed() else " (portable)")
         return "n63read %s%s" % (__version__, where)
 
     def _set_auto_update(self):
@@ -487,24 +483,25 @@ class App(tk.Tk):
                     info = update.update()
                 else:                           # from source: report only
                     info = update.check()
-                    info["installed"] = False
-                diag.record("update", state="installed" if info["installed"] else "checked",
+                setup = info.get("setup")
+                diag.record("update", state="downloaded" if setup else "checked",
                             current=info["current"], latest=info["latest"])
-                self.q.put(("update", "installed" if info["installed"] else
+                self.q.put(("update", "ready" if setup else
                             "newer" if info["newer"] else "current",
-                            info["latest"], info.get("url"), manual))
+                            info["latest"], info.get("url"), manual, setup))
             except Exception as e:                                  # noqa: BLE001
                 diag.record("update", state="failed", error=str(e))
                 self.q.put(("update", "failed", str(e), None, manual))
         threading.Thread(target=work, daemon=True).start()
 
-    def _show_update(self, state, detail, url, manual):
+    def _show_update(self, state, detail, url, manual, setup=None):
         """Footer (and, for a manual check, a message) for an update result."""
         self._updating = False
         self._update_url = url or self._update_url
         text = self._version_text()
-        if state == "installed":
+        if state == "ready":
             self._update_ready = detail
+            self._update_setup = setup
             text += " \u00b7 %s ready \u2014 restart to update" % detail
             self.version_menu.entryconfig("Restart to update", state="normal")
             self.version_btn.configure(style="FooterReady.TMenubutton")
@@ -518,9 +515,11 @@ class App(tk.Tk):
         if manual:
             if state == "current":
                 messagebox.showinfo("Updates", "n63read %s is the latest version." % __version__)
-            elif state == "installed":
+            elif state == "ready":
                 if messagebox.askyesno("Updates", "Version %s is downloaded and verified.\n\n"
-                                       "Restart n63read now to use it?" % detail):
+                                       "Install it now? n63read closes, updates and starts "
+                                       "again. Otherwise it installs when you close "
+                                       "n63read." % detail):
                     self._restart_to_update()
             elif state == "newer":
                 messagebox.showinfo("Updates", "Version %s is available:\n%s"
@@ -529,19 +528,18 @@ class App(tk.Tk):
                 messagebox.showerror("Updates", "Could not update: %s" % detail)
 
     def _restart_to_update(self):
-        exe = update.running_exe()
-        if not exe or not self._update_ready:
+        if not self._update_setup:
             return
         if self.poller and not messagebox.askyesno(
                 "Restart", "This disconnects from the car%s. Restart now?"
                 % (" and stops logging" if self.logging_to else "")):
             return
         try:
-            subprocess.Popen([exe], close_fds=True)
-        except OSError as e:
-            messagebox.showerror("Restart", "Could not start the new version: %s\n\n"
-                                 "Start n63read again yourself." % e)
+            update.install(self._update_setup, relaunch=True)
+        except update.UpdateError as e:
+            messagebox.showerror("Restart", "Could not update: %s" % e)
             return
+        self._update_setup = None           # started; don't run it again on close
         self._close()
 
     # -- diagnostics -----------------------------------------------------
@@ -1575,6 +1573,11 @@ class App(tk.Tk):
         if self.poller:
             self.poller.stop()
         self._stop_feed()
+        if self._update_setup:              # a downloaded update installs on the way out
+            try:
+                update.install(self._update_setup)
+            except update.UpdateError:
+                pass
         self.destroy()
 
 

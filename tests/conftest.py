@@ -21,6 +21,8 @@ def quick_diagnostics(tmp_path, monkeypatch):
     def offline():
         raise update.UpdateError("no network in tests")
     monkeypatch.setattr(update, "latest_release", offline)
+    updates = str(tmp_path / "updates")
+    monkeypatch.setattr(update, "updates_dir", lambda: updates)
     # Logs go under a temp "Documents", never the real one.
     docs = str(tmp_path / "Documents")
     monkeypatch.setattr(core, "documents_dir", lambda: docs)

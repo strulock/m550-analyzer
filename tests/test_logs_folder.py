@@ -1,4 +1,4 @@
-"""Documents\\BMW Analyzer Logs, and the installer's Settings > Apps entry."""
+"""Documents\\BMW Analyzer Logs, and where the installer put the app."""
 
 import os
 import sys
@@ -57,12 +57,11 @@ def test_gui_dialogs_open_in_the_logs_folder(app, monkeypatch):
 
 class FakeWinreg:
     HKEY_CURRENT_USER = "HKCU"
-    KEY_READ, KEY_SET_VALUE, REG_SZ = 1, 2, 1
 
     def __init__(self, keys):
         self.keys = keys
 
-    def OpenKey(self, root, sub, reserved, access):
+    def OpenKey(self, root, sub):
         if (root, sub) not in self.keys:
             raise FileNotFoundError(sub)
         key = self.keys[(root, sub)]
@@ -75,23 +74,25 @@ class FakeWinreg:
                 return False
         return Handle()
 
-    def SetValueEx(self, key, name, reserved, kind, value):
-        key[name] = value
+    def QueryValueEx(self, key, name):
+        if name not in key:
+            raise FileNotFoundError(name)
+        return key[name], 1
 
 
-def test_installed_version_follows_a_self_update(monkeypatch):
-    entry = {"DisplayVersion": "0.3.2"}
+def test_install_location_comes_from_the_uninstall_entry(monkeypatch):
+    entry = {"InstallLocation": r"C:\Users\me\AppData\Local\Programs\BMW Analyzer" "\\"}
     monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.setitem(sys.modules, "winreg",
                         FakeWinreg({("HKCU", update.UNINSTALL_KEY): entry}))
-    assert update.set_installed_version("0.3.3") is True
-    assert entry["DisplayVersion"] == "0.3.3"
+    assert update.install_location() == entry["InstallLocation"]
 
 
-def test_no_installer_entry_means_nothing_to_set(monkeypatch):
+def test_no_installer_entry_means_not_installed(monkeypatch):
     monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.setitem(sys.modules, "winreg", FakeWinreg({}))
-    assert update.set_installed_version("0.3.3") is False
+    assert update.install_location() is None
+    assert not update.installed(r"C:\x\n63read.exe")
 
 
 def test_uninstall_key_matches_the_installer_script():

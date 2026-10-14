@@ -262,27 +262,30 @@ def op_log(args):
 def op_update(args):
     """Check GitHub for a newer release and, unless --check, install it."""
     try:
-        if args.check or not update.running_exe():
+        if args.check or not update.installed():
             info = update.check()
             if info["newer"]:
                 print("n63read %s is available (this is %s): %s"
                       % (info["latest"], info["current"], info["url"]))
             else:
                 print("n63read %s is the latest version." % info["current"])
-            if info["newer"] and not update.running_exe() and not args.check:
-                print("Running from source: update with git, not here.")
+            if info["newer"] and not args.check:
+                print("Running from source: update with git, not here."
+                      if not update.running_exe() else
+                      "This copy wasn't installed by %s; download that to update." % update.SETUP)
             return
         info = update.update(progress=lambda got, size: print(
             "\r  %d / %d KB" % (got // 1024, size // 1024), end="", flush=True))
+        if info["setup"]:
+            update.install(info["setup"])
     except update.UpdateError as e:
         diag.record("update", state="failed", error=str(e))
         sys.exit("update failed: %s" % e)
-    diag.record("update", state="installed" if info["installed"] else "checked",
+    diag.record("update", state="installing" if info["setup"] else "checked",
                 current=info["current"], latest=info["latest"])
-    if info["installed"]:
-        print("\nInstalled n63read %s; it runs from the next start. The previous "
-              "version is kept beside it, as %s.previous after that start."
-              % (info["latest"], os.path.basename(update.running_exe())))
+    if info["setup"]:
+        print("\nInstalling n63read %s in the background; close any open BMW Analyzer "
+              "windows. It takes under a minute." % info["latest"])
     else:
         print("n63read %s is the latest version." % info["current"])
 
@@ -512,7 +515,7 @@ def build_parser():
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
 
-    sp = sub.add_parser("update", help="update this exe from the latest GitHub release")
+    sp = sub.add_parser("update", help="install the latest GitHub release")
     sp.add_argument("--check", action="store_true", help="only say whether one is available")
     sp.set_defaults(func=op_update)
 
@@ -554,8 +557,7 @@ def build_parser():
 
 
 def main(argv=None):
-    if update.tidy():                   # first start after a self-update
-        update.set_installed_version()
+    update.tidy()
     args = build_parser().parse_args(argv)
     try:
         args.func(args)

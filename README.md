@@ -75,8 +75,20 @@ A desktop icon is optional. The app keeps itself up to date (see
 Uninstalling removes the program but never the logs folder. Expect a
 SmartScreen warning: the installer is unsigned.
 
-The bare `n63read.exe` and `n63read-cli.exe` are attached to each release
-too, for running without installing.
+`BMW-Analyzer-portable.zip`, also on each release, is the same folder for
+running without installing: unzip it anywhere and run `n63read.exe` from
+it. It tells you when there's a newer version but doesn't update itself.
+
+#### Antivirus
+
+The app is a folder (`n63read.exe`, `n63read-cli.exe` and `_internal\`), not
+a single self-unpacking exe; those get flagged by antivirus heuristics far
+more often. If yours still quarantines it (Trend Micro's `TRX` detections
+are machine-learning guesses), restore it from quarantine and add an
+exclusion for `%LOCALAPPDATA%\Programs\BMW Analyzer`, or ask whoever
+manages the antivirus to. Reporting the file to the vendor as a false
+positive clears it for everyone. The exes are unsigned; the checksums of
+each release's files are in its `SHA256SUMS.txt`.
 
 ## Usage
 
@@ -222,21 +234,23 @@ The app keeps itself up to date from this repository's GitHub releases.
 About 10 seconds after it starts, and every 6 hours while it's open, it
 checks for a newer release. If there is one:
 
-1. It downloads the matching exe into its own folder as `.new`, and checks
-   its SHA-256 against the digest GitHub publishes (or the release's
-   `SHA256SUMS.txt`). A mismatch discards the download and changes nothing.
-2. It renames itself to `.old` (Windows allows that while running) and puts
-   the new exe in its place. The version you're running carries on.
-3. The next start runs the new version, which keeps the one before as
-   `n63read.exe.previous`. To roll back, rename that back.
+1. It downloads that release's `BMW-Analyzer-Setup.exe` to
+   `%LOCALAPPDATA%\n63read\updates` and checks its SHA-256 against the
+   digest GitHub publishes (or the release's `SHA256SUMS.txt`). A mismatch
+   discards the download and changes nothing.
+2. **Restart to update** runs it silently, closes n63read, and the installer
+   starts it again when it's done. Otherwise it installs when you close
+   n63read, ready for next time.
+
+To roll back, install an older release's setup over it.
 
 It only takes a strictly newer version, never downloads while connected to
 the car, and stays quiet when there's no internet (the car's network has
 none). The footer, bottom right, shows the version; when an update is ready
 it says so, and its menu has **Restart to update**, **Check for updates
-now**, **Automatic updates** (on/off) and **Release notes**. The folder the
-exe is in must be writable: the installer's is. A bare exe works anywhere
-you can write, like `Downloads`, but not `Program Files`.
+now**, **Automatic updates** (on/off) and **Release notes**. Only the
+installed copy updates itself; the portable one says "portable" in the
+footer and only tells you.
 
 From a terminal: `n63read update --check`, `n63read update` and
 `n63read --version`.
@@ -293,7 +307,7 @@ n63read selftest                             every data file bundled and loading
 n63read diag                                 connection check, step by step, recorded
 n63read diag --capture                       ...and record the packets (administrator)
 n63read diag --report report.jsonl           save the recent journal to send
-n63read update                               update this exe from the latest release
+n63read update                               install the latest release
 n63read update --check                       only say whether there is one
 ```
 
@@ -327,12 +341,15 @@ py -m venv .venv
 build.bat
 ```
 
-`build.bat` writes `dist\n63read.exe` (GUI) and `dist\n63read-cli.exe`. The
-CLI is built without `--windowed`, or it would have no stdout. The installer
-is `installer\BMW-Analyzer.iss` ([Inno Setup 6](https://jrsoftware.org/isinfo.php)):
-`iscc /DAppVersion=0.3.3 installer\BMW-Analyzer.iss` writes
-`dist\BMW-Analyzer-Setup.exe`. CI builds all three on every push, installs
-and uninstalls the installer silently as a smoke test, and attaches them with
+`build.bat` runs PyInstaller on `BMW-Analyzer.spec`, which writes one
+folder, `dist\BMW Analyzer\`: `n63read.exe` (GUI), `n63read-cli.exe` and the
+`_internal\` they share. The CLI is a console exe, or it would have no
+stdout. The installer is `installer\BMW-Analyzer.iss`
+([Inno Setup 6](https://jrsoftware.org/isinfo.php)):
+`iscc /DAppVersion=0.3.4 installer\BMW-Analyzer.iss` writes
+`dist\BMW-Analyzer-Setup.exe`. CI builds on every push, zips the folder as
+`BMW-Analyzer-portable.zip`, installs, reinstalls (as an update does) and
+uninstalls silently as a smoke test, and attaches the setup, the zip and
 `SHA256SUMS.txt` to the release when a `v*` tag is pushed. Keep the
 installer's `AppId`: upgrades and the uninstall entry depend on it.
 

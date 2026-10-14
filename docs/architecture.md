@@ -1,7 +1,8 @@
 # Architecture
 
 Pure Python standard library at runtime (`socket`, `struct`, `csv`, `json`,
-`threading`, `queue`, `tkinter`). PyInstaller builds the two Windows exes;
+`threading`, `queue`, `tkinter`). PyInstaller builds the two Windows exes
+into one folder (`BMW-Analyzer.spec`);
 Inno Setup packs them into a per-user installer.
 
 ```
@@ -13,8 +14,8 @@ src/n63read/
   playback.py   demo data and log replay (no Tk, testable)
   diag.py       connection diagnostics: journal, network snapshot, verdicts,
                 packet capture, the `n63read diag` check
-  update.py     self-update from GitHub releases: check, download, verify
-                SHA-256, swap the running exe by renaming
+  update.py     self-update from GitHub releases: check, download and verify
+                the next installer (SHA-256), run it silently
   data/         catalogs and lookup CSVs (see data-sources.md)
 installer/
   BMW-Analyzer.iss    Inno Setup script -> dist/BMW-Analyzer-Setup.exe
@@ -126,5 +127,5 @@ every request, answers modules it has (DME `0x12`, gateway `0x10`, BDC
 `0x40`, head unit `0x63`) and stays silent elsewhere, exactly like an empty
 address. Tests drive the CLI and the GUI against it. Tk roots are created
 once per test session, because creating them repeatedly is flaky on some
-Windows Pythons. CI runs `pytest`, builds both exes, and runs
+Windows Pythons. CI runs `pytest`, builds the folder, and runs
 `n63read-cli.exe selftest` to prove every data file made it into the build.
