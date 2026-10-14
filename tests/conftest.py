@@ -21,6 +21,9 @@ def quick_diagnostics(tmp_path, monkeypatch):
     def offline():
         raise update.UpdateError("no network in tests")
     monkeypatch.setattr(update, "latest_release", offline)
+    # Logs go under a temp "Documents", never the real one.
+    docs = str(tmp_path / "Documents")
+    monkeypatch.setattr(core, "documents_dir", lambda: docs)
     return journal
 
 
@@ -36,10 +39,14 @@ def shared_app(tmp_path_factory):
     avail = str(tmp_path_factory.mktemp("answers") / "avail.json")
     saved = core.availability_path
     core.availability_path = lambda: avail
+    docs = str(tmp_path_factory.mktemp("Documents"))
+    saved_docs = core.documents_dir
+    core.documents_dir = lambda: docs       # the start-up thread makes the logs folder
     try:
         a = gui.App()
     except Exception as e:                                  # noqa: BLE001
         core.availability_path = saved
+        core.documents_dir = saved_docs
         pytest.skip("no display: %s" % e)
     a._stop_feed()
     a.autoupdate_var.set(False)             # no update checks during tests
@@ -49,6 +56,7 @@ def shared_app(tmp_path_factory):
         a.poller.stop()
     a.destroy()
     core.availability_path = saved
+    core.documents_dir = saved_docs
 
 
 def reset_app(a):

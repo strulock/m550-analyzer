@@ -1172,6 +1172,39 @@ ANSWERS = ("ok", "size")
 AVAILABILITY_FILE = "availability.json"
 
 
+# ------------------------------------------------------------- logs folder
+
+LOGS_FOLDER = "BMW Analyzer Logs"
+
+
+def documents_dir():
+    """The user's Documents folder, where Windows really keeps it (OneDrive
+    can redirect it), else ~/Documents."""
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            buf = ctypes.create_unicode_buffer(1024)
+            # CSIDL_PERSONAL (5): Documents, following any redirection.
+            if ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf) == 0 \
+                    and buf.value:
+                return buf.value
+        except Exception:                                           # noqa: BLE001
+            pass
+    return os.path.join(os.path.expanduser("~"), "Documents")
+
+
+def logs_dir(create=True):
+    """Documents\\BMW Analyzer Logs: where drive logs, fault lists and reports
+    go by default. Created on first use."""
+    path = os.path.join(documents_dir(), LOGS_FOLDER)
+    if create:
+        try:
+            os.makedirs(path, exist_ok=True)
+        except OSError:
+            pass
+    return path
+
+
 def availability_path():
     base = os.environ.get("APPDATA") or os.path.expanduser("~")
     return os.path.join(base, "n63read", AVAILABILITY_FILE)
