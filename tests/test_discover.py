@@ -84,6 +84,7 @@ def test_discover_uses_the_current_address_not_the_stale_one(app, addrs, monkeyp
 def test_no_reply_without_an_enet_address_explains_why(app, addrs, monkeypatch, dialogs):
     addrs["now"] = ["192.168.1.20"]
     monkeypatch.setattr(core, "discover", lambda t, bind: [])
+    monkeypatch.setattr(core, "link_neighbours", lambda ip: [])
     app._discover()
     assert pump(app, lambda: dialogs.info)
     assert "no 169.254.x.x (ENET) address" in dialogs.info[-1]
@@ -131,3 +132,58 @@ def test_no_answer_explains_itself(app, dialogs, monkeypatch):
     text = dialogs.errors[-1]
     assert "Nothing answered at 127.0.0.1" in text and "Discover" in text
     assert app.poller is None
+
+
+# --------------------------------------- what Discover sends, and fallbacks
+
+def test_probes_include_the_zero_length_hsfz_request_and_doip():
+    assert core.HSFZ_IDENT_PROBES[0] == bytes.fromhex("000000000011")   # as BMW's tools send it
+    assert core.DOIP_IDENT_PROBE == bytes.fromhex("02fd000100000000")
+    assert core.reply_protocol(bytes.fromhex("02fd0004")) == "DoIP"
+    assert core.reply_protocol(bytes.fromhex("000000320011")) == "HSFZ"
+
+
+ARP_OUTPUT = """
+Interface: 169.254.35.7 --- 0x1b
+  Internet Address      Physical Address      Type
+  169.254.12.34         00-1a-37-aa-bb-cc     dynamic
+  169.254.255.255       ff-ff-ff-ff-ff-ff     static
+  224.0.0.22            01-00-5e-00-00-16     static
+  255.255.255.255       ff-ff-ff-ff-ff-ff     static
+"""
+
+
+def test_link_neighbours_reads_arp(monkeypatch):
+    import subprocess
+
+    class Done:
+        stdout = ARP_OUTPUT
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: Done())
+    assert core.link_neighbours("169.254.35.7") == ["169.254.12.34"]
+
+
+def test_no_reply_but_a_neighbour_fills_the_ip(app, addrs, monkeypatch, dialogs):
+    monkeypatch.setattr(core, "discover", lambda t, bind: [])
+    monkeypatch.setattr(core, "link_neighbours", lambda ip: ["169.254.12.34"])
+    app.ip_var.set("")
+    app._discover()
+    assert pump(app, lambda: dialogs.info)
+    assert app.ip_var.get() == "169.254.12.34"
+    assert "press Connect" in dialogs.info[-1]
+
+
+def test_a_doip_car_is_reported(app, addrs, monkeypatch, dialogs):
+    monkeypatch.setattr(core, "discover",
+                        lambda t, bind: [("169.254.12.34", bytes.fromhex("02fd0004"))])
+    app._discover()
+    assert pump(app, lambda: dialogs.info)
+    assert "DoIP" in dialogs.info[-1] and app.ip_var.get() == "169.254.12.34"
+
+
+def test_cli_discover_lists_neighbours_when_nothing_answers(monkeypatch, capsys):
+    from n63read import cli
+    monkeypatch.setattr(core, "discover", lambda t, bind: [])
+    monkeypatch.setattr(core, "link_neighbours", lambda ip: ["169.254.12.34"])
+    cli.main(["discover", "--bind", "169.254.35.7"])
+    out = capsys.readouterr().out
+    assert "169.254.12.34" in out and "--ip 169.254.12.34" in out

@@ -542,6 +542,50 @@ def local_ipv4s():
     return sorted(addrs, key=lambda a: (not a.startswith("169.254."), a))
 
 
+# Vehicle identification requests. BMW's tools (and ediabaslib) send the
+# zero-length HSFZ form; the 2-byte form is what this tool sent first and is
+# kept in case a gateway wants it. The DoIP one (ISO 13400, UDP 13400) is only
+# to tell a DoIP car apart: this tool speaks HSFZ.
+HSFZ_IDENT_PROBES = (
+    struct.pack(">IH", 0, 0x0011),
+    struct.pack(">IH", 2, 0x0011) + b"\x00\x00",
+)
+DOIP_PORT = 13400
+DOIP_IDENT_PROBE = bytes([0x02, 0xFD, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00])
+
+
+def reply_protocol(payload):
+    """"DoIP" or "HSFZ", from a discovery reply's first bytes."""
+    return "DoIP" if payload[:2] == b"\x02\xfd" else "HSFZ"
+
+
+def link_neighbours(local_ip):
+    """Other devices Windows has seen on the link `local_ip` is on (arp -a).
+
+    Before the car answers anything it asks, by ARP, who has this PC's
+    address; Windows keeps that even when the answer itself is dropped. So
+    with no reply to Discover, this still finds the car's address. Empty
+    off Windows or if arp fails.
+    """
+    import subprocess
+    flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)     # no console flash in the GUI
+    try:
+        out = subprocess.run(["arp", "-a", "-N", local_ip], capture_output=True,
+                             text=True, timeout=5, creationflags=flags).stdout
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return []
+    found = []
+    for ip, mac in re.findall(r"^\s*(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F]{2}(?:-[0-9a-fA-F]{2}){5})",
+                              out, re.M):
+        first = int(ip.split(".")[0])
+        if (ip == local_ip or ip.endswith(".255") or first >= 224
+                or mac.lower().startswith(("ff-ff-ff", "01-00-5e", "00-00-00"))):
+            continue                    # broadcast, multicast, empty
+        if ip not in found:
+            found.append(ip)
+    return found
+
+
 class AddressNotAvailable(OSError):
     """The local address to send from isn't on this PC (WinError 10049)."""
 
@@ -553,7 +597,8 @@ def link_local(addrs):
 
 def discover(timeout=3.0, bind_ip=None):
     """
-    UDP broadcast on 6811. Returns [(ip, payload_bytes), ...].
+    UDP broadcast on 6811 (HSFZ) and 13400 (DoIP, to recognise such a car).
+    Returns [(ip, payload_bytes), ...]; reply_protocol(payload) tells which.
 
     bind_ip pins the broadcast to one interface. On a machine with WiFi up,
     an unbound broadcast leaves via the default route and never reaches the
@@ -576,23 +621,30 @@ def discover(timeout=3.0, bind_ip=None):
                 "give it a 169.254.x.x address, then pick that address."
                 % (bind_ip, e.strerror or e)) from None
     s.settimeout(timeout)
-    # Vehicle identification request: length 2, control 0x0011, no payload.
-    probe = struct.pack(">IH", 2, CTRL_IDENT) + b"\x00\x00"
+    probes = [(p, HSFZ_CONTROL_PORT) for p in HSFZ_IDENT_PROBES] + \
+        [(DOIP_IDENT_PROBE, DOIP_PORT)]
     for dest in ("255.255.255.255", "169.254.255.255"):
-        try:
-            s.sendto(probe, (dest, HSFZ_CONTROL_PORT))
-        except OSError:
-            pass
+        for probe, port in probes:
+            try:
+                s.sendto(probe, (dest, port))
+            except OSError:
+                pass
 
     found = []
     end = time.time() + timeout
     while time.time() < end:
+        s.settimeout(max(0.05, end - time.time()))
         try:
             data, addr = s.recvfrom(1024)
         except socket.timeout:
             break
-        found.append((addr[0], data))
+        except OSError:
+            continue                    # e.g. WSAECONNRESET from an ICMP reply
+        if (addr[0], data) not in found:
+            found.append((addr[0], data))
     s.close()
+    # HSFZ replies first: that is the protocol this tool speaks.
+    found.sort(key=lambda h: reply_protocol(h[1]) != "HSFZ")
     return found
 
 

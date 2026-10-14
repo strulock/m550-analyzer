@@ -865,7 +865,8 @@ class App(tk.Tk):
             except Exception as e:                                  # noqa: BLE001
                 self.q.put(("joberror", "discover failed: %s" % e))
                 return
-            self.q.put(("discovered", hits))
+            near = [] if hits or bind == "auto" else core.link_neighbours(bind)
+            self.q.put(("discovered", hits, near))
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -1152,7 +1153,27 @@ class App(tk.Tk):
 
                 elif kind == "discovered":
                     hits = msg[1]
-                    if not hits:
+                    near = msg[2] if len(msg) > 2 else []
+                    hsfz = [h for h in hits if core.reply_protocol(h[1]) == "HSFZ"]
+                    if hits and not hsfz:
+                        self.ip_var.set(hits[0][0])
+                        self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
+                        messagebox.showinfo(
+                            "Discover",
+                            "The car at %s answered with DoIP (port 13400), not "
+                            "HSFZ, which is what this tool speaks. Please report "
+                            "this: DoIP support can be added." % hits[0][0])
+                    elif not hits and near:
+                        self.ip_var.set(near[0])
+                        self.status.config(text="\u25cf no reply; %s is on the link"
+                                           % near[0], foreground="#b8860b")
+                        messagebox.showinfo(
+                            "Discover",
+                            "The car didn't answer Discover, but %s is on the car's "
+                            "link, so it's probably the car. It's in the IP box: "
+                            "press Connect.%s" % (near[0], "\n\nAlso seen: " +
+                                                  ", ".join(near[1:]) if near[1:] else ""))
+                    elif not hits:
                         messagebox.showinfo(
                             "Discover",
                             "No reply.\n\n"
