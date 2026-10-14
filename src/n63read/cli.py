@@ -35,7 +35,7 @@ import os
 import sys
 import time
 
-from n63read import core
+from n63read import core, diag
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
                           Hsfz, HsfzError, NegativeResponse, decode)
 
@@ -257,6 +257,32 @@ def op_log(args):
         print("wrote %d samples to %s" % (n, args.out))
 
 
+def op_diag(args):
+    """Connection check, step by step, recorded for later analysis."""
+    if args.report:
+        n = diag.report(args.report, days=args.days)
+        print("Saved %d journal entries from the last %d days to %s" % (n, args.days, args.report))
+        print("Packet captures, if any, are .pcapng files in %s" % diag.journal_dir())
+        return
+    capture = None
+    if args.capture:
+        capture = diag.Capture(args.capture)
+        try:
+            capture.start()
+            print("Capturing all packets on this PC for up to %d s..." % args.capture)
+        except Exception as e:                                      # noqa: BLE001
+            print("No packet capture: %s" % e)
+            capture = None
+    try:
+        result = diag.full_check(args.bind, args.ip, args.timeout)
+    finally:
+        if capture:
+            saved = capture.stop()
+            print("Packet capture: %s" % (saved or "failed (see the journal)"))
+    if not result["ok"]:
+        sys.exit(1)
+
+
 def op_selftest(args):
     """Check every data file is bundled and loads; exit non-zero if not.
 
@@ -448,6 +474,18 @@ def build_parser():
     sp.add_argument("--out", default="n63log.csv")
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("diag", help="check the connection to the car step by step "
+                                     "and record it (no IP needed)")
+    sp.add_argument("--bind", help="this PC's ENET address (default: its 169.254.x.x)")
+    sp.add_argument("--ip", help="also try this address for the car")
+    sp.add_argument("--timeout", type=float, default=3.0, help="Discover wait, s")
+    sp.add_argument("--capture", type=int, nargs="?", const=60, metavar="SECONDS",
+                    help="also record the packets with pktmon (administrator)")
+    sp.add_argument("--report", metavar="FILE",
+                    help="instead: save the recent journal to FILE to send on")
+    sp.add_argument("--days", type=int, default=7, help="with --report: days to include")
+    sp.set_defaults(func=op_diag)
 
     sp = sub.add_parser("selftest", help="check every data file is bundled and loads "
                                          "(no car needed)")

@@ -129,12 +129,19 @@ class Hsfz:
     activation step.
     """
 
-    def __init__(self, ip, port=HSFZ_DIAG_PORT, source=TESTER_ADDR, timeout=3.0):
+    TRACE_LIMIT = 400               # frames kept when tracing
+
+    def __init__(self, ip, port=HSFZ_DIAG_PORT, source=TESTER_ADDR, timeout=3.0, *,
+                 trace=None):
         self.ip = ip
         self.port = port
         self.source = source
         self.timeout = timeout
         self.sock = None
+        # A list to record the first TRACE_LIMIT frames into, for diagnostics:
+        # (seconds since connect, "tx"/"rx", control, source, target, hex).
+        self.trace = trace
+        self._t0 = time.time()
 
     def __enter__(self):
         self.connect()
@@ -144,8 +151,15 @@ class Hsfz:
         self.close()
 
     def connect(self):
+        self._t0 = time.time()
         self.sock = socket.create_connection((self.ip, self.port), timeout=self.timeout)
         self.sock.settimeout(self.timeout)
+        self._note("connected", None, None, None, b"")
+
+    def _note(self, direction, control, src, dst, data):
+        if self.trace is not None and len(self.trace) < self.TRACE_LIMIT:
+            self.trace.append((round(time.time() - self._t0, 4), direction,
+                               control, src, dst, data.hex()))
 
     def close(self):
         if self.sock:
@@ -159,6 +173,7 @@ class Hsfz:
     def _send(self, target, payload):
         header = struct.pack(">IH", len(payload) + 2, CTRL_DIAG)
         self.sock.sendall(header + bytes([self.source, target]) + payload)
+        self._note("tx", CTRL_DIAG, self.source, target, payload)
 
     def _recv_exact(self, n):
         buf = b""
@@ -179,7 +194,9 @@ class Hsfz:
         length, control = struct.unpack(">IH", head)
         body = self._recv_exact(length)
         if length >= 2:
+            self._note("rx", control, body[0], body[1], body[2:])
             return control, body[0], body[1], body[2:]
+        self._note("rx", control, None, None, body)
         return control, None, None, body
 
     # -- request/response --------------------------------------------------
@@ -595,10 +612,12 @@ def link_local(addrs):
     return [a for a in addrs if a.startswith("169.254.")]
 
 
-def discover(timeout=3.0, bind_ip=None):
+def discover(timeout=3.0, bind_ip=None, details=None):
     """
     UDP broadcast on 6811 (HSFZ) and 13400 (DoIP, to recognise such a car).
     Returns [(ip, payload_bytes), ...]; reply_protocol(payload) tells which.
+    `details`, if a list, gets every datagram received (duplicates too) with
+    its source port and arrival time, for diagnostics.
 
     bind_ip pins the broadcast to one interface. On a machine with WiFi up,
     an unbound broadcast leaves via the default route and never reaches the
@@ -631,15 +650,21 @@ def discover(timeout=3.0, bind_ip=None):
                 pass
 
     found = []
-    end = time.time() + timeout
+    sent = time.time()
+    end = sent + timeout
     while time.time() < end:
         s.settimeout(max(0.05, end - time.time()))
         try:
             data, addr = s.recvfrom(1024)
         except socket.timeout:
             break
-        except OSError:
+        except OSError as e:
+            if details is not None:
+                details.append({"ms": round((time.time() - sent) * 1000), "error": str(e)})
             continue                    # e.g. WSAECONNRESET from an ICMP reply
+        if details is not None:
+            details.append({"ms": round((time.time() - sent) * 1000), "from": addr[0],
+                            "port": addr[1], "bytes": data.hex()})
         if (addr[0], data) not in found:
             found.append((addr[0], data))
     s.close()

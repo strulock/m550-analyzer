@@ -37,6 +37,17 @@ Implementation: `core.Hsfz`, `core.discover`.
   current one; if there is none, the adapter isn't connected or Windows
   hasn't set it up yet (30–60 s after plugging in).
 
+- **Diagnosing a connection.** `n63read diag` (or the GUI's journal, see the
+  README's *Connection diagnostics*) records the network snapshot, every
+  Discover datagram, port checks, the first frames on the wire and a verdict.
+  As administrator it can also capture the packets with `pktmon`.
+- **Discover requests.** Discover sends the zero-length HSFZ identification
+  request BMW's tools use (`00 00 00 00 00 11`), the 2-byte form
+  (`00 00 00 02 00 11 00 00`), and a DoIP identification request
+  (`02 FD 00 01 00 00 00 00` to UDP 13400) to recognise a DoIP car. With no
+  reply it reads the ARP table: the car asks for this PC's MAC before it
+  answers, so its address shows up there even if the answer is lost.
+
 ## Frames
 
 ```
