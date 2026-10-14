@@ -35,7 +35,7 @@ import os
 import sys
 import time
 
-from n63read import core, diag
+from n63read import __version__, core, diag, update
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
                           Hsfz, HsfzError, NegativeResponse, decode)
 
@@ -257,6 +257,34 @@ def op_log(args):
         print("wrote %d samples to %s" % (n, args.out))
 
 
+def op_update(args):
+    """Check GitHub for a newer release and, unless --check, install it."""
+    try:
+        if args.check or not update.running_exe():
+            info = update.check()
+            if info["newer"]:
+                print("n63read %s is available (this is %s): %s"
+                      % (info["latest"], info["current"], info["url"]))
+            else:
+                print("n63read %s is the latest version." % info["current"])
+            if info["newer"] and not update.running_exe() and not args.check:
+                print("Running from source: update with git, not here.")
+            return
+        info = update.update(progress=lambda got, size: print(
+            "\r  %d / %d KB" % (got // 1024, size // 1024), end="", flush=True))
+    except update.UpdateError as e:
+        diag.record("update", state="failed", error=str(e))
+        sys.exit("update failed: %s" % e)
+    diag.record("update", state="installed" if info["installed"] else "checked",
+                current=info["current"], latest=info["latest"])
+    if info["installed"]:
+        print("\nInstalled n63read %s; it runs from the next start. The previous "
+              "version is kept beside it, as %s.previous after that start."
+              % (info["latest"], os.path.basename(update.running_exe())))
+    else:
+        print("n63read %s is the latest version." % info["current"])
+
+
 def op_diag(args):
     """Connection check, step by step, recorded for later analysis."""
     if args.report:
@@ -418,6 +446,7 @@ def probe_arg(sp):
 def build_parser():
     p = argparse.ArgumentParser(prog="n63read", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--version", action="version", version="n63read %s" % __version__)
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def common(sp, need_ip=True):
@@ -474,6 +503,10 @@ def build_parser():
     sp.add_argument("--out", default="n63log.csv")
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("update", help="update this exe from the latest GitHub release")
+    sp.add_argument("--check", action="store_true", help="only say whether one is available")
+    sp.set_defaults(func=op_update)
 
     sp = sub.add_parser("diag", help="check the connection to the car step by step "
                                      "and record it (no IP needed)")
