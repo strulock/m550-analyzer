@@ -255,6 +255,32 @@ footer and only tells you.
 From a terminal: `n63read update --check`, `n63read update` and
 `n63read --version`.
 
+### Claude
+
+Claude can use n63read directly: check the connection to the car, read
+channels, fault memory and GPS, and review your drive logs and the
+diagnostics journal. It gets the same read-only commands as the CLI, nothing
+more. You need [Claude Code or Claude Desktop](https://claude.ai/download)
+on the same PC, signed in, and internet alongside the car's link (Wi-Fi or
+a phone hotspot).
+
+**Diagnostics ▾ Connect to Claude...** sets it up: it adds n63read to Claude
+Code (for all your projects) and to Claude Desktop, whichever are installed,
+and offers to start Claude Code in the logs folder. Restart Claude Desktop
+afterwards. Then ask, for example, "use n63read to check the connection to
+my car" or "review my last drive log".
+
+From a terminal: `n63read-cli mcp --register` (or `--unregister`). By hand,
+the server is `n63read-cli.exe mcp`, an MCP server on stdin/stdout:
+`claude mcp add -s user n63read -- "%LOCALAPPDATA%\Programs\BMW Analyzer\n63read-cli.exe" mcp`.
+Uninstalling removes it from Claude again.
+
+Its tools: `status`, `connection_check`, `discover`, `scan_modules`,
+`read_channels`, `read_faults`, `read_gps`, `check_modules`,
+`search_channels`, `list_files`, `read_log` and `diagnostics_journal`. The
+file tools only read the logs folder and the journal. Each tool call is
+noted in the journal.
+
 ### Connection diagnostics
 
 Every Discover, Connect, session and car check is recorded to a journal in
@@ -307,6 +333,7 @@ n63read selftest                             every data file bundled and loading
 n63read diag                                 connection check, step by step, recorded
 n63read diag --capture                       ...and record the packets (administrator)
 n63read diag --report report.jsonl           save the recent journal to send
+n63read mcp --register                       let Claude use n63read (see Claude)
 n63read update                               install the latest release
 n63read update --check                       only say whether there is one
 ```
