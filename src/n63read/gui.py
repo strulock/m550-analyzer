@@ -31,7 +31,7 @@ class Poller(threading.Thread):
     def __init__(self, ip, target, source, timeout, out_q, layouts=None):
         super().__init__(daemon=True)
         self.ip, self.target = ip, target
-        # DME channels go to `target`; head unit channels to their own module.
+        # DME channels go to `target`; other modules' channels to their own.
         self.reader = core.ChannelReader(layouts or {}, target)
         self.source, self.timeout = source, timeout
         self.out_q = out_q
@@ -200,8 +200,9 @@ class App(tk.Tk):
         with open(path, encoding="utf-8-sig") as f:
             for row in csv.DictReader(f):
                 cat[row["ARG"].strip()] = row
-        # Head unit (GPS etc.): optional, so a missing file only hides them.
-        cat.update(core.load_head_unit_catalog())
+        # Other modules (head unit, transmission, DSC...): optional, so a
+        # missing file only hides that module's channels.
+        cat.update(core.load_module_catalogs())
         return cat
 
     # -- layout ----------------------------------------------------------
@@ -314,7 +315,8 @@ class App(tk.Tk):
             english = self._english(meta)
             label = "%s  -  %s" % (english[:70], name) if english else name
             if meta.get("MODULE"):
-                label = "Head unit: " + label
+                module = int(meta["MODULE"], 16)
+                label = "%s: %s" % (core.MODULE_LABELS.get(module, "0x%02X" % module), label)
             # Search the German and the code name too: the English is a
             # glossary translation and sometimes leaves words untranslated.
             haystack = " ".join((label, meta.get("INFO") or "")).lower()
@@ -331,8 +333,9 @@ class App(tk.Tk):
         skipped = len(self._visible) - len(names)
         if len(names) > 40 and not messagebox.askyesno(
                 "Add all", "Add %d channels to the watch list?\n\n"
-                "Head unit channels refresh every 1-10 s, a few per cycle, so "
-                "DME channels keep their rate." % len(names)):
+                "Channels on other modules (head unit, transmission, DSC...) "
+                "refresh every 1-10 s, a few per cycle, so DME channels keep "
+                "their rate." % len(names)):
             return
         self._add_names(names)
         if skipped:

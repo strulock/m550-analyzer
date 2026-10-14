@@ -1,0 +1,81 @@
+﻿table_name,value,text_de,text_en
+ACSM5.IMU_QUAL,2,signal valid,signal valid
+ACSM5.IMU_QUAL,4,signal substituted,signal substituted
+ACSM5.IMU_QUAL,6,signal invalid,signal invalid
+ACSM5.IMU_QUAL,7,sensor missing,sensor missing
+ACSM5.IMU_QUAL,8,Init,Init
+ACSM5.IMU_QUAL,15,Invalid,Invalid
+ACSM5.RDBI_ADS_DOP,0,ISOSAEReserved_00,ISOSAEReserved_00
+ACSM5.RDBI_ADS_DOP,1,defaultSession,defaultSession
+ACSM5.RDBI_ADS_DOP,2,programmingSession,programmingSession
+ACSM5.RDBI_ADS_DOP,3,extendedDiagnosticSession,extendedDiagnosticSession
+ACSM5.RDBI_ADS_DOP,4,safetySystemDiagnosticSession,safetySystemDiagnosticSession
+ACSM5.RDBI_ADS_DOP,64,vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
+ACSM5.RDBI_ADS_DOP,65,codingSession,codingSession
+ACSM5.RDBI_ADS_DOP,66,SWTSession,SWTSession
+ACSM5.RDBI_ADS_DOP,79,developmentSession,developmentSession
+ACSM5.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
+ACSM5.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
+ACSM5.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0x01,11bit normal addressing,11bit normal addressing
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0x02,11bit extended addressing,11bit extended addressing
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0x03,11bit mixed addressing,11bit mixed addressing
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0x04,29bit normal fixed addressing,29bit normal fixed addressing
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0x05,29bit mixed addressing,29bit mixed addressing
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0x06,29bit unique addressing,29bit unique addressing
+ACSM5.TAB_EDR_ADDRESS_FORMAT,0xFF,Ungültiger Wert,Invalid value
+ACSM5.TAB_OEM_IDENTIFICATION,0x00,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x01,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x02,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x03,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x04,BMW,BMW
+ACSM5.TAB_OEM_IDENTIFICATION,0x05,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x06,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x07,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x08,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0x09,Reserved,Reserved
+ACSM5.TAB_OEM_IDENTIFICATION,0xFF,Ungültiger Wert,Invalid value
+ACSM5.TAB_POS_ZUSTAND,0x00,Stellung Airbag Off  (codiert + verbaut),Position Airbag Off  (codiert + verbaut)
+ACSM5.TAB_POS_ZUSTAND,0x01,Stellung Airbag ON (codiert + verbaut),Position Airbag ON (codiert + verbaut)
+ACSM5.TAB_POS_ZUSTAND,0xFB,Fehler (codiert aber nicht gesteckt oder Defekt),Fault (codiert but not gesteckt or defective)
+ACSM5.TAB_POS_ZUSTAND,0xFC,Verbaufehler (nicht codiert+verbaut),Verbaufehler (not codiert+verbaut)
+ACSM5.TAB_POS_ZUSTAND,0xFD,nicht verbaut (nicht verbaut+nicht codiert),not verbaut (not verbaut+not codiert)
+ACSM5.TAB_POS_ZUSTAND,0xFF,ungültig,invalid
+ACSM5.TAB_SITZBELEGUNG_ZUSTAND,0x00,nicht belegt (codiert + verbaut),not belegt (codiert + verbaut)
+ACSM5.TAB_SITZBELEGUNG_ZUSTAND,0x01,belegt (codiert + verbaut),belegt (codiert + verbaut)
+ACSM5.TAB_SITZBELEGUNG_ZUSTAND,0xFB,Fehler (codiert aber nicht empfangen/gesteckt oder Signal ungültig/Defekt),Fault (codiert but not empfangen/gesteckt or signal invalid/defective)
+ACSM5.TAB_SITZBELEGUNG_ZUSTAND,0xFC,Verbaufehler (nicht codiert+verbaut),Verbaufehler (not codiert+verbaut)
+ACSM5.TAB_SITZBELEGUNG_ZUSTAND,0xFD,nicht verbaut (nicht verbaut+nicht codiert),not verbaut (not verbaut+not codiert)
+ACSM5.TAB_SITZBELEGUNG_ZUSTAND,0xFF,ungültig,invalid
+ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND,0x00,Lehne nicht verriegelt (codiert + verbaut),Lehne not locked (codiert + verbaut)
+ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND,0x01,Lehne verriegelt (codiert + verbaut),Lehne locked (codiert + verbaut)
+ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND,0xFB,Fehler (codiert aber nicht empfangen oder Signal ungültig),Fault (codiert but not empfangen or signal invalid)
+ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND,0xFC,n/a,n/a
+ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND,0xFD,nicht verwendet (nicht codiert),not verwendet (not codiert)
+ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND,0xFF,ungültig,invalid
+ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND,0x00,Sitzposition vorne (codiert + verbaut),Seat position front (codiert + verbaut)
+ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND,0x01,Sitzposition hinten (codiert + verbaut),Seat position rear (codiert + verbaut)
+ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND,0xFB,Fehler (codiert aber nicht gesteckt oder Defekt),Fault (codiert but not gesteckt or defective)
+ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND,0xFC,Verbaufehler (nicht codiert+verbaut),Verbaufehler (not codiert+verbaut)
+ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND,0xFD,nicht verbaut (nicht verbaut+nicht codiert),not verbaut (not verbaut+not codiert)
+ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND,0xFF,ungültig,invalid
+ACSM5.TAB_SITZPOS_SM_ZUSTAND,0x00,Sitzposition vorne (codiert + verbaut),Seat position front (codiert + verbaut)
+ACSM5.TAB_SITZPOS_SM_ZUSTAND,0x01,Sitzposition hinten (codiert + verbaut),Seat position rear (codiert + verbaut)
+ACSM5.TAB_SITZPOS_SM_ZUSTAND,0xFB,Fehler (codiert aber nicht empfangen oder Signal ungültig),Fault (codiert but not empfangen or signal invalid)
+ACSM5.TAB_SITZPOS_SM_ZUSTAND,0xFC,n/a,n/a
+ACSM5.TAB_SITZPOS_SM_ZUSTAND,0xFD,nicht verwendet (nicht codiert),not verwendet (not codiert)
+ACSM5.TAB_SITZPOS_SM_ZUSTAND,0xFF,Ungültig,Invalid
+ACSM5.TAB_STEUERGERAET_TYP,0x00,Seriensteuergeraet,Seriensteuergeraet
+ACSM5.TAB_STEUERGERAET_TYP,0x01,Entwicklungssteuergeraet,Entwicklungssteuergeraet
+ACSM5._GURTZUSTAND,0,nicht_gesteckt,nicht_gesteckt
+ACSM5._GURTZUSTAND,1,gesteckt,gesteckt
+ACSM5._GURTZUSTAND,2,nicht_verbaut,nicht_verbaut
+ACSM5._GURTZUSTAND,3,ungueltig,invalid
+ACSM5._SITZBELEGUNG_2,0,nicht_belegt,nicht_belegt
+ACSM5._SITZBELEGUNG_2,1,Sitz_mit_Kindersitz_belegt,Sitz_mit_Kindersitz_belegt
+ACSM5._SITZBELEGUNG_2,2,na,na
+ACSM5._SITZBELEGUNG_2,3,Sitz_belegt,Sitz_belegt
+ACSM5._SITZBELEGUNG_2,4,Erkennungssystem_nicht_vorhanden,Erkennungssystem_nicht_vorhanden
+ACSM5._SITZBELEGUNG_2,5,na,na
+ACSM5._SITZBELEGUNG_2,6,Wert_Initialisierung,Wert_Initialisierung
+ACSM5._SITZBELEGUNG_2,7,Signal_ungueltig,Signal_ungueltig

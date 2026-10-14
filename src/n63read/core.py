@@ -15,8 +15,10 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   BMW_enum_tables.csv                    value -> text enumerations
   BMW_freeze_frame_fields.csv            FS_LESEN_DETAIL field catalog
   G30_module_sgbd_map.csv                module address -> SGBD variant
-  NBTEVO_head_unit_measurements.csv      head unit (0x63) channels, GPS etc.
-  NBTEVO_enum_tables.csv                 head unit value -> text enumerations
+  <MODULE>_measurements.csv              other modules' channels: NBTEVO (head
+                                         unit, GPS), GSZFB1 (transmission),
+                                         ACSM5 (airbag), DSC_G30N, BDC_G11
+  <MODULE>_enum_tables.csv               their value -> text enumerations
 """
 
 import csv
@@ -65,8 +67,9 @@ STATUS_CSV = "BMW_dtc_status_byte.csv"
 ENUM_CSV = "BMW_enum_tables.csv"
 FREEZE_CSV = "BMW_freeze_frame_fields.csv"
 MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
-HU_CSV = "NBTEVO_head_unit_measurements.csv"
-HU_ENUM_CSV = "NBTEVO_enum_tables.csv"
+# Per-module catalogs from tools/module_catalog.py: <NAME>_measurements.csv
+# and <NAME>_enum_tables.csv for each.
+MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11")
 
 DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
               MODULE_MAP_CSV)
@@ -216,8 +219,21 @@ class Hsfz:
 
         raise HsfzTimeout("timed out waiting for response")
 
-    def read_did(self, target, did):
-        """UDS 0x22. Returns the raw payload bytes after the echoed identifier."""
+    def read_did(self, target, did, timeout=None):
+        """UDS 0x22. Returns the raw payload bytes after the echoed identifier.
+
+        `timeout` overrides the connection's for this read: an absent or
+        sleeping module then costs that long, not the full timeout.
+        """
+        if timeout is not None:
+            saved = self.timeout
+            self.timeout = timeout
+            self.sock.settimeout(timeout)
+            try:
+                return self.read_did(target, did)
+            finally:
+                self.timeout = saved
+                self.sock.settimeout(saved)
         resp = self.request(target, bytes([0x22, (did >> 8) & 0xFF, did & 0xFF]))
         if len(resp) < 3:
             raise HsfzError("short response")
@@ -317,10 +333,13 @@ def dtc_status_summary(status):
 # Addresses confirmed for this car (PROJECT.md). Others are named from
 # G30_module_sgbd_map.csv where it has exactly one module at that address.
 KNOWN_MODULES = {
+    0x01: "Airbag / crash safety (ACSM)",
     0x10: "Central gateway (ZGW)",
     0x12: "Engine, master DME",
+    0x18: "Transmission, ZF 8HP (EGS)",
     0x40: "Body domain controller (BDC)",
     0x60: "Instrument cluster (KOMBI)",
+    0x63: "Head unit (NBT Evo)",
 }
 
 FAULT_CSV_HEADER = ("read_at", "module", "module_name", "code", "status",
@@ -590,8 +609,8 @@ def load_enum_tables():
     keyed by integer.
     """
     tables = {}
-    # The head unit's tables are prefixed NBTEVO., so they never collide.
-    for name in (ENUM_CSV, HU_ENUM_CSV):
+    # Module tables are prefixed with the module (NBTEVO.), so never collide.
+    for name in (ENUM_CSV,) + tuple(m + "_enum_tables.csv" for m in MODULE_CATALOGS):
         path = resource_path(name)
         if not os.path.exists(path):
             continue
@@ -674,16 +693,30 @@ def decode(raw, meta, enums=None, lang="text_en"):
     return (text if text is not None else scaled), unit
 
 
-# ----------------------------------------------------------- head unit catalog
+# ------------------------------------------------------------ module catalogs
 
-# Channels on another module (the head unit) are refreshed on these periods
-# rather than every cycle: it answers slowly, most of what it reports
-# changes slowly, and the DME channels must keep their rate.
-FAST_PERIOD = 1.0              # GPS, speeds, direction
-SLOW_PERIOD = 10.0             # everything else
-FAST_DIDS = frozenset({0xD030, 0xD031, 0xD032, 0xD034, 0xD038, 0xD039})
-SLOW_READS_PER_CYCLE = 4       # head unit reads allowed per DME cycle
+# Short names for the picker, by module address.
+MODULE_LABELS = {
+    0x01: "Airbag", 0x18: "Transmission", 0x29: "DSC", 0x40: "Body",
+    0x63: "Head unit",
+}
+
+# Channels on modules other than the DME are refreshed on these periods
+# rather than every cycle: most of what they report changes slowly, and the
+# DME channels must keep their rate. FAST is for what moves while driving.
+FAST_PERIOD = 1.0
+SLOW_PERIOD = 10.0
+FAST_DIDS = frozenset(
+    [(0x63, d) for d in (0xD030, 0xD031, 0xD032, 0xD034, 0xD038, 0xD039)]  # GPS, speeds
+    + [(0x18, d) for d in (0x6000, 0xDA12, 0xDA1C, 0xDA1F, 0xDA22, 0xDA24,
+                           0xDA27, 0xDA2A, 0xDA2C, 0xDA2E, 0xDA34)]        # gear, temps, speeds
+    + [(0x29, d) for d in (0xDBE4, 0xDBE5, 0xDBF4, 0xDBF5)]                # wheels, brakes
+    + [(0x01, d) for d in (0x4101, 0x4102)]                                # acceleration, yaw
+    + [(0x40, d) for d in (0xD601, 0xD611)])                               # ride height, drive mode
+SLOW_READS_PER_CYCLE = 6       # module reads allowed per DME cycle
 NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
+MODULE_TIMEOUT = 0.5           # a present module answers in milliseconds; a
+                               # missing or sleeping one must not stall the DME
 
 # Values a log should not carry by default: credentials, SIM identity,
 # where the car has been, and paired devices. Still in the catalog, so
@@ -697,20 +730,25 @@ def is_sensitive(name):
     return bool(SENSITIVE.search(name))
 
 
-def load_head_unit_catalog():
-    """ARG -> row for the head unit channels, or {} if the CSV is missing."""
-    path = resource_path(HU_CSV)
-    if not os.path.exists(path):
-        return {}
-    with open(path, encoding="utf-8-sig") as f:
-        return {row["ARG"].strip(): row for row in csv.DictReader(f)}
+def load_module_catalogs():
+    """ARG -> row for every module catalog present (head unit, transmission...).
+
+    A missing file just leaves that module's channels out.
+    """
+    cat = {}
+    for name in MODULE_CATALOGS:
+        path = resource_path(name + "_measurements.csv")
+        if os.path.exists(path):
+            with open(path, encoding="utf-8-sig") as f:
+                cat.update((row["ARG"].strip(), row) for row in csv.DictReader(f))
+    return cat
 
 
 def record_layouts(catalog):
     """(module, DID) -> that identifier's fields in reply order.
 
-    Only channels with a MODULE (the head unit) are records; DME channels
-    are single values and are left out.
+    Only channels with a MODULE (the module catalogs) are records; DME
+    channels are single values and are left out.
     """
     layouts = {}
     for row in catalog.values():
@@ -764,10 +802,10 @@ def decode_record(raw, fields):
 
 
 class ChannelReader:
-    """Reads a watch list from the DME and the head unit, one request per DID.
+    """Reads a watch list from the DME and other modules, one request per DID.
 
     DME channels (no MODULE) are read from `target` every cycle, as before.
-    Head unit channels are records: one read fills every field of that
+    Other modules' channels are records: one read fills every field of that
     identifier. They are refreshed on FAST_PERIOD / SLOW_PERIOD, at most
     SLOW_READS_PER_CYCLE per cycle, stalest first, and the last values are
     reused in between, so every sample and log row is complete.
@@ -782,7 +820,7 @@ class ChannelReader:
 
     @staticmethod
     def period(key):
-        return FAST_PERIOD if key[1] in FAST_DIDS else SLOW_PERIOD
+        return FAST_PERIOD if key in FAST_DIDS else SLOW_PERIOD
 
     def read(self, h, chans, now=None):
         now = time.time() if now is None else now
@@ -829,7 +867,7 @@ class ChannelReader:
         module, did = key
         self.last[key] = now
         try:
-            raw = h.read_did(module, did)
+            raw = h.read_did(module, did, timeout=MODULE_TIMEOUT)
         except NegativeResponse as e:
             reason = NRC.get(e.code, "0x%02X" % e.code)
             if e.code in (0x11, 0x12, 0x31):
@@ -841,3 +879,67 @@ class ChannelReader:
             self.cache.pop(key, None)
             return
         self.cache[key] = decode_record(raw, self.layouts[key])
+
+
+# -------------------------------------------------------------- catalog check
+
+def expected_size(fields):
+    """(bytes, exact) a record's reply should have. `exact` is False when an
+    unsized string or a field of unknown size makes `bytes` only a minimum."""
+    total = 0
+    for f in fields:
+        dtype = (f.get("DATENTYP") or "").strip().lower()
+        if dtype == "string":
+            return total, False
+        size = field_size(dtype, b"", 0)
+        if size is None:
+            return total, False
+        total += size
+    return total, True
+
+
+def check_layouts(catalog, target=DME_MASTER):
+    """(module, DID) -> fields for every identifier in the catalog.
+
+    DME channels (no MODULE) become one-field records at `target`; several
+    DME channels can share an identifier, so the widest one is kept.
+    """
+    out = record_layouts(catalog)
+    for row in catalog.values():
+        if not (row.get("MODULE") or "").strip():
+            key = (target, int(row["ID"], 16))
+            if key not in out or expected_size([row])[0] > expected_size(out[key])[0]:
+                out[key] = [row]
+    return out
+
+
+def check_identifier(h, key, fields):
+    """Read one identifier and judge whether the catalog's layout fits it.
+
+    Returns (status, detail, raw): status is "ok", "size", "refused" or
+    "no answer". Only service 0x22, read-only like everything else here.
+    """
+    module, did = key
+    try:
+        raw = h.read_did(module, did, timeout=MODULE_TIMEOUT)
+    except NegativeResponse as e:
+        return "refused", NRC.get(e.code, "0x%02X" % e.code), b""
+    except HsfzTimeout:
+        return "no answer", "", b""
+    size, exact = expected_size(fields)
+    if (exact and len(raw) == size) or (not exact and len(raw) >= size):
+        return "ok", "%d bytes" % len(raw), raw
+    return "size", "got %d bytes, expected %s%d" % (len(raw), "" if exact else ">=", size), raw
+
+
+def check_verdict(counts):
+    """Summary for one module from {status: n}."""
+    answered = counts.get("ok", 0) + counts.get("size", 0)
+    if not answered:
+        return "no identifiers answered - module absent, asleep, or the wrong file"
+    share = counts.get("ok", 0) / answered
+    if share >= 0.9:
+        return "fits (%d%% of answers are the expected size)" % round(share * 100)
+    if share < 0.5:
+        return "does NOT fit (only %d%% of answers are the expected size)" % round(share * 100)
+    return "unclear (%d%% of answers are the expected size)" % round(share * 100)

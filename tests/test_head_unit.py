@@ -3,7 +3,7 @@ import pytest
 from n63read import core
 from fake_car import FakeCar, HU_GPS
 
-CAT = core.load_head_unit_catalog()
+CAT = core.load_module_catalogs()
 LAYOUTS = core.record_layouts(CAT)
 ENUMS = core.load_enum_tables()
 
@@ -87,7 +87,7 @@ class FakeH:
     def __init__(self, answers):
         self.answers, self.calls = answers, []
 
-    def read_did(self, target, did):
+    def read_did(self, target, did, timeout=None):
         self.calls.append((target, did))
         a = self.answers[(target, did)]
         if isinstance(a, Exception):
