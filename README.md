@@ -3,7 +3,14 @@
 `n63read` reads live engine data and fault memory from a 2018 BMW M550i (G30,
 N63TU2 / N63B44O2) over the OBD Ethernet (ENET) port, using BMW's HSFZ
 protocol. It is pure Python standard library, with a CLI and a Tkinter GUI,
-and ships as a single Windows exe.
+and ships as a single Windows exe. Besides the engine it reads ten more
+modules: head unit (GPS), transmission, transfer case, DSC, steering, body,
+suspension, climate, airbag module and fuel pump.
+
+**Documentation:** [docs/](docs/README.md) covers the protocol, the modules
+and which BMW files fit this car, the `.prg` format and how values are
+decoded, data sources, the in-car checklist, a glossary, and a
+[lookup of every channel](docs/channels/README.md).
 
 ## Why
 
@@ -185,6 +192,7 @@ n63read log --ip 169.254.x.x --out run.csv ILAG1 ILAG2 ILUZ5 ILUZ7
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?
+n63read selftest                             every data file bundled and loading
 ```
 
 `read` and `log` take the other modules' channels (`HU_...`, `EGS_...`...)
@@ -227,7 +235,9 @@ the PyInstaller bundle, the package, next to the exe, or the working
 directory, so an updated CSV can be dropped next to the exe without
 rebuilding.
 
-`PROJECT.md` has the protocol notes, data file descriptions and design brief.
+`PROJECT.md` has the original design brief and safety rules; [docs/](docs/README.md)
+is the reference. After changing a catalog, run `python tools/translate.py`
+and `python tools/channel_docs.py`; tests fail if either is out of date.
 
 ## Data provenance
 

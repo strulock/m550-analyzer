@@ -2,6 +2,10 @@
 
 Task brief for setting this up as a repo and producing a Windows executable.
 
+> This is the original brief. The current reference, including the modules
+> added since, the `.prg` format and decoding details, is in
+> [docs/](docs/README.md).
+
 ## What this is
 
 A dependency-free Python tool that reads live engine measurements from a
@@ -368,6 +372,13 @@ themselves, and do not redistribute SP-Daten. Note the provenance in the
 README and leave it there.
 
 ## SGBD table directory
+
+> Correction (October 2026): in every module file extracted since
+> (`nbtevo`, `gszfb1`, `bdc_g11`, ...), each directory entry is
+> `[name: 64][offset][0][cols][rows]`, numbers **after** the name. Reading
+> the 16 bytes before a name, as below and in `sgbd_tables.py`, pairs each
+> table with its neighbour's contents there. See
+> [docs/sgbd-format.md](docs/sgbd-format.md#the-table-directory).
 
 Tables inside a `.prg` are not self-describing — the data blocks sit
 back-to-back with no names. A directory elsewhere in the file maps names to

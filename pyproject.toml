@@ -12,7 +12,7 @@ requires-python = ">=3.9"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "coverage"]
 build = ["pyinstaller"]
 
 [project.scripts]
