@@ -1,3 +1,5 @@
+<img src="src/n63read/data/n63read.png" alt="" width="96" align="right">
+
 # m550-analyzer
 
 `n63read` reads live engine data and fault memory from a 2018 BMW M550i (G30,

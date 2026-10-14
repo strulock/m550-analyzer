@@ -33,6 +33,7 @@ RestartApplications=no
 LicenseFile=..\LICENSE
 OutputDir=..\dist
 OutputBaseFilename=BMW-Analyzer-Setup
+SetupIconFile=..\src\n63read\data\n63read.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

@@ -157,3 +157,13 @@ def test_probe_timeout_is_validated(value, capsys):
     with pytest.raises(SystemExit):
         cli.build_parser().parse_args(["scan", "--ip", "x", "--probe-timeout", value])
     assert "probe" in capsys.readouterr().err
+
+
+def test_the_logo_is_there_and_drawn_at_every_size():
+    ico = core.resource_path("n63read.ico")
+    with open(ico, "rb") as f:
+        head = f.read(6)
+    assert head[:4] == b"\x00\x00\x01\x00"          # an icon file
+    assert int.from_bytes(head[4:6], "little") >= 8  # 16 px up to 256 px
+    with open(core.resource_path("n63read.png"), "rb") as f:
+        assert f.read(8) == b"\x89PNG\r\n\x1a\n"

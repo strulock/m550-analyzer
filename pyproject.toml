@@ -22,7 +22,7 @@ n63read = "n63read.cli:main"
 n63read-gui = "n63read.gui:main"
 
 [tool.setuptools.package-data]
-n63read = ["data/*.csv"]
+n63read = ["data/*.csv", "data/*.ico", "data/*.png"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
