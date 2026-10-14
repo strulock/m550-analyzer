@@ -19,6 +19,13 @@ from n63read import core, playback
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
 CHART_LINES = 6                     # lines drawn at once; select rows to choose
+DME_LABEL = "Engine (DME)"
+CHECK_BATCH = 10                    # identifiers checked per poll cycle while logging
+# Picker marks for what the car said about a channel's identifier.
+ANSWER_MARKS = {"ok": "\u2713  ", "size": "\u2260  ", "refused": "\u2717  ",
+                "no answer": "\u2013  "}
+# Negative responses meaning the identifier does not exist on this car.
+REFUSALS = {core.NRC[c] for c in (0x11, 0x12, 0x31)}
 LOG_FLUSH_SECONDS = 1.0
 COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 
@@ -172,6 +179,10 @@ class App(tk.Tk):
 
         self.catalog = self._load_catalog()
         self.layouts = core.record_layouts(self.catalog)
+        self._info, self._order = self._index_catalog()
+        self.avail = core.load_availability()   # (module, DID) -> what the car said
+        self._avail_dirty = False
+        self._checking = None                    # stop flag of a running check
         self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
         self.series = {}                     # name -> [values]
@@ -184,6 +195,7 @@ class App(tk.Tk):
         self._build()
         self._start_demo()
         self.after(60, self._drain)
+        self.after(10000, self._save_answers)
         self.protocol("WM_DELETE_WINDOW", self._close)
 
     # -- data ------------------------------------------------------------
@@ -251,13 +263,44 @@ class App(tk.Tk):
 
         left = ttk.Frame(body)
         body.add(left, weight=1)
-        ttk.Label(left, text="Channels (%d)" % len(self.catalog)).pack(anchor="w")
+        head = ttk.Frame(left)
+        head.pack(fill="x")
+        self.count_label = ttk.Label(head, text="Channels (%d)" % len(self.catalog))
+        self.count_label.pack(side="left")
+        self.answers_btn = ttk.Menubutton(head, text="Answers \u25be")
+        menu = tk.Menu(self.answers_btn, tearoff=False)
+        menu.add_command(label="Check car now", command=self._check_car)
+        menu.add_command(label="Stop check", command=self._stop_check)
+        menu.add_command(label="Import n63read check CSV...", command=self._import_check)
+        menu.add_separator()
+        menu.add_command(label="Forget recorded answers", command=self._forget_answers)
+        self.answers_btn["menu"] = menu
+        self.answers_btn.pack(side="right")
+
         self.filter_var = tk.StringVar()
-        self.filter_var.trace_add("write", lambda *_: self._refilter())
+        self.filter_var.trace_add("write", lambda *_: self._refilter_soon())
         ttk.Entry(left, textvariable=self.filter_var).pack(fill="x", pady=3)
-        self.picker = tk.Listbox(left, selectmode="extended", activestyle="none")
-        self.picker.pack(fill="both", expand=True)
-        self.picker.bind("<Double-Button-1>", lambda e: self._add())
+        opts = ttk.Frame(left)
+        opts.pack(fill="x")
+        ttk.Label(opts, text="Group by").pack(side="left")
+        self.group_var = tk.StringVar(value="Module")
+        group = ttk.Combobox(opts, textvariable=self.group_var, width=9, state="readonly",
+                             values=("Module", "Function"))
+        group.pack(side="left", padx=(4, 8))
+        group.bind("<<ComboboxSelected>>", lambda e: self._refilter())
+        self.only_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(opts, text="Only channels the car answers", variable=self.only_var,
+                        command=self._refilter).pack(side="left")
+
+        pick = ttk.Frame(left)
+        pick.pack(fill="both", expand=True, pady=(3, 0))
+        self.picker = ttk.Treeview(pick, show="tree", selectmode="extended")
+        scroll = ttk.Scrollbar(pick, orient="vertical", command=self.picker.yview)
+        self.picker.configure(yscrollcommand=scroll.set)
+        scroll.pack(side="right", fill="y")
+        self.picker.pack(side="left", fill="both", expand=True)
+        self.picker.bind("<<TreeviewOpen>>", self._fill_open_node)
+        self.picker.bind("<Double-Button-1>", self._pick_double)
         btns = ttk.Frame(left)
         btns.pack(fill="x", pady=4)
         ttk.Button(btns, text="Add to watch  \u2192", command=self._add).pack(
@@ -303,46 +346,321 @@ class App(tk.Tk):
             text = (meta.get("INFO") or "").strip()
         return "" if text == "-" else text
 
-    def _refilter(self):
-        term = self.filter_var.get().lower().strip()
-        self.picker.delete(0, "end")
-        self._visible = []
-        # Undescribed channels sort last and show just their code name.
-        rows = sorted(self.catalog.items(),
-                      key=lambda kv: (not self._english(kv[1]),
-                                      self._english(kv[1]).lower(), kv[0]))
-        for name, meta in rows:
+    def _index_catalog(self):
+        """Per channel: module label, function group, record, label, search text.
+
+        Done once: classifying 8,900 channels takes about half a second.
+        The values a module returns in one reply (a record) stay together,
+        so a record is classified once, by its prefixed job name and first
+        field.
+        """
+        info, record_group = {}, {}
+        for name, meta in self.catalog.items():
             english = self._english(meta)
             label = "%s  -  %s" % (english[:70], name) if english else name
             if meta.get("MODULE"):
                 module = int(meta["MODULE"], 16)
-                label = "%s: %s" % (core.MODULE_LABELS.get(module, "0x%02X" % module), label)
+                module_label = core.MODULE_LABELS.get(module, "0x%02X" % module)
+                key = (module, meta["ID"])
+                prefix_job = name.split(".")[0]
+                if key not in record_group:
+                    # The job name says what a record is; a field's text
+                    # ("wheel electronics identifier") can mislead, so it
+                    # only decides when the name says nothing.
+                    group = core.function_group(prefix_job)
+                    if group == core.OTHER_GROUP:
+                        group = core.function_group(
+                            prefix_job, meta.get("INFO"), meta.get("INFO_EN"))
+                    record_group[key] = group
+                func = record_group[key]
+                record = prefix_job if "." in name else None
+            else:
+                module_label = DME_LABEL
+                func = core.function_group(name, meta.get("INFO"), english)
+                record = None
             # Search the German and the code name too: the English is a
             # glossary translation and sometimes leaves words untranslated.
-            haystack = " ".join((label, meta.get("INFO") or "")).lower()
-            if not term or term in haystack:
-                self.picker.insert("end", label)
-                self._visible.append(name)
+            hay = " ".join((label, module_label, func, meta.get("INFO") or "")).lower()
+            info[name] = (module_label, func, record, label, hay)
+        # Undescribed channels sort last and show just their code name.
+        order = sorted(info, key=lambda n: (not self._english(self.catalog[n]),
+                                            info[n][3].lower()))
+        return info, order
+
+    def _avail_key(self, name):
+        meta = self.catalog[name]
+        if meta.get("MODULE"):
+            return int(meta["MODULE"], 16), int(meta["ID"], 16)
+        return self._dme_target(), int(meta["ID"], 16)
+
+    def _dme_target(self):
+        try:
+            return int(self.target_var.get(), 0)
+        except ValueError:
+            return core.DME_MASTER
+
+    def _answer_mark(self, name):
+        return ANSWER_MARKS.get(self.avail.get(self._avail_key(name)), "     ")
+
+    def _refilter_soon(self):
+        """Typing in the filter rebuilds the tree once the typing pauses."""
+        if getattr(self, "_refilter_job", None):
+            self.after_cancel(self._refilter_job)
+        self._refilter_job = self.after(250, self._refilter)
+
+    def _refilter(self):
+        self._refilter_job = None
+        term = self.filter_var.get().lower().strip()
+        by_module = self.group_var.get() == "Module"
+        only = self.only_var.get()
+        was_open = {i for i in self._all_nodes() if self.picker.item(i, "open")}
+        self.picker.delete(*self.picker.get_children())
+        self._members, self._pending = {}, {}
+        self._expand = False
+
+        groups, shown = {}, 0
+        for name in self._order:
+            module, func, record, _, hay = self._info[name]
+            if term and term not in hay:
+                continue
+            if only and self.avail.get(self._avail_key(name)) not in core.ANSWERS:
+                continue
+            top, sub = (module, func) if by_module else (func, module)
+            groups.setdefault(top, {}).setdefault(sub, {}).setdefault(record, []).append(name)
+            shown += 1
+        total = len(self.catalog)
+        self.count_label.config(text="Channels (%d of %d)" % (shown, total)
+                                if shown != total else "Channels (%d)" % total)
+        if not groups:
+            text = ("No answers recorded yet: Answers > Check car now, or connect "
+                    "and watch some channels" if only and not self.avail
+                    else "Nothing matches")
+            self.picker.insert("", "end", iid="none", text=text)
+            return
+
+        expand = self._expand = bool(term) and shown <= 300
+        top_kind, sub_kind = ("module", "function") if by_module else ("function", "module")
+        for top in sorted(groups, key=lambda g: self._group_sort(g, top_kind)):
+            top_iid = "g|" + top
+            subs = groups[top]
+            self._members[top_iid] = [n for sub in subs.values()
+                                      for names in sub.values() for n in names]
+            self.picker.insert("", "end", iid=top_iid,
+                               text="%s  (%d)" % (top, len(self._members[top_iid])),
+                               open=expand or top_iid in was_open)
+            for sub in sorted(subs, key=lambda g: self._group_sort(g, sub_kind)):
+                sub_iid = "%s|%s" % (top_iid, sub)
+                self._members[sub_iid] = [n for ns in subs[sub].values() for n in ns]
+                self._pending[sub_iid] = subs[sub]
+                self.picker.insert(top_iid, "end", iid=sub_iid,
+                                   text="%s  (%d)" % (sub, len(self._members[sub_iid])))
+                self.picker.insert(sub_iid, "end", iid=sub_iid + "|...", text="...")
+                if expand or sub_iid in was_open:
+                    self._fill(sub_iid)
+                    self.picker.item(sub_iid, open=True)
+
+    @staticmethod
+    def _group_sort(name, kind):
+        """Modules: DME first, then A-Z. Functions: FUNCTION_GROUPS order, Other last.
+
+        `kind` matters: "Climate" is both a module and a function group.
+        """
+        if kind == "module":
+            return (0, "") if name == DME_LABEL else (1, name)
+        order = [g for g, _ in core.FUNCTION_GROUPS]
+        return (len(order), "") if name not in order else (order.index(name), "")
+
+    def _all_nodes(self, parent=""):
+        for iid in self.picker.get_children(parent):
+            yield iid
+            yield from self._all_nodes(iid)
+
+    def _fill_open_node(self, _event=None):
+        iid = self.picker.focus()
+        if iid in self._pending:
+            self._fill(iid)
+
+    def _fill(self, iid):
+        """Insert a group's channels the first time it opens."""
+        records = self._pending.pop(iid, None)
+        if records is None:
+            return
+        self.picker.delete(*self.picker.get_children(iid))
+        for record in sorted(records, key=lambda r: (r is not None, r or "")):
+            names = records[record]
+            parent = iid
+            if record is not None and len(self.layouts.get(
+                    self._avail_key(names[0]), ())) > 1:
+                # Values one reply returns together stay together.
+                parent = "%s|%s" % (iid, record)
+                self._members[parent] = names
+                self.picker.insert(iid, "end", iid=parent, open=self._expand,
+                                   text="%s  (%d)" % (record, len(names)))
+            for name in names:
+                self.picker.insert(parent, "end", iid="c|" + name,
+                                   text=self._answer_mark(name) + self._info[name][3])
+
+    def _picked(self):
+        """Selected channel names, and whether a whole group was selected."""
+        names, group = [], False
+        for iid in self.picker.selection():
+            if iid.startswith("c|"):
+                names.append(iid[2:])
+            elif iid in self._members:
+                names.extend(self._members[iid])
+                group = True
+        seen = set()
+        return [n for n in names if not (n in seen or seen.add(n))], group
+
+    def _pick_double(self, event):
+        iid = self.picker.identify_row(event.y)
+        if iid.startswith("c|"):
+            self._add_names([iid[2:]])
 
     def _add(self):
-        self._add_names([self._visible[i] for i in self.picker.curselection()])
+        names, group = self._picked()
+        if group:
+            self._add_checked(names, "Add group")
+        else:
+            self._add_names(names)
 
     def _add_all(self):
         """Every channel the filter shows, minus the private ones."""
-        names = [n for n in self._visible if not core.is_sensitive(n)]
-        skipped = len(self._visible) - len(names)
-        if len(names) > 40 and not messagebox.askyesno(
-                "Add all", "Add %d channels to the watch list?\n\n"
+        tops = [i for i in self.picker.get_children() if i in self._members]
+        self._add_checked([n for t in tops for n in self._members[t]], "Add all")
+
+    def _add_checked(self, names, title):
+        """Add many at once: skip private values, confirm a long list."""
+        keep = [n for n in names if not core.is_sensitive(n)]
+        skipped = len(names) - len(keep)
+        if len(keep) > 40 and not messagebox.askyesno(
+                title, "Add %d channels to the watch list?\n\n"
                 "Channels on other modules (head unit, transmission, DSC...) "
                 "refresh every 1-10 s, a few per cycle, so DME channels keep "
-                "their rate." % len(names)):
+                "their rate." % len(keep)):
             return
-        self._add_names(names)
+        self._add_names(keep)
         if skipped:
             messagebox.showinfo(
-                "Add all", "Skipped %d private channel(s): Wi-Fi password and PIN, "
+                title, "Skipped %d private channel(s): Wi-Fi password and PIN, "
                 "SIM identity, previous destinations, paired devices. Add them "
                 "one at a time if you need them." % skipped)
+
+    # -- what the car answers --------------------------------------------
+
+    def _learn(self, sample):
+        """Record, from live reads, which identifiers this car answers."""
+        for name, (value, _unit, note) in sample.items():
+            if name not in self.catalog:
+                continue
+            status = "ok" if value is not None else "refused" if note in REFUSALS else None
+            key = self._avail_key(name)
+            if status and self.avail.get(key) != status:
+                self.avail[key] = status
+                self._avail_dirty = True
+
+    def _save_answers(self):
+        """Every few seconds: save what was learned, and show it in the picker."""
+        if self._avail_dirty:
+            self._avail_dirty = False
+            try:
+                core.save_availability(self.avail)
+            except OSError:
+                pass                    # a read-only profile shouldn't stop logging
+            self._refresh_marks()
+        self.after(10000, self._save_answers)
+
+    def _refresh_marks(self):
+        """Update the marks in place; rebuild only if they decide what shows.
+
+        A rebuild every few seconds while connected would drop the
+        selection someone is in the middle of making.
+        """
+        if self.only_var.get():
+            self._refilter()
+            return
+        for iid in self._all_nodes():
+            if iid.startswith("c|"):
+                name = iid[2:]
+                self.picker.item(iid, text=self._answer_mark(name) + self._info[name][3])
+
+    def _answers_changed(self, note):
+        try:
+            core.save_availability(self.avail)
+        except OSError as e:
+            note += " (not saved: %s)" % e
+        self._avail_dirty = False
+        self._refilter()
+        self.status.config(text="\u25cf " + note, foreground="#2d7dd2")
+
+    def _check_car(self):
+        """Ask the car for every catalogued identifier, as `n63read check` does."""
+        if self._checking:
+            messagebox.showinfo("Check car", "A check is already running.")
+            return
+        ip = self.ip_var.get().strip()
+        if not ip and not self.poller:
+            messagebox.showinfo("Check car", "Enter or discover an IP first.")
+            return
+        layouts = core.check_layouts(self.catalog, self._dme_target())
+        if not messagebox.askyesno(
+                "Check car", "Ask the car for all %d identifiers?\n\n"
+                "It only reads, takes a few minutes, and the answers are kept "
+                "for next time. While connected, logging slows down during the "
+                "check but doesn't stop." % len(layouts)):
+            return
+        stop = self._checking = {"stop": False}
+        total = len(layouts)
+
+        def job(h):
+            for i, (key, status) in enumerate(core.check_steps(h, layouts), 1):
+                self.q.put(("checkres", key, status, i, total))
+                if stop["stop"]:
+                    break
+                if i % CHECK_BATCH == 0:
+                    yield                   # let a sample through
+            self.q.put(("checkdone", stop["stop"]))
+
+        if self.poller:
+            self.poller.submit(job)
+            return
+
+        def work():
+            try:
+                with core.Hsfz(ip, source=0xF4, timeout=2.0) as h:
+                    for _ in job(h):
+                        pass
+            except Exception as e:                                  # noqa: BLE001
+                self.q.put(("error", "check failed: %s" % e))
+                self.q.put(("checkdone", True))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _stop_check(self):
+        if self._checking:
+            self._checking["stop"] = True
+
+    def _import_check(self):
+        path = filedialog.askopenfilename(
+            title="n63read check CSV", filetypes=[("CSV", "*.csv"), ("All files", "*.*")])
+        if not path:
+            return
+        try:
+            found = core.import_check_csv(path)
+        except (OSError, ValueError, csv.Error) as e:
+            messagebox.showerror("Import", "Could not read %s:\n\n%s"
+                                 % (os.path.basename(path), e))
+            return
+        self.avail.update(found)
+        answered = sum(1 for v in found.values() if v in core.ANSWERS)
+        self._answers_changed("imported %d answers (%d answered)" % (len(found), answered))
+
+    def _forget_answers(self):
+        if self.avail and messagebox.askyesno(
+                "Forget answers", "Forget what the car answered (%d identifiers)?"
+                % len(self.avail)):
+            self.avail.clear()
+            self._answers_changed("recorded answers forgotten")
 
     def _add_names(self, names):
         for name in names:
@@ -670,7 +988,23 @@ class App(tk.Tk):
                 kind = msg[0]
 
                 if kind == "sample":
+                    self._learn(msg[2])
                     self._show_sample(msg[2])
+
+                elif kind == "checkres":
+                    _, key, status, i, total = msg
+                    if status in core.ANSWERS or status == "refused" \
+                            or key not in self.avail:
+                        self.avail[key] = status
+                    if i % 50 == 0 or i == total:
+                        self.status.config(text="\u25cf checking %d / %d" % (i, total),
+                                           foreground="#b8860b")
+
+                elif kind == "checkdone":
+                    self._checking = None
+                    answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
+                    self._answers_changed("check %s: %d identifiers answer"
+                                          % ("stopped" if msg[1] else "done", answered))
 
                 elif kind == "feedsample":
                     _, feed, elapsed, sample = msg
@@ -823,6 +1157,12 @@ class App(tk.Tk):
                           fill=color, font=("TkDefaultFont", 7), text=label)
 
     def _close(self):
+        self._stop_check()
+        if self._avail_dirty:
+            try:
+                core.save_availability(self.avail)
+            except OSError:
+                pass
         if self.poller:
             self.poller.stop()
         self._stop_feed()

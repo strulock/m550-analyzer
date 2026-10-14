@@ -69,6 +69,29 @@ watch table, and press **Start logging** to write a CSV.
   unit values (Wi-Fi password and PIN, SIM identity, previous destinations,
   paired devices), which can still be added one at a time.
 
+The channel picker is a tree. **Group by Module** shows module ▸ function ▸
+channels; **Group by Function** shows function (GPS, gearbox, brakes & tires,
+lambda, misfire, fuel, boost, oil, cooling, electrical...) ▸ module ▸
+channels. Function groups come from keywords in each channel's name and
+description, so they are a guide, not gospel. Values a module returns in one
+reply stay together as a sub-group. Select a group and press **Add to watch**
+to add all of it (private values excepted); double-click adds one channel.
+Typing in the filter opens the matching groups when there are few matches.
+
+**Only channels the car answers** hides everything this car has not been
+seen to answer. Each channel is marked ✓ (answers), ≠ (answers, but not the
+size the catalog expects), ✗ (refused: not on this car) or – (no answer).
+What the car answers is learned from:
+
+- live reads while connected,
+- **Answers ▾ > Check car now**, which asks for every catalogued identifier,
+  like `n63read check` (a few minutes; while logging, logging slows but
+  doesn't stop), and
+- **Answers ▾ > Import n63read check CSV...** for a check run from the CLI.
+
+It is saved in `%APPDATA%\n63read\availability.json`, so one check carries
+over to later sessions. **Forget recorded answers** clears it.
+
 The chart draws the rows selected in the table, or the first six numeric
 channels if none are, each on its own scale; the legend gives each line's
 range. Enumerated values (GPS fix, gear) are logged and charted as numbers,
