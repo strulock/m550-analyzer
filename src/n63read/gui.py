@@ -14,7 +14,7 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-from n63read import core
+from n63read import core, playback
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
@@ -181,8 +181,10 @@ class App(tk.Tk):
         self.poller = None
         self.modules = []                    # addresses found by the last scan
         self.logging_to = None
+        self.feed = None                     # DemoFeed or ReplayFeed while not connected
 
         self._build()
+        self._start_demo()
         self.after(60, self._drain)
         self.protocol("WM_DELETE_WINDOW", self._close)
 
@@ -239,6 +241,8 @@ class App(tk.Tk):
 
         ttk.Button(bar, text="Faults", command=self._faults).pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Scan modules", command=self._scan).pack(side="right")
+        self.replay_btn = ttk.Button(bar, text="Open log...", command=self._toggle_replay)
+        self.replay_btn.pack(side="right", padx=(0, 4))
 
         # --- body: picker | watch
         body = ttk.Panedwindow(self, orient="horizontal")
@@ -339,6 +343,78 @@ class App(tk.Tk):
     def _push_channels(self):
         if self.poller:
             self.poller.set_channels(self.watch)
+        if self.feed:
+            self.feed.set_channels(self.watch)
+
+    def _set_watch(self, names):
+        """Replace the watch list with these catalog channels."""
+        self._clear()
+        for name in names:
+            meta = self.catalog[name]
+            self.watch.append((name, int(meta["ID"], 16), meta))
+            self.series[name] = []
+            self.tree.insert("", "end", iid=name, text=self._english(meta) or name,
+                             values=("", meta["EINHEIT"], name, meta["ID"], ""))
+        self._push_channels()
+
+    # -- demo and replay -------------------------------------------------
+
+    def _start_demo(self):
+        """Made-up data so the table and chart show something before connecting."""
+        self._set_watch([n for n in playback.DEMO_CHANNELS if n in self.catalog])
+        self._start_feed(playback.DemoFeed(self.q))
+        self.status.config(text="\u25cf demo data - not connected", foreground="#b8860b")
+
+    def _start_feed(self, feed):
+        self._stop_feed()
+        self.feed = feed
+        feed.set_channels(self.watch)
+        feed.start()
+
+    def _stop_feed(self):
+        """Stop demo or replay, and drop its points so they never mix with real ones."""
+        if not self.feed:
+            return
+        if self.feed.kind == "replay":
+            self.replay_btn.config(text="Open log...")
+        self.feed.stop()
+        self.feed = None
+        for s in self.series.values():
+            s.clear()
+        self._plot()
+
+    def _toggle_replay(self):
+        if self.feed and self.feed.kind == "replay":
+            self._stop_feed()
+            self.status.config(text="\u25cf replay stopped", foreground="#999")
+            return
+        if self.poller:
+            messagebox.showinfo("Replay", "Disconnect first.")
+            return
+        path = filedialog.askopenfilename(
+            filetypes=[("CSV log", "*.csv"), ("All files", "*.*")])
+        if not path:
+            return
+        try:
+            names, rows = playback.read_log(path)
+        except (OSError, ValueError, csv.Error) as e:
+            messagebox.showerror("Replay", "Could not read %s:\n\n%s"
+                                 % (os.path.basename(path), e))
+            return
+        known = [n for n in names if n in self.catalog]
+        if not known:
+            messagebox.showerror("Replay", "None of the log's columns are known channels.")
+            return
+        if len(known) < len(names):
+            messagebox.showwarning(
+                "Replay", "Skipping columns not in the channel catalog:\n\n"
+                + ", ".join(n for n in names if n not in self.catalog))
+        self._stop_feed()
+        self._set_watch(known)
+        feed = playback.ReplayFeed(self.q, rows)
+        feed.name_shown = os.path.basename(path)
+        self._start_feed(feed)
+        self.replay_btn.config(text="Stop replay")
 
     # -- connection ------------------------------------------------------
 
@@ -431,6 +507,7 @@ class App(tk.Tk):
             messagebox.showerror("Connect", "Target must be hex (0x12); interval a number.")
             return
 
+        self._stop_feed()
         self.status.config(text="\u25cf connecting...", foreground="#b8860b")
         self.poller = Poller(ip, target, 0xF4, 2.0, self.q)
         self.poller.interval = max(0.05, interval)
@@ -565,19 +642,25 @@ class App(tk.Tk):
                 kind = msg[0]
 
                 if kind == "sample":
-                    _, elapsed, sample = msg
-                    for name, (value, unit, note) in sample.items():
-                        if not self.tree.exists(name):
-                            continue
-                        shown = "" if value is None else (
-                            "%.4g" % value if isinstance(value, float) else value)
-                        self.tree.set(name, "v", shown)
-                        self.tree.set(name, "note", note)
-                        if isinstance(value, (int, float)):
-                            s = self.series.setdefault(name, [])
-                            s.append(float(value))
-                            del s[:-PLOT_POINTS]
-                    self._plot()
+                    self._show_sample(msg[2])
+
+                elif kind == "feedsample":
+                    _, feed, elapsed, sample = msg
+                    if feed is not self.feed:
+                        continue                # left over from a stopped feed
+                    self._show_sample(sample)
+                    if feed.kind == "replay":
+                        self.status.config(
+                            text="● replaying %s  %s / %s" % (
+                                feed.name_shown, _clock(elapsed - feed.rows[0][0]),
+                                _clock(feed.duration)),
+                            foreground="#2d7dd2")
+
+                elif kind == "feeddone":
+                    if msg[1] is self.feed:
+                        self.feed = None
+                        self.replay_btn.config(text="Open log...")
+                        self.status.config(text="● replay finished", foreground="#999")
 
                 elif kind == "status":
                     ok = msg[1] == "connected"
@@ -640,6 +723,20 @@ class App(tk.Tk):
             pass
         self.after(60, self._drain)
 
+    def _show_sample(self, sample):
+        for name, (value, unit, note) in sample.items():
+            if not self.tree.exists(name):
+                continue
+            shown = "" if value is None else (
+                "%.4g" % value if isinstance(value, float) else value)
+            self.tree.set(name, "v", shown)
+            self.tree.set(name, "note", note)
+            if isinstance(value, (int, float)):
+                s = self.series.setdefault(name, [])
+                s.append(float(value))
+                del s[:-PLOT_POINTS]
+        self._plot()
+
     # -- chart -----------------------------------------------------------
 
     def _plot(self):
@@ -648,6 +745,11 @@ class App(tk.Tk):
         w = c.winfo_width() or 700
         h = c.winfo_height() or 200
         pad = 28
+
+        if self.feed:
+            c.create_text(w - pad, h - 8, anchor="e", fill="#c8c8c8",
+                          font=("TkDefaultFont", 9, "bold"),
+                          text="DEMO DATA" if self.feed.kind == "demo" else "REPLAY")
 
         active = [(n, v) for n, v in self.series.items() if len(v) > 1]
         if not active:
@@ -683,7 +785,13 @@ class App(tk.Tk):
     def _close(self):
         if self.poller:
             self.poller.stop()
+        self._stop_feed()
         self.destroy()
+
+
+def _clock(seconds):
+    seconds = max(0, int(seconds))
+    return "%d:%02d" % (seconds // 60, seconds % 60)
 
 
 def main():
