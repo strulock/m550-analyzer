@@ -216,6 +216,9 @@ class App(tk.Tk):
         self._update_ready = None       # version installed, waiting for a restart
         self._update_url = None
         self._updated_from = update.tidy()   # we are the new version: keep the old
+        if self._updated_from:
+            update.set_installed_version()  # keep Settings > Apps in step
+        threading.Thread(target=core.logs_dir, daemon=True).start()
         diag.enabled = self.settings.get("diagnostics", True)
         threading.Thread(target=diag.prune, daemon=True).start()
         self._capture = None
@@ -569,6 +572,7 @@ class App(tk.Tk):
     def _save_diag_report(self):
         path = filedialog.asksaveasfilename(
             defaultextension=".jsonl", filetypes=[("Diagnostics report", "*.jsonl")],
+            initialdir=core.logs_dir(),
             initialfile=time.strftime("n63read_diagnostics_%Y-%m-%d_%H-%M.jsonl"))
         if not path:
             return
@@ -929,7 +933,8 @@ class App(tk.Tk):
 
     def _import_check(self):
         path = filedialog.askopenfilename(
-            title="n63read check CSV", filetypes=[("CSV", "*.csv"), ("All files", "*.*")])
+            title="n63read check CSV", filetypes=[("CSV", "*.csv"), ("All files", "*.*")],
+            initialdir=core.logs_dir())
         if not path:
             return
         try:
@@ -1025,7 +1030,8 @@ class App(tk.Tk):
             messagebox.showinfo("Replay", "Disconnect first.")
             return
         path = filedialog.askopenfilename(
-            filetypes=[("CSV log", "*.csv"), ("All files", "*.*")])
+            filetypes=[("CSV log", "*.csv"), ("All files", "*.*")],
+            initialdir=core.logs_dir())
         if not path:
             return
         try:
@@ -1292,7 +1298,8 @@ class App(tk.Tk):
         else:
             path = filedialog.asksaveasfilename(
                 parent=win, defaultextension=".csv", filetypes=[("CSV", "*.csv")],
-                initialdir=os.path.dirname(self.logging_to) if self.logging_to else None,
+                initialdir=os.path.dirname(self.logging_to) if self.logging_to
+                else core.logs_dir(),
                 initialfile="n63_faults_%s.csv" % stamp)
             if not path:
                 return
@@ -1317,6 +1324,7 @@ class App(tk.Tk):
             return
         path = filedialog.asksaveasfilename(
             defaultextension=".csv", filetypes=[("CSV", "*.csv")],
+            initialdir=core.logs_dir(),
             initialfile=time.strftime("n63_%Y-%m-%d_%H-%M-%S.csv"))
         if not path:
             return

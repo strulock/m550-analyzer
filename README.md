@@ -55,13 +55,35 @@ actuator control (`0x2F`) and routines (`0x31`) are all blocked, and the
 future feature needs any of them, it gets a separate, explicit opt-in path
 with a loud warning — not a wider allow-list.
 
+## Install
+
+Download `BMW-Analyzer-Setup.exe` from the
+[latest release](https://github.com/strulock/m550-analyzer/releases/latest)
+and run it. It installs for your user only (no administrator prompt) into
+`%LOCALAPPDATA%\Programs\BMW Analyzer`, and adds to the Start menu:
+
+- **BMW Analyzer**, the app;
+- **BMW Analyzer Logs**, the folder `Documents\BMW Analyzer Logs`, where drive
+  logs, fault lists and diagnostics reports are saved by default;
+- **BMW Analyzer command prompt**, a terminal in the install folder for
+  `n63read-cli.exe`.
+
+A desktop icon is optional. The app keeps itself up to date (see
+[Updates](#updates)), and Settings > Apps shows the version it's on.
+Uninstalling removes the program but never the logs folder. Expect a
+SmartScreen warning: the installer is unsigned.
+
+The bare `n63read.exe` and `n63read-cli.exe` are attached to each release
+too, for running without installing.
+
 ## Usage
 
 ### GUI
 
 Run `n63read.exe`. Choose the `169.254.x.x` interface under **via**, press
 **Discover**, then **Connect**. Filter the channel list, add channels to the
-watch table, and press **Start logging** to write a CSV.
+watch table, and press **Start logging** to write a CSV. File dialogs open
+in `Documents\BMW Analyzer Logs`.
 
 - **Scan modules** sweeps addresses `0x00`–`0x7F` with TesterPresent and
   lists the modules that answer.
@@ -211,8 +233,8 @@ the car, and stays quiet when there's no internet (the car's network has
 none). The footer, bottom right, shows the version; when an update is ready
 it says so, and its menu has **Restart to update**, **Check for updates
 now**, **Automatic updates** (on/off) and **Release notes**. The folder the
-exe is in must be writable, so keep it somewhere like `Downloads` or
-`%LOCALAPPDATA%`, not `Program Files`.
+exe is in must be writable: the installer's is. A bare exe works anywhere
+you can write, like `Downloads`, but not `Program Files`.
 
 From a terminal: `n63read update --check`, `n63read update` and
 `n63read --version`.
@@ -259,7 +281,9 @@ n63read read --ip 169.254.x.x ILAG1 ILAG2    read channels once
 n63read faults --ip 169.254.x.x -v           DME fault memory, decoded
 n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
-n63read log --ip 169.254.x.x --out run.csv ILAG1 ILAG2 ILUZ5 ILUZ7
+n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
+                                             log to Documents\BMW Analyzer Logs
+                                             (or --out run.csv)
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?
@@ -302,9 +326,13 @@ build.bat
 ```
 
 `build.bat` writes `dist\n63read.exe` (GUI) and `dist\n63read-cli.exe`. The
-CLI is built without `--windowed`, or it would have no stdout. CI builds both
-on every push and attaches them to the release when a `v*` tag is pushed.
-Expect a SmartScreen warning: the binary is unsigned.
+CLI is built without `--windowed`, or it would have no stdout. The installer
+is `installer\BMW-Analyzer.iss` ([Inno Setup 6](https://jrsoftware.org/isinfo.php)):
+`iscc /DAppVersion=0.3.3 installer\BMW-Analyzer.iss` writes
+`dist\BMW-Analyzer-Setup.exe`. CI builds all three on every push, installs
+and uninstalls the installer silently as a smoke test, and attaches them with
+`SHA256SUMS.txt` to the release when a `v*` tag is pushed. Keep the
+installer's `AppId`: upgrades and the uninstall entry depend on it.
 
 The data CSVs live in `src/n63read/data/`. At runtime they are found in
 the PyInstaller bundle, the package, next to the exe, or the working

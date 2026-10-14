@@ -23,6 +23,10 @@ import urllib.request
 from n63read import __version__
 
 REPO = "strulock/m550-analyzer"
+# The installer's AppId (installer/BMW-Analyzer.iss); its per-user uninstall
+# entry is where Settings > Apps reads the version from.
+APP_ID = "{15CE8A75-71CE-4317-BF3E-1730307815CD}"
+UNINSTALL_KEY = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\%s_is1" % APP_ID
 API = "https://api.github.com/repos/%s/releases/latest" % REPO
 RELEASES_PAGE = "https://github.com/%s/releases" % REPO
 CHECK_EVERY = 6 * 3600          # seconds between checks while open
@@ -186,6 +190,24 @@ def tidy(exe_path=None):
         except OSError:
             pass                            # still running somewhere; next time
     return None
+
+
+def set_installed_version(version=__version__):
+    """After a self-update, show the new version in Settings > Apps.
+
+    Only touches the installer's own per-user entry, and only if it exists
+    (a copy run from Downloads has none). Returns True if it was set.
+    """
+    if sys.platform != "win32":
+        return False
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, UNINSTALL_KEY, 0,
+                            winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
+            winreg.SetValueEx(key, "DisplayVersion", 0, winreg.REG_SZ, version)
+        return True
+    except OSError:
+        return False
 
 
 def _remove(path):

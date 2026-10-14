@@ -1,11 +1,13 @@
 # Architecture
 
 Pure Python standard library at runtime (`socket`, `struct`, `csv`, `json`,
-`threading`, `queue`, `tkinter`). PyInstaller builds the two Windows exes.
+`threading`, `queue`, `tkinter`). PyInstaller builds the two Windows exes;
+Inno Setup packs them into a per-user installer.
 
 ```
 src/n63read/
-  core.py       protocol, decoding, catalogs, the reader, the check, answers store
+  core.py       protocol, decoding, catalogs, the reader, the check, answers store,
+                the Documents\BMW Analyzer Logs folder
   cli.py        n63read / n63read-cli.exe: discover, scan, read, log, faults, check, gps, selftest
   gui.py        n63read.exe: Tkinter app
   playback.py   demo data and log replay (no Tk, testable)
@@ -14,6 +16,8 @@ src/n63read/
   update.py     self-update from GitHub releases: check, download, verify
                 SHA-256, swap the running exe by renaming
   data/         catalogs and lookup CSVs (see data-sources.md)
+installer/
+  BMW-Analyzer.iss    Inno Setup script -> dist/BMW-Analyzer-Setup.exe
 tools/
   module_catalog.py   .prg -> module catalogs + fault texts
   translate.py, glossary.py   German -> English columns

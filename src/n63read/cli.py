@@ -225,6 +225,8 @@ def op_log(args):
             sys.exit("unknown channel: %s" % name)
         chans.append((name, int(meta["ID"], 16), meta))
 
+    if not args.out:
+        args.out = os.path.join(core.logs_dir(), time.strftime("n63_%Y-%m-%d_%H-%M-%S.csv"))
     out = open(args.out, "w", newline="", encoding="utf-8")
     w = csv.writer(out)
     w.writerow(["Time"] + [n for n, _, _ in chans])
@@ -500,7 +502,8 @@ def build_parser():
     common(sp)
     sp.add_argument("--target", type=hexint, default=DME_MASTER)
     sp.add_argument("--interval", type=float, default=0.2)
-    sp.add_argument("--out", default="n63log.csv")
+    sp.add_argument("--out", help="CSV to write (default: a dated file in "
+                                  "Documents\\%s)" % core.LOGS_FOLDER)
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
 
@@ -546,6 +549,8 @@ def build_parser():
 
 
 def main(argv=None):
+    if update.tidy():                   # first start after a self-update
+        update.set_installed_version()
     args = build_parser().parse_args(argv)
     try:
         args.func(args)
