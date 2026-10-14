@@ -3,9 +3,9 @@
 `n63read` reads live engine data and fault memory from a 2018 BMW M550i (G30,
 N63TU2 / N63B44O2) over the OBD Ethernet (ENET) port, using BMW's HSFZ
 protocol. It is pure Python standard library, with a CLI and a Tkinter GUI,
-and ships as a single Windows exe. Besides the engine it reads ten more
+and ships as a single Windows exe. Besides the engine it reads eleven more
 modules: head unit (GPS), transmission, transfer case, DSC, steering, body,
-suspension, climate, airbag module and fuel pump.
+suspension, climate, airbag module, fuel pump and park assist.
 
 **Documentation:** [docs/](docs/README.md) covers the protocol, the modules
 and which BMW files fit this car, the `.prg` format and how values are
@@ -76,6 +76,13 @@ watch table, and press **Start logging** to write a CSV.
   unit values (Wi-Fi password and PIN, SIM identity, previous destinations,
   paired devices), which can still be added one at a time.
 
+**Language** (top right) switches channel descriptions, value texts in the
+Status column and fault descriptions between English and Deutsch (BMW's
+original German). The filter searches both, whichever is shown, and the
+choice is remembered (`%APPDATA%\n63read\settings.json`). Code names
+(`ILAG2`, `EGS_ISTGANG.ISTGANG`) stay as they are in both: they're the
+column names in logs.
+
 The channel picker is a tree. **Group by Module** shows module ▸ function ▸
 channels; **Group by Function** shows function (GPS, gearbox, brakes & tires,
 lambda, misfire, fuel, boost, oil, cooling, electrical...) ▸ module ▸
@@ -119,7 +126,7 @@ down during it but doesn't stop.
 
 ### Other modules: head unit, transmission, chassis, body, climate
 
-Besides the DME, the channel list holds the readable values of ten more
+Besides the DME, the channel list holds the readable values of eleven more
 modules, generated from their SGBD files by `tools/module_catalog.py` and
 labelled by module in the picker:
 
@@ -135,6 +142,7 @@ labelled by module in the picker:
 | Transfer case, xDrive (0x19) | `lmv_g11` | `LMV_` | 224 | clutch torque and status, clutch temperature model |
 | Climate, IHKA (0x78) | `ihka_g11` | `IHKA_` | 154 | climate temperature sensors, A/C compressor speed and state |
 | Fuel pump, EKP (0x17) | `ekp301` | `EKP_` | 13 | pump motor voltages and currents, battery voltage, tank senders, temperatures |
+| Park assist, PMA (0x2C) | `pma_20` | `PMA_` | 89 | distance at every parking sensor, parking space size, reverse gear |
 
 Most of the transmission's values are shift adaptation tables. Their fault
 texts are in the fault file too, so their codes now come with a description.
@@ -244,7 +252,7 @@ and `python tools/channel_docs.py`; tests fail if either is out of date.
 The CSVs were extracted from BMW SGBD (`.prg`) files, mainly `dme8ff_r.prg`;
 the module catalogs (`<MODULE>_measurements.csv`, `<MODULE>_enum_tables.csv`)
 and their fault texts from `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`,
-`bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11` and `ekp301.prg`, by
+`bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11`, `ekp301` and `pma_20.prg`, by
 `tools/module_catalog.py`.
 They hold identifier numbers, units and scaling factors: the interface facts
 you need to talk to hardware you own. BMW's `.prg` files and SP-Daten are not

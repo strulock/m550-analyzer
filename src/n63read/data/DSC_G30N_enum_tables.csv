@@ -8,72 +8,72 @@ DSC_G30N.RDBI_ADS_DOP,0x40,vehicleManufacturerSpecific_40,vehicleManufacturerSpe
 DSC_G30N.RDBI_ADS_DOP,0x41,codingSession,codingSession
 DSC_G30N.RDBI_ADS_DOP,0x42,SWTSession,SWTSession
 DSC_G30N.RDBI_ADS_DOP,0x43,HDDUpdateSession,HDDUpdateSession
-DSC_G30N.RDBI_ADS_DOP,0xff,ungültig,invalid
-DSC_G30N.RDBI_PC_PCS_DOP,0x00,ECU mehrmals programmierbar,ECU mehrmals programmierbar
-DSC_G30N.RDBI_PC_PCS_DOP,0x01,ECU mindestens einmal vollstaendig programmierbar,ECU mindestens einmal vollstaendig programmierbar
-DSC_G30N.RDBI_PC_PCS_DOP,0x02,ECU nicht mehr programmierbar,ECU not mehr programmierbar
-DSC_G30N.RDBI_PC_PCS_DOP,0xff,ungültig,invalid
-DSC_G30N.TAB_ABS_FUNKTION,0,nicht verfügbar,not available
-DSC_G30N.TAB_ABS_FUNKTION,1,verfügbar,available
-DSC_G30N.TAB_ABS_FUNKTION,2,verfügbar Rückfallebene,available Rückfallebene
-DSC_G30N.TAB_ABS_FUNKTION,0xFF,ungültig,invalid
-DSC_G30N.TAB_ASC_FUNKTION,0,nicht verfügbar,not available
-DSC_G30N.TAB_ASC_FUNKTION,1,verfügbar,available
-DSC_G30N.TAB_ASC_FUNKTION,2,verfügbar Rückfallebene,available Rückfallebene
-DSC_G30N.TAB_ASC_FUNKTION,3,verfügbar Schlupf aufgeweitet,available Schlupf aufgeweitet
-DSC_G30N.TAB_ASC_FUNKTION,4,verfügbar Rückfallebene Schlupf aufgeweitet,available Rückfallebene Schlupf aufgeweitet
-DSC_G30N.TAB_ASC_FUNKTION,0xFF,ungültig,invalid
-DSC_G30N.TAB_AUTOHOLDTASTER,0,Taster nicht betätigt,Button not betätigt
-DSC_G30N.TAB_AUTOHOLDTASTER,1,Taster gedrückt,Button gedrückt
+DSC_G30N.RDBI_ADS_DOP,0xff,ungültig,Invalid
+DSC_G30N.RDBI_PC_PCS_DOP,0x00,ECU mehrmals programmierbar,ECU programmable several times
+DSC_G30N.RDBI_PC_PCS_DOP,0x01,ECU mindestens einmal vollstaendig programmierbar,ECU fully programmable at least once more
+DSC_G30N.RDBI_PC_PCS_DOP,0x02,ECU nicht mehr programmierbar,ECU no longer programmable
+DSC_G30N.RDBI_PC_PCS_DOP,0xff,ungültig,Invalid
+DSC_G30N.TAB_ABS_FUNKTION,0,nicht verfügbar,Not available
+DSC_G30N.TAB_ABS_FUNKTION,1,verfügbar,Available
+DSC_G30N.TAB_ABS_FUNKTION,2,verfügbar Rückfallebene,"Available, fallback level"
+DSC_G30N.TAB_ABS_FUNKTION,0xFF,ungültig,Invalid
+DSC_G30N.TAB_ASC_FUNKTION,0,nicht verfügbar,Not available
+DSC_G30N.TAB_ASC_FUNKTION,1,verfügbar,Available
+DSC_G30N.TAB_ASC_FUNKTION,2,verfügbar Rückfallebene,"Available, fallback level"
+DSC_G30N.TAB_ASC_FUNKTION,3,verfügbar Schlupf aufgeweitet,"Available, extended slip"
+DSC_G30N.TAB_ASC_FUNKTION,4,verfügbar Rückfallebene Schlupf aufgeweitet,"Available, fallback level, extended slip"
+DSC_G30N.TAB_ASC_FUNKTION,0xFF,ungültig,Invalid
+DSC_G30N.TAB_AUTOHOLDTASTER,0,Taster nicht betätigt,Button not pressed
+DSC_G30N.TAB_AUTOHOLDTASTER,1,Taster gedrückt,Button pressed
 DSC_G30N.TAB_AUTOHOLDTASTER,2,Taster defekt,Button defective
-DSC_G30N.TAB_AUTOHOLDTASTER,3,Signalmuster ungültig,Signalmuster invalid
+DSC_G30N.TAB_AUTOHOLDTASTER,3,Signalmuster ungültig,Signal pattern invalid
 DSC_G30N.TAB_AXLE_RESULT,0x00,false,false
 DSC_G30N.TAB_AXLE_RESULT,0x01,true,true
-DSC_G30N.TAB_AXLE_RESULT,0xFF,Undefiniert,Undefiniert
+DSC_G30N.TAB_AXLE_RESULT,0xFF,Undefiniert,Undefined
 DSC_G30N.TAB_BREMSBELAGVERSCHLEISSSENSOR,0x00,OK,OK
-DSC_G30N.TAB_BREMSBELAGVERSCHLEISSSENSOR,0x01,Pille durchgeschliffen,Pille durchgeschliffen
-DSC_G30N.TAB_BREMSBELAGVERSCHLEISSSENSOR,0xFF,ungültig,invalid
-DSC_G30N.TAB_DREHRICHTUNG,0x00,Stand,Stand
-DSC_G30N.TAB_DREHRICHTUNG,0x01,Vorwaerts,Vorwaerts
-DSC_G30N.TAB_DREHRICHTUNG,0x02,Rueckwaerts,Rueckwaerts
-DSC_G30N.TAB_DREHRICHTUNG,0x03,nicht definiert,not definiert
+DSC_G30N.TAB_BREMSBELAGVERSCHLEISSSENSOR,0x01,Pille durchgeschliffen,Sensor contact worn through
+DSC_G30N.TAB_BREMSBELAGVERSCHLEISSSENSOR,0xFF,ungültig,Invalid
+DSC_G30N.TAB_DREHRICHTUNG,0x00,Stand,Stationary
+DSC_G30N.TAB_DREHRICHTUNG,0x01,Vorwaerts,Forwards
+DSC_G30N.TAB_DREHRICHTUNG,0x02,Rueckwaerts,Reverse
+DSC_G30N.TAB_DREHRICHTUNG,0x03,nicht definiert,Not defined
 DSC_G30N.TAB_DSC_ECU_TYP,0x00,1-DS,1-DS
 DSC_G30N.TAB_DSC_ECU_TYP,0x01,3-DS,3-DS
 DSC_G30N.TAB_DSC_ECU_TYP,0x02,HYBRID,HYBRID
 DSC_G30N.TAB_DSC_ECU_TYP,0xFF,Wert ungültig,Value invalid
-DSC_G30N.TAB_EMF_HU_MODE,0x00,aktiv,active
-DSC_G30N.TAB_EMF_HU_MODE,0x01,Stufe 1,Stage 1
-DSC_G30N.TAB_EMF_HU_MODE,0x02,Stufe 2,Stage 2
-DSC_G30N.TAB_EMF_HU_MODE,0x03,Stufe 3,Stage 3
-DSC_G30N.TAB_EMF_HU_MODE,0x04,Stufe 4,Stage 4
-DSC_G30N.TAB_EMF_HU_MODE,0x05,Stufe 5,Stage 5
-DSC_G30N.TAB_EMF_HU_MODE,0x06,Stufe 6,Stage 6
-DSC_G30N.TAB_EMF_HU_MODE,0xFF,nicht aktiv,not active
-DSC_G30N.TAB_EMF_POSITION,0x00,Angelegt,Angelegt
-DSC_G30N.TAB_EMF_POSITION,0x01,beim Schließen,during Schließen
+DSC_G30N.TAB_EMF_HU_MODE,0x00,aktiv,Active
+DSC_G30N.TAB_EMF_HU_MODE,0x01,Stufe 1,Level 1
+DSC_G30N.TAB_EMF_HU_MODE,0x02,Stufe 2,Level 2
+DSC_G30N.TAB_EMF_HU_MODE,0x03,Stufe 3,Level 3
+DSC_G30N.TAB_EMF_HU_MODE,0x04,Stufe 4,Level 4
+DSC_G30N.TAB_EMF_HU_MODE,0x05,Stufe 5,Level 5
+DSC_G30N.TAB_EMF_HU_MODE,0x06,Stufe 6,Level 6
+DSC_G30N.TAB_EMF_HU_MODE,0xFF,nicht aktiv,Not active
+DSC_G30N.TAB_EMF_POSITION,0x00,Angelegt,Applied
+DSC_G30N.TAB_EMF_POSITION,0x01,beim Schließen,While closing
 DSC_G30N.TAB_EMF_POSITION,0x02,Geschlossen,Closed
-DSC_G30N.TAB_EMF_POSITION,0x03,Geöffnet,Open
-DSC_G30N.TAB_EMF_POSITION,0x04,beim Öffnen,during Öffnen
-DSC_G30N.TAB_EMF_POSITION,0x05,Initialisierung,Initialisierung
-DSC_G30N.TAB_EMF_POSITION,0x06,unbekannt / fehlerhaft,unknown / faulty
-DSC_G30N.TAB_EMF_POSITION,0x07,Montageposition,Montageposition
-DSC_G30N.TAB_EMF_POSITION,0x08,beim Anfahren Montageposition,during Anfahren Montageposition
-DSC_G30N.TAB_EMF_POSITION,0xFF,nicht definiert,not definiert
-DSC_G30N.TAB_EMF_TASTER,0x00,neutral,neutral
-DSC_G30N.TAB_EMF_TASTER,0x01,gezogen,gezogen
-DSC_G30N.TAB_EMF_TASTER,0x02,gedrueckt,gedrueckt
+DSC_G30N.TAB_EMF_POSITION,0x03,Geöffnet,Opened
+DSC_G30N.TAB_EMF_POSITION,0x04,beim Öffnen,While opening
+DSC_G30N.TAB_EMF_POSITION,0x05,Initialisierung,Initialisation
+DSC_G30N.TAB_EMF_POSITION,0x06,unbekannt / fehlerhaft,Unknown / faulty
+DSC_G30N.TAB_EMF_POSITION,0x07,Montageposition,Assembly position
+DSC_G30N.TAB_EMF_POSITION,0x08,beim Anfahren Montageposition,Assembly position when driving off
+DSC_G30N.TAB_EMF_POSITION,0xFF,nicht definiert,Not defined
+DSC_G30N.TAB_EMF_TASTER,0x00,neutral,Neutral
+DSC_G30N.TAB_EMF_TASTER,0x01,gezogen,Pulled
+DSC_G30N.TAB_EMF_TASTER,0x02,gedrueckt,Pressed
 DSC_G30N.TAB_EMF_TASTER,0x03,Fehler,Fault
-DSC_G30N.TAB_EMF_TASTER,0xFF,undefinierter Zustand,undefinierter state
+DSC_G30N.TAB_EMF_TASTER,0xFF,undefinierter Zustand,Undefined state
 DSC_G30N.TAB_EPB_LED,0x00,Aus,Off
 DSC_G30N.TAB_EPB_LED,0x01,Ein,On
 DSC_G30N.TAB_EPB_LED,0x02,Defekt,Defective
-DSC_G30N.TAB_EPB_LED,0xFF,Signalmuster ungültig,Signalmuster invalid
+DSC_G30N.TAB_EPB_LED,0xFF,Signalmuster ungültig,Signal pattern invalid
 DSC_G30N.TAB_EPB_TASTER_FEHLER,0x00,Kein Fehler,No fault
-DSC_G30N.TAB_EPB_TASTER_FEHLER,0x01,Drücken defekt,Drücken defective
-DSC_G30N.TAB_EPB_TASTER_FEHLER,0x02,Ziehen defekt,Ziehen defective
-DSC_G30N.TAB_EPB_TASTER_FEHLER,0xFF,Signalmuster ungültig,Signalmuster invalid
-DSC_G30N.TAB_ERFS_AKT_VERBAUT,0x00,Nein,Nein
-DSC_G30N.TAB_ERFS_AKT_VERBAUT,0x01,Ja,Ja
+DSC_G30N.TAB_EPB_TASTER_FEHLER,0x01,Drücken defekt,Press function defective
+DSC_G30N.TAB_EPB_TASTER_FEHLER,0x02,Ziehen defekt,Pull function defective
+DSC_G30N.TAB_EPB_TASTER_FEHLER,0xFF,Signalmuster ungültig,Signal pattern invalid
+DSC_G30N.TAB_ERFS_AKT_VERBAUT,0x00,Nein,No
+DSC_G30N.TAB_ERFS_AKT_VERBAUT,0x01,Ja,Yes
 DSC_G30N.TAB_ERFS_AKT_VERBAUT,0xFF,Ungültig,Invalid
 DSC_G30N.TAB_ERFS_GESCHW_IDX,0x00,L,L
 DSC_G30N.TAB_ERFS_GESCHW_IDX,0x01,M,M
@@ -91,7 +91,7 @@ DSC_G30N.TAB_ERFS_GESCHW_IDX,0x0C,W,W
 DSC_G30N.TAB_ERFS_GESCHW_IDX,0x0D,ZR,ZR
 DSC_G30N.TAB_ERFS_GESCHW_IDX,0x0E,Y,Y
 DSC_G30N.TAB_ERFS_GESCHW_IDX,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_ERFS_KARKASSE,0x00,Normal Last,Normal load
+DSC_G30N.TAB_ERFS_KARKASSE,0x00,Normal Last,Standard load
 DSC_G30N.TAB_ERFS_KARKASSE,0x01,Extra Last,Extra load
 DSC_G30N.TAB_ERFS_KARKASSE,0xFF,Ungültig,Invalid
 DSC_G30N.TAB_ERFS_RSC,0x00,RSC,RSC
@@ -99,200 +99,200 @@ DSC_G30N.TAB_ERFS_RSC,0x01,Standard,Standard
 DSC_G30N.TAB_ERFS_RSC,0x02,PAX,PAX
 DSC_G30N.TAB_ERFS_RSC,0x03,Seal,Seal
 DSC_G30N.TAB_ERFS_RSC,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_ERFS_SAISON,0x00,Sommer,Sommer
+DSC_G30N.TAB_ERFS_SAISON,0x00,Sommer,Summer
 DSC_G30N.TAB_ERFS_SAISON,0x01,Winter,Winter
-DSC_G30N.TAB_ERFS_SAISON,0x02,Ganzjahres,Ganzjahres
+DSC_G30N.TAB_ERFS_SAISON,0x02,Ganzjahres,All-season
 DSC_G30N.TAB_ERFS_SAISON,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_ERFS_WERKSAUSLIEFERUNG,0x00,Nein,Nein
-DSC_G30N.TAB_ERFS_WERKSAUSLIEFERUNG,0x01,Ja,Ja
+DSC_G30N.TAB_ERFS_WERKSAUSLIEFERUNG,0x00,Nein,No
+DSC_G30N.TAB_ERFS_WERKSAUSLIEFERUNG,0x01,Ja,Yes
 DSC_G30N.TAB_ERFS_WERKSAUSLIEFERUNG,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_FDR_FUNKTION,0,nicht verfügbar,not available
-DSC_G30N.TAB_FDR_FUNKTION,1,verfügbar,available
-DSC_G30N.TAB_FDR_FUNKTION,3,verfügbar Schlupf aufgeweitet,available Schlupf aufgeweitet
-DSC_G30N.TAB_FDR_FUNKTION,0xFF,ungültig,invalid
-DSC_G30N.TAB_HDC_FUNKTION,0,nicht verfügbar,not available
-DSC_G30N.TAB_HDC_FUNKTION,1,verfügbar,available
-DSC_G30N.TAB_HDC_FUNKTION,0xFF,ungültig,invalid
+DSC_G30N.TAB_FDR_FUNKTION,0,nicht verfügbar,Not available
+DSC_G30N.TAB_FDR_FUNKTION,1,verfügbar,Available
+DSC_G30N.TAB_FDR_FUNKTION,3,verfügbar Schlupf aufgeweitet,"Available, extended slip"
+DSC_G30N.TAB_FDR_FUNKTION,0xFF,ungültig,Invalid
+DSC_G30N.TAB_HDC_FUNKTION,0,nicht verfügbar,Not available
+DSC_G30N.TAB_HDC_FUNKTION,1,verfügbar,Available
+DSC_G30N.TAB_HDC_FUNKTION,0xFF,ungültig,Invalid
 DSC_G30N.TAB_KALIBRIERUNG,0x00,RDC unterbrochen mit Fehler,RDC interrupted with fault
-DSC_G30N.TAB_KALIBRIERUNG,0x01,RDC Reset Erfolgreich abgeschlossen,RDC reset Erfolgreich abgeschlossen
-DSC_G30N.TAB_KALIBRIERUNG,0x02,eRFS - Auswahl über ABK,eRFS - Auswahl via ABK
-DSC_G30N.TAB_KALIBRIERUNG,0x03,eRFS - Auswahl über Diagnose,eRFS - Auswahl via diagnosis
-DSC_G30N.TAB_KALIBRIERUNG,0x04,Steuegerät noch nicht kalibriert,Steuegerät yet not kalibriert
-DSC_G30N.TAB_KALIBRIERUNG,0x05,Automatische Befüllerkennung RE0,Automatische Befüllerkennung RE0
-DSC_G30N.TAB_KALIBRIERUNG,0x06,Automatische Befüllerkennung RE1,Automatische Befüllerkennung RE1
-DSC_G30N.TAB_KALIBRIERUNG,0x07,Automatische Befüllerkennung RE2,Automatische Befüllerkennung RE2
-DSC_G30N.TAB_KALIBRIERUNG,0x08,Automatische Befüllerkennung RE3,Automatische Befüllerkennung RE3
-DSC_G30N.TAB_KALIBRIERUNG,0x09,NVM beschädigt,NVM beschädigt
-DSC_G30N.TAB_KALIBRIERUNG,0x0A,RID - Erkennung ohne Fortschrittsanzeige,RID - detection without Fortschrittsanzeige
-DSC_G30N.TAB_KALIBRIERUNG,0x0B,RID - Erkennung mit Fortschrittsanzeige,RID - detection with Fortschrittsanzeige
-DSC_G30N.TAB_KALIBRIERUNG,0x81,RDC Reset abgeschlossen - RE Positionen vermutet,RDC reset abgeschlossen - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x82,eRFS - Auswahl über ABK - RE Positionen vermutet,eRFS - Auswahl via ABK - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x83,eRFS - Auswahl über Diagnose - RE Positionen vermutet,eRFS - Auswahl via diagnosis - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x84,Steuegerät noch nicht kalibriert - RE Positionen vermutet,Steuegerät yet not kalibriert - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x85,Automatische Befüllerkennung RE0 - RE Positionen vermutet,Automatische Befüllerkennung RE0 - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x86,Automatische Befüllerkennung RE1 - RE Positionen vermutet,Automatische Befüllerkennung RE1 - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x87,Automatische Befüllerkennung RE2 - RE Positionen vermutet,Automatische Befüllerkennung RE2 - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x88,Automatische Befüllerkennung RE3 - RE Positionen vermutet,Automatische Befüllerkennung RE3 - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x8A,RID - Erkennung ohne Fortschrittsanzeige - RE Positionen vermutet,RID - detection without Fortschrittsanzeige - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0x8B,RID - Erkennung with Fortschrittsanzeige - RE Positionen vermutet,RID - detection with Fortschrittsanzeige - RE position vermutet
-DSC_G30N.TAB_KALIBRIERUNG,0xFE,Kalibrierung läuft,Kalibrierung läuft
+DSC_G30N.TAB_KALIBRIERUNG,0x01,RDC Reset Erfolgreich abgeschlossen,RDC reset completed successfully
+DSC_G30N.TAB_KALIBRIERUNG,0x02,eRFS - Auswahl über ABK,eRFS - selection via ABK
+DSC_G30N.TAB_KALIBRIERUNG,0x03,eRFS - Auswahl über Diagnose,eRFS - selection via diagnosis
+DSC_G30N.TAB_KALIBRIERUNG,0x04,Steuegerät noch nicht kalibriert,Control unit not yet calibrated
+DSC_G30N.TAB_KALIBRIERUNG,0x05,Automatische Befüllerkennung RE0,Automatic inflation detection RE0
+DSC_G30N.TAB_KALIBRIERUNG,0x06,Automatische Befüllerkennung RE1,Automatic inflation detection RE1
+DSC_G30N.TAB_KALIBRIERUNG,0x07,Automatische Befüllerkennung RE2,Automatic inflation detection RE2
+DSC_G30N.TAB_KALIBRIERUNG,0x08,Automatische Befüllerkennung RE3,Automatic inflation detection RE3
+DSC_G30N.TAB_KALIBRIERUNG,0x09,NVM beschädigt,NVM corrupted
+DSC_G30N.TAB_KALIBRIERUNG,0x0A,RID - Erkennung ohne Fortschrittsanzeige,RID - detection without progress indicator
+DSC_G30N.TAB_KALIBRIERUNG,0x0B,RID - Erkennung mit Fortschrittsanzeige,RID - detection with progress indicator
+DSC_G30N.TAB_KALIBRIERUNG,0x81,RDC Reset abgeschlossen - RE Positionen vermutet,RDC reset completed - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x82,eRFS - Auswahl über ABK - RE Positionen vermutet,eRFS - selection via ABK - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x83,eRFS - Auswahl über Diagnose - RE Positionen vermutet,eRFS - selection via diagnosis - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x84,Steuegerät noch nicht kalibriert - RE Positionen vermutet,Control unit not yet calibrated - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x85,Automatische Befüllerkennung RE0 - RE Positionen vermutet,Automatic inflation detection RE0 - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x86,Automatische Befüllerkennung RE1 - RE Positionen vermutet,Automatic inflation detection RE1 - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x87,Automatische Befüllerkennung RE2 - RE Positionen vermutet,Automatic inflation detection RE2 - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x88,Automatische Befüllerkennung RE3 - RE Positionen vermutet,Automatic inflation detection RE3 - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x8A,RID - Erkennung ohne Fortschrittsanzeige - RE Positionen vermutet,RID - detection without progress indicator - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0x8B,RID - Erkennung with Fortschrittsanzeige - RE Positionen vermutet,RID - detection with progress indicator - wheel electronics positions assumed
+DSC_G30N.TAB_KALIBRIERUNG,0xFE,Kalibrierung läuft,Calibration in progress
 DSC_G30N.TAB_KALIBRIERUNG,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_LLA_STATUS,0x00,Andere,Andere
-DSC_G30N.TAB_LLA_STATUS,0x01,Anlern Fehler,Anlern fault
-DSC_G30N.TAB_LLA_STATUS,0x02,Lokalisierung Fehler,Lokalisierung fault
-DSC_G30N.TAB_LLA_STATUS,0x03,Erfolgreich,Erfolgreich
+DSC_G30N.TAB_LLA_STATUS,0x00,Andere,Other
+DSC_G30N.TAB_LLA_STATUS,0x01,Anlern Fehler,Teach-in fault
+DSC_G30N.TAB_LLA_STATUS,0x02,Lokalisierung Fehler,Localisation fault
+DSC_G30N.TAB_LLA_STATUS,0x03,Erfolgreich,Successful
 DSC_G30N.TAB_LLA_STATUS,0xFF,Ungueltig,Invalid
-DSC_G30N.TAB_PAL_STATUS,0x00,Initialisierung,Initialisierung
-DSC_G30N.TAB_PAL_STATUS,0x01,Warten,Warten
-DSC_G30N.TAB_PAL_STATUS,0x03,Laeuft,Laeuft
-DSC_G30N.TAB_PAL_STATUS,0x04,Abgeschlossen i.O.,Abgeschlossen i.O.
-DSC_G30N.TAB_PAL_STATUS,0x05,Time Out,Time Out
-DSC_G30N.TAB_PAL_STATUS,0x06,Aufgehaengt,Aufgehaengt
-DSC_G30N.TAB_PAL_STATUS,0xFF,Undefiniert,Undefiniert
+DSC_G30N.TAB_PAL_STATUS,0x00,Initialisierung,Initialisation
+DSC_G30N.TAB_PAL_STATUS,0x01,Warten,Waiting
+DSC_G30N.TAB_PAL_STATUS,0x03,Laeuft,Running
+DSC_G30N.TAB_PAL_STATUS,0x04,Abgeschlossen i.O.,Completed OK
+DSC_G30N.TAB_PAL_STATUS,0x05,Time Out,Timeout
+DSC_G30N.TAB_PAL_STATUS,0x06,Aufgehaengt,Hung
+DSC_G30N.TAB_PAL_STATUS,0xFF,Undefiniert,Undefined
 DSC_G30N.TAB_PCIB_START_STATE,0,Kein Eintrag,No entry
-DSC_G30N.TAB_PCIB_START_STATE,1,Bremse genutzt,Brake genutzt
+DSC_G30N.TAB_PCIB_START_STATE,1,Bremse genutzt,Brake used
 DSC_G30N.TAB_PCIB_START_STATE,0xFF,Wert ungültig,Value invalid
 DSC_G30N.TAB_PCIB_STOP_STATE,0,Kein Eintrag,No entry
-DSC_G30N.TAB_PCIB_STOP_STATE,1,Ziel Anhaltegeschwindigkeit erreicht,Ziel Anhaltegeschwindigkeit erreicht
-DSC_G30N.TAB_PCIB_STOP_STATE,2,übersteuert durch Gaspedal Betätigung,übersteuert by Gaspedal actuation
-DSC_G30N.TAB_PCIB_STOP_STATE,3,übersteuert durch Bremspedal Betätigung,übersteuert by Bremspedal actuation
-DSC_G30N.TAB_PCIB_STOP_STATE,4,Verbindung zu Gas- und Bremspedal verloren,Verbindung to Gas- and Bremspedal verloren
-DSC_G30N.TAB_PCIB_STOP_STATE,5,Abwürgverhinderung,Abwürgverhinderung
+DSC_G30N.TAB_PCIB_STOP_STATE,1,Ziel Anhaltegeschwindigkeit erreicht,Target stopping speed reached
+DSC_G30N.TAB_PCIB_STOP_STATE,2,übersteuert durch Gaspedal Betätigung,Overridden by accelerator pedal
+DSC_G30N.TAB_PCIB_STOP_STATE,3,übersteuert durch Bremspedal Betätigung,Overridden by brake pedal
+DSC_G30N.TAB_PCIB_STOP_STATE,4,Verbindung zu Gas- und Bremspedal verloren,Connection to accelerator and brake pedal lost
+DSC_G30N.TAB_PCIB_STOP_STATE,5,Abwürgverhinderung,Stall prevention
 DSC_G30N.TAB_PCIB_STOP_STATE,0xFF,Wert ungültig,Value invalid
-DSC_G30N.TAB_PLAUSI_DRUCK,0x00,Fehlgeschlagen,Fehlgeschlagen
-DSC_G30N.TAB_PLAUSI_DRUCK,0x01,Erfolgreich,Erfolgreich
-DSC_G30N.TAB_PLAUSI_DRUCK,0x02,Manuelle Kalibrierung fehlgeschlagen,Manuelle Kalibrierung fehlgeschlagen
-DSC_G30N.TAB_PLAUSI_DRUCK,0x03,Manuelle Kalibrierung erfolgreich,Manuelle Kalibrierung erfolgreich
-DSC_G30N.TAB_PLAUSI_DRUCK,0xFE,Läuft,Läuft
+DSC_G30N.TAB_PLAUSI_DRUCK,0x00,Fehlgeschlagen,Failed
+DSC_G30N.TAB_PLAUSI_DRUCK,0x01,Erfolgreich,Successful
+DSC_G30N.TAB_PLAUSI_DRUCK,0x02,Manuelle Kalibrierung fehlgeschlagen,Manual calibration failed
+DSC_G30N.TAB_PLAUSI_DRUCK,0x03,Manuelle Kalibrierung erfolgreich,Manual calibration successful
+DSC_G30N.TAB_PLAUSI_DRUCK,0xFE,Läuft,Running
 DSC_G30N.TAB_PLAUSI_DRUCK,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_POSITION_RAD,0,keine,no
-DSC_G30N.TAB_POSITION_RAD,1,vorn links,vorn left
-DSC_G30N.TAB_POSITION_RAD,2,vorn rechts,vorn right
-DSC_G30N.TAB_POSITION_RAD,3,hinten links,rear left
-DSC_G30N.TAB_POSITION_RAD,4,hinten rechts,rear right
+DSC_G30N.TAB_POSITION_RAD,0,keine,None
+DSC_G30N.TAB_POSITION_RAD,1,vorn links,Front left
+DSC_G30N.TAB_POSITION_RAD,2,vorn rechts,Front right
+DSC_G30N.TAB_POSITION_RAD,3,hinten links,Rear left
+DSC_G30N.TAB_POSITION_RAD,4,hinten rechts,Rear right
 DSC_G30N.TAB_RDC_AKTIV_INAKTIV,0x00,Inaktiv,Inactive
 DSC_G30N.TAB_RDC_AKTIV_INAKTIV,0x01,Aktiv,Active
 DSC_G30N.TAB_RDC_AKTIV_INAKTIV,0x03,Gateway oder Antenne Fehler,Gateway or antenna fault
-DSC_G30N.TAB_RDC_AKTIV_INAKTIV,0x04,Weiche Warnung aktiv,Weiche Warnung active
+DSC_G30N.TAB_RDC_AKTIV_INAKTIV,0x04,Weiche Warnung aktiv,Soft warning active
 DSC_G30N.TAB_RDC_AKTIV_INAKTIV,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_RDC_BANDMODE_ACTIVE,0,Bandmode nicht aktiv,Bandmode not active
-DSC_G30N.TAB_RDC_BANDMODE_ACTIVE,1,Bandmode aktiv,Bandmode active
-DSC_G30N.TAB_RDC_BANDMODE_ACTIVE,255,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT,0,Nicht bekannt,Not bekannt
-DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT,1,Bekannt,Bekannt
-DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT,255,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_CAL_ACTIVE,0,Kalibrieranforderung inaktiv,Kalibrieranforderung inaktiv
-DSC_G30N.TAB_RDC_CAL_ACTIVE,1,Kalibrieranforderung aktiv,Kalibrieranforderung active
-DSC_G30N.TAB_RDC_CAL_ACTIVE,2,Kalibrierung abgewiesen,Kalibrierung abgewiesen
-DSC_G30N.TAB_RDC_CAL_ACTIVE,255,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_CHANGED,0,Nicht geändert,Not geändert
-DSC_G30N.TAB_RDC_CHANGED,1,Geändert,Geändert
+DSC_G30N.TAB_RDC_BANDMODE_ACTIVE,0,Bandmode nicht aktiv,Production line mode not active
+DSC_G30N.TAB_RDC_BANDMODE_ACTIVE,1,Bandmode aktiv,Production line mode active
+DSC_G30N.TAB_RDC_BANDMODE_ACTIVE,255,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT,0,Nicht bekannt,Not known
+DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT,1,Bekannt,Known
+DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT,255,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_CAL_ACTIVE,0,Kalibrieranforderung inaktiv,Calibration request inactive
+DSC_G30N.TAB_RDC_CAL_ACTIVE,1,Kalibrieranforderung aktiv,Calibration request active
+DSC_G30N.TAB_RDC_CAL_ACTIVE,2,Kalibrierung abgewiesen,Calibration rejected
+DSC_G30N.TAB_RDC_CAL_ACTIVE,255,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_CHANGED,0,Nicht geändert,Not changed
+DSC_G30N.TAB_RDC_CHANGED,1,Geändert,Changed
 DSC_G30N.TAB_RDC_CHANGED,255,Ungültig,Invalid
 DSC_G30N.TAB_RDC_DETECTED,0,Nicht erkannt,Not detected
 DSC_G30N.TAB_RDC_DETECTED,1,Erkannt,Detected
-DSC_G30N.TAB_RDC_DETECTED,255,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x00,Bandmode Eigenradprüfung i.O. (in Kundenbetrieb: DTC nicht aktiv).,Bandmode Eigenradprüfung i.O. (in customer operation: DTC not active).
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x01,Bandmode Eigenradprüfung - Sensor Defekt entdeckt. (in Kundenbetrieb: DTC aktiv).,Bandmode Eigenradprüfung - sensor defective entdeckt. (in customer operation: DTC active).
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x10,Bandmode: Sensoren HL nicht empfangen.,Bandmode: sensor HL not empfangen.
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x20,Bandmode: Sensoren HR nicht empfangen.,Bandmode: sensor HR not empfangen.
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x30,"Bandmode: Sensoren HR, HL nicht empfangen.","Bandmode: sensor HR, HL not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x40,Bandmode: Sensoren VR nicht empfangen.,Bandmode: sensor VR not empfangen.
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x50,"Bandmode: Sensoren VR, HL nicht empfangen.","Bandmode: sensor VR, HL not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x60,"Bandmode: Sensoren VR, HR nicht empfangen.","Bandmode: sensor VR, HR not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x70,"Bandmode: Sensoren VR, HR, HL nicht empfangen.","Bandmode: sensor VR, HR, HL not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x80,Bandmode: Sensoren VL nicht empfangen.,Bandmode: sensor VL not empfangen.
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x90,"Bandmode: Sensoren VL, HL nicht empfangen.","Bandmode: sensor VL, HL not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xA0,"Bandmode: Sensoren VL, HR nicht empfangen.","Bandmode: sensor VL, HR not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xB0,"Bandmode: Sensoren VL, HR, HL nicht empfangen.","Bandmode: sensor VL, HR, HL not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xC0,"Bandmode: Sensoren VL, VR nicht empfangen.","Bandmode: sensor VL, VR not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xD0,"Bandmode: Sensoren VL, VR, HL nicht empfangen.","Bandmode: sensor VL, VR, HL not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xE0,"Bandmode: Sensoren VL, VR, HR nicht empfangen.","Bandmode: sensor VL, VR, HR not empfangen."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xF0,"Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC nicht aktiv).","Bandmode: sensor VL, VR, HR, HL not empfangen (in customer operation: DTC not active)."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x11,Bandmode: Sensoren HL nicht empfangen. - Sensor Defekt entdeckt,Bandmode: sensor HL not empfangen. - sensor defective entdeckt
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x21,Bandmode: Sensoren HR nicht empfangen. - Sensor Defekt entdeckt,Bandmode: sensor HR not empfangen. - sensor defective entdeckt
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x31,"Bandmode: Sensoren HR, HL nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor HR, HL not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x41,Bandmode: Sensoren VR nicht empfangen. - Sensor Defekt entdeckt,Bandmode: sensor VR not empfangen. - sensor defective entdeckt
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x51,"Bandmode: Sensoren VR, HL nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VR, HL not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x61,"Bandmode: Sensoren VR, HR nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VR, HR not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x71,"Bandmode: Sensoren VR, HR, HL nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VR, HR, HL not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x81,Bandmode: Sensoren VL nicht empfangen. - Sensor Defekt entdeckt,Bandmode: sensor VL not empfangen. - sensor defective entdeckt
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0x91,"Bandmode: Sensoren VL, HL nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VL, HL not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xA1,"Bandmode: Sensoren VL, HR nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VL, HR not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xB1,"Bandmode: Sensoren VL, HR, HL nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VL, HR, HL not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xC1,"Bandmode: Sensoren VL, VR nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VL, VR not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xD1,"Bandmode: Sensoren VL, VR, HL nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VL, VR, HL not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xE1,"Bandmode: Sensoren VL, VR, HR nicht empfangen. - Sensor Defekt entdeckt","Bandmode: sensor VL, VR, HR not empfangen. - sensor defective entdeckt"
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xF1,"Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC aktiv).","Bandmode: sensor VL, VR, HR, HL not empfangen (in customer operation: DTC active)."
-DSC_G30N.TAB_RDC_DTC_ACTIVE,0xFF,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_INT_FEHLER,0,Radelektronik 0 mute,Radelektronik 0 mute
-DSC_G30N.TAB_RDC_INT_FEHLER,1,Radelektronik 1 mute,Radelektronik 1 mute
-DSC_G30N.TAB_RDC_INT_FEHLER,2,Radelektronik 2 mute,Radelektronik 2 mute
-DSC_G30N.TAB_RDC_INT_FEHLER,3,Radelektronik 3 mute,Radelektronik 3 mute
-DSC_G30N.TAB_RDC_INT_FEHLER,4,nicht benutzt,not benutzt
-DSC_G30N.TAB_RDC_INT_FEHLER,5,Radelektronik 0 defekt,Radelektronik 0 defective
-DSC_G30N.TAB_RDC_INT_FEHLER,6,Radelektronik 1 defekt,Radelektronik 1 defective
-DSC_G30N.TAB_RDC_INT_FEHLER,7,Radelektronik 2 defekt,Radelektronik 2 defective
-DSC_G30N.TAB_RDC_INT_FEHLER,8,Radelektronik 3 defekt,Radelektronik 3 defective
-DSC_G30N.TAB_RDC_INT_FEHLER,9,RDCi Bandmode aktiv,RDCi Bandmode active
-DSC_G30N.TAB_RDC_INT_FEHLER,10,Eigenrad Einlernfehler,Eigenrad Einlernfehler
+DSC_G30N.TAB_RDC_DETECTED,255,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x00,Bandmode Eigenradprüfung i.O. (in Kundenbetrieb: DTC nicht aktiv).,Production line mode own-wheel check OK (in customer operation: DTC not active).
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x01,Bandmode Eigenradprüfung - Sensor Defekt entdeckt. (in Kundenbetrieb: DTC aktiv).,Production line mode own-wheel check - sensor defect detected (in customer operation: DTC active).
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x10,Bandmode: Sensoren HL nicht empfangen.,Production line mode: sensors RL not received.
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x20,Bandmode: Sensoren HR nicht empfangen.,Production line mode: sensors RR not received.
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x30,"Bandmode: Sensoren HR, HL nicht empfangen.","Production line mode: sensors RR, RL not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x40,Bandmode: Sensoren VR nicht empfangen.,Production line mode: sensors FR not received.
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x50,"Bandmode: Sensoren VR, HL nicht empfangen.","Production line mode: sensors FR, RL not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x60,"Bandmode: Sensoren VR, HR nicht empfangen.","Production line mode: sensors FR, RR not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x70,"Bandmode: Sensoren VR, HR, HL nicht empfangen.","Production line mode: sensors FR, RR, RL not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x80,Bandmode: Sensoren VL nicht empfangen.,Production line mode: sensors FL not received.
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x90,"Bandmode: Sensoren VL, HL nicht empfangen.","Production line mode: sensors FL, RL not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xA0,"Bandmode: Sensoren VL, HR nicht empfangen.","Production line mode: sensors FL, RR not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xB0,"Bandmode: Sensoren VL, HR, HL nicht empfangen.","Production line mode: sensors FL, RR, RL not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xC0,"Bandmode: Sensoren VL, VR nicht empfangen.","Production line mode: sensors FL, FR not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xD0,"Bandmode: Sensoren VL, VR, HL nicht empfangen.","Production line mode: sensors FL, FR, RL not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xE0,"Bandmode: Sensoren VL, VR, HR nicht empfangen.","Production line mode: sensors FL, FR, RR not received."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xF0,"Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC nicht aktiv).","Production line mode: sensors FL, FR, RR, RL not received (in customer operation: DTC not active)."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x11,Bandmode: Sensoren HL nicht empfangen. - Sensor Defekt entdeckt,Production line mode: sensors RL not received. - Sensor defect detected
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x21,Bandmode: Sensoren HR nicht empfangen. - Sensor Defekt entdeckt,Production line mode: sensors RR not received. - Sensor defect detected
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x31,"Bandmode: Sensoren HR, HL nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors RR, RL not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x41,Bandmode: Sensoren VR nicht empfangen. - Sensor Defekt entdeckt,Production line mode: sensors FR not received. - Sensor defect detected
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x51,"Bandmode: Sensoren VR, HL nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FR, RL not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x61,"Bandmode: Sensoren VR, HR nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FR, RR not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x71,"Bandmode: Sensoren VR, HR, HL nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FR, RR, RL not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x81,Bandmode: Sensoren VL nicht empfangen. - Sensor Defekt entdeckt,Production line mode: sensors FL not received. - Sensor defect detected
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0x91,"Bandmode: Sensoren VL, HL nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FL, RL not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xA1,"Bandmode: Sensoren VL, HR nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FL, RR not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xB1,"Bandmode: Sensoren VL, HR, HL nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FL, RR, RL not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xC1,"Bandmode: Sensoren VL, VR nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FL, FR not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xD1,"Bandmode: Sensoren VL, VR, HL nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FL, FR, RL not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xE1,"Bandmode: Sensoren VL, VR, HR nicht empfangen. - Sensor Defekt entdeckt","Production line mode: sensors FL, FR, RR not received. - Sensor defect detected"
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xF1,"Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC aktiv).","Production line mode: sensors FL, FR, RR, RL not received (in customer operation: DTC active)."
+DSC_G30N.TAB_RDC_DTC_ACTIVE,0xFF,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_INT_FEHLER,0,Radelektronik 0 mute,Wheel electronics 0 mute
+DSC_G30N.TAB_RDC_INT_FEHLER,1,Radelektronik 1 mute,Wheel electronics 1 mute
+DSC_G30N.TAB_RDC_INT_FEHLER,2,Radelektronik 2 mute,Wheel electronics 2 mute
+DSC_G30N.TAB_RDC_INT_FEHLER,3,Radelektronik 3 mute,Wheel electronics 3 mute
+DSC_G30N.TAB_RDC_INT_FEHLER,4,nicht benutzt,Not used
+DSC_G30N.TAB_RDC_INT_FEHLER,5,Radelektronik 0 defekt,Wheel electronics 0 defective
+DSC_G30N.TAB_RDC_INT_FEHLER,6,Radelektronik 1 defekt,Wheel electronics 1 defective
+DSC_G30N.TAB_RDC_INT_FEHLER,7,Radelektronik 2 defekt,Wheel electronics 2 defective
+DSC_G30N.TAB_RDC_INT_FEHLER,8,Radelektronik 3 defekt,Wheel electronics 3 defective
+DSC_G30N.TAB_RDC_INT_FEHLER,9,RDCi Bandmode aktiv,RDCi production line mode active
+DSC_G30N.TAB_RDC_INT_FEHLER,10,Eigenrad Einlernfehler,Own-wheel teach-in fault
 DSC_G30N.TAB_RDC_INT_FEHLER,11,Gateway / Antenne Fehler,Gateway / antenna fault
 DSC_G30N.TAB_RDC_INT_FEHLER,12,Eingangssignal fehlt,Input signal missing
 DSC_G30N.TAB_RDC_INT_FEHLER,13,Eingangssignal ungültig,Input signal invalid
-DSC_G30N.TAB_RDC_INT_FEHLER,14,Eingangssignal Alive Fehler,Input signal alive fault
+DSC_G30N.TAB_RDC_INT_FEHLER,14,Eingangssignal Alive Fehler,Input signal alive counter fault
 DSC_G30N.TAB_RDC_INT_FEHLER,15,Eingangssignal CRC Fehler,Input signal CRC fault
-DSC_G30N.TAB_RDC_INT_FEHLER,16,HF Überdeckung,HF Überdeckung
+DSC_G30N.TAB_RDC_INT_FEHLER,16,HF Überdeckung,RF interference (overlap)
 DSC_G30N.TAB_RDC_INT_FEHLER,17,Geschwindigkeitssignal Fehler,Speed signal fault
-DSC_G30N.TAB_RDC_INT_FEHLER,128,Geschütztes RAM Bereich Fehler,Geschütztes RAM range fault
-DSC_G30N.TAB_RDC_INT_FEHLER,129,EEPROM Fehler beim Initialisierung,EEPROM fault during Initialisierung
-DSC_G30N.TAB_RDC_INT_FEHLER,130,EEPROM Fehler beim Laufzeit,EEPROM fault during Laufzeit
-DSC_G30N.TAB_RDC_INT_FEHLER,131,Betriebssystem Task Fehler,Operation system Task fault
-DSC_G30N.TAB_RDC_INT_FEHLER,132,SW Watchdog Fehler,SW Watchdog fault
+DSC_G30N.TAB_RDC_INT_FEHLER,128,Geschütztes RAM Bereich Fehler,Protected RAM area fault
+DSC_G30N.TAB_RDC_INT_FEHLER,129,EEPROM Fehler beim Initialisierung,EEPROM fault during initialisation
+DSC_G30N.TAB_RDC_INT_FEHLER,130,EEPROM Fehler beim Laufzeit,EEPROM fault during runtime
+DSC_G30N.TAB_RDC_INT_FEHLER,131,Betriebssystem Task Fehler,Operating system task fault
+DSC_G30N.TAB_RDC_INT_FEHLER,132,SW Watchdog Fehler,SW watchdog fault
 DSC_G30N.TAB_RDC_INT_FEHLER,255,Ungültig,Invalid
 DSC_G30N.TAB_RDC_ON_OFF,0,Aus,Off
 DSC_G30N.TAB_RDC_ON_OFF,1,Ein,On
-DSC_G30N.TAB_RDC_ON_OFF,9,Nicht bedient,Not bedient
-DSC_G30N.TAB_RDC_ON_OFF,255,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x00,vorn links,vorn left
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x01,vorn rechts,vorn right
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x02,hinten links,rear left
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x03,hinten rechts,rear right
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x05,unbekannt 1,unknown 1
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x04,Reserverad (nur RDC Gen2),Reserverad (nur RDC Gen2)
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x06,unbekannt 2,unknown 2
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x07,unbekannt 3,unknown 3
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x08,unbekannt 4,unknown 4
-DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x09,unbekannt 5 (nur RDC Gen2),unknown 5 (nur RDC Gen2)
+DSC_G30N.TAB_RDC_ON_OFF,9,Nicht bedient,Not supported
+DSC_G30N.TAB_RDC_ON_OFF,255,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x00,vorn links,Front left
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x01,vorn rechts,Front right
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x02,hinten links,Rear left
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x03,hinten rechts,Rear right
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x05,unbekannt 1,Unknown 1
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x04,Reserverad (nur RDC Gen2),Spare wheel (RDC Gen2 only)
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x06,unbekannt 2,Unknown 2
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x07,unbekannt 3,Unknown 3
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x08,unbekannt 4,Unknown 4
+DSC_G30N.TAB_RDC_RAD_POSITION_NR,0x09,unbekannt 5 (nur RDC Gen2),Unknown 5 (RDC Gen2 only)
 DSC_G30N.TAB_RDC_RAD_POSITION_NR,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x00,Stationär,Stationär
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x01,Stationär TFA,Stationär TFA
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x02,Einlernen Fahren,Einlernen Fahren
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x03,Normal Fahren,Normal Fahren
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x04,Einlernen Interim,Einlernen Interim
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x05,Normal Interim,Normal Interim
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x00,Stationär,Stationary
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x01,Stationär TFA,Stationary TFA
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x02,Einlernen Fahren,Teach-in driving
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x03,Normal Fahren,Normal driving
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x04,Einlernen Interim,Teach-in interim
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x05,Normal Interim,Normal interim
 DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x06,Delta P,Delta P
 DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x07,OFF Modus,OFF mode
-DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x08,Über LF angefordert,Via LF angefordert
+DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0x08,Über LF angefordert,Requested via LF
 DSC_G30N.TAB_RDC_RE_SENDEMODE_AK,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_RDC_RE_STATUS,0x00,Radelektronik i.O.,Radelektronik i.O.
-DSC_G30N.TAB_RDC_RE_STATUS,0x01,Radelektronik mute,Radelektronik mute
-DSC_G30N.TAB_RDC_RE_STATUS,0x02,Radelektronik defekt,Radelektronik defective
-DSC_G30N.TAB_RDC_RE_STATUS,0x03,Radelektronik Daten noch nicht empfangen,Radelektronik data yet not empfangen
+DSC_G30N.TAB_RDC_RE_STATUS,0x00,Radelektronik i.O.,Wheel electronics OK
+DSC_G30N.TAB_RDC_RE_STATUS,0x01,Radelektronik mute,Wheel electronics mute
+DSC_G30N.TAB_RDC_RE_STATUS,0x02,Radelektronik defekt,Wheel electronics defective
+DSC_G30N.TAB_RDC_RE_STATUS,0x03,Radelektronik Daten noch nicht empfangen,Wheel electronics data not yet received
 DSC_G30N.TAB_RDC_RE_STATUS,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_RDC_STARTED,0,Nicht gestartet,Not gestartet
-DSC_G30N.TAB_RDC_STARTED,1,Gestartet,Gestartet
-DSC_G30N.TAB_RDC_STARTED,255,Nicht definiert,Not definiert
+DSC_G30N.TAB_RDC_STARTED,0,Nicht gestartet,Not started
+DSC_G30N.TAB_RDC_STARTED,1,Gestartet,Started
+DSC_G30N.TAB_RDC_STARTED,255,Nicht definiert,Not defined
 DSC_G30N.TAB_RDC_TIMEOUT,0,Kein Timeout,No timeout
 DSC_G30N.TAB_RDC_TIMEOUT,1,Timeout,Timeout
-DSC_G30N.TAB_RDC_TIMEOUT,255,Nicht definiert,Not definiert
-DSC_G30N.TAB_RDC_VEHICLE_RUNNING,0,Fahrzeug steht,Vehicle steht
-DSC_G30N.TAB_RDC_VEHICLE_RUNNING,1,Fahrzeug fährt,Vehicle fährt
-DSC_G30N.TAB_RDC_VEHICLE_RUNNING,255,Nicht definiert,Not definiert
+DSC_G30N.TAB_RDC_TIMEOUT,255,Nicht definiert,Not defined
+DSC_G30N.TAB_RDC_VEHICLE_RUNNING,0,Fahrzeug steht,Vehicle stationary
+DSC_G30N.TAB_RDC_VEHICLE_RUNNING,1,Fahrzeug fährt,Vehicle moving
+DSC_G30N.TAB_RDC_VEHICLE_RUNNING,255,Nicht definiert,Not defined
 DSC_G30N.TAB_RDC_ZUSTAND,0x00,Inaktiv,Inactive
 DSC_G30N.TAB_RDC_ZUSTAND,0x01,Aktiv,Active
 DSC_G30N.TAB_RDC_ZUSTAND,0x03,Gateway oder Antenne Fehler,Gateway or antenna fault
-DSC_G30N.TAB_RDC_ZUSTAND,0x04,Weiche Warnung aktiv,Weiche Warnung active
-DSC_G30N.TAB_RDC_ZUSTAND,0xFF,Nicht definiert,Not definiert
-DSC_G30N.TAB_RE_HERSTELLER,0x00,nicht bedient,not bedient
+DSC_G30N.TAB_RDC_ZUSTAND,0x04,Weiche Warnung aktiv,Soft warning active
+DSC_G30N.TAB_RDC_ZUSTAND,0xFF,Nicht definiert,Not defined
+DSC_G30N.TAB_RE_HERSTELLER,0x00,nicht bedient,Not supported
 DSC_G30N.TAB_RE_HERSTELLER,0x01,Autonet,Autonet
 DSC_G30N.TAB_RE_HERSTELLER,0x02,HUF,HUF
 DSC_G30N.TAB_RE_HERSTELLER,0x03,Continental,Continental
@@ -301,22 +301,22 @@ DSC_G30N.TAB_RE_HERSTELLER,0x05,Schrader,Schrader
 DSC_G30N.TAB_RE_HERSTELLER,0x0F,Hersteller unbekannt,Manufacturer unknown
 DSC_G30N.TAB_RE_HERSTELLER,0xFF,Ungültig,Invalid
 DSC_G30N.TAB_RE_TELEGRAMMTYP,0x00,AK35 default,AK35 default
-DSC_G30N.TAB_RE_TELEGRAMMTYP,0x82,HUF G3 ,HUF G3 
-DSC_G30N.TAB_RE_TELEGRAMMTYP,0x88,AK35 HUF lang,AK35 HUF lang
-DSC_G30N.TAB_RE_TELEGRAMMTYP,0xA0,AK35 HUF mittel,AK35 HUF mittel
-DSC_G30N.TAB_RE_TELEGRAMMTYP,0xC1,AK35 HUF kurz,AK35 HUF kurz
+DSC_G30N.TAB_RE_TELEGRAMMTYP,0x82,HUF G3 ,HUF G3
+DSC_G30N.TAB_RE_TELEGRAMMTYP,0x88,AK35 HUF lang,AK35 HUF long
+DSC_G30N.TAB_RE_TELEGRAMMTYP,0xA0,AK35 HUF mittel,AK35 HUF medium
+DSC_G30N.TAB_RE_TELEGRAMMTYP,0xC1,AK35 HUF kurz,AK35 HUF short
 DSC_G30N.TAB_RE_TELEGRAMMTYP,0xFF,Ungültig,Invalid
-DSC_G30N.TAB_RF_BASIS_STATE,0x00,Nicht unterstützt,Not unterstützt
+DSC_G30N.TAB_RF_BASIS_STATE,0x00,Nicht unterstützt,Not supported
 DSC_G30N.TAB_RF_BASIS_STATE,0x01,Aus,Off
-DSC_G30N.TAB_RF_BASIS_STATE,0x02,Stationär,Stationär
-DSC_G30N.TAB_RF_BASIS_STATE,0x03,Lokalisierung mit Bewegung,Lokalisierung with Bewegung
-DSC_G30N.TAB_RF_BASIS_STATE,0x04,Lokalisierung ohne Bewegung,Lokalisierung without Bewegung
-DSC_G30N.TAB_RF_BASIS_STATE,0x05,Fahrt mit Bewegung,Fahrt with Bewegung
-DSC_G30N.TAB_RF_BASIS_STATE,0x06,Fahrt ohne Bewegung,Fahrt without Bewegung
-DSC_G30N.TAB_RF_BASIS_STATE,0x07,Reserviert,Reserviert
+DSC_G30N.TAB_RF_BASIS_STATE,0x02,Stationär,Stationary
+DSC_G30N.TAB_RF_BASIS_STATE,0x03,Lokalisierung mit Bewegung,Localisation with movement
+DSC_G30N.TAB_RF_BASIS_STATE,0x04,Lokalisierung ohne Bewegung,Localisation without movement
+DSC_G30N.TAB_RF_BASIS_STATE,0x05,Fahrt mit Bewegung,Driving with movement
+DSC_G30N.TAB_RF_BASIS_STATE,0x06,Fahrt ohne Bewegung,Driving without movement
+DSC_G30N.TAB_RF_BASIS_STATE,0x07,Reserviert,Reserved
 DSC_G30N.TAB_RF_BASIS_STATE,0xFF,Ungueltig,Invalid
-DSC_G30N.TAB_RF_BATTERIE_STATUS,0x00,Nicht unterstützt,Not unterstützt
-DSC_G30N.TAB_RF_BATTERIE_STATUS,0x01,Nicht i.O. <=10%,Not i.O. <=10%
+DSC_G30N.TAB_RF_BATTERIE_STATUS,0x00,Nicht unterstützt,Not supported
+DSC_G30N.TAB_RF_BATTERIE_STATUS,0x01,Nicht i.O. <=10%,Not OK <=10%
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0x02,0.2,0.2
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0x03,0.3,0.3
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0x04,0.4,0.4
@@ -326,46 +326,46 @@ DSC_G30N.TAB_RF_BATTERIE_STATUS,0x07,0.7,0.7
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0x08,0.8,0.8
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0x09,0.9,0.9
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0x10,1.0,1.0
-DSC_G30N.TAB_RF_BATTERIE_STATUS,0x11,i.O.,i.O.
-DSC_G30N.TAB_RF_BATTERIE_STATUS,0x12,Reserviert,Reserviert
-DSC_G30N.TAB_RF_BATTERIE_STATUS,0x13,Reserviert,Reserviert
-DSC_G30N.TAB_RF_BATTERIE_STATUS,0x14,Reserviert,Reserviert
+DSC_G30N.TAB_RF_BATTERIE_STATUS,0x11,i.O.,OK
+DSC_G30N.TAB_RF_BATTERIE_STATUS,0x12,Reserviert,Reserved
+DSC_G30N.TAB_RF_BATTERIE_STATUS,0x13,Reserviert,Reserved
+DSC_G30N.TAB_RF_BATTERIE_STATUS,0x14,Reserviert,Reserved
 DSC_G30N.TAB_RF_BATTERIE_STATUS,0xFF,Ungueltig,Invalid
-DSC_G30N.TAB_RF_LTS,0x00,Nicht unterstützt,Not unterstützt
+DSC_G30N.TAB_RF_LTS,0x00,Nicht unterstützt,Not supported
 DSC_G30N.TAB_RF_LTS,0x01,Nicht LTS,Not LTS
-DSC_G30N.TAB_RF_LTS,0x02,LTS Parkdauer > 7 Tage,LTS Parkdauer > 7 days
-DSC_G30N.TAB_RF_LTS,0x03,LTS Parkdauer > 30 Tage,LTS Parkdauer > 30 days
+DSC_G30N.TAB_RF_LTS,0x02,LTS Parkdauer > 7 Tage,LTS parking duration > 7 days
+DSC_G30N.TAB_RF_LTS,0x03,LTS Parkdauer > 30 Tage,LTS parking time > 30 days
 DSC_G30N.TAB_RF_LTS,0xFF,Ungueltig,Invalid
-DSC_G30N.TAB_RF_TX_TRIGGER,0x00,Nicht unterstützt,Not unterstützt
-DSC_G30N.TAB_RF_TX_TRIGGER,0x01,Neu messen (Delta P),Neu messen (Delta P)
-DSC_G30N.TAB_RF_TX_TRIGGER,0x02,LF Trigger,LF Trigger
-DSC_G30N.TAB_RF_TX_TRIGGER,0x03,Geplante Sendung,Geplante Sendung
+DSC_G30N.TAB_RF_TX_TRIGGER,0x00,Nicht unterstützt,Not supported
+DSC_G30N.TAB_RF_TX_TRIGGER,0x01,Neu messen (Delta P),Measure again (delta P)
+DSC_G30N.TAB_RF_TX_TRIGGER,0x02,LF Trigger,LF trigger
+DSC_G30N.TAB_RF_TX_TRIGGER,0x03,Geplante Sendung,Scheduled transmission
 DSC_G30N.TAB_RF_TX_TRIGGER,0xFF,Ungueltig,Invalid
 DSC_G30N.TAB_STATUS_SEC_ZUGRIFF,0,Verriegelt,Locked
-DSC_G30N.TAB_STATUS_SEC_ZUGRIFF,1,Geöffnet,Open
-DSC_G30N.TAB_WU_POSITION,0x00,vorne links,front left
-DSC_G30N.TAB_WU_POSITION,0x01,vorne rechts,front right
-DSC_G30N.TAB_WU_POSITION,0x02,hinten links,rear left
-DSC_G30N.TAB_WU_POSITION,0x03,hinten rechts,rear right
-DSC_G30N.TAB_WU_POSITION,0x04,Position bekannt,Position bekannt
-DSC_G30N.TAB_WU_POSITION,0x05,unbekannt 1,unknown 1
-DSC_G30N.TAB_WU_POSITION,0x06,unbekannt 2,unknown 2
-DSC_G30N.TAB_WU_POSITION,0x07,unbekannt 3,unknown 3
-DSC_G30N.TAB_WU_POSITION,0x08,unbekannt 4,unknown 4
-DSC_G30N.TAB_WU_POSITION,0xFF,undefiniert,undefiniert
-DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x00,i.O.,i.O.
-DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x01,Warnung,Warnung
-DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x02,Vorwarnung 1,Vorwarnung 1
-DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x03,Vorwarnung 2,Vorwarnung 2
-DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x04,Vorwarnung 3,Vorwarnung 3
-DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x05,Vorwarnung 4,Vorwarnung 4
+DSC_G30N.TAB_STATUS_SEC_ZUGRIFF,1,Geöffnet,Opened
+DSC_G30N.TAB_WU_POSITION,0x00,vorne links,Front left
+DSC_G30N.TAB_WU_POSITION,0x01,vorne rechts,Front right
+DSC_G30N.TAB_WU_POSITION,0x02,hinten links,Rear left
+DSC_G30N.TAB_WU_POSITION,0x03,hinten rechts,Rear right
+DSC_G30N.TAB_WU_POSITION,0x04,Position bekannt,Position known
+DSC_G30N.TAB_WU_POSITION,0x05,unbekannt 1,Unknown 1
+DSC_G30N.TAB_WU_POSITION,0x06,unbekannt 2,Unknown 2
+DSC_G30N.TAB_WU_POSITION,0x07,unbekannt 3,Unknown 3
+DSC_G30N.TAB_WU_POSITION,0x08,unbekannt 4,Unknown 4
+DSC_G30N.TAB_WU_POSITION,0xFF,undefiniert,Undefined
+DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x00,i.O.,OK
+DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x01,Warnung,Warning
+DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x02,Vorwarnung 1,Pre-warning 1
+DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x03,Vorwarnung 2,Pre-warning 2
+DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x04,Vorwarnung 3,Pre-warning 3
+DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0x05,Vorwarnung 4,Pre-warning 4
 DSC_G30N.TAB_WU_PREWARN_WARN_STATUS,0xFF,Ungueltig,Invalid
-DSC_G30N.TAB_WU_STATUS,0x00,i.O.,i.O.
+DSC_G30N.TAB_WU_STATUS,0x00,i.O.,OK
 DSC_G30N.TAB_WU_STATUS,0x01,Fehlt,Missing
 DSC_G30N.TAB_WU_STATUS,0x02,Defekt,Defective
 DSC_G30N.TAB_WU_STATUS,0x03,Unbekannt,Unknown
-DSC_G30N.TAB_WU_STATUS,0x04,Gestoert,Disturbed
+DSC_G30N.TAB_WU_STATUS,0x04,Gestoert,Faulty
 DSC_G30N.TAB_WU_STATUS,0xFF,Ungueltig,Invalid
 DSC_G30N.TAB_ZUSTAND,0x00,Aus,Off
-DSC_G30N.TAB_ZUSTAND,0x01,Pumpe Vollansteuerung,Pump Vollansteuerung
-DSC_G30N.TAB_ZUSTAND,0x02,Pumpe EMV-Betrieb (Teilansteuerung),Pump EMV-operation (Teilansteuerung)
+DSC_G30N.TAB_ZUSTAND,0x01,Pumpe Vollansteuerung,Pump full activation
+DSC_G30N.TAB_ZUSTAND,0x02,Pumpe EMV-Betrieb (Teilansteuerung),Pump EMC mode (partial activation)

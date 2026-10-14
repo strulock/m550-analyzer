@@ -18,6 +18,8 @@ value  = raw * MUL / DIV + ADD
 | `unsigned char` / `signed char` | 1 | no / yes |
 | `unsigned int` / `signed int` | 2 | no / yes |
 | `unsigned long` / `signed long` | 4 | no / yes |
+| `int` | 2 | yes (EDIABAS shorthand) |
+| `motorola float` / `intel float` | 4 | IEEE 754 float, big- / little-endian, then scaled |
 | `string`, `string[n]` | to NUL / n | text, Latin-1, trimmed |
 | `data[n]` | n | shown as hex |
 | `gps_dms` | 5 | GPS coordinate, see below |

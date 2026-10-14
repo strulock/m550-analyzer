@@ -52,10 +52,10 @@ matching the G30 map.
 Since added by `tools/module_catalog.py`: ACSM5 (0x01), GSZFB1 transmission
 (0x18), LMV_G11 transfer box (0x19), DSC_G30N (0x29), EPS_G11 (0x30),
 NBTEVO head unit (0x63), VDP_G11 (0x76), IHKA_G11 (0x78), EKP301 fuel pump
-(0x17), and BDC_G11, whose
+(0x17), PMA_20 park assist (0x2C), and BDC_G11, whose
 wording now wins where BDC variants disagree. A code another module already
 uses keeps its first text, since the file is keyed by code alone. Remaining
-gaps: ARS (0x04 / 0x25), PMA (0x2C).
+gaps: ARS (0x04 / 0x25).
 
 ### DTC status byte
 

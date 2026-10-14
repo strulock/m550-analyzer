@@ -18,7 +18,7 @@ German is the source of truth for every text; English columns are generated.
 | `BMW_enum_tables.csv` | 1,448 | DME | its 162 value tables |
 | `BMW_freeze_frame_fields.csv` | 204 | DME | `FS_LESEN_DETAIL` environment fields |
 | `G30_module_sgbd_map.csv` | 13 | BMW's variant list (G30 rows) | address → SGBD index → file |
-| `<MODULE>_measurements.csv` | see [Modules](modules.md) | `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`, `bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11`, `ekp301` | `tools/module_catalog.py` |
+| `<MODULE>_measurements.csv` | see [Modules](modules.md) | `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`, `bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11`, `ekp301`, `pma_20` | `tools/module_catalog.py` |
 | `<MODULE>_enum_tables.csv` | | the same | `tools/module_catalog.py` |
 
 The `.prg` files for the modules were supplied from an EDIABAS `Ecu` folder
@@ -73,15 +73,25 @@ collisions are rare.
 
 ## Translation
 
-`tools/translate.py` regenerates each file's English column from the German
-with the glossary in `tools/glossary.py`: whole-word and phrase matches,
-German endings stripped, compounds split into known terms
-(`Kuehlmitteltemperatur` → "coolant temperature"). A word it can't fully
-account for stays German rather than being half-translated, which is why
-some descriptions read "Validity the GPS position". Fix by adding terms to
-the glossary (prefer a compound's parts), then rerun. Never edit an English
-column by hand. `--report` lists the commonest untranslated words.
+`tools/translate.py` regenerates each file's English column from the German.
+For each text it uses, in order:
 
-GPS/navigation terms (Breitengrad, Laengengrad, Hoehe, Satellit...) were
-added in this work, which also improved existing rows ("Hoehe of the
-vehicle" → "Height of the vehicle").
+1. **The curated translation** in `tools/translations_en.csv` (`de,en`), keyed
+   by the exact German text. Every channel description and value text in
+   the catalogs has one: about 8,000 texts translated by hand into plain
+   English, using one shared terminology list (Istwert → actual value,
+   Laufunruhe → uneven running, Höhenstand → ride height...). Identifiers,
+   signal names, units and abbreviations are kept as they are.
+2. **The glossary** in `tools/glossary.py`, as a fallback: whole-word and
+   phrase matches, German endings stripped, compounds split into known terms
+   (`Kuehlmitteltemperatur` → "coolant temperature"). A word it can't fully
+   account for stays German. Fault texts still use only this.
+
+When a catalog gains text (a new module, a regenerated SGBD), `python
+tools/translate.py --uncurated` lists the channel and value texts with no
+curated translation. Add them to `translations_en.csv`; a test fails until
+you do. Never edit an English column in the data files by hand: it is
+overwritten on the next run. To improve a translation, edit
+`translations_en.csv` and rerun.
+
+The app can show either language: see the README's *Language* setting.

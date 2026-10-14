@@ -27,17 +27,19 @@ import translate  # noqa: E402
     ("Aus", "Off"),
     ("AUS", "OFF"),
 ])
-def test_translate(german, english):
-    assert translate.translate(german) == english
+def test_glossary_translate(german, english):
+    # The glossary engine itself; curated translations are tested in
+    # test_language.py.
+    assert translate.glossary_translate(german) == english
 
 
 def test_umlaut_and_ascii_spellings_are_the_same():
-    assert translate.translate("Kühlmittel") == translate.translate("Kuehlmittel")
+    assert translate.glossary_translate("Kühlmittel") == translate.glossary_translate("Kuehlmittel")
 
 
 def test_identifiers_and_acronyms_are_left_alone():
     for text in ("STAT_LAMBDA_WERT", "CA_response_check_nok", "DME", "KOMBI"):
-        assert translate.translate(text) == text
+        assert translate.glossary_translate(text) == text
 
 
 def test_compound_only_splits_into_known_pieces():

@@ -1,6 +1,6 @@
 ﻿table_name,value,text_de,text_en
-LMV_G11.KALIBRIERUNG,0x00,nicht iO,not iO
-LMV_G11.KALIBRIERUNG,0x01,iO,iO
+LMV_G11.KALIBRIERUNG,0x00,nicht iO,Not OK
+LMV_G11.KALIBRIERUNG,0x01,iO,OK
 LMV_G11.RDBI_ADS_DOP,0x00,ISOSAEReserved_00,ISOSAEReserved_00
 LMV_G11.RDBI_ADS_DOP,0x01,defaultSession,defaultSession
 LMV_G11.RDBI_ADS_DOP,0x02,programmingSession,programmingSession
@@ -9,6 +9,6 @@ LMV_G11.RDBI_ADS_DOP,0x04,safetySystemDiagnosticSession,safetySystemDiagnosticSe
 LMV_G11.RDBI_ADS_DOP,0x40,vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
 LMV_G11.RDBI_ADS_DOP,0x41,codingSession,codingSession
 LMV_G11.RDBI_ADS_DOP,0x42,SWTSession,SWTSession
-LMV_G11.RDBI_PC_PCS_DOP,0x00,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
-LMV_G11.RDBI_PC_PCS_DOP,0x01,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
-LMV_G11.RDBI_PC_PCS_DOP,0x02,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
+LMV_G11.RDBI_PC_PCS_DOP,0x00,ECUMehrmalsProgrammierbar,ECU programmable multiple times
+LMV_G11.RDBI_PC_PCS_DOP,0x01,ECUMindestensEinmalVollstaendigProgrammierbar,ECU fully programmable at least once
+LMV_G11.RDBI_PC_PCS_DOP,0x02,ECUNichtMehrProgrammierbar,ECU no longer programmable

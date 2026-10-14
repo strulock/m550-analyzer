@@ -12,578 +12,578 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (4
 
 | Channel | ID | Field | Type | Unit | Scaling | Values | Description | German |
 |---|---|---|---|---|---|---|---|---|
-| `ACSM_EDR_OEM_IDENTIFICATION.EDR_VERSION_PUBLIC` | 0x1011 | 0 | unsigned int |  |  |  | EDID List Version public | EDID List Version public |
-| `ACSM_EDR_OEM_IDENTIFICATION.EDR_VERSION_OEM` | 0x1011 | 1 | unsigned int |  |  |  | EDID List Version OEM | EDID List Version OEM |
-| `ACSM_EDR_OEM_IDENTIFICATION.EDR_CONFIG_LIST_USED` | 0x1011 | 2 | unsigned char |  |  |  | Used EDID Config List | Used EDID Config List |
-| `ACSM_EDR_OEM_IDENTIFICATION.EDR_CONFIG_LIST_VERSION` | 0x1011 | 3 | unsigned char |  |  |  | EDID Config List Version | EDID Config List Version |
-| `ACSM_EDR_OEM_IDENTIFICATION.ECU_IDENTIFICATION` | 0x1011 | 4 | unsigned char | 0-n |  | [`ACSM5.TAB_OEM_IDENTIFICATION`](ACSM5-values.md#acsm5tab_oem_identification) (11 values) | ECUIdentification | ECUIdentification |
-| `ACSM_PROGRAMMING_COUNTER.RESERVE` | 0x2502 | 0 | unsigned char |  |  |  | Reserve. Konstante = 0x00 | Reserve. Konstante = 0x00 |
-| `ACSM_PROGRAMMING_COUNTER.PROG_ZAEHLER_STATUS` | 0x2502 | 1 | unsigned char | 0-n |  | 0 = ECUMehrmalsProgrammierbar; 1 = ECUMindestensEinmalVollstaendigProgrammierbar; 2 = ECUNichtMehrProgrammierbar | ProgrammingCounterStatus | ProgrammingCounterStatus |
-| `ACSM_PROGRAMMING_COUNTER.PROG_ZAEHLER` | 0x2502 | 2 | unsigned int |  |  |  | ProgrammingCounter | ProgrammingCounter |
-| `ACSM_PROGRAMMING_COUNTER_MAX_VALUE` | 0x2503 | 0 | unsigned int |  |  |  | maximum number of Programmiervorgängen | maximalen Anzahl von Programmiervorgängen |
-| `ACSM_FLASH_TIMING_PARAMETER.ERASE_MEMORY_TIME` | 0x2504 | 0 | unsigned int | s |  |  | EraseMemoryTime, maximum SWE-Löschzeit with Ablaufkontrolle in the control unit. | EraseMemoryTime, maximale SWE-Löschzeit mit Ablaufkontrolle im Steuergerät. |
-| `ACSM_FLASH_TIMING_PARAMETER.CHECK_MEMORY_TIME` | 0x2504 | 1 | unsigned int | s |  |  | CheckMemoryTime (Bsp.: Signaturprüfung), maximum Speicherprüfzeit with Ablaufkontrolle in the control unit. | CheckMemoryTime (Bsp.: Signaturprüfung), maximale Speicherprüfzeit mit Ablaufkontrolle im Steuergerät. |
-| `ACSM_FLASH_TIMING_PARAMETER.BOOTLOADER_INSTALLATION_TIME` | 0x2504 | 2 | unsigned int | s |  |  | BootloaderInstallationTime the time, the to the reset benötigt is, damit the Hilfsbootloader gestartet is, the Bootloader löscht, the neuen Bootloader kopiert, dessen Signatur prüf and the neue Bootloader gestartet is bis er wieder diagnosefähig is. Angabe is verpflichtend for alle control unit, auch if the control unit no Bootloader Update geplant has. a value of 0x0000 is verboten. | BootloaderInstallationTime Die Zeit, die nach dem Reset benötigt wird, damit der Hilfsbootloader gestartet wird, den Bootloader löscht, den neuen Bootloader kopiert, dessen Signatur prüf und der neue Bootloader gestartet wird bis er wieder diagnosefähig ist. Angabe ist verpflichtend für alle Steuergeräte, auch wenn das Steuergerät keinen Bootloader Update geplant hat. Ein Wert von 0x0000 ist verboten. |
-| `ACSM_FLASH_TIMING_PARAMETER.AUTHENTICATION_TIME` | 0x2504 | 3 | unsigned int | s |  |  | AuthenticationTime, the maximum time, the the control unit to check the authentication (sendKey) benötigt with Ablaufkontrolle in the control unit. | AuthenticationTime, die maximale Zeit, die das Steuergerät zur Prüfung der Authentisierung (sendKey) benötigt mit Ablaufkontrolle im Steuergerät. |
-| `ACSM_FLASH_TIMING_PARAMETER.RESET_TIME` | 0x2504 | 4 | unsigned int | s |  |  | ResetTime the Zeitangabe bezieht sich on the Übergang of the ApplicationExtendedSesssion in the ProgrammingSession resp. at Übergang of the ProgrammingSession in the DefaultSession. Es is the maximum value auszugeben. to Ablauf the ResetTime is the control unit by diagnosis ansprechbar. | ResetTime Die Zeitangabe bezieht sich auf den Übergang von der ApplicationExtendedSesssion in die ProgrammingSession bzw. bei Übergang von der ProgrammingSession in die DefaultSession. Es ist der Maximalwert auszugeben. Nach Ablauf der ResetTime ist das Steuergerät durch Diagnose ansprechbar. |
-| `ACSM_FLASH_TIMING_PARAMETER.TRANSFER_DATA_TIME` | 0x2504 | 5 | unsigned int | s |  |  | TransferDataTime the Angabe has sich to beziehen on a TransferData with maximum Blocklänge on the Zeitspanne vom vollständigen Empfang the data in the control unit via the ggf. erforderliche Dekomprimieren and the vollständigen memory in the nichtflüchtigen memory bis einschließlich the Senden the positive Response. | TransferDataTime Die Angabe hat sich zu beziehen auf einen TransferData mit maximaler Blocklänge auf die Zeitspanne vom vollständigen Empfang der Daten im Steuergerät über das ggf. erforderliche Dekomprimieren und dem vollständigen Speichern im nichtflüchtigen Speicher bis einschließlich dem Senden der positiven Response. |
-| `ACSM__BMW_SACHNUMMER` | 0x4040 | 0 | unsigned long | HEX |  |  | 7 stellige Sachnummer to Produktionszeitpunkt  BCD codiert,  führendes Nibbel immer 0 | 7 stellige Sachnummer zum Produktionszeitpunkt  BCD codiert,  führendes Nibbel immer 0 |
-| `ACSM__SW_MODUL_VERSION.ID_VERSION_0` | 0x4044 | 0 | unsigned long | HEX |  |  | 4 Byte  Byte1  ID of the SW-module Byte2 Hauptversion of the SW-module Byte3 Unterversion of the SW-module Byte4 Patchversion of the SW-module | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
-| `ACSM__SW_MODUL_VERSION.ID_VERSION_1` | 0x4044 | 1 | unsigned long | HEX |  |  | 4 Byte  Byte1  ID of the SW-module Byte2 Hauptversion of the SW-module Byte3 Unterversion of the SW-module Byte4 Patchversion of the SW-module | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
-| `ACSM__SW_MODUL_VERSION.ID_VERSION_2` | 0x4044 | 2 | unsigned long | HEX |  |  | 4 Byte  Byte1  ID of the SW-module Byte2 Hauptversion of the SW-module Byte3 Unterversion of the SW-module Byte4 Patchversion of the SW-module | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
-| `ACSM__SW_MODUL_VERSION.ID_VERSION_3` | 0x4044 | 3 | unsigned long | HEX |  |  | 4 Byte  Byte1  ID of the SW-module Byte2 Hauptversion of the SW-module Byte3 Unterversion of the SW-module Byte4 Patchversion of the SW-module | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
-| `ACSM__SW_MODUL_VERSION.ID_VERSION_4` | 0x4044 | 4 | unsigned long | HEX |  |  | 4 Byte  Byte1  ID of the SW-module Byte2 Hauptversion of the SW-module Byte3 Unterversion of the SW-module Byte4 Patchversion of the SW-module | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
-| `ACSM__SW_MODUL_VERSION.ID_VERSION_5` | 0x4044 | 5 | unsigned long | HEX |  |  | 4 Byte  Byte1  ID of the SW-module Byte2 Hauptversion of the SW-module Byte3 Unterversion of the SW-module Byte4 Patchversion of the SW-module | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
-| `ACSM__SW_MODUL_VERSION_SBR.HAUPTVERSION` | 0x407A | 0 | unsigned char | HEX |  |  | Hauptversion of the SW-module  SBR . | Hauptversion des SW-Moduls  SBR . |
-| `ACSM__SW_MODUL_VERSION_SBR.UNTERVERSION` | 0x407A | 1 | unsigned char | HEX |  |  | Unterversion of the SW-module  SBR . | Unterversion des SW-Moduls  SBR . |
-| `ACSM__SW_MODUL_VERSION_SBR.PATCHVERSION` | 0x407A | 2 | unsigned char | HEX |  |  | Patchversion of the SW-module  SBR . | Patchversion des SW-Moduls  SBR . |
-| `ACSM__SW_MODUL_VERSION_DAC.HAUPTVERSION` | 0x407C | 0 | unsigned char | HEX |  |  | Hauptversion of the SW-module  DAC . | Hauptversion des SW-Moduls  DAC . |
-| `ACSM__SW_MODUL_VERSION_DAC.UNTERVERSION` | 0x407C | 1 | unsigned char | HEX |  |  | Unterversion of the SW-module  DAC . | Unterversion des SW-Moduls  DAC . |
-| `ACSM__SW_MODUL_VERSION_DAC.PATCHVERSION` | 0x407C | 2 | unsigned char | HEX |  |  | Patchversion of the SW-module  DAC . | Patchversion des SW-Moduls  DAC . |
-| `ACSM__SW_MODUL_VERSION_PARKMASTER.HAUPTVERSION` | 0x407D | 0 | unsigned char | HEX |  |  | Hauptversion of the SW-module  PARKMASTER . | Hauptversion des SW-Moduls  PARKMASTER . |
-| `ACSM__SW_MODUL_VERSION_PARKMASTER.UNTERVERSION` | 0x407D | 1 | unsigned char | HEX |  |  | Unterversion of the SW-module  PARKMASTER . | Unterversion des SW-Moduls  PARKMASTER . |
-| `ACSM__SW_MODUL_VERSION_PARKMASTER.PATCHVERSION` | 0x407D | 2 | unsigned char | HEX |  |  | Patchversion of the SW-module  PARKMASTER . | Patchversion des SW-Moduls  PARKMASTER . |
-| `ACSM__SW_MODUL_VERSION_DMGDET.HAUPTVERSION` | 0x407E | 0 | unsigned char | HEX |  |  | Hauptversion of the SW-module IUSM | Hauptversion des SW-Moduls IUSM |
-| `ACSM__SW_MODUL_VERSION_DMGDET.UNTERVERSION` | 0x407E | 1 | unsigned char | HEX |  |  | Subversion of the SW-module IUSM | Subversion des SW-Moduls IUSM |
-| `ACSM__SW_MODUL_VERSION_DMGDET.PATCHVERSION` | 0x407E | 2 | unsigned char | HEX |  |  | Patchversion of the SW-module IUSM | Patchversion des SW-Moduls IUSM |
-| `ACSM__DAC_DIAG_PARAM_IDENT` | 0x4085 | 0 | unsigned int | HEX |  |  | Parameter-Ident | Parameter-Ident |
-| `ACSM_SW_MODUL_VERSION_PRECRASH.HAUPTVERSION` | 0xD425 | 0 | unsigned char | HEX |  |  | Hauptversion of the SW-module  PRECRASH . | Hauptversion des SW-Moduls  PRECRASH . |
-| `ACSM_SW_MODUL_VERSION_PRECRASH.UNTERVERSION` | 0xD425 | 1 | unsigned char | HEX |  |  | Unterversion of the SW-module  PRECRASH . | Unterversion des SW-Moduls  PRECRASH . |
-| `ACSM_SW_MODUL_VERSION_PRECRASH.PATCHVERSION` | 0xD425 | 2 | unsigned char | HEX |  |  | Patchversion of the SW-module  PRECRASH . | Patchversion des SW-Moduls  PRECRASH . |
-| `ACSM_EDR_IDENTIFICATION.OEM_IDENTIFICATION` | 0xFA11 | 0 | unsigned char | 0-n |  | [`ACSM5.TAB_OEM_IDENTIFICATION`](ACSM5-values.md#acsm5tab_oem_identification) (11 values) | OEMIdentification | OEMIdentification |
-| `ACSM_EDR_IDENTIFICATION.EDR_VERSION` | 0xFA11 | 1 | unsigned int |  |  |  | EDRVersion | EDRVersion |
+| `ACSM_EDR_OEM_IDENTIFICATION.EDR_VERSION_PUBLIC` | 0x1011 | 0 | unsigned int |  |  |  | EDID list version public | EDID List Version public |
+| `ACSM_EDR_OEM_IDENTIFICATION.EDR_VERSION_OEM` | 0x1011 | 1 | unsigned int |  |  |  | EDID list version OEM | EDID List Version OEM |
+| `ACSM_EDR_OEM_IDENTIFICATION.EDR_CONFIG_LIST_USED` | 0x1011 | 2 | unsigned char |  |  |  | Used EDID config list | Used EDID Config List |
+| `ACSM_EDR_OEM_IDENTIFICATION.EDR_CONFIG_LIST_VERSION` | 0x1011 | 3 | unsigned char |  |  |  | EDID config list version | EDID Config List Version |
+| `ACSM_EDR_OEM_IDENTIFICATION.ECU_IDENTIFICATION` | 0x1011 | 4 | unsigned char | 0-n |  | [`ACSM5.TAB_OEM_IDENTIFICATION`](ACSM5-values.md#acsm5tab_oem_identification) (11 values) | ECU identification | ECUIdentification |
+| `ACSM_PROGRAMMING_COUNTER.RESERVE` | 0x2502 | 0 | unsigned char |  |  |  | Reserve. Constant = 0x00 | Reserve. Konstante = 0x00 |
+| `ACSM_PROGRAMMING_COUNTER.PROG_ZAEHLER_STATUS` | 0x2502 | 1 | unsigned char | 0-n |  | 0 = ECU programmable multiple times; 1 = ECU fully programmable at least once; 2 = ECU no longer programmable | Programming counter status | ProgrammingCounterStatus |
+| `ACSM_PROGRAMMING_COUNTER.PROG_ZAEHLER` | 0x2502 | 2 | unsigned int |  |  |  | Programming counter | ProgrammingCounter |
+| `ACSM_PROGRAMMING_COUNTER_MAX_VALUE` | 0x2503 | 0 | unsigned int |  |  |  | Maximum number of programming operations | maximalen Anzahl von Programmiervorgängen |
+| `ACSM_FLASH_TIMING_PARAMETER.ERASE_MEMORY_TIME` | 0x2504 | 0 | unsigned int | s |  |  | EraseMemoryTime: maximum SWE erase time with sequence monitoring in the control unit | EraseMemoryTime, maximale SWE-Löschzeit mit Ablaufkontrolle im Steuergerät. |
+| `ACSM_FLASH_TIMING_PARAMETER.CHECK_MEMORY_TIME` | 0x2504 | 1 | unsigned int | s |  |  | CheckMemoryTime (e.g. signature check): maximum memory check time with sequence monitoring in the control unit | CheckMemoryTime (Bsp.: Signaturprüfung), maximale Speicherprüfzeit mit Ablaufkontrolle im Steuergerät. |
+| `ACSM_FLASH_TIMING_PARAMETER.BOOTLOADER_INSTALLATION_TIME` | 0x2504 | 2 | unsigned int | s |  |  | BootloaderInstallationTime: the time needed after reset for the auxiliary bootloader to start, erase the bootloader, copy the new bootloader, check its signature and start the new bootloader until it is diagnosable again. Mandatory for all control units, even if no bootloader update is planned. A value of 0x0000 is not allowed. | BootloaderInstallationTime Die Zeit, die nach dem Reset benötigt wird, damit der Hilfsbootloader gestartet wird, den Bootloader löscht, den neuen Bootloader kopiert, dessen Signatur prüf und der neue Bootloader gestartet wird bis er wieder diagnosefähig ist. Angabe ist verpflichtend für alle Steuergeräte, auch wenn das Steuergerät keinen Bootloader Update geplant hat. Ein Wert von 0x0000 ist verboten. |
+| `ACSM_FLASH_TIMING_PARAMETER.AUTHENTICATION_TIME` | 0x2504 | 3 | unsigned int | s |  |  | AuthenticationTime: maximum time the control unit needs to check authentication (sendKey), with sequence monitoring in the control unit | AuthenticationTime, die maximale Zeit, die das Steuergerät zur Prüfung der Authentisierung (sendKey) benötigt mit Ablaufkontrolle im Steuergerät. |
+| `ACSM_FLASH_TIMING_PARAMETER.RESET_TIME` | 0x2504 | 4 | unsigned int | s |  |  | ResetTime: refers to the transition from ApplicationExtendedSession to ProgrammingSession, or from ProgrammingSession to DefaultSession. The maximum value is to be output. After ResetTime has elapsed, the control unit can be addressed by diagnosis. | ResetTime Die Zeitangabe bezieht sich auf den Übergang von der ApplicationExtendedSesssion in die ProgrammingSession bzw. bei Übergang von der ProgrammingSession in die DefaultSession. Es ist der Maximalwert auszugeben. Nach Ablauf der ResetTime ist das Steuergerät durch Diagnose ansprechbar. |
+| `ACSM_FLASH_TIMING_PARAMETER.TRANSFER_DATA_TIME` | 0x2504 | 5 | unsigned int | s |  |  | TransferDataTime: refers to a TransferData with maximum block length, covering the period from complete reception of the data in the control unit, through any decompression and complete storage in non-volatile memory, up to and including sending the positive response. | TransferDataTime Die Angabe hat sich zu beziehen auf einen TransferData mit maximaler Blocklänge auf die Zeitspanne vom vollständigen Empfang der Daten im Steuergerät über das ggf. erforderliche Dekomprimieren und dem vollständigen Speichern im nichtflüchtigen Speicher bis einschließlich dem Senden der positiven Response. |
+| `ACSM__BMW_SACHNUMMER` | 0x4040 | 0 | unsigned long | HEX |  |  | 7-digit part number at time of production, BCD coded, leading nibble always 0 | 7 stellige Sachnummer zum Produktionszeitpunkt  BCD codiert,  führendes Nibbel immer 0 |
+| `ACSM__SW_MODUL_VERSION.ID_VERSION_0` | 0x4044 | 0 | unsigned long | HEX |  |  | 4 bytes: byte 1 SW module ID, byte 2 SW module major version, byte 3 SW module minor version, byte 4 SW module patch version | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
+| `ACSM__SW_MODUL_VERSION.ID_VERSION_1` | 0x4044 | 1 | unsigned long | HEX |  |  | 4 bytes: byte 1 SW module ID, byte 2 SW module major version, byte 3 SW module minor version, byte 4 SW module patch version | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
+| `ACSM__SW_MODUL_VERSION.ID_VERSION_2` | 0x4044 | 2 | unsigned long | HEX |  |  | 4 bytes: byte 1 SW module ID, byte 2 SW module major version, byte 3 SW module minor version, byte 4 SW module patch version | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
+| `ACSM__SW_MODUL_VERSION.ID_VERSION_3` | 0x4044 | 3 | unsigned long | HEX |  |  | 4 bytes: byte 1 SW module ID, byte 2 SW module major version, byte 3 SW module minor version, byte 4 SW module patch version | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
+| `ACSM__SW_MODUL_VERSION.ID_VERSION_4` | 0x4044 | 4 | unsigned long | HEX |  |  | 4 bytes: byte 1 SW module ID, byte 2 SW module major version, byte 3 SW module minor version, byte 4 SW module patch version | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
+| `ACSM__SW_MODUL_VERSION.ID_VERSION_5` | 0x4044 | 5 | unsigned long | HEX |  |  | 4 bytes: byte 1 SW module ID, byte 2 SW module major version, byte 3 SW module minor version, byte 4 SW module patch version | 4 Byte  Byte1  ID des SW-Moduls Byte2 Hauptversion des SW-Moduls Byte3 Unterversion des SW-Moduls Byte4 Patchversion des SW-Moduls |
+| `ACSM__SW_MODUL_VERSION_SBR.HAUPTVERSION` | 0x407A | 0 | unsigned char | HEX |  |  | SBR SW module major version | Hauptversion des SW-Moduls  SBR . |
+| `ACSM__SW_MODUL_VERSION_SBR.UNTERVERSION` | 0x407A | 1 | unsigned char | HEX |  |  | SBR SW module minor version | Unterversion des SW-Moduls  SBR . |
+| `ACSM__SW_MODUL_VERSION_SBR.PATCHVERSION` | 0x407A | 2 | unsigned char | HEX |  |  | SBR SW module patch version | Patchversion des SW-Moduls  SBR . |
+| `ACSM__SW_MODUL_VERSION_DAC.HAUPTVERSION` | 0x407C | 0 | unsigned char | HEX |  |  | DAC SW module major version | Hauptversion des SW-Moduls  DAC . |
+| `ACSM__SW_MODUL_VERSION_DAC.UNTERVERSION` | 0x407C | 1 | unsigned char | HEX |  |  | DAC SW module minor version | Unterversion des SW-Moduls  DAC . |
+| `ACSM__SW_MODUL_VERSION_DAC.PATCHVERSION` | 0x407C | 2 | unsigned char | HEX |  |  | DAC SW module patch version | Patchversion des SW-Moduls  DAC . |
+| `ACSM__SW_MODUL_VERSION_PARKMASTER.HAUPTVERSION` | 0x407D | 0 | unsigned char | HEX |  |  | PARKMASTER SW module major version | Hauptversion des SW-Moduls  PARKMASTER . |
+| `ACSM__SW_MODUL_VERSION_PARKMASTER.UNTERVERSION` | 0x407D | 1 | unsigned char | HEX |  |  | PARKMASTER SW module minor version | Unterversion des SW-Moduls  PARKMASTER . |
+| `ACSM__SW_MODUL_VERSION_PARKMASTER.PATCHVERSION` | 0x407D | 2 | unsigned char | HEX |  |  | PARKMASTER SW module patch version | Patchversion des SW-Moduls  PARKMASTER . |
+| `ACSM__SW_MODUL_VERSION_DMGDET.HAUPTVERSION` | 0x407E | 0 | unsigned char | HEX |  |  | IUSM SW module major version | Hauptversion des SW-Moduls IUSM |
+| `ACSM__SW_MODUL_VERSION_DMGDET.UNTERVERSION` | 0x407E | 1 | unsigned char | HEX |  |  | IUSM SW module minor version | Subversion des SW-Moduls IUSM |
+| `ACSM__SW_MODUL_VERSION_DMGDET.PATCHVERSION` | 0x407E | 2 | unsigned char | HEX |  |  | IUSM SW module patch version | Patchversion des SW-Moduls IUSM |
+| `ACSM__DAC_DIAG_PARAM_IDENT` | 0x4085 | 0 | unsigned int | HEX |  |  | Parameter ident | Parameter-Ident |
+| `ACSM_SW_MODUL_VERSION_PRECRASH.HAUPTVERSION` | 0xD425 | 0 | unsigned char | HEX |  |  | PRECRASH SW module major version | Hauptversion des SW-Moduls  PRECRASH . |
+| `ACSM_SW_MODUL_VERSION_PRECRASH.UNTERVERSION` | 0xD425 | 1 | unsigned char | HEX |  |  | PRECRASH SW module minor version | Unterversion des SW-Moduls  PRECRASH . |
+| `ACSM_SW_MODUL_VERSION_PRECRASH.PATCHVERSION` | 0xD425 | 2 | unsigned char | HEX |  |  | PRECRASH SW module patch version | Patchversion des SW-Moduls  PRECRASH . |
+| `ACSM_EDR_IDENTIFICATION.OEM_IDENTIFICATION` | 0xFA11 | 0 | unsigned char | 0-n |  | [`ACSM5.TAB_OEM_IDENTIFICATION`](ACSM5-values.md#acsm5tab_oem_identification) (11 values) | OEM identification | OEMIdentification |
+| `ACSM_EDR_IDENTIFICATION.EDR_VERSION` | 0xFA11 | 1 | unsigned int |  |  |  | EDR version | EDRVersion |
 
 ## Ignition & misfire
 
 | Channel | ID | Field | Type | Unit | Scaling | Values | Description | German |
 |---|---|---|---|---|---|---|---|---|
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABFA1_FREIGABE` | 0x4054 | 0 | unsigned char | HEX |  |  | Airbag driver stage 1; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Fahrer Stufe 1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABFA2_FREIGABE` | 0x4054 | 1 | unsigned char | HEX |  |  | Airbag driver stage 2; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Fahrer Stufe 2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VAFA_FREIGABE` | 0x4054 | 2 | unsigned char | HEX |  |  | Airbag driver Vent; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Fahrer Vent; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABBF1_FREIGABE` | 0x4054 | 3 | unsigned char | HEX |  |  | Airbag passenger stage 1; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Beifahrer Stufe 1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABBF2_FREIGABE` | 0x4054 | 4 | unsigned char | HEX |  |  | Airbag passenger stage 2; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Beifahrer Stufe 2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VABF_FREIGABE` | 0x4054 | 5 | unsigned char | HEX |  |  | Airbag passenger Vent; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Beifahrer Vent; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAFA_FREIGABE` | 0x4054 | 6 | unsigned char | HEX |  |  | Sitzairbag driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Sitzairbag Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIABF_FREIGABE` | 0x4054 | 7 | unsigned char | HEX |  |  | Sitzairbag passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Sitzairbag Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAFAV_FREIGABE` | 0x4054 | 8 | unsigned char | HEX |  |  | Sitzairbag driver valve; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Sitzairbag Fahrer Ventil; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIABFV_FREIGABE` | 0x4054 | 9 | unsigned char | HEX |  |  | Sitzairbag passenger valve; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Sitzairbag Beifahrer Ventil; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KNAFA_FREIGABE` | 0x4054 | 10 | unsigned char | HEX |  |  | Knieairbag driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Knieairbag Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KNABF_FREIGABE` | 0x4054 | 11 | unsigned char | HEX |  |  | Knieairbag passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Knieairbag Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSFA_FREIGABE` | 0x4054 | 12 | unsigned char | HEX |  |  | Automatenstrammer driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Automatenstrammer Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSBF_FREIGABE` | 0x4054 | 13 | unsigned char | HEX |  |  | Automatenstrammer passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Automatenstrammer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSHL_FREIGABE` | 0x4054 | 14 | unsigned char | HEX |  |  | Automatenstrammer rear left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Automatenstrammer hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSHR_FREIGABE` | 0x4054 | 15 | unsigned char | HEX |  |  | Automatenstrammer rear right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Automatenstrammer hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSFA_FREIGABE` | 0x4054 | 16 | unsigned char | HEX |  |  | Gurtschlossstrammer  driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Gurtschlossstrammer  Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSBF_FREIGABE` | 0x4054 | 17 | unsigned char | HEX |  |  | Gurtsschlosstrammer passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Gurtsschlosstrammer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSFA_FREIGABE` | 0x4054 | 18 | unsigned char | HEX |  |  | Endbeschlagsstrammer driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Endbeschlagsstrammer Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSBF_FREIGABE` | 0x4054 | 19 | unsigned char | HEX |  |  | Endbeschlagsstrammer passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Endbeschlagsstrammer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GKBFA_FREIGABE` | 0x4054 | 20 | unsigned char | HEX |  |  | Gurtkraftbegrenzer driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Gurtkraftbegrenzer Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GKBBF_FREIGABE` | 0x4054 | 21 | unsigned char | HEX |  |  | Gurtkraftbegrenzer passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Gurtkraftbegrenzer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSHL_FREIGABE` | 0x4054 | 22 | unsigned char | HEX |  |  | Gurtschlossstrammer rear left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Gurtschlossstrammer hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSHR_FREIGABE` | 0x4054 | 23 | unsigned char | HEX |  |  | Gurtschlossstrammer rear right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Gurtschlossstrammer hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSHL_FREIGABE` | 0x4054 | 24 | unsigned char | HEX |  |  | Endbeschlagstrammer rear left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Endbeschlagstrammer hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSHR_FREIGABE` | 0x4054 | 25 | unsigned char | HEX |  |  | Endbeschlagstrammer rear right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Endbeschlagstrammer hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KOSFA_FREIGABE` | 0x4054 | 26 | unsigned char | HEX |  |  | Crash active Kopfstütze driver; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Crash Aktive Kopfstütze Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KOSBF_FREIGABE` | 0x4054 | 27 | unsigned char | HEX |  |  | Crash active Kopfstütze passenger; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Crash Aktive Kopfstütze Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUL_FREIGABE` | 0x4054 | 28 | unsigned char | HEX |  |  | Curtain left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Curtain links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUR_FREIGABE` | 0x4054 | 29 | unsigned char | HEX |  |  | Curtain right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Curtain rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROSPL_FREIGABE` | 0x4054 | 30 | unsigned char | HEX |  |  | Pyrotechnischer Rolloverschutz left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Pyrotechnischer Rolloverschutz links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROSPR_FREIGABE` | 0x4054 | 31 | unsigned char | HEX |  |  | Pyrotechnischer Rolloverschutz right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Pyrotechnischer Rolloverschutz rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROLML_FREIGABE` | 0x4054 | 32 | unsigned char | HEX |  |  | Magnetischer Rolloveraktuator left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Magnetischer Rolloveraktuator links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROSMR_FREIGABE` | 0x4054 | 33 | unsigned char | HEX |  |  | Magnetischer Rolloveraktuator right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Magnetischer Rolloveraktuator rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSVL_FREIGABE` | 0x4054 | 34 | unsigned char | HEX |  |  | Fußgängerschutz front left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Fußgängerschutz vorne links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSVR_FREIGABE` | 0x4054 | 35 | unsigned char | HEX |  |  | Fußgängerschutz front right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Fußgängerschutz vorne rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSHL_FREIGABE` | 0x4054 | 36 | unsigned char | HEX |  |  | Fußgängerschutz rear left; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Fußgängerschutz hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSHR_FREIGABE` | 0x4054 | 37 | unsigned char | HEX |  |  | Fußgängerschutz rear right; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Fußgängerschutz hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.PPA_FREIGABE` | 0x4054 | 38 | unsigned char | HEX |  |  | Airbag Windowbag; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Airbag Windowbag; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.RPPA1_FREIGABE` | 0x4054 | 39 | unsigned char | HEX |  |  | Windowbag Retractor1; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Windowbag Retractor1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.RPPA2_FREIGABE` | 0x4054 | 40 | unsigned char | HEX |  |  | Windowbag Retractor2; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Windowbag Retractor2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VPPA_FREIGABE` | 0x4054 | 41 | unsigned char | HEX |  |  | Windowbag Vent; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Windowbag Vent; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VPPA2_FREIGABE` | 0x4054 | 42 | unsigned char | HEX |  |  | Windowbag Vent2; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Windowbag Vent2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SBK_FREIGABE` | 0x4054 | 43 | unsigned char | HEX |  |  | SBK - Sicherheitsbatterieklemme; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | SBK - Sicherheitsbatterieklemme; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.HV1_FREIGABE` | 0x4054 | 44 | unsigned char | HEX |  |  | Crash_HV1 - SBK2; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Crash_HV1 - SBK2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.HV2_FREIGABE` | 0x4054 | 45 | unsigned char | HEX |  |  | Crash_HV2 - SBK3; 0x10 = blocked,  0x01 = freigegeben,  0x00 = not present | Crash_HV2 - SBK3; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUHL_FREIGABE` | 0x4054 | 46 | unsigned char | HEX |  |  | Curtain rear left; 0x10 = blocked, 0x01 = freigegeben, 0x00 = not present | Curtain hinten links; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUHR_FREIGABE` | 0x4054 | 47 | unsigned char | HEX |  |  | Curtain rear right; 0x10 = blocked, 0x01 = freigegeben, 0x00 = not present | Curtain hinten rechts; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAHL_FREIGABE` | 0x4054 | 48 | unsigned char | HEX |  |  | Seitenairbag rear left; 0x10 = blocked, 0x01 = freigegeben, 0x00 = not present | Seitenairbag hinten links; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
-| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAHR_FREIGABE` | 0x4054 | 49 | unsigned char | HEX |  |  | Seitenairbag rear right; 0x10 = blocked, 0x01 = freigegeben, 0x00 = not present | Seitenairbag hinten rechts; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
-| `ACSM_ANZAHL_UNERWARTETER_ZUENDKREISE` | 0xD48B | 0 | unsigned char |  |  |  | Number unexpected Zündkreise (plausibility fault PIN-basiert) | Anzahl unerwarteter Zündkreise (Plausifehler PIN-basiert) |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABFA1_FREIGABE` | 0x4054 | 0 | unsigned char | HEX |  |  | Driver airbag stage 1; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Fahrer Stufe 1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABFA2_FREIGABE` | 0x4054 | 1 | unsigned char | HEX |  |  | Driver airbag stage 2; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Fahrer Stufe 2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VAFA_FREIGABE` | 0x4054 | 2 | unsigned char | HEX |  |  | Driver airbag vent; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Fahrer Vent; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABBF1_FREIGABE` | 0x4054 | 3 | unsigned char | HEX |  |  | Front passenger airbag stage 1; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Beifahrer Stufe 1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ABBF2_FREIGABE` | 0x4054 | 4 | unsigned char | HEX |  |  | Front passenger airbag stage 2; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Beifahrer Stufe 2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VABF_FREIGABE` | 0x4054 | 5 | unsigned char | HEX |  |  | Front passenger airbag vent; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Beifahrer Vent; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAFA_FREIGABE` | 0x4054 | 6 | unsigned char | HEX |  |  | Seat airbag, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Sitzairbag Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIABF_FREIGABE` | 0x4054 | 7 | unsigned char | HEX |  |  | Seat airbag, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Sitzairbag Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAFAV_FREIGABE` | 0x4054 | 8 | unsigned char | HEX |  |  | Seat airbag valve, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Sitzairbag Fahrer Ventil; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIABFV_FREIGABE` | 0x4054 | 9 | unsigned char | HEX |  |  | Seat airbag valve, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Sitzairbag Beifahrer Ventil; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KNAFA_FREIGABE` | 0x4054 | 10 | unsigned char | HEX |  |  | Knee airbag, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Knieairbag Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KNABF_FREIGABE` | 0x4054 | 11 | unsigned char | HEX |  |  | Knee airbag, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Knieairbag Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSFA_FREIGABE` | 0x4054 | 12 | unsigned char | HEX |  |  | Retractor pretensioner, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Automatenstrammer Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSBF_FREIGABE` | 0x4054 | 13 | unsigned char | HEX |  |  | Retractor pretensioner, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Automatenstrammer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSHL_FREIGABE` | 0x4054 | 14 | unsigned char | HEX |  |  | Retractor pretensioner, rear left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Automatenstrammer hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.AUSHR_FREIGABE` | 0x4054 | 15 | unsigned char | HEX |  |  | Retractor pretensioner, rear right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Automatenstrammer hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSFA_FREIGABE` | 0x4054 | 16 | unsigned char | HEX |  |  | Buckle pretensioner, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Gurtschlossstrammer  Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSBF_FREIGABE` | 0x4054 | 17 | unsigned char | HEX |  |  | Buckle pretensioner, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Gurtsschlosstrammer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSFA_FREIGABE` | 0x4054 | 18 | unsigned char | HEX |  |  | End fitting pretensioner, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Endbeschlagsstrammer Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSBF_FREIGABE` | 0x4054 | 19 | unsigned char | HEX |  |  | End fitting pretensioner, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Endbeschlagsstrammer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GKBFA_FREIGABE` | 0x4054 | 20 | unsigned char | HEX |  |  | Belt force limiter, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Gurtkraftbegrenzer Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GKBBF_FREIGABE` | 0x4054 | 21 | unsigned char | HEX |  |  | Belt force limiter, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Gurtkraftbegrenzer Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSHL_FREIGABE` | 0x4054 | 22 | unsigned char | HEX |  |  | Buckle pretensioner, rear left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Gurtschlossstrammer hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.GSSHR_FREIGABE` | 0x4054 | 23 | unsigned char | HEX |  |  | Buckle pretensioner, rear right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Gurtschlossstrammer hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSHL_FREIGABE` | 0x4054 | 24 | unsigned char | HEX |  |  | End fitting pretensioner, rear left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Endbeschlagstrammer hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.EBSHR_FREIGABE` | 0x4054 | 25 | unsigned char | HEX |  |  | End fitting pretensioner, rear right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Endbeschlagstrammer hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KOSFA_FREIGABE` | 0x4054 | 26 | unsigned char | HEX |  |  | Crash active head restraint, driver; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Crash Aktive Kopfstütze Fahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.KOSBF_FREIGABE` | 0x4054 | 27 | unsigned char | HEX |  |  | Crash active head restraint, front passenger; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Crash Aktive Kopfstütze Beifahrer; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUL_FREIGABE` | 0x4054 | 28 | unsigned char | HEX |  |  | Curtain airbag left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Curtain links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUR_FREIGABE` | 0x4054 | 29 | unsigned char | HEX |  |  | Curtain airbag right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Curtain rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROSPL_FREIGABE` | 0x4054 | 30 | unsigned char | HEX |  |  | Pyrotechnic rollover protection left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Pyrotechnischer Rolloverschutz links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROSPR_FREIGABE` | 0x4054 | 31 | unsigned char | HEX |  |  | Pyrotechnic rollover protection right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Pyrotechnischer Rolloverschutz rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROLML_FREIGABE` | 0x4054 | 32 | unsigned char | HEX |  |  | Magnetic rollover actuator left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Magnetischer Rolloveraktuator links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.ROSMR_FREIGABE` | 0x4054 | 33 | unsigned char | HEX |  |  | Magnetic rollover actuator right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Magnetischer Rolloveraktuator rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSVL_FREIGABE` | 0x4054 | 34 | unsigned char | HEX |  |  | Pedestrian protection front left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Fußgängerschutz vorne links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSVR_FREIGABE` | 0x4054 | 35 | unsigned char | HEX |  |  | Pedestrian protection front right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Fußgängerschutz vorne rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSHL_FREIGABE` | 0x4054 | 36 | unsigned char | HEX |  |  | Pedestrian protection rear left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Fußgängerschutz hinten links; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.FGSHR_FREIGABE` | 0x4054 | 37 | unsigned char | HEX |  |  | Pedestrian protection rear right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Fußgängerschutz hinten rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.PPA_FREIGABE` | 0x4054 | 38 | unsigned char | HEX |  |  | Window airbag; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Airbag Windowbag; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.RPPA1_FREIGABE` | 0x4054 | 39 | unsigned char | HEX |  |  | Window airbag retractor 1; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Windowbag Retractor1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.RPPA2_FREIGABE` | 0x4054 | 40 | unsigned char | HEX |  |  | Window airbag retractor 2; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Windowbag Retractor2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VPPA_FREIGABE` | 0x4054 | 41 | unsigned char | HEX |  |  | Window airbag vent; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Windowbag Vent; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.VPPA2_FREIGABE` | 0x4054 | 42 | unsigned char | HEX |  |  | Window airbag vent 2; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Windowbag Vent2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SBK_FREIGABE` | 0x4054 | 43 | unsigned char | HEX |  |  | SBK - safety battery terminal; 0x10 = locked, 0x01 = enabled, 0x00 = not present | SBK - Sicherheitsbatterieklemme; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.HV1_FREIGABE` | 0x4054 | 44 | unsigned char | HEX |  |  | Crash_HV1 - SBK2; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Crash_HV1 - SBK2; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.HV2_FREIGABE` | 0x4054 | 45 | unsigned char | HEX |  |  | Crash_HV2 - SBK3; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Crash_HV2 - SBK3; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUHL_FREIGABE` | 0x4054 | 46 | unsigned char | HEX |  |  | Curtain airbag rear left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Curtain hinten links; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.CUHR_FREIGABE` | 0x4054 | 47 | unsigned char | HEX |  |  | Curtain airbag rear right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Curtain hinten rechts; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAHL_FREIGABE` | 0x4054 | 48 | unsigned char | HEX |  |  | Side airbag rear left; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Seitenairbag hinten links; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
+| `ACSM__STATUS_FREIGABE_ZUENDKREISE.SIAHR_FREIGABE` | 0x4054 | 49 | unsigned char | HEX |  |  | Side airbag rear right; 0x10 = locked, 0x01 = enabled, 0x00 = not present | Seitenairbag hinten rechts; 0x10 = gesperrt, 0x01 = freigegeben, 0x00 = nicht vorhanden |
+| `ACSM_ANZAHL_UNERWARTETER_ZUENDKREISE` | 0xD48B | 0 | unsigned char |  |  |  | Number of unexpected firing circuits (PIN-based plausibility error) | Anzahl unerwarteter Zündkreise (Plausifehler PIN-basiert) |
 
 ## Safety & airbag
 
 | Channel | ID | Field | Type | Unit | Scaling | Values | Description | German |
 |---|---|---|---|---|---|---|---|---|
-| `ACSM_SG_INNENTEMPERATUR` | 0x4003 | 0 | signed int | °C | ÷ 10 |  | Control unit-inside-temperature in 0,1°C 0xFFFF = value not present | Steuergeräte-Innen-Temperatur in 0,1°C 0xFFFF = Wert nicht vorhanden |
-| `ACSM_SG_SPANNUNG` | 0x4007 | 0 | unsigned int | mV |  |  | Voltage am control unit in mV 0xFFFF = no value vorhande | Spannung am Steuergerät in mV 0xFFFF = kein Wert vorhande |
-| `ACSM__DTCDEBUGINFO_KONFIG.DTC_1` | 0x4011 | 0 | unsigned long | HEX |  |  | DTC-Code of the erste set DTCs | DTC-Code des erste gesetzten DTCs |
-| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_A_1` | 0x4011 | 1 | unsigned long | HEX |  |  | gibt the set Adresse  A of the ersten entry wieder | gibt die gesetzte Adresse  A des ersten Eintrages wieder |
-| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_B_1` | 0x4011 | 2 | unsigned long | HEX |  |  | gibt the set Adresse B of the ersten entry wieder | gibt die gesetzte Adresse B des ersten Eintrages wieder |
-| `ACSM__DTCDEBUGINFO_KONFIG.DTC_2` | 0x4011 | 3 | unsigned long | HEX |  |  | DTC-Code of the zweiten set DTCs | DTC-Code des zweiten gesetzten DTCs |
-| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_A_2` | 0x4011 | 4 | unsigned long | HEX |  |  | gibt the set Adresse  A of the zweiten entry wieder | gibt die gesetzte Adresse  A des zweiten Eintrages wieder |
-| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_B_2` | 0x4011 | 5 | unsigned long | HEX |  |  | gibt the set Adresse B of the zweiten entry wieder | gibt die gesetzte Adresse B des zweiten Eintrages wieder |
-| `ACSM__DTCDEBUGINFO_KONFIG.DTC_3` | 0x4011 | 6 | unsigned long | HEX |  |  | DTC-Code of the dritten set DTCs | DTC-Code des dritten gesetzten DTCs |
-| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_A_3` | 0x4011 | 7 | unsigned long | HEX |  |  | gibt the set Adresse  A of the dritten entry wieder | gibt die gesetzte Adresse  A des dritten Eintrages wieder |
-| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_B_3` | 0x4011 | 8 | unsigned long | HEX |  |  | gibt the set Adresse B of the dritten entry wieder | gibt die gesetzte Adresse B des dritten Eintrages wieder |
-| `ACSM__BETRIEBSSTUNDENZAEHLER_AKTUELL` | 0x4020 | 0 | unsigned long | s |  |  | current Betriebstunden in s FF FF FF FF Ungültigkeitsbez | aktuelle Betriebstunden in s FF FF FF FF Ungültigkeitsbez |
-| `ACSM__BETRIEBSSTUNDENZAEHLER_PWRON` | 0x4021 | 0 | unsigned long | s |  |  | Betriebstunden in s FF FF FF FF Ungültigkeitsbez | Betriebstunden in s FF FF FF FF Ungültigkeitsbez |
-| `ACSM__BETRIEBSSTUNDENZAEHLER_FSP_LOESCHEN` | 0x4022 | 0 | unsigned long | s |  |  | Betriebstunden in s FF FF FF FF Ungültigkeitsbez | Betriebstunden in s FF FF FF FF Ungültigkeitsbez |
-| `ACSM__SYSTEMZEIT_AKTUELL` | 0x4025 | 0 | unsigned long | s |  |  | System time in s FF FF FF FF Ungültigkeitsbez | Systemzeit in s FF FF FF FF Ungültigkeitsbez |
-| `ACSM__SYSTEMZEIT_PWRON` | 0x4026 | 0 | unsigned long | s |  |  | System time in s FF FF FF FF Ungültigkeitsbez | Systemzeit in s FF FF FF FF Ungültigkeitsbez |
-| `ACSM__SYSTEMZEIT_FSP_LOESCHEN` | 0x4027 | 0 | unsigned long | s |  |  | System time in s FF FF FF FF Ungültigkeitsbez | Systemzeit in s FF FF FF FF Ungültigkeitsbez |
-| `ACSM__BORDZEIT_AKTUELL.STUNDE` | 0x4029 | 0 | unsigned char | h |  |  | Stunden in h >250  Ungültigkeitsbez | Stunden in h >250  Ungültigkeitsbez |
-| `ACSM__BORDZEIT_AKTUELL.MINUTE` | 0x4029 | 1 | unsigned char | min |  |  | Minute in min >250 Ungültigkeitsbezeichner | Minute in min >250 Ungültigkeitsbezeichner |
-| `ACSM__BORDZEIT_AKTUELL.SEKUNDE` | 0x4029 | 2 | unsigned char | s |  |  | Sekunden in s >250 Ungültigkeitsbez | Sekunden in s >250 Ungültigkeitsbez |
-| `ACSM__BORDZEIT_AKTUELL.DATUM_TAG` | 0x4029 | 3 | unsigned char |  |  |  | Tag in the Monat | Tag im Monat |
-| `ACSM__BORDZEIT_AKTUELL.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | 0x4029 | 4 | BITFIELD | Bit |  | `ACSM5.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | Wochentag, Monat | Wochentag, Monat |
-| `ACSM__BORDZEIT_AKTUELL.DATUM_JAHR` | 0x4029 | 5 | unsigned int |  |  |  | JAHR | JAHR |
-| `ACSM__BORDZEIT_AKTUELL.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | 0x4029 | 6 | BITFIELD | Bit |  | `ACSM5.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | Status the display Uhrzeit/Datum | Status der Anzeige Uhrzeit/Datum |
-| `ACSM__BORDZEIT_PWRON.STUNDE` | 0x402A | 0 | unsigned char | h |  |  | Stunden in h  >250  Ungültigkeitsbez | Stunden in h  >250  Ungültigkeitsbez |
-| `ACSM__BORDZEIT_PWRON.MINUTE` | 0x402A | 1 | unsigned char | min |  |  | Minute in min  >250 Ungültigkeitsbezeichner | Minute in min  >250 Ungültigkeitsbezeichner |
-| `ACSM__BORDZEIT_PWRON.SEKUNDE` | 0x402A | 2 | unsigned char | s |  |  | Sekunden in s  >250 Ungültigkeitsbez | Sekunden in s  >250 Ungültigkeitsbez |
-| `ACSM__BORDZEIT_PWRON.DATUM_TAG` | 0x402A | 3 | unsigned char |  |  |  | Tag in the Monat | Tag im Monat |
-| `ACSM__BORDZEIT_PWRON.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | 0x402A | 4 | BITFIELD | Bit |  | `ACSM5.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | Wochentag | Wochentag |
-| `ACSM__BORDZEIT_PWRON.DATUM_JAHR` | 0x402A | 5 | unsigned int |  |  |  | JAHR | JAHR |
-| `ACSM__BORDZEIT_PWRON.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | 0x402A | 6 | BITFIELD | Bit |  | `ACSM5.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | Status the display Uhrzeit/Datum | Status der Anzeige Uhrzeit/Datum |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.STUNDE` | 0x402B | 0 | unsigned char | h |  |  | Stunden in h >250  Ungültigkeitsbez | Stunden in h >250  Ungültigkeitsbez |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.MINUTE` | 0x402B | 1 | unsigned char | min |  |  | Minute in min >250 Ungültigkeitsbezeichner | Minute in min >250 Ungültigkeitsbezeichner |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.SEKUNDE` | 0x402B | 2 | unsigned char | s |  |  | Sekunden in s >250 Ungültigkeitsbez | Sekunden in s >250 Ungültigkeitsbez |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.DATUM_TAG` | 0x402B | 3 | unsigned char |  |  |  | Tag in the Monat | Tag im Monat |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | 0x402B | 4 | BITFIELD | Bit |  | `ACSM5.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | Wochentag | Wochentag |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.DATUM_JAHR` | 0x402B | 5 | unsigned int |  |  |  | JAHR | JAHR |
-| `ACSM__BORDZEIT_FSP_LOESCHEN.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | 0x402B | 6 | BITFIELD | Bit |  | `ACSM5.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | Status the display Uhrzeit/Datum | Status der Anzeige Uhrzeit/Datum |
-| `ACSM__POWER_ON_ZAHLER_AKTUELL` | 0x402E | 0 | unsigned long | count |  |  | Power-ON counter | Power-ON Zähler |
-| `ACSM__POWER_ON_ZAEHLER_FSP_LOESCHEN` | 0x402F | 0 | unsigned long | count |  |  | Power-ON counter | Power-ON Zähler |
-| `ACSM__SICHERHEITSLASTZAEHLER.ZAEHLER_1_SICHERHEITSLAST` | 0x4032 | 0 | unsigned int | count |  |  | Counter for the Trigger the Sicherheitslast 1 | Zaehler fuer den Trigger der Sicherheitslast 1 |
-| `ACSM__SICHERHEITSLASTZAEHLER.ZAEHLER_2_SICHERHEITSLAST` | 0x4032 | 1 | unsigned int | count |  |  | Counter for the Trigger the Sicherheitslast 2 | Zaehler fuer den Trigger der Sicherheitslast 2 |
-| `ACSM__SICHERHEITSLASTZAEHLER.ZAEHLER_3_SICHERHEITSLAST` | 0x4032 | 2 | unsigned int | count |  |  | Counter for the Trigger the Sicherheitslast 3 | Zaehler fuer den Trigger der Sicherheitslast 3 |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_UF_L` | 0x4034 | 0 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor left | Fehlerzahler fuer Up-Frontsensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_UF_R` | 0x4034 | 1 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor right | Fehlerzahler fuer Up-Frontsensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_BS_L` | 0x4034 | 2 | unsigned char | count |  |  | Fehlerzahler for B-pillar sensor left | Fehlerzahler fuer B-Saeulensensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_BS_R` | 0x4034 | 3 | unsigned char | count |  |  | Fehlerzahler for B-pillar sensor right | Fehlerzahler fuer B-Saeulensensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_TD_L` | 0x4034 | 4 | unsigned char | count |  |  | Fehlerzahler for door-pressure-sensor left | Fehlerzahler fuer Tuer-Druck-Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_TD_R` | 0x4034 | 5 | unsigned char | count |  |  | Fehlerzahler for door-pressure-sensor right | Fehlerzahler fuer Tuer-Druck-Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_FGS_L` | 0x4034 | 6 | unsigned char | count |  |  | Fehlerzahler for FGS-sensor left | Fehlerzahler fuer FGS-Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_FGS_M` | 0x4034 | 7 | unsigned char | count |  |  | Fehlerzahler for FGS-sensor center | Fehlerzahler fuer FGS-Sensor mitte |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_FGS_R` | 0x4034 | 8 | unsigned char | count |  |  | Fehlerzahler for FGS-sensor right | Fehlerzahler fuer FGS-Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_CS_L` | 0x4034 | 9 | unsigned char | count |  |  | Fehlerzahler for C-pillar sensor left | Fehlerzahler fuer C-Säulen Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_CS_R` | 0x4034 | 10 | unsigned char | count |  |  | Fehlerzahler for C-pillar sensor right | Fehlerzahler fuer C-Säulen Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_UF_L` | 0x4035 | 0 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor left | Fehlerzahler fuer Up-Frontsensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_UF_R` | 0x4035 | 1 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor right | Fehlerzahler fuer Up-Frontsensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_BS_L` | 0x4035 | 2 | unsigned char | count |  |  | Fehlerzahler for B-pillar sensor left | Fehlerzahler fuer B-Saeulensensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_BS_R` | 0x4035 | 3 | unsigned char | count |  |  | Fehlerzahler for B-pillar sensor right | Fehlerzahler fuer B-Saeulensensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_TD_L` | 0x4035 | 4 | unsigned char | count |  |  | Fehlerzahler for door-pressure-sensor left | Fehlerzahler fuer Tuer-Druck-Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_TD_R` | 0x4035 | 5 | unsigned char | count |  |  | Fehlerzahler for door-pressure-sensor right | Fehlerzahler fuer Tuer-Druck-Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_PTS_L` | 0x4035 | 6 | unsigned char | count |  |  | Fehlerzahler for FGS-PTS-sensor left | Fehlerzahler fuer FGS-PTS-Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_ZUS_M` | 0x4035 | 7 | unsigned char | count |  |  | Fehlerzahler for FGS-sensor/Up-front sensor center | Fehlerzahler fuer FGS-Sensor/Up-Frontsensor mitte |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_PTS_R` | 0x4035 | 8 | unsigned char | count |  |  | Fehlerzahler for FGS-PTS-sensor right | Fehlerzahler fuer FGS-PTS-Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_CS_L` | 0x4035 | 9 | unsigned char | count |  |  | Fehlerzahler for C-pillar sensor left | Fehlerzahler fuer C-Säulen Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_CS_R` | 0x4035 | 10 | unsigned char | count |  |  | Fehlerzahler for C-pillar sensor right | Fehlerzahler fuer C-Säulen Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_ZUS_L` | 0x4035 | 11 | unsigned char | count |  |  | Fehlerzahler for FGS Zusatzsensor acceleration left | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung links |
-| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_ZUS_R` | 0x4035 | 12 | unsigned char | count |  |  | Fehlerzahler for FGS Zusatzsensor acceleration right | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung rechts |
-| `ACSM__INTERNER_SG_STATUS.ECU_OPERATION_STATE` | 0x4036 | 0 | unsigned char | HEX |  |  | Nachfolgende values sind for the ECU Operation State to berücksichtigen: * Energiesparmode       $01 * PDC                            $02 * Normal                        $03 * Lieferanten Spez.       $04 | Nachfolgende Werte sind für den ECU Operation State zu berücksichtigen: * Energiesparmode       $01 * PDC                            $02 * Normal                        $03 * Lieferanten Spez.       $04 |
-| `ACSM__INTERNER_SG_STATUS.ENERGY_STATE` | 0x4036 | 1 | unsigned char | HEX |  |  | Nachfolgende values sind for the Energy State to berücksichtigen: * Autarkie                      $01 * undervoltage           $02 * Normalspannung         $03 * overvoltage            $04 | Nachfolgende Werte sind für den Energy State zu berücksichtigen: * Autarkie                      $01 * Unterspannung           $02 * Normalspannung         $03 * Überspannung            $04 |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_UF_L` | 0x4037 | 0 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor left | Fehlerzahler fuer Up-Frontsensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_UF_R` | 0x4037 | 1 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor right | Fehlerzahler fuer Up-Frontsensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_BS_L` | 0x4037 | 2 | unsigned char | count |  |  | Fehlerzahler for B-pillar sensor left | Fehlerzahler fuer B-Saeulensensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_BS_R` | 0x4037 | 3 | unsigned char | count |  |  | Fehlerzahler for B-pillar sensor right | Fehlerzahler fuer B-Saeulensensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_TD_L` | 0x4037 | 4 | unsigned char | count |  |  | Fehlerzahler for door-pressure-sensor left | Fehlerzahler fuer Tuer-Druck-Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_TD_R` | 0x4037 | 5 | unsigned char | count |  |  | Fehlerzahler for door-pressure-sensor right | Fehlerzahler fuer Tuer-Druck-Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_PTS_L` | 0x4037 | 6 | unsigned char | count |  |  | Fehlerzahler for FGS-PTS-sensor left | Fehlerzahler fuer FGS-PTS-Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_M` | 0x4037 | 7 | unsigned char | count |  |  | Fehlerzahler for FGS-sensor center | Fehlerzahler fuer FGS-Sensor mitte |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_PTS_R` | 0x4037 | 8 | unsigned char | count |  |  | Fehlerzahler for FGS-PTS-sensor right | Fehlerzahler fuer FGS-PTS-Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_CS_L` | 0x4037 | 9 | unsigned char | count |  |  | Fehlerzahler for C-pillar sensor left | Fehlerzahler fuer C-Säulen Sensor links |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_CS_R` | 0x4037 | 10 | unsigned char | count |  |  | Fehlerzahler for C-pillar sensor right | Fehlerzahler fuer C-Säulen Sensor rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_ZUS_L` | 0x4037 | 11 | unsigned char | count |  |  | Fehlerzahler for FGS Zusatzsensor acceleration left | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung links |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_ZUS_R` | 0x4037 | 12 | unsigned char | count |  |  | Fehlerzahler for FGS Zusatzsensor acceleration right | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung rechts |
-| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_UF_M` | 0x4037 | 13 | unsigned char | count |  |  | Fehlerzahler for Up-front sensor center | Fehlerzahler fuer Up-Frontsensor mitte |
-| `ACSM__SEATBELTMIND_2.IW_STATE` | 0x4047 | 0 | unsigned char | HEX |  |  | current state the function Initialwarnung | aktueller Zustand der Funktion Initialwarnung |
-| `ACSM__SEATBELTMIND_2.SBR_STATE_PAS` | 0x4047 | 1 | unsigned char | HEX |  |  | current state SBR passenger | aktueller Zustand SBR Beifahrer |
-| `ACSM__SEATBELTMIND_2.SBR_STATE_DRIV` | 0x4047 | 2 | unsigned char | HEX |  |  | current state SBR driver | aktueller Zustand SBR Fahrer |
-| `ACSM__SEATBELTMIND_2.MON_COUNTER_PAS` | 0x4047 | 3 | unsigned char | s |  |  | Monitoring counter SBR passenger | Monitoring Zähler SBR Beifahrer |
-| `ACSM__SEATBELTMIND_2.MON_COUNTER_DRIV` | 0x4047 | 4 | unsigned char | s |  |  | Monitoring counter SBR driver | Monitoring Zähler SBR Fahrer |
-| `ACSM__SEATBELTMIND_2.ST_BELT_PAS` | 0x4047 | 5 | unsigned char | 0-n |  | 0 = nicht_gesteckt; 1 = gesteckt; 2 = nicht_verbaut; 3 = invalid | Gurtschlosszustand passenger | Gurtschlosszustand Beifahrer |
-| `ACSM__SEATBELTMIND_2.ERR_ST_BELT_PAS` | 0x4047 | 6 | unsigned char | HEX |  |  | Errorstatus Gurtkontakt BF | Errorstatus Gurtkontakt BF |
-| `ACSM__SEATBELTMIND_2.ST_BELT_DRIV` | 0x4047 | 7 | unsigned char | 0-n |  | 0 = nicht_gesteckt; 1 = gesteckt; 2 = nicht_verbaut; 3 = invalid | Gurtschlosszustand driver | Gurtschlosszustand Fahrer |
-| `ACSM__SEATBELTMIND_2.ERR_ST_BELT_DRIV` | 0x4047 | 8 | unsigned char | HEX |  |  | Errorstatus Gurtkontakt FA | Errorstatus Gurtkontakt FA |
-| `ACSM__SEATBELTMIND_2.SEAT_OCC_PAS` | 0x4047 | 9 | unsigned char | 0-n |  | 0 = nicht_belegt; 1 = Sitz_mit_Kindersitz_belegt; 2 = na; 3 = Sitz_belegt; 4 = Erkennungssystem_nicht_vorhanden; 5 = na; 6 = Wert_Initialisierung; 7 = Signal_ungueltig | Status Sitzbelegung passenger (SBR-Info) | Status Sitzbelegung Beifahrer (SBR-Info) |
-| `ACSM__SEATBELTMIND_2.ERR_ST_SEAT_OCC_PAS` | 0x4047 | 10 | unsigned char | HEX |  |  | Errorstatus Sitzbelegung BF | Errorstatus Sitzbelegung BF |
-| `ACSM__SEATBELTMIND_2.BF_SITZBELEGUNG_BF_GEFILTERT` | 0x4047 | 11 | BITFIELD | Bit |  | `ACSM5.BF_SITZBELEGUNG_BF_GEFILTERT` | Status Sitzbelegung Befahrer entprellt | Status Sitzbelegung Befahrer entprellt |
-| `ACSM__SEATBELTMIND_2.SBR_ACT_COND` | 0x4047 | 12 | unsigned char | HEX |  |  | Activation state SBR (terminal or PWF) | Aktivierungszustand SBR (Klemmen oder PWF) |
-| `ACSM__SEATBELTMIND_2.SBR_DIST` | 0x4047 | 13 | unsigned long | m | ÷ 1000 |  | current SBR-distance | aktuelle SBR-Wegstrecke |
-| `ACSM__SEATBELTMIND_2.BF_ST_DISP_STRUCT` | 0x4047 | 14 | BITFIELD | Bit |  | `ACSM5.BF_ST_DISP_STRUCT` | Status the display | Status der Anzeige |
-| `ACSM__SEATBELTMIND_2.DVCO_VEH` | 0x4047 | 15 | unsigned char | HEX |  |  | Fahrzustand vehicle (u.a. Richtungsinformation) | Fahrzustand Fahrzeug (u.a. Richtungsinformation) |
-| `ACSM__SEATBELTMIND_2.ERR_DVCO_VEH` | 0x4047 | 16 | unsigned char | HEX |  |  | Errorstatus Fahrzustand vehicle | Errorstatus Fahrzustand Fahrzeug |
+| `ACSM_SG_INNENTEMPERATUR` | 0x4003 | 0 | signed int | °C | ÷ 10 |  | Control unit internal temperature in 0.1 °C; 0xFFFF = value not available | Steuergeräte-Innen-Temperatur in 0,1°C 0xFFFF = Wert nicht vorhanden |
+| `ACSM_SG_SPANNUNG` | 0x4007 | 0 | unsigned int | mV |  |  | Control unit voltage in mV; 0xFFFF = no value available | Spannung am Steuergerät in mV 0xFFFF = kein Wert vorhande |
+| `ACSM__DTCDEBUGINFO_KONFIG.DTC_1` | 0x4011 | 0 | unsigned long | HEX |  |  | DTC code of the first set DTC | DTC-Code des erste gesetzten DTCs |
+| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_A_1` | 0x4011 | 1 | unsigned long | HEX |  |  | Set address A of the first entry | gibt die gesetzte Adresse  A des ersten Eintrages wieder |
+| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_B_1` | 0x4011 | 2 | unsigned long | HEX |  |  | Set address B of the first entry | gibt die gesetzte Adresse B des ersten Eintrages wieder |
+| `ACSM__DTCDEBUGINFO_KONFIG.DTC_2` | 0x4011 | 3 | unsigned long | HEX |  |  | DTC code of the second set DTC | DTC-Code des zweiten gesetzten DTCs |
+| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_A_2` | 0x4011 | 4 | unsigned long | HEX |  |  | Set address A of the second entry | gibt die gesetzte Adresse  A des zweiten Eintrages wieder |
+| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_B_2` | 0x4011 | 5 | unsigned long | HEX |  |  | Set address B of the second entry | gibt die gesetzte Adresse B des zweiten Eintrages wieder |
+| `ACSM__DTCDEBUGINFO_KONFIG.DTC_3` | 0x4011 | 6 | unsigned long | HEX |  |  | DTC code of the third set DTC | DTC-Code des dritten gesetzten DTCs |
+| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_A_3` | 0x4011 | 7 | unsigned long | HEX |  |  | Set address A of the third entry | gibt die gesetzte Adresse  A des dritten Eintrages wieder |
+| `ACSM__DTCDEBUGINFO_KONFIG.ADRESSE_B_3` | 0x4011 | 8 | unsigned long | HEX |  |  | Set address B of the third entry | gibt die gesetzte Adresse B des dritten Eintrages wieder |
+| `ACSM__BETRIEBSSTUNDENZAEHLER_AKTUELL` | 0x4020 | 0 | unsigned long | s |  |  | Current operating hours in s; FF FF FF FF = invalid | aktuelle Betriebstunden in s FF FF FF FF Ungültigkeitsbez |
+| `ACSM__BETRIEBSSTUNDENZAEHLER_PWRON` | 0x4021 | 0 | unsigned long | s |  |  | Operating hours in s; FF FF FF FF = invalid | Betriebstunden in s FF FF FF FF Ungültigkeitsbez |
+| `ACSM__BETRIEBSSTUNDENZAEHLER_FSP_LOESCHEN` | 0x4022 | 0 | unsigned long | s |  |  | Operating hours in s; FF FF FF FF = invalid | Betriebstunden in s FF FF FF FF Ungültigkeitsbez |
+| `ACSM__SYSTEMZEIT_AKTUELL` | 0x4025 | 0 | unsigned long | s |  |  | System time in s; FF FF FF FF = invalid | Systemzeit in s FF FF FF FF Ungültigkeitsbez |
+| `ACSM__SYSTEMZEIT_PWRON` | 0x4026 | 0 | unsigned long | s |  |  | System time in s; FF FF FF FF = invalid | Systemzeit in s FF FF FF FF Ungültigkeitsbez |
+| `ACSM__SYSTEMZEIT_FSP_LOESCHEN` | 0x4027 | 0 | unsigned long | s |  |  | System time in s; FF FF FF FF = invalid | Systemzeit in s FF FF FF FF Ungültigkeitsbez |
+| `ACSM__BORDZEIT_AKTUELL.STUNDE` | 0x4029 | 0 | unsigned char | h |  |  | Hours in h; >250 = invalid | Stunden in h >250  Ungültigkeitsbez |
+| `ACSM__BORDZEIT_AKTUELL.MINUTE` | 0x4029 | 1 | unsigned char | min |  |  | Minutes in min; >250 = invalid | Minute in min >250 Ungültigkeitsbezeichner |
+| `ACSM__BORDZEIT_AKTUELL.SEKUNDE` | 0x4029 | 2 | unsigned char | s |  |  | Seconds in s; >250 = invalid | Sekunden in s >250 Ungültigkeitsbez |
+| `ACSM__BORDZEIT_AKTUELL.DATUM_TAG` | 0x4029 | 3 | unsigned char |  |  |  | Day of month | Tag im Monat |
+| `ACSM__BORDZEIT_AKTUELL.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | 0x4029 | 4 | BITFIELD | Bit |  | `ACSM5.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | Weekday, month | Wochentag, Monat |
+| `ACSM__BORDZEIT_AKTUELL.DATUM_JAHR` | 0x4029 | 5 | unsigned int |  |  |  | Year | JAHR |
+| `ACSM__BORDZEIT_AKTUELL.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | 0x4029 | 6 | BITFIELD | Bit |  | `ACSM5.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | Time/date display status | Status der Anzeige Uhrzeit/Datum |
+| `ACSM__BORDZEIT_PWRON.STUNDE` | 0x402A | 0 | unsigned char | h |  |  | Hours in h; >250 = invalid | Stunden in h  >250  Ungültigkeitsbez |
+| `ACSM__BORDZEIT_PWRON.MINUTE` | 0x402A | 1 | unsigned char | min |  |  | Minutes in min; >250 = invalid | Minute in min  >250 Ungültigkeitsbezeichner |
+| `ACSM__BORDZEIT_PWRON.SEKUNDE` | 0x402A | 2 | unsigned char | s |  |  | Seconds in s; >250 = invalid | Sekunden in s  >250 Ungültigkeitsbez |
+| `ACSM__BORDZEIT_PWRON.DATUM_TAG` | 0x402A | 3 | unsigned char |  |  |  | Day of month | Tag im Monat |
+| `ACSM__BORDZEIT_PWRON.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | 0x402A | 4 | BITFIELD | Bit |  | `ACSM5.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | Weekday | Wochentag |
+| `ACSM__BORDZEIT_PWRON.DATUM_JAHR` | 0x402A | 5 | unsigned int |  |  |  | Year | JAHR |
+| `ACSM__BORDZEIT_PWRON.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | 0x402A | 6 | BITFIELD | Bit |  | `ACSM5.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | Time/date display status | Status der Anzeige Uhrzeit/Datum |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.STUNDE` | 0x402B | 0 | unsigned char | h |  |  | Hours in h; >250 = invalid | Stunden in h >250  Ungültigkeitsbez |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.MINUTE` | 0x402B | 1 | unsigned char | min |  |  | Minutes in min; >250 = invalid | Minute in min >250 Ungültigkeitsbezeichner |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.SEKUNDE` | 0x402B | 2 | unsigned char | s |  |  | Seconds in s; >250 = invalid | Sekunden in s >250 Ungültigkeitsbez |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.DATUM_TAG` | 0x402B | 3 | unsigned char |  |  |  | Day of month | Tag im Monat |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | 0x402B | 4 | BITFIELD | Bit |  | `ACSM5.BF_DATUM_WOCHENTAG_MONAT_STRUCT` | Weekday | Wochentag |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.DATUM_JAHR` | 0x402B | 5 | unsigned int |  |  |  | Year | JAHR |
+| `ACSM__BORDZEIT_FSP_LOESCHEN.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | 0x402B | 6 | BITFIELD | Bit |  | `ACSM5.BF_ANZEIGE_UHR_GUELTIG_STRUCT` | Time/date display status | Status der Anzeige Uhrzeit/Datum |
+| `ACSM__POWER_ON_ZAHLER_AKTUELL` | 0x402E | 0 | unsigned long | count |  |  | Power-on counter | Power-ON Zähler |
+| `ACSM__POWER_ON_ZAEHLER_FSP_LOESCHEN` | 0x402F | 0 | unsigned long | count |  |  | Power-on counter | Power-ON Zähler |
+| `ACSM__SICHERHEITSLASTZAEHLER.ZAEHLER_1_SICHERHEITSLAST` | 0x4032 | 0 | unsigned int | count |  |  | Counter for safety load 1 trigger | Zaehler fuer den Trigger der Sicherheitslast 1 |
+| `ACSM__SICHERHEITSLASTZAEHLER.ZAEHLER_2_SICHERHEITSLAST` | 0x4032 | 1 | unsigned int | count |  |  | Counter for safety load 2 trigger | Zaehler fuer den Trigger der Sicherheitslast 2 |
+| `ACSM__SICHERHEITSLASTZAEHLER.ZAEHLER_3_SICHERHEITSLAST` | 0x4032 | 2 | unsigned int | count |  |  | Counter for safety load 3 trigger | Zaehler fuer den Trigger der Sicherheitslast 3 |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_UF_L` | 0x4034 | 0 | unsigned char | count |  |  | Fault counter for upfront sensor left | Fehlerzahler fuer Up-Frontsensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_UF_R` | 0x4034 | 1 | unsigned char | count |  |  | Fault counter for upfront sensor right | Fehlerzahler fuer Up-Frontsensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_BS_L` | 0x4034 | 2 | unsigned char | count |  |  | Fault counter for B-pillar sensor left | Fehlerzahler fuer B-Saeulensensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_BS_R` | 0x4034 | 3 | unsigned char | count |  |  | Fault counter for B-pillar sensor right | Fehlerzahler fuer B-Saeulensensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_TD_L` | 0x4034 | 4 | unsigned char | count |  |  | Fault counter for door pressure sensor left | Fehlerzahler fuer Tuer-Druck-Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_TD_R` | 0x4034 | 5 | unsigned char | count |  |  | Fault counter for door pressure sensor right | Fehlerzahler fuer Tuer-Druck-Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_FGS_L` | 0x4034 | 6 | unsigned char | count |  |  | Fault counter for FGS sensor left | Fehlerzahler fuer FGS-Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_FGS_M` | 0x4034 | 7 | unsigned char | count |  |  | Fault counter for FGS sensor centre | Fehlerzahler fuer FGS-Sensor mitte |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_FGS_R` | 0x4034 | 8 | unsigned char | count |  |  | Fault counter for FGS sensor right | Fehlerzahler fuer FGS-Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_CS_L` | 0x4034 | 9 | unsigned char | count |  |  | Fault counter for C-pillar sensor left | Fehlerzahler fuer C-Säulen Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER.SENSOR_FZ_CS_R` | 0x4034 | 10 | unsigned char | count |  |  | Fault counter for C-pillar sensor right | Fehlerzahler fuer C-Säulen Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_UF_L` | 0x4035 | 0 | unsigned char | count |  |  | Fault counter for upfront sensor left | Fehlerzahler fuer Up-Frontsensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_UF_R` | 0x4035 | 1 | unsigned char | count |  |  | Fault counter for upfront sensor right | Fehlerzahler fuer Up-Frontsensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_BS_L` | 0x4035 | 2 | unsigned char | count |  |  | Fault counter for B-pillar sensor left | Fehlerzahler fuer B-Saeulensensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_BS_R` | 0x4035 | 3 | unsigned char | count |  |  | Fault counter for B-pillar sensor right | Fehlerzahler fuer B-Saeulensensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_TD_L` | 0x4035 | 4 | unsigned char | count |  |  | Fault counter for door pressure sensor left | Fehlerzahler fuer Tuer-Druck-Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_TD_R` | 0x4035 | 5 | unsigned char | count |  |  | Fault counter for door pressure sensor right | Fehlerzahler fuer Tuer-Druck-Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_PTS_L` | 0x4035 | 6 | unsigned char | count |  |  | Fault counter for FGS PTS sensor left | Fehlerzahler fuer FGS-PTS-Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_ZUS_M` | 0x4035 | 7 | unsigned char | count |  |  | Fault counter for FGS sensor / upfront sensor centre | Fehlerzahler fuer FGS-Sensor/Up-Frontsensor mitte |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_PTS_R` | 0x4035 | 8 | unsigned char | count |  |  | Fault counter for FGS PTS sensor right | Fehlerzahler fuer FGS-PTS-Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_CS_L` | 0x4035 | 9 | unsigned char | count |  |  | Fault counter for C-pillar sensor left | Fehlerzahler fuer C-Säulen Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_CS_R` | 0x4035 | 10 | unsigned char | count |  |  | Fault counter for C-pillar sensor right | Fehlerzahler fuer C-Säulen Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_ZUS_L` | 0x4035 | 11 | unsigned char | count |  |  | Fault counter for FGS additional acceleration sensor left | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung links |
+| `ACSM__SENSORFEHLER_ZAEHLER_2.SENSOR_FZ_FGS_ZUS_R` | 0x4035 | 12 | unsigned char | count |  |  | Fault counter for FGS additional acceleration sensor right | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung rechts |
+| `ACSM__INTERNER_SG_STATUS.ECU_OPERATION_STATE` | 0x4036 | 0 | unsigned char | HEX |  |  | The following values apply to the ECU operation state: * Energy saving mode $01 * PDC $02 * Normal $03 * Supplier-specific $04 | Nachfolgende Werte sind für den ECU Operation State zu berücksichtigen: * Energiesparmode       $01 * PDC                            $02 * Normal                        $03 * Lieferanten Spez.       $04 |
+| `ACSM__INTERNER_SG_STATUS.ENERGY_STATE` | 0x4036 | 1 | unsigned char | HEX |  |  | The following values apply to the energy state: * Autonomous $01 * Undervoltage $02 * Normal voltage $03 * Overvoltage $04 | Nachfolgende Werte sind für den Energy State zu berücksichtigen: * Autarkie                      $01 * Unterspannung           $02 * Normalspannung         $03 * Überspannung            $04 |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_UF_L` | 0x4037 | 0 | unsigned char | count |  |  | Fault counter for upfront sensor left | Fehlerzahler fuer Up-Frontsensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_UF_R` | 0x4037 | 1 | unsigned char | count |  |  | Fault counter for upfront sensor right | Fehlerzahler fuer Up-Frontsensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_BS_L` | 0x4037 | 2 | unsigned char | count |  |  | Fault counter for B-pillar sensor left | Fehlerzahler fuer B-Saeulensensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_BS_R` | 0x4037 | 3 | unsigned char | count |  |  | Fault counter for B-pillar sensor right | Fehlerzahler fuer B-Saeulensensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_TD_L` | 0x4037 | 4 | unsigned char | count |  |  | Fault counter for door pressure sensor left | Fehlerzahler fuer Tuer-Druck-Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_TD_R` | 0x4037 | 5 | unsigned char | count |  |  | Fault counter for door pressure sensor right | Fehlerzahler fuer Tuer-Druck-Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_PTS_L` | 0x4037 | 6 | unsigned char | count |  |  | Fault counter for FGS PTS sensor left | Fehlerzahler fuer FGS-PTS-Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_M` | 0x4037 | 7 | unsigned char | count |  |  | Fault counter for FGS sensor centre | Fehlerzahler fuer FGS-Sensor mitte |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_PTS_R` | 0x4037 | 8 | unsigned char | count |  |  | Fault counter for FGS PTS sensor right | Fehlerzahler fuer FGS-PTS-Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_CS_L` | 0x4037 | 9 | unsigned char | count |  |  | Fault counter for C-pillar sensor left | Fehlerzahler fuer C-Säulen Sensor links |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_CS_R` | 0x4037 | 10 | unsigned char | count |  |  | Fault counter for C-pillar sensor right | Fehlerzahler fuer C-Säulen Sensor rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_ZUS_L` | 0x4037 | 11 | unsigned char | count |  |  | Fault counter for FGS additional acceleration sensor left | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung links |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_FGS_ZUS_R` | 0x4037 | 12 | unsigned char | count |  |  | Fault counter for FGS additional acceleration sensor right | Fehlerzahler fuer FGS Zusatzsensor Beschleunigung rechts |
+| `ACSM__SENSORFEHLER_ZAEHLER_3.SENSOR_FZ_UF_M` | 0x4037 | 13 | unsigned char | count |  |  | Fault counter for upfront sensor centre | Fehlerzahler fuer Up-Frontsensor mitte |
+| `ACSM__SEATBELTMIND_2.IW_STATE` | 0x4047 | 0 | unsigned char | HEX |  |  | Current state of the initial warning function | aktueller Zustand der Funktion Initialwarnung |
+| `ACSM__SEATBELTMIND_2.SBR_STATE_PAS` | 0x4047 | 1 | unsigned char | HEX |  |  | Current SBR state, front passenger | aktueller Zustand SBR Beifahrer |
+| `ACSM__SEATBELTMIND_2.SBR_STATE_DRIV` | 0x4047 | 2 | unsigned char | HEX |  |  | Current SBR state, driver | aktueller Zustand SBR Fahrer |
+| `ACSM__SEATBELTMIND_2.MON_COUNTER_PAS` | 0x4047 | 3 | unsigned char | s |  |  | SBR monitoring counter, front passenger | Monitoring Zähler SBR Beifahrer |
+| `ACSM__SEATBELTMIND_2.MON_COUNTER_DRIV` | 0x4047 | 4 | unsigned char | s |  |  | SBR monitoring counter, driver | Monitoring Zähler SBR Fahrer |
+| `ACSM__SEATBELTMIND_2.ST_BELT_PAS` | 0x4047 | 5 | unsigned char | 0-n |  | 0 = Not buckled; 1 = Buckled; 2 = Not fitted; 3 = Invalid | Seat belt buckle state, front passenger | Gurtschlosszustand Beifahrer |
+| `ACSM__SEATBELTMIND_2.ERR_ST_BELT_PAS` | 0x4047 | 6 | unsigned char | HEX |  |  | Belt contact error status, front passenger | Errorstatus Gurtkontakt BF |
+| `ACSM__SEATBELTMIND_2.ST_BELT_DRIV` | 0x4047 | 7 | unsigned char | 0-n |  | 0 = Not buckled; 1 = Buckled; 2 = Not fitted; 3 = Invalid | Seat belt buckle state, driver | Gurtschlosszustand Fahrer |
+| `ACSM__SEATBELTMIND_2.ERR_ST_BELT_DRIV` | 0x4047 | 8 | unsigned char | HEX |  |  | Belt contact error status, driver | Errorstatus Gurtkontakt FA |
+| `ACSM__SEATBELTMIND_2.SEAT_OCC_PAS` | 0x4047 | 9 | unsigned char | 0-n |  | 0 = Not occupied; 1 = Seat occupied by child seat; 2 = n/a; 3 = Seat occupied; 4 = Detection system not present; 5 = n/a; 6 = Value initialisation; 7 = Signal invalid | Front passenger seat occupancy status (SBR info) | Status Sitzbelegung Beifahrer (SBR-Info) |
+| `ACSM__SEATBELTMIND_2.ERR_ST_SEAT_OCC_PAS` | 0x4047 | 10 | unsigned char | HEX |  |  | Seat occupancy error status, front passenger | Errorstatus Sitzbelegung BF |
+| `ACSM__SEATBELTMIND_2.BF_SITZBELEGUNG_BF_GEFILTERT` | 0x4047 | 11 | BITFIELD | Bit |  | `ACSM5.BF_SITZBELEGUNG_BF_GEFILTERT` | Front passenger seat occupancy status, debounced | Status Sitzbelegung Befahrer entprellt |
+| `ACSM__SEATBELTMIND_2.SBR_ACT_COND` | 0x4047 | 12 | unsigned char | HEX |  |  | SBR activation state (terminals or vehicle power state) | Aktivierungszustand SBR (Klemmen oder PWF) |
+| `ACSM__SEATBELTMIND_2.SBR_DIST` | 0x4047 | 13 | unsigned long | m | ÷ 1000 |  | Current SBR distance | aktuelle SBR-Wegstrecke |
+| `ACSM__SEATBELTMIND_2.BF_ST_DISP_STRUCT` | 0x4047 | 14 | BITFIELD | Bit |  | `ACSM5.BF_ST_DISP_STRUCT` | Display status | Status der Anzeige |
+| `ACSM__SEATBELTMIND_2.DVCO_VEH` | 0x4047 | 15 | unsigned char | HEX |  |  | Vehicle driving state (incl. direction information) | Fahrzustand Fahrzeug (u.a. Richtungsinformation) |
+| `ACSM__SEATBELTMIND_2.ERR_DVCO_VEH` | 0x4047 | 16 | unsigned char | HEX |  |  | Vehicle driving state error status | Errorstatus Fahrzustand Fahrzeug |
 | `ACSM__SEATBELTMIND_2.V_VEH_COG` | 0x4047 | 17 | unsigned int | km/h | ÷ 64 |  | Vehicle speed | Fahrzeuggeschwindigkeit |
-| `ACSM__SEATBELTMIND_2.ERR_V_VEH_COG` | 0x4047 | 18 | unsigned char | HEX |  |  | Errorstatus vehicle speed | Errorstatus Fahrzeuggeschwindigkeit |
-| `ACSM__SEATBELTMIND_2.ST_DRV_VEH` | 0x4047 | 19 | unsigned char | HEX |  |  | Status drive vehicle | Status Antrieb Fahrzeug |
-| `ACSM__SEATBELTMIND_2.ERR_ST_DRV_VEH` | 0x4047 | 20 | unsigned char | HEX |  |  | Errorstatus state drive vehicle | Errorstatus Zustand Antrieb Fahrzeug |
-| `ACSM__SEATBELTMIND_2.ST_GRSEL_DRV` | 0x4047 | 21 | unsigned char | HEX |  |  | Status Gangwahl Anrtrieb value Definiert in Nachrichtenkatalog | Status Gangwahl Anrtrieb Wert Definiert in Nachrichtenkatalog |
-| `ACSM__SEATBELTMIND_2.ERR_ST_GRSEL_DRV` | 0x4047 | 22 | unsigned char | HEX |  |  | Errorstatus state Gangwahl drive | Errorstatus Zustand Gangwahl Antrieb |
-| `ACSM__STATUS_SEATBELTMIND_3.IW_STATE` | 0x4048 | 0 | unsigned char | HEX |  |  | Current state Initialwarnung | Aktueller Zustand Initialwarnung |
-| `ACSM__STATUS_SEATBELTMIND_3.PREDRIVE_DISP_RBS_STATE` | 0x4048 | 1 | unsigned char | HEX |  |  | Current state PreDrive-display Fondgurtstatus | Aktueller Zustand PreDrive-Anzeige Fondgurtstatus |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_DRIV` | 0x4048 | 2 | unsigned char | HEX |  |  | Current state SBR driver | Aktueller Zustand SBR Fahrer |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_PAS` | 0x4048 | 3 | unsigned char | HEX |  |  | Current state SBR passenger | Aktueller Zustand SBR Beifahrer |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR2L` | 0x4048 | 4 | unsigned char | HEX |  |  | Current state SBR Sitzreihe 2 left | Aktueller Zustand SBR Sitzreihe 2 Links |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR2M` | 0x4048 | 5 | unsigned char | HEX |  |  | Current state SBR Sitzreihe 2 center | Aktueller Zustand SBR Sitzreihe 2 Mitte |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR2R` | 0x4048 | 6 | unsigned char | HEX |  |  | Current state SBR Sitzreihe 2 right | Aktueller Zustand SBR Sitzreihe 2 Rechts |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR3L` | 0x4048 | 7 | unsigned char | HEX |  |  | Current state SBR Sitzreihe 3 left | Aktueller Zustand SBR Sitzreihe 3 Links |
-| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR3R` | 0x4048 | 8 | unsigned char | HEX |  |  | Current state SBR Sitzreihe 3 right | Aktueller Zustand SBR Sitzreihe 3 Rechts |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_DRIV` | 0x4048 | 9 | unsigned char | HEX |  |  | Current state Sitzbelegung driver | Aktueller Zustand Sitzbelegung Fahrer |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_PAS` | 0x4048 | 10 | unsigned char | HEX |  |  | Current state Sitzbelegung passenger | Aktueller Zustand Sitzbelegung Beifahrer |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR2L` | 0x4048 | 11 | unsigned char | HEX |  |  | Current state Sitzbelegung Sitzreihe 2 left | Aktueller Zustand Sitzbelegung Sitzreihe 2 Links |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR2M` | 0x4048 | 12 | unsigned char | HEX |  |  | Current state Sitzbelegung Sitzreihe 2 center | Aktueller Zustand Sitzbelegung Sitzreihe 2 Mitte |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR2R` | 0x4048 | 13 | unsigned char | HEX |  |  | Current state Sitzbelegung Sitzreihe 2 right | Aktueller Zustand Sitzbelegung Sitzreihe 2 Rechts |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR3L` | 0x4048 | 14 | unsigned char | HEX |  |  | Current state Sitzbelegung Sitzreihe 3 left | Aktueller Zustand Sitzbelegung Sitzreihe 3 Links |
-| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR3R` | 0x4048 | 15 | unsigned char | HEX |  |  | Current state Sitzbelegung Sitzreihe 3 right | Aktueller Zustand Sitzbelegung Sitzreihe 3 Rechts |
+| `ACSM__SEATBELTMIND_2.ERR_V_VEH_COG` | 0x4047 | 18 | unsigned char | HEX |  |  | Vehicle speed error status | Errorstatus Fahrzeuggeschwindigkeit |
+| `ACSM__SEATBELTMIND_2.ST_DRV_VEH` | 0x4047 | 19 | unsigned char | HEX |  |  | Vehicle drive status | Status Antrieb Fahrzeug |
+| `ACSM__SEATBELTMIND_2.ERR_ST_DRV_VEH` | 0x4047 | 20 | unsigned char | HEX |  |  | Vehicle drive state error status | Errorstatus Zustand Antrieb Fahrzeug |
+| `ACSM__SEATBELTMIND_2.ST_GRSEL_DRV` | 0x4047 | 21 | unsigned char | HEX |  |  | Drive gear selection status; value defined in message catalogue | Status Gangwahl Anrtrieb Wert Definiert in Nachrichtenkatalog |
+| `ACSM__SEATBELTMIND_2.ERR_ST_GRSEL_DRV` | 0x4047 | 22 | unsigned char | HEX |  |  | Drive gear selection state error status | Errorstatus Zustand Gangwahl Antrieb |
+| `ACSM__STATUS_SEATBELTMIND_3.IW_STATE` | 0x4048 | 0 | unsigned char | HEX |  |  | Current state of initial warning | Aktueller Zustand Initialwarnung |
+| `ACSM__STATUS_SEATBELTMIND_3.PREDRIVE_DISP_RBS_STATE` | 0x4048 | 1 | unsigned char | HEX |  |  | Current state of PreDrive rear seat belt status display | Aktueller Zustand PreDrive-Anzeige Fondgurtstatus |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_DRIV` | 0x4048 | 2 | unsigned char | HEX |  |  | Current SBR state, driver | Aktueller Zustand SBR Fahrer |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_PAS` | 0x4048 | 3 | unsigned char | HEX |  |  | Current SBR state, front passenger | Aktueller Zustand SBR Beifahrer |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR2L` | 0x4048 | 4 | unsigned char | HEX |  |  | Current SBR state, seat row 2 left | Aktueller Zustand SBR Sitzreihe 2 Links |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR2M` | 0x4048 | 5 | unsigned char | HEX |  |  | Current SBR state, seat row 2 centre | Aktueller Zustand SBR Sitzreihe 2 Mitte |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR2R` | 0x4048 | 6 | unsigned char | HEX |  |  | Current SBR state, seat row 2 right | Aktueller Zustand SBR Sitzreihe 2 Rechts |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR3L` | 0x4048 | 7 | unsigned char | HEX |  |  | Current SBR state, seat row 3 left | Aktueller Zustand SBR Sitzreihe 3 Links |
+| `ACSM__STATUS_SEATBELTMIND_3.SBR_STATE_TR3R` | 0x4048 | 8 | unsigned char | HEX |  |  | Current SBR state, seat row 3 right | Aktueller Zustand SBR Sitzreihe 3 Rechts |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_DRIV` | 0x4048 | 9 | unsigned char | HEX |  |  | Current seat occupancy state, driver | Aktueller Zustand Sitzbelegung Fahrer |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_PAS` | 0x4048 | 10 | unsigned char | HEX |  |  | Current seat occupancy state, front passenger | Aktueller Zustand Sitzbelegung Beifahrer |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR2L` | 0x4048 | 11 | unsigned char | HEX |  |  | Current seat occupancy state, seat row 2 left | Aktueller Zustand Sitzbelegung Sitzreihe 2 Links |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR2M` | 0x4048 | 12 | unsigned char | HEX |  |  | Current seat occupancy state, seat row 2 centre | Aktueller Zustand Sitzbelegung Sitzreihe 2 Mitte |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR2R` | 0x4048 | 13 | unsigned char | HEX |  |  | Current seat occupancy state, seat row 2 right | Aktueller Zustand Sitzbelegung Sitzreihe 2 Rechts |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR3L` | 0x4048 | 14 | unsigned char | HEX |  |  | Current seat occupancy state, seat row 3 left | Aktueller Zustand Sitzbelegung Sitzreihe 3 Links |
+| `ACSM__STATUS_SEATBELTMIND_3.SEAT_OCCU_STATE_TR3R` | 0x4048 | 15 | unsigned char | HEX |  |  | Current seat occupancy state, seat row 3 right | Aktueller Zustand Sitzbelegung Sitzreihe 3 Rechts |
 | `ACSM__STATUS_SEATBELTMIND_3.SBR_DIST` | 0x4048 | 16 | unsigned int | m |  |  | Current SBR distance | Aktuelle SBR Wegstrecke |
-| `ACSM__STATUS_SEATBELTMIND_3.BF_ST_DISP_STRUCT_3` | 0x4048 | 17 | BITFIELD | Bit |  | `ACSM5.BF_ST_DISP_STRUCT_3` | Status the display | Status der Anzeige |
-| `ACSM__ZK_WIDERSTANDSWERTE.ANZAHL_ZK` | 0x4050 | 0 | unsigned char | count |  |  | gibt the number the ZK zurück, the ausgegeben be | gibt die Anzahl der ZK zurück, die ausgegeben werden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_0` | 0x4050 | 1 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 0 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 0 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_1` | 0x4050 | 2 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 1 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 1 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_2` | 0x4050 | 3 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 2  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 2  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_3` | 0x4050 | 4 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 3  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 3  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_4` | 0x4050 | 5 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 4 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 4 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_5` | 0x4050 | 6 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 5  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 5  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_6` | 0x4050 | 7 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 6  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 6  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_7` | 0x4050 | 8 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 7  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 7  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_8` | 0x4050 | 9 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 8 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 8 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_9` | 0x4050 | 10 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 9 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 9 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_10` | 0x4050 | 11 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 10  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 10  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_11` | 0x4050 | 12 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 11  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 11  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_12` | 0x4050 | 13 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 12 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 12 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_13` | 0x4050 | 14 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 13  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 13  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_14` | 0x4050 | 15 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 14  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 14  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_15` | 0x4050 | 16 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 15  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 15  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_16` | 0x4050 | 17 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 16 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 16 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_17` | 0x4050 | 18 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 17  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 17  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_18` | 0x4050 | 19 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 18  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 18  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_19` | 0x4050 | 20 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 19 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 19 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_20` | 0x4050 | 21 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 20  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 20  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_21` | 0x4050 | 22 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 21  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 21  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_22` | 0x4050 | 23 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 22  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 22  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_23` | 0x4050 | 24 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 23 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 23 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_24` | 0x4050 | 25 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 24  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 24  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_25` | 0x4050 | 26 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 25  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 25  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_26` | 0x4050 | 27 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 26  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 26  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_27` | 0x4050 | 28 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 27  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 27  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_28` | 0x4050 | 29 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 28  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 28  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_29` | 0x4050 | 30 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 29  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 29  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_30` | 0x4050 | 31 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 30  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 30  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_31` | 0x4050 | 32 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 31  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 31  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_32` | 0x4050 | 33 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 32  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 32  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_33` | 0x4050 | 34 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 33  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 33  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_34` | 0x4050 | 35 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 34  zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 34  zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_35` | 0x4050 | 36 | unsigned char | Ohm | ÷ 10 |  | gibt value of ZK 35 zurück  in Ohm 0xFF = ZK not present | gibt Wert von ZK 35 zurück  in Ohm 0xFF = ZK nicht vorhanden |
-| `ACSM__SBR_WIDERSTANDSWERTE` | 0x4052 | 0 | unsigned int | Ohm | ÷ 10 |  | Resistance values the SBR-Matte in 0,1 Ohm  0xFFFF invalid | Widerstandswerte der SBR-Matte in 0,1 Ohm  0xFFFF ungültig |
-| `ACSM__HALL_FIX_STROMWERT.GKFA` | 0x4053 | 0 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt driver in mA 0xFF = input not present | Stromwert Gurtkontakt Fahrer in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKBF` | 0x4053 | 1 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt passenger  in mA 0xFF = input not present | Stromwert Gurtkontakt Beifahrer  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKHL2` | 0x4053 | 2 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt rear left 2. Sitzreihe  in mA 0xFF = input not present | Stromwert Gurtkontakt hinten links 2. Sitzreihe  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKHM2` | 0x4053 | 3 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt rear center 2. Sitzreihe  in mA 0xFF = input not present | Stromwert Gurtkontakt hinten mitte 2. Sitzreihe  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKHR2` | 0x4053 | 4 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt rear right 2. Sitzreihe  in mA 0xFF = input not present | Stromwert Gurtkontakt hinten rechts 2. Sitzreihe  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKHL3` | 0x4053 | 5 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt rear left 3. Sitzreihe   in mA 0xFF = input not present | Stromwert Gurtkontakt hinten links 3. Sitzreihe   in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKHM3` | 0x4053 | 6 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt rear center 3. Sitzreihe   in mA 0xFF = input not present | Stromwert Gurtkontakt hinten mitte 3. Sitzreihe   in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.GKHR3` | 0x4053 | 7 | unsigned char | mA | ÷ 10 |  | Current value Gurtkontakt rear right 3. Sitzreihe   in mA 0xFF = input not present | Stromwert Gurtkontakt hinten rechts 3. Sitzreihe   in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.POS` | 0x4053 | 8 | unsigned char | mA | ÷ 10 |  | Current value Passenger Off switch  in mA 0xFF = input not present | Stromwert Passenger Off Schalter  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.SPSFA` | 0x4053 | 9 | unsigned char | mA | ÷ 10 |  | Current value seat position sensor driver  in mA 0xFF = input not present | Stromwert Sitzpositionssensor Fahrer  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__HALL_FIX_STROMWERT.SPSBF` | 0x4053 | 10 | unsigned char | mA | ÷ 10 |  | Current value seat position sensor passenger  in mA 0xFF = input not present | Stromwert Sitzpositionssensor Beifahrer  in mA 0xFF = Eingang nicht vorhanden |
-| `ACSM__SBR_FOND_WIDERSTANDSWERTE.SBR_HINTEN_LINKS_WIDERSTANDSWERTE` | 0x4056 | 0 | unsigned int | Ohm | ÷ 10 |  | Resistance values the SBR-Matte rear left in 0,1 Ohm  0xFFFF invalid | Widerstandswerte der SBR-Matte hinten links in 0,1 Ohm  0xFFFF ungültig |
-| `ACSM__SBR_FOND_WIDERSTANDSWERTE.SBR_HINTEN_MITTE_WIDERSTANDSWERTE` | 0x4056 | 1 | unsigned int | Ohm | ÷ 10 |  | Resistance values the SBR-Matte rear center in 0,1 Ohm  0xFFFF invalid | Widerstandswerte der SBR-Matte hinten mitte in 0,1 Ohm  0xFFFF ungültig |
-| `ACSM__SBR_FOND_WIDERSTANDSWERTE.SBR_HINTEN_RECHTS_WIDERSTANDSWERTE` | 0x4056 | 2 | unsigned int | Ohm | ÷ 10 |  | Resistance values the SBR-Matte rear right in 0,1 Ohm  0xFFFF invalid | Widerstandswerte der SBR-Matte hinten rechts in 0,1 Ohm  0xFFFF ungültig |
-| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_1` | 0x407F | 0 | unsigned char | HEX |  |  | Event counter Level 1 | Event Zähler Level 1 |
-| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_2` | 0x407F | 1 | unsigned char | HEX |  |  | Event counter Level 2 | Event Zähler Level 2 |
-| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_3` | 0x407F | 2 | unsigned char | HEX |  |  | Event counter Level 3 | Event Zähler Level 3 |
-| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_4` | 0x407F | 3 | unsigned char | HEX |  |  | Event counter Level 4 | Event Zähler Level 4 |
-| `ACSM__DD_READ_SCHADENSMELDUNG.ZS_VEH_DMG_1` | 0x4080 | 0 | unsigned long | s |  |  | Timestamp Event (entry 1) | Zeitstempel Event (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_COU_1` | 0x4080 | 1 | unsigned char | HEX |  |  | Vehicle Schaden counter (entry 1) | Fahrzeug Schaden Zähler (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_0_LOC_1` | 0x4080 | 2 | unsigned char | HEX |  |  | Vehicle Schaden data 0 Localization (entry 1) | Fahrzeug Schaden Daten 0 Localization (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_1_MAXAX_1` | 0x4080 | 3 | unsigned char | HEX |  |  | Vehicle Schaden data 1 max a_x (entry 1) | Fahrzeug Schaden Daten 1 max a_x (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_2_MAXAY_1` | 0x4080 | 4 | unsigned char | HEX |  |  | Vehicle Schaden data 2 max a_y (entry 1) | Fahrzeug Schaden Daten 2 max a_y (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_3_MAXVYAW_1` | 0x4080 | 5 | unsigned char | HEX |  |  | Vehicle Schaden data 3 max vyaw (entry 1) | Fahrzeug Schaden Daten 3 max vyaw (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_4_1` | 0x4080 | 6 | unsigned char | HEX |  |  | Vehicle Schaden data 4 (entry 1) | Fahrzeug Schaden Daten 4 (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_5_CONF_1` | 0x4080 | 7 | unsigned char | HEX |  |  | Vehicle Schaden data 5 confidence (entry 1) | Fahrzeug Schaden Daten 5 confidence (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_STG_1` | 0x4080 | 8 | unsigned char | HEX |  |  | Vehicle Schaden stage (entry 1) | Fahrzeug Schaden Stufe (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_ALGO_1` | 0x4080 | 9 | unsigned char | HEX |  |  | Vehicle Version Algorithmus (entry 1) | Fahrzeug Version Algorithmus (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_DMG_DT_1` | 0x4080 | 10 | unsigned char | HEX |  |  | Vehicle Version Schaden data (entry 1) | Fahrzeug Version Schaden Daten (Eintrag 1) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.ZS_VEH_DMG_2` | 0x4080 | 11 | unsigned long | s |  |  | Timestamp Event (entry 2) | Zeitstempel Event (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_COU_2` | 0x4080 | 12 | unsigned char | HEX |  |  | Vehicle Schaden counter (entry 2) | Fahrzeug Schaden Zähler (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_0_LOC_2` | 0x4080 | 13 | unsigned char | HEX |  |  | Vehicle Schaden data 0 Localization (entry 2) | Fahrzeug Schaden Daten 0 Localization (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_1_MAXAX_2` | 0x4080 | 14 | unsigned char | HEX |  |  | Vehicle Schaden data 1 max a_x (entry 2) | Fahrzeug Schaden Daten 1 max a_x (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_2_MAXAY_2` | 0x4080 | 15 | unsigned char | HEX |  |  | Vehicle Schaden data 2 max a_y (entry 2) | Fahrzeug Schaden Daten 2 max a_y (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_3_MAXVYAW_2` | 0x4080 | 16 | unsigned char | HEX |  |  | Vehicle Schaden data 3 max vyaw (entry 2) | Fahrzeug Schaden Daten 3 max vyaw (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_4_2` | 0x4080 | 17 | unsigned char | HEX |  |  | Vehicle Schaden data 4 (entry 2) | Fahrzeug Schaden Daten 4 (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_5_CONF_2` | 0x4080 | 18 | unsigned char | HEX |  |  | Vehicle Schaden data 5 confidence (entry 2) | Fahrzeug Schaden Daten 5 confidence (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_STG_2` | 0x4080 | 19 | unsigned char | HEX |  |  | Vehicle Schaden stage (entry 2) | Fahrzeug Schaden Stufe (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_ALGO_2` | 0x4080 | 20 | unsigned char | HEX |  |  | Vehicle Version Algorithmus (entry 2) | Fahrzeug Version Algorithmus (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_DMG_DT_2` | 0x4080 | 21 | unsigned char | HEX |  |  | Vehicle Version Schaden data (entry 2) | Fahrzeug Version Schaden Daten (Eintrag 2) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.ZS_VEH_DMG_3` | 0x4080 | 22 | unsigned long | s |  |  | Timestamp Event (entry 3) | Zeitstempel Event (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_COU_3` | 0x4080 | 23 | unsigned char | HEX |  |  | Vehicle Schaden counter (entry 3) | Fahrzeug Schaden Zähler (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_0_LOC_3` | 0x4080 | 24 | unsigned char | HEX |  |  | Vehicle Schaden data 0 Localization (entry 3) | Fahrzeug Schaden Daten 0 Localization (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_1_MAXAX_3` | 0x4080 | 25 | unsigned char | HEX |  |  | Vehicle Schaden data 1 max a_x (entry 3) | Fahrzeug Schaden Daten 1 max a_x (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_2_MAXAY_3` | 0x4080 | 26 | unsigned char | HEX |  |  | Vehicle Schaden data 2 max a_y (entry 3) | Fahrzeug Schaden Daten 2 max a_y (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_3_MAXVYAW_3` | 0x4080 | 27 | unsigned char | HEX |  |  | Vehicle Schaden data 3 max vyaw (entry 3) | Fahrzeug Schaden Daten 3 max vyaw (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_4_3` | 0x4080 | 28 | unsigned char | HEX |  |  | Vehicle Schaden data 4 (entry 3) | Fahrzeug Schaden Daten 4 (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_5_CONF_3` | 0x4080 | 29 | unsigned char | HEX |  |  | Vehicle Schaden data 5 confidence (entry 3) | Fahrzeug Schaden Daten 5 confidence (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_STG_3` | 0x4080 | 30 | unsigned char | HEX |  |  | Vehicle Schaden stage (entry 3) | Fahrzeug Schaden Stufe (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_ALGO_3` | 0x4080 | 31 | unsigned char | HEX |  |  | Vehicle Version Algorithmus (entry 3) | Fahrzeug Version Algorithmus (Eintrag 3) |
-| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_DMG_DT_3` | 0x4080 | 32 | unsigned char | HEX |  |  | Vehicle Version Schaden data (entry 3) | Fahrzeug Version Schaden Daten (Eintrag 3) |
-| `ACSM__DD_READ_DEV_DATA.DEV_DATA_FORMAT_VERS` | 0x4081 | 0 | unsigned char | HEX |  |  | Development Data Format Version | Development Data Format Version |
-| `ACSM__DD_READ_DEV_DATA.ZS_VEH_DMG_MESSAGE_1` | 0x4081 | 1 | unsigned long | s |  |  | Timestamp Schadensmeldung | Zeitstempel Schadensmeldung |
-| `ACSM__DD_READ_DEV_DATA.ZD_STORED_DATA_1` | 0x4081 | 2 | unsigned char | ms |  |  | Zeitunterschied the einzelnen stored data | Zeitunterschied der einzelnen gespeicherten Daten |
+| `ACSM__STATUS_SEATBELTMIND_3.BF_ST_DISP_STRUCT_3` | 0x4048 | 17 | BITFIELD | Bit |  | `ACSM5.BF_ST_DISP_STRUCT_3` | Display status | Status der Anzeige |
+| `ACSM__ZK_WIDERSTANDSWERTE.ANZAHL_ZK` | 0x4050 | 0 | unsigned char | count |  |  | Number of firing circuits output | gibt die Anzahl der ZK zurück, die ausgegeben werden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_0` | 0x4050 | 1 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 0 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 0 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_1` | 0x4050 | 2 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 1 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 1 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_2` | 0x4050 | 3 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 2 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 2  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_3` | 0x4050 | 4 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 3 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 3  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_4` | 0x4050 | 5 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 4 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 4 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_5` | 0x4050 | 6 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 5 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 5  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_6` | 0x4050 | 7 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 6 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 6  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_7` | 0x4050 | 8 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 7 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 7  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_8` | 0x4050 | 9 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 8 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 8 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_9` | 0x4050 | 10 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 9 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 9 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_10` | 0x4050 | 11 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 10 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 10  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_11` | 0x4050 | 12 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 11 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 11  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_12` | 0x4050 | 13 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 12 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 12 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_13` | 0x4050 | 14 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 13 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 13  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_14` | 0x4050 | 15 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 14 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 14  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_15` | 0x4050 | 16 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 15 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 15  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_16` | 0x4050 | 17 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 16 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 16 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_17` | 0x4050 | 18 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 17 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 17  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_18` | 0x4050 | 19 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 18 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 18  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_19` | 0x4050 | 20 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 19 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 19 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_20` | 0x4050 | 21 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 20 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 20  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_21` | 0x4050 | 22 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 21 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 21  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_22` | 0x4050 | 23 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 22 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 22  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_23` | 0x4050 | 24 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 23 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 23 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_24` | 0x4050 | 25 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 24 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 24  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_25` | 0x4050 | 26 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 25 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 25  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_26` | 0x4050 | 27 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 26 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 26  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_27` | 0x4050 | 28 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 27 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 27  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_28` | 0x4050 | 29 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 28 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 28  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_29` | 0x4050 | 30 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 29 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 29  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_30` | 0x4050 | 31 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 30 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 30  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_31` | 0x4050 | 32 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 31 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 31  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_32` | 0x4050 | 33 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 32 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 32  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_33` | 0x4050 | 34 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 33 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 33  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_34` | 0x4050 | 35 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 34 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 34  zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__ZK_WIDERSTANDSWERTE.WID_ZK_35` | 0x4050 | 36 | unsigned char | Ohm | ÷ 10 |  | Firing circuit 35 resistance in ohms; 0xFF = firing circuit not present | gibt Wert von ZK 35 zurück  in Ohm 0xFF = ZK nicht vorhanden |
+| `ACSM__SBR_WIDERSTANDSWERTE` | 0x4052 | 0 | unsigned int | Ohm | ÷ 10 |  | SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid | Widerstandswerte der SBR-Matte in 0,1 Ohm  0xFFFF ungültig |
+| `ACSM__HALL_FIX_STROMWERT.GKFA` | 0x4053 | 0 | unsigned char | mA | ÷ 10 |  | Belt contact current, driver, in mA; 0xFF = input not present | Stromwert Gurtkontakt Fahrer in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKBF` | 0x4053 | 1 | unsigned char | mA | ÷ 10 |  | Belt contact current, front passenger, in mA; 0xFF = input not present | Stromwert Gurtkontakt Beifahrer  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKHL2` | 0x4053 | 2 | unsigned char | mA | ÷ 10 |  | Belt contact current, rear left, seat row 2, in mA; 0xFF = input not present | Stromwert Gurtkontakt hinten links 2. Sitzreihe  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKHM2` | 0x4053 | 3 | unsigned char | mA | ÷ 10 |  | Belt contact current, rear centre, seat row 2, in mA; 0xFF = input not present | Stromwert Gurtkontakt hinten mitte 2. Sitzreihe  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKHR2` | 0x4053 | 4 | unsigned char | mA | ÷ 10 |  | Belt contact current, rear right, seat row 2, in mA; 0xFF = input not present | Stromwert Gurtkontakt hinten rechts 2. Sitzreihe  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKHL3` | 0x4053 | 5 | unsigned char | mA | ÷ 10 |  | Belt contact current, rear left, seat row 3, in mA; 0xFF = input not present | Stromwert Gurtkontakt hinten links 3. Sitzreihe   in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKHM3` | 0x4053 | 6 | unsigned char | mA | ÷ 10 |  | Belt contact current, rear centre, seat row 3, in mA; 0xFF = input not present | Stromwert Gurtkontakt hinten mitte 3. Sitzreihe   in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.GKHR3` | 0x4053 | 7 | unsigned char | mA | ÷ 10 |  | Belt contact current, rear right, seat row 3, in mA; 0xFF = input not present | Stromwert Gurtkontakt hinten rechts 3. Sitzreihe   in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.POS` | 0x4053 | 8 | unsigned char | mA | ÷ 10 |  | Passenger Off switch current in mA; 0xFF = input not present | Stromwert Passenger Off Schalter  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.SPSFA` | 0x4053 | 9 | unsigned char | mA | ÷ 10 |  | Seat position sensor current, driver, in mA; 0xFF = input not present | Stromwert Sitzpositionssensor Fahrer  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__HALL_FIX_STROMWERT.SPSBF` | 0x4053 | 10 | unsigned char | mA | ÷ 10 |  | Seat position sensor current, front passenger, in mA; 0xFF = input not present | Stromwert Sitzpositionssensor Beifahrer  in mA 0xFF = Eingang nicht vorhanden |
+| `ACSM__SBR_FOND_WIDERSTANDSWERTE.SBR_HINTEN_LINKS_WIDERSTANDSWERTE` | 0x4056 | 0 | unsigned int | Ohm | ÷ 10 |  | Rear left SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid | Widerstandswerte der SBR-Matte hinten links in 0,1 Ohm  0xFFFF ungültig |
+| `ACSM__SBR_FOND_WIDERSTANDSWERTE.SBR_HINTEN_MITTE_WIDERSTANDSWERTE` | 0x4056 | 1 | unsigned int | Ohm | ÷ 10 |  | Rear centre SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid | Widerstandswerte der SBR-Matte hinten mitte in 0,1 Ohm  0xFFFF ungültig |
+| `ACSM__SBR_FOND_WIDERSTANDSWERTE.SBR_HINTEN_RECHTS_WIDERSTANDSWERTE` | 0x4056 | 2 | unsigned int | Ohm | ÷ 10 |  | Rear right SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid | Widerstandswerte der SBR-Matte hinten rechts in 0,1 Ohm  0xFFFF ungültig |
+| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_1` | 0x407F | 0 | unsigned char | HEX |  |  | Event counter level 1 | Event Zähler Level 1 |
+| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_2` | 0x407F | 1 | unsigned char | HEX |  |  | Event counter level 2 | Event Zähler Level 2 |
+| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_3` | 0x407F | 2 | unsigned char | HEX |  |  | Event counter level 3 | Event Zähler Level 3 |
+| `ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_4` | 0x407F | 3 | unsigned char | HEX |  |  | Event counter level 4 | Event Zähler Level 4 |
+| `ACSM__DD_READ_SCHADENSMELDUNG.ZS_VEH_DMG_1` | 0x4080 | 0 | unsigned long | s |  |  | Event timestamp (entry 1) | Zeitstempel Event (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_COU_1` | 0x4080 | 1 | unsigned char | HEX |  |  | Vehicle damage counter (entry 1) | Fahrzeug Schaden Zähler (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_0_LOC_1` | 0x4080 | 2 | unsigned char | HEX |  |  | Vehicle damage data 0 localization (entry 1) | Fahrzeug Schaden Daten 0 Localization (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_1_MAXAX_1` | 0x4080 | 3 | unsigned char | HEX |  |  | Vehicle damage data 1 max a_x (entry 1) | Fahrzeug Schaden Daten 1 max a_x (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_2_MAXAY_1` | 0x4080 | 4 | unsigned char | HEX |  |  | Vehicle damage data 2 max a_y (entry 1) | Fahrzeug Schaden Daten 2 max a_y (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_3_MAXVYAW_1` | 0x4080 | 5 | unsigned char | HEX |  |  | Vehicle damage data 3 max vyaw (entry 1) | Fahrzeug Schaden Daten 3 max vyaw (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_4_1` | 0x4080 | 6 | unsigned char | HEX |  |  | Vehicle damage data 4 (entry 1) | Fahrzeug Schaden Daten 4 (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_5_CONF_1` | 0x4080 | 7 | unsigned char | HEX |  |  | Vehicle damage data 5 confidence (entry 1) | Fahrzeug Schaden Daten 5 confidence (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_STG_1` | 0x4080 | 8 | unsigned char | HEX |  |  | Vehicle damage level (entry 1) | Fahrzeug Schaden Stufe (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_ALGO_1` | 0x4080 | 9 | unsigned char | HEX |  |  | Vehicle algorithm version (entry 1) | Fahrzeug Version Algorithmus (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_DMG_DT_1` | 0x4080 | 10 | unsigned char | HEX |  |  | Vehicle damage data version (entry 1) | Fahrzeug Version Schaden Daten (Eintrag 1) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.ZS_VEH_DMG_2` | 0x4080 | 11 | unsigned long | s |  |  | Event timestamp (entry 2) | Zeitstempel Event (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_COU_2` | 0x4080 | 12 | unsigned char | HEX |  |  | Vehicle damage counter (entry 2) | Fahrzeug Schaden Zähler (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_0_LOC_2` | 0x4080 | 13 | unsigned char | HEX |  |  | Vehicle damage data 0 localization (entry 2) | Fahrzeug Schaden Daten 0 Localization (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_1_MAXAX_2` | 0x4080 | 14 | unsigned char | HEX |  |  | Vehicle damage data 1 max a_x (entry 2) | Fahrzeug Schaden Daten 1 max a_x (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_2_MAXAY_2` | 0x4080 | 15 | unsigned char | HEX |  |  | Vehicle damage data 2 max a_y (entry 2) | Fahrzeug Schaden Daten 2 max a_y (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_3_MAXVYAW_2` | 0x4080 | 16 | unsigned char | HEX |  |  | Vehicle damage data 3 max vyaw (entry 2) | Fahrzeug Schaden Daten 3 max vyaw (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_4_2` | 0x4080 | 17 | unsigned char | HEX |  |  | Vehicle damage data 4 (entry 2) | Fahrzeug Schaden Daten 4 (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_5_CONF_2` | 0x4080 | 18 | unsigned char | HEX |  |  | Vehicle damage data 5 confidence (entry 2) | Fahrzeug Schaden Daten 5 confidence (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_STG_2` | 0x4080 | 19 | unsigned char | HEX |  |  | Vehicle damage level (entry 2) | Fahrzeug Schaden Stufe (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_ALGO_2` | 0x4080 | 20 | unsigned char | HEX |  |  | Vehicle algorithm version (entry 2) | Fahrzeug Version Algorithmus (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_DMG_DT_2` | 0x4080 | 21 | unsigned char | HEX |  |  | Vehicle damage data version (entry 2) | Fahrzeug Version Schaden Daten (Eintrag 2) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.ZS_VEH_DMG_3` | 0x4080 | 22 | unsigned long | s |  |  | Event timestamp (entry 3) | Zeitstempel Event (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_COU_3` | 0x4080 | 23 | unsigned char | HEX |  |  | Vehicle damage counter (entry 3) | Fahrzeug Schaden Zähler (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_0_LOC_3` | 0x4080 | 24 | unsigned char | HEX |  |  | Vehicle damage data 0 localization (entry 3) | Fahrzeug Schaden Daten 0 Localization (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_1_MAXAX_3` | 0x4080 | 25 | unsigned char | HEX |  |  | Vehicle damage data 1 max a_x (entry 3) | Fahrzeug Schaden Daten 1 max a_x (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_2_MAXAY_3` | 0x4080 | 26 | unsigned char | HEX |  |  | Vehicle damage data 2 max a_y (entry 3) | Fahrzeug Schaden Daten 2 max a_y (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_3_MAXVYAW_3` | 0x4080 | 27 | unsigned char | HEX |  |  | Vehicle damage data 3 max vyaw (entry 3) | Fahrzeug Schaden Daten 3 max vyaw (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_4_3` | 0x4080 | 28 | unsigned char | HEX |  |  | Vehicle damage data 4 (entry 3) | Fahrzeug Schaden Daten 4 (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_DT_5_CONF_3` | 0x4080 | 29 | unsigned char | HEX |  |  | Vehicle damage data 5 confidence (entry 3) | Fahrzeug Schaden Daten 5 confidence (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_DMG_STG_3` | 0x4080 | 30 | unsigned char | HEX |  |  | Vehicle damage level (entry 3) | Fahrzeug Schaden Stufe (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_ALGO_3` | 0x4080 | 31 | unsigned char | HEX |  |  | Vehicle algorithm version (entry 3) | Fahrzeug Version Algorithmus (Eintrag 3) |
+| `ACSM__DD_READ_SCHADENSMELDUNG.VEH_VRS_DMG_DT_3` | 0x4080 | 32 | unsigned char | HEX |  |  | Vehicle damage data version (entry 3) | Fahrzeug Version Schaden Daten (Eintrag 3) |
+| `ACSM__DD_READ_DEV_DATA.DEV_DATA_FORMAT_VERS` | 0x4081 | 0 | unsigned char | HEX |  |  | Development data format version | Development Data Format Version |
+| `ACSM__DD_READ_DEV_DATA.ZS_VEH_DMG_MESSAGE_1` | 0x4081 | 1 | unsigned long | s |  |  | Damage message timestamp | Zeitstempel Schadensmeldung |
+| `ACSM__DD_READ_DEV_DATA.ZD_STORED_DATA_1` | 0x4081 | 2 | unsigned char | ms |  |  | Time difference between the individual stored data | Zeitunterschied der einzelnen gespeicherten Daten |
 | `ACSM__DD_READ_DEV_DATA.DD_DEV_DATA_1_1_DATA` | 0x4081 | 3 | data[200] | DATA |  |  | Development Data Message 1 Part 1 | Development Data Message 1 Part 1 |
 | `ACSM__DD_READ_DEV_DATA.DD_DEV_DATA_1_2_DATA` | 0x4081 | 4 | data[200] | DATA |  |  | Development Data Message 1 Part 2 | Development Data Message 1 Part 2 |
-| `ACSM__DD_READ_DEV_DATA.ZS_VEH_DMG_MESSAGE_2` | 0x4081 | 5 | unsigned long | s |  |  | Timestamp Schadensmeldung | Zeitstempel Schadensmeldung |
-| `ACSM__DD_READ_DEV_DATA.ZD_STORED_DATA_2` | 0x4081 | 6 | unsigned char | ms |  |  | Zeitunterschied the einzelnen stored data | Zeitunterschied der einzelnen gespeicherten Daten |
+| `ACSM__DD_READ_DEV_DATA.ZS_VEH_DMG_MESSAGE_2` | 0x4081 | 5 | unsigned long | s |  |  | Damage message timestamp | Zeitstempel Schadensmeldung |
+| `ACSM__DD_READ_DEV_DATA.ZD_STORED_DATA_2` | 0x4081 | 6 | unsigned char | ms |  |  | Time difference between the individual stored data | Zeitunterschied der einzelnen gespeicherten Daten |
 | `ACSM__DD_READ_DEV_DATA.DD_DEV_DATA_2_1_DATA` | 0x4081 | 7 | data[200] | DATA |  |  | Development Data Message 2 Part 1 | Development Data Message 2 Part 1 |
 | `ACSM__DD_READ_DEV_DATA.DD_DEV_DATA_2_2_DATA` | 0x4081 | 8 | data[200] | DATA |  |  | Development Data Message 2 Part 2 | Development Data Message 2 Part 2 |
-| `ACSM__DD_READ_DEV_DATA.ZS_VEH_DMG_MESSAGE_3` | 0x4081 | 9 | unsigned long | s |  |  | Timestamp Schadensmeldung | Zeitstempel Schadensmeldung |
-| `ACSM__DD_READ_DEV_DATA.ZD_STORED_DATA_3` | 0x4081 | 10 | unsigned char | ms |  |  | Zeitunterschied the einzelnen stored data | Zeitunterschied der einzelnen gespeicherten Daten |
+| `ACSM__DD_READ_DEV_DATA.ZS_VEH_DMG_MESSAGE_3` | 0x4081 | 9 | unsigned long | s |  |  | Damage message timestamp | Zeitstempel Schadensmeldung |
+| `ACSM__DD_READ_DEV_DATA.ZD_STORED_DATA_3` | 0x4081 | 10 | unsigned char | ms |  |  | Time difference between the individual stored data | Zeitunterschied der einzelnen gespeicherten Daten |
 | `ACSM__DD_READ_DEV_DATA.DD_DEV_DATA_3_1_DATA` | 0x4081 | 11 | data[200] | DATA |  |  | Development Data Message 3 Part 1 | Development Data Message 3 Part 1 |
 | `ACSM__DD_READ_DEV_DATA.DD_DEV_DATA_3_2_DATA` | 0x4081 | 12 | data[200] | DATA |  |  | Development Data Message 3 Part 2 | Development Data Message 3 Part 2 |
-| `ACSM__PC_READ_PCR.RESERVE_01` | 0x4098 | 0 | unsigned char | HEX |  |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ANZ_RRA` | 0x4098 | 1 | unsigned char | HEX |  |  | Number activation by Heckradar | Anzahl Aktivierungen durch Heckradar |
-| `ACSM__PC_READ_PCR.RESERVE_02` | 0x4098 | 2 | unsigned char | HEX |  |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ANZ_FPA_EB` | 0x4098 | 3 | unsigned char | HEX |  |  | Number activation by Notbremsung | Anzahl Aktivierungen durch Notbremsung |
-| `ACSM__PC_READ_PCR.ANZ_FPA_OS` | 0x4098 | 4 | unsigned char | HEX |  |  | Number activation by Uebersteuern | Anzahl Aktivierungen durch Uebersteuern |
-| `ACSM__PC_READ_PCR.ANZ_FPA_US` | 0x4098 | 5 | unsigned char | HEX |  |  | Number activation by Untersteuern | Anzahl Aktivierungen durch Untersteuern |
-| `ACSM__PC_READ_PCR.ANZ_FPA_USTD` | 0x4098 | 6 | unsigned char | HEX |  |  | Number activation by Untersteuern TD | Anzahl Aktivierungen durch Untersteuern TD |
-| `ACSM__PC_READ_PCR.ANZ_AUTON_BRK` | 0x4098 | 7 | unsigned char | HEX |  |  | Number activation by autonome Bremsung | Anzahl Aktivierungen durch autonome Bremsung |
-| `ACSM__PC_READ_PCR.ANZ_DBC` | 0x4098 | 8 | unsigned char | HEX |  |  | Number activation by Bremsassistent | Anzahl Aktivierungen durch Bremsassistent |
-| `ACSM__PC_READ_PCR.ZS_CRASH_1` | 0x4098 | 9 | unsigned int | s | × 0.01 |  | Timestamp Crash (entry 1) | Zeitstempel Crash (Eintrag 1) |
-| `ACSM__PC_READ_PCR.RESERVE_10` | 0x4098 | 10 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_RRA_1` | 0x4098 | 11 | unsigned int | s | × 0.01 |  | Timestamp Heckradar (entry 1) | Zeitstempel Heckradar (Eintrag 1) |
-| `ACSM__PC_READ_PCR.RESERVE_11` | 0x4098 | 12 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_EB_1` | 0x4098 | 13 | unsigned int | s | × 0.01 |  | Timestamp Notbremsung (entry 1) | Zeitstempel Notbremsung (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_OS_1` | 0x4098 | 14 | unsigned int | s | × 0.01 |  | Timestamp Uebersteuern (entry 1) | Zeitstempel Uebersteuern (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_US_1` | 0x4098 | 15 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern (entry 1) | Zeitstempel Untersteuern (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_USTD_1` | 0x4098 | 16 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern TD (entry 1) | Zeitstempel Untersteuern TD (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_1` | 0x4098 | 17 | unsigned int | s | × 0.01 |  | Timestamp autonome Bremsung (entry 1) | Zeitstempel autonome Bremsung (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_DBC_1` | 0x4098 | 18 | unsigned int | s | × 0.01 |  | Timestamp Bremsassistent (entry 1) | Zeitstempel Bremsassistent (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1L_1` | 0x4098 | 19 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 left (entry 1) | Zeitstempel Gurtaktuator 1 Links (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1R_1` | 0x4098 | 20 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 right (entry 1) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_FENSTER_1` | 0x4098 | 21 | unsigned int | s | × 0.01 |  | Timestamp window (entry 1) | Zeitstempel Fenster (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_SITZ_1` | 0x4098 | 22 | unsigned int | s | × 0.01 |  | Timestamp seat (entry 1) | Zeitstempel Sitz (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_SHD_1` | 0x4098 | 23 | unsigned int | s | × 0.01 |  | Timestamp Schiebe / Hebe - roof (entry 1) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_1` | 0x4098 | 24 | unsigned char | s | × 0.01 |  | Timestamp Error V_VEH_COG (entry 1) | Zeitstempel Error V_VEH_COG (Eintrag 1) |
-| `ACSM__PC_READ_PCR.RESERVE_12` | 0x4098 | 25 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_13` | 0x4098 | 26 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_1` | 0x4098 | 27 | unsigned char | s | × 0.01 |  | Timestamp Error Heckradar (entry 1) | Zeitstempel Error Heckradar (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_1` | 0x4098 | 28 | unsigned char | s | × 0.01 |  | Timestamp Error status Heckradar (entry 1) | Zeitstempel Error Status Heckradar (Eintrag 1) |
-| `ACSM__PC_READ_PCR.RESERVE_14` | 0x4098 | 29 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_15` | 0x4098 | 30 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_1` | 0x4098 | 31 | unsigned char | s | × 0.01 |  | Timestamp Error VYAW_VEH (entry 1) | Zeitstempel Error VYAW_VEH (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_1` | 0x4098 | 32 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNX_COG (entry 1) | Zeitstempel Error ACLNX_COG (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_1` | 0x4098 | 33 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNY_COG (entry 1) | Zeitstempel Error ACLNY_COG (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_1` | 0x4098 | 34 | unsigned char | s | × 0.01 |  | Timestamp Error BRTORQ_SUM_DVCH (entry 1) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_1` | 0x4098 | 35 | unsigned char | s | × 0.01 |  | Timestamp Error STEA_FTAX_EFFV (entry 1) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_1` | 0x4098 | 36 | unsigned char | s | × 0.01 |  | Timestamp Error AVL_ANG_ACPD (entry 1) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_1` | 0x4098 | 37 | unsigned char | s | × 0.01 |  | Timestamp Error GRAD_AVL_ANG_ACPD (entry 1) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_1` | 0x4098 | 38 | unsigned char | s | × 0.01 |  | Timestamp Error ATTA_ESTI (entry 1) | Zeitstempel Error ATTA_ESTI (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_1` | 0x4098 | 39 | unsigned char | s | × 0.01 |  | Timestamp Error ATTAV_ESTI (entry 1) | Zeitstempel Error ATTAV_ESTI (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_1` | 0x4098 | 40 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_AUTON_BRK (entry 1) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_1` | 0x4098 | 41 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_MAX_DBC (entry 1) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_1` | 0x4098 | 42 | unsigned char | s | × 0.01 |  | Timestamp Error ST_CR (entry 1) | Zeitstempel Error ST_CR (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_1` | 0x4098 | 43 | unsigned char | s | × 0.01 |  | Timestamp Error ST_DRIV_DIR (entry 1) | Zeitstempel Error ST_DRIV_DIR (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_1` | 0x4098 | 44 | unsigned char | s | × 0.01 |  | Timestamp Error ST_THR_INCR_DRDY (entry 1) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_1` | 0x4098 | 45 | unsigned char | s | × 0.01 |  | Timestamp Error QU_SER_PRMSN_DBC (entry 1) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_1` | 0x4098 | 46 | unsigned char | s | × 0.01 |  | Timestamp Error THRV_TRIG_PRMSN_DBC (entry 1) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 1) |
-| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_1` | 0x4098 | 47 | unsigned char | km/h |  |  | Speed Snapshot (entry 1) | Geschwindigkeit Snapshot (Eintrag 1) |
-| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_1` | 0x4098 | 48 | unsigned char | HEX |  |  | Request WBK (bit 0-3) / DBC (bit 4-7) (entry 1) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 1) |
-| `ACSM__PC_READ_PCR.AKT_PCS_1` | 0x4098 | 49 | unsigned char | HEX |  |  | Ausgeloeste PreCrashSchweren (bitkodiert) (entry 1) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 1) |
-| `ACSM__PC_READ_PCR.ZS_CRASH_2` | 0x4098 | 50 | unsigned int | s | × 0.01 |  | Timestamp Crash (entry 2) | Zeitstempel Crash (Eintrag 2) |
-| `ACSM__PC_READ_PCR.RESERVE_20` | 0x4098 | 51 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_RRA_2` | 0x4098 | 52 | unsigned int | s | × 0.01 |  | Timestamp Heckradar (entry 2) | Zeitstempel Heckradar (Eintrag 2) |
-| `ACSM__PC_READ_PCR.RESERVE_21` | 0x4098 | 53 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_EB_2` | 0x4098 | 54 | unsigned int | s | × 0.01 |  | Timestamp Notbremsung (entry 2) | Zeitstempel Notbremsung (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_OS_2` | 0x4098 | 55 | unsigned int | s | × 0.01 |  | Timestamp Uebersteuern (entry 2) | Zeitstempel Uebersteuern (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_US_2` | 0x4098 | 56 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern (entry 2) | Zeitstempel Untersteuern (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_USTD_2` | 0x4098 | 57 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern TD (entry 2) | Zeitstempel Untersteuern TD (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_2` | 0x4098 | 58 | unsigned int | s | × 0.01 |  | Timestamp autonome Bremsung (entry 2) | Zeitstempel autonome Bremsung (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_DBC_2` | 0x4098 | 59 | unsigned int | s | × 0.01 |  | Timestamp Bremsassistent (entry 2) | Zeitstempel Bremsassistent (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1L_2` | 0x4098 | 60 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 left (entry 2) | Zeitstempel Gurtaktuator 1 Links (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1R_2` | 0x4098 | 61 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 right (entry 2) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_FENSTER_2` | 0x4098 | 62 | unsigned int | s | × 0.01 |  | Timestamp window (entry 2) | Zeitstempel Fenster (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_SITZ_2` | 0x4098 | 63 | unsigned int | s | × 0.01 |  | Timestamp seat (entry 2) | Zeitstempel Sitz (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_SHD_2` | 0x4098 | 64 | unsigned int | s | × 0.01 |  | Timestamp Schiebe / Hebe - roof (entry 2) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_2` | 0x4098 | 65 | unsigned char | s | × 0.01 |  | Timestamp Error V_VEH_COG (entry 2) | Zeitstempel Error V_VEH_COG (Eintrag 2) |
-| `ACSM__PC_READ_PCR.RESERVE_22` | 0x4098 | 66 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_23` | 0x4098 | 67 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_2` | 0x4098 | 68 | unsigned char | s | × 0.01 |  | Timestamp Error Heckradar (entry 2) | Zeitstempel Error Heckradar (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_2` | 0x4098 | 69 | unsigned char | s | × 0.01 |  | Timestamp Error status Heckradar (entry 2) | Zeitstempel Error Status Heckradar (Eintrag 2) |
-| `ACSM__PC_READ_PCR.RESERVE_24` | 0x4098 | 70 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_25` | 0x4098 | 71 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_2` | 0x4098 | 72 | unsigned char | s | × 0.01 |  | Timestamp Error VYAW_VEH (entry 2) | Zeitstempel Error VYAW_VEH (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_2` | 0x4098 | 73 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNX_COG (entry 2) | Zeitstempel Error ACLNX_COG (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_2` | 0x4098 | 74 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNY_COG (entry 2) | Zeitstempel Error ACLNY_COG (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_2` | 0x4098 | 75 | unsigned char | s | × 0.01 |  | Timestamp Error BRTORQ_SUM_DVCH (entry 2) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_2` | 0x4098 | 76 | unsigned char | s | × 0.01 |  | Timestamp Error STEA_FTAX_EFFV (entry 2) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_2` | 0x4098 | 77 | unsigned char | s | × 0.01 |  | Timestamp Error AVL_ANG_ACPD (entry 2) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_2` | 0x4098 | 78 | unsigned char | s | × 0.01 |  | Timestamp Error GRAD_AVL_ANG_ACPD (entry 2) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_2` | 0x4098 | 79 | unsigned char | s | × 0.01 |  | Timestamp Error ATTA_ESTI (entry 2) | Zeitstempel Error ATTA_ESTI (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_2` | 0x4098 | 80 | unsigned char | s | × 0.01 |  | Timestamp Error ATTAV_ESTI (entry 2) | Zeitstempel Error ATTAV_ESTI (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_2` | 0x4098 | 81 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_AUTON_BRK (entry 2) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_2` | 0x4098 | 82 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_MAX_DBC (entry 2) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_2` | 0x4098 | 83 | unsigned char | s | × 0.01 |  | Timestamp Error ST_CR (entry 2) | Zeitstempel Error ST_CR (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_2` | 0x4098 | 84 | unsigned char | s | × 0.01 |  | Timestamp Error ST_DRIV_DIR (entry 2) | Zeitstempel Error ST_DRIV_DIR (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_2` | 0x4098 | 85 | unsigned char | s | × 0.01 |  | Timestamp Error ST_THR_INCR_DRDY (entry 2) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_2` | 0x4098 | 86 | unsigned char | s | × 0.01 |  | Timestamp Error QU_SER_PRMSN_DBC (entry 2) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_2` | 0x4098 | 87 | unsigned char | s | × 0.01 |  | Timestamp Error THRV_TRIG_PRMSN_DBC (entry 2) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 2) |
-| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_2` | 0x4098 | 88 | unsigned char | km/h |  |  | Speed Snapshot (entry 2) | Geschwindigkeit Snapshot (Eintrag 2) |
-| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_2` | 0x4098 | 89 | unsigned char | HEX |  |  | Request WBK (bit 0-3) / DBC (bit 4-7) (entry 2) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 2) |
-| `ACSM__PC_READ_PCR.AKT_PCS_2` | 0x4098 | 90 | unsigned char | HEX |  |  | Ausgeloeste PreCrashSchweren (bitkodiert) (entry 2) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 2) |
-| `ACSM__PC_READ_PCR.ZS_CRASH_3` | 0x4098 | 91 | unsigned int | s | × 0.01 |  | Timestamp Crash (entry 3) | Zeitstempel Crash (Eintrag 3) |
-| `ACSM__PC_READ_PCR.RESERVE_30` | 0x4098 | 92 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_RRA_3` | 0x4098 | 93 | unsigned int | s | × 0.01 |  | Timestamp Heckradar (entry 3) | Zeitstempel Heckradar (Eintrag 3) |
-| `ACSM__PC_READ_PCR.RESERVE_31` | 0x4098 | 94 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_EB_3` | 0x4098 | 95 | unsigned int | s | × 0.01 |  | Timestamp Notbremsung (entry 3) | Zeitstempel Notbremsung (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_OS_3` | 0x4098 | 96 | unsigned int | s | × 0.01 |  | Timestamp Uebersteuern (entry 3) | Zeitstempel Uebersteuern (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_US_3` | 0x4098 | 97 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern (entry 3) | Zeitstempel Untersteuern (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_USTD_3` | 0x4098 | 98 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern TD (entry 3) | Zeitstempel Untersteuern TD (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_3` | 0x4098 | 99 | unsigned int | s | × 0.01 |  | Timestamp autonome Bremsung (entry 3) | Zeitstempel autonome Bremsung (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_DBC_3` | 0x4098 | 100 | unsigned int | s | × 0.01 |  | Timestamp Bremsassistent (entry 3) | Zeitstempel Bremsassistent (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1L_3` | 0x4098 | 101 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 left (entry 3) | Zeitstempel Gurtaktuator 1 Links (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1R_3` | 0x4098 | 102 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 right (entry 3) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_FENSTER_3` | 0x4098 | 103 | unsigned int | s | × 0.01 |  | Timestamp window (entry 3) | Zeitstempel Fenster (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_SITZ_3` | 0x4098 | 104 | unsigned int | s | × 0.01 |  | Timestamp seat (entry 3) | Zeitstempel Sitz (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_SHD_3` | 0x4098 | 105 | unsigned int | s | × 0.01 |  | Timestamp Schiebe / Hebe - roof (entry 3) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_3` | 0x4098 | 106 | unsigned char | s | × 0.01 |  | Timestamp Error V_VEH_COG (entry 3) | Zeitstempel Error V_VEH_COG (Eintrag 3) |
-| `ACSM__PC_READ_PCR.RESERVE_32` | 0x4098 | 107 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_33` | 0x4098 | 108 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_3` | 0x4098 | 109 | unsigned char | s | × 0.01 |  | Timestamp Error Heckradar (entry 3) | Zeitstempel Error Heckradar (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_3` | 0x4098 | 110 | unsigned char | s | × 0.01 |  | Timestamp Error status Heckradar (entry 3) | Zeitstempel Error Status Heckradar (Eintrag 3) |
-| `ACSM__PC_READ_PCR.RESERVE_34` | 0x4098 | 111 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_35` | 0x4098 | 112 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_3` | 0x4098 | 113 | unsigned char | s | × 0.01 |  | Timestamp Error VYAW_VEH (entry 3) | Zeitstempel Error VYAW_VEH (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_3` | 0x4098 | 114 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNX_COG (entry 3) | Zeitstempel Error ACLNX_COG (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_3` | 0x4098 | 115 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNY_COG (entry 3) | Zeitstempel Error ACLNY_COG (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_3` | 0x4098 | 116 | unsigned char | s | × 0.01 |  | Timestamp Error BRTORQ_SUM_DVCH (entry 3) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_3` | 0x4098 | 117 | unsigned char | s | × 0.01 |  | Timestamp Error STEA_FTAX_EFFV (entry 3) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_3` | 0x4098 | 118 | unsigned char | s | × 0.01 |  | Timestamp Error AVL_ANG_ACPD (entry 3) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_3` | 0x4098 | 119 | unsigned char | s | × 0.01 |  | Timestamp Error GRAD_AVL_ANG_ACPD (entry 3) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_3` | 0x4098 | 120 | unsigned char | s | × 0.01 |  | Timestamp Error ATTA_ESTI (entry 3) | Zeitstempel Error ATTA_ESTI (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_3` | 0x4098 | 121 | unsigned char | s | × 0.01 |  | Timestamp Error ATTAV_ESTI (entry 3) | Zeitstempel Error ATTAV_ESTI (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_3` | 0x4098 | 122 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_AUTON_BRK (entry 3) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_3` | 0x4098 | 123 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_MAX_DBC (entry 3) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_3` | 0x4098 | 124 | unsigned char | s | × 0.01 |  | Timestamp Error ST_CR (entry 3) | Zeitstempel Error ST_CR (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_3` | 0x4098 | 125 | unsigned char | s | × 0.01 |  | Timestamp Error ST_DRIV_DIR (entry 3) | Zeitstempel Error ST_DRIV_DIR (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_3` | 0x4098 | 126 | unsigned char | s | × 0.01 |  | Timestamp Error ST_THR_INCR_DRDY (entry 3) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_3` | 0x4098 | 127 | unsigned char | s | × 0.01 |  | Timestamp Error QU_SER_PRMSN_DBC (entry 3) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_3` | 0x4098 | 128 | unsigned char | s | × 0.01 |  | Timestamp Error THRV_TRIG_PRMSN_DBC (entry 3) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 3) |
-| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_3` | 0x4098 | 129 | unsigned char | km/h |  |  | Speed Snapshot (entry 3) | Geschwindigkeit Snapshot (Eintrag 3) |
-| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_3` | 0x4098 | 130 | unsigned char | HEX |  |  | Request WBK (bit 0-3) / DBC (bit 4-7) (entry 3) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 3) |
-| `ACSM__PC_READ_PCR.AKT_PCS_3` | 0x4098 | 131 | unsigned char | HEX |  |  | Ausgeloeste PreCrashSchweren (bitkodiert) (entry 3) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 3) |
-| `ACSM__PC_READ_PCR.ZS_CRASH_4` | 0x4098 | 132 | unsigned int | s | × 0.01 |  | Timestamp Crash (entry 4) | Zeitstempel Crash (Eintrag 4) |
-| `ACSM__PC_READ_PCR.RESERVE_40` | 0x4098 | 133 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_RRA_4` | 0x4098 | 134 | unsigned int | s | × 0.01 |  | Timestamp Heckradar (entry 4) | Zeitstempel Heckradar (Eintrag 4) |
-| `ACSM__PC_READ_PCR.RESERVE_41` | 0x4098 | 135 | unsigned int | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_EB_4` | 0x4098 | 136 | unsigned int | s | × 0.01 |  | Timestamp Notbremsung (entry 4) | Zeitstempel Notbremsung (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_OS_4` | 0x4098 | 137 | unsigned int | s | × 0.01 |  | Timestamp Uebersteuern (entry 4) | Zeitstempel Uebersteuern (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_US_4` | 0x4098 | 138 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern (entry 4) | Zeitstempel Untersteuern (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_USTD_4` | 0x4098 | 139 | unsigned int | s | × 0.01 |  | Timestamp Untersteuern TD (entry 4) | Zeitstempel Untersteuern TD (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_4` | 0x4098 | 140 | unsigned int | s | × 0.01 |  | Timestamp autonome Bremsung (entry 4) | Zeitstempel autonome Bremsung (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_DBC_4` | 0x4098 | 141 | unsigned int | s | × 0.01 |  | Timestamp Bremsassistent (entry 4) | Zeitstempel Bremsassistent (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1L_4` | 0x4098 | 142 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 left (entry 4) | Zeitstempel Gurtaktuator 1 Links (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_GA_T1R_4` | 0x4098 | 143 | unsigned int | s | × 0.01 |  | Timestamp Gurtaktuator 1 right (entry 4) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_FENSTER_4` | 0x4098 | 144 | unsigned int | s | × 0.01 |  | Timestamp window (entry 4) | Zeitstempel Fenster (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_SITZ_4` | 0x4098 | 145 | unsigned int | s | × 0.01 |  | Timestamp seat (entry 4) | Zeitstempel Sitz (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_SHD_4` | 0x4098 | 146 | unsigned int | s | × 0.01 |  | Timestamp Schiebe / Hebe - roof (entry 4) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_4` | 0x4098 | 147 | unsigned char | s | × 0.01 |  | Timestamp Error V_VEH_COG (entry 4) | Zeitstempel Error V_VEH_COG (Eintrag 4) |
-| `ACSM__PC_READ_PCR.RESERVE_42` | 0x4098 | 148 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_43` | 0x4098 | 149 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_4` | 0x4098 | 150 | unsigned char | s | × 0.01 |  | Timestamp Error Heckradar (entry 4) | Zeitstempel Error Heckradar (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_4` | 0x4098 | 151 | unsigned char | s | × 0.01 |  | Timestamp Error status Heckradar (entry 4) | Zeitstempel Error Status Heckradar (Eintrag 4) |
-| `ACSM__PC_READ_PCR.RESERVE_44` | 0x4098 | 152 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.RESERVE_45` | 0x4098 | 153 | unsigned char | s | × 0.01 |  | Ergebnis without Info | Ergebnis ohne Info |
-| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_4` | 0x4098 | 154 | unsigned char | s | × 0.01 |  | Timestamp Error VYAW_VEH (entry 4) | Zeitstempel Error VYAW_VEH (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_4` | 0x4098 | 155 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNX_COG (entry 4) | Zeitstempel Error ACLNX_COG (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_4` | 0x4098 | 156 | unsigned char | s | × 0.01 |  | Timestamp Error ACLNY_COG (entry 4) | Zeitstempel Error ACLNY_COG (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_4` | 0x4098 | 157 | unsigned char | s | × 0.01 |  | Timestamp Error BRTORQ_SUM_DVCH (entry 4) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_4` | 0x4098 | 158 | unsigned char | s | × 0.01 |  | Timestamp Error STEA_FTAX_EFFV (entry 4) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_4` | 0x4098 | 159 | unsigned char | s | × 0.01 |  | Timestamp Error AVL_ANG_ACPD (entry 4) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_4` | 0x4098 | 160 | unsigned char | s | × 0.01 |  | Timestamp Error GRAD_AVL_ANG_ACPD (entry 4) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_4` | 0x4098 | 161 | unsigned char | s | × 0.01 |  | Timestamp Error ATTA_ESTI (entry 4) | Zeitstempel Error ATTA_ESTI (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_4` | 0x4098 | 162 | unsigned char | s | × 0.01 |  | Timestamp Error ATTAV_ESTI (entry 4) | Zeitstempel Error ATTAV_ESTI (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_4` | 0x4098 | 163 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_AUTON_BRK (entry 4) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_4` | 0x4098 | 164 | unsigned char | s | × 0.01 |  | Timestamp Error DCRN_MAX_DBC (entry 4) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_4` | 0x4098 | 165 | unsigned char | s | × 0.01 |  | Timestamp Error ST_CR (entry 4) | Zeitstempel Error ST_CR (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_4` | 0x4098 | 166 | unsigned char | s | × 0.01 |  | Timestamp Error ST_DRIV_DIR (entry 4) | Zeitstempel Error ST_DRIV_DIR (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_4` | 0x4098 | 167 | unsigned char | s | × 0.01 |  | Timestamp Error ST_THR_INCR_DRDY (entry 4) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_4` | 0x4098 | 168 | unsigned char | s | × 0.01 |  | Timestamp Error QU_SER_PRMSN_DBC (entry 4) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 4) |
-| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_4` | 0x4098 | 169 | unsigned char | s | × 0.01 |  | Timestamp Error THRV_TRIG_PRMSN_DBC (entry 4) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 4) |
-| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_4` | 0x4098 | 170 | unsigned char | km/h |  |  | Speed Snapshot (entry 4) | Geschwindigkeit Snapshot (Eintrag 4) |
-| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_4` | 0x4098 | 171 | unsigned char | HEX |  |  | Request WBK (bit 0-3) / DBC (bit 4-7) (entry 4) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 4) |
-| `ACSM__PC_READ_PCR.AKT_PCS_4` | 0x4098 | 172 | unsigned char | HEX |  |  | Ausgeloeste PreCrashSchweren (bitkodiert) (entry 4) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 4) |
-| `ACSM__IMU_WERTE.X_ACC_SCAL` | 0x4101 | 0 | unsigned long | m/s² | × 0.02 − 41 |  | acceleration longitudinal scaled value | acceleration longitudinal scaled value |
-| `ACSM__IMU_WERTE.X_ACC_SCAL_QUAL` | 0x4101 | 1 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier acceleration longitudinal scaled value | qualifier acceleration longitudinal scaled value |
-| `ACSM__IMU_WERTE.Y_ACC_SCAL` | 0x4101 | 2 | unsigned long | m/s² | × 0.02 − 41 |  | acceleration lateral scaled value | acceleration lateral scaled value |
-| `ACSM__IMU_WERTE.Y_ACC_SCAL_QUAL` | 0x4101 | 3 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier acceleration lateral scaled value | qualifier acceleration lateral scaled value |
-| `ACSM__IMU_WERTE.Z_ACC_SCAL` | 0x4101 | 4 | unsigned long | m/s² | × 0.02 − 20.92 |  | acceleration vertical scaled value | acceleration vertical scaled value |
-| `ACSM__IMU_WERTE.Z_ACC_SCAL_QUAL` | 0x4101 | 5 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier acceleration vertical scaled value | qualifier acceleration vertical scaled value |
-| `ACSM__IMU_WERTE.X_RATE_SCAL` | 0x4101 | 6 | unsigned long | °/s | × 0.01 − 328 |  | roll angular velocity scaled value | roll angular velocity scaled value |
-| `ACSM__IMU_WERTE.X_RATE_SCAL_QUAL` | 0x4101 | 7 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier roll angular velocity scaled value | qualifier roll angular velocity scaled value |
-| `ACSM__IMU_WERTE.Y_RATE_SCAL` | 0x4101 | 8 | unsigned long | °/s | × 0.05 − 102.5 |  | pitch angular velocity scaled value | pitch angular velocity scaled value |
-| `ACSM__IMU_WERTE.Y_RATE_SCAL_QUAL` | 0x4101 | 9 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier pitch angular velocity scaled value | qualifier pitch angular velocity scaled value |
-| `ACSM__IMU_WERTE.Z_RATE_SCAL` | 0x4101 | 10 | unsigned long | °/s | × 0.005 − 163.84 |  | yaw angular velocity scaled value | yaw angular velocity scaled value |
-| `ACSM__IMU_WERTE.Z_RATE_SCAL_QUAL` | 0x4101 | 11 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier yaw angular velocity scaled value | qualifier yaw angular velocity scaled value |
-| `ACSM__IMU_WERTE_ERWEITERT.X_ACC_SCAL_RED` | 0x4102 | 0 | unsigned long | m/s² | × 0.02 − 41 |  | acceleration longitudinal scaled value redundant | acceleration longitudinal scaled value redundant |
-| `ACSM__IMU_WERTE_ERWEITERT.X_ACC_SCAL_QUAL_RED` | 0x4102 | 1 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier acceleration longitudinal scaled value  redundant | qualifier acceleration longitudinal scaled value  redundant |
-| `ACSM__IMU_WERTE_ERWEITERT.Y_ACC_SCAL_RED` | 0x4102 | 2 | unsigned long | m/s² | × 0.02 − 41 |  | acceleration lateral scaled value  redundant | acceleration lateral scaled value  redundant |
-| `ACSM__IMU_WERTE_ERWEITERT.Y_ACC_SCAL_QUAL_RED` | 0x4102 | 3 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier acceleration lateral scaled value  redundant | qualifier acceleration lateral scaled value  redundant |
-| `ACSM__IMU_WERTE_ERWEITERT.Z_RATE_SCAL_RED` | 0x4102 | 4 | unsigned long | °/s | × 0.005 − 163.84 |  | yaw angular velocity scaled value redundant | yaw angular velocity scaled value redundant |
-| `ACSM__IMU_WERTE_ERWEITERT.Z_RATE_SCAL_QUAL_RED` | 0x4102 | 5 | unsigned char | 0-n |  | 2 = signal valid; 4 = signal substituted; 6 = signal invalid; 7 = sensor missing; 8 = Init; 15 = Invalid | qualifier yaw angular velocity scaled value redundant | qualifier yaw angular velocity scaled value redundant |
-| `ACSM__STATUS_STEUERGERAET_TYP.STEUERGERAET_TYP` | 0x4104 | 0 | unsigned char | 0-n |  | 0 = Seriensteuergeraet; 1 = Entwicklungssteuergeraet | Typ of the control unit | Typ des Steuergeräts |
-| `ACSM_PC_READ_ID_REMA.SUPP_NO_BLT_TIR_1_LH_PSCAN` | 0xD402 | 0 | unsigned char | HEX |  |  | Lieferanten-Nummer T1L | Lieferanten-Nummer T1L |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_1` | 0xD402 | 1 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 1 | Seriennummer des REMA-Aktuators T1L byte 1 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_2` | 0xD402 | 2 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 2 | Seriennummer des REMA-Aktuators T1L byte 2 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_3` | 0xD402 | 3 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 3 | Seriennummer des REMA-Aktuators T1L byte 3 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_4` | 0xD402 | 4 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 4 | Seriennummer des REMA-Aktuators T1L byte 4 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_5` | 0xD402 | 5 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 5 | Seriennummer des REMA-Aktuators T1L byte 5 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_6` | 0xD402 | 6 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 6 | Seriennummer des REMA-Aktuators T1L byte 6 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_7` | 0xD402 | 7 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1L byte 7 | Seriennummer des REMA-Aktuators T1L byte 7 |
-| `ACSM_PC_READ_ID_REMA.HW_VRS_BLT_TIR_1_LH_PSCAN` | 0xD402 | 8 | unsigned int | HEX |  |  | Hardware Version T1L | Hardware Version T1L |
-| `ACSM_PC_READ_ID_REMA.SFTW_VRS_BLT_TIR_1_LH_PSCAN` | 0xD402 | 9 | unsigned int | HEX |  |  | Software Version T1L | Software Version T1L |
-| `ACSM_PC_READ_ID_REMA.BLT_TIR_1_LH_PRMTR_VRS_PSCAN` | 0xD402 | 10 | unsigned int | HEX |  |  | Parameter Version T1L | Parameter Version T1L |
-| `ACSM_PC_READ_ID_REMA.SUPP_NO_BLT_TIR_1_RH_PSCAN` | 0xD402 | 11 | unsigned char | HEX |  |  | Lieferanten-Nummer T1R | Lieferanten-Nummer T1R |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_1` | 0xD402 | 12 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 1 | Seriennummer des REMA-Aktuators T1R byte 1 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_2` | 0xD402 | 13 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 2 | Seriennummer des REMA-Aktuators T1R byte 2 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_3` | 0xD402 | 14 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 3 | Seriennummer des REMA-Aktuators T1R byte 3 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_4` | 0xD402 | 15 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 4 | Seriennummer des REMA-Aktuators T1R byte 4 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_5` | 0xD402 | 16 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 5 | Seriennummer des REMA-Aktuators T1R byte 5 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_6` | 0xD402 | 17 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 6 | Seriennummer des REMA-Aktuators T1R byte 6 |
-| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_7` | 0xD402 | 18 | unsigned char | HEX |  |  | Seriennummer of the REMA-actuator T1R byte 7 | Seriennummer des REMA-Aktuators T1R byte 7 |
-| `ACSM_PC_READ_ID_REMA.HW_VRS_BLT_TIR_1_RH_PSCAN` | 0xD402 | 19 | unsigned int | HEX |  |  | Hardware Version T1R | Hardware Version T1R |
-| `ACSM_PC_READ_ID_REMA.SFTW_VRS_BLT_TIR_1_RH_PSCAN` | 0xD402 | 20 | unsigned int | HEX |  |  | Software Version T1R | Software Version T1R |
-| `ACSM_PC_READ_ID_REMA.BLT_TIR_1_RH_PRMTR_VRS_PSCAN` | 0xD402 | 21 | unsigned int | HEX |  |  | Parameter Version T1R | Parameter Version T1R |
-| `ACSM_PC_READ_ST_REMA.ALIV_BLT_TIR_1_LH_PSCAN` | 0xD41D | 0 | unsigned char | HEX |  |  | Überprüfen ob, alive = OK / NOK is T1L | Überprüfen ob, Alive = OK / NOK ist T1L |
+| `ACSM__PC_READ_PCR.RESERVE_01` | 0x4098 | 0 | unsigned char | HEX |  |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ANZ_RRA` | 0x4098 | 1 | unsigned char | HEX |  |  | Number of activations by rear radar | Anzahl Aktivierungen durch Heckradar |
+| `ACSM__PC_READ_PCR.RESERVE_02` | 0x4098 | 2 | unsigned char | HEX |  |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ANZ_FPA_EB` | 0x4098 | 3 | unsigned char | HEX |  |  | Number of activations by emergency braking | Anzahl Aktivierungen durch Notbremsung |
+| `ACSM__PC_READ_PCR.ANZ_FPA_OS` | 0x4098 | 4 | unsigned char | HEX |  |  | Number of activations by oversteer | Anzahl Aktivierungen durch Uebersteuern |
+| `ACSM__PC_READ_PCR.ANZ_FPA_US` | 0x4098 | 5 | unsigned char | HEX |  |  | Number of activations by understeer | Anzahl Aktivierungen durch Untersteuern |
+| `ACSM__PC_READ_PCR.ANZ_FPA_USTD` | 0x4098 | 6 | unsigned char | HEX |  |  | Number of activations by understeer TD | Anzahl Aktivierungen durch Untersteuern TD |
+| `ACSM__PC_READ_PCR.ANZ_AUTON_BRK` | 0x4098 | 7 | unsigned char | HEX |  |  | Number of activations by autonomous braking | Anzahl Aktivierungen durch autonome Bremsung |
+| `ACSM__PC_READ_PCR.ANZ_DBC` | 0x4098 | 8 | unsigned char | HEX |  |  | Number of activations by brake assist | Anzahl Aktivierungen durch Bremsassistent |
+| `ACSM__PC_READ_PCR.ZS_CRASH_1` | 0x4098 | 9 | unsigned int | s | × 0.01 |  | Crash timestamp (entry 1) | Zeitstempel Crash (Eintrag 1) |
+| `ACSM__PC_READ_PCR.RESERVE_10` | 0x4098 | 10 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_RRA_1` | 0x4098 | 11 | unsigned int | s | × 0.01 |  | Rear radar timestamp (entry 1) | Zeitstempel Heckradar (Eintrag 1) |
+| `ACSM__PC_READ_PCR.RESERVE_11` | 0x4098 | 12 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_EB_1` | 0x4098 | 13 | unsigned int | s | × 0.01 |  | Emergency braking timestamp (entry 1) | Zeitstempel Notbremsung (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_OS_1` | 0x4098 | 14 | unsigned int | s | × 0.01 |  | Oversteer timestamp (entry 1) | Zeitstempel Uebersteuern (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_US_1` | 0x4098 | 15 | unsigned int | s | × 0.01 |  | Understeer timestamp (entry 1) | Zeitstempel Untersteuern (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_USTD_1` | 0x4098 | 16 | unsigned int | s | × 0.01 |  | Understeer TD timestamp (entry 1) | Zeitstempel Untersteuern TD (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_1` | 0x4098 | 17 | unsigned int | s | × 0.01 |  | Autonomous braking timestamp (entry 1) | Zeitstempel autonome Bremsung (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_DBC_1` | 0x4098 | 18 | unsigned int | s | × 0.01 |  | Brake assist timestamp (entry 1) | Zeitstempel Bremsassistent (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1L_1` | 0x4098 | 19 | unsigned int | s | × 0.01 |  | Belt actuator 1 left timestamp (entry 1) | Zeitstempel Gurtaktuator 1 Links (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1R_1` | 0x4098 | 20 | unsigned int | s | × 0.01 |  | Belt actuator 1 right timestamp (entry 1) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_FENSTER_1` | 0x4098 | 21 | unsigned int | s | × 0.01 |  | Window timestamp (entry 1) | Zeitstempel Fenster (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_SITZ_1` | 0x4098 | 22 | unsigned int | s | × 0.01 |  | Seat timestamp (entry 1) | Zeitstempel Sitz (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_SHD_1` | 0x4098 | 23 | unsigned int | s | × 0.01 |  | Sunroof (slide/tilt) timestamp (entry 1) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_1` | 0x4098 | 24 | unsigned char | s | × 0.01 |  | V_VEH_COG error timestamp (entry 1) | Zeitstempel Error V_VEH_COG (Eintrag 1) |
+| `ACSM__PC_READ_PCR.RESERVE_12` | 0x4098 | 25 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_13` | 0x4098 | 26 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_1` | 0x4098 | 27 | unsigned char | s | × 0.01 |  | Rear radar error timestamp (entry 1) | Zeitstempel Error Heckradar (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_1` | 0x4098 | 28 | unsigned char | s | × 0.01 |  | Rear radar status error timestamp (entry 1) | Zeitstempel Error Status Heckradar (Eintrag 1) |
+| `ACSM__PC_READ_PCR.RESERVE_14` | 0x4098 | 29 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_15` | 0x4098 | 30 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_1` | 0x4098 | 31 | unsigned char | s | × 0.01 |  | VYAW_VEH error timestamp (entry 1) | Zeitstempel Error VYAW_VEH (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_1` | 0x4098 | 32 | unsigned char | s | × 0.01 |  | ACLNX_COG error timestamp (entry 1) | Zeitstempel Error ACLNX_COG (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_1` | 0x4098 | 33 | unsigned char | s | × 0.01 |  | ACLNY_COG error timestamp (entry 1) | Zeitstempel Error ACLNY_COG (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_1` | 0x4098 | 34 | unsigned char | s | × 0.01 |  | BRTORQ_SUM_DVCH error timestamp (entry 1) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_1` | 0x4098 | 35 | unsigned char | s | × 0.01 |  | STEA_FTAX_EFFV error timestamp (entry 1) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_1` | 0x4098 | 36 | unsigned char | s | × 0.01 |  | AVL_ANG_ACPD error timestamp (entry 1) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_1` | 0x4098 | 37 | unsigned char | s | × 0.01 |  | GRAD_AVL_ANG_ACPD error timestamp (entry 1) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_1` | 0x4098 | 38 | unsigned char | s | × 0.01 |  | ATTA_ESTI error timestamp (entry 1) | Zeitstempel Error ATTA_ESTI (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_1` | 0x4098 | 39 | unsigned char | s | × 0.01 |  | ATTAV_ESTI error timestamp (entry 1) | Zeitstempel Error ATTAV_ESTI (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_1` | 0x4098 | 40 | unsigned char | s | × 0.01 |  | DCRN_AUTON_BRK error timestamp (entry 1) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_1` | 0x4098 | 41 | unsigned char | s | × 0.01 |  | DCRN_MAX_DBC error timestamp (entry 1) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_1` | 0x4098 | 42 | unsigned char | s | × 0.01 |  | ST_CR error timestamp (entry 1) | Zeitstempel Error ST_CR (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_1` | 0x4098 | 43 | unsigned char | s | × 0.01 |  | ST_DRIV_DIR error timestamp (entry 1) | Zeitstempel Error ST_DRIV_DIR (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_1` | 0x4098 | 44 | unsigned char | s | × 0.01 |  | ST_THR_INCR_DRDY error timestamp (entry 1) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_1` | 0x4098 | 45 | unsigned char | s | × 0.01 |  | QU_SER_PRMSN_DBC error timestamp (entry 1) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_1` | 0x4098 | 46 | unsigned char | s | × 0.01 |  | THRV_TRIG_PRMSN_DBC error timestamp (entry 1) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 1) |
+| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_1` | 0x4098 | 47 | unsigned char | km/h |  |  | Speed snapshot (entry 1) | Geschwindigkeit Snapshot (Eintrag 1) |
+| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_1` | 0x4098 | 48 | unsigned char | HEX |  |  | WBK (bit 0-3) / DBC (bit 4-7) request (entry 1) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 1) |
+| `ACSM__PC_READ_PCR.AKT_PCS_1` | 0x4098 | 49 | unsigned char | HEX |  |  | Triggered pre-crash severities (bit-coded) (entry 1) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 1) |
+| `ACSM__PC_READ_PCR.ZS_CRASH_2` | 0x4098 | 50 | unsigned int | s | × 0.01 |  | Crash timestamp (entry 2) | Zeitstempel Crash (Eintrag 2) |
+| `ACSM__PC_READ_PCR.RESERVE_20` | 0x4098 | 51 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_RRA_2` | 0x4098 | 52 | unsigned int | s | × 0.01 |  | Rear radar timestamp (entry 2) | Zeitstempel Heckradar (Eintrag 2) |
+| `ACSM__PC_READ_PCR.RESERVE_21` | 0x4098 | 53 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_EB_2` | 0x4098 | 54 | unsigned int | s | × 0.01 |  | Emergency braking timestamp (entry 2) | Zeitstempel Notbremsung (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_OS_2` | 0x4098 | 55 | unsigned int | s | × 0.01 |  | Oversteer timestamp (entry 2) | Zeitstempel Uebersteuern (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_US_2` | 0x4098 | 56 | unsigned int | s | × 0.01 |  | Understeer timestamp (entry 2) | Zeitstempel Untersteuern (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_USTD_2` | 0x4098 | 57 | unsigned int | s | × 0.01 |  | Understeer TD timestamp (entry 2) | Zeitstempel Untersteuern TD (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_2` | 0x4098 | 58 | unsigned int | s | × 0.01 |  | Autonomous braking timestamp (entry 2) | Zeitstempel autonome Bremsung (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_DBC_2` | 0x4098 | 59 | unsigned int | s | × 0.01 |  | Brake assist timestamp (entry 2) | Zeitstempel Bremsassistent (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1L_2` | 0x4098 | 60 | unsigned int | s | × 0.01 |  | Belt actuator 1 left timestamp (entry 2) | Zeitstempel Gurtaktuator 1 Links (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1R_2` | 0x4098 | 61 | unsigned int | s | × 0.01 |  | Belt actuator 1 right timestamp (entry 2) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_FENSTER_2` | 0x4098 | 62 | unsigned int | s | × 0.01 |  | Window timestamp (entry 2) | Zeitstempel Fenster (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_SITZ_2` | 0x4098 | 63 | unsigned int | s | × 0.01 |  | Seat timestamp (entry 2) | Zeitstempel Sitz (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_SHD_2` | 0x4098 | 64 | unsigned int | s | × 0.01 |  | Sunroof (slide/tilt) timestamp (entry 2) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_2` | 0x4098 | 65 | unsigned char | s | × 0.01 |  | V_VEH_COG error timestamp (entry 2) | Zeitstempel Error V_VEH_COG (Eintrag 2) |
+| `ACSM__PC_READ_PCR.RESERVE_22` | 0x4098 | 66 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_23` | 0x4098 | 67 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_2` | 0x4098 | 68 | unsigned char | s | × 0.01 |  | Rear radar error timestamp (entry 2) | Zeitstempel Error Heckradar (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_2` | 0x4098 | 69 | unsigned char | s | × 0.01 |  | Rear radar status error timestamp (entry 2) | Zeitstempel Error Status Heckradar (Eintrag 2) |
+| `ACSM__PC_READ_PCR.RESERVE_24` | 0x4098 | 70 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_25` | 0x4098 | 71 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_2` | 0x4098 | 72 | unsigned char | s | × 0.01 |  | VYAW_VEH error timestamp (entry 2) | Zeitstempel Error VYAW_VEH (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_2` | 0x4098 | 73 | unsigned char | s | × 0.01 |  | ACLNX_COG error timestamp (entry 2) | Zeitstempel Error ACLNX_COG (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_2` | 0x4098 | 74 | unsigned char | s | × 0.01 |  | ACLNY_COG error timestamp (entry 2) | Zeitstempel Error ACLNY_COG (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_2` | 0x4098 | 75 | unsigned char | s | × 0.01 |  | BRTORQ_SUM_DVCH error timestamp (entry 2) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_2` | 0x4098 | 76 | unsigned char | s | × 0.01 |  | STEA_FTAX_EFFV error timestamp (entry 2) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_2` | 0x4098 | 77 | unsigned char | s | × 0.01 |  | AVL_ANG_ACPD error timestamp (entry 2) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_2` | 0x4098 | 78 | unsigned char | s | × 0.01 |  | GRAD_AVL_ANG_ACPD error timestamp (entry 2) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_2` | 0x4098 | 79 | unsigned char | s | × 0.01 |  | ATTA_ESTI error timestamp (entry 2) | Zeitstempel Error ATTA_ESTI (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_2` | 0x4098 | 80 | unsigned char | s | × 0.01 |  | ATTAV_ESTI error timestamp (entry 2) | Zeitstempel Error ATTAV_ESTI (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_2` | 0x4098 | 81 | unsigned char | s | × 0.01 |  | DCRN_AUTON_BRK error timestamp (entry 2) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_2` | 0x4098 | 82 | unsigned char | s | × 0.01 |  | DCRN_MAX_DBC error timestamp (entry 2) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_2` | 0x4098 | 83 | unsigned char | s | × 0.01 |  | ST_CR error timestamp (entry 2) | Zeitstempel Error ST_CR (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_2` | 0x4098 | 84 | unsigned char | s | × 0.01 |  | ST_DRIV_DIR error timestamp (entry 2) | Zeitstempel Error ST_DRIV_DIR (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_2` | 0x4098 | 85 | unsigned char | s | × 0.01 |  | ST_THR_INCR_DRDY error timestamp (entry 2) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_2` | 0x4098 | 86 | unsigned char | s | × 0.01 |  | QU_SER_PRMSN_DBC error timestamp (entry 2) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_2` | 0x4098 | 87 | unsigned char | s | × 0.01 |  | THRV_TRIG_PRMSN_DBC error timestamp (entry 2) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 2) |
+| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_2` | 0x4098 | 88 | unsigned char | km/h |  |  | Speed snapshot (entry 2) | Geschwindigkeit Snapshot (Eintrag 2) |
+| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_2` | 0x4098 | 89 | unsigned char | HEX |  |  | WBK (bit 0-3) / DBC (bit 4-7) request (entry 2) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 2) |
+| `ACSM__PC_READ_PCR.AKT_PCS_2` | 0x4098 | 90 | unsigned char | HEX |  |  | Triggered pre-crash severities (bit-coded) (entry 2) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 2) |
+| `ACSM__PC_READ_PCR.ZS_CRASH_3` | 0x4098 | 91 | unsigned int | s | × 0.01 |  | Crash timestamp (entry 3) | Zeitstempel Crash (Eintrag 3) |
+| `ACSM__PC_READ_PCR.RESERVE_30` | 0x4098 | 92 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_RRA_3` | 0x4098 | 93 | unsigned int | s | × 0.01 |  | Rear radar timestamp (entry 3) | Zeitstempel Heckradar (Eintrag 3) |
+| `ACSM__PC_READ_PCR.RESERVE_31` | 0x4098 | 94 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_EB_3` | 0x4098 | 95 | unsigned int | s | × 0.01 |  | Emergency braking timestamp (entry 3) | Zeitstempel Notbremsung (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_OS_3` | 0x4098 | 96 | unsigned int | s | × 0.01 |  | Oversteer timestamp (entry 3) | Zeitstempel Uebersteuern (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_US_3` | 0x4098 | 97 | unsigned int | s | × 0.01 |  | Understeer timestamp (entry 3) | Zeitstempel Untersteuern (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_USTD_3` | 0x4098 | 98 | unsigned int | s | × 0.01 |  | Understeer TD timestamp (entry 3) | Zeitstempel Untersteuern TD (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_3` | 0x4098 | 99 | unsigned int | s | × 0.01 |  | Autonomous braking timestamp (entry 3) | Zeitstempel autonome Bremsung (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_DBC_3` | 0x4098 | 100 | unsigned int | s | × 0.01 |  | Brake assist timestamp (entry 3) | Zeitstempel Bremsassistent (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1L_3` | 0x4098 | 101 | unsigned int | s | × 0.01 |  | Belt actuator 1 left timestamp (entry 3) | Zeitstempel Gurtaktuator 1 Links (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1R_3` | 0x4098 | 102 | unsigned int | s | × 0.01 |  | Belt actuator 1 right timestamp (entry 3) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_FENSTER_3` | 0x4098 | 103 | unsigned int | s | × 0.01 |  | Window timestamp (entry 3) | Zeitstempel Fenster (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_SITZ_3` | 0x4098 | 104 | unsigned int | s | × 0.01 |  | Seat timestamp (entry 3) | Zeitstempel Sitz (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_SHD_3` | 0x4098 | 105 | unsigned int | s | × 0.01 |  | Sunroof (slide/tilt) timestamp (entry 3) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_3` | 0x4098 | 106 | unsigned char | s | × 0.01 |  | V_VEH_COG error timestamp (entry 3) | Zeitstempel Error V_VEH_COG (Eintrag 3) |
+| `ACSM__PC_READ_PCR.RESERVE_32` | 0x4098 | 107 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_33` | 0x4098 | 108 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_3` | 0x4098 | 109 | unsigned char | s | × 0.01 |  | Rear radar error timestamp (entry 3) | Zeitstempel Error Heckradar (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_3` | 0x4098 | 110 | unsigned char | s | × 0.01 |  | Rear radar status error timestamp (entry 3) | Zeitstempel Error Status Heckradar (Eintrag 3) |
+| `ACSM__PC_READ_PCR.RESERVE_34` | 0x4098 | 111 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_35` | 0x4098 | 112 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_3` | 0x4098 | 113 | unsigned char | s | × 0.01 |  | VYAW_VEH error timestamp (entry 3) | Zeitstempel Error VYAW_VEH (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_3` | 0x4098 | 114 | unsigned char | s | × 0.01 |  | ACLNX_COG error timestamp (entry 3) | Zeitstempel Error ACLNX_COG (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_3` | 0x4098 | 115 | unsigned char | s | × 0.01 |  | ACLNY_COG error timestamp (entry 3) | Zeitstempel Error ACLNY_COG (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_3` | 0x4098 | 116 | unsigned char | s | × 0.01 |  | BRTORQ_SUM_DVCH error timestamp (entry 3) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_3` | 0x4098 | 117 | unsigned char | s | × 0.01 |  | STEA_FTAX_EFFV error timestamp (entry 3) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_3` | 0x4098 | 118 | unsigned char | s | × 0.01 |  | AVL_ANG_ACPD error timestamp (entry 3) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_3` | 0x4098 | 119 | unsigned char | s | × 0.01 |  | GRAD_AVL_ANG_ACPD error timestamp (entry 3) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_3` | 0x4098 | 120 | unsigned char | s | × 0.01 |  | ATTA_ESTI error timestamp (entry 3) | Zeitstempel Error ATTA_ESTI (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_3` | 0x4098 | 121 | unsigned char | s | × 0.01 |  | ATTAV_ESTI error timestamp (entry 3) | Zeitstempel Error ATTAV_ESTI (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_3` | 0x4098 | 122 | unsigned char | s | × 0.01 |  | DCRN_AUTON_BRK error timestamp (entry 3) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_3` | 0x4098 | 123 | unsigned char | s | × 0.01 |  | DCRN_MAX_DBC error timestamp (entry 3) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_3` | 0x4098 | 124 | unsigned char | s | × 0.01 |  | ST_CR error timestamp (entry 3) | Zeitstempel Error ST_CR (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_3` | 0x4098 | 125 | unsigned char | s | × 0.01 |  | ST_DRIV_DIR error timestamp (entry 3) | Zeitstempel Error ST_DRIV_DIR (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_3` | 0x4098 | 126 | unsigned char | s | × 0.01 |  | ST_THR_INCR_DRDY error timestamp (entry 3) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_3` | 0x4098 | 127 | unsigned char | s | × 0.01 |  | QU_SER_PRMSN_DBC error timestamp (entry 3) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_3` | 0x4098 | 128 | unsigned char | s | × 0.01 |  | THRV_TRIG_PRMSN_DBC error timestamp (entry 3) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 3) |
+| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_3` | 0x4098 | 129 | unsigned char | km/h |  |  | Speed snapshot (entry 3) | Geschwindigkeit Snapshot (Eintrag 3) |
+| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_3` | 0x4098 | 130 | unsigned char | HEX |  |  | WBK (bit 0-3) / DBC (bit 4-7) request (entry 3) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 3) |
+| `ACSM__PC_READ_PCR.AKT_PCS_3` | 0x4098 | 131 | unsigned char | HEX |  |  | Triggered pre-crash severities (bit-coded) (entry 3) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 3) |
+| `ACSM__PC_READ_PCR.ZS_CRASH_4` | 0x4098 | 132 | unsigned int | s | × 0.01 |  | Crash timestamp (entry 4) | Zeitstempel Crash (Eintrag 4) |
+| `ACSM__PC_READ_PCR.RESERVE_40` | 0x4098 | 133 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_RRA_4` | 0x4098 | 134 | unsigned int | s | × 0.01 |  | Rear radar timestamp (entry 4) | Zeitstempel Heckradar (Eintrag 4) |
+| `ACSM__PC_READ_PCR.RESERVE_41` | 0x4098 | 135 | unsigned int | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_EB_4` | 0x4098 | 136 | unsigned int | s | × 0.01 |  | Emergency braking timestamp (entry 4) | Zeitstempel Notbremsung (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_OS_4` | 0x4098 | 137 | unsigned int | s | × 0.01 |  | Oversteer timestamp (entry 4) | Zeitstempel Uebersteuern (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_US_4` | 0x4098 | 138 | unsigned int | s | × 0.01 |  | Understeer timestamp (entry 4) | Zeitstempel Untersteuern (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_USTD_4` | 0x4098 | 139 | unsigned int | s | × 0.01 |  | Understeer TD timestamp (entry 4) | Zeitstempel Untersteuern TD (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_AUTON_BRK_4` | 0x4098 | 140 | unsigned int | s | × 0.01 |  | Autonomous braking timestamp (entry 4) | Zeitstempel autonome Bremsung (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_DBC_4` | 0x4098 | 141 | unsigned int | s | × 0.01 |  | Brake assist timestamp (entry 4) | Zeitstempel Bremsassistent (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1L_4` | 0x4098 | 142 | unsigned int | s | × 0.01 |  | Belt actuator 1 left timestamp (entry 4) | Zeitstempel Gurtaktuator 1 Links (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_GA_T1R_4` | 0x4098 | 143 | unsigned int | s | × 0.01 |  | Belt actuator 1 right timestamp (entry 4) | Zeitstempel Gurtaktuator 1 Rechts (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_FENSTER_4` | 0x4098 | 144 | unsigned int | s | × 0.01 |  | Window timestamp (entry 4) | Zeitstempel Fenster (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_SITZ_4` | 0x4098 | 145 | unsigned int | s | × 0.01 |  | Seat timestamp (entry 4) | Zeitstempel Sitz (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_SHD_4` | 0x4098 | 146 | unsigned int | s | × 0.01 |  | Sunroof (slide/tilt) timestamp (entry 4) | Zeitstempel Schiebe / Hebe - Dach (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_V_VEH_COG_4` | 0x4098 | 147 | unsigned char | s | × 0.01 |  | V_VEH_COG error timestamp (entry 4) | Zeitstempel Error V_VEH_COG (Eintrag 4) |
+| `ACSM__PC_READ_PCR.RESERVE_42` | 0x4098 | 148 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_43` | 0x4098 | 149 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_REAR_RADAR_4` | 0x4098 | 150 | unsigned char | s | × 0.01 |  | Rear radar error timestamp (entry 4) | Zeitstempel Error Heckradar (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STATUS_REAR_RADAR_4` | 0x4098 | 151 | unsigned char | s | × 0.01 |  | Rear radar status error timestamp (entry 4) | Zeitstempel Error Status Heckradar (Eintrag 4) |
+| `ACSM__PC_READ_PCR.RESERVE_44` | 0x4098 | 152 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.RESERVE_45` | 0x4098 | 153 | unsigned char | s | × 0.01 |  | Result without info | Ergebnis ohne Info |
+| `ACSM__PC_READ_PCR.ZS_ERR_VYAW_VEH_4` | 0x4098 | 154 | unsigned char | s | × 0.01 |  | VYAW_VEH error timestamp (entry 4) | Zeitstempel Error VYAW_VEH (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNX_COG_4` | 0x4098 | 155 | unsigned char | s | × 0.01 |  | ACLNX_COG error timestamp (entry 4) | Zeitstempel Error ACLNX_COG (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ACLNY_COG_4` | 0x4098 | 156 | unsigned char | s | × 0.01 |  | ACLNY_COG error timestamp (entry 4) | Zeitstempel Error ACLNY_COG (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_BRTORQ_SUM_DVCH_4` | 0x4098 | 157 | unsigned char | s | × 0.01 |  | BRTORQ_SUM_DVCH error timestamp (entry 4) | Zeitstempel Error BRTORQ_SUM_DVCH (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_STEA_FTAX_EFFV_4` | 0x4098 | 158 | unsigned char | s | × 0.01 |  | STEA_FTAX_EFFV error timestamp (entry 4) | Zeitstempel Error STEA_FTAX_EFFV (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_AVL_ANG_ACPD_4` | 0x4098 | 159 | unsigned char | s | × 0.01 |  | AVL_ANG_ACPD error timestamp (entry 4) | Zeitstempel Error AVL_ANG_ACPD (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_GRAD_AVL_ANG_ACPD_4` | 0x4098 | 160 | unsigned char | s | × 0.01 |  | GRAD_AVL_ANG_ACPD error timestamp (entry 4) | Zeitstempel Error GRAD_AVL_ANG_ACPD (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTA_ESTI_4` | 0x4098 | 161 | unsigned char | s | × 0.01 |  | ATTA_ESTI error timestamp (entry 4) | Zeitstempel Error ATTA_ESTI (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ATTAV_ESTI_4` | 0x4098 | 162 | unsigned char | s | × 0.01 |  | ATTAV_ESTI error timestamp (entry 4) | Zeitstempel Error ATTAV_ESTI (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_AUTON_BRK_4` | 0x4098 | 163 | unsigned char | s | × 0.01 |  | DCRN_AUTON_BRK error timestamp (entry 4) | Zeitstempel Error DCRN_AUTON_BRK (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_DCRN_MAX_DBC_4` | 0x4098 | 164 | unsigned char | s | × 0.01 |  | DCRN_MAX_DBC error timestamp (entry 4) | Zeitstempel Error DCRN_MAX_DBC (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_CR_4` | 0x4098 | 165 | unsigned char | s | × 0.01 |  | ST_CR error timestamp (entry 4) | Zeitstempel Error ST_CR (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_DRIV_DIR_4` | 0x4098 | 166 | unsigned char | s | × 0.01 |  | ST_DRIV_DIR error timestamp (entry 4) | Zeitstempel Error ST_DRIV_DIR (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_ST_THR_INCR_DRDY_4` | 0x4098 | 167 | unsigned char | s | × 0.01 |  | ST_THR_INCR_DRDY error timestamp (entry 4) | Zeitstempel Error ST_THR_INCR_DRDY (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_QU_SER_PRMSN_DBC_4` | 0x4098 | 168 | unsigned char | s | × 0.01 |  | QU_SER_PRMSN_DBC error timestamp (entry 4) | Zeitstempel Error QU_SER_PRMSN_DBC (Eintrag 4) |
+| `ACSM__PC_READ_PCR.ZS_ERR_THRV_TRIG_PRMSN_DBC_4` | 0x4098 | 169 | unsigned char | s | × 0.01 |  | THRV_TRIG_PRMSN_DBC error timestamp (entry 4) | Zeitstempel Error THRV_TRIG_PRMSN_DBC (Eintrag 4) |
+| `ACSM__PC_READ_PCR.GESCHWINDIGKEIT_4` | 0x4098 | 170 | unsigned char | km/h |  |  | Speed snapshot (entry 4) | Geschwindigkeit Snapshot (Eintrag 4) |
+| `ACSM__PC_READ_PCR.REQ_SRC_WBK_DBC_4` | 0x4098 | 171 | unsigned char | HEX |  |  | WBK (bit 0-3) / DBC (bit 4-7) request (entry 4) | Anforderung WBK (bit 0-3) / DBC (bit 4-7) (Eintrag 4) |
+| `ACSM__PC_READ_PCR.AKT_PCS_4` | 0x4098 | 172 | unsigned char | HEX |  |  | Triggered pre-crash severities (bit-coded) (entry 4) | Ausgeloeste PreCrashSchweren (bitkodiert) (Eintrag 4) |
+| `ACSM__IMU_WERTE.X_ACC_SCAL` | 0x4101 | 0 | unsigned long | m/s² | × 0.02 − 41 |  | Longitudinal acceleration, scaled value | acceleration longitudinal scaled value |
+| `ACSM__IMU_WERTE.X_ACC_SCAL_QUAL` | 0x4101 | 1 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for longitudinal acceleration, scaled value | qualifier acceleration longitudinal scaled value |
+| `ACSM__IMU_WERTE.Y_ACC_SCAL` | 0x4101 | 2 | unsigned long | m/s² | × 0.02 − 41 |  | Lateral acceleration, scaled value | acceleration lateral scaled value |
+| `ACSM__IMU_WERTE.Y_ACC_SCAL_QUAL` | 0x4101 | 3 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for lateral acceleration, scaled value | qualifier acceleration lateral scaled value |
+| `ACSM__IMU_WERTE.Z_ACC_SCAL` | 0x4101 | 4 | unsigned long | m/s² | × 0.02 − 20.92 |  | Vertical acceleration, scaled value | acceleration vertical scaled value |
+| `ACSM__IMU_WERTE.Z_ACC_SCAL_QUAL` | 0x4101 | 5 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for vertical acceleration, scaled value | qualifier acceleration vertical scaled value |
+| `ACSM__IMU_WERTE.X_RATE_SCAL` | 0x4101 | 6 | unsigned long | °/s | × 0.01 − 328 |  | Roll rate, scaled value | roll angular velocity scaled value |
+| `ACSM__IMU_WERTE.X_RATE_SCAL_QUAL` | 0x4101 | 7 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for roll rate, scaled value | qualifier roll angular velocity scaled value |
+| `ACSM__IMU_WERTE.Y_RATE_SCAL` | 0x4101 | 8 | unsigned long | °/s | × 0.05 − 102.5 |  | Pitch rate, scaled value | pitch angular velocity scaled value |
+| `ACSM__IMU_WERTE.Y_RATE_SCAL_QUAL` | 0x4101 | 9 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for pitch rate, scaled value | qualifier pitch angular velocity scaled value |
+| `ACSM__IMU_WERTE.Z_RATE_SCAL` | 0x4101 | 10 | unsigned long | °/s | × 0.005 − 163.84 |  | Yaw rate, scaled value | yaw angular velocity scaled value |
+| `ACSM__IMU_WERTE.Z_RATE_SCAL_QUAL` | 0x4101 | 11 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for yaw rate, scaled value | qualifier yaw angular velocity scaled value |
+| `ACSM__IMU_WERTE_ERWEITERT.X_ACC_SCAL_RED` | 0x4102 | 0 | unsigned long | m/s² | × 0.02 − 41 |  | Longitudinal acceleration, scaled value (redundant) | acceleration longitudinal scaled value redundant |
+| `ACSM__IMU_WERTE_ERWEITERT.X_ACC_SCAL_QUAL_RED` | 0x4102 | 1 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for longitudinal acceleration, scaled value (redundant) | qualifier acceleration longitudinal scaled value  redundant |
+| `ACSM__IMU_WERTE_ERWEITERT.Y_ACC_SCAL_RED` | 0x4102 | 2 | unsigned long | m/s² | × 0.02 − 41 |  | Lateral acceleration, scaled value (redundant) | acceleration lateral scaled value  redundant |
+| `ACSM__IMU_WERTE_ERWEITERT.Y_ACC_SCAL_QUAL_RED` | 0x4102 | 3 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for lateral acceleration, scaled value (redundant) | qualifier acceleration lateral scaled value  redundant |
+| `ACSM__IMU_WERTE_ERWEITERT.Z_RATE_SCAL_RED` | 0x4102 | 4 | unsigned long | °/s | × 0.005 − 163.84 |  | Yaw rate, scaled value (redundant) | yaw angular velocity scaled value redundant |
+| `ACSM__IMU_WERTE_ERWEITERT.Z_RATE_SCAL_QUAL_RED` | 0x4102 | 5 | unsigned char | 0-n |  | 2 = Signal valid; 4 = Signal substituted; 6 = Signal invalid; 7 = Sensor missing; 8 = Init; 15 = Invalid | Qualifier for yaw rate, scaled value (redundant) | qualifier yaw angular velocity scaled value redundant |
+| `ACSM__STATUS_STEUERGERAET_TYP.STEUERGERAET_TYP` | 0x4104 | 0 | unsigned char | 0-n |  | 0 = Series production control unit; 1 = Development control unit | Control unit type | Typ des Steuergeräts |
+| `ACSM_PC_READ_ID_REMA.SUPP_NO_BLT_TIR_1_LH_PSCAN` | 0xD402 | 0 | unsigned char | HEX |  |  | Supplier number T1L | Lieferanten-Nummer T1L |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_1` | 0xD402 | 1 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 1 | Seriennummer des REMA-Aktuators T1L byte 1 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_2` | 0xD402 | 2 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 2 | Seriennummer des REMA-Aktuators T1L byte 2 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_3` | 0xD402 | 3 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 3 | Seriennummer des REMA-Aktuators T1L byte 3 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_4` | 0xD402 | 4 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 4 | Seriennummer des REMA-Aktuators T1L byte 4 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_5` | 0xD402 | 5 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 5 | Seriennummer des REMA-Aktuators T1L byte 5 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_6` | 0xD402 | 6 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 6 | Seriennummer des REMA-Aktuators T1L byte 6 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_LH_PSCAN_BYTE_7` | 0xD402 | 7 | unsigned char | HEX |  |  | REMA actuator T1L serial number byte 7 | Seriennummer des REMA-Aktuators T1L byte 7 |
+| `ACSM_PC_READ_ID_REMA.HW_VRS_BLT_TIR_1_LH_PSCAN` | 0xD402 | 8 | unsigned int | HEX |  |  | Hardware version T1L | Hardware Version T1L |
+| `ACSM_PC_READ_ID_REMA.SFTW_VRS_BLT_TIR_1_LH_PSCAN` | 0xD402 | 9 | unsigned int | HEX |  |  | Software version T1L | Software Version T1L |
+| `ACSM_PC_READ_ID_REMA.BLT_TIR_1_LH_PRMTR_VRS_PSCAN` | 0xD402 | 10 | unsigned int | HEX |  |  | Parameter version T1L | Parameter Version T1L |
+| `ACSM_PC_READ_ID_REMA.SUPP_NO_BLT_TIR_1_RH_PSCAN` | 0xD402 | 11 | unsigned char | HEX |  |  | Supplier number T1R | Lieferanten-Nummer T1R |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_1` | 0xD402 | 12 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 1 | Seriennummer des REMA-Aktuators T1R byte 1 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_2` | 0xD402 | 13 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 2 | Seriennummer des REMA-Aktuators T1R byte 2 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_3` | 0xD402 | 14 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 3 | Seriennummer des REMA-Aktuators T1R byte 3 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_4` | 0xD402 | 15 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 4 | Seriennummer des REMA-Aktuators T1R byte 4 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_5` | 0xD402 | 16 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 5 | Seriennummer des REMA-Aktuators T1R byte 5 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_6` | 0xD402 | 17 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 6 | Seriennummer des REMA-Aktuators T1R byte 6 |
+| `ACSM_PC_READ_ID_REMA.SN_BLT_TIR_1_RH_PSCAN_BYTE_7` | 0xD402 | 18 | unsigned char | HEX |  |  | REMA actuator T1R serial number byte 7 | Seriennummer des REMA-Aktuators T1R byte 7 |
+| `ACSM_PC_READ_ID_REMA.HW_VRS_BLT_TIR_1_RH_PSCAN` | 0xD402 | 19 | unsigned int | HEX |  |  | Hardware version T1R | Hardware Version T1R |
+| `ACSM_PC_READ_ID_REMA.SFTW_VRS_BLT_TIR_1_RH_PSCAN` | 0xD402 | 20 | unsigned int | HEX |  |  | Software version T1R | Software Version T1R |
+| `ACSM_PC_READ_ID_REMA.BLT_TIR_1_RH_PRMTR_VRS_PSCAN` | 0xD402 | 21 | unsigned int | HEX |  |  | Parameter version T1R | Parameter Version T1R |
+| `ACSM_PC_READ_ST_REMA.ALIV_BLT_TIR_1_LH_PSCAN` | 0xD41D | 0 | unsigned char | HEX |  |  | Check whether alive = OK / NOK, T1L | Überprüfen ob, Alive = OK / NOK ist T1L |
 | `ACSM_PC_READ_ST_REMA.ST_FN_BLT_TIR_1_LH_PSCAN` | 0xD41D | 1 | unsigned char | HEX |  |  | Function status T1L | Funktionsstatus T1L |
-| `ACSM_PC_READ_ST_REMA.ST_HW_BLT_TIR_1_LH_PSCAN` | 0xD41D | 2 | unsigned char | HEX |  |  | Hardwarestatus T1L | Hardwarestatus T1L |
-| `ACSM_PC_READ_ST_REMA.ST_SFTW_BLT_TIR_1_LH_PSCAN` | 0xD41D | 3 | unsigned char | HEX |  |  | Softwarestatus T1L | Softwarestatus T1L |
-| `ACSM_PC_READ_ST_REMA.ST_MOT_BLT_TIR_1_LH_PSCAN` | 0xD41D | 4 | unsigned char | HEX |  |  | Engine status T1L | Motorstatus T1L |
+| `ACSM_PC_READ_ST_REMA.ST_HW_BLT_TIR_1_LH_PSCAN` | 0xD41D | 2 | unsigned char | HEX |  |  | Hardware status T1L | Hardwarestatus T1L |
+| `ACSM_PC_READ_ST_REMA.ST_SFTW_BLT_TIR_1_LH_PSCAN` | 0xD41D | 3 | unsigned char | HEX |  |  | Software status T1L | Softwarestatus T1L |
+| `ACSM_PC_READ_ST_REMA.ST_MOT_BLT_TIR_1_LH_PSCAN` | 0xD41D | 4 | unsigned char | HEX |  |  | Motor status T1L | Motorstatus T1L |
 | `ACSM_PC_READ_ST_REMA.ST_TEMP_BLT_TIR_1_LH_PSCAN` | 0xD41D | 5 | unsigned char | HEX |  |  | Temperature status T1L | Temperaturstatus T1L |
 | `ACSM_PC_READ_ST_REMA.ST_USUP_BLT_TIR_1_LH_PSCAN` | 0xD41D | 6 | unsigned char | HEX |  |  | Voltage status T1L | Spannungsstatus T1L |
-| `ACSM_PC_READ_ST_REMA.ST_DA_BLT_TIR_1_LH_PSCAN` | 0xD41D | 7 | unsigned char | HEX |  |  | Status shutdown T1L | Status Abschaltung T1L |
-| `ACSM_PC_READ_ST_REMA.ERC_BLT_TIR_1_LH_PSCAN` | 0xD41D | 8 | unsigned long | HEX |  |  | Fehlercode T1L | Fehlercode T1L |
-| `ACSM_PC_READ_ST_REMA.ALIV_BLT_TIR_1_RH_PSCAN` | 0xD41D | 9 | unsigned char | HEX |  |  | Überprüfen ob, alive = OK / NOK is T1R | Überprüfen ob, Alive = OK / NOK ist T1R |
+| `ACSM_PC_READ_ST_REMA.ST_DA_BLT_TIR_1_LH_PSCAN` | 0xD41D | 7 | unsigned char | HEX |  |  | Shutdown status T1L | Status Abschaltung T1L |
+| `ACSM_PC_READ_ST_REMA.ERC_BLT_TIR_1_LH_PSCAN` | 0xD41D | 8 | unsigned long | HEX |  |  | Error code T1L | Fehlercode T1L |
+| `ACSM_PC_READ_ST_REMA.ALIV_BLT_TIR_1_RH_PSCAN` | 0xD41D | 9 | unsigned char | HEX |  |  | Check whether alive = OK / NOK, T1R | Überprüfen ob, Alive = OK / NOK ist T1R |
 | `ACSM_PC_READ_ST_REMA.ST_FN_BLT_TIR_1_RH_PSCAN` | 0xD41D | 10 | unsigned char | HEX |  |  | Function status T1R | Funktionsstatus T1R |
-| `ACSM_PC_READ_ST_REMA.ST_HW_BLT_TIR_1_RH_PSCAN` | 0xD41D | 11 | unsigned char | HEX |  |  | Hardwarestatus T1R | Hardwarestatus T1R |
-| `ACSM_PC_READ_ST_REMA.ST_SFTW_BLT_TIR_1_RH_PSCAN` | 0xD41D | 12 | unsigned char | HEX |  |  | Softwarestatus T1R | Softwarestatus T1R |
-| `ACSM_PC_READ_ST_REMA.ST_MOT_BLT_TIR_1_RH_PSCAN` | 0xD41D | 13 | unsigned char | HEX |  |  | Engine status T1R | Motorstatus T1R |
+| `ACSM_PC_READ_ST_REMA.ST_HW_BLT_TIR_1_RH_PSCAN` | 0xD41D | 11 | unsigned char | HEX |  |  | Hardware status T1R | Hardwarestatus T1R |
+| `ACSM_PC_READ_ST_REMA.ST_SFTW_BLT_TIR_1_RH_PSCAN` | 0xD41D | 12 | unsigned char | HEX |  |  | Software status T1R | Softwarestatus T1R |
+| `ACSM_PC_READ_ST_REMA.ST_MOT_BLT_TIR_1_RH_PSCAN` | 0xD41D | 13 | unsigned char | HEX |  |  | Motor status T1R | Motorstatus T1R |
 | `ACSM_PC_READ_ST_REMA.ST_TEMP_BLT_TIR_1_RH_PSCAN` | 0xD41D | 14 | unsigned char | HEX |  |  | Temperature status T1R | Temperaturstatus T1R |
 | `ACSM_PC_READ_ST_REMA.ST_USUP_BLT_TIR_1_RH_PSCAN` | 0xD41D | 15 | unsigned char | HEX |  |  | Voltage status T1R | Spannungsstatus T1R |
-| `ACSM_PC_READ_ST_REMA.ST_DA_BLT_TIR_1_RH_PSCAN` | 0xD41D | 16 | unsigned char | HEX |  |  | Status shutdown T1R | Status Abschaltung T1R |
-| `ACSM_PC_READ_ST_REMA.ERC_BLT_TIR_1_RH_PSCAN` | 0xD41D | 17 | unsigned long | HEX |  |  | Fehlercode T1R | Fehlercode T1R |
-| `ACSM_VERRIEGELUNG_SG.VERRIEGELUNG_LESEN` | 0xD482 | 0 | unsigned char | 0/1 |  |  | 0 = locked 1 = not locked | 0 = verriegelt 1 = nicht verriegelt |
-| `ACSM_PASSENGER_AIRBAG_OFF_SWITCH` | 0xD485 | 0 | unsigned char | 0-n |  | 0 = Position Airbag Off  (codiert + verbaut); 1 = Position Airbag ON (codiert + verbaut); 251 = Fault (codiert but not gesteckt or defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | Switch position passenger Airbag from switch see TAB_POS_ZUSTAND | Schalterstellung Beifahrer Airbag aus Schalter Siehe TAB_POS_ZUSTAND |
-| `ACSM_SITZBELEGUNG.SITZBELEGUNG_FA` | 0xD486 | 0 | unsigned char | 0-n |  | 0 = not belegt (codiert + verbaut); 1 = belegt (codiert + verbaut); 251 = Fault (codiert but not empfangen/gesteckt or signal invalid/defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | Driver seat: Person detected / not detected | Fahrersitz: Person erkannt / nicht erkannt |
-| `ACSM_SITZBELEGUNG.SITZBELEGUNG_BF` | 0xD486 | 1 | unsigned char | 0-n |  | 0 = not belegt (codiert + verbaut); 1 = belegt (codiert + verbaut); 251 = Fault (codiert but not empfangen/gesteckt or signal invalid/defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | Passenger seat: Person detected / not detected | Beifahrersitz: Person erkannt / nicht erkannt |
-| `ACSM_SITZBELEGUNG.SITZBELEGUNG_HI_LI` | 0xD486 | 2 | unsigned char | 0-n |  | 0 = not belegt (codiert + verbaut); 1 = belegt (codiert + verbaut); 251 = Fault (codiert but not empfangen/gesteckt or signal invalid/defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | Seat rear left: Person detected / not detected | Sitz hinten links: Person erkannt / nicht erkannt |
-| `ACSM_SITZBELEGUNG.SITZBELEGUNG_HI_RE` | 0xD486 | 3 | unsigned char | 0-n |  | 0 = not belegt (codiert + verbaut); 1 = belegt (codiert + verbaut); 251 = Fault (codiert but not empfangen/gesteckt or signal invalid/defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | Seat rear right: Person detected / not detected | Sitz hinten rechts: Person erkannt / nicht erkannt |
-| `ACSM_SITZLEHNENVERRIEGELUNG.SITZLEHNENVERRIEGELUNG_FA` | 0xD487 | 0 | unsigned char | 0-n |  | 0 = Lehne not locked (codiert + verbaut); 1 = Lehne locked (codiert + verbaut); 251 = Fault (codiert but not empfangen or signal invalid); 252 = n/a; 253 = not verwendet (not codiert); 255 = invalid | Sitzlehne driver (Cabrio): locked / not locked | Sitzlehne Fahrer (Cabrio): verriegelt / nicht verriegelt |
-| `ACSM_SITZLEHNENVERRIEGELUNG.SITZLEHNENVERRIEGELUNG_BF` | 0xD487 | 1 | unsigned char | 0-n |  | 0 = Lehne not locked (codiert + verbaut); 1 = Lehne locked (codiert + verbaut); 251 = Fault (codiert but not empfangen or signal invalid); 252 = n/a; 253 = not verwendet (not codiert); 255 = invalid | Sitzlehne passenger (Cabrio): locked / not locked | Sitzlehne Beifahrer (Cabrio): verriegelt / nicht verriegelt |
-| `ACSM_SITZPOSITIONSSENSOR.SITZPOS_SENSOR_ZUSTAND_FA` | 0xD488 | 0 | unsigned char | 0-n |  | 0 = Seat position front (codiert + verbaut); 1 = Seat position rear (codiert + verbaut); 251 = Fault (codiert but not gesteckt or defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | State vom seat position sensor driver. see TAB_SITZPOS_SENSOR_ZUSTAND | Zustand vom Sitzpositionssensor Fahrer. Siehe TAB_SITZPOS_SENSOR_ZUSTAND |
-| `ACSM_SITZPOSITIONSSENSOR.SITZPOS_SENSOR_ZUSTAND_BF` | 0xD488 | 1 | unsigned char | 0-n |  | 0 = Seat position front (codiert + verbaut); 1 = Seat position rear (codiert + verbaut); 251 = Fault (codiert but not gesteckt or defective); 252 = Verbaufehler (not codiert+verbaut); 253 = not verbaut (not verbaut+not codiert); 255 = invalid | State vom seat position sensor passenger. see TAB_SITZPOS_SENSOR_ZUSTAND | Zustand vom Sitzpositionssensor Beifahrer. Siehe TAB_SITZPOS_SENSOR_ZUSTAND |
-| `ACSM_SITZPOSITION_SITZMEMORY.SITZPOS_SM_ZUSTAND_FA` | 0xD489 | 0 | unsigned char | 0-n |  | 0 = Seat position front (codiert + verbaut); 1 = Seat position rear (codiert + verbaut); 251 = Fault (codiert but not empfangen or signal invalid); 252 = n/a; 253 = not verwendet (not codiert); 255 = Invalid | Seat position driver from seat module (bus-message) see TAB_SITZPOS_SM_ZUSTAND | Sitzposition Fahrer aus Sitzmodul (Bus-Nachricht) Siehe TAB_SITZPOS_SM_ZUSTAND |
-| `ACSM_SITZPOSITION_SITZMEMORY.SITZPOS_SM_ZUSTAND_BF` | 0xD489 | 1 | unsigned char | 0-n |  | 0 = Seat position front (codiert + verbaut); 1 = Seat position rear (codiert + verbaut); 251 = Fault (codiert but not empfangen or signal invalid); 252 = n/a; 253 = not verwendet (not codiert); 255 = Invalid | Seat position passenger from seat module (bus-message) see TAB_SITZPOS_SM_ZUSTAND | Sitzposition Beifahrer aus Sitzmodul (Bus-Nachricht) Siehe TAB_SITZPOS_SM_ZUSTAND |
-| `ACSM_ACTIVE_DIAGNOSTIC_SESSION` | 0xF186 | 0 | unsigned char | 0-n |  | [`ACSM5.RDBI_ADS_DOP`](ACSM5-values.md#acsm5rdbi_ads_dop) (9 values) | activeDiagnosticSession | activeDiagnosticSession |
-| `ACSM_EDR_ADDRESS_INFORMATION.ADDRESS_FORMAT` | 0xFA12 | 0 | unsigned char | 0-n |  | 1 = 11bit normal addressing; 2 = 11bit extended addressing; 3 = 11bit mixed addressing; 4 = 29bit normal fixed addressing; 5 = 29bit mixed addressing; 6 = 29bit unique addressing; 255 = Invalid value | Address format | Address format |
+| `ACSM_PC_READ_ST_REMA.ST_DA_BLT_TIR_1_RH_PSCAN` | 0xD41D | 16 | unsigned char | HEX |  |  | Shutdown status T1R | Status Abschaltung T1R |
+| `ACSM_PC_READ_ST_REMA.ERC_BLT_TIR_1_RH_PSCAN` | 0xD41D | 17 | unsigned long | HEX |  |  | Error code T1R | Fehlercode T1R |
+| `ACSM_VERRIEGELUNG_SG.VERRIEGELUNG_LESEN` | 0xD482 | 0 | unsigned char | 0/1 |  |  | 0 = locked, 1 = not locked | 0 = verriegelt 1 = nicht verriegelt |
+| `ACSM_PASSENGER_AIRBAG_OFF_SWITCH` | 0xD485 | 0 | unsigned char | 0-n |  | 0 = Airbag OFF position (coded + fitted); 1 = Airbag ON position (coded + fitted); 251 = Fault (coded but not connected or defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Front passenger airbag off switch position; see TAB_POS_ZUSTAND | Schalterstellung Beifahrer Airbag aus Schalter Siehe TAB_POS_ZUSTAND |
+| `ACSM_SITZBELEGUNG.SITZBELEGUNG_FA` | 0xD486 | 0 | unsigned char | 0-n |  | 0 = Not occupied (coded + fitted); 1 = Occupied (coded + fitted); 251 = Fault (coded but not received/connected or signal invalid/defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Driver seat: person detected / not detected | Fahrersitz: Person erkannt / nicht erkannt |
+| `ACSM_SITZBELEGUNG.SITZBELEGUNG_BF` | 0xD486 | 1 | unsigned char | 0-n |  | 0 = Not occupied (coded + fitted); 1 = Occupied (coded + fitted); 251 = Fault (coded but not received/connected or signal invalid/defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Front passenger seat: person detected / not detected | Beifahrersitz: Person erkannt / nicht erkannt |
+| `ACSM_SITZBELEGUNG.SITZBELEGUNG_HI_LI` | 0xD486 | 2 | unsigned char | 0-n |  | 0 = Not occupied (coded + fitted); 1 = Occupied (coded + fitted); 251 = Fault (coded but not received/connected or signal invalid/defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Rear left seat: person detected / not detected | Sitz hinten links: Person erkannt / nicht erkannt |
+| `ACSM_SITZBELEGUNG.SITZBELEGUNG_HI_RE` | 0xD486 | 3 | unsigned char | 0-n |  | 0 = Not occupied (coded + fitted); 1 = Occupied (coded + fitted); 251 = Fault (coded but not received/connected or signal invalid/defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Rear right seat: person detected / not detected | Sitz hinten rechts: Person erkannt / nicht erkannt |
+| `ACSM_SITZLEHNENVERRIEGELUNG.SITZLEHNENVERRIEGELUNG_FA` | 0xD487 | 0 | unsigned char | 0-n |  | 0 = Backrest not locked (coded + fitted); 1 = Backrest locked (coded + fitted); 251 = Fault (coded but not received or signal invalid); 252 = n/a; 253 = Not used (not coded); 255 = Invalid | Driver seat backrest (convertible): locked / not locked | Sitzlehne Fahrer (Cabrio): verriegelt / nicht verriegelt |
+| `ACSM_SITZLEHNENVERRIEGELUNG.SITZLEHNENVERRIEGELUNG_BF` | 0xD487 | 1 | unsigned char | 0-n |  | 0 = Backrest not locked (coded + fitted); 1 = Backrest locked (coded + fitted); 251 = Fault (coded but not received or signal invalid); 252 = n/a; 253 = Not used (not coded); 255 = Invalid | Front passenger seat backrest (convertible): locked / not locked | Sitzlehne Beifahrer (Cabrio): verriegelt / nicht verriegelt |
+| `ACSM_SITZPOSITIONSSENSOR.SITZPOS_SENSOR_ZUSTAND_FA` | 0xD488 | 0 | unsigned char | 0-n |  | 0 = Seat position forward (coded + fitted); 1 = Seat position rearward (coded + fitted); 251 = Fault (coded but not connected or defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Driver seat position sensor state; see TAB_SITZPOS_SENSOR_ZUSTAND | Zustand vom Sitzpositionssensor Fahrer. Siehe TAB_SITZPOS_SENSOR_ZUSTAND |
+| `ACSM_SITZPOSITIONSSENSOR.SITZPOS_SENSOR_ZUSTAND_BF` | 0xD488 | 1 | unsigned char | 0-n |  | 0 = Seat position forward (coded + fitted); 1 = Seat position rearward (coded + fitted); 251 = Fault (coded but not connected or defective); 252 = Installation fault (not coded + fitted); 253 = Not fitted (not fitted + not coded); 255 = Invalid | Front passenger seat position sensor state; see TAB_SITZPOS_SENSOR_ZUSTAND | Zustand vom Sitzpositionssensor Beifahrer. Siehe TAB_SITZPOS_SENSOR_ZUSTAND |
+| `ACSM_SITZPOSITION_SITZMEMORY.SITZPOS_SM_ZUSTAND_FA` | 0xD489 | 0 | unsigned char | 0-n |  | 0 = Seat position forward (coded + fitted); 1 = Seat position rearward (coded + fitted); 251 = Fault (coded but not received or signal invalid); 252 = n/a; 253 = Not used (not coded); 255 = Invalid | Driver seat position from seat module (bus message); see TAB_SITZPOS_SM_ZUSTAND | Sitzposition Fahrer aus Sitzmodul (Bus-Nachricht) Siehe TAB_SITZPOS_SM_ZUSTAND |
+| `ACSM_SITZPOSITION_SITZMEMORY.SITZPOS_SM_ZUSTAND_BF` | 0xD489 | 1 | unsigned char | 0-n |  | 0 = Seat position forward (coded + fitted); 1 = Seat position rearward (coded + fitted); 251 = Fault (coded but not received or signal invalid); 252 = n/a; 253 = Not used (not coded); 255 = Invalid | Front passenger seat position from seat module (bus message); see TAB_SITZPOS_SM_ZUSTAND | Sitzposition Beifahrer aus Sitzmodul (Bus-Nachricht) Siehe TAB_SITZPOS_SM_ZUSTAND |
+| `ACSM_ACTIVE_DIAGNOSTIC_SESSION` | 0xF186 | 0 | unsigned char | 0-n |  | [`ACSM5.RDBI_ADS_DOP`](ACSM5-values.md#acsm5rdbi_ads_dop) (9 values) | Active diagnostic session | activeDiagnosticSession |
+| `ACSM_EDR_ADDRESS_INFORMATION.ADDRESS_FORMAT` | 0xFA12 | 0 | unsigned char | 0-n |  | 1 = 11-bit normal addressing; 2 = 11-bit extended addressing; 3 = 11-bit mixed addressing; 4 = 29-bit normal fixed addressing; 5 = 29-bit mixed addressing; 6 = 29-bit unique addressing; 255 = Invalid value | Address format | Address format |
 | `ACSM_EDR_ADDRESS_INFORMATION.REQUEST_ADDRESS_1_DATA` | 0xFA12 | 1 | data[4] | DATA |  |  | REQUEST_ADDRESS_1_DATA | REQUEST_ADDRESS_1_DATA |
 | `ACSM_EDR_ADDRESS_INFORMATION.RESPONSE_ADDRESS_1_DATA` | 0xFA12 | 2 | data[4] | DATA |  |  | RESPONSE_ADDRESS_1_DATA | RESPONSE_ADDRESS_1_DATA |

@@ -21,57 +21,57 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
 
 ## GSZFB1.STAT_SEGEL_ZUSTAND_GETRIEBE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Segeln not possible | Segeln nicht möglich |
-| 1 | Segeln möglich, passiv | Segeln möglich, passiv |
-| 2 | Übergang in Segeln | Übergang in Segeln |
-| 3 | Segeln active | Segeln aktiv |
-| 4 | Übergang from Segeln | Übergang aus Segeln |
+| 0 | Coasting not possible | Segeln nicht möglich |
+| 1 | Coasting possible, passive | Segeln möglich, passiv |
+| 2 | Transition into coasting | Übergang in Segeln |
+| 3 | Coasting active | Segeln aktiv |
+| 4 | Transition out of coasting | Übergang aus Segeln |
 | 13 | Not available | Nicht verfügbar |
 | 14 | Fault | Fehler |
 | 15 | Signal invalid | Signal ungültig |
-| 255 | undefiniert | undefiniert |
+| 255 | Undefined | undefiniert |
 
 ## GSZFB1.TAB_ANHAENGERBETRIEB
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Anhängerbetrieb inaktiv | Anhängerbetrieb inaktiv |
-| 1 | Anhängerbetrieb active | Anhängerbetrieb aktiv |
+| 0 | Trailer mode inactive | Anhängerbetrieb inaktiv |
+| 1 | Trailer mode active | Anhängerbetrieb aktiv |
 | 65535 | Signal invalid | Signal ungültig |
 
 ## GSZFB1.TAB_EE_UPDATE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | idle / update done | idle / update done |
-| 1 | pending / update running | pending / update running |
+| 0 | Idle / update done | idle / update done |
+| 1 | Pending / update running | pending / update running |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## GSZFB1.TAB_FAHRSTUFE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | P - parken | P - parken |
-| 1 | R - rückwärts | R - rückwärts |
+| 0 | P - park | P - parken |
+| 1 | R - reverse | R - rückwärts |
 | 2 | N - neutral | N - neutral |
-| 3 | D - duration | D - dauer |
-| 4 | M - manuelle Schaltgasse | M - manuelle Schaltgasse |
-| 255 | invalid value | ungültiger Wert |
+| 3 | D - drive | D - dauer |
+| 4 | M - manual shift gate | M - manuelle Schaltgasse |
+| 255 | Invalid value | ungültiger Wert |
 
 ## GSZFB1.TAB_FESTSTELLBREMSE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Feststellbremse inaktiv | Feststellbremse inaktiv |
-| 1 | Feststellbremse active | Feststellbremse aktiv |
+| 0 | Parking brake inactive | Feststellbremse inaktiv |
+| 1 | Parking brake active | Feststellbremse aktiv |
 | 65535 | Signal invalid | Signal ungültig |
 
 ## GSZFB1.TAB_GETRIEBEVORADAPTION_ZUSTAND
@@ -79,38 +79,38 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Routine not active | Routine nicht aktiv |
-| 1 | alle condition met | alle Bedingungen erfüllt |
-| 2 | Standstill adaptation erfolgreich carried out | Stillstandsadaption erfolgreich durchgeführt |
-| 3 | Transmission oil temperature too small | Getriebeöltemperatur zu klein |
-| 4 | Transmission oil temperature too large | Getriebeöltemperatur zu groß |
-| 5 | Fußbremse not betätigt | Fußbremse nicht betätigt |
-| 6 | Position D not eingelegt | Position D nicht eingelegt |
-| 7 | Fahrpedal betätigt | Fahrpedal betätigt |
-| 8 | Vehicle not in the standstill | Fahrzeug nicht im Stillstand |
+| 1 | All conditions met | alle Bedingungen erfüllt |
+| 2 | Standstill adaptation completed successfully | Stillstandsadaption erfolgreich durchgeführt |
+| 3 | Transmission oil temperature too low | Getriebeöltemperatur zu klein |
+| 4 | Transmission oil temperature too high | Getriebeöltemperatur zu groß |
+| 5 | Foot brake not applied | Fußbremse nicht betätigt |
+| 6 | Position D not engaged | Position D nicht eingelegt |
+| 7 | Accelerator pedal pressed | Fahrpedal betätigt |
+| 8 | Vehicle not at standstill | Fahrzeug nicht im Stillstand |
 | 9 | Engine speed outside window | Motordrehzahl außerhalb Fenster |
-| 16 | Parkbremse/EMF not active | Parkbremse/EMF nicht aktiv |
-| 17 | Allgemeine Abbruchkriterien for adaptation not met (Notprogramme or auch Sonderzustände the Adaptionsgüte beeinflussen) | Allgemeine Abbruchkriterien für Adaptionen nicht erfüllt (Notprogramme oder auch Sonderzustände die Adaptionsgüte beeinflussen) |
-| 18 | Not alle clutch konnten adaptiert be. Da wo es möglich war, be the adaptation values gesichert. | Nicht alle Kupplungen konnten adaptiert werden. Da wo es möglich war, werden die Adaptionswerte gesichert. |
-| 255 | Notgang or andere not definierte Zustände | Notgang oder andere nicht definierte Zustände |
+| 16 | Parking brake/EMF not active | Parkbremse/EMF nicht aktiv |
+| 17 | General abort criteria for adaptations not met (emergency programs or special states affecting adaptation quality) | Allgemeine Abbruchkriterien für Adaptionen nicht erfüllt (Notprogramme oder auch Sonderzustände die Adaptionsgüte beeinflussen) |
+| 18 | Not all clutches could be adapted. Where possible, the adaptation values are saved. | Nicht alle Kupplungen konnten adaptiert werden. Da wo es möglich war, werden die Adaptionswerte gesichert. |
+| 255 | Limp-home gear or other undefined states | Notgang oder andere nicht definierte Zustände |
 
 ## GSZFB1.TAB_GETRIEBVORADA_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Standstill adaptation not gestartet | Stillstandsadaption nicht gestartet |
-| 16 | Standstill adaptation beendet | Stillstandsadaption beendet |
-| 64 | Standstill adaptation due to Sicherheitskriterien abgebrochen | Stillstandsadaption wegen Sicherheitskriterien abgebrochen |
-| 96 | Standstill adaptation due to detected fault abgebrochen | Stillstandsadaption wegen erkanntem Fehler abgebrochen |
-| 128 | Standstill adaptation konnte not gestoppt be | Stillstandsadaption konnte nicht gestoppt werden |
-| 192 | Standstill adaptation läuft | Stillstandsadaption läuft |
-| 255 | undefiniert | undefiniert |
+| 0 | Standstill adaptation not started | Stillstandsadaption nicht gestartet |
+| 16 | Standstill adaptation finished | Stillstandsadaption beendet |
+| 64 | Standstill adaptation aborted due to safety criteria | Stillstandsadaption wegen Sicherheitskriterien abgebrochen |
+| 96 | Standstill adaptation aborted due to detected fault | Stillstandsadaption wegen erkanntem Fehler abgebrochen |
+| 128 | Standstill adaptation could not be stopped | Stillstandsadaption konnte nicht gestoppt werden |
+| 192 | Standstill adaptation running | Stillstandsadaption läuft |
+| 255 | Undefined | undefiniert |
 
 ## GSZFB1.TAB_ISTGANG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | P - parken | P - parken |
-| 1 | R - rückwärts | R - rückwärts |
+| 0 | P - park | P - parken |
+| 1 | R - reverse | R - rückwärts |
 | 2 | N - neutral | N - neutral |
 | 3 | Gear 1 | Gang 1 |
 | 4 | Gear 2 | Gang 2 |
@@ -120,221 +120,221 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 8 | Gear 6 | Gang 6 |
 | 9 | Gear 7 | Gang 7 |
 | 16 | Gear 8 | Gang 8 |
-| 255 | invalid value | ungültiger Wert |
+| 255 | Invalid value | ungültiger Wert |
 
 ## GSZFB1.TAB_LERNFLAG_HA
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not learned | nicht gelernt |
-| 1 | eingelernt | eingelernt |
-| 255 | not definiert | nicht definiert |
+| 0 | Not learned | nicht gelernt |
+| 1 | Learned | eingelernt |
+| 255 | Not defined | nicht definiert |
 
 ## GSZFB1.TAB_MIL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | MIL from | MIL aus |
-| 1 | MIL a | MIL ein |
-| 255 | invalid | ungültig |
+| 0 | MIL off | MIL aus |
+| 1 | MIL on | MIL ein |
+| 255 | Invalid | ungültig |
 
 ## GSZFB1.TAB_MSA_EGS
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Abschaltverhinderer_Retry | Abschaltverhinderer_Retry |
-| 2 | Abschaltverhinderer_Getriebetemperatur | Abschaltverhinderer_Getriebetemperatur |
-| 3 | Abschaltverhinderer_fehlende_Druckversorgung | Abschaltverhinderer_fehlende_Druckversorgung |
-| 4 | Abschaltverhinderer_Gang | Abschaltverhinderer_Gang |
-| 5 | Abschaltverhinderer_vnab | Abschaltverhinderer_vnab |
-| 6 | Abschaltverhinderer_PosR | Abschaltverhinderer_PosR |
-| 7 | Freigabe_Motorstopp | Freigabe_Motorstopp |
-| 8 | Freigabe_Motorstopp_mit_Teilentkopplung | Freigabe_Motorstopp_mit_Teilentkopplung |
-| 9 | Freigabe_Motorstopp_und_Start_Kraftschlussfrei | Freigabe_Motorstopp_und_Start_Kraftschlussfrei |
-| 10 | Einschaltaufforderer_PosP | Einschaltaufforderer_PosP |
-| 11 | Einschaltaufforderer_PosR | Einschaltaufforderer_PosR |
-| 12 | MSA_Getriebe_Systemfehler | MSA_Getriebe_Systemfehler |
-| 13 | Abschaltverhinderer_AGS | Abschaltverhinderer_AGS |
-| 14 | Abschaltverhinderer_MSA_passiv | Abschaltverhinderer_MSA_passiv |
-| 15 | invalid | ungültig |
-| 255 | invalid | ungültig |
+| 1 | Shut-off inhibitor: retry | Abschaltverhinderer_Retry |
+| 2 | Shut-off inhibitor: transmission temperature | Abschaltverhinderer_Getriebetemperatur |
+| 3 | Shut-off inhibitor: missing pressure supply | Abschaltverhinderer_fehlende_Druckversorgung |
+| 4 | Shut-off inhibitor: gear | Abschaltverhinderer_Gang |
+| 5 | Shut-off inhibitor: vnab | Abschaltverhinderer_vnab |
+| 6 | Shut-off inhibitor: position R | Abschaltverhinderer_PosR |
+| 7 | Engine stop enabled | Freigabe_Motorstopp |
+| 8 | Engine stop enabled with partial decoupling | Freigabe_Motorstopp_mit_Teilentkopplung |
+| 9 | Engine stop and start enabled without power transmission | Freigabe_Motorstopp_und_Start_Kraftschlussfrei |
+| 10 | Restart request: position P | Einschaltaufforderer_PosP |
+| 11 | Restart request: position R | Einschaltaufforderer_PosR |
+| 12 | MSA transmission system fault | MSA_Getriebe_Systemfehler |
+| 13 | Shut-off inhibitor: AGS | Abschaltverhinderer_AGS |
+| 14 | Shut-off inhibitor: MSA passive | Abschaltverhinderer_MSA_passiv |
+| 15 | Invalid | ungültig |
+| 255 | Invalid | ungültig |
 
 ## GSZFB1.TAB_NIC
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | NIC switched on | NIC eingeschaltet |
-| 1 | NIC ausgeschaltet | NIC ausgeschaltet |
-| 2 | NIC applikativ switched on | NIC applikativ eingeschaltet |
-| 255 | invalid | ungültig |
+| 1 | NIC switched off | NIC ausgeschaltet |
+| 2 | NIC switched on by application | NIC applikativ eingeschaltet |
+| 255 | Invalid | ungültig |
 
 ## GSZFB1.TAB_SCANTOOL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Communication from | Kommunikation aus |
-| 1 | Communication a | Kommunikation ein |
-| 255 | invalid | ungültig |
+| 0 | Communication off | Kommunikation aus |
+| 1 | Communication on | Kommunikation ein |
+| 255 | Invalid | ungültig |
 
 ## GSZFB1.TAB_SCHALTWIPPE2
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Schaltwippe not betätigt | Schaltwippe nicht betätigt |
-| 1 | Schaltwippe betätigt | Schaltwippe betätigt |
+| 0 | Shift paddle not pressed | Schaltwippe nicht betätigt |
+| 1 | Shift paddle pressed | Schaltwippe betätigt |
 | 65535 | Signal invalid | Signal ungültig |
 
 ## GSZFB1.TAB_SEGELVERHINDERER_DME
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Segelverhinderer outside drive | Kein Segelverhinderer außerhalb Antrieb |
-| 1 | Segelverhinderer outside drive | Segelverhinderer außerhalb Antrieb |
-| 2 | DME-internal Segelverhinderer 1 | DME-interner Segelverhinderer 1 |
-| 3 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
-| 4 | DME- internal Segelverhinderer  2 | DME- interner Segelverhinderer  2 |
-| 5 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
-| 6 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 7 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 8 | DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 3 |
-| 9 | Segelverhinderer outside drive and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
-| 16 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 17 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 18 | DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 19 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 20 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 21 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
-| 22 | No Segelverhinderer outside drive | Kein Segelverhinderer außerhalb Antrieb |
-| 23 | Segelverhinderer outside drive | Segelverhinderer außerhalb Antrieb |
-| 24 | DME-internal Segelverhinderer 1 | DME-interner Segelverhinderer 1 |
-| 25 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
-| 32 | DME- internal Segelverhinderer  2 | DME- interner Segelverhinderer  2 |
-| 33 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
-| 34 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 35 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 36 | DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 3 |
-| 37 | Segelverhinderer outside drive and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
-| 38 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 39 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 40 | DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 41 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 48 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 49 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
-| 50 | No Segelverhinderer outside drive | Kein Segelverhinderer außerhalb Antrieb |
-| 51 | Segelverhinderer outside drive | Segelverhinderer außerhalb Antrieb |
-| 52 | DME-internal Segelverhinderer 1 | DME-interner Segelverhinderer 1 |
-| 53 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
-| 54 | DME- internal Segelverhinderer  2 | DME- interner Segelverhinderer  2 |
-| 55 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
-| 56 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 57 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 64 | DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 3 |
-| 65 | Segelverhinderer outside drive and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
-| 66 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 67 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 68 | DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 69 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 70 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 71 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
-| 72 | No Segelverhinderer outside drive | Kein Segelverhinderer außerhalb Antrieb |
-| 73 | Segelverhinderer outside drive | Segelverhinderer außerhalb Antrieb |
-| 80 | DME-internal Segelverhinderer 1 | DME-interner Segelverhinderer 1 |
-| 81 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
-| 82 | DME- internal Segelverhinderer  2 | DME- interner Segelverhinderer  2 |
-| 83 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
-| 84 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 85 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 86 | DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 3 |
-| 87 | Segelverhinderer outside drive and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
-| 88 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 89 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 96 | DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 97 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 98 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 99 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
-| 100 | No Segelverhinderer outside drive | Kein Segelverhinderer außerhalb Antrieb |
-| 101 | Segelverhinderer outside drive | Segelverhinderer außerhalb Antrieb |
-| 102 | DME-internal Segelverhinderer 1 | DME-interner Segelverhinderer 1 |
-| 103 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
-| 104 | DME- internal Segelverhinderer  2 | DME- interner Segelverhinderer  2 |
-| 105 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
-| 112 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 113 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
-| 114 | DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 3 |
-| 115 | Segelverhinderer outside drive and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
-| 116 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 117 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
-| 118 | DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 119 | Segelverhinderer outside drive and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 120 | DME-internal Segelverhinderer 1 and DME-internal Segelverhinderer 2 and DME-internal Segelverhinderer 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
-| 121 | Segelverhinderer outside drive and DME-internal Segelverhinderer 1 and 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
-| 128 | undefiniert | undefiniert |
+| 0 | No coasting inhibitor outside the drivetrain | Kein Segelverhinderer außerhalb Antrieb |
+| 1 | Coasting inhibitor outside the drivetrain | Segelverhinderer außerhalb Antrieb |
+| 2 | DME-internal coasting inhibitor 1 | DME-interner Segelverhinderer 1 |
+| 3 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
+| 4 | DME-internal coasting inhibitor 2 | DME- interner Segelverhinderer  2 |
+| 5 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
+| 6 | DME-internal coasting inhibitors 1 and 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 7 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 8 | DME-internal coasting inhibitor 3 | DME-interner Segelverhinderer 3 |
+| 9 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
+| 16 | DME-internal coasting inhibitors 1 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 17 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 18 | DME-internal coasting inhibitors 2 and 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 19 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 20 | DME-internal coasting inhibitors 1, 2 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 21 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1, 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
+| 22 | No coasting inhibitor outside the drivetrain | Kein Segelverhinderer außerhalb Antrieb |
+| 23 | Coasting inhibitor outside the drivetrain | Segelverhinderer außerhalb Antrieb |
+| 24 | DME-internal coasting inhibitor 1 | DME-interner Segelverhinderer 1 |
+| 25 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
+| 32 | DME-internal coasting inhibitor 2 | DME- interner Segelverhinderer  2 |
+| 33 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
+| 34 | DME-internal coasting inhibitors 1 and 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 35 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 36 | DME-internal coasting inhibitor 3 | DME-interner Segelverhinderer 3 |
+| 37 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
+| 38 | DME-internal coasting inhibitors 1 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 39 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 40 | DME-internal coasting inhibitors 2 and 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 41 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 48 | DME-internal coasting inhibitors 1, 2 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 49 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1, 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
+| 50 | No coasting inhibitor outside the drivetrain | Kein Segelverhinderer außerhalb Antrieb |
+| 51 | Coasting inhibitor outside the drivetrain | Segelverhinderer außerhalb Antrieb |
+| 52 | DME-internal coasting inhibitor 1 | DME-interner Segelverhinderer 1 |
+| 53 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
+| 54 | DME-internal coasting inhibitor 2 | DME- interner Segelverhinderer  2 |
+| 55 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
+| 56 | DME-internal coasting inhibitors 1 and 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 57 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 64 | DME-internal coasting inhibitor 3 | DME-interner Segelverhinderer 3 |
+| 65 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
+| 66 | DME-internal coasting inhibitors 1 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 67 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 68 | DME-internal coasting inhibitors 2 and 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 69 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 70 | DME-internal coasting inhibitors 1, 2 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 71 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1, 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
+| 72 | No coasting inhibitor outside the drivetrain | Kein Segelverhinderer außerhalb Antrieb |
+| 73 | Coasting inhibitor outside the drivetrain | Segelverhinderer außerhalb Antrieb |
+| 80 | DME-internal coasting inhibitor 1 | DME-interner Segelverhinderer 1 |
+| 81 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
+| 82 | DME-internal coasting inhibitor 2 | DME- interner Segelverhinderer  2 |
+| 83 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
+| 84 | DME-internal coasting inhibitors 1 and 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 85 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 86 | DME-internal coasting inhibitor 3 | DME-interner Segelverhinderer 3 |
+| 87 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
+| 88 | DME-internal coasting inhibitors 1 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 89 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 96 | DME-internal coasting inhibitors 2 and 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 97 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 98 | DME-internal coasting inhibitors 1, 2 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 99 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1, 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
+| 100 | No coasting inhibitor outside the drivetrain | Kein Segelverhinderer außerhalb Antrieb |
+| 101 | Coasting inhibitor outside the drivetrain | Segelverhinderer außerhalb Antrieb |
+| 102 | DME-internal coasting inhibitor 1 | DME-interner Segelverhinderer 1 |
+| 103 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 1 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 |
+| 104 | DME-internal coasting inhibitor 2 | DME- interner Segelverhinderer  2 |
+| 105 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 |
+| 112 | DME-internal coasting inhibitors 1 and 2 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 113 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 2 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 |
+| 114 | DME-internal coasting inhibitor 3 | DME-interner Segelverhinderer 3 |
+| 115 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitor 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 3 |
+| 116 | DME-internal coasting inhibitors 1 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 117 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 3 |
+| 118 | DME-internal coasting inhibitors 2 and 3 | DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 119 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 120 | DME-internal coasting inhibitors 1, 2 and 3 | DME-interner Segelverhinderer 1 und DME-interner Segelverhinderer 2 und DME-interner Segelverhinderer 3 |
+| 121 | Coasting inhibitor outside the drivetrain and DME-internal coasting inhibitors 1, 2 and 3 | Segelverhinderer außerhalb Antrieb und DME-interner Segelverhinderer 1 und 2 und 3 |
+| 128 | Undefined | undefiniert |
 | 253 | Not available | Nicht verfügbar |
 | 254 | Fault | Fehler |
-| 255 | invalid | ungültig |
+| 255 | Invalid | ungültig |
 
 ## GSZFB1.TAB_SEGEL_FKT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Segelfunktion fest deactivated | Segelfunktion fest deaktiviert |
-| 2 | Segel-Lernfunktion activated, but not learned | Segel-Lernfunktion aktiviert, aber nicht gelernt |
-| 3 | Segel-Codierfunktion activated, but not codiert | Segel-Codierfunktion aktiviert, aber nicht codiert |
-| 65 | Segelfunktion fest switched on and not per diagnosis tester deaktivert | Segelfunktion fest eingeschaltet und nicht per Diagnosetester deaktivert |
-| 66 | Segelfunktion via Lernfunktion activated and not per diagnosis tester deaktivert | Segelfunktion über Lernfunktion aktiviert und nicht per Diagnosetester deaktivert |
-| 67 | Segelfunktion per coding switched on and not per diagnosis tester deaktivert | Segelfunktion per Codierung eingeschaltet und nicht per Diagnosetester deaktivert |
-| 128 | Segelfunktion fest deactivated and per diagnosis tester deaktivert | Segelfunktion fest deaktiviert und per Diagnosetester deaktivert |
-| 130 | Segel-Lernfunktion activated, but not learned and per diagnosis tester deaktivert | Segel-Lernfunktion aktiviert, aber nicht gelernt und per Diagnosetester deaktivert |
-| 131 | Segel-Codierfunktion activated, but not codiert and per diagnosis tester deaktivert | Segel-Codierfunktion aktiviert, aber nicht codiert und per Diagnosetester deaktivert |
-| 193 | Segelfunktion fest switched on but per diagnosis tester deaktivert | Segelfunktion fest eingeschaltet aber per Diagnosetester deaktivert |
-| 194 | Segelfunktion via Lernfunktion activated but per diagnosis tester deaktivert | Segelfunktion über Lernfunktion aktiviert aber per Diagnosetester deaktivert |
-| 195 | Segelfunktion per coding switched on but per diagnosis tester deaktivert | Segelfunktion per Codierung eingeschaltet aber per Diagnosetester deaktivert |
-| 255 | undefiniert | undefiniert |
+| 0 | Coasting function permanently deactivated | Segelfunktion fest deaktiviert |
+| 2 | Coasting learning function activated, but not learned | Segel-Lernfunktion aktiviert, aber nicht gelernt |
+| 3 | Coasting coding function activated, but not coded | Segel-Codierfunktion aktiviert, aber nicht codiert |
+| 65 | Coasting function permanently on and not deactivated by diagnostic tester | Segelfunktion fest eingeschaltet und nicht per Diagnosetester deaktivert |
+| 66 | Coasting function activated via learning function and not deactivated by diagnostic tester | Segelfunktion über Lernfunktion aktiviert und nicht per Diagnosetester deaktivert |
+| 67 | Coasting function switched on via coding and not deactivated by diagnostic tester | Segelfunktion per Codierung eingeschaltet und nicht per Diagnosetester deaktivert |
+| 128 | Coasting function permanently deactivated and deactivated by diagnostic tester | Segelfunktion fest deaktiviert und per Diagnosetester deaktivert |
+| 130 | Coasting learning function activated, but not learned and deactivated by diagnostic tester | Segel-Lernfunktion aktiviert, aber nicht gelernt und per Diagnosetester deaktivert |
+| 131 | Coasting coding function activated, but not coded and deactivated by diagnostic tester | Segel-Codierfunktion aktiviert, aber nicht codiert und per Diagnosetester deaktivert |
+| 193 | Coasting function permanently on but deactivated by diagnostic tester | Segelfunktion fest eingeschaltet aber per Diagnosetester deaktivert |
+| 194 | Coasting function activated via learning function but deactivated by diagnostic tester | Segelfunktion über Lernfunktion aktiviert aber per Diagnosetester deaktivert |
+| 195 | Coasting function switched on via coding but deactivated by diagnostic tester | Segelfunktion per Codierung eingeschaltet aber per Diagnosetester deaktivert |
+| 255 | Undefined | undefiniert |
 
 ## GSZFB1.TAB_SEGEL_RUECKMELDUNG_AGS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Segelanforderung seitens AGS resp. Segelverbot by AGS | keine Segelanforderung seitens AGS bzw. Segelverbot durch AGS |
-| 1 | Segelanforderung AGS (the AGS sieht Segeln as sinnvoll an and es liegt no Verhinderer before) | Segelanforderung AGS (die AGS sieht Segeln als sinnvoll an und es liegt kein Verhinderer vor) |
-| 255 | undefiniert | undefiniert |
+| 0 | No coasting request from AGS, or coasting prohibited by AGS | keine Segelanforderung seitens AGS bzw. Segelverbot durch AGS |
+| 1 | Coasting request from AGS (AGS considers coasting appropriate and no inhibitor is present) | Segelanforderung AGS (die AGS sieht Segeln als sinnvoll an und es liegt kein Verhinderer vor) |
+| 255 | Undefined | undefiniert |
 
 ## GSZFB1.TAB_SEGEL_ZUSTAND_ATSYS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Segeln not available (from Getriebesicht Segeln not possible) | Segeln nicht verfügbar (aus Getriebesicht Segeln nicht möglich) |
-| 1 | Segeln available (not active) (from Getriebesicht Segeln möglich, but no Segel-request by AGS  resp. Segelverbot by AGS) | Segeln verfügbar (nicht aktiv) (aus Getriebesicht Segeln möglich, aber keine Segel-Anforderung durch AGS  bzw. Segelverbot durch AGS) |
-| 2 | Segeln Einstieg | Segeln Einstieg |
-| 3 | Segeln active | Segeln aktiv |
-| 4 | Segeln Ausstieg | Segeln Ausstieg |
-| 255 | undefiniert | undefiniert |
+| 0 | Coasting not available (coasting not possible from the transmission's point of view) | Segeln nicht verfügbar (aus Getriebesicht Segeln nicht möglich) |
+| 1 | Coasting available (not active) (coasting possible from the transmission's point of view, but no coasting request from AGS, or coasting prohibited by AGS) | Segeln verfügbar (nicht aktiv) (aus Getriebesicht Segeln möglich, aber keine Segel-Anforderung durch AGS  bzw. Segelverbot durch AGS) |
+| 2 | Coasting entry | Segeln Einstieg |
+| 3 | Coasting active | Segeln aktiv |
+| 4 | Coasting exit | Segeln Ausstieg |
+| 255 | Undefined | undefiniert |
 
 ## GSZFB1.TAB_SPORTTASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sporttaster ausgeschaltet | Sporttaster ausgeschaltet |
-| 1 | Sporttaster switched on | Sporttaster eingeschaltet |
-| 255 | invalid | ungültig |
+| 0 | Sport button off | Sporttaster ausgeschaltet |
+| 1 | Sport button on | Sporttaster eingeschaltet |
+| 255 | Invalid | ungültig |
 
 ## GSZFB1.TAB_STATUS_BLS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Bremslichtschalter not betätigt | Bremslichtschalter nicht betätigt |
-| 1 | Bremslichtschalter betätigt | Bremslichtschalter betätigt |
+| 0 | Brake light switch not pressed | Bremslichtschalter nicht betätigt |
+| 1 | Brake light switch pressed | Bremslichtschalter betätigt |
 | 65535 | Invalid value | Ungültiger Wert |
 
 ## GSZFB1.TAB_WAEHLHEBELPOSITION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Reason position | Grundstellung |
-| 1 | P-button | P-Taster |
-| 2 | R - rückwärts | R - rückwärts |
+| 0 | Home position | Grundstellung |
+| 1 | P button | P-Taster |
+| 2 | R - reverse | R - rückwärts |
 | 3 | N - neutral | N - neutral |
-| 4 | D - duration | D - dauer |
+| 4 | D - drive | D - dauer |
 | 5 | M- | M- |
 | 6 | M+ | M+ |
 | 7 | M/S | M/S |
@@ -343,14 +343,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Converter clutch open | Wandlerkupplung geöffnet |
-| 1 | Converter clutch geregelt low | Wandlerkupplung geregelt low |
-| 2 | Converter clutch geregelt high | Wandlerkupplung geregelt high |
-| 3 | Converter clutch closed low | Wandlerkupplung geschlossen low |
-| 4 | Converter clutch closed high | Wandlerkupplung geschlossen high |
-| 8 | Converter clutch Übergang to on | Wandlerkupplung Übergang nach auf |
-| 9 | Converter clutch Übergang to geregelt low | Wandlerkupplung Übergang nach geregelt low |
-| 10 | Converter clutch Übergang to geregelt high | Wandlerkupplung Übergang nach geregelt high |
-| 11 | Converter clutch Übergang to to low | Wandlerkupplung Übergang nach zu low |
-| 12 | Converter clutch Übergang to to high | Wandlerkupplung Übergang nach zu high |
+| 0 | Torque converter lock-up clutch open | Wandlerkupplung geöffnet |
+| 1 | Torque converter lock-up clutch controlled low | Wandlerkupplung geregelt low |
+| 2 | Torque converter lock-up clutch controlled high | Wandlerkupplung geregelt high |
+| 3 | Torque converter lock-up clutch closed low | Wandlerkupplung geschlossen low |
+| 4 | Torque converter lock-up clutch closed high | Wandlerkupplung geschlossen high |
+| 8 | Torque converter lock-up clutch transition to open | Wandlerkupplung Übergang nach auf |
+| 9 | Torque converter lock-up clutch transition to controlled low | Wandlerkupplung Übergang nach geregelt low |
+| 10 | Torque converter lock-up clutch transition to controlled high | Wandlerkupplung Übergang nach geregelt high |
+| 11 | Torque converter lock-up clutch transition to closed low | Wandlerkupplung Übergang nach zu low |
+| 12 | Torque converter lock-up clutch transition to closed high | Wandlerkupplung Übergang nach zu high |
 | 65535 | Signal invalid | Signal ungültig |

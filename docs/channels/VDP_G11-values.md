@@ -21,122 +21,122 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
 
 ## VDP_G11.TAB_ARSFF_QUQUERBSCHLVOREINDARS
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | normaler Beobachter | normaler Beobachter |
-| 2 | normaler Beobachter, temporaerer offset in the lateral acceleration signal | normaler Beobachter, temporaerer Offset im Querbeschleunigungssignal |
-| 3 | normaler Beobachter, lateral acceleration not fused | normaler Beobachter, Querbeschleunigung nicht abgesichert |
-| 6 | Beobachterwert not berechenbar (lateral acceleration and Lenkwinkel or speed not present) | Beobachterwert nicht berechenbar (Querbeschleunigung und Lenkwinkel oder Geschwindigkeit nicht vorhanden) |
-| 9 | Beobachter without Lenkwinkel, lateral acceleration IO | Beobachter ohne Lenkwinkel, Querbeschleunigung IO |
-| 10 | Beobachter without Lenkwinkel, lateral acceleration with temporaerem offset | Beobachter ohne Lenkwinkel, Querbeschleunigung mit temporaerem Offset |
-| 11 | Beobachter without lenkwinkel, lateral acceleration not fused | Beobachter ohne lenkwinkel, Querbeschleunigung nicht abgesichert |
-| 12 | Beobachter without lateral acceleration (nur Lenkwinkel and speed) | Beobachter ohne Querbeschleunigung (nur Lenkwinkel und Geschwindigkeit) |
+| 1 | Normal observer | normaler Beobachter |
+| 2 | Normal observer, temporary offset in lateral acceleration signal | normaler Beobachter, temporaerer Offset im Querbeschleunigungssignal |
+| 3 | Normal observer, lateral acceleration not validated | normaler Beobachter, Querbeschleunigung nicht abgesichert |
+| 6 | Observer value cannot be calculated (lateral acceleration and steering angle or speed not available) | Beobachterwert nicht berechenbar (Querbeschleunigung und Lenkwinkel oder Geschwindigkeit nicht vorhanden) |
+| 9 | Observer without steering angle, lateral acceleration OK | Beobachter ohne Lenkwinkel, Querbeschleunigung IO |
+| 10 | Observer without steering angle, lateral acceleration with temporary offset | Beobachter ohne Lenkwinkel, Querbeschleunigung mit temporaerem Offset |
+| 11 | Observer without steering angle, lateral acceleration not validated | Beobachter ohne lenkwinkel, Querbeschleunigung nicht abgesichert |
+| 12 | Observer without lateral acceleration (steering angle and speed only) | Beobachter ohne Querbeschleunigung (nur Lenkwinkel und Geschwindigkeit) |
 | 255 | Value invalid | Wert ungültig |
 
 ## VDP_G11.TAB_EARSAS_STATUS_UEBERWACHUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no fault | kein Fehler |
-| 1 | Is-torque too small | Ist-Moment zu klein |
-| 2 | Is-torque too large | Ist-Moment zu groß |
-| 4 | Is-torque schwere deviation | Ist-Moment schwere Abweichung |
-| 8 | Communication error at Aktor-signal | Kommunikationsfehler bei Aktor-Signalen |
-| 16 | Aktor fault - engine ansteuerbar | Aktor Fehler - Motor ansteuerbar |
-| 32 | No Reaktion Aktor | Keine Reaktion Aktor |
-| 64 | Aktor fault - engine not ansteuerbar | Aktor Fehler - Motor nicht ansteuerbar |
-| 128 | Aktor temporäre Volldegradation - engine not ansteuerbar | Aktor temporäre Volldegradation - Motor nicht ansteuerbar |
-| 256 | Aktor eingeschränkter controller  - Vorsteuersignale fehlen | Aktor eingeschränkter Regler  - Vorsteuersignale fehlen |
-| 512 | Aktor degradiert to Nullpositionregelung | Aktor degradiert zur Nullpositionregelung |
-| 1024 | Aktor controller shutdown due to signal fault | Aktor Regler Abschaltung aufgrund Signalfehler |
-| 2048 | Aktor controller unplausible Reaktion on  Befehl  Umsetzen | Aktor Regler unplausible Reaktion auf  Befehl  Umsetzen |
-| 4096 | Aktor controller unplausible Reaktion on Befehl  Nullpositionsregelung | Aktor Regler unplausible Reaktion auf Befehl  Nullpositionsregelung |
-| 8192 | Aktor Momentensignal outside tolerance | Aktor Momentensignal außerhalb Toleranz |
-| 16384 | Aktor Momentensignal temporär invalid | Aktor Momentensignal temporär ungültig |
-| 32768 | Aktor Momentensignal permanent invalid | Aktor Momentensignal dauerhaft ungültig |
-| 65535 | Mehrere Fehlerbits set | Mehrere Fehlerbits gesetzt |
+| 0 | No fault | kein Fehler |
+| 1 | Actual torque too low | Ist-Moment zu klein |
+| 2 | Actual torque too high | Ist-Moment zu groß |
+| 4 | Actual torque severe deviation | Ist-Moment schwere Abweichung |
+| 8 | Communication fault in actuator signals | Kommunikationsfehler bei Aktor-Signalen |
+| 16 | Actuator fault - motor can be activated | Aktor Fehler - Motor ansteuerbar |
+| 32 | No actuator response | Keine Reaktion Aktor |
+| 64 | Actuator fault - motor cannot be activated | Aktor Fehler - Motor nicht ansteuerbar |
+| 128 | Actuator temporary full degradation - motor cannot be activated | Aktor temporäre Volldegradation - Motor nicht ansteuerbar |
+| 256 | Actuator restricted controller - pilot control signals missing | Aktor eingeschränkter Regler  - Vorsteuersignale fehlen |
+| 512 | Actuator degraded to zero position control | Aktor degradiert zur Nullpositionregelung |
+| 1024 | Actuator controller shutdown due to signal fault | Aktor Regler Abschaltung aufgrund Signalfehler |
+| 2048 | Actuator controller implausible response to 'switch over' command | Aktor Regler unplausible Reaktion auf  Befehl  Umsetzen |
+| 4096 | Actuator controller implausible response to 'zero position control' command | Aktor Regler unplausible Reaktion auf Befehl  Nullpositionsregelung |
+| 8192 | Actuator torque signal out of tolerance | Aktor Momentensignal außerhalb Toleranz |
+| 16384 | Actuator torque signal temporarily invalid | Aktor Momentensignal temporär ungültig |
+| 32768 | Actuator torque signal permanently invalid | Aktor Momentensignal dauerhaft ungültig |
+| 65535 | Several fault bits set | Mehrere Fehlerbits gesetzt |
 
 ## VDP_G11.TAB_EARSAS_STATUS_UNTERSPANNUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Undervoltage inaktiv | Unterspannung inaktiv |
+| 0 | Undervoltage inactive | Unterspannung inaktiv |
 | 1 | Undervoltage active | Unterspannung aktiv |
-| 2 | Undervoltage inaktiv, Entprellzeit >0% | Unterspannung inaktiv, Entprellzeit >0% |
-| 3 | Undervoltage active; Entprellzeit >0% | Unterspannung aktiv; Entprellzeit >0% |
-| 4 | Entprellzeit >25% | Entprellzeit >25% |
-| 6 | Undervoltage inaktiv, Entprellzeit >25% | Unterspannung inaktiv, Entprellzeit >25% |
-| 7 | Undervoltage active, Entprellzeit >25% | Unterspannung aktiv, Entprellzeit >25% |
-| 8 | Entprellzeit >50% | Entprellzeit >50% |
-| 14 | Undervoltage inaktiv, Entprellzeit >50% | Unterspannung inaktiv, Entprellzeit >50% |
-| 15 | Undervoltage inaktiv, Entprellzeit >50% | Unterspannung inaktiv, Entprellzeit >50% |
-| 16 | Entprellzeit >75% | Entprellzeit >75% |
-| 30 | Undervoltage inaktiv, Entprellzeit >75% | Unterspannung inaktiv, Entprellzeit >75% |
-| 31 | Undervoltage active, Entprellzeit >75% | Unterspannung aktiv, Entprellzeit >75% |
-| 32 | Entprellzeit >=100% | Entprellzeit >=100% |
-| 62 | Undervoltage inaktiv, Entprellzeit >=100% | Unterspannung inaktiv, Entprellzeit >=100% |
-| 63 | Undervoltage active, Entprellzeit >=100% | Unterspannung aktiv, Entprellzeit >=100% |
-| 64 | Run-on active; undervoltage inaktiv, Entprellzeit =0% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit =0% |
-| 67 | Run-on active; undervoltage active, Entprellzeit >0% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >0% |
-| 70 | Run-on active; undervoltage inaktiv, Entprellzeit >25% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >25% |
-| 71 | Run-on active; undervoltage active, Entprellzeit >25% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >25% |
-| 78 | Run-on active; undervoltage inaktiv, Entprellzeit >50% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
-| 79 | Run-on active; undervoltage inaktiv, Entprellzeit >50% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
-| 94 | Run-on active; undervoltage inaktiv, Entprellzeit >75% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >75% |
-| 95 | Run-on active; undervoltage active, Entprellzeit >75% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >75% |
-| 126 | Run-on active; undervoltage inaktiv, Entprellzeit >=100% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >=100% |
-| 127 | Run-on active; undervoltage active, Entprellzeit >=100% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >=100% |
-| 128 | Ummapping torque-DTC on Uspang-DTC | Ummapping Momenten-DTC auf Uspang-DTC |
-| 130 | Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >0% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >0% |
-| 131 | Ummapping torque-DTC on Uspang-DTC; undervoltage active; Entprellzeit >0% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv; Entprellzeit >0% |
-| 134 | Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >25% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >25% |
-| 135 | Ummapping torque-DTC on Uspang-DTC; undervoltage active, Entprellzeit >25% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >25% |
-| 142 | Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >50% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >50% |
-| 143 | Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >50% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >50% |
-| 158 | Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >75% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >75% |
-| 159 | Ummapping torque-DTC on Uspang-DTC; undervoltage active, Entprellzeit >75% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >75% |
-| 190 | Ummapping torque-DTC on Uspang-DTC; undervoltage inaktiv, Entprellzeit >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >=100% |
-| 191 | Ummapping torque-DTC on Uspang-DTC; undervoltage active, Entprellzeit >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >=100% |
-| 192 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit =0% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit =0% |
-| 195 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >0% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >0% |
-| 198 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >25% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >25% |
-| 199 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >25% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >25% |
-| 206 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >50% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
-| 207 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >50% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
-| 222 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >75% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >75% |
-| 223 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >75% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >75% |
-| 254 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage inaktiv, Entprellzeit >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >=100% |
-| 255 | Ummapping torque-DTC on Uspang-DTC; run-on active; undervoltage active, Entprellzeit >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >=100% |
+| 2 | Undervoltage inactive, debounce time >0% | Unterspannung inaktiv, Entprellzeit >0% |
+| 3 | Undervoltage active, debounce time >0% | Unterspannung aktiv; Entprellzeit >0% |
+| 4 | Debounce time >25% | Entprellzeit >25% |
+| 6 | Undervoltage inactive, debounce time >25% | Unterspannung inaktiv, Entprellzeit >25% |
+| 7 | Undervoltage active, debounce time >25% | Unterspannung aktiv, Entprellzeit >25% |
+| 8 | Debounce time >50% | Entprellzeit >50% |
+| 14 | Undervoltage inactive, debounce time >50% | Unterspannung inaktiv, Entprellzeit >50% |
+| 15 | Undervoltage inactive, debounce time >50% | Unterspannung inaktiv, Entprellzeit >50% |
+| 16 | Debounce time >75% | Entprellzeit >75% |
+| 30 | Undervoltage inactive, debounce time >75% | Unterspannung inaktiv, Entprellzeit >75% |
+| 31 | Undervoltage active, debounce time >75% | Unterspannung aktiv, Entprellzeit >75% |
+| 32 | Debounce time >=100% | Entprellzeit >=100% |
+| 62 | Undervoltage inactive, debounce time >=100% | Unterspannung inaktiv, Entprellzeit >=100% |
+| 63 | Undervoltage active, debounce time >=100% | Unterspannung aktiv, Entprellzeit >=100% |
+| 64 | Run-on active, undervoltage inactive, debounce time =0% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit =0% |
+| 67 | Run-on active, undervoltage active, debounce time >0% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >0% |
+| 70 | Run-on active, undervoltage inactive, debounce time >25% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >25% |
+| 71 | Run-on active, undervoltage active, debounce time >25% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >25% |
+| 78 | Run-on active, undervoltage inactive, debounce time >50% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
+| 79 | Run-on active, undervoltage inactive, debounce time >50% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
+| 94 | Run-on active, undervoltage inactive, debounce time >75% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >75% |
+| 95 | Run-on active, undervoltage active, debounce time >75% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >75% |
+| 126 | Run-on active, undervoltage inactive, debounce time >=100% | Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >=100% |
+| 127 | Run-on active, undervoltage active, debounce time >=100% | Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >=100% |
+| 128 | Remapping torque DTC to undervoltage DTC | Ummapping Momenten-DTC auf Uspang-DTC |
+| 130 | Remapping torque DTC to undervoltage DTC, undervoltage inactive, debounce time >0% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >0% |
+| 131 | Remapping torque DTC to undervoltage DTC, undervoltage active, debounce time >0% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv; Entprellzeit >0% |
+| 134 | Remapping torque DTC to undervoltage DTC, undervoltage inactive, debounce time >25% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >25% |
+| 135 | Remapping torque DTC to undervoltage DTC, undervoltage active, debounce time >25% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >25% |
+| 142 | Remapping torque DTC to undervoltage DTC, undervoltage inactive, debounce time >50% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >50% |
+| 143 | Remapping torque DTC to undervoltage DTC, undervoltage inactive, debounce time >50% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >50% |
+| 158 | Remapping torque DTC to undervoltage DTC, undervoltage inactive, debounce time >75% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >75% |
+| 159 | Remapping torque DTC to undervoltage DTC, undervoltage active, debounce time >75% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >75% |
+| 190 | Remapping torque DTC to undervoltage DTC, undervoltage inactive, debounce time >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung inaktiv, Entprellzeit >=100% |
+| 191 | Remapping torque DTC to undervoltage DTC, undervoltage active, debounce time >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Unterspannung aktiv, Entprellzeit >=100% |
+| 192 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage inactive, debounce time =0% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit =0% |
+| 195 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage active, debounce time >0% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >0% |
+| 198 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage inactive, debounce time >25% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >25% |
+| 199 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage active, debounce time >25% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >25% |
+| 206 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage inactive, debounce time >50% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
+| 207 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage inactive, debounce time >50% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >50% |
+| 222 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage inactive, debounce time >75% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >75% |
+| 223 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage active, debounce time >75% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >75% |
+| 254 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage inactive, debounce time >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung inaktiv, Entprellzeit >=100% |
+| 255 | Remapping torque DTC to undervoltage DTC, run-on active, undervoltage active, debounce time >=100% | Ummapping Momenten-DTC auf Uspang-DTC; Nachlauf aktiv; Unterspannung aktiv, Entprellzeit >=100% |
 | 65535 | Value invalid | Wert ungültig |
 
 ## VDP_G11.TAB_EHC_VEHICLE_HEIGHT
 
 | Value | Meaning | German |
 |---|---|---|
-| 2 | Tiefniveau | Tiefniveau |
-| 8 | Standardniveau | Standardniveau |
-| 16 | Hochniveau | Hochniveau |
+| 2 | Low level | Tiefniveau |
+| 8 | Standard level | Standardniveau |
+| 16 | High level | Hochniveau |
 
 ## VDP_G11.TAB_HOEHENSTAND_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Kalibrierung offset not erfolgreich | Kalibrierung Offset nicht erfolgreich |
-| 1 | Kalibrierung offset erfolgreich | Kalibrierung Offset erfolgreich |
-| 2 | Sensor ausstattungsbedingt (coding) not verbaut | Sensor ausstattungsbedingt (Codierung) nicht verbaut |
-| 255 | unknown state | unbekannter Zustand |
+| 0 | Offset calibration not successful | Kalibrierung Offset nicht erfolgreich |
+| 1 | Offset calibration successful | Kalibrierung Offset erfolgreich |
+| 2 | Sensor not fitted due to equipment (coding) | Sensor ausstattungsbedingt (Codierung) nicht verbaut |
+| 255 | Unknown state | unbekannter Zustand |
 
 ## VDP_G11.TAB_HOHENSTAND_SENSOR
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sensor in Ordnung | Sensor in Ordnung |
+| 0 | Sensor OK | Sensor in Ordnung |
 | 1 | Sensor faulty | Sensor fehlerhaft |
 | 255 | Sensor faulty | Sensor fehlerhaft |
 
@@ -144,46 +144,46 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 65040 | Slow offset Compensation Error | Slow Offset Compensation Error |
-| 65041 | Fast offset Compensation Error | Fast Offset Compensation Error |
-| 65042 | Self test Failure: Pos. test | Self Test Failure: Pos. Test |
-| 65043 | Self test Failure: Neg. test | Self Test Failure: Neg. Test |
-| 65044 | PROM Parity Bit P1 Error | PROM Parity Bit P1 Error |
-| 65045 | PROM Parity Bit P2 Error | PROM Parity Bit P2 Error |
-| 65046 | PROM Parity Bit P3 Error | PROM Parity Bit P3 Error |
-| 65047 | Lock bit Failure | Lock bit Failure |
-| 65048 | PROM P00-P02 CRC Bits Error | PROM P00-P02 CRC Bits Error |
+| 65040 | Slow offset compensation error | Slow Offset Compensation Error |
+| 65041 | Fast offset compensation error | Fast Offset Compensation Error |
+| 65042 | Self-test failure: pos. test | Self Test Failure: Pos. Test |
+| 65043 | Self-test failure: neg. test | Self Test Failure: Neg. Test |
+| 65044 | PROM parity bit P1 error | PROM Parity Bit P1 Error |
+| 65045 | PROM parity bit P2 error | PROM Parity Bit P2 Error |
+| 65046 | PROM parity bit P3 error | PROM Parity Bit P3 Error |
+| 65047 | Lock bit failure | Lock bit Failure |
+| 65048 | PROM P00-P02 CRC bits error | PROM P00-P02 CRC Bits Error |
 | 65535 | Invalid value | Ungültiger Wert |
 
 ## VDP_G11.TAB_PSI5_INITSTATE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sensor data yet not gelesen/not fertig | Sensordaten noch nicht gelesen/nicht fertig |
-| 1 | Sensor data be gelesen | Sensordaten werden gelesen |
-| 2 | Sensor data reading abgeschlossen and OK | Sensordaten lesen abgeschlossen und OK |
-| 3 | Sensor data reading abgeschlossen and not OK | Sensordaten lesen abgeschlossen und nicht OK |
+| 0 | Sensor data not yet read/not ready | Sensordaten noch nicht gelesen/nicht fertig |
+| 1 | Sensor data being read | Sensordaten werden gelesen |
+| 2 | Sensor data read completed and OK | Sensordaten lesen abgeschlossen und OK |
+| 3 | Sensor data read completed and not OK | Sensordaten lesen abgeschlossen und nicht OK |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## VDP_G11.TAB_PSI5_INTERNAL_ERROR
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Error | No Error |
-| 10 | Channel over current | Channel over current |
+| 0 | No error | No Error |
+| 10 | Channel overcurrent | Channel over current |
 | 11 | Leakage to GND | Leakage to GND |
 | 12 | Leakage to VBAT (soft short) / open load | Leakage to VBAT (soft short) / open load |
 | 13 | Reverse current detected | Reverse current detected |
-| 14 | More as one error | More as one error |
-| 20 | Manchester Decoder parity/CRC error | Manchester Decoder parity/CRC error |
-| 21 | Manchester Decoder frame error | Manchester Decoder frame error |
-| 22 | Manchester Decoder no frame received | Manchester Decoder no frame received |
-| 23 | Manchester Decoder unexpected frame received | Manchester Decoder unexpected frame received |
-| 24 | More as one error | More as one error |
+| 14 | More than one error | More as one error |
+| 20 | Manchester decoder parity/CRC error | Manchester Decoder parity/CRC error |
+| 21 | Manchester decoder frame error | Manchester Decoder frame error |
+| 22 | Manchester decoder: no frame received | Manchester Decoder no frame received |
+| 23 | Manchester decoder: unexpected frame received | Manchester Decoder unexpected frame received |
+| 24 | More than one error | More as one error |
 | 25 | Parity error from software check | Parity error from software check |
 | 30 | General sensor defect response (retval = 500) | General sensor defect response (retval = 500) |
-| 31 | Group error codes (Error collection of 9 errors) | Group error codes (Error collection of 9 errors) |
-| 32 | Unknown sensor Error | Unknown Sensor Error |
+| 31 | Group error code (collection of 9 errors) | Group error codes (Error collection of 9 errors) |
+| 32 | Unknown sensor error | Unknown Sensor Error |
 | 33 | DWS protocol error | DWS protocol error |
 | 255 | Invalid value | Ungültiger Wert |
 
@@ -192,7 +192,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Sensor OK | Sensor OK |
-| 1 | Sensor Warnung | Sensor Warnung |
+| 1 | Sensor warning | Sensor Warnung |
 | 3 | Sensor fault | Sensor Fehler |
 | 255 | Invalid value | Ungültiger Wert |
 
@@ -200,9 +200,9 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 485 | Sensor in Ordnung, ungelockt (lock bit L0-1 set) | Sensor in Ordnung, ungelockt (lock bit L0-1 set) |
-| 486 | Sensor in Ordnung, ungelockt (lock bits L0-2 set) | Sensor in Ordnung, ungelockt (lock bits L0-2 set) |
-| 487 | Sensor in Ordnung | Sensor in Ordnung |
+| 485 | Sensor OK, unlocked (lock bit L0-1 set) | Sensor in Ordnung, ungelockt (lock bit L0-1 set) |
+| 486 | Sensor OK, unlocked (lock bits L0-2 set) | Sensor in Ordnung, ungelockt (lock bits L0-2 set) |
+| 487 | Sensor OK | Sensor in Ordnung |
 | 500 | Sensor defective | Sensor defekt |
 | 65535 | Invalid value | Ungültiger Wert |
 
@@ -210,7 +210,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sensor in Ordnung | Sensor in Ordnung |
+| 0 | Sensor OK | Sensor in Ordnung |
 | 1 | Sensor faulty | Sensor fehlerhaft |
 | 255 | Invalid value | Ungültiger Wert |
 
@@ -218,36 +218,36 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no fault festgestellt | kein Fehler festgestellt |
-| 1 | Valve short circuit to KL30 | Ventil Kurzschluss nach KL30 |
-| 2 | Valve short circuit to KL31 | Ventil Kurzschluss nach KL31 |
-| 4 | Valve open line | Ventil offene Leitung |
+| 0 | No fault detected | kein Fehler festgestellt |
+| 1 | Valve short circuit to terminal 30 | Ventil Kurzschluss nach KL30 |
+| 2 | Valve short circuit to terminal 31 | Ventil Kurzschluss nach KL31 |
+| 4 | Valve open circuit | Ventil offene Leitung |
 | 8 | Valve short circuit | Ventil Kurzschluss |
-| 16 | reserviert | reserviert |
-| 32 | Valve current measurement not kalibriert | Ventilstrommessung nicht kalibriert |
-| 64 | no output stage enable via Watchdog | keine Endstufenfreigabe über Watchdog |
+| 16 | Reserved | reserviert |
+| 32 | Valve current measurement not calibrated | Ventilstrommessung nicht kalibriert |
+| 64 | No output stage enable via watchdog | keine Endstufenfreigabe über Watchdog |
 | 128 | Signal implausible | Signal unplausibel |
-| 256 | allgemeiner valve fault at Onlinepruefung | allgemeiner Ventilfehler bei Onlinepruefung |
-| 512 | Hochlaufpruefung not carried out | Hochlaufpruefung nicht durchgefuehrt |
-| 1024 | Current plausibility fault | Stromplausibilitaetsfehler |
-| 2048 | reserviert | reserviert |
-| 4096 | reserviert | reserviert |
-| 8192 | reserviert | reserviert |
-| 16384 | reserviert | reserviert |
-| 32768 | reserviert | reserviert |
-| 65535 | manuell auswerten | manuell auswerten |
+| 256 | General valve fault during online check | allgemeiner Ventilfehler bei Onlinepruefung |
+| 512 | Start-up check not performed | Hochlaufpruefung nicht durchgefuehrt |
+| 1024 | Current plausibility error | Stromplausibilitaetsfehler |
+| 2048 | Reserved | reserviert |
+| 4096 | Reserved | reserviert |
+| 8192 | Reserved | reserviert |
+| 16384 | Reserved | reserviert |
+| 32768 | Reserved | reserviert |
+| 65535 | Evaluate manually | manuell auswerten |
 
 ## VDP_G11.TAB_VDC_VENTILE_VORGABE_ENDSTUFE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | State Regeln target verlassen be | Zustand Regeln soll verlassen werden |
-| 1 | reserviert | reserviert |
-| 2 | Initialisierung | Initialisierung |
-| 4 | Verwende target current | Verwende Sollstrom |
-| 8 | Verwende target-PWM | Verwende Soll-PWM |
-| 16 | Output stage abschalten | Endstufe abschalten |
-| 32 | Hochlaufprüfung start | Hochlaufprüfung starten |
-| 64 | reserviert | reserviert |
-| 128 | Vorgaben invalid | Vorgaben invalid |
-| 255 | not definiert | nicht definiert |
+| 0 | Exit control state | Zustand Regeln soll verlassen werden |
+| 1 | Reserved | reserviert |
+| 2 | Initialisation | Initialisierung |
+| 4 | Use target current | Verwende Sollstrom |
+| 8 | Use target PWM | Verwende Soll-PWM |
+| 16 | Switch off output stage | Endstufe abschalten |
+| 32 | Start start-up check | Hochlaufprüfung starten |
+| 64 | Reserved | reserviert |
+| 128 | Specifications invalid | Vorgaben invalid |
+| 255 | Not defined | nicht definiert |

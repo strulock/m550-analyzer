@@ -93,6 +93,10 @@ channel; about half a second for ~9,900 channels). Groups are inserted
 eagerly; channels only when a group opens, so a rebuild takes ~10 ms. A
 filter with ≤ 300 matches opens them.
 
+The display language (English / Deutsch) is kept in
+`%APPDATA%\n63read\settings.json`; switching it rebuilds the picker index and
+relabels the watch table.
+
 What the car answers is kept in `%APPDATA%\n63read\availability.json`,
 keyed `0xMM:0xDDDD` → `ok` / `size` / `refused` / `no answer`:
 

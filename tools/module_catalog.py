@@ -64,6 +64,7 @@ MODULES = {
     "lmv_g11": ("LMV_G11", "0x19", "LMV_", "LMV-G11"),
     "ihka_g11": ("IHKA_G11", "0x78", "IHKA_", "IHKA-G11"),
     "ekp301": ("EKP301", "0x17", "EKP_", "EKP301"),
+    "pma_20": ("PMA_20", "0x2C", "PMA_", "PMA-20"),
 }
 
 HEADER = ["ARG", "MODULE", "ID", "FIELD", "RESULTNAME", "INFO", "INFO_EN",

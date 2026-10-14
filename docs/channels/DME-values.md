@@ -12,47 +12,47 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 149 | Vmax master | Vmax Master |
 | 151 | Pmax slave | Pmax Slave |
 | 152 | Pmax master | Pmax Master |
-| 65535 | unknown | unbekannt |
+| 65535 | Unknown | unbekannt |
 
 ## RDBI_ADS_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | HEGO_nrFltIdS2B1RiDHtgObdRdr_C   Heizleistungsdiagnose for Zweipunktlambdasonden | HEGO_nrFltIdS2B1RiDHtgObdRdr_C   Heizleistungsdiagnose für Zweipunktlambdasonden |
-| 2 | MisfDet_nrFltIdCat_C   Katalysatorschädigende misfire | MisfDet_nrFltIdCat_C   Katalysatorschädigende Aussetzer |
-| 3 | MisfDet_nrFltIdEmi_C   Emissionsrelevante misfire | MisfDet_nrFltIdEmi_C   Emissionsrelevante Aussetzer |
-| 4 | UEGO_nrFltIdDynArB1_C   diagnosis Dynamikverhalten the LSU Flächenprüfung | UEGO_nrFltIdDynArB1_C   Diagnose Dynamikverhalten der LSU Flächenprüfung |
-| 5 | UEGO_nrFltIdDynSlopB1_C   diagnosis Dynamikverhalten the LSU Steigungsprüfung | UEGO_nrFltIdDynSlopB1_C   Diagnose Dynamikverhalten der LSU Steigungsprüfung |
-| 6 | UEGO_nrFltIdHeatrB1_C   diagnosis heating control LSU | UEGO_nrFltIdHeatrB1_C   Diagnose Heizungsregelung LSU |
-| 7 | UEGO_nrFltIdPlausB1_C   plausibility diagnosis LSU | UEGO_nrFltIdPlausB1_C   Plausibilitätsdiagnose LSU |
-| 8 | CIb_nrFltId_C   cylinder individual fault lambda interface | CIb_nrFltId_C   Zylinderindividuelle Fehler Lambda Schnittstelle |
-| 9 | CIb_nrRawFltId_C   cylinder individual lambda-fault Roh-lambda interface | CIb_nrRawFltId_C   Zylinderindividuelle Lambda-Fehler Roh-Lambda Schnittstelle |
-| 10 | FlMA_FRAId_C   mixture adaptation diagnosis | FlMA_FRAId_C   Gemischadaption Diagnose |
-| 11 | TWCD_nrFltldObdRdrB1   catalytic converter diagnosis by Bestimmung the Sauerstoffspeicherfähigkeit | TWCD_nrFltldObdRdrB1   Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfähigkeit |
-| 12 | FlSply_nrFltIdObdRdrId57_C   diagnosis plausibility check fuel supply system BDE HDR Kalt | FlSply_nrFltIdObdRdrId57_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR Kalt |
-| 13 | FlSply_nrFltIdObdRdrId58_C   diagnosis plausibility check fuel supply system BDE HDR | FlSply_nrFltIdObdRdrId58_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR |
-| 14 | CtT_nrFltIdObdRdr_C   diagnosis Thermostat engine-coolant | CtT_nrFltIdObdRdr_C   Diagnose Thermostat Motor-Kühlmittel |
-| 15 | GEVlv_nrFltIdObdRdrIntk_C   intake camshaft actuator diagnosis for OBD-Radar | GEVlv_nrFltIdObdRdrIntk_C   Einlass Nockenwellenstellerdiagnose für OBD-Radar |
-| 16 | GEVlv_nrFltIdObdRdrOutl_C   exhaust camshaft actuator diagnosis for OBD-Radar | GEVlv_nrFltIdObdRdrOutl_C   Auslass Nockenwellenstellerdiagnose für OBD-Radar |
-| 17 | HEGOD_nrFltIdS2B1RdrRLTran_C   Dynamik diagnosis sensor hinter catalytic converter rich-lean-Schaltzeit Bank1 | HEGOD_nrFltIdS2B1RdrRLTran_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Schaltzeit Bank1 |
-| 18 | HEGOD_nrFltIdS2B1RdrLRTran_C   Dynamik diagnosis sensor hinter catalytic converter lean-rich-Schaltzeit Bank1 | HEGOD_nrFltIdS2B1RdrLRTran_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Schaltzeit Bank1 |
-| 19 | HEGOD_nrFltIdS2B1RdrRLDly_C   Dynamik diagnosis sensor hinter catalytic converter rich-lean-Verzögerung Bank1 | HEGOD_nrFltIdS2B1RdrRLDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Bank1 |
-| 20 | HEGOD_nrFltIdS2B1RdrRLRawDly_C   Dynamik diagnosis sensor hinter catalytic converter rich-lean-Verzögerung raw value Bank1 | HEGOD_nrFltIdS2B1RdrRLRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Rohwert Bank1 |
-| 21 | HEGOD_nrFltIdS2B1RdrLRDly_C   Dynamik diagnosis sensor hinter catalytic converter lean-rich-Verzögerung Bank1 | HEGOD_nrFltIdS2B1RdrLRDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Bank1 |
-| 22 | HEGOD_nrFltIdS2B1RdrLRRawDly_C   Dynamik diagnosis sensor hinter catalytic converter lean-rich-Verzögerung raw value Bank1 | HEGOD_nrFltIdS2B1RdrLRRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Rohwert Bank1 |
-| 23 | CEngDsT_nrFltIdObdRdr_C   coolant temperature sensor | CEngDsT_nrFltIdObdRdr_C   Kühlmitteltemperatursensor |
-| 24 | GEVlv_nrFltIdObdRdrColdStrtIntk_C   intake camshaft actuator diagnosis cold start | GEVlv_nrFltIdObdRdrColdStrtIntk_C   Einlass Nockenwellenstellerdiagnose Kaltstart |
-| 25 | GEVlv_nrFltIdObdRdrColdStrtOutl_C   exhaust camshaft actuator diagnosis cold start | GEVlv_nrFltIdObdRdrColdStrtOutl_C   Auslass Nockenwellenstellerdiagnose Kaltstart |
-| 26 | ExhMgT_nrFltIdCSERSCatH_C   Sekundärluftdiagnose for CSERS-diagnosis | ExhMgT_nrFltIdCSERSCatH_C   Sekundärluftdiagnose für CSERS-Diagnose |
-| 27 | AirMon_nrFltIdObdRdrCrkcsLeakDiag_C  diagnosis Kurbelgehäuseentlueftung (PCV) leakage | AirMon_nrFltIdObdRdrCrkcsLeakDiag_C  Diagnose Kurbelgehäuseentlueftung (PCV) Leckage |
-| 65535 | Channel-ID not Definiert | Kanal-ID nicht Definiert |
+| 1 | HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heater output diagnosis for binary lambda sensors | HEGO_nrFltIdS2B1RiDHtgObdRdr_C   Heizleistungsdiagnose für Zweipunktlambdasonden |
+| 2 | MisfDet_nrFltIdCat_C Catalyst-damaging misfires | MisfDet_nrFltIdCat_C   Katalysatorschädigende Aussetzer |
+| 3 | MisfDet_nrFltIdEmi_C Emissions-relevant misfires | MisfDet_nrFltIdEmi_C   Emissionsrelevante Aussetzer |
+| 4 | UEGO_nrFltIdDynArB1_C LSU dynamic response diagnosis, area check | UEGO_nrFltIdDynArB1_C   Diagnose Dynamikverhalten der LSU Flächenprüfung |
+| 5 | UEGO_nrFltIdDynSlopB1_C LSU dynamic response diagnosis, slope check | UEGO_nrFltIdDynSlopB1_C   Diagnose Dynamikverhalten der LSU Steigungsprüfung |
+| 6 | UEGO_nrFltIdHeatrB1_C LSU heater control diagnosis | UEGO_nrFltIdHeatrB1_C   Diagnose Heizungsregelung LSU |
+| 7 | UEGO_nrFltIdPlausB1_C LSU plausibility diagnosis | UEGO_nrFltIdPlausB1_C   Plausibilitätsdiagnose LSU |
+| 8 | CIb_nrFltId_C Cylinder-individual faults, lambda interface | CIb_nrFltId_C   Zylinderindividuelle Fehler Lambda Schnittstelle |
+| 9 | CIb_nrRawFltId_C Cylinder-individual lambda faults, raw lambda interface | CIb_nrRawFltId_C   Zylinderindividuelle Lambda-Fehler Roh-Lambda Schnittstelle |
+| 10 | FlMA_FRAId_C Mixture adaptation diagnosis | FlMA_FRAId_C   Gemischadaption Diagnose |
+| 11 | TWCD_nrFltldObdRdrB1 Catalytic converter diagnosis by determining oxygen storage capacity | TWCD_nrFltldObdRdrB1   Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfähigkeit |
+| 12 | FlSply_nrFltIdObdRdrId57_C Plausibility check diagnosis of BDE fuel supply system, HDR cold | FlSply_nrFltIdObdRdrId57_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR Kalt |
+| 13 | FlSply_nrFltIdObdRdrId58_C Plausibility check diagnosis of BDE fuel supply system, HDR | FlSply_nrFltIdObdRdrId58_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR |
+| 14 | CtT_nrFltIdObdRdr_C Engine coolant thermostat diagnosis | CtT_nrFltIdObdRdr_C   Diagnose Thermostat Motor-Kühlmittel |
+| 15 | GEVlv_nrFltIdObdRdrIntk_C Intake camshaft actuator diagnosis for OBD radar | GEVlv_nrFltIdObdRdrIntk_C   Einlass Nockenwellenstellerdiagnose für OBD-Radar |
+| 16 | GEVlv_nrFltIdObdRdrOutl_C Exhaust camshaft actuator diagnosis for OBD radar | GEVlv_nrFltIdObdRdrOutl_C   Auslass Nockenwellenstellerdiagnose für OBD-Radar |
+| 17 | HEGOD_nrFltIdS2B1RdrRLTran_C Dynamic diagnosis of sensor downstream of catalyst, rich-to-lean switching time bank 1 | HEGOD_nrFltIdS2B1RdrRLTran_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Schaltzeit Bank1 |
+| 18 | HEGOD_nrFltIdS2B1RdrLRTran_C Dynamic diagnosis of sensor downstream of catalyst, lean-to-rich switching time bank 1 | HEGOD_nrFltIdS2B1RdrLRTran_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Schaltzeit Bank1 |
+| 19 | HEGOD_nrFltIdS2B1RdrRLDly_C Dynamic diagnosis of sensor downstream of catalyst, rich-to-lean delay bank 1 | HEGOD_nrFltIdS2B1RdrRLDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Bank1 |
+| 20 | HEGOD_nrFltIdS2B1RdrRLRawDly_C Dynamic diagnosis of sensor downstream of catalyst, rich-to-lean delay raw value bank 1 | HEGOD_nrFltIdS2B1RdrRLRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Rohwert Bank1 |
+| 21 | HEGOD_nrFltIdS2B1RdrLRDly_C Dynamic diagnosis of sensor downstream of catalyst, lean-to-rich delay bank 1 | HEGOD_nrFltIdS2B1RdrLRDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Bank1 |
+| 22 | HEGOD_nrFltIdS2B1RdrLRRawDly_C Dynamic diagnosis of sensor downstream of catalyst, lean-to-rich delay raw value bank 1 | HEGOD_nrFltIdS2B1RdrLRRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Rohwert Bank1 |
+| 23 | CEngDsT_nrFltIdObdRdr_C Coolant temperature sensor | CEngDsT_nrFltIdObdRdr_C   Kühlmitteltemperatursensor |
+| 24 | GEVlv_nrFltIdObdRdrColdStrtIntk_C Intake camshaft actuator diagnosis, cold start | GEVlv_nrFltIdObdRdrColdStrtIntk_C   Einlass Nockenwellenstellerdiagnose Kaltstart |
+| 25 | GEVlv_nrFltIdObdRdrColdStrtOutl_C Exhaust camshaft actuator diagnosis, cold start | GEVlv_nrFltIdObdRdrColdStrtOutl_C   Auslass Nockenwellenstellerdiagnose Kaltstart |
+| 26 | ExhMgT_nrFltIdCSERSCatH_C Secondary air diagnosis for CSERS diagnosis | ExhMgT_nrFltIdCSERSCatH_C   Sekundärluftdiagnose für CSERS-Diagnose |
+| 27 | AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Crankcase ventilation (PCV) leak diagnosis | AirMon_nrFltIdObdRdrCrkcsLeakDiag_C  Diagnose Kurbelgehäuseentlueftung (PCV) Leckage |
+| 65535 | Channel ID not defined | Kanal-ID nicht Definiert |
 
 ## T_1BYTE_0X59C7_TEXTTAB_SIGDOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Electrical system configuration high-voltage system not codiert | Bordnetzkonfiguration Hochvoltsystem nicht codiert |
-| 4 | Electrical system configuration high-voltage system codiert | Bordnetzkonfiguration Hochvoltsystem codiert |
+| 0 | Vehicle electrical system configuration: high-voltage system not coded | Bordnetzkonfiguration Hochvoltsystem nicht codiert |
+| 4 | Vehicle electrical system configuration: high-voltage system coded | Bordnetzkonfiguration Hochvoltsystem codiert |
 
 ## T_BAWIST_W_MSG_TEXT_DOP
 
@@ -65,10 +65,10 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Battery i.O. | Batterie i.O. |
-| 1 | Battery pruefen | Batterie pruefen |
-| 2 | Battery not i.O. | Batterie nicht i.O. |
-| 3 | invalid | ungueltig |
+| 0 | Battery OK | Batterie i.O. |
+| 1 | Check battery | Batterie pruefen |
+| 2 | Battery not OK | Batterie nicht i.O. |
+| 3 | Invalid | ungueltig |
 
 ## T_B_MOLAET_DOP
 
@@ -81,14 +81,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Adaptation laeuft | Adaption laeuft |
-| 1 | Adaptation blocked, engine outside speed-/load range | Adaption blockiert, Motor ausserhalb Drehzahl-/Lastbereich |
-| 2 | Adaptation blocked, engine temperature outside zul. range | Adaption blockiert, Motortemperatur ausserhalb zul. Bereich |
-| 3 | Adaptation blocked, KAT-temperature outside zul. range | Adaption blockiert, KAT-Temperatur ausserhalb zul. Bereich |
+| 0 | Adaptation running | Adaption laeuft |
+| 1 | Adaptation blocked, engine outside speed/load range | Adaption blockiert, Motor ausserhalb Drehzahl-/Lastbereich |
+| 2 | Adaptation blocked, engine temperature outside permitted range | Adaption blockiert, Motortemperatur ausserhalb zul. Bereich |
+| 3 | Adaptation blocked, catalyst temperature outside permitted range | Adaption blockiert, KAT-Temperatur ausserhalb zul. Bereich |
 | 4 | Adaptation blocked due to fault memory entry | Adaption blockiert wegen Fehlerspeichereintrag |
-| 5 | Adaptation blocked, weil lambda value not 1, fuel supply system not i.O., KAT-Heizen active or Bauteileschutz active | Adaption blockiert, weil Lambdawert nicht 1, Kraftstoffversorgungssystem nicht i.O., KAT-Heizen aktiv oder Bauteileschutz aktiv |
-| 6 | Adaptation blocked, weil Tankentlueftung or mixture adaptation active | Adaption blockiert, weil Tankentlueftung oder Gemischadaption aktiv |
-| 255 | Adaptation is blocked (sonstige enable condition not met) | Adaption ist blockiert (sonstige Freigabebedingung nicht erfuellt) |
+| 5 | Adaptation blocked because lambda not 1, fuel supply system not OK, catalyst heating active or component protection active | Adaption blockiert, weil Lambdawert nicht 1, Kraftstoffversorgungssystem nicht i.O., KAT-Heizen aktiv oder Bauteileschutz aktiv |
+| 6 | Adaptation blocked because tank venting or mixture adaptation active | Adaption blockiert, weil Tankentlueftung oder Gemischadaption aktiv |
+| 255 | Adaptation is blocked (other enable condition not met) | Adaption ist blockiert (sonstige Freigabebedingung nicht erfuellt) |
 
 ## T_COM_STCOMMSTATE_LIN_DOP
 
@@ -102,39 +102,39 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Function yet not gestartet | Funktion noch nicht gestartet |
-| 1 | Start condition not met | Startbedingungen nicht erfuellt |
-| 2 | Uebergabeparameter not plausible | Uebergabeparameter nicht plausibel |
-| 3 | Function wartet on enable | Funktion wartet auf Freigabe |
-| 4 | Undefinierter state | Undefinierter Zustand |
-| 5 | Function test laeuft | Funktionstest laeuft |
-| 6 | Function ergebnislos beendet | Funktion ergebnislos beendet |
-| 7 | Function abgebrochen | Funktion abgebrochen |
-| 8 | Function durchlaufen and no fault detected | Funktion durchlaufen und kein Fehler erkannt |
-| 9 | Function durchlaufen and fault detected | Funktion durchlaufen und Fehler erkannt |
+| 0 | Function not yet started | Funktion noch nicht gestartet |
+| 1 | Start conditions not met | Startbedingungen nicht erfuellt |
+| 2 | Transfer parameters not plausible | Uebergabeparameter nicht plausibel |
+| 3 | Function waiting for enable | Funktion wartet auf Freigabe |
+| 4 | Undefined state | Undefinierter Zustand |
+| 5 | Function test running | Funktionstest laeuft |
+| 6 | Function ended without result | Funktion ergebnislos beendet |
+| 7 | Function aborted | Funktion abgebrochen |
+| 8 | Function completed and no fault detected | Funktion durchlaufen und kein Fehler erkannt |
+| 9 | Function completed and fault detected | Funktion durchlaufen und Fehler erkannt |
 
 ## T_IKCTL_FLGKNKDETN_SIGDOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Gear 1 Synchronisiert | Gang 1 Synchronisiert |
-| 2 | Gear 2 Synchronisiert | Gang 2 Synchronisiert |
+| 1 | Gear 1 synchronised | Gang 1 Synchronisiert |
+| 2 | Gear 2 synchronised | Gang 2 Synchronisiert |
 | 3 | Neutral 12 | Neutral 12 |
-| 4 | Gear 3 Synchronisiert | Gang 3 Synchronisiert |
-| 8 | Gear 4 Synchronisiert | Gang 4 Synchronisiert |
+| 4 | Gear 3 synchronised | Gang 3 Synchronisiert |
+| 8 | Gear 4 synchronised | Gang 4 Synchronisiert |
 | 12 | Neutral 34 | Neutral 34 |
-| 16 | Gear 5 Synchronisiert | Gang 5 Synchronisiert |
-| 32 | Gear 6 Synchronisiert | Gang 6 Synchronisiert |
+| 16 | Gear 5 synchronised | Gang 5 Synchronisiert |
+| 32 | Gear 6 synchronised | Gang 6 Synchronisiert |
 | 48 | Neutral 56 | Neutral 56 |
-| 64 | Rueckwaertsgang Synchronisiert | Rueckwaertsgang Synchronisiert |
-| 65 | Neutral Rueckwaerts | Neutral Rueckwaerts |
+| 64 | Reverse gear synchronised | Rueckwaertsgang Synchronisiert |
+| 65 | Neutral reverse | Neutral Rueckwaerts |
 | 129 | Gear 1 | Gang 1 |
 | 130 | Gear 2 | Gang 2 |
 | 132 | Gear 3 | Gang 3 |
 | 136 | Gear 4 | Gang 4 |
 | 144 | Gear 5 | Gang 5 |
 | 160 | Gear 6 | Gang 6 |
-| 192 | Rueckwaertsgang | Rueckwaertsgang |
+| 192 | Reverse gear | Rueckwaertsgang |
 | 255 | Invalid | Ungueltig |
 
 ## T_INFO_MOTORAUSGEHER_DOP
@@ -148,14 +148,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Ausgeher | Kein Ausgeher |
-| 1 | Abstellvorgang MSA- or SST- Stop | Abstellvorgang MSA- oder SST- Stop |
-| 2 | Start process abgebrochen (Verlassen brake/clutch) | Startvorgang abgebrochen (Verlassen Bremse/Kupplung) |
-| 3 | Nichtstarter at SST- start | Nichtstarter bei SST- Start |
-| 4 | Nichtstarter MSA- start | Nichtstarter MSA- Start |
-| 5 | Ausgeher during operation (to SST- start) | Ausgeher während Betrieb (nach SST- Start) |
-| 6 | Ausgeher during operation (to MSA- start) | Ausgeher während Betrieb (nach MSA- Start) |
-| 7 | Ausgeher to CoM | Ausgeher nach CoM |
+| 0 | No stall | Kein Ausgeher |
+| 1 | Shutdown MSA or SST stop | Abstellvorgang MSA- oder SST- Stop |
+| 2 | Start aborted (brake/clutch released) | Startvorgang abgebrochen (Verlassen Bremse/Kupplung) |
+| 3 | Failed start on SST start | Nichtstarter bei SST- Start |
+| 4 | Failed start on MSA start | Nichtstarter MSA- Start |
+| 5 | Stall during operation (after SST start) | Ausgeher während Betrieb (nach SST- Start) |
+| 6 | Stall during operation (after MSA start) | Ausgeher während Betrieb (nach MSA- Start) |
+| 7 | Stall after CoM | Ausgeher nach CoM |
 
 ## T_INMRST_STCOMMSTATE_LIN_DOP
 
@@ -191,11 +191,11 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | unknown | unbekannt |
-| 1 | BSD-alternator | BSD-Generator |
-| 2 | VDA-LIN-alternator | VDA-LIN-Generator |
-| 3 | Starter-alternator SGR | Starter-Generator SGR |
-| 255 | not Definiert | nicht Definiert |
+| 0 | Unknown | unbekannt |
+| 1 | BSD generator | BSD-Generator |
+| 2 | VDA LIN generator | VDA-LIN-Generator |
+| 3 | Starter-generator SGR | Starter-Generator SGR |
+| 255 | Not defined | nicht Definiert |
 
 ## T_STATE_ENG_SIGDOP
 
@@ -203,31 +203,31 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | START | START |
 | 1 | Reference leak measurement | Referenzleck Messung |
-| 2 | Grobleck measurement | Grobleck Messung |
-| 3 | Feinleck measurement | Feinleck Messung |
-| 4 | Zweite reference leak measurement | Zweite Referenzleck Messung |
-| 6 | Diagnosis beendet | Diagnose beendet |
-| 10 | Function not Startbar | Funktion nicht Startbar |
-| 11 | Battery voltage outside range | Batteriespannung ausserhalb Bereich |
-| 12 | Schwankung of reference current too large | Schwankung von Referenzstrom zu gross |
+| 2 | Large leak measurement | Grobleck Messung |
+| 3 | Small leak measurement | Feinleck Messung |
+| 4 | Second reference leak measurement | Zweite Referenzleck Messung |
+| 6 | Diagnosis ended | Diagnose beendet |
+| 10 | Function cannot be started | Funktion nicht Startbar |
+| 11 | Battery voltage out of range | Batteriespannung ausserhalb Bereich |
+| 12 | Reference current fluctuation too large | Schwankung von Referenzstrom zu gross |
 | 13 | Electrical fault present | Elektrischer Fehler vorhanden |
-| 14 | Max. diagnosis time erreicht/exceeded | Max. Diagnosezeit erreicht/ueberschritten |
-| 15 | No enable TEV active | Kein Freigabe TEV Aktiv |
-| 20 | Function was Abgebrochen | Funktion wurde Abgebrochen |
-| 23 | Spannungsschwankung too large | Spannungsschwankung zu gross |
-| 24 | Ignition an | Zuendung an |
-| 30 | Function beendet: tank Dicht | Funktion beendet: Tank Dicht |
-| 31 | Function beendet: Feinleck detected | Funktion beendet: Feinleck erkannt |
-| 32 | Function beendet: Grobleck detected | Funktion beendet: Grobleck erkannt |
-| 33 | Function beendet: module fault | Funktion beendet: Modulfehler |
-| 34 | Function beendet: no Grobleck detected | Funktion beendet: Kein Grobleck erkannt |
-| 255 | Function yet not gestartet | Funktion noch nicht gestartet |
+| 14 | Max. diagnosis time reached/exceeded | Max. Diagnosezeit erreicht/ueberschritten |
+| 15 | No enable, TEV active | Kein Freigabe TEV Aktiv |
+| 20 | Function was aborted | Funktion wurde Abgebrochen |
+| 23 | Voltage fluctuation too large | Spannungsschwankung zu gross |
+| 24 | Ignition on | Zuendung an |
+| 30 | Function ended: tank sealed | Funktion beendet: Tank Dicht |
+| 31 | Function ended: small leak detected | Funktion beendet: Feinleck erkannt |
+| 32 | Function ended: large leak detected | Funktion beendet: Grobleck erkannt |
+| 33 | Function ended: module fault | Funktion beendet: Modulfehler |
+| 34 | Function ended: no large leak detected | Funktion beendet: Kein Grobleck erkannt |
+| 255 | Function not yet started | Funktion noch nicht gestartet |
 
 ## T_SYC_STMNCOORD_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 4 | Power management histogram loeschen. | Powermanagement Histogramm loeschen. |
+| 4 | Clear power management histogram | Powermanagement Histogramm loeschen. |
 
 ## T_SYC_STPOSTDRV_DOP
 

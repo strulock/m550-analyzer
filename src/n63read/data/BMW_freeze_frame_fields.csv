@@ -48,7 +48,7 @@
 0x4C80,Klimabedienteil 3. Sitzreihe,Climate control panel 3. Sitzreihe,1,0x4D00,Gebläseregler,1,0x4E00,Klappenmotor,0
 0x4F00,Elektrischer Kältemittelverdichter eKMV,Electric Kältemittelverdichter eKMV,1,0x4F80,Elektrischer Zuheizer PTC,1,0x4F88,Elektrischer Zuheizer PTC 48V,1
 0x4FC0,Elektrischer Zuheizer 3. Sitzreihe,Electric auxiliary heater 3. Sitzreihe,1,0x6000,Standheizung,1,0x6100,Wärmepumpe,1
-0x6180,LIN-Zusatzwasserpumpe,LIN-Zusatzwasserpumpe,1,0x6200,elektrischer Durchlaufheizer,1,0x6300,Ionisator,1
+0x6180,LIN-Zusatzwasserpumpe,LIN auxiliary water pump,1,0x6200,elektrischer Durchlaufheizer,1,0x6300,Ionisator,1
 0x6400,Bedufter,Bedufter,1,0x6500,Sense-Touch-Modul links,1,0x6600,Sense-Touch-Modul rechts,1
 0x6700,Hochdruck- Temperatursensor 1,High pressure- temperature sensor 1,1,0x6710,Niederdruck- Temperatursensor 1,1,0x6720,Elektrisches Expansionsventil,1
 0x6730,Kältekreislauf Dreiwegeventil 1,Kältekreislauf Dreiwegeventil 1,1,0x6740,Unbelüfteter Innenraumtemperaturfühler 1,1,0x6750,Waschventilblock,1
@@ -89,17 +89,17 @@
 0x5D10,Sitzkühlung Fahrer,Seat cooling driver,1,0x5D20,Sitzkühlung Beifahrer,1,0x5D30,Sitzkühlung Fahrer hinten,1
 0x5D40,Sitzkühlung Beifahrer hinten,Seat cooling passenger rear,1,0x5D50,Nackenwärmer Fahrer hinten,1,0x5D60,Nackenwärmer Beifahrer hinten,1
 0x5D70,Waschpumpen-Steuergerät PSG,Waschpumpen-control unit PSG,1,0x5D80,Waschpumpen-Steuergerät PSG2 VAF,1,0x5E01,Innenbeleuchtung Fußraum Fahrer vorne,1
-0x5E02,Innenbeleuchtung Fußraum Fahrer hinten,Interior lighting Fußraum driver rear,1,0x5E03,Innenbeleuchtung Fußraum Beifahrer vorne,1,0x5E04,Innenbeleuchtung Fußraum Beifahrer hinten,1
+0x5E02,Innenbeleuchtung Fußraum Fahrer hinten,"Interior lighting, footwell driver side rear",1,0x5E03,Innenbeleuchtung Fußraum Beifahrer vorne,1,0x5E04,Innenbeleuchtung Fußraum Beifahrer hinten,1
 0x5E05,Innenbeleuchtung Konturlinie Fahrertür vorne,Interior lighting Konturlinie driver door front,1,0x5E06,Innenbeleuchtung Dekor indirekt Fahrertür vorne,1,0x5E07,Innenbeleuchtung Türöffner Fahrertür vorne,1
-0x5E08,Innenbeleuchtung Fahrertür vorne Kartentasche,Interior lighting driver door front Kartentasche,1,0x5E09,Innenbeleuchtung Konturlinie Fahrertür hinten,1,0x5E0A,Innenbeleuchtung Dekor indirekt Fahrertür hinten,1
-0x5E0B,Innenbeleuchtung Fahrertür hinten Kartentasche,Interior lighting driver door rear Kartentasche,1,0x5E0C,Innenbeleuchtung Konturlinie Beifahrertür vorne,1,0x5E0D,Innenbeleuchtung Dekor indirekt Beifahrertür vorne,1
+0x5E08,Innenbeleuchtung Fahrertür vorne Kartentasche,"Interior lighting, driver's door front map pocket",1,0x5E09,Innenbeleuchtung Konturlinie Fahrertür hinten,1,0x5E0A,Innenbeleuchtung Dekor indirekt Fahrertür hinten,1
+0x5E0B,Innenbeleuchtung Fahrertür hinten Kartentasche,"Interior lighting, driver's side rear door map pocket",1,0x5E0C,Innenbeleuchtung Konturlinie Beifahrertür vorne,1,0x5E0D,Innenbeleuchtung Dekor indirekt Beifahrertür vorne,1
 0x5E0E,Innenbeleuchtung Türöffner Beifahrertür vorne,Interior lighting Türöffner passenger door front,1,0x5E0F,Innenbeleuchtung Beifahrertür vorne Kartentasche,1,0x5E10,Innenbeleuchtung Konturlinie Beifahrertür hinten,1
 0x5E11,Innenbeleuchtung Dekor indirekt Beifahrertür hinten,Interior lighting Dekor indirekt passenger door rear,1,0x5E12,Innenbeleuchtung Beifahrertür hinten Kartentasche,1,0x5E13,Innenbeleuchtung Konturlinie I-Tafel Fahrer,1
 0x5E14,Innenbeleuchtung Dekor indirekt I-Tafel Fahrer,Interior lighting Dekor indirekt I-Tafel driver,1,0x5E15,Innenbeleuchtung Konturlinie I-Tafel Mitte,1,0x5E16,Innenbeleuchtung Dekor indirekt I-Tafel Mitte,1
 0x5E17,Innenbeleuchtung Konturlinie I-Tafel Beifahrer,Interior lighting Konturlinie I-Tafel passenger,1,0x5E18,Innenbeleuchtung Dekor indirekt I-Tafel Beifahrer,1,0x5E19,Innenbeleuchtung B-Säule Fahrer,1
-0x5E1A,Innenbeleuchtung B-Säule Beifahrer,Interior lighting B-pillar passenger,1,0x5E1B,Innenbeleuchtung Lehne Fahrersitz,1,0x5E1C,Innenbeleuchtung Lehne Beifahrersitz,1
+0x5E1A,Innenbeleuchtung B-Säule Beifahrer,"Interior lighting, B-pillar passenger side",1,0x5E1B,Innenbeleuchtung Lehne Fahrersitz,1,0x5E1C,Innenbeleuchtung Lehne Beifahrersitz,1
 0x5E1D,Innenbeleuchtung Centerstack Ablagefach,Interior lighting Centerstack Ablagefach,1,0x5E1E,Innenbeleuchtung Mittelkonsole Ablagefach,1,0x5E1F,Innenbeleuchtung Gangwahlschalter links,1
-0x5E20,Innenbeleuchtung Gangwahlschalter rechts,Interior lighting Gangwahlschalter right,1,0x5E21,Innenbeleuchtung Türöffner Fahrertür hinten,1,0x5E22,Innenbeleuchtung Türöffner Beifahrertür hinten,1
+0x5E20,Innenbeleuchtung Gangwahlschalter rechts,"Interior lighting, gear selector switch right",1,0x5E21,Innenbeleuchtung Türöffner Fahrertür hinten,1,0x5E22,Innenbeleuchtung Türöffner Beifahrertür hinten,1
 0x5E23,Innenbeleuchtung Fußraum Fahrer 3SR,Interior lighting Fußraum driver 3SR,1,0x5E24,Innenbeleuchtung Fußraum Beifahrer 3SR,1,0x5E25,Innenbeleuchtung Kartentasche Fahrertür 3SR,1
 0x5E26,Innenbeleuchtung Kartentasche Beifahrertür 3SR,Interior lighting Kartentasche passenger door 3SR,1,0x5E27,Innenbeleuchtung Konturlinie Fahrertür 3SR,1,0x5E28,Innenbeleuchtung Konturlinie Beifahrertür 3SR,1
 0x5E29,Innenbeleuchtung Dekor indirekt Fahrertür 3SR,Interior lighting Dekor indirekt driver door 3SR,1,0x5E2A,Innenbeleuchtung Dekor indirekt Beifahrertür 3SR,1,0x5E2B,Innenbeleuchtung Konturlinie Mittelkonsole Fahrer vorne,1

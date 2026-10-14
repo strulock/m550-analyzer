@@ -1,70 +1,70 @@
 ﻿table_name,value,text_de,text_en
-BDC_G11.FH_THERMOMONITOR_AKTIV,0x00,Keine Thermoschwelle aktiv (übersteuert),No Thermoschwelle active (übersteuert)
-BDC_G11.FH_THERMOMONITOR_AKTIV,0x01,Thermo 90 aktiv (übersteuert),Thermo 90 active (übersteuert)
-BDC_G11.FH_THERMOMONITOR_AKTIV,0x02,Thermo 100 aktiv (übersteuert),Thermo 100 active (übersteuert)
-BDC_G11.FH_THERMOMONITOR_AKTIV,0x03,Normalbetrieb Schwellen werden entsprechend dem Ergebnis der Berechnung gesetzt,Normalbetrieb threshold be entsprechend the Ergebnis the Berechnung set
-BDC_G11.FH_THERMOMONITOR_AKTIV,0x04,"Thermo 90 aktiv, nicht übersteuert","Thermo 90 active, not übersteuert"
-BDC_G11.FH_THERMOMONITOR_AKTIV,0x05,"Thermo 100 aktiv, nicht übersteuert","Thermo 100 active, not übersteuert"
+BDC_G11.FH_THERMOMONITOR_AKTIV,0x00,Keine Thermoschwelle aktiv (übersteuert),No thermal threshold active (overridden)
+BDC_G11.FH_THERMOMONITOR_AKTIV,0x01,Thermo 90 aktiv (übersteuert),Thermo 90 active (overridden)
+BDC_G11.FH_THERMOMONITOR_AKTIV,0x02,Thermo 100 aktiv (übersteuert),Thermo 100 active (overridden)
+BDC_G11.FH_THERMOMONITOR_AKTIV,0x03,Normalbetrieb Schwellen werden entsprechend dem Ergebnis der Berechnung gesetzt,Normal operation: thresholds are set according to the calculation result
+BDC_G11.FH_THERMOMONITOR_AKTIV,0x04,"Thermo 90 aktiv, nicht übersteuert","Thermo 90 active, not overridden"
+BDC_G11.FH_THERMOMONITOR_AKTIV,0x05,"Thermo 100 aktiv, nicht übersteuert","Thermo 100 active, not overridden"
 BDC_G11.FH_THERMOMONITOR_AKTIV,0xFF,Ungültig,Invalid
-BDC_G11.HOD_STATUS,0x00,"Handsoff erkannt, QU_HOFF_RCOG_SEN_LIN = 0x9","Handsoff detected, QU_HOFF_RCOG_SEN_LIN = 0x9"
-BDC_G11.HOD_STATUS,0x01,"Handsoff funktionsbereit, QU_HOFF_RCOG_SEN_LIN = 0x1","Handsoff funktionsbereit, QU_HOFF_RCOG_SEN_LIN = 0x1"
-BDC_G11.HOD_STATUS,0x02,"Handsoff nicht funktionsbereit oder Energiesparmode, QU_HOFF_RCOG_SEN_LIN = 0x5 oder 0xD oder 0xE oder 0xF","Handsoff not funktionsbereit or Energiesparmode, QU_HOFF_RCOG_SEN_LIN = 0x5 or 0xD or 0xE or 0xF"
-BDC_G11.HOD_STATUS,0xFF,ungültiger Wert,invalid value
-BDC_G11.HSS_TYPE,0x00,Keine Höhenstandssensoren,No Höhenstandssensoren
-BDC_G11.HSS_TYPE,0x01,Höhenstandssensoren durch CAN,Höhenstandssensoren by CAN
-BDC_G11.HSS_TYPE,0x02,Höhenstandssensoren an BDC,Höhenstandssensoren an BDC
+BDC_G11.HOD_STATUS,0x00,"Handsoff erkannt, QU_HOFF_RCOG_SEN_LIN = 0x9","Hands-off detected, QU_HOFF_RCOG_SEN_LIN = 0x9"
+BDC_G11.HOD_STATUS,0x01,"Handsoff funktionsbereit, QU_HOFF_RCOG_SEN_LIN = 0x1","Hands-off ready for operation, QU_HOFF_RCOG_SEN_LIN = 0x1"
+BDC_G11.HOD_STATUS,0x02,"Handsoff nicht funktionsbereit oder Energiesparmode, QU_HOFF_RCOG_SEN_LIN = 0x5 oder 0xD oder 0xE oder 0xF","Hands-off not ready for operation or energy saving mode, QU_HOFF_RCOG_SEN_LIN = 0x5 or 0xD or 0xE or 0xF"
+BDC_G11.HOD_STATUS,0xFF,ungültiger Wert,Invalid value
+BDC_G11.HSS_TYPE,0x00,Keine Höhenstandssensoren,No ride height sensors
+BDC_G11.HSS_TYPE,0x01,Höhenstandssensoren durch CAN,Ride height sensors via CAN
+BDC_G11.HSS_TYPE,0x02,Höhenstandssensoren an BDC,Ride height sensors on BDC
 BDC_G11.HSS_TYPE,0xFF,Wert ungültig,Value invalid
-BDC_G11.LICHTSPERRE,0x00,Lichtsperre nicht aktiv,Lichtsperre not active
-BDC_G11.LICHTSPERRE,0x01,Lichtsperre aktiv,Lichtsperre active
-BDC_G11.LICHTSPERRE,0xFF,ungültig,invalid
-BDC_G11.PWF_MESSEMODUS,0,MESSEMODUS_NICHT_AKTIV,MESSEMODUS_NICHT_AKTIV
+BDC_G11.LICHTSPERRE,0x00,Lichtsperre nicht aktiv,Light lock not active
+BDC_G11.LICHTSPERRE,0x01,Lichtsperre aktiv,Light lock active
+BDC_G11.LICHTSPERRE,0xFF,ungültig,Invalid
+BDC_G11.PWF_MESSEMODUS,0,MESSEMODUS_NICHT_AKTIV,Showroom mode not active
 BDC_G11.PWF_MESSEMODUS,0xFF,Wert ungültig,Value invalid
-BDC_G11.PWF_MESSEMODUS,1,MESSEMODUS_AKTIV,MESSEMODUS_AKTIV
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x0,reserviert,reserviert
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x1,Parken_BN_niO,Parken_BN_niO
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x2,Parken_BN_iO,Parken_BN_iO
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x3,Standfunktionen_Kunde_nicht_im_FZG,Standfunktionen_Kunde_nicht_im_FZG
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x4,reserviert,reserviert
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x5,Wohnen,Wohnen
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x6,reserviert,reserviert
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x7,Pruefen_Analyse_Diagnose,Pruefen_Analyse_Diagnose
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x8,Fahrbereitschaft_herstellen,Fahrbereitschaft_herstellen
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x9,reserviert,reserviert
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xA,Fahren,Fahren
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xB,reserviert,reserviert
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xC,Fahrbereitschaft_beenden,Fahrbereitschaft_beenden
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xD,reserviert,reserviert
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xE,nicht verfügbar,not available
-BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xF,ungültig,invalid
-BDC_G11.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
-BDC_G11.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
-BDC_G11.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
-BDC_G11.TAB_ANTENNA_LOCATION,0x01,Innenraum vorne,Innenraum front
-BDC_G11.TAB_ANTENNA_LOCATION,0x02,Innenraum hinten,Innenraum rear
-BDC_G11.TAB_ANTENNA_LOCATION,0x03,Aussenraum links,Aussenraum left
-BDC_G11.TAB_ANTENNA_LOCATION,0x04,Aussenraum rechts,Aussenraum right
-BDC_G11.TAB_ANTENNA_LOCATION,0x05,Kofferraum mittig,Kofferraum mittig
-BDC_G11.TAB_ANTENNA_LOCATION,0x06,Stossfänger hinten,Bumper rear
-BDC_G11.TAB_ANTENNA_LOCATION,0x07,Kofferraum links,Kofferraum left
-BDC_G11.TAB_ANTENNA_LOCATION,0x08,Kofferraum rechts,Kofferraum right
-BDC_G11.TAB_ANTENNA_LOCATION,0x09,Hutablage,Hutablage
-BDC_G11.TAB_ANTENNA_LOCATION,0xFF,nicht verbaut,not verbaut
-BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x00,nicht vorhanden,not present
-BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x01,vorhanden (2 getrennte Heizflächen in der Mittelarmlehne hinten),present (2 getrennte Heizflächen in the Mittelarmlehne rear)
-BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x02,vorhanden (1 gemeinsame Heizfläche in der Mittelarmlehne hinten),present (1 gemeinsame Heizfläche in the Mittelarmlehne rear)
-BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x03,vorhanden (2 gemeinsame Heizflächen in der Mittelarmlehne hinten),present (2 gemeinsame Heizflächen in the Mittelarmlehne rear)
-BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0xFF,ungültig,invalid
-BDC_G11.TAB_AUC_STUFE,0x00,Luftgütestufe 0,Luftgütestufe 0
-BDC_G11.TAB_AUC_STUFE,0x01,Luftgütestufe 1,Luftgütestufe 1
-BDC_G11.TAB_AUC_STUFE,0x02,Luftgütestufe 2,Luftgütestufe 2
-BDC_G11.TAB_AUC_STUFE,0x03,Luftgütestufe 3,Luftgütestufe 3
-BDC_G11.TAB_AUC_STUFE,0x04,Luftgütestufe 4,Luftgütestufe 4
-BDC_G11.TAB_AUC_STUFE,0x05,Luftgütestufe 5,Luftgütestufe 5
-BDC_G11.TAB_AUC_STUFE,0x06,Luftgütestufe 6,Luftgütestufe 6
-BDC_G11.TAB_AUC_STUFE,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0x00,Keine Abblendenfunktion,No Abblendenfunktion
-BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0x01,Abblendfunktion beide Außenspiegel vorhanden,Abblendfunktion beide exterior mirror present
-BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0x02,Abblendfunktion nur Außenspiegel Fahrerseite  vorhanden,Abblendfunktion nur exterior mirror driver side  present
+BDC_G11.PWF_MESSEMODUS,1,MESSEMODUS_AKTIV,Showroom mode active
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x0,reserviert,Reserved
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x1,Parken_BN_niO,"Parking, vehicle electrical system not OK"
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x2,Parken_BN_iO,"Parking, vehicle electrical system OK"
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x3,Standfunktionen_Kunde_nicht_im_FZG,"Stationary functions, customer not in vehicle"
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x4,reserviert,Reserved
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x5,Wohnen,Residing
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x6,reserviert,Reserved
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x7,Pruefen_Analyse_Diagnose,Testing/analysis/diagnosis
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x8,Fahrbereitschaft_herstellen,Establishing drive readiness
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0x9,reserviert,Reserved
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xA,Fahren,Driving
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xB,reserviert,Reserved
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xC,Fahrbereitschaft_beenden,Ending drive readiness
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xD,reserviert,Reserved
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xE,nicht verfügbar,Not available
+BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS,0xF,ungültig,Invalid
+BDC_G11.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECU programmable multiple times
+BDC_G11.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECU fully programmable at least once
+BDC_G11.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECU no longer programmable
+BDC_G11.TAB_ANTENNA_LOCATION,0x01,Innenraum vorne,Interior front
+BDC_G11.TAB_ANTENNA_LOCATION,0x02,Innenraum hinten,Interior rear
+BDC_G11.TAB_ANTENNA_LOCATION,0x03,Aussenraum links,Exterior left
+BDC_G11.TAB_ANTENNA_LOCATION,0x04,Aussenraum rechts,Exterior right
+BDC_G11.TAB_ANTENNA_LOCATION,0x05,Kofferraum mittig,Luggage compartment centre
+BDC_G11.TAB_ANTENNA_LOCATION,0x06,Stossfänger hinten,Rear bumper
+BDC_G11.TAB_ANTENNA_LOCATION,0x07,Kofferraum links,Luggage compartment left
+BDC_G11.TAB_ANTENNA_LOCATION,0x08,Kofferraum rechts,Luggage compartment right
+BDC_G11.TAB_ANTENNA_LOCATION,0x09,Hutablage,Rear parcel shelf
+BDC_G11.TAB_ANTENNA_LOCATION,0xFF,nicht verbaut,Not fitted
+BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x00,nicht vorhanden,Not present
+BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x01,vorhanden (2 getrennte Heizflächen in der Mittelarmlehne hinten),Present (2 separate heating surfaces in the rear centre armrest)
+BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x02,vorhanden (1 gemeinsame Heizfläche in der Mittelarmlehne hinten),Present (1 common heating surface in the rear centre armrest)
+BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0x03,vorhanden (2 gemeinsame Heizflächen in der Mittelarmlehne hinten),Present (2 common heating surfaces in the rear centre armrest)
+BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH,0xFF,ungültig,Invalid
+BDC_G11.TAB_AUC_STUFE,0x00,Luftgütestufe 0,Air quality level 0
+BDC_G11.TAB_AUC_STUFE,0x01,Luftgütestufe 1,Air quality level 1
+BDC_G11.TAB_AUC_STUFE,0x02,Luftgütestufe 2,Air quality level 2
+BDC_G11.TAB_AUC_STUFE,0x03,Luftgütestufe 3,Air quality level 3
+BDC_G11.TAB_AUC_STUFE,0x04,Luftgütestufe 4,Air quality level 4
+BDC_G11.TAB_AUC_STUFE,0x05,Luftgütestufe 5,Air quality level 5
+BDC_G11.TAB_AUC_STUFE,0x06,Luftgütestufe 6,Air quality level 6
+BDC_G11.TAB_AUC_STUFE,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0x00,Keine Abblendenfunktion,No dimming function
+BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0x01,Abblendfunktion beide Außenspiegel vorhanden,Dimming function present for both exterior mirrors
+BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0x02,Abblendfunktion nur Außenspiegel Fahrerseite  vorhanden,Dimming function present for driver's side exterior mirror only
 BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN,0xFF,Wert ungültig,Value invalid
 BDC_G11.TAB_CARCODE_WISCHERMOTOR,0x00,F01,F01
 BDC_G11.TAB_CARCODE_WISCHERMOTOR,0x01,F02,F02
@@ -84,207 +84,207 @@ BDC_G11.TAB_CARCODE_WISCHERMOTOR,0x0E,I12 RL,I12 RL
 BDC_G11.TAB_CARCODE_WISCHERMOTOR,0x0F,F26,F26
 BDC_G11.TAB_CARCODE_WISCHERMOTOR,0x10,"G11, G12","G11, G12"
 BDC_G11.TAB_CARCODE_WISCHERMOTOR,0x11,"G30, G31","G30, G31"
-BDC_G11.TAB_CARCODE_WISCHERMOTOR,0xFF,ungültig,invalid
-BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE,0x00,Antirutschmatte eingefahren,Antirutschmatte eingefahren
-BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE,0x01,Antirutschmatte ausgefahren,Antirutschmatte ausgefahren
-BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_CAS_DIGITAL_EINGANG,0,nicht aktiv / nicht betätigt,not active / not betätigt
-BDC_G11.TAB_CAS_DIGITAL_EINGANG,1,aktiv / betätigt,active / betätigt
-BDC_G11.TAB_CAS_DIGITAL_EINGANG,2,nicht verbaut / Status nicht verfügbar,not verbaut / status not available
-BDC_G11.TAB_CAS_DIGITAL_EINGANG,3,ungültig,invalid
-BDC_G11.TAB_CAS_DIGITAL_EINGANG,255,ungültig / Fehler erkannt,invalid / fault detected
-BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL,0,Low-Pegel,Low-Pegel
-BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL,1,High-Pegel,High-Pegel
-BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL,255,ungültig / Fehler erkannt,invalid / fault detected
+BDC_G11.TAB_CARCODE_WISCHERMOTOR,0xFF,ungültig,Invalid
+BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE,0x00,Antirutschmatte eingefahren,Anti-slip mat retracted
+BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE,0x01,Antirutschmatte ausgefahren,Anti-slip mat extended
+BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_CAS_DIGITAL_EINGANG,0,nicht aktiv / nicht betätigt,Not active / not operated
+BDC_G11.TAB_CAS_DIGITAL_EINGANG,1,aktiv / betätigt,Active / operated
+BDC_G11.TAB_CAS_DIGITAL_EINGANG,2,nicht verbaut / Status nicht verfügbar,Not fitted / status not available
+BDC_G11.TAB_CAS_DIGITAL_EINGANG,3,ungültig,Invalid
+BDC_G11.TAB_CAS_DIGITAL_EINGANG,255,ungültig / Fehler erkannt,Invalid / fault detected
+BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL,0,Low-Pegel,Low level
+BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL,1,High-Pegel,High level
+BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL,255,ungültig / Fehler erkannt,Invalid / fault detected
 BDC_G11.TAB_CAS_FH_STATUS,0,Geschlossen,Closed
-BDC_G11.TAB_CAS_FH_STATUS,1,Zwischenstellung,Zwischenstellung
+BDC_G11.TAB_CAS_FH_STATUS,1,Zwischenstellung,Intermediate position
 BDC_G11.TAB_CAS_FH_STATUS,2,Offen,Open
-BDC_G11.TAB_CAS_FH_STATUS,255,ungültig/unbekannt,invalid/unknown
-BDC_G11.TAB_CAS_GANG,1,N - Kein Kraftschluss,N - no Kraftschluss
-BDC_G11.TAB_CAS_GANG,2,R - Rückwärtsgang,R - Rückwärtsgang
-BDC_G11.TAB_CAS_GANG,3,P - Parkposition,P - Parkposition
-BDC_G11.TAB_CAS_GANG,5,1. Gang,1. gear
-BDC_G11.TAB_CAS_GANG,6,2. Gang,2. gear
-BDC_G11.TAB_CAS_GANG,7,3. Gang,3. gear
-BDC_G11.TAB_CAS_GANG,8,4. Gang,4. gear
-BDC_G11.TAB_CAS_GANG,9,5. Gang,5. gear
-BDC_G11.TAB_CAS_GANG,10,6. Gang,6. gear
-BDC_G11.TAB_CAS_GANG,11,7. Gang,7. gear
-BDC_G11.TAB_CAS_GANG,12,8. Gang,8. gear
-BDC_G11.TAB_CAS_GANG,13,9. Gang,9. gear
-BDC_G11.TAB_CAS_GANG,15,ungültig,invalid
-BDC_G11.TAB_CAS_GANG,255,ungültig,invalid
-BDC_G11.TAB_CAS_GESCHW_STATUS,0,Fahrzeug steht,Vehicle steht
-BDC_G11.TAB_CAS_GESCHW_STATUS,1,Fahrzeug fährt vorwärts,Vehicle fährt vorwärts
-BDC_G11.TAB_CAS_GESCHW_STATUS,2,Fahrzeug fährt rückwärts,Vehicle fährt rückwärts
-BDC_G11.TAB_CAS_GESCHW_STATUS,3,Fahrzeug fährt,Vehicle fährt
-BDC_G11.TAB_CAS_GESCHW_STATUS,4,"Fahrzeug steht, Hinterachse auf Rollenprüfstand erkannt","Vehicle steht, rear axle on Rollenprüfstand detected"
-BDC_G11.TAB_CAS_GESCHW_STATUS,5,"Fahrzeug steht, Zwei-Achs-Rollenbetrieb gesetzt","Vehicle steht, Zwei-Achs-Rollenbetrieb set"
-BDC_G11.TAB_CAS_GESCHW_STATUS,6,"Fahrzeug steht, Vorderachse auf Rollenprüfstand erkannt","Vehicle steht, front axle on Rollenprüfstand detected"
+BDC_G11.TAB_CAS_FH_STATUS,255,ungültig/unbekannt,Invalid/unknown
+BDC_G11.TAB_CAS_GANG,1,N - Kein Kraftschluss,N - no power transmission
+BDC_G11.TAB_CAS_GANG,2,R - Rückwärtsgang,R - reverse gear
+BDC_G11.TAB_CAS_GANG,3,P - Parkposition,P - park position
+BDC_G11.TAB_CAS_GANG,5,1. Gang,Gear 1
+BDC_G11.TAB_CAS_GANG,6,2. Gang,Gear 2
+BDC_G11.TAB_CAS_GANG,7,3. Gang,Gear 3
+BDC_G11.TAB_CAS_GANG,8,4. Gang,Gear 4
+BDC_G11.TAB_CAS_GANG,9,5. Gang,Gear 5
+BDC_G11.TAB_CAS_GANG,10,6. Gang,Gear 6
+BDC_G11.TAB_CAS_GANG,11,7. Gang,Gear 7
+BDC_G11.TAB_CAS_GANG,12,8. Gang,Gear 8
+BDC_G11.TAB_CAS_GANG,13,9. Gang,Gear 9
+BDC_G11.TAB_CAS_GANG,15,ungültig,Invalid
+BDC_G11.TAB_CAS_GANG,255,ungültig,Invalid
+BDC_G11.TAB_CAS_GESCHW_STATUS,0,Fahrzeug steht,Vehicle stationary
+BDC_G11.TAB_CAS_GESCHW_STATUS,1,Fahrzeug fährt vorwärts,Vehicle moving forwards
+BDC_G11.TAB_CAS_GESCHW_STATUS,2,Fahrzeug fährt rückwärts,Vehicle moving backwards
+BDC_G11.TAB_CAS_GESCHW_STATUS,3,Fahrzeug fährt,Vehicle moving
+BDC_G11.TAB_CAS_GESCHW_STATUS,4,"Fahrzeug steht, Hinterachse auf Rollenprüfstand erkannt","Vehicle stationary, rear axle on roller dynamometer detected"
+BDC_G11.TAB_CAS_GESCHW_STATUS,5,"Fahrzeug steht, Zwei-Achs-Rollenbetrieb gesetzt","Vehicle stationary, two-axle roller mode set"
+BDC_G11.TAB_CAS_GESCHW_STATUS,6,"Fahrzeug steht, Vorderachse auf Rollenprüfstand erkannt","Vehicle stationary, front axle on roller dynamometer detected"
 BDC_G11.TAB_CAS_GESCHW_STATUS,255,Signal ungültig/unbekannt,Signal invalid/unknown
-BDC_G11.TAB_CAS_HALL_SENSOR,0,Sensor nicht verbaut/ nicht vorhanden (Open Load),Sensor not verbaut/ not present (Open Load)
+BDC_G11.TAB_CAS_HALL_SENSOR,0,Sensor nicht verbaut/ nicht vorhanden (Open Load),Sensor not fitted/not present (open load)
 BDC_G11.TAB_CAS_HALL_SENSOR,2,Sensor nicht aktiv,Sensor not active
 BDC_G11.TAB_CAS_HALL_SENSOR,4,Sensor aktiv,Sensor active
 BDC_G11.TAB_CAS_HALL_SENSOR,6,Kurzschluss,Short circuit
-BDC_G11.TAB_CAS_HALL_SENSOR,255,ungültig / unplausibel / unbekannt,invalid / implausible / unknown
+BDC_G11.TAB_CAS_HALL_SENSOR,255,ungültig / unplausibel / unbekannt,Invalid / implausible / unknown
 BDC_G11.TAB_CAS_HECKKLAPPENSENSOR,0,Geschlossen,Closed
-BDC_G11.TAB_CAS_HECKKLAPPENSENSOR,1,Geöffnet,Open
+BDC_G11.TAB_CAS_HECKKLAPPENSENSOR,1,Geöffnet,Opened
 BDC_G11.TAB_CAS_HECKKLAPPENSENSOR,2,Fehler,Fault
 BDC_G11.TAB_CAS_HECKKLAPPENSENSOR,255,Ungültig,Invalid
-BDC_G11.TAB_CAS_HW_KONTAKT,0x00,Leitungsbruch / Kurzschluss nach Batteriespannung,Leitungsbruch / short circuit to battery voltage
+BDC_G11.TAB_CAS_HW_KONTAKT,0x00,Leitungsbruch / Kurzschluss nach Batteriespannung,Open circuit / short circuit to battery voltage
 BDC_G11.TAB_CAS_HW_KONTAKT,0x02,Tür geschlossen,Door closed
 BDC_G11.TAB_CAS_HW_KONTAKT,0x04,Tür offen,Door open
 BDC_G11.TAB_CAS_HW_KONTAKT,0x06,Kurzschluss nach Masse,Short circuit to ground
-BDC_G11.TAB_CAS_HW_KONTAKT,0x08,Kontakt nicht verbaut,Contact not verbaut
-BDC_G11.TAB_CAS_HW_KONTAKT,0xFF,ungültig / unplausibel / unbekannt,invalid / implausible / unknown
+BDC_G11.TAB_CAS_HW_KONTAKT,0x08,Kontakt nicht verbaut,Contact not fitted
+BDC_G11.TAB_CAS_HW_KONTAKT,0xFF,ungültig / unplausibel / unbekannt,Invalid / implausible / unknown
 BDC_G11.TAB_CAS_KLEMMENSTATUS,0,INIT,INIT
 BDC_G11.TAB_CAS_KLEMMENSTATUS,1,Reserve,Reserve
-BDC_G11.TAB_CAS_KLEMMENSTATUS,2,KL30 alle Klemmen aus,KL30 alle terminal from
-BDC_G11.TAB_CAS_KLEMMENSTATUS,3,KL30F-Änderung,KL30F-Änderung
-BDC_G11.TAB_CAS_KLEMMENSTATUS,4,KL30F,KL30F
-BDC_G11.TAB_CAS_KLEMMENSTATUS,5,KL30B-Änderung,KL30B-Änderung
-BDC_G11.TAB_CAS_KLEMMENSTATUS,6,KL30B,KL30B
-BDC_G11.TAB_CAS_KLEMMENSTATUS,7,KLR-Änderung,KLR-Änderung
-BDC_G11.TAB_CAS_KLEMMENSTATUS,8,KLR,KLR
-BDC_G11.TAB_CAS_KLEMMENSTATUS,9,KL15-Änderung,KL15-Änderung
-BDC_G11.TAB_CAS_KLEMMENSTATUS,10,KL15,KL15
-BDC_G11.TAB_CAS_KLEMMENSTATUS,11,KL50-Verzögerung,KL50-Verzögerung
-BDC_G11.TAB_CAS_KLEMMENSTATUS,12,KL50-Änderung,KL50-Änderung
-BDC_G11.TAB_CAS_KLEMMENSTATUS,13,KL50,KL50
+BDC_G11.TAB_CAS_KLEMMENSTATUS,2,KL30 alle Klemmen aus,"Terminal 30, all terminals off"
+BDC_G11.TAB_CAS_KLEMMENSTATUS,3,KL30F-Änderung,Terminal 30F change
+BDC_G11.TAB_CAS_KLEMMENSTATUS,4,KL30F,Terminal 30F
+BDC_G11.TAB_CAS_KLEMMENSTATUS,5,KL30B-Änderung,Terminal 30B change
+BDC_G11.TAB_CAS_KLEMMENSTATUS,6,KL30B,Terminal 30B
+BDC_G11.TAB_CAS_KLEMMENSTATUS,7,KLR-Änderung,Terminal R change
+BDC_G11.TAB_CAS_KLEMMENSTATUS,8,KLR,Terminal R
+BDC_G11.TAB_CAS_KLEMMENSTATUS,9,KL15-Änderung,Terminal 15 change
+BDC_G11.TAB_CAS_KLEMMENSTATUS,10,KL15,Terminal 15
+BDC_G11.TAB_CAS_KLEMMENSTATUS,11,KL50-Verzögerung,Terminal 50 delay
+BDC_G11.TAB_CAS_KLEMMENSTATUS,12,KL50-Änderung,Terminal 50 change
+BDC_G11.TAB_CAS_KLEMMENSTATUS,13,KL50,Terminal 50
 BDC_G11.TAB_CAS_KLEMMENSTATUS,14,Fehler,Fault
 BDC_G11.TAB_CAS_KLEMMENSTATUS,15,Ungültig,Invalid
-BDC_G11.TAB_CAS_MONTAGEMODUS,0,Normalbetrieb - Alle Montagemodi deaktiviert,Normalbetrieb - Alle Montagemodi deactivated
-BDC_G11.TAB_CAS_MONTAGEMODUS,1,KL50-Sperre/Fahrbereitschafts-Sperre  aktiv,KL50-Sperre/readiness to drive-Sperre  active
-BDC_G11.TAB_CAS_MONTAGEMODUS,2,ELV_KL50-Montagemodus - Entfällt ab SP2015,ELV_KL50-Montagemodus - Entfällt ab SP2015
-BDC_G11.TAB_CAS_MONTAGEMODUS,3,Präsentations-Modus,Präsentations-mode
+BDC_G11.TAB_CAS_MONTAGEMODUS,0,Normalbetrieb - Alle Montagemodi deaktiviert,Normal operation - all assembly modes deactivated
+BDC_G11.TAB_CAS_MONTAGEMODUS,1,KL50-Sperre/Fahrbereitschafts-Sperre  aktiv,Terminal 50 lock/drive readiness lock active
+BDC_G11.TAB_CAS_MONTAGEMODUS,2,ELV_KL50-Montagemodus - Entfällt ab SP2015,ELV_KL50 assembly mode - discontinued from SP2015
+BDC_G11.TAB_CAS_MONTAGEMODUS,3,Präsentations-Modus,Presentation mode
 BDC_G11.TAB_CAS_MONTAGEMODUS,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_CAS_MOTOR_STATUS,0,Motor aus,Engine from
-BDC_G11.TAB_CAS_MOTOR_STATUS,1,Motor startet,Engine startet
-BDC_G11.TAB_CAS_MOTOR_STATUS,2,Motor läuft,Engine läuft
-BDC_G11.TAB_CAS_MOTOR_STATUS,3,Initialisierung / Ungültig / Unbekannt,Initialisierung / invalid / unknown
-BDC_G11.TAB_CAS_MOTOR_STATUS,255,ungültig/unbekannt,invalid/unknown
-BDC_G11.TAB_CAS_PIA_NUMMER,0,Personalisierungskonfiguration 0,Personalisierungskonfiguration 0
-BDC_G11.TAB_CAS_PIA_NUMMER,1,Personalisierungskonfiguration 1,Personalisierungskonfiguration 1
-BDC_G11.TAB_CAS_PIA_NUMMER,2,Personalisierungskonfiguration 2,Personalisierungskonfiguration 2
-BDC_G11.TAB_CAS_PIA_NUMMER,10,Gast,Gast
-BDC_G11.TAB_CAS_PIA_NUMMER,15,Keine Personalisierung zugewiesen - unpersonalisiertes Profil,No Personalisierung zugewiesen - unpersonalisiertes Profil
-BDC_G11.TAB_CAS_PIA_NUMMER,255,ungültig,invalid
-BDC_G11.TAB_CAS_TAGE_SPERRSTATUS,0x00,Gesperrt,Blocked
-BDC_G11.TAB_CAS_TAGE_SPERRSTATUS,0x01,Freigegeben,Freigegeben
+BDC_G11.TAB_CAS_MOTOR_STATUS,0,Motor aus,Engine off
+BDC_G11.TAB_CAS_MOTOR_STATUS,1,Motor startet,Engine starting
+BDC_G11.TAB_CAS_MOTOR_STATUS,2,Motor läuft,Engine running
+BDC_G11.TAB_CAS_MOTOR_STATUS,3,Initialisierung / Ungültig / Unbekannt,Initialisation / invalid / unknown
+BDC_G11.TAB_CAS_MOTOR_STATUS,255,ungültig/unbekannt,Invalid/unknown
+BDC_G11.TAB_CAS_PIA_NUMMER,0,Personalisierungskonfiguration 0,Personalisation configuration 0
+BDC_G11.TAB_CAS_PIA_NUMMER,1,Personalisierungskonfiguration 1,Personalisation configuration 1
+BDC_G11.TAB_CAS_PIA_NUMMER,2,Personalisierungskonfiguration 2,Personalisation configuration 2
+BDC_G11.TAB_CAS_PIA_NUMMER,10,Gast,Guest
+BDC_G11.TAB_CAS_PIA_NUMMER,15,Keine Personalisierung zugewiesen - unpersonalisiertes Profil,No personalisation assigned - unpersonalised profile
+BDC_G11.TAB_CAS_PIA_NUMMER,255,ungültig,Invalid
+BDC_G11.TAB_CAS_TAGE_SPERRSTATUS,0x00,Gesperrt,Locked
+BDC_G11.TAB_CAS_TAGE_SPERRSTATUS,0x01,Freigegeben,Enabled
 BDC_G11.TAB_CAS_TAGE_SPERRSTATUS,0xFF,Ungültig/Unbekannt,Invalid/unknown
 BDC_G11.TAB_CA_CAR_CONFIG,0x01,CG-only,CG-only
-BDC_G11.TAB_CA_CAR_CONFIG,0x02,CA - one trunk antenna -  short side antennas,CA - one trunk antenna -  short side antennas
-BDC_G11.TAB_CA_CAR_CONFIG,0x22,CA - one trunk antenna -  long side antennas,CA - one trunk antenna -  long side antennas
+BDC_G11.TAB_CA_CAR_CONFIG,0x02,CA - one trunk antenna -  short side antennas,CA - one trunk antenna - short side antennas
+BDC_G11.TAB_CA_CAR_CONFIG,0x22,CA - one trunk antenna -  long side antennas,CA - one trunk antenna - long side antennas
 BDC_G11.TAB_CA_CAR_CONFIG,0x04,CA+RCP - one trunk antenna - short side antennas,CA+RCP - one trunk antenna - short side antennas
-BDC_G11.TAB_CA_CAR_CONFIG,0x24,CA+RCP - one trunk antenna -  long side antennas,CA+RCP - one trunk antenna -  long side antennas
-BDC_G11.TAB_CA_CAR_CONFIG,0x06,CA-  two trunk antennas - short side antennas,CA-  two trunk antennas - short side antennas
-BDC_G11.TAB_CA_CAR_CONFIG,0x26,CA - two trunk antennas -  long side antennas,CA - two trunk antennas -  long side antennas
+BDC_G11.TAB_CA_CAR_CONFIG,0x24,CA+RCP - one trunk antenna -  long side antennas,CA+RCP - one trunk antenna - long side antennas
+BDC_G11.TAB_CA_CAR_CONFIG,0x06,CA-  two trunk antennas - short side antennas,CA - two trunk antennas - short side antennas
+BDC_G11.TAB_CA_CAR_CONFIG,0x26,CA - two trunk antennas -  long side antennas,CA - two trunk antennas - long side antennas
 BDC_G11.TAB_CA_CAR_CONFIG,0x07,CA+RCP - two trunk antennas - short side antennas,CA+RCP - two trunk antennas - short side antennas
-BDC_G11.TAB_CA_CAR_CONFIG,0x27,CA+RCP - two trunk antennas -  long side antennas,CA+RCP - two trunk antennas -  long side antennas
+BDC_G11.TAB_CA_CAR_CONFIG,0x27,CA+RCP - two trunk antennas -  long side antennas,CA+RCP - two trunk antennas - long side antennas
 BDC_G11.TAB_CA_CAR_CONFIG,255,Ungültig/Unbekannt,Invalid/unknown
 BDC_G11.TAB_CA_HW_VARIANT,0,CG2,CG2
 BDC_G11.TAB_CA_HW_VARIANT,1,CA5,CA5
 BDC_G11.TAB_CA_HW_VARIANT,2,CA56,CA56
 BDC_G11.TAB_CA_HW_VARIANT,3,CA57,CA57
 BDC_G11.TAB_CA_HW_VARIANT,4,CA567,CA567
-BDC_G11.TAB_CA_HW_VARIANT,7,undefined,undefined
-BDC_G11.TAB_CA_HW_VARIANT,255,invalid,invalid
-BDC_G11.TAB_CA_TAGE_ER_LEITUNG,0,CA-Taster und TAGE nicht verbaut ,CA-button and TAGE not verbaut 
-BDC_G11.TAB_CA_TAGE_ER_LEITUNG,1,CA-Taster oder TAGE betätigt ,CA-button or TAGE betätigt 
-BDC_G11.TAB_CA_TAGE_ER_LEITUNG,2,CA-Taster oder TAGE nicht betätigt,CA-button or TAGE not betätigt
-BDC_G11.TAB_CA_TAGE_ER_LEITUNG,3,CA-Taster oder TAGE Kurzschluss,CA-button or TAGE short circuit
-BDC_G11.TAB_CA_TAGE_ER_LEITUNG,255,CA-Taster oder TAGE ausserhalb Wertebereich,CA-button or TAGE outside values range
-BDC_G11.TAB_CA_TAGE_STATUS,0,Kein Status (keine Betätigung),No status (no actuation)
-BDC_G11.TAB_CA_TAGE_STATUS,1,CA-Taster oder TAGE-Zugsensor (Hall) betätigt,CA-button or TAGE-Zugsensor (Hall) betätigt
-BDC_G11.TAB_CA_TAGE_STATUS,2,TAGE-Sichern Sensor betätigt (VR-Kap-Sensor),TAGE-Sichern sensor betätigt (VR-Kap-sensor)
-BDC_G11.TAB_CA_TAGE_STATUS,3,TAGE-Entriegeln Sensor betätigt (ER-Kap-Sensor),TAGE-Entriegeln sensor betätigt (ER-Kap-sensor)
-BDC_G11.TAB_CA_TAGE_STATUS,4,CA-Taster oder TAGE nicht verbaut,CA-button or TAGE not verbaut
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x00,undefined,undefined
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x01,OutputPermanentlyDisabled,OutputPermanentlyDisabled
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x02,MeasurementPending,MeasurementPending
+BDC_G11.TAB_CA_HW_VARIANT,7,undefined,Undefined
+BDC_G11.TAB_CA_HW_VARIANT,255,invalid,Invalid
+BDC_G11.TAB_CA_TAGE_ER_LEITUNG,0,CA-Taster und TAGE nicht verbaut ,CA button and TAGE not fitted
+BDC_G11.TAB_CA_TAGE_ER_LEITUNG,1,CA-Taster oder TAGE betätigt ,CA button or TAGE pressed
+BDC_G11.TAB_CA_TAGE_ER_LEITUNG,2,CA-Taster oder TAGE nicht betätigt,CA button or TAGE not pressed
+BDC_G11.TAB_CA_TAGE_ER_LEITUNG,3,CA-Taster oder TAGE Kurzschluss,CA button or TAGE short circuit
+BDC_G11.TAB_CA_TAGE_ER_LEITUNG,255,CA-Taster oder TAGE ausserhalb Wertebereich,CA button or TAGE out of value range
+BDC_G11.TAB_CA_TAGE_STATUS,0,Kein Status (keine Betätigung),No status (not operated)
+BDC_G11.TAB_CA_TAGE_STATUS,1,CA-Taster oder TAGE-Zugsensor (Hall) betätigt,CA button or TAGE pull sensor (Hall) operated
+BDC_G11.TAB_CA_TAGE_STATUS,2,TAGE-Sichern Sensor betätigt (VR-Kap-Sensor),TAGE lock sensor operated (VR capacitive sensor)
+BDC_G11.TAB_CA_TAGE_STATUS,3,TAGE-Entriegeln Sensor betätigt (ER-Kap-Sensor),TAGE unlock sensor operated (ER capacitive sensor)
+BDC_G11.TAB_CA_TAGE_STATUS,4,CA-Taster oder TAGE nicht verbaut,CA button or TAGE not fitted
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x00,undefined,Undefined
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x01,OutputPermanentlyDisabled,Output permanently disabled
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x02,MeasurementPending,Measurement pending
 BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x03,Healthy,Healthy
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x04,ShortCircuit,ShortCircuit
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x04,ShortCircuit,Short circuit
 BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x05,Restarting,Restarting
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x06,NoRestartBeforCl15,NoRestartBeforCl15
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x07,OpenLoadDebouncing,OpenLoadDebouncing
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x08,LocalHealingOpenLoad,LocalHealingOpenLoad
-BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x09,OpenLoad,OpenLoad
-BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x00,ShortcutOvertemperature,ShortcutOvertemperature
-BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x01,PreShortcutOvertemperature,PreShortcutOvertemperature
-BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x02,LampOk,LampOk
-BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x03,OpenLoad,OpenLoad
-BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x04,DeviceError,DeviceError
-BDC_G11.TAB_DISP_PO_GRB,0x00,Dunkelschaltung (aus),Dunkelschaltung (from)
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x06,NoRestartBeforCl15,No restart before terminal 15
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x07,OpenLoadDebouncing,Open load debouncing
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x08,LocalHealingOpenLoad,"Local healing, open load"
+BDC_G11.TAB_CURRENT_STATE_OF_OP_STM,0x09,OpenLoad,Open load
+BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x00,ShortcutOvertemperature,Short circuit overtemperature
+BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x01,PreShortcutOvertemperature,Pre-short-circuit overtemperature
+BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x02,LampOk,Lamp OK
+BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x03,OpenLoad,Open load
+BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE,0x04,DeviceError,Device error
+BDC_G11.TAB_DISP_PO_GRB,0x00,Dunkelschaltung (aus),Dimmed display (off)
 BDC_G11.TAB_DISP_PO_GRB,0x01,P,P
 BDC_G11.TAB_DISP_PO_GRB,0x02,R,R
 BDC_G11.TAB_DISP_PO_GRB,0x03,N,N
 BDC_G11.TAB_DISP_PO_GRB,0x04,D,D
 BDC_G11.TAB_DISP_PO_GRB,0x0F,Signal ungültig,Signal invalid
-BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x00,Initalisierung,Initalisierung
-BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x01,ELSV normiert,ELSV normiert
-BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x02,ELSV teilnormiert Länge,ELSV teilnormiert Länge
-BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x03,ELSV teilnormiert Neigung,ELSV teilnormiert inclination
-BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x04,ELSV denormiert,ELSV denormiert
+BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x00,Initalisierung,Initialisation
+BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x01,ELSV normiert,ELSV initialised
+BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x02,ELSV teilnormiert Länge,"ELSV partially initialised, length"
+BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x03,ELSV teilnormiert Neigung,"ELSV partially initialised, tilt"
+BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x04,ELSV denormiert,ELSV not initialised
 BDC_G11.TAB_ELSV_NORMIERUNG_STATUS,0x0F,Signal ungültig,Signal invalid
-BDC_G11.TAB_ELSV_TASTER,0x00,Taster nicht betätigt,Button not betätigt
-BDC_G11.TAB_ELSV_TASTER,0x01,Taster nach hinten,Button to rear
-BDC_G11.TAB_ELSV_TASTER,0x02,Taster nach oben,Button to top
-BDC_G11.TAB_ELSV_TASTER,0x03,Taster nach vorne,Button to front
-BDC_G11.TAB_ELSV_TASTER,0x04,Taster nach unten,Button to bottom
-BDC_G11.TAB_ELSV_TASTER,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x01,Standlicht,Standlicht
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x02,Parklicht,Parklicht
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x03,Parklicht und Standlicht,Parklicht and Standlicht
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x04,Warnblinken,Warnblinken
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x05,Warnblinken und Standlicht,Warnblinken and Standlicht
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x06,Warnblinken und Parklicht,Warnblinken and Parklicht
-BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x07,"Warnblinken, Standlicht und Parklicht","Warnblinken, Standlicht and Parklicht"
+BDC_G11.TAB_ELSV_TASTER,0x00,Taster nicht betätigt,Button not pressed
+BDC_G11.TAB_ELSV_TASTER,0x01,Taster nach hinten,Button backwards
+BDC_G11.TAB_ELSV_TASTER,0x02,Taster nach oben,Button up
+BDC_G11.TAB_ELSV_TASTER,0x03,Taster nach vorne,Button forwards
+BDC_G11.TAB_ELSV_TASTER,0x04,Taster nach unten,Button down
+BDC_G11.TAB_ELSV_TASTER,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x01,Standlicht,Side lights
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x02,Parklicht,Parking lights
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x03,Parklicht und Standlicht,Parking lights and side lights
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x04,Warnblinken,Hazard warning lights
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x05,Warnblinken und Standlicht,Hazard warning lights and side lights
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x06,Warnblinken und Parklicht,Hazard warning lights and parking lights
+BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x07,"Warnblinken, Standlicht und Parklicht","Hazard warning lights, side lights and parking lights"
 BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL,0x0FF,Ungültig,Invalid
-BDC_G11.TAB_ERROR_STATE,0x00,Lamp_Ok,Lamp_Ok
-BDC_G11.TAB_ERROR_STATE,0x01,Lamp_OpenLoad,Lamp_OpenLoad
-BDC_G11.TAB_ERROR_STATE,0x02,Lamp_ShortToGndSoft,Lamp_ShortToGndSoft
-BDC_G11.TAB_ERROR_STATE,0x03,Lamp_ShortToGndHard,Lamp_ShortToGndHard
-BDC_G11.TAB_ERROR_STATE,0x04,Lamp_ShortToPlus,Lamp_ShortToPlus
-BDC_G11.TAB_ERROR_STATE,0x05,Lamp_Invalid,Lamp_Invalid
-BDC_G11.TAB_ERROR_STATE,0x06,Lamp_Init,Lamp_Init
-BDC_G11.TAB_ERROR_STATE,0x07,Lamp_DebounceOpenLoad,Lamp_DebounceOpenLoad
-BDC_G11.TAB_ERROR_STATE,0x08,Lamp_DebounceShortToGndSoft,Lamp_DebounceShortToGndSoft
-BDC_G11.TAB_ERROR_STATE,0x09,Lamp_DebounceShortToGndHard,Lamp_DebounceShortToGndHard
-BDC_G11.TAB_ERROR_STATE,0x010,Lamp_ShortToGndSoftReenable,Lamp_ShortToGndSoftReenable
-BDC_G11.TAB_ERROR_STATE,0x011,Lamp_ShortToGndHardReenable,Lamp_ShortToGndHardReenable
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x00,Keine Vorgabe,No Vorgabe
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x01,Schlechtwetter C1,Schlechtwetter C1
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x02,Schlechtwetter C2,Schlechtwetter C2
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x03,Stadt V,Stadt V
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x04,Touristenmodus  SAE - Semi-Autonomes Einparkenv,Touristenmodus  SAE - Semi-Autonomes Einparkenv
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x05,H-10 Landstraßenlicht C,H-10 Landstraßenlicht C
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x06,H-8 Autobahnlicht E3,H-8 Autobahnlicht E3
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x07,H-6 Autobahnlicht E2,H-6 Autobahnlicht E2
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x08,H-5 Autobahnlicht E1,H-5 Autobahnlicht E1
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x09,H-4 Autobahnlicht E,H-4 Autobahnlicht E
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0A,Lichtverteilung H-2,Lichtverteilung H-2
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0B,Lichtverteilung H-0,Lichtverteilung H-0
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0C,Lichtverteilung H+2,Lichtverteilung H+2
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0D,Lichtverteilung H+4,Lichtverteilung H+4
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0E,Blendfreies Fernlicht,Blendfreies Fernlicht
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0F,Automatisches Volles Fernlicht,Automatisches Volles Fernlicht
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x10,Manuelles Fernlicht,Manuelles Fernlicht
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x11,Lichthupe,Lichthupe
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x12,Blendfreies Fernlicht Dimmung 1,Blendfreies Fernlicht Dimmung 1
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x13,Blendfreies Fernlicht Dimmung 2,Blendfreies Fernlicht Dimmung 2
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x14,Automatisches Volles Fernlicht Dimmung 1,Automatisches Volles Fernlicht Dimmung 1
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x15,Automatisches Volles Fernlicht Dimmung 2,Automatisches Volles Fernlicht Dimmung 2
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x16,Blendfreies Fernlicht 5,Blendfreies Fernlicht 5
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x17,Blendfreies Fernlicht 6,Blendfreies Fernlicht 6
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x18,Blendfreies Fernlicht 7,Blendfreies Fernlicht 7
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x19,Blendfreies Fernlicht 8,Blendfreies Fernlicht 8
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1A,Blendfreies Fernlicht 9,Blendfreies Fernlicht 9
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1B,Blendfreies Fernlicht 10,Blendfreies Fernlicht 10
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1C,Blendfreies Fernlicht 11,Blendfreies Fernlicht 11
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1D,Abblendlicht bei DLS aktiv,Abblendlicht at DLS active
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1E,Teilfernlicht bei DLS aktiv,Teilfernlicht at DLS active
-BDC_G11.TAB_FAHRLICHTSITUATION_2,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FES_MODE,0x00,Initialisierung,Initialisierung
+BDC_G11.TAB_ERROR_STATE,0x00,Lamp_Ok,Lamp OK
+BDC_G11.TAB_ERROR_STATE,0x01,Lamp_OpenLoad,Lamp open load
+BDC_G11.TAB_ERROR_STATE,0x02,Lamp_ShortToGndSoft,"Lamp short to ground, soft"
+BDC_G11.TAB_ERROR_STATE,0x03,Lamp_ShortToGndHard,"Lamp short to ground, hard"
+BDC_G11.TAB_ERROR_STATE,0x04,Lamp_ShortToPlus,Lamp short to positive
+BDC_G11.TAB_ERROR_STATE,0x05,Lamp_Invalid,Lamp invalid
+BDC_G11.TAB_ERROR_STATE,0x06,Lamp_Init,Lamp init
+BDC_G11.TAB_ERROR_STATE,0x07,Lamp_DebounceOpenLoad,Lamp debouncing open load
+BDC_G11.TAB_ERROR_STATE,0x08,Lamp_DebounceShortToGndSoft,"Lamp debouncing short to ground, soft"
+BDC_G11.TAB_ERROR_STATE,0x09,Lamp_DebounceShortToGndHard,"Lamp debouncing short to ground, hard"
+BDC_G11.TAB_ERROR_STATE,0x010,Lamp_ShortToGndSoftReenable,"Lamp short to ground, soft re-enable"
+BDC_G11.TAB_ERROR_STATE,0x011,Lamp_ShortToGndHardReenable,"Lamp short to ground, hard re-enable"
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x00,Keine Vorgabe,No setting
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x01,Schlechtwetter C1,Bad weather C1
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x02,Schlechtwetter C2,Bad weather C2
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x03,Stadt V,Town V
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x04,Touristenmodus  SAE - Semi-Autonomes Einparkenv,Tourist mode SAE - semi-autonomous parking
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x05,H-10 Landstraßenlicht C,H-10 country road light C
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x06,H-8 Autobahnlicht E3,H-8 motorway light E3
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x07,H-6 Autobahnlicht E2,H-6 motorway light E2
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x08,H-5 Autobahnlicht E1,H-5 motorway light E1
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x09,H-4 Autobahnlicht E,H-4 motorway light E
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0A,Lichtverteilung H-2,Light distribution H-2
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0B,Lichtverteilung H-0,Light distribution H-0
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0C,Lichtverteilung H+2,Light distribution H+2
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0D,Lichtverteilung H+4,Light distribution H+4
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0E,Blendfreies Fernlicht,Glare-free high beam
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x0F,Automatisches Volles Fernlicht,Automatic full high beam
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x10,Manuelles Fernlicht,Manual high beam
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x11,Lichthupe,Headlight flasher
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x12,Blendfreies Fernlicht Dimmung 1,Glare-free high beam dimming 1
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x13,Blendfreies Fernlicht Dimmung 2,Glare-free high beam dimming 2
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x14,Automatisches Volles Fernlicht Dimmung 1,Automatic full high beam dimming 1
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x15,Automatisches Volles Fernlicht Dimmung 2,Automatic full high beam dimming 2
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x16,Blendfreies Fernlicht 5,Glare-free high beam 5
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x17,Blendfreies Fernlicht 6,Glare-free high beam 6
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x18,Blendfreies Fernlicht 7,Glare-free high beam 7
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x19,Blendfreies Fernlicht 8,Glare-free high beam 8
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1A,Blendfreies Fernlicht 9,Glare-free high beam 9
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1B,Blendfreies Fernlicht 10,Glare-free high beam 10
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1C,Blendfreies Fernlicht 11,Glare-free high beam 11
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1D,Abblendlicht bei DLS aktiv,Low beam with DLS active
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0x1E,Teilfernlicht bei DLS aktiv,Partial high beam with DLS active
+BDC_G11.TAB_FAHRLICHTSITUATION_2,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FES_MODE,0x00,Initialisierung,Initialisation
 BDC_G11.TAB_FES_MODE,0x01,Sport Dynamic,Sport Dynamic
 BDC_G11.TAB_FES_MODE,0x02,Sport Expert,Sport Expert
 BDC_G11.TAB_FES_MODE,0x03,Sport Individual,Sport Individual
@@ -296,37 +296,37 @@ BDC_G11.TAB_FES_MODE,0x08,ECO PRO Plus,ECO PRO Plus
 BDC_G11.TAB_FES_MODE,0x09,ECO PRO Individual,ECO PRO Individual
 BDC_G11.TAB_FES_MODE,0x0A,Adaptive,Adaptive
 BDC_G11.TAB_FES_MODE,0x3F,Signal ungültig,Signal invalid
-BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x00,Keine Fensterheber vorhanden/kodiert,No window lifter present/kodiert
-BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x01,Fensterheber für FA und BF vorhanden/kodiert,Window lifter for FA and BF present/kodiert
-BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x02,"Fensterheber für FA, BF und FAH, BFH vorhanden/kodiert","Window lifter for FA, BF and FAH, BFH present/kodiert"
-BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x03,Fensterheber für FAH und BFH vorhanden/kodiert,Window lifter for FAH and BFH present/kodiert
-BDC_G11.TAB_FH_BEWEGUNG,0x00,Fenster steht,Window steht
-BDC_G11.TAB_FH_BEWEGUNG,0x01,Fensterheber fährt auf,Window lifter fährt on
-BDC_G11.TAB_FH_BEWEGUNG,0x02,Reversieren Mautlauf,Reversieren Mautlauf
-BDC_G11.TAB_FH_BEWEGUNG,0x03,Reversieren Emergency-Mode,Reversieren Emergency-Mode
-BDC_G11.TAB_FH_BEWEGUNG,0x04,Fenster fährt zu,Window fährt to
-BDC_G11.TAB_FH_BEWEGUNG,0x05,Fenster fährt zu Emergency-Mode,Window fährt to Emergency-Mode
-BDC_G11.TAB_FH_BEWEGUNG,0x06,Fenster fährt zu Panic-Mode,Window fährt to Panic-Mode
-BDC_G11.TAB_FH_BEWEGUNG,0x07,Einlernvorgang aktiv,Einlernvorgang active
-BDC_G11.TAB_FH_BEWEGUNG,0x08,stellt aus,stellt from
-BDC_G11.TAB_FH_BEWEGUNG,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FH_FENSTER_GS,0x00,geschlossen,closed
-BDC_G11.TAB_FH_FENSTER_GS,0x01,teilweise geöffnet,teilweise open
-BDC_G11.TAB_FH_FENSTER_GS,0x02,vollständig geöffnet,vollständig open
-BDC_G11.TAB_FH_FENSTER_GS,0xFF,ungültig,invalid
-BDC_G11.TAB_FH_INIT,0x01,"Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig","Window lifter normiert, adaptation data Schließen valid, adaptation data Senken valid"
-BDC_G11.TAB_FH_INIT,0x02,"Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig","Window lifter denormiert, adaptation data Schließen valid, adaptation data Senken valid"
-BDC_G11.TAB_FH_INIT,0x03,"Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig","Window lifter normiert, adaptation data Schließen invalid, adaptation data Senken valid"
-BDC_G11.TAB_FH_INIT,0x04,"Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig","Window lifter denormiert, adaptation data Schließen invalid, adaptation data Senken valid"
-BDC_G11.TAB_FH_INIT,0x05,"Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig","Window lifter normiert, adaptation data Schließen valid, adaptation data Senken invalid"
-BDC_G11.TAB_FH_INIT,0x06,"Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig","Window lifter denormiert, adaptation data Schließen valid, adaptation data Senken invalid"
-BDC_G11.TAB_FH_INIT,0x07,"Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig","Window lifter normiert, adaptation data Schließen invalid, adaptation data Senken invalid"
-BDC_G11.TAB_FH_INIT,0x08,"Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig","Window lifter denormiert, adaptation data Schließen invalid, adaptation data Senken invalid"
-BDC_G11.TAB_FH_INIT,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FH_MOTORTEMPERATUR,0x01,Motortemperatur OK,Engine temperature OK
-BDC_G11.TAB_FH_MOTORTEMPERATUR,0x02,Motortemperatur 90% des maximal zulässigen Wertes erreicht,Engine temperature 90% of the maximum permissible value erreicht
-BDC_G11.TAB_FH_MOTORTEMPERATUR,0x03,Motortemperatur 100% des maximal zulässigen Wertes erreicht,Engine temperature 100% of the maximum permissible value erreicht
-BDC_G11.TAB_FH_MOTORTEMPERATUR,0xFF,Motortemperatur ungültig,Engine temperature invalid
+BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x00,Keine Fensterheber vorhanden/kodiert,No window lifters present/coded
+BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x01,Fensterheber für FA und BF vorhanden/kodiert,Window lifters for driver and front passenger present/coded
+BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x02,"Fensterheber für FA, BF und FAH, BFH vorhanden/kodiert","Window lifters for driver, front passenger, rear driver side and rear passenger side present/coded"
+BDC_G11.TAB_FH_ANZAHL_VORHANDEN,0x03,Fensterheber für FAH und BFH vorhanden/kodiert,Window lifters for rear driver side and rear passenger side present/coded
+BDC_G11.TAB_FH_BEWEGUNG,0x00,Fenster steht,Window stationary
+BDC_G11.TAB_FH_BEWEGUNG,0x01,Fensterheber fährt auf,Window lifter opening
+BDC_G11.TAB_FH_BEWEGUNG,0x02,Reversieren Mautlauf,"Reversing, toll mode"
+BDC_G11.TAB_FH_BEWEGUNG,0x03,Reversieren Emergency-Mode,"Reversing, emergency mode"
+BDC_G11.TAB_FH_BEWEGUNG,0x04,Fenster fährt zu,Window closing
+BDC_G11.TAB_FH_BEWEGUNG,0x05,Fenster fährt zu Emergency-Mode,"Window closing, emergency mode"
+BDC_G11.TAB_FH_BEWEGUNG,0x06,Fenster fährt zu Panic-Mode,"Window closing, panic mode"
+BDC_G11.TAB_FH_BEWEGUNG,0x07,Einlernvorgang aktiv,Learning procedure active
+BDC_G11.TAB_FH_BEWEGUNG,0x08,stellt aus,Tilting open
+BDC_G11.TAB_FH_BEWEGUNG,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FH_FENSTER_GS,0x00,geschlossen,Closed
+BDC_G11.TAB_FH_FENSTER_GS,0x01,teilweise geöffnet,Partially open
+BDC_G11.TAB_FH_FENSTER_GS,0x02,vollständig geöffnet,Fully open
+BDC_G11.TAB_FH_FENSTER_GS,0xFF,ungültig,Invalid
+BDC_G11.TAB_FH_INIT,0x01,"Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig","Window lifter initialised, closing adaptation data valid, lowering adaptation data valid"
+BDC_G11.TAB_FH_INIT,0x02,"Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig","Window lifter not initialised, closing adaptation data valid, lowering adaptation data valid"
+BDC_G11.TAB_FH_INIT,0x03,"Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig","Window lifter initialised, closing adaptation data invalid, lowering adaptation data valid"
+BDC_G11.TAB_FH_INIT,0x04,"Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig","Window lifter not initialised, closing adaptation data invalid, lowering adaptation data valid"
+BDC_G11.TAB_FH_INIT,0x05,"Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig","Window lifter initialised, closing adaptation data valid, lowering adaptation data invalid"
+BDC_G11.TAB_FH_INIT,0x06,"Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig","Window lifter not initialised, closing adaptation data valid, lowering adaptation data invalid"
+BDC_G11.TAB_FH_INIT,0x07,"Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig","Window lifter initialised, closing adaptation data invalid, lowering adaptation data invalid"
+BDC_G11.TAB_FH_INIT,0x08,"Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig","Window lifter not initialised, closing adaptation data invalid, lowering adaptation data invalid"
+BDC_G11.TAB_FH_INIT,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FH_MOTORTEMPERATUR,0x01,Motortemperatur OK,Motor temperature OK
+BDC_G11.TAB_FH_MOTORTEMPERATUR,0x02,Motortemperatur 90% des maximal zulässigen Wertes erreicht,Motor temperature reached 90% of maximum permissible value
+BDC_G11.TAB_FH_MOTORTEMPERATUR,0x03,Motortemperatur 100% des maximal zulässigen Wertes erreicht,Motor temperature reached 100% of maximum permissible value
+BDC_G11.TAB_FH_MOTORTEMPERATUR,0xFF,Motortemperatur ungültig,Motor temperature invalid
 BDC_G11.TAB_FH_MT_LIEFERANT,0x1F,Brose,Brose
 BDC_G11.TAB_FH_MT_LIEFERANT,0x02,Küster,Küster
 BDC_G11.TAB_FH_MT_LIEFERANT,0x03,Magna,Magna
@@ -334,176 +334,176 @@ BDC_G11.TAB_FH_MT_LIEFERANT,0x04,Webasto,Webasto
 BDC_G11.TAB_FH_MT_LIEFERANT,0x05,Inalfa,Inalfa
 BDC_G11.TAB_FH_MT_LIEFERANT,0x06,Arvin Meritor,Arvin Meritor
 BDC_G11.TAB_FH_MT_LIEFERANT,0x07,Lames,Lames
-BDC_G11.TAB_FH_MT_LIEFERANT,0xFE,Dummy Motortreiber,Dummy engine driver
-BDC_G11.TAB_FH_MT_LIEFERANT,0xFF,ungültiger Hersteller,invalid manufacturer
-BDC_G11.TAB_FH_PANIKMODUS,0x00,Panikmodus nicht freigeschalten,Panikmodus not freigeschalten
-BDC_G11.TAB_FH_PANIKMODUS,0x01,Panikmodus freigeschalten,Panikmodus freigeschalten
-BDC_G11.TAB_FH_PANIKMODUS,0x03,Freigabe Panikmodus ungültig,Enable Panikmodus invalid
-BDC_G11.TAB_FH_PANIKMODUS,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FH_POSITION,0x00,Fenster in Bewegung,Window in Bewegung
-BDC_G11.TAB_FH_POSITION,0x01,Fenster komplett geschlossen,Window komplett closed
-BDC_G11.TAB_FH_POSITION,0x02,Fenster komplett offen,Window komplett open
-BDC_G11.TAB_FH_POSITION,0x03,Fenster steht in Zwischenpositon,Window steht in Zwischenpositon
-BDC_G11.TAB_FH_POSITION,0x04,Fenster steht auf Position Kurzhub,Window steht on position Kurzhub
-BDC_G11.TAB_FH_POSITION,0x05,Fenster steht auf Position Langhub,Window steht on position Langhub
-BDC_G11.TAB_FH_POSITION,0x06,Fenster steht auf Position Cabrio,Window steht on position Cabrio
-BDC_G11.TAB_FH_POSITION,0x07,Fenster steht in Ausstellage,Window steht in Ausstellage
-BDC_G11.TAB_FH_POSITION,0x0A,Fenster steht in Crash-Position,Window steht in Crash-position
-BDC_G11.TAB_FH_POSITION,0xA0,Fenster steht in Demontageposition,Window steht in Demontageposition
-BDC_G11.TAB_FH_POSITION,0xA1,Fenster steht in Serviceposition A,Window steht in service position A
-BDC_G11.TAB_FH_POSITION,0xA2,Fenster steht in Serviceposition B,Window steht in service position B
-BDC_G11.TAB_FH_POSITION,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FH_SHD_ESH_LAGE_NR,0x01,Ausstelllage,Ausstelllage
-BDC_G11.TAB_FH_SHD_ESH_LAGE_NR,0x02,Schiebelage,Schiebelage
-BDC_G11.TAB_FH_SHD_ESH_LAGE_NR,0xFF,Funktion nicht unterstützt,Function not unterstützt
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x00,Element in Bewegung,Element in Bewegung
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x01,Element komplett geschlossen,Element komplett closed
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x02,Element komplett offen,Element komplett open
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x03,Element steht in Zwischenpositon,Element steht in Zwischenpositon
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x04,Element steht auf Position Kurzhub  nur FH,Element steht on position Kurzhub  nur FH
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x05,Element steht auf Position Langhub  nur FH,Element steht on position Langhub  nur FH
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x06,Element steht auf Position Cabrio nur FH,Element steht on position Cabrio nur FH
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x07,Element steht in Ausstellage nur SHD/PDK,Element steht in Ausstellage nur SHD/PDK
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x08,Element steht in Komfortposition nur PDK,Element steht in Komfortposition nur PDK
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x09,Element steht in Anti-Wummer Position nur SHD,Element steht in Anti-Wummer position nur SHD
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0x0A,Element steht in Crash-Position,Element steht in Crash-position
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0xA0,Element steht in Demontageposition,Element steht in Demontageposition
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0xA1,Element steht in Serviceposition A,Element steht in service position A
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0xA2,Element steht in Serviceposition B,Element steht in service position B
-BDC_G11.TAB_FH_SHD_ESH_POSITION,0xFF,ungültiger Wert,invalid value
+BDC_G11.TAB_FH_MT_LIEFERANT,0xFE,Dummy Motortreiber,Dummy motor driver
+BDC_G11.TAB_FH_MT_LIEFERANT,0xFF,ungültiger Hersteller,Invalid manufacturer
+BDC_G11.TAB_FH_PANIKMODUS,0x00,Panikmodus nicht freigeschalten,Panic mode not enabled
+BDC_G11.TAB_FH_PANIKMODUS,0x01,Panikmodus freigeschalten,Panic mode enabled
+BDC_G11.TAB_FH_PANIKMODUS,0x03,Freigabe Panikmodus ungültig,Panic mode enable invalid
+BDC_G11.TAB_FH_PANIKMODUS,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FH_POSITION,0x00,Fenster in Bewegung,Window moving
+BDC_G11.TAB_FH_POSITION,0x01,Fenster komplett geschlossen,Window fully closed
+BDC_G11.TAB_FH_POSITION,0x02,Fenster komplett offen,Window fully open
+BDC_G11.TAB_FH_POSITION,0x03,Fenster steht in Zwischenpositon,Window in intermediate position
+BDC_G11.TAB_FH_POSITION,0x04,Fenster steht auf Position Kurzhub,Window in short-stroke position
+BDC_G11.TAB_FH_POSITION,0x05,Fenster steht auf Position Langhub,Window in long-stroke position
+BDC_G11.TAB_FH_POSITION,0x06,Fenster steht auf Position Cabrio,Window in convertible position
+BDC_G11.TAB_FH_POSITION,0x07,Fenster steht in Ausstellage,Window in tilted position
+BDC_G11.TAB_FH_POSITION,0x0A,Fenster steht in Crash-Position,Window in crash position
+BDC_G11.TAB_FH_POSITION,0xA0,Fenster steht in Demontageposition,Window in removal position
+BDC_G11.TAB_FH_POSITION,0xA1,Fenster steht in Serviceposition A,Window in service position A
+BDC_G11.TAB_FH_POSITION,0xA2,Fenster steht in Serviceposition B,Window in service position B
+BDC_G11.TAB_FH_POSITION,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FH_SHD_ESH_LAGE_NR,0x01,Ausstelllage,Tilted position
+BDC_G11.TAB_FH_SHD_ESH_LAGE_NR,0x02,Schiebelage,Sliding position
+BDC_G11.TAB_FH_SHD_ESH_LAGE_NR,0xFF,Funktion nicht unterstützt,Function not supported
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x00,Element in Bewegung,Element moving
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x01,Element komplett geschlossen,Element fully closed
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x02,Element komplett offen,Element fully open
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x03,Element steht in Zwischenpositon,Element in intermediate position
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x04,Element steht auf Position Kurzhub  nur FH,Element in short-stroke position (window lifter only)
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x05,Element steht auf Position Langhub  nur FH,Element in long-stroke position (window lifter only)
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x06,Element steht auf Position Cabrio nur FH,Element in convertible position (window lifter only)
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x07,Element steht in Ausstellage nur SHD/PDK,Element in tilted position (sunroof/PDK only)
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x08,Element steht in Komfortposition nur PDK,Element in comfort position (PDK only)
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x09,Element steht in Anti-Wummer Position nur SHD,Element in anti-buffeting position (sunroof only)
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0x0A,Element steht in Crash-Position,Element in crash position
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0xA0,Element steht in Demontageposition,Element in removal position
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0xA1,Element steht in Serviceposition A,Element in service position A
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0xA2,Element steht in Serviceposition B,Element in service position B
+BDC_G11.TAB_FH_SHD_ESH_POSITION,0xFF,ungültiger Wert,Invalid value
 BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER,0x00,Tür geschlossen,Door closed
 BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER,0x01,Tür offen,Door open
-BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER,0x02,Tür in Vorraste,Door in Vorraste
+BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER,0x02,Tür in Vorraste,Door in pre-latch position
 BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER,0x03,Türstatus ungültig,Door status invalid
 BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER,0xFF,Signal ungültig,Signal invalid
-BDC_G11.TAB_FH_STAT_EEPROM,0x01,Checksumme IO,Check sum IO
-BDC_G11.TAB_FH_STAT_EEPROM,0x02,Checksumme NIO,Check sum NIO
-BDC_G11.TAB_FH_STAT_EEPROM,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FH_SYSTEMTYP,0x00,EKS mit 2-Hallsensoren,EKS with 2-Hall sensor
-BDC_G11.TAB_FH_SYSTEMTYP,0x01,Nur Motorschutz mit 1-Hallsensor,Nur Motorschutz with 1-Hall sensor
-BDC_G11.TAB_FH_SYSTEMTYP,0x02,Nur Motorschutz mit Strommessung,Nur Motorschutz with current measurement
-BDC_G11.TAB_FH_SYSTEMTYP,0xFF,ungültig,invalid
-BDC_G11.TAB_FH_VERFAHREN,0x00,Keine Aktion,No Aktion
-BDC_G11.TAB_FH_VERFAHREN,0x01,Öffnen,Öffnen
-BDC_G11.TAB_FH_VERFAHREN,0x02,Schliessen,Schliessen
-BDC_G11.TAB_FH_VERFAHREN,0x03,Maut öffnen,Maut öffnen
-BDC_G11.TAB_FH_VERFAHREN,0x04,Maut schliessen,Maut schliessen
-BDC_G11.TAB_FH_VERFAHREN,0x05,Heben / Ausstellen,Heben / Ausstellen
-BDC_G11.TAB_FH_VERFAHREN,0xFE,Element nicht unterstützt,Element not unterstützt
-BDC_G11.TAB_FH_VERFAHREN,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_FH_WACHHALTEN,0x00,aus,off
-BDC_G11.TAB_FH_WACHHALTEN,0x01,ein,on
-BDC_G11.TAB_FH_WACHHALTEN,0x02,ungültig,invalid
+BDC_G11.TAB_FH_STAT_EEPROM,0x01,Checksumme IO,Checksum OK
+BDC_G11.TAB_FH_STAT_EEPROM,0x02,Checksumme NIO,Checksum not OK
+BDC_G11.TAB_FH_STAT_EEPROM,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FH_SYSTEMTYP,0x00,EKS mit 2-Hallsensoren,Anti-trap system with 2 Hall sensors
+BDC_G11.TAB_FH_SYSTEMTYP,0x01,Nur Motorschutz mit 1-Hallsensor,"Motor protection only, with 1 Hall sensor"
+BDC_G11.TAB_FH_SYSTEMTYP,0x02,Nur Motorschutz mit Strommessung,"Motor protection only, with current measurement"
+BDC_G11.TAB_FH_SYSTEMTYP,0xFF,ungültig,Invalid
+BDC_G11.TAB_FH_VERFAHREN,0x00,Keine Aktion,No action
+BDC_G11.TAB_FH_VERFAHREN,0x01,Öffnen,Open
+BDC_G11.TAB_FH_VERFAHREN,0x02,Schliessen,Close
+BDC_G11.TAB_FH_VERFAHREN,0x03,Maut öffnen,Toll open
+BDC_G11.TAB_FH_VERFAHREN,0x04,Maut schliessen,Toll close
+BDC_G11.TAB_FH_VERFAHREN,0x05,Heben / Ausstellen,Raise / tilt
+BDC_G11.TAB_FH_VERFAHREN,0xFE,Element nicht unterstützt,Element not supported
+BDC_G11.TAB_FH_VERFAHREN,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_FH_WACHHALTEN,0x00,aus,Off
+BDC_G11.TAB_FH_WACHHALTEN,0x01,ein,On
+BDC_G11.TAB_FH_WACHHALTEN,0x02,ungültig,Invalid
 BDC_G11.TAB_FH_ZUSTAND_TUER,0x00,Tür geschlossen,Door closed
 BDC_G11.TAB_FH_ZUSTAND_TUER,0x01,Tür offen,Door open
-BDC_G11.TAB_FH_ZUSTAND_TUER,0x02,Türstatus unplausiebel,Door status unplausiebel
+BDC_G11.TAB_FH_ZUSTAND_TUER,0x02,Türstatus unplausiebel,Door status implausible
 BDC_G11.TAB_FH_ZUSTAND_TUER,0x03,Türstatus ungültig,Door status invalid
 BDC_G11.TAB_FH_ZUSTAND_TUER,0xFF,Signal ungültig,Signal invalid
-BDC_G11.TAB_FORCED_SWITCH_OFF_XENON,0x00,NotActive,NotActive
+BDC_G11.TAB_FORCED_SWITCH_OFF_XENON,0x00,NotActive,Not active
 BDC_G11.TAB_FORCED_SWITCH_OFF_XENON,0x01,Active,Active
-BDC_G11.TAB_FORCED_SWITCH_OFF_XENON,0x02,NotAvailable,NotAvailable
-BDC_G11.TAB_HECKROLLO_VORHANDEN,0x00,Heckrollo nicht vorhanden,Heckrollo not present
-BDC_G11.TAB_HECKROLLO_VORHANDEN,0x01,Heckrollo über BDC,Heckrollo via BDC
-BDC_G11.TAB_HECKROLLO_VORHANDEN,0x02,Heckrollo über HKFM,Heckrollo via HKFM
+BDC_G11.TAB_FORCED_SWITCH_OFF_XENON,0x02,NotAvailable,Not available
+BDC_G11.TAB_HECKROLLO_VORHANDEN,0x00,Heckrollo nicht vorhanden,Rear window blind not present
+BDC_G11.TAB_HECKROLLO_VORHANDEN,0x01,Heckrollo über BDC,Rear window blind via BDC
+BDC_G11.TAB_HECKROLLO_VORHANDEN,0x02,Heckrollo über HKFM,Rear window blind via HKFM
 BDC_G11.TAB_HECKROLLO_VORHANDEN,0xFF,Ungültiger Wert,Invalid value
-BDC_G11.TAB_HK_WIPPE,0x00,Keine Betätigung,No actuation
-BDC_G11.TAB_HK_WIPPE,0x01,Taster gedrückt,Button gedrückt
-BDC_G11.TAB_HK_WIPPE,0x02,Taster gezogen,Button gezogen
+BDC_G11.TAB_HK_WIPPE,0x00,Keine Betätigung,Not operated
+BDC_G11.TAB_HK_WIPPE,0x01,Taster gedrückt,Button pressed
+BDC_G11.TAB_HK_WIPPE,0x02,Taster gezogen,Button pulled
 BDC_G11.TAB_HK_WIPPE,0x03,Signal ungültig,Signal invalid
-BDC_G11.TAB_HOEHENSTAND_ZUSTAND,0,Kalibrierung Offset nicht erfolgreich,Kalibrierung offset not erfolgreich
-BDC_G11.TAB_HOEHENSTAND_ZUSTAND,1,Kalibrierung Offset erfolgreich,Kalibrierung offset erfolgreich
-BDC_G11.TAB_HOEHENSTAND_ZUSTAND,2,Sensor ausstattungsbedingt (Codierung) nicht verbaut,Sensor ausstattungsbedingt (coding) not verbaut
-BDC_G11.TAB_HOEHENSTAND_ZUSTAND,255,unbekannter Zustand,unknown state
-BDC_G11.TAB_HOHENSTAND_SENSOR,0,Sensor in Ordnung,Sensor in Ordnung
+BDC_G11.TAB_HOEHENSTAND_ZUSTAND,0,Kalibrierung Offset nicht erfolgreich,Offset calibration not successful
+BDC_G11.TAB_HOEHENSTAND_ZUSTAND,1,Kalibrierung Offset erfolgreich,Offset calibration successful
+BDC_G11.TAB_HOEHENSTAND_ZUSTAND,2,Sensor ausstattungsbedingt (Codierung) nicht verbaut,Sensor not fitted due to equipment (coding)
+BDC_G11.TAB_HOEHENSTAND_ZUSTAND,255,unbekannter Zustand,Unknown state
+BDC_G11.TAB_HOHENSTAND_SENSOR,0,Sensor in Ordnung,Sensor OK
 BDC_G11.TAB_HOHENSTAND_SENSOR,1,Sensor fehlerhaft,Sensor faulty
 BDC_G11.TAB_HOHENSTAND_SENSOR,255,Sensor fehlerhaft,Sensor faulty
-BDC_G11.TAB_IBS_WAKEUP_GRUND,1,Erreichen der Startfähigkeitsgrenze 1,Erreichen the Startfähigkeitsgrenze 1
-BDC_G11.TAB_IBS_WAKEUP_GRUND,2,Erreichen der Startfähigkeitsgrenze 2,Erreichen the Startfähigkeitsgrenze 2
-BDC_G11.TAB_IBS_WAKEUP_GRUND,3,Ruhestromverletzung,Ruhestromverletzung
-BDC_G11.TAB_IBS_WAKEUP_GRUND,4,Nachladefunktion,Nachladefunktion
-BDC_G11.TAB_IBS_WAKEUP_GRUND,5,Fremdladeerkennung 48V,Fremdladeerkennung 48V
-BDC_G11.TAB_IBS_WAKEUP_GRUND,6,Reserviert für zukünftige Werte,Reserviert for zukünftige values
+BDC_G11.TAB_IBS_WAKEUP_GRUND,1,Erreichen der Startfähigkeitsgrenze 1,Starting capability limit 1 reached
+BDC_G11.TAB_IBS_WAKEUP_GRUND,2,Erreichen der Startfähigkeitsgrenze 2,Starting capability limit 2 reached
+BDC_G11.TAB_IBS_WAKEUP_GRUND,3,Ruhestromverletzung,Quiescent current violation
+BDC_G11.TAB_IBS_WAKEUP_GRUND,4,Nachladefunktion,Recharging function
+BDC_G11.TAB_IBS_WAKEUP_GRUND,5,Fremdladeerkennung 48V,External charging detection 48V
+BDC_G11.TAB_IBS_WAKEUP_GRUND,6,Reserviert für zukünftige Werte,Reserved for future values
 BDC_G11.TAB_IBS_WAKEUP_GRUND,255,Ungültig/Unbekannt,Invalid/unknown
 BDC_G11.TAB_IFK_TEMP_EINHEIT,0x00,Celsius,Celsius
 BDC_G11.TAB_IFK_TEMP_EINHEIT,0x01,Fahrenheit,Fahrenheit
 BDC_G11.TAB_IFK_TEMP_EINHEIT,0x03,Ungültig,Invalid
 BDC_G11.TAB_IFK_TEMP_EINHEIT,0xFF,Ungültiger Wert,Invalid value
-BDC_G11.TAB_IM_ADEV_VALID,0,Authentisierungs-Device 0,Authentication-Device 0
-BDC_G11.TAB_IM_ADEV_VALID,1,Authentisierungs-Device 1,Authentication-Device 1
-BDC_G11.TAB_IM_ADEV_VALID,2,Authentisierungs-Device 2,Authentication-Device 2
-BDC_G11.TAB_IM_ADEV_VALID,3,Authentisierungs-Device 3,Authentication-Device 3
-BDC_G11.TAB_IM_ADEV_VALID,4,Authentisierungs-Device 4,Authentication-Device 4
-BDC_G11.TAB_IM_ADEV_VALID,5,Authentisierungs-Device 5,Authentication-Device 5
-BDC_G11.TAB_IM_ADEV_VALID,6,Authentisierungs-Device 6,Authentication-Device 6
-BDC_G11.TAB_IM_ADEV_VALID,7,Authentisierungs-Device 7,Authentication-Device 7
-BDC_G11.TAB_IM_ADEV_VALID,8,Authentisierungs-Device 8,Authentication-Device 8
-BDC_G11.TAB_IM_ADEV_VALID,9,Authentisierungs-Device 9,Authentication-Device 9
-BDC_G11.TAB_IM_ADEV_VALID,10,Authentisierungs-Device 10,Authentication-Device 10
-BDC_G11.TAB_IM_ADEV_VALID,11,Authentisierungs-Device 11,Authentication-Device 11
-BDC_G11.TAB_IM_ADEV_VALID,12,Authentisierungs-Device 12,Authentication-Device 12
-BDC_G11.TAB_IM_ADEV_VALID,13,Authentisierungs-Device 13,Authentication-Device 13
-BDC_G11.TAB_IM_ADEV_VALID,14,Authentisierungs-Device 14,Authentication-Device 14
-BDC_G11.TAB_IM_ADEV_VALID,15,Authentisierungs-Device 15,Authentication-Device 15
-BDC_G11.TAB_IM_ADEV_VALID,16,Authentisierungs-Device 16,Authentication-Device 16
-BDC_G11.TAB_IM_ADEV_VALID,17,Authentisierungs-Device 17,Authentication-Device 17
-BDC_G11.TAB_IM_ADEV_VALID,18,Authentisierungs-Device 18,Authentication-Device 18
-BDC_G11.TAB_IM_ADEV_VALID,19,Authentisierungs-Device 19,Authentication-Device 19
-BDC_G11.TAB_IM_ADEV_VALID,255,unbekannt / ungültig,unknown / invalid
-BDC_G11.TAB_INNENLICHT_MAPPING,0x15,Suchbeleuchtung,Suchbeleuchtung
-BDC_G11.TAB_INNENLICHT_MAPPING,0x16,Innenbeleuchtung Front,Interior lighting front
-BDC_G11.TAB_INNENLICHT_MAPPING,0x17,Innenbeleuchtung Fond,Interior lighting rear compartment
-BDC_G11.TAB_INNENLICHT_MAPPING,0x18,Optische Vorfeld Beleuchtung (OVT),Optische Vorfeld lighting (OVT)
-BDC_G11.TAB_INNENLICHT_MAPPING,0x19,Fußraumleuchte Front,Fußraumleuchte front
-BDC_G11.TAB_INNENLICHT_MAPPING,0x1A,Fußraumleuchte Fond,Fußraumleuchte rear compartment
+BDC_G11.TAB_IM_ADEV_VALID,0,Authentisierungs-Device 0,Authentication device 0
+BDC_G11.TAB_IM_ADEV_VALID,1,Authentisierungs-Device 1,Authentication device 1
+BDC_G11.TAB_IM_ADEV_VALID,2,Authentisierungs-Device 2,Authentication device 2
+BDC_G11.TAB_IM_ADEV_VALID,3,Authentisierungs-Device 3,Authentication device 3
+BDC_G11.TAB_IM_ADEV_VALID,4,Authentisierungs-Device 4,Authentication device 4
+BDC_G11.TAB_IM_ADEV_VALID,5,Authentisierungs-Device 5,Authentication device 5
+BDC_G11.TAB_IM_ADEV_VALID,6,Authentisierungs-Device 6,Authentication device 6
+BDC_G11.TAB_IM_ADEV_VALID,7,Authentisierungs-Device 7,Authentication device 7
+BDC_G11.TAB_IM_ADEV_VALID,8,Authentisierungs-Device 8,Authentication device 8
+BDC_G11.TAB_IM_ADEV_VALID,9,Authentisierungs-Device 9,Authentication device 9
+BDC_G11.TAB_IM_ADEV_VALID,10,Authentisierungs-Device 10,Authentication device 10
+BDC_G11.TAB_IM_ADEV_VALID,11,Authentisierungs-Device 11,Authentication device 11
+BDC_G11.TAB_IM_ADEV_VALID,12,Authentisierungs-Device 12,Authentication device 12
+BDC_G11.TAB_IM_ADEV_VALID,13,Authentisierungs-Device 13,Authentication device 13
+BDC_G11.TAB_IM_ADEV_VALID,14,Authentisierungs-Device 14,Authentication device 14
+BDC_G11.TAB_IM_ADEV_VALID,15,Authentisierungs-Device 15,Authentication device 15
+BDC_G11.TAB_IM_ADEV_VALID,16,Authentisierungs-Device 16,Authentication device 16
+BDC_G11.TAB_IM_ADEV_VALID,17,Authentisierungs-Device 17,Authentication device 17
+BDC_G11.TAB_IM_ADEV_VALID,18,Authentisierungs-Device 18,Authentication device 18
+BDC_G11.TAB_IM_ADEV_VALID,19,Authentisierungs-Device 19,Authentication device 19
+BDC_G11.TAB_IM_ADEV_VALID,255,unbekannt / ungültig,Unknown / invalid
+BDC_G11.TAB_INNENLICHT_MAPPING,0x15,Suchbeleuchtung,Search lighting
+BDC_G11.TAB_INNENLICHT_MAPPING,0x16,Innenbeleuchtung Front,Front interior lighting
+BDC_G11.TAB_INNENLICHT_MAPPING,0x17,Innenbeleuchtung Fond,Rear interior lighting
+BDC_G11.TAB_INNENLICHT_MAPPING,0x18,Optische Vorfeld Beleuchtung (OVT),Optical approach lighting (OVT)
+BDC_G11.TAB_INNENLICHT_MAPPING,0x19,Fußraumleuchte Front,Front footwell light
+BDC_G11.TAB_INNENLICHT_MAPPING,0x1A,Fußraumleuchte Fond,Rear footwell light
 BDC_G11.TAB_INNENLICHT_MAPPING,0x1B,Colourswitch 1,Colourswitch 1
 BDC_G11.TAB_INNENLICHT_MAPPING,0x1C,Colourswitch 2,Colourswitch 2
 BDC_G11.TAB_INNENLICHT_MAPPING,0x1D,Colourswitch 3,Colourswitch 3
-BDC_G11.TAB_INNENLICHT_MAPPING,0x1E,separate Welcomeleuchte,separate Welcomeleuchte
+BDC_G11.TAB_INNENLICHT_MAPPING,0x1E,separate Welcomeleuchte,Separate welcome light
 BDC_G11.TAB_INNENLICHT_MAPPING,0x1F,CORONA_1_LED,CORONA_1_LED
 BDC_G11.TAB_INNENLICHT_MAPPING,0x20,CORONA_2_LED,CORONA_2_LED
-BDC_G11.TAB_INNENLICHT_MAPPING,0xFF,ungültig,invalid
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x01,Innenbeleuchtung Fußraum Fahrer vorne,Interior lighting Fußraum driver front
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x02,Innenbeleuchtung Fußraum Fahrer hinten,Interior lighting Fußraum driver rear
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x03,Innenbeleuchtung Fußraum Beifahrer vorne,Interior lighting Fußraum passenger front
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x04,Innenbeleuchtung Fußraum Beifahrer hinten,Interior lighting Fußraum passenger rear
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x05,Innenbeleuchtung Fahrertür vorne oben,Interior lighting driver door front top
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x06,Innenbeleuchtung Fahrertür vorne Mitte,Interior lighting driver door front center
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x07,Innenbeleuchtung Fahrertür vorne unten,Interior lighting driver door front bottom
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x08,Innenbeleuchtung Fahrertür vorne Kartentasche,Interior lighting driver door front Kartentasche
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x09,Innenbeleuchtung Fahrertür hinten oben,Interior lighting driver door rear top
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0A,Innenbeleuchtung Fahrertür hinten unten,Interior lighting driver door rear bottom
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0B,Innenbeleuchtung Fahrertür hinten Kartentasche,Interior lighting driver door rear Kartentasche
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0C,Innenbeleuchtung Beifahrertür vorne oben,Interior lighting passenger door front top
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0D,Innenbeleuchtung Beifahrertür vorne Mitte,Interior lighting passenger door front center
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0E,Innenbeleuchtung Beifahrertür vorne unten,Interior lighting passenger door front bottom
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0F,Innenbeleuchtung Beifahrertür vorne Kartentasche,Interior lighting passenger door front Kartentasche
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x10,Innenbeleuchtung Beifahrertür hinten oben,Interior lighting passenger door rear top
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x11,Innenbeleuchtung Beifahrertür hinten unten,Interior lighting passenger door rear bottom
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x12,Innenbeleuchtung Beifahrertür hinten Kartentasche,Interior lighting passenger door rear Kartentasche
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x13,Innenbeleuchtung I-Tafel Fahrer oben,Interior lighting I-Tafel driver top
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x14,Innenbeleuchtung I-Tafel Fahrer unten,Interior lighting I-Tafel driver bottom
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x15,Innenbeleuchtung I-Tafel oben Mitte,Interior lighting I-Tafel top center
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x16,Innenbeleuchtung I-Tafel unten Mitte,Interior lighting I-Tafel bottom center
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x17,Innenbeleuchtung I-Tafel oben Beifahrer,Interior lighting I-Tafel top passenger
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x18,Innenbeleuchtung I-Tafel unten Beifahrer,Interior lighting I-Tafel bottom passenger
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x19,Innenbeleuchtung B-Säule Fahrer,Interior lighting B-pillar driver
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1A,Innenbeleuchtung B-Säule Beifahrer,Interior lighting B-pillar passenger
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1B,Innenbeleuchtung Lehne Fahrersitz,Interior lighting Lehne driver seat
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1C,Innenbeleuchtung Lehne Beifahrersitz,Interior lighting Lehne passenger seat
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1D,Innenbeleuchtung Centerstack,Interior lighting Centerstack
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1E,Innenbeleuchtung Mittelkonsole Ablagefach,Interior lighting center console Ablagefach
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1F,Innenbeleuchtung Gangwahlschalter links,Interior lighting Gangwahlschalter left
-BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x20,Innenbeleuchtung Gangwahlschalter rechts,Interior lighting Gangwahlschalter right
+BDC_G11.TAB_INNENLICHT_MAPPING,0xFF,ungültig,Invalid
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x01,Innenbeleuchtung Fußraum Fahrer vorne,"Interior lighting, footwell driver side front"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x02,Innenbeleuchtung Fußraum Fahrer hinten,"Interior lighting, footwell driver side rear"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x03,Innenbeleuchtung Fußraum Beifahrer vorne,"Interior lighting, footwell passenger side front"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x04,Innenbeleuchtung Fußraum Beifahrer hinten,"Interior lighting, footwell passenger side rear"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x05,Innenbeleuchtung Fahrertür vorne oben,"Interior lighting, driver's door front top"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x06,Innenbeleuchtung Fahrertür vorne Mitte,"Interior lighting, driver's door front middle"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x07,Innenbeleuchtung Fahrertür vorne unten,"Interior lighting, driver's door front bottom"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x08,Innenbeleuchtung Fahrertür vorne Kartentasche,"Interior lighting, driver's door front map pocket"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x09,Innenbeleuchtung Fahrertür hinten oben,"Interior lighting, driver's side rear door top"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0A,Innenbeleuchtung Fahrertür hinten unten,"Interior lighting, driver's side rear door bottom"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0B,Innenbeleuchtung Fahrertür hinten Kartentasche,"Interior lighting, driver's side rear door map pocket"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0C,Innenbeleuchtung Beifahrertür vorne oben,"Interior lighting, front passenger door top"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0D,Innenbeleuchtung Beifahrertür vorne Mitte,"Interior lighting, front passenger door middle"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0E,Innenbeleuchtung Beifahrertür vorne unten,"Interior lighting, front passenger door bottom"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x0F,Innenbeleuchtung Beifahrertür vorne Kartentasche,"Interior lighting, front passenger door map pocket"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x10,Innenbeleuchtung Beifahrertür hinten oben,"Interior lighting, passenger side rear door top"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x11,Innenbeleuchtung Beifahrertür hinten unten,"Interior lighting, passenger side rear door bottom"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x12,Innenbeleuchtung Beifahrertür hinten Kartentasche,"Interior lighting, passenger side rear door map pocket"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x13,Innenbeleuchtung I-Tafel Fahrer oben,"Interior lighting, instrument panel driver side top"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x14,Innenbeleuchtung I-Tafel Fahrer unten,"Interior lighting, instrument panel driver side bottom"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x15,Innenbeleuchtung I-Tafel oben Mitte,"Interior lighting, instrument panel top centre"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x16,Innenbeleuchtung I-Tafel unten Mitte,"Interior lighting, instrument panel bottom centre"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x17,Innenbeleuchtung I-Tafel oben Beifahrer,"Interior lighting, instrument panel top passenger side"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x18,Innenbeleuchtung I-Tafel unten Beifahrer,"Interior lighting, instrument panel bottom passenger side"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x19,Innenbeleuchtung B-Säule Fahrer,"Interior lighting, B-pillar driver side"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1A,Innenbeleuchtung B-Säule Beifahrer,"Interior lighting, B-pillar passenger side"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1B,Innenbeleuchtung Lehne Fahrersitz,"Interior lighting, driver's seat backrest"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1C,Innenbeleuchtung Lehne Beifahrersitz,"Interior lighting, front passenger seat backrest"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1D,Innenbeleuchtung Centerstack,"Interior lighting, centre stack"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1E,Innenbeleuchtung Mittelkonsole Ablagefach,"Interior lighting, centre console storage compartment"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x1F,Innenbeleuchtung Gangwahlschalter links,"Interior lighting, gear selector switch left"
+BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0x20,Innenbeleuchtung Gangwahlschalter rechts,"Interior lighting, gear selector switch right"
 BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_JBR_STATUS_RELAY,0x00,Relais ausgeschaltet,Relay ausgeschaltet
+BDC_G11.TAB_JBR_STATUS_RELAY,0x00,Relais ausgeschaltet,Relay switched off
 BDC_G11.TAB_JBR_STATUS_RELAY,0x01,Relais eingeschaltet,Relay switched on
-BDC_G11.TAB_JBR_STATUS_RELAY,0x02,Relais nicht verbaut/diagnostiziert,Relay not verbaut/diagnostiziert
-BDC_G11.TAB_JBR_STATUS_RELAY,0x03,ungültig,invalid
-BDC_G11.TAB_KOMPASS_LENKUNG,0x00,Rechtslenker,Rechtslenker
-BDC_G11.TAB_KOMPASS_LENKUNG,0x01,Linkslenker,Linkslenker
-BDC_G11.TAB_KOMPASS_LENKUNG,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_KOMPASS_SPRACHE,0x00,Sprache Englisch,Sprache Englisch
-BDC_G11.TAB_KOMPASS_SPRACHE,0x01,Sprache Deutsch,Sprache Deutsch
+BDC_G11.TAB_JBR_STATUS_RELAY,0x02,Relais nicht verbaut/diagnostiziert,Relay not fitted/diagnosed
+BDC_G11.TAB_JBR_STATUS_RELAY,0x03,ungültig,Invalid
+BDC_G11.TAB_KOMPASS_LENKUNG,0x00,Rechtslenker,Right-hand drive
+BDC_G11.TAB_KOMPASS_LENKUNG,0x01,Linkslenker,Left-hand drive
+BDC_G11.TAB_KOMPASS_LENKUNG,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_KOMPASS_SPRACHE,0x00,Sprache Englisch,Language English
+BDC_G11.TAB_KOMPASS_SPRACHE,0x01,Sprache Deutsch,Language German
 BDC_G11.TAB_LA_ERRORBITS,0,CONST_SM_ERROR_NO_ERROR,CONST_SM_ERROR_NO_ERROR
 BDC_G11.TAB_LA_ERRORBITS,1,CONST_SM_ERROR_LEFT,CONST_SM_ERROR_LEFT
 BDC_G11.TAB_LA_ERRORBITS,2,CONST_SM_ERROR_RIGHT,CONST_SM_ERROR_RIGHT
@@ -545,48 +545,48 @@ BDC_G11.TAB_LA_QUALIFIER,31,FRONT_NOT_ACTIVE_REAR_ERROR,FRONT_NOT_ACTIVE_REAR_ER
 BDC_G11.TAB_LA_QUALIFIER,32,FRONT_ACTIVE_REAR_ERROR,FRONT_ACTIVE_REAR_ERROR
 BDC_G11.TAB_LA_QUALIFIER,33,FRONT_ERROR_REAR_ERROR,FRONT_ERROR_REAR_ERROR
 BDC_G11.TAB_LA_QUALIFIER,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_LENKRADHEIZUNG_LED,0x00,Lenkradheizung LED aus,Steering wheel heating LED from
-BDC_G11.TAB_LENKRADHEIZUNG_LED,0x01,Lenkradheizung LED ein,Steering wheel heating LED a
-BDC_G11.TAB_LENKRADHEIZUNG_LED,0x03,Lenkradheizung LED nicht verbaut,Steering wheel heating LED not verbaut
+BDC_G11.TAB_LENKRADHEIZUNG_LED,0x00,Lenkradheizung LED aus,Steering wheel heating LED off
+BDC_G11.TAB_LENKRADHEIZUNG_LED,0x01,Lenkradheizung LED ein,Steering wheel heating LED on
+BDC_G11.TAB_LENKRADHEIZUNG_LED,0x03,Lenkradheizung LED nicht verbaut,Steering wheel heating LED not fitted
 BDC_G11.TAB_LENKRADHEIZUNG_LED,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x00,Lenkstock in Nullstellung,Lenkstock in Nullstellung
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x01,Blinker rechts tipp,Blinker right tipp
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x02,Blinker rechts Dauer,Blinker right duration
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x03,Blinker links tipp,Blinker left tipp
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x04,Blinker links Dauer,Blinker left duration
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x05,Fernlicht,Fernlicht
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x06,Lichthupe,Lichthupe
-BDC_G11.TAB_LENKSTOCK_BLINKER,0x07,Mehrfachbetätigung,Mehrfachbetätigung
-BDC_G11.TAB_LENKSTOCK_BLINKER,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0x00,nicht betätigt,not betätigt
-BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0x01,nach oben,to top
-BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0x02,nach unten,to bottom
-BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x00,Nullstellung,Nullstellung
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x01,Tippwischen,Tippwischen
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x02,Wischer Stufe 1,Wiper stage 1
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x03,Wischer Stufe 2,Wiper stage 2
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x04,Frontwaschen,Frontwaschen
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x05,Intervall,Intervall
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x06,Heckwischen,Heckwischen
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x07,Heckwaschen,Heckwaschen
-BDC_G11.TAB_LENKSTOCK_WISCHER,0x08,Mehrfachbetätigung,Mehrfachbetätigung
-BDC_G11.TAB_LENKSTOCK_WISCHER,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER,0x00,Nicht betätigt,Not betätigt
-BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER,0x01,Betätigt,Betätigt
-BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER,0xFF,Element nicht unterstützt,Element not unterstützt
-BDC_G11.TAB_LICHTSCHALTER,0x00,Stellung Neutral,Position Neutral
-BDC_G11.TAB_LICHTSCHALTER,0x01,Stellung Standlicht,Position Standlicht
-BDC_G11.TAB_LICHTSCHALTER,0x02,Stellung Abblendlicht,Position Abblendlicht
-BDC_G11.TAB_LICHTSCHALTER,0x03,Stellung Fahrlichtkontrolle,Position Fahrlichtkontrolle
-BDC_G11.TAB_LICHTSCHALTER,0xFF,ungültiges Signal,invalid signal
-BDC_G11.TAB_LIMIT,0x00,keine Aussage,no Aussage
-BDC_G11.TAB_LIMIT,0x01,unterhalb Limit,below Limit
-BDC_G11.TAB_LIMIT,0x02,normal Zustand,normal state
-BDC_G11.TAB_LIMIT,0x03,oberhalb Limit,above Limit
-BDC_G11.TAB_LIMIT,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_LIN_METHODE_ADRESSIERUNG,0x00,Busshunt,Busshunt
-BDC_G11.TAB_LIN_METHODE_ADRESSIERUNG,0x01,extra wire daisy chain,extra wire daisy chain
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x00,Lenkstock in Nullstellung,Steering column stalk in neutral position
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x01,Blinker rechts tipp,"Turn signal right, tap"
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x02,Blinker rechts Dauer,"Turn signal right, continuous"
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x03,Blinker links tipp,"Turn signal left, tap"
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x04,Blinker links Dauer,"Turn signal left, continuous"
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x05,Fernlicht,High beam
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x06,Lichthupe,Headlight flasher
+BDC_G11.TAB_LENKSTOCK_BLINKER,0x07,Mehrfachbetätigung,Multiple operation
+BDC_G11.TAB_LENKSTOCK_BLINKER,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0x00,nicht betätigt,Not pressed
+BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0x01,nach oben,Up
+BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0x02,nach unten,Down
+BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x00,Nullstellung,Neutral position
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x01,Tippwischen,Single wipe
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x02,Wischer Stufe 1,Wiper speed 1
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x03,Wischer Stufe 2,Wiper speed 2
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x04,Frontwaschen,Front washing
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x05,Intervall,Interval
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x06,Heckwischen,Rear wiping
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x07,Heckwaschen,Rear washing
+BDC_G11.TAB_LENKSTOCK_WISCHER,0x08,Mehrfachbetätigung,Multiple operation
+BDC_G11.TAB_LENKSTOCK_WISCHER,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER,0x00,Nicht betätigt,Not pressed
+BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER,0x01,Betätigt,Pressed
+BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER,0xFF,Element nicht unterstützt,Element not supported
+BDC_G11.TAB_LICHTSCHALTER,0x00,Stellung Neutral,Position neutral
+BDC_G11.TAB_LICHTSCHALTER,0x01,Stellung Standlicht,Position parking lights
+BDC_G11.TAB_LICHTSCHALTER,0x02,Stellung Abblendlicht,Position low beam
+BDC_G11.TAB_LICHTSCHALTER,0x03,Stellung Fahrlichtkontrolle,Position automatic driving lights
+BDC_G11.TAB_LICHTSCHALTER,0xFF,ungültiges Signal,Invalid signal
+BDC_G11.TAB_LIMIT,0x00,keine Aussage,No information
+BDC_G11.TAB_LIMIT,0x01,unterhalb Limit,Below limit
+BDC_G11.TAB_LIMIT,0x02,normal Zustand,Normal state
+BDC_G11.TAB_LIMIT,0x03,oberhalb Limit,Above limit
+BDC_G11.TAB_LIMIT,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_LIN_METHODE_ADRESSIERUNG,0x00,Busshunt,Bus shunt
+BDC_G11.TAB_LIN_METHODE_ADRESSIERUNG,0x01,extra wire daisy chain,Extra wire daisy chain
 BDC_G11.TAB_LIN_METHODE_ADRESSIERUNG,0xFF,Wert ungültig,Value invalid
 BDC_G11.TAB_MAGNETZONE,0x00,Zone 0,Zone 0
 BDC_G11.TAB_MAGNETZONE,0x01,Zone 1,Zone 1
@@ -599,290 +599,290 @@ BDC_G11.TAB_MAGNETZONE,0x07,Zone 7,Zone 7
 BDC_G11.TAB_MAGNETZONE,0x08,Zone 8,Zone 8
 BDC_G11.TAB_MAGNETZONE,0x09,Zone 9,Zone 9
 BDC_G11.TAB_MAGNETZONE,0x0A,Zone 10,Zone 10
-BDC_G11.TAB_MAGNETZONE,0x0B,Zone  11,Zone  11
+BDC_G11.TAB_MAGNETZONE,0x0B,Zone  11,Zone 11
 BDC_G11.TAB_MAGNETZONE,0x0C,Zone 12,Zone 12
 BDC_G11.TAB_MAGNETZONE,0x0D,Zone 13,Zone 13
 BDC_G11.TAB_MAGNETZONE,0x0E,Zone 14,Zone 14
 BDC_G11.TAB_MAGNETZONE,0x0F,Zone 15,Zone 15
-BDC_G11.TAB_MAGNETZONE,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_MFL_RAENDEL_FGR,0x00,Keine Betätigung,No actuation
-BDC_G11.TAB_MFL_RAENDEL_FGR,0x01,Rändel auf Stufe 2 unten,Rändel on stage 2 bottom
-BDC_G11.TAB_MFL_RAENDEL_FGR,0x02,Rändel auf Stufe 1 unten,Rändel on stage 1 bottom
-BDC_G11.TAB_MFL_RAENDEL_FGR,0x03,Rändel auf Stufe 1 oben,Rändel on stage 1 top
-BDC_G11.TAB_MFL_RAENDEL_FGR,0x04,Rändel auf Stufe 2 oben,Rändel on stage 2 top
-BDC_G11.TAB_MFL_RAENDEL_FGR,0x05,ungültige Position,invalid position
-BDC_G11.TAB_MFL_TASTEN1,0x00,Keine Betätigung,No actuation
-BDC_G11.TAB_MFL_TASTEN1,0x01,Taste FGR SET betätigt,Taste FGR SET betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x02,Umschalttaste ACC / DCC betätigt,Umschalttaste ACC / DCC betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x03,Taste FGR RES betätigt,Taste FGR RES betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x04,Taste ACC-Abstand betätigt,Taste ACC-Abstand betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x05,Rändel FGR Stufe 2 unten betätigt,Rändel FGR stage 2 bottom betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x06,Rändel FGR Stufe 1 unten betätigt,Rändel FGR stage 1 bottom betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x07,Rändel FGR Stufe 1 oben betätigt,Rändel FGR stage 1 top betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x08,Rändel FGR Stufe 2 oben betätigt,Rändel FGR stage 2 top betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x09,Taste FGR OFF betätigt,Taste FGR OFF betätigt
-BDC_G11.TAB_MFL_TASTEN1,0x0A,Mehrfachbetätigung,Mehrfachbetätigung
-BDC_G11.TAB_MFL_TASTEN1,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_MFL_TASTEN2,0x00,Keine Betätigung,No actuation
-BDC_G11.TAB_MFL_TASTEN2,0x01,Taste Source / Mode betätigt,Taste Source / Mode betätigt
-BDC_G11.TAB_MFL_TASTEN2,0x02,BC-Rändel gedrückt,BC-Rändel gedrückt
-BDC_G11.TAB_MFL_TASTEN2,0x03,BC-Rändel nach unten,BC-Rändel to bottom
-BDC_G11.TAB_MFL_TASTEN2,0x04,BC-Rändel nach oben,BC-Rändel to top
-BDC_G11.TAB_MFL_TASTEN2,0x05,Taste Telefon betätigt,Taste Telefon betätigt
-BDC_G11.TAB_MFL_TASTEN2,0x06,Taste Volume Minus betätigt,Taste Volume Minus betätigt
-BDC_G11.TAB_MFL_TASTEN2,0x07,Taste Volume Plus betätigt,Taste Volume Plus betätigt
-BDC_G11.TAB_MFL_TASTEN2,0x08,Taste Push-To-talk betätigt,Taste Push-To-talk betätigt
-BDC_G11.TAB_MFL_TASTEN2,0x09,Mehrfachbetätigung,Mehrfachbetätigung
-BDC_G11.TAB_MFL_TASTEN2,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_MFL_TIPPRAENDEL,0x00,Tipprändel BC nicht betätigt,Tipprändel BC not betätigt
-BDC_G11.TAB_MFL_TIPPRAENDEL,0x01,Tipprändel BC gedrückt,Tipprändel BC gedrückt
-BDC_G11.TAB_MFL_TIPPRAENDEL,0x02,Tipprändel nach unten,Tipprändel to bottom
-BDC_G11.TAB_MFL_TIPPRAENDEL,0x03,Tipprändel nach oben,Tipprändel to top
-BDC_G11.TAB_MFL_TIPPRAENDEL,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_M_TASTER_STATUS,0x00,Nicht gedrückt,Not gedrückt
-BDC_G11.TAB_M_TASTER_STATUS,0x01,Gedrückt,Gedrückt
+BDC_G11.TAB_MAGNETZONE,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_MFL_RAENDEL_FGR,0x00,Keine Betätigung,Not operated
+BDC_G11.TAB_MFL_RAENDEL_FGR,0x01,Rändel auf Stufe 2 unten,Thumbwheel at level 2 down
+BDC_G11.TAB_MFL_RAENDEL_FGR,0x02,Rändel auf Stufe 1 unten,Thumbwheel at level 1 down
+BDC_G11.TAB_MFL_RAENDEL_FGR,0x03,Rändel auf Stufe 1 oben,Thumbwheel at level 1 up
+BDC_G11.TAB_MFL_RAENDEL_FGR,0x04,Rändel auf Stufe 2 oben,Thumbwheel at level 2 up
+BDC_G11.TAB_MFL_RAENDEL_FGR,0x05,ungültige Position,Invalid position
+BDC_G11.TAB_MFL_TASTEN1,0x00,Keine Betätigung,Not operated
+BDC_G11.TAB_MFL_TASTEN1,0x01,Taste FGR SET betätigt,Cruise control SET button pressed
+BDC_G11.TAB_MFL_TASTEN1,0x02,Umschalttaste ACC / DCC betätigt,ACC / DCC toggle button pressed
+BDC_G11.TAB_MFL_TASTEN1,0x03,Taste FGR RES betätigt,Cruise control RES button pressed
+BDC_G11.TAB_MFL_TASTEN1,0x04,Taste ACC-Abstand betätigt,ACC distance button pressed
+BDC_G11.TAB_MFL_TASTEN1,0x05,Rändel FGR Stufe 2 unten betätigt,Cruise control thumbwheel level 2 down operated
+BDC_G11.TAB_MFL_TASTEN1,0x06,Rändel FGR Stufe 1 unten betätigt,Cruise control thumbwheel level 1 down operated
+BDC_G11.TAB_MFL_TASTEN1,0x07,Rändel FGR Stufe 1 oben betätigt,Cruise control thumbwheel level 1 up operated
+BDC_G11.TAB_MFL_TASTEN1,0x08,Rändel FGR Stufe 2 oben betätigt,Cruise control thumbwheel level 2 up operated
+BDC_G11.TAB_MFL_TASTEN1,0x09,Taste FGR OFF betätigt,Cruise control OFF button pressed
+BDC_G11.TAB_MFL_TASTEN1,0x0A,Mehrfachbetätigung,Multiple operation
+BDC_G11.TAB_MFL_TASTEN1,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_MFL_TASTEN2,0x00,Keine Betätigung,Not operated
+BDC_G11.TAB_MFL_TASTEN2,0x01,Taste Source / Mode betätigt,Source / Mode button pressed
+BDC_G11.TAB_MFL_TASTEN2,0x02,BC-Rändel gedrückt,On-board computer thumbwheel pressed
+BDC_G11.TAB_MFL_TASTEN2,0x03,BC-Rändel nach unten,On-board computer thumbwheel down
+BDC_G11.TAB_MFL_TASTEN2,0x04,BC-Rändel nach oben,On-board computer thumbwheel up
+BDC_G11.TAB_MFL_TASTEN2,0x05,Taste Telefon betätigt,Telephone button pressed
+BDC_G11.TAB_MFL_TASTEN2,0x06,Taste Volume Minus betätigt,Volume minus button pressed
+BDC_G11.TAB_MFL_TASTEN2,0x07,Taste Volume Plus betätigt,Volume plus button pressed
+BDC_G11.TAB_MFL_TASTEN2,0x08,Taste Push-To-talk betätigt,Push-to-talk button pressed
+BDC_G11.TAB_MFL_TASTEN2,0x09,Mehrfachbetätigung,Multiple operation
+BDC_G11.TAB_MFL_TASTEN2,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_MFL_TIPPRAENDEL,0x00,Tipprändel BC nicht betätigt,On-board computer thumbwheel not operated
+BDC_G11.TAB_MFL_TIPPRAENDEL,0x01,Tipprändel BC gedrückt,On-board computer thumbwheel pressed
+BDC_G11.TAB_MFL_TIPPRAENDEL,0x02,Tipprändel nach unten,Thumbwheel down
+BDC_G11.TAB_MFL_TIPPRAENDEL,0x03,Tipprändel nach oben,Thumbwheel up
+BDC_G11.TAB_MFL_TIPPRAENDEL,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_M_TASTER_STATUS,0x00,Nicht gedrückt,Not pressed
+BDC_G11.TAB_M_TASTER_STATUS,0x01,Gedrückt,Pressed
 BDC_G11.TAB_M_TASTER_STATUS,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x01,Wohnen_durch_Betätigung_Schiebehebedach-Taster_PWF_MASTER_544,Wohnen_durch_Betätigung_Schiebehebedach-Taster_PWF_MASTER_544
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x02,Wohnen_durch_Betätigung_des_Innenlichttasters_PWF_MASTER_126,Wohnen_durch_Betätigung_des_Innenlichttasters_PWF_MASTER_126
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x03,Wohnen_durch_Betätigung_Cabrioverdeck-Taster_PWF_MASTER_553,Wohnen_durch_Betätigung_Cabrioverdeck-Taster_PWF_MASTER_553
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x04,Wohnen_durch_Betätigung_Lenkstockhebel_links_PWF_MASTER_560,Wohnen_durch_Betätigung_Lenkstockhebel_links_PWF_MASTER_560
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x05,Wohnen_durch_Betätigung_Fernlicht-Assistent-Taste_PWF_MASTER_564,Wohnen_durch_Betätigung_Fernlicht-Assistent-Taste_PWF_MASTER_564
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x06,Wohnen_durch_Betätigung_Lenkstockhebel_rechts_PWF_MASTER_565,Wohnen_durch_Betätigung_Lenkstockhebel_rechts_PWF_MASTER_565
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x07,Wohnen_durch_Betätigung_Drehschalter_Licht_PWF_MASTER_570,Wohnen_durch_Betätigung_Drehschalter_Licht_PWF_MASTER_570
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x08,Wohnen_durch_Betätigung_Nebelscheinwerfer_PWF_MASTER_571,Wohnen_durch_Betätigung_Nebelscheinwerfer_PWF_MASTER_571
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x09,Wohnen_durch_Betätigung_Nebelschlussleuchte_PWF_MASTER_572,Wohnen_durch_Betätigung_Nebelschlussleuchte_PWF_MASTER_572
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0A,Wohnen_durch_Betätigung_Leuchtweitenregulierung_PWF_MASTER_559,Wohnen_durch_Betätigung_Leuchtweitenregulierung_PWF_MASTER_559
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0B,Wohnen_durch_Bedienen_eines_Fensterhebers_PWF_MASTER_500,Wohnen_durch_Bedienen_eines_Fensterhebers_PWF_MASTER_500
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0C,Wohnen_durch_Betätigung_Rollo-Tasten_PWF_MASTER_573,Wohnen_durch_Betätigung_Rollo-Tasten_PWF_MASTER_573
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0D,Wohnen_durch_Betätigung_Spiegelverstellung_PWF_MASTER_574,Wohnen_durch_Betätigung_Spiegelverstellung_PWF_MASTER_574
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0E,Wohnen_durch_Betätigung_Spiegel-Beiklappen_PWF_MASTER_575,Wohnen_durch_Betätigung_Spiegel-Beiklappen_PWF_MASTER_575
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x11,Wohnen_durch_Bedienen_des_Sarah-Tasters_PWF_MASTER_497,Wohnen_durch_Bedienen_des_Sarah-Tasters_PWF_MASTER_497
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x12,Wohnen_durch_Betätigung_Modus-Taste_PWF_MASTER_379,Wohnen_durch_Betätigung_Modus-Taste_PWF_MASTER_379
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x13,Wohnen_durch_Betätigung_Eject-Button_PWF_MASTER_377,Wohnen_durch_Betätigung_Eject-Button_PWF_MASTER_377
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x14,Wohnen_durch_Betätigung_AM_FM_Verkehrsinformationen-Taste_PWF_MASTER_380,Wohnen_durch_Betätigung_AM_FM_Verkehrsinformationen-Taste_PWF_MASTER_380
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x15,Wohnen_durch_Betätigung_Functional-Bookmark-Taste_PWF_MASTER_381,Wohnen_durch_Betätigung_Functional-Bookmark-Taste_PWF_MASTER_381
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x18,Wohnen_durch_Betätigung_einer_BE_MIKO-Taste_PWF_MASTER_628,Wohnen_durch_Betätigung_einer_BE_MIKO-Taste_PWF_MASTER_628
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x19,Wohnen_durch_Betätigung_Heckspoiler-Taster_PWF_MASTER_549,Wohnen_durch_Betätigung_Heckspoiler-Taster_PWF_MASTER_549
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1A,Wohnen_durch_Betätigung_MSA-Taster_PWF_MASTER_552,Wohnen_durch_Betätigung_MSA-Taster_PWF_MASTER_552
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1B,Wohnen_durch_Betätigung_ZBE-Taste_Front_PWF_MASTER_382,Wohnen_durch_Betätigung_ZBE-Taste_Front_PWF_MASTER_382
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1C,Wohnen_durch_Betätigung_ZBE-Taste_Fond_PWF_MASTER_414,Wohnen_durch_Betätigung_ZBE-Taste_Fond_PWF_MASTER_414
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1D,Wohnen_durch_Schieben_des_ZBE-Drehstellers_Front_PWF_MASTER_383,Wohnen_durch_Schieben_des_ZBE-Drehstellers_Front_PWF_MASTER_383
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1E,Wohnen_durch_Schieben_des_ZBE-Drehstellers_Fond_PWF_MASTER_415,Wohnen_durch_Schieben_des_ZBE-Drehstellers_Fond_PWF_MASTER_415
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1F,Wohnen_durch_Drehen_des_ZBE-Drehstellers_Front_PWF_MASTER_384,Wohnen_durch_Drehen_des_ZBE-Drehstellers_Front_PWF_MASTER_384
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x20,Wohnen_durch_Drehen_des_ZBE-Drehstellers_Fond_PWF_MASTER_416,Wohnen_durch_Drehen_des_ZBE-Drehstellers_Fond_PWF_MASTER_416
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x21,Wohnen_durch_Betätigung_Lautstärke-Wippe_PWF_MASTER_554,Wohnen_durch_Betätigung_Lautstärke-Wippe_PWF_MASTER_554
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x22,Wohnen_durch_Betätigung_Toggle-Taste_PWF_MASTER_555,Wohnen_durch_Betätigung_Toggle-Taste_PWF_MASTER_555
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x23,Wohnen_durch_Betätigung_Menu-Walze_PWF_MASTER_556,Wohnen_durch_Betätigung_Menu-Walze_PWF_MASTER_556
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x24,Wohnen_durch_Betätigung_Telefon-Taste_PWF_MASTER_557,Wohnen_durch_Betätigung_Telefon-Taste_PWF_MASTER_557
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x25,Wohnen_durch_Betätigung_Push-to-talk-Taste_PWF_MASTER_558,Wohnen_durch_Betätigung_Push-to-talk-Taste_PWF_MASTER_558
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x26,Wohnen_durch_Betätigung_Start-Stopp-Taster_PWF_MASTER_104,Wohnen_durch_Betätigung_Start-Stopp-Taster_PWF_MASTER_104
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x27,Wohnen_durch_Betätigung_Entertainment-Button_(Kurzdruck)_PWF_MASTER_378,Wohnen_durch_Betätigung_Entertainment-Button_(Kurzdruck)_PWF_MASTER_378
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x28,Wohnen_durch_Betätigung_Zentralverriegelungstaster/-wippe_PWF_MASTER_625,Wohnen_durch_Betätigung_Zentralverriegelungstaster/-wippe_PWF_MASTER_625
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x29,Wohnen_durch_Betätigung_Motorhaube_PWF_MASTER_124,Wohnen_durch_Betätigung_Motorhaube_PWF_MASTER_124
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2A,Standfunktion_durch_Betätigung_Motorhaube_PWF_MASTER_124,Standfunktion_durch_Betätigung_Motorhaube_PWF_MASTER_124
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2B,Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114,Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2C,Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114,Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2D,Wohnen_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116,Wohnen_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2E,Wohnen_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117,Wohnen_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2F,Wohnen_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125,Wohnen_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x30,Wohnen_durch_Betätigung_Funkschlüssel_PWF_MASTER_118,Wohnen_durch_Betätigung_Funkschlüssel_PWF_MASTER_118
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x31,Wohnen_durch_ZV_entriegeln_PWF_MASTER_221,Wohnen_durch_ZV_entriegeln_PWF_MASTER_221
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x32,Wohnen_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109,Wohnen_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x33,Wohnen_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110,Wohnen_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x34,Wohnen_durch_Schließen_der_Fahrertür_PWF_MASTER_650,Wohnen_durch_Schließen_der_Fahrertür_PWF_MASTER_650
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x35,Wohnen_durch_Schließen_der_Beifahrertür_PWF_MASTER_651,Wohnen_durch_Schließen_der_Beifahrertür_PWF_MASTER_651
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x36,Wohnen_durch_RCP-TasteBedienen_PWF_MASTER_652,Wohnen_durch_RCP-TasteBedienen_PWF_MASTER_652
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x37,Wohnen_durch_Öffnen_der_Fahrertür_PWF_MASTER_107,Wohnen_durch_Öffnen_der_Fahrertür_PWF_MASTER_107
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x38,Wohnen_durch_Öffnen_der_Beifahrertür_PWF_MASTER_108,Wohnen_durch_Öffnen_der_Beifahrertür_PWF_MASTER_108
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x39,Parken_durch_ZV_sichern_PWF_MASTER_130,Parken_durch_ZV_sichern_PWF_MASTER_130
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3A,Standfunktion_durch_ZV_sichern_PWF_MASTER_130,Standfunktion_durch_ZV_sichern_PWF_MASTER_130
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3B,Fahren_durch_Fahrbereitschaft_hergestellt_PWF_MASTER_132,Fahren_durch_Fahrbereitschaft_hergestellt_PWF_MASTER_132
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3C,Fahrbereitschaft_beenden_durch_Fahrbereitschaft_beendet_PWF_MASTER_275,Fahrbereitschaft_beenden_durch_Fahrbereitschaft_beendet_PWF_MASTER_275
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3D,Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134,Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3E,Wohnen_durch_Analyse_beenden_PWF_MASTER_285,Wohnen_durch_Analyse_beenden_PWF_MASTER_285
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3F,Fahrbereitschaft_herstellen_durch_Fahrwunsch_erkannt_PWF_MASTER_136,Fahrbereitschaft_herstellen_durch_Fahrwunsch_erkannt_PWF_MASTER_136
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x40,Wohnen_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278,Wohnen_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x41,Fahrbereitschaft_beenden_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278,Fahrbereitschaft_beenden_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x42,Standfunktion_durch_Timeout_Wohnen_Kunde_anwesend_PWF_MASTER_145,Standfunktion_durch_Timeout_Wohnen_Kunde_anwesend_PWF_MASTER_145
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x43,Parken_BN_iO_durch_Timeout_Kunde_abwesend_abgelaufen_PWF_MASTER_146,Parken_BN_iO_durch_Timeout_Kunde_abwesend_abgelaufen_PWF_MASTER_146
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x44,Standfunktion_durch_Nachladegrenze_erreicht_PWF_MASTER_507,Standfunktion_durch_Nachladegrenze_erreicht_PWF_MASTER_507
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x45,Parken_BN_niO_durch_Bordnetzfehler_erkannt_PWF_MASTER_238,Parken_BN_niO_durch_Bordnetzfehler_erkannt_PWF_MASTER_238
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x46,Parken_BN_iO_durch_Pruefung_BN_Fehler_PWF_MASTER_534,Parken_BN_iO_durch_Pruefung_BN_Fehler_PWF_MASTER_534
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x47,Parken_BN_niO_durch_TimeOutTransportModus_PWF_MASTER_412,Parken_BN_niO_durch_TimeOutTransportModus_PWF_MASTER_412
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x48,Wohnen_durch_Erstes_Oeffnen_FAT_nach_Fahrt_PWF_MASTER_493,Wohnen_durch_Erstes_Oeffnen_FAT_nach_Fahrt_PWF_MASTER_493
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x49,Standfunktion_durch_Abschaltung_durch_Kunden_PWF_MASTER_517,Standfunktion_durch_Abschaltung_durch_Kunden_PWF_MASTER_517
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4A,Standfunktion_durch_Insassenausstieg_PWF_MASTER_629,Standfunktion_durch_Insassenausstieg_PWF_MASTER_629
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4B,Standfunktion_durch_OSFG_erreicht_PWF_MASTER_200,Standfunktion_durch_OSFG_erreicht_PWF_MASTER_200
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4C,Standfunktion_durch_Virtuelle_Batterie_entleert_PWF_MASTER_532,Standfunktion_durch_Virtuelle_Batterie_entleert_PWF_MASTER_532
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4D,Standfunktion_durch_Standfunktion_aktiv_PWF_MASTER_196,Standfunktion_durch_Standfunktion_aktiv_PWF_MASTER_196
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4E,Standfunktion_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114,Standfunktion_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4F,Standfunktion_durch_Änderung_des_Heckscheibenkontakts_PWF_MASTER_115,Standfunktion_durch_Änderung_des_Heckscheibenkontakts_PWF_MASTER_115
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x50,Standfunktion_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116,Standfunktion_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x51,Standfunktion_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117,Standfunktion_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x52,Standfunktion_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125,Standfunktion_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x53,Standfunktion_durch_FunkschlüsselBedienen_PWF_MASTER_118,Standfunktion_durch_FunkschlüsselBedienen_PWF_MASTER_118
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x54,Standfunktion_durch_ZV_entriegeln_PWF_MASTER_221,Standfunktion_durch_ZV_entriegeln_PWF_MASTER_221
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x55,Standfunktion_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109,Standfunktion_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x56,Standfunktion_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110,Standfunktion_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x57,Standfunktion_durch_Schließen_der_Fahrertür_PWF_MASTER_650,Standfunktion_durch_Schließen_der_Fahrertür_PWF_MASTER_650
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x58,Standfunktion_durch_Schließen_der_Beifahrertür_PWF_MASTER_651,Standfunktion_durch_Schließen_der_Beifahrertür_PWF_MASTER_651
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x59,Standfunktion_durch_RCP-TasteBedienen_PWF_MASTER_652,Standfunktion_durch_RCP-TasteBedienen_PWF_MASTER_652
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5A,Parken_BN_niO_durch_Diagnose_PWF_MASTER_403,Parken_BN_niO_durch_Diagnose_PWF_MASTER_403
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5B,Parken_BN_iO_durch_Diagnose_PWF_MASTER_403,Parken_BN_iO_durch_Diagnose_PWF_MASTER_403
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5C,Standfunktion_durch_Diagnose_PWF_MASTER_403,Standfunktion_durch_Diagnose_PWF_MASTER_403
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5D,Wohnen_durch_Diagnose_PWF_MASTER_403,Wohnen_durch_Diagnose_PWF_MASTER_403
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5E,Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403,Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x61,Fahrbereitschaft_beenden_durch_Diagnose_PWF_MASTER_403,Fahrbereitschaft_beenden_durch_Diagnose_PWF_MASTER_403
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x62,Parken_BN_niO_durch_Dienst_PWF_MASTER_430,Parken_BN_niO_durch_Dienst_PWF_MASTER_430
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x63,Parken_BN_iO_durch_Dienst_PWF_MASTER_430,Parken_BN_iO_durch_Dienst_PWF_MASTER_430
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x64,Standfunktion_durch_Dienst_PWF_MASTER_430,Standfunktion_durch_Dienst_PWF_MASTER_430
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x65,Wohnen_durch_Dienst_PWF_MASTER_430,Wohnen_durch_Dienst_PWF_MASTER_430
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x6A,Wohnen_durch_beenden_Fahrbereitschaft,Wohnen_durch_beenden_Fahrbereitschaft
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x6B,Wohnen_durch_Klemme15HW_PWF_MASTER_750,Wohnen_durch_Klemme15HW_PWF_MASTER_750
-BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x6C,Wohnen_durch_Betätigung_Heckklappentaster_Fußraum_Fahrer_PWF_MASTER_744,Wohnen_durch_Betätigung_Heckklappentaster_Fußraum_Fahrer_PWF_MASTER_744
-BDC_G11.TAB_RESERVE_RESULT,0xFD,Reserve Byte wegen SGBD-Kompatibilität.,Reserve Byte due to SGBD-Kompatibilität.
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x01,Wohnen_durch_Betätigung_Schiebehebedach-Taster_PWF_MASTER_544,Residing: sunroof button pressed (PWF_MASTER_544)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x02,Wohnen_durch_Betätigung_des_Innenlichttasters_PWF_MASTER_126,Residing: interior light button pressed (PWF_MASTER_126)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x03,Wohnen_durch_Betätigung_Cabrioverdeck-Taster_PWF_MASTER_553,Residing: convertible top button pressed (PWF_MASTER_553)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x04,Wohnen_durch_Betätigung_Lenkstockhebel_links_PWF_MASTER_560,Residing: left steering column stalk operated (PWF_MASTER_560)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x05,Wohnen_durch_Betätigung_Fernlicht-Assistent-Taste_PWF_MASTER_564,Residing: high-beam assistant button pressed (PWF_MASTER_564)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x06,Wohnen_durch_Betätigung_Lenkstockhebel_rechts_PWF_MASTER_565,Residing: right steering column stalk operated (PWF_MASTER_565)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x07,Wohnen_durch_Betätigung_Drehschalter_Licht_PWF_MASTER_570,Residing: light rotary switch operated (PWF_MASTER_570)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x08,Wohnen_durch_Betätigung_Nebelscheinwerfer_PWF_MASTER_571,Residing: fog lights operated (PWF_MASTER_571)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x09,Wohnen_durch_Betätigung_Nebelschlussleuchte_PWF_MASTER_572,Residing: rear fog light operated (PWF_MASTER_572)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0A,Wohnen_durch_Betätigung_Leuchtweitenregulierung_PWF_MASTER_559,Residing: headlight range control operated (PWF_MASTER_559)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0B,Wohnen_durch_Bedienen_eines_Fensterhebers_PWF_MASTER_500,Residing: window lifter operated (PWF_MASTER_500)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0C,Wohnen_durch_Betätigung_Rollo-Tasten_PWF_MASTER_573,Residing: roller sunblind buttons pressed (PWF_MASTER_573)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0D,Wohnen_durch_Betätigung_Spiegelverstellung_PWF_MASTER_574,Residing: mirror adjustment operated (PWF_MASTER_574)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x0E,Wohnen_durch_Betätigung_Spiegel-Beiklappen_PWF_MASTER_575,Residing: mirror fold-in operated (PWF_MASTER_575)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x11,Wohnen_durch_Bedienen_des_Sarah-Tasters_PWF_MASTER_497,Residing: SARAH button operated (PWF_MASTER_497)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x12,Wohnen_durch_Betätigung_Modus-Taste_PWF_MASTER_379,Residing: mode button pressed (PWF_MASTER_379)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x13,Wohnen_durch_Betätigung_Eject-Button_PWF_MASTER_377,Residing: eject button pressed (PWF_MASTER_377)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x14,Wohnen_durch_Betätigung_AM_FM_Verkehrsinformationen-Taste_PWF_MASTER_380,Residing: AM/FM traffic information button pressed (PWF_MASTER_380)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x15,Wohnen_durch_Betätigung_Functional-Bookmark-Taste_PWF_MASTER_381,Residing: functional bookmark button pressed (PWF_MASTER_381)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x18,Wohnen_durch_Betätigung_einer_BE_MIKO-Taste_PWF_MASTER_628,Residing: BE_MIKO button pressed (PWF_MASTER_628)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x19,Wohnen_durch_Betätigung_Heckspoiler-Taster_PWF_MASTER_549,Residing: rear spoiler button pressed (PWF_MASTER_549)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1A,Wohnen_durch_Betätigung_MSA-Taster_PWF_MASTER_552,Residing: MSA button pressed (PWF_MASTER_552)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1B,Wohnen_durch_Betätigung_ZBE-Taste_Front_PWF_MASTER_382,Residing: front controller (ZBE) button pressed (PWF_MASTER_382)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1C,Wohnen_durch_Betätigung_ZBE-Taste_Fond_PWF_MASTER_414,Residing: rear controller (ZBE) button pressed (PWF_MASTER_414)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1D,Wohnen_durch_Schieben_des_ZBE-Drehstellers_Front_PWF_MASTER_383,Residing: front controller (ZBE) pushed (PWF_MASTER_383)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1E,Wohnen_durch_Schieben_des_ZBE-Drehstellers_Fond_PWF_MASTER_415,Residing: rear controller (ZBE) pushed (PWF_MASTER_415)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x1F,Wohnen_durch_Drehen_des_ZBE-Drehstellers_Front_PWF_MASTER_384,Residing: front controller (ZBE) turned (PWF_MASTER_384)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x20,Wohnen_durch_Drehen_des_ZBE-Drehstellers_Fond_PWF_MASTER_416,Residing: rear controller (ZBE) turned (PWF_MASTER_416)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x21,Wohnen_durch_Betätigung_Lautstärke-Wippe_PWF_MASTER_554,Residing: volume rocker operated (PWF_MASTER_554)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x22,Wohnen_durch_Betätigung_Toggle-Taste_PWF_MASTER_555,Residing: toggle button pressed (PWF_MASTER_555)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x23,Wohnen_durch_Betätigung_Menu-Walze_PWF_MASTER_556,Residing: menu roller operated (PWF_MASTER_556)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x24,Wohnen_durch_Betätigung_Telefon-Taste_PWF_MASTER_557,Residing: telephone button pressed (PWF_MASTER_557)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x25,Wohnen_durch_Betätigung_Push-to-talk-Taste_PWF_MASTER_558,Residing: push-to-talk button pressed (PWF_MASTER_558)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x26,Wohnen_durch_Betätigung_Start-Stopp-Taster_PWF_MASTER_104,Residing: Start/Stop button pressed (PWF_MASTER_104)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x27,Wohnen_durch_Betätigung_Entertainment-Button_(Kurzdruck)_PWF_MASTER_378,Residing: entertainment button pressed (short press) (PWF_MASTER_378)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x28,Wohnen_durch_Betätigung_Zentralverriegelungstaster/-wippe_PWF_MASTER_625,Residing: central locking button/rocker operated (PWF_MASTER_625)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x29,Wohnen_durch_Betätigung_Motorhaube_PWF_MASTER_124,Residing: bonnet operated (PWF_MASTER_124)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2A,Standfunktion_durch_Betätigung_Motorhaube_PWF_MASTER_124,Standby functions: bonnet operated (PWF_MASTER_124)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2B,Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114,Residing: tailgate contact changed (PWF_MASTER_114)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2C,Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114,Residing: tailgate contact changed (PWF_MASTER_114)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2D,Wohnen_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116,Residing: rear window button pressed (PWF_MASTER_116)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2E,Wohnen_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117,Residing: tailgate button pressed (PWF_MASTER_117)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x2F,Wohnen_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125,Residing: secure switch on tailgate operated (PWF_MASTER_125)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x30,Wohnen_durch_Betätigung_Funkschlüssel_PWF_MASTER_118,Residing: remote key operated (PWF_MASTER_118)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x31,Wohnen_durch_ZV_entriegeln_PWF_MASTER_221,Residing: central locking unlocked (PWF_MASTER_221)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x32,Wohnen_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109,Residing: driver's side rear door opened or closed (PWF_MASTER_109)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x33,Wohnen_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110,Residing: passenger side rear door opened or closed (PWF_MASTER_110)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x34,Wohnen_durch_Schließen_der_Fahrertür_PWF_MASTER_650,Residing: driver's door closed (PWF_MASTER_650)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x35,Wohnen_durch_Schließen_der_Beifahrertür_PWF_MASTER_651,Residing: front passenger door closed (PWF_MASTER_651)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x36,Wohnen_durch_RCP-TasteBedienen_PWF_MASTER_652,Residing: RCP button operated (PWF_MASTER_652)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x37,Wohnen_durch_Öffnen_der_Fahrertür_PWF_MASTER_107,Residing: driver's door opened (PWF_MASTER_107)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x38,Wohnen_durch_Öffnen_der_Beifahrertür_PWF_MASTER_108,Residing: front passenger door opened (PWF_MASTER_108)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x39,Parken_durch_ZV_sichern_PWF_MASTER_130,Parking: central locking secured (PWF_MASTER_130)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3A,Standfunktion_durch_ZV_sichern_PWF_MASTER_130,Standby functions: central locking secured (PWF_MASTER_130)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3B,Fahren_durch_Fahrbereitschaft_hergestellt_PWF_MASTER_132,Driving: ready to drive established (PWF_MASTER_132)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3C,Fahrbereitschaft_beenden_durch_Fahrbereitschaft_beendet_PWF_MASTER_275,End ready to drive: ready to drive ended (PWF_MASTER_275)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3D,Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134,Test/analysis/diagnosis: analysis started (PWF_MASTER_134)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3E,Wohnen_durch_Analyse_beenden_PWF_MASTER_285,Residing: analysis ended (PWF_MASTER_285)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x3F,Fahrbereitschaft_herstellen_durch_Fahrwunsch_erkannt_PWF_MASTER_136,Establish ready to drive: drive request detected (PWF_MASTER_136)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x40,Wohnen_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278,Residing: drive request withdrawn (PWF_MASTER_278)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x41,Fahrbereitschaft_beenden_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278,End ready to drive: drive request withdrawn (PWF_MASTER_278)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x42,Standfunktion_durch_Timeout_Wohnen_Kunde_anwesend_PWF_MASTER_145,"Standby functions: residing timeout, customer present (PWF_MASTER_145)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x43,Parken_BN_iO_durch_Timeout_Kunde_abwesend_abgelaufen_PWF_MASTER_146,"Parking, electrical system OK: customer-absent timeout expired (PWF_MASTER_146)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x44,Standfunktion_durch_Nachladegrenze_erreicht_PWF_MASTER_507,Standby functions: recharge limit reached (PWF_MASTER_507)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x45,Parken_BN_niO_durch_Bordnetzfehler_erkannt_PWF_MASTER_238,"Parking, electrical system not OK: electrical system fault detected (PWF_MASTER_238)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x46,Parken_BN_iO_durch_Pruefung_BN_Fehler_PWF_MASTER_534,"Parking, electrical system OK: electrical system fault check (PWF_MASTER_534)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x47,Parken_BN_niO_durch_TimeOutTransportModus_PWF_MASTER_412,"Parking, electrical system not OK: transport mode timeout (PWF_MASTER_412)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x48,Wohnen_durch_Erstes_Oeffnen_FAT_nach_Fahrt_PWF_MASTER_493,Residing: first opening of driver's door after drive (PWF_MASTER_493)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x49,Standfunktion_durch_Abschaltung_durch_Kunden_PWF_MASTER_517,Standby functions: switched off by customer (PWF_MASTER_517)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4A,Standfunktion_durch_Insassenausstieg_PWF_MASTER_629,Standby functions: occupants exited (PWF_MASTER_629)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4B,Standfunktion_durch_OSFG_erreicht_PWF_MASTER_200,Standby functions: OSFG reached (PWF_MASTER_200)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4C,Standfunktion_durch_Virtuelle_Batterie_entleert_PWF_MASTER_532,Standby functions: virtual battery depleted (PWF_MASTER_532)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4D,Standfunktion_durch_Standfunktion_aktiv_PWF_MASTER_196,Standby functions: standby function active (PWF_MASTER_196)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4E,Standfunktion_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114,Standby functions: tailgate contact changed (PWF_MASTER_114)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x4F,Standfunktion_durch_Änderung_des_Heckscheibenkontakts_PWF_MASTER_115,Standby functions: rear window contact changed (PWF_MASTER_115)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x50,Standfunktion_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116,Standby functions: rear window button pressed (PWF_MASTER_116)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x51,Standfunktion_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117,Standby functions: tailgate button pressed (PWF_MASTER_117)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x52,Standfunktion_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125,Standby functions: secure switch on tailgate operated (PWF_MASTER_125)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x53,Standfunktion_durch_FunkschlüsselBedienen_PWF_MASTER_118,Standby functions: remote key operated (PWF_MASTER_118)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x54,Standfunktion_durch_ZV_entriegeln_PWF_MASTER_221,Standby functions: central locking unlocked (PWF_MASTER_221)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x55,Standfunktion_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109,Standby functions: driver's side rear door opened or closed (PWF_MASTER_109)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x56,Standfunktion_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110,Standby functions: passenger side rear door opened or closed (PWF_MASTER_110)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x57,Standfunktion_durch_Schließen_der_Fahrertür_PWF_MASTER_650,Standby functions: driver's door closed (PWF_MASTER_650)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x58,Standfunktion_durch_Schließen_der_Beifahrertür_PWF_MASTER_651,Standby functions: front passenger door closed (PWF_MASTER_651)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x59,Standfunktion_durch_RCP-TasteBedienen_PWF_MASTER_652,Standby functions: RCP button operated (PWF_MASTER_652)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5A,Parken_BN_niO_durch_Diagnose_PWF_MASTER_403,"Parking, electrical system not OK: by diagnosis (PWF_MASTER_403)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5B,Parken_BN_iO_durch_Diagnose_PWF_MASTER_403,"Parking, electrical system OK: by diagnosis (PWF_MASTER_403)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5C,Standfunktion_durch_Diagnose_PWF_MASTER_403,Standby functions: by diagnosis (PWF_MASTER_403)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5D,Wohnen_durch_Diagnose_PWF_MASTER_403,Residing: by diagnosis (PWF_MASTER_403)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x5E,Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403,Test/analysis/diagnosis: by diagnosis (PWF_MASTER_403)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x61,Fahrbereitschaft_beenden_durch_Diagnose_PWF_MASTER_403,End ready to drive: by diagnosis (PWF_MASTER_403)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x62,Parken_BN_niO_durch_Dienst_PWF_MASTER_430,"Parking, electrical system not OK: by service (PWF_MASTER_430)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x63,Parken_BN_iO_durch_Dienst_PWF_MASTER_430,"Parking, electrical system OK: by service (PWF_MASTER_430)"
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x64,Standfunktion_durch_Dienst_PWF_MASTER_430,Standby functions: by service (PWF_MASTER_430)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x65,Wohnen_durch_Dienst_PWF_MASTER_430,Residing: by service (PWF_MASTER_430)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x6A,Wohnen_durch_beenden_Fahrbereitschaft,Residing: ready to drive ended
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x6B,Wohnen_durch_Klemme15HW_PWF_MASTER_750,Residing: terminal 15 hardware (PWF_MASTER_750)
+BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL,0x6C,Wohnen_durch_Betätigung_Heckklappentaster_Fußraum_Fahrer_PWF_MASTER_744,Residing: tailgate button in driver's footwell pressed (PWF_MASTER_744)
+BDC_G11.TAB_RESERVE_RESULT,0xFD,Reserve Byte wegen SGBD-Kompatibilität.,Reserve byte for SGBD compatibility.
 BDC_G11.TAB_RESERVE_RESULT,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_ROLLO_VERFAHREN,0x00,Keine Betätigung,No actuation
-BDC_G11.TAB_ROLLO_VERFAHREN,0x01,Betätigt,Betätigt
+BDC_G11.TAB_ROLLO_VERFAHREN,0x00,Keine Betätigung,Not operated
+BDC_G11.TAB_ROLLO_VERFAHREN,0x01,Betätigt,Pressed
 BDC_G11.TAB_ROLLO_VERFAHREN,0x07,Signal ungültig,Signal invalid
-BDC_G11.TAB_ROLLO_VERFAHREN,0xFF,ungültiger Wert,invalid value
+BDC_G11.TAB_ROLLO_VERFAHREN,0xFF,ungültiger Wert,Invalid value
 BDC_G11.TAB_SARAH_LED,0x00,Aus,Off
-BDC_G11.TAB_SARAH_LED,0x01,Gruen,Gruen
+BDC_G11.TAB_SARAH_LED,0x01,Gruen,Green
 BDC_G11.TAB_SARAH_LED,0x02,Defekt,Defective
 BDC_G11.TAB_SARAH_LED,0x03,Orange,Orange
-BDC_G11.TAB_SARAH_LED,0xFF,ungueltig,invalid
-BDC_G11.TAB_SARAH_ZUSTAND,0x00,Alle Funktionen aus,Alle function from
-BDC_G11.TAB_SARAH_ZUSTAND,0x01,Benutzerdefiniert,Benutzerdefiniert
-BDC_G11.TAB_SARAH_ZUSTAND,0x02,Alle Funktionen an,Alle function an
-BDC_G11.TAB_SCHALTWIPPE,0x00,Schaltpaddles nicht betätigt,Schaltpaddles not betätigt
-BDC_G11.TAB_SCHALTWIPPE,0x03,Fehler Schaltpaddle,Fault Schaltpaddle
-BDC_G11.TAB_SCHALTWIPPE,0x05,Schaltwippe Tip minus betätigt und entprellt,Schaltwippe Tip minus betätigt and entprellt
-BDC_G11.TAB_SCHALTWIPPE,0x06,Schaltwippe Tip plus betätigt und entprellt,Schaltwippe Tip plus betätigt and entprellt
+BDC_G11.TAB_SARAH_LED,0xFF,ungueltig,Invalid
+BDC_G11.TAB_SARAH_ZUSTAND,0x00,Alle Funktionen aus,All functions off
+BDC_G11.TAB_SARAH_ZUSTAND,0x01,Benutzerdefiniert,User-defined
+BDC_G11.TAB_SARAH_ZUSTAND,0x02,Alle Funktionen an,All functions on
+BDC_G11.TAB_SCHALTWIPPE,0x00,Schaltpaddles nicht betätigt,Shift paddles not operated
+BDC_G11.TAB_SCHALTWIPPE,0x03,Fehler Schaltpaddle,Shift paddle fault
+BDC_G11.TAB_SCHALTWIPPE,0x05,Schaltwippe Tip minus betätigt und entprellt,Shift paddle tip minus operated and debounced
+BDC_G11.TAB_SCHALTWIPPE,0x06,Schaltwippe Tip plus betätigt und entprellt,Shift paddle tip plus operated and debounced
 BDC_G11.TAB_SCHALTWIPPE,0xFF,Signal ungültig,Signal invalid
-BDC_G11.TAB_SHD_FH_LAGE_NR,0x01,Ausstelllage,Ausstelllage
-BDC_G11.TAB_SHD_FH_LAGE_NR,0x02,Schiebelage,Schiebelage
-BDC_G11.TAB_SHD_FH_LAGE_NR,0xFF,Funktion nicht unterstützt,Function not unterstützt
-BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x00,Nicht kodiert (FAH und BFH),Not kodiert (FAH and BFH)
-BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x01,Kodiert (FAH und BFH),Kodiert (FAH and BFH)
-BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x02,Nur FAH kodiert,Nur FAH kodiert
-BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x03,Nur BFH kodiert,Nur BFH kodiert
-BDC_G11.TAB_SITZEXT_TASTER,0x00,nicht gedrückt,not gedrückt
-BDC_G11.TAB_SITZEXT_TASTER,0x01,Gedrückt / Betätigt,Gedrückt / Betätigt
+BDC_G11.TAB_SHD_FH_LAGE_NR,0x01,Ausstelllage,Tilted position
+BDC_G11.TAB_SHD_FH_LAGE_NR,0x02,Schiebelage,Sliding position
+BDC_G11.TAB_SHD_FH_LAGE_NR,0xFF,Funktion nicht unterstützt,Function not supported
+BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x00,Nicht kodiert (FAH und BFH),Not coded (rear driver side and rear passenger side)
+BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x01,Kodiert (FAH und BFH),Coded (rear driver side and rear passenger side)
+BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x02,Nur FAH kodiert,Only rear driver side coded
+BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN,0x03,Nur BFH kodiert,Only rear passenger side coded
+BDC_G11.TAB_SITZEXT_TASTER,0x00,nicht gedrückt,Not pressed
+BDC_G11.TAB_SITZEXT_TASTER,0x01,Gedrückt / Betätigt,Pressed / operated
 BDC_G11.TAB_SITZEXT_TASTER,0x03,Ungültig,Invalid
-BDC_G11.TAB_SITZEXT_VORHANDEN,0x00,Nicht kodiert (FA und BF),Not kodiert (FA and BF)
-BDC_G11.TAB_SITZEXT_VORHANDEN,0x01,Kodiert  (FA und BF),Kodiert  (FA and BF)
-BDC_G11.TAB_SITZEXT_VORHANDEN,0x02,Nur FA kodiert,Nur FA kodiert
-BDC_G11.TAB_SITZEXT_VORHANDEN,0x03,Nur BF kodiert,Nur BF kodiert
+BDC_G11.TAB_SITZEXT_VORHANDEN,0x00,Nicht kodiert (FA und BF),Not coded (driver and front passenger)
+BDC_G11.TAB_SITZEXT_VORHANDEN,0x01,Kodiert  (FA und BF),Coded (driver and front passenger)
+BDC_G11.TAB_SITZEXT_VORHANDEN,0x02,Nur FA kodiert,Only driver coded
+BDC_G11.TAB_SITZEXT_VORHANDEN,0x03,Nur BF kodiert,Only front passenger coded
 BDC_G11.TAB_SITZHEIZUNG_STUFE,0x00,Aus,Off
-BDC_G11.TAB_SITZHEIZUNG_STUFE,0x01,Stufe 1,Stage 1
-BDC_G11.TAB_SITZHEIZUNG_STUFE,0x02,Stufe 2,Stage 2
-BDC_G11.TAB_SITZHEIZUNG_STUFE,0x03,Stufe 3,Stage 3
-BDC_G11.TAB_SITZHEIZUNG_STUFE,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_SITZMEMORY_TASTER,0x00,Nicht gedrückt,Not gedrückt
+BDC_G11.TAB_SITZHEIZUNG_STUFE,0x01,Stufe 1,Level 1
+BDC_G11.TAB_SITZHEIZUNG_STUFE,0x02,Stufe 2,Level 2
+BDC_G11.TAB_SITZHEIZUNG_STUFE,0x03,Stufe 3,Level 3
+BDC_G11.TAB_SITZHEIZUNG_STUFE,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_SITZMEMORY_TASTER,0x00,Nicht gedrückt,Not pressed
 BDC_G11.TAB_SITZMEMORY_TASTER,0x01,Taster 1,Button 1
 BDC_G11.TAB_SITZMEMORY_TASTER,0x02,Taster 2,Button 2
 BDC_G11.TAB_SITZMEMORY_TASTER,0x03,Taster 3,Button 3
 BDC_G11.TAB_SITZMEMORY_TASTER,0x04,Taster M,Button M
-BDC_G11.TAB_SITZMEMORY_TASTER,0x15,Signal Ungültig/ Fehler / nicht vorhanden,Signal invalid/ fault / not present
-BDC_G11.TAB_SLEEP_MODE_NRC,0x00,Positive Response,Positive Response
-BDC_G11.TAB_SLEEP_MODE_NRC,0x01,Light Switch in Position 2,Light Switch in position 2
-BDC_G11.TAB_SLEEP_MODE_NRC,0x02,Relay Stuck Hw Failure,Relay Stuck Hw Failure
-BDC_G11.TAB_SLEEP_MODE_NRC,0x03,Power Window Activated,Power Window Activated
+BDC_G11.TAB_SITZMEMORY_TASTER,0x15,Signal Ungültig/ Fehler / nicht vorhanden,Signal invalid / fault / not present
+BDC_G11.TAB_SLEEP_MODE_NRC,0x00,Positive Response,Positive response
+BDC_G11.TAB_SLEEP_MODE_NRC,0x01,Light Switch in Position 2,Light switch in position 2
+BDC_G11.TAB_SLEEP_MODE_NRC,0x02,Relay Stuck Hw Failure,Relay stuck hardware failure
+BDC_G11.TAB_SLEEP_MODE_NRC,0x03,Power Window Activated,Power window activated
 BDC_G11.TAB_SLEEP_MODE_NRC,0xFF,Invalid,Invalid
-BDC_G11.TAB_SMO_ANFORDERUNG,0,keine Anforderungsbotschaft von SMO erhalten,no request message of SMO erhalten
-BDC_G11.TAB_SMO_ANFORDERUNG,1,Anforderungsbotschaft von SMO erhalten,Request message of SMO erhalten
+BDC_G11.TAB_SMO_ANFORDERUNG,0,keine Anforderungsbotschaft von SMO erhalten,No request message received from SMO
+BDC_G11.TAB_SMO_ANFORDERUNG,1,Anforderungsbotschaft von SMO erhalten,Request message received from SMO
 BDC_G11.TAB_SMO_ANFORDERUNG,255,Ungültig/Unbekannt,Invalid/unknown
-BDC_G11.TAB_SMO_FAHRZEUGTYP,0x00,Kein Fahrzeugtyp definiert,No Fahrzeugtyp definiert
-BDC_G11.TAB_SMO_FAHRZEUGTYP,0xFE,Dynamische Parametrierung,Dynamic Parametrierung
+BDC_G11.TAB_SMO_FAHRZEUGTYP,0x00,Kein Fahrzeugtyp definiert,No vehicle type defined
+BDC_G11.TAB_SMO_FAHRZEUGTYP,0xFE,Dynamische Parametrierung,Dynamic parameterisation
 BDC_G11.TAB_SMO_FAHRZEUGTYP,0xFF,Ungültiger Signal,Invalid signal
-BDC_G11.TAB_SMO_VERBAU,0,kein Smart Opener/Closer vorhanden,no Smart Opener/Closer present
+BDC_G11.TAB_SMO_VERBAU,0,kein Smart Opener/Closer vorhanden,No Smart Opener/Closer present
 BDC_G11.TAB_SMO_VERBAU,1,Smart Opener/Closer vorhanden,Smart Opener/Closer present
 BDC_G11.TAB_SMO_VERBAU,255,Ungültig/Unbekannt,Invalid/unknown
 BDC_G11.TAB_SPIEGEL_HC2,0x00,Aus,Off
-BDC_G11.TAB_SPIEGEL_HC2,0x01,An Kein Blinken,An no Blinken
-BDC_G11.TAB_SPIEGEL_HC2,0x02,An Blinken Stufe 1,An Blinken stage 1
-BDC_G11.TAB_SPIEGEL_HC2,0x03,An Blinken Stufe 2,An Blinken stage 2
-BDC_G11.TAB_SPIEGEL_HC2,0x04,An Blinken Stufe 3,An Blinken stage 3
+BDC_G11.TAB_SPIEGEL_HC2,0x01,An Kein Blinken,"On, no flashing"
+BDC_G11.TAB_SPIEGEL_HC2,0x02,An Blinken Stufe 1,"On, flashing level 1"
+BDC_G11.TAB_SPIEGEL_HC2,0x03,An Blinken Stufe 2,"On, flashing level 2"
+BDC_G11.TAB_SPIEGEL_HC2,0x04,An Blinken Stufe 3,"On, flashing level 3"
 BDC_G11.TAB_SPIEGEL_HC2,0x0D,Anzeigefehler,Display fault
 BDC_G11.TAB_SPIEGEL_HC2,0xFF,Signal ungültig,Signal invalid
-BDC_G11.TAB_SPIEGEL_VERFAHREN,0x00,Keine Ansteuerung,No actuation
-BDC_G11.TAB_SPIEGEL_VERFAHREN,0x01,links,left
-BDC_G11.TAB_SPIEGEL_VERFAHREN,0x02,oben,top
-BDC_G11.TAB_SPIEGEL_VERFAHREN,0x03,rechts,right
-BDC_G11.TAB_SPIEGEL_VERFAHREN,0x04,unten,bottom
-BDC_G11.TAB_SPIEGEL_VERFAHREN,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_STATUS_TASTER,0x00,Taster nicht betätigt,Button not betätigt
-BDC_G11.TAB_STATUS_TASTER,0x01,Taster links betätigt,Button left betätigt
-BDC_G11.TAB_STATUS_TASTER,0x02,Taster rechts betätigt,Button right betätigt
+BDC_G11.TAB_SPIEGEL_VERFAHREN,0x00,Keine Ansteuerung,No activation
+BDC_G11.TAB_SPIEGEL_VERFAHREN,0x01,links,Left
+BDC_G11.TAB_SPIEGEL_VERFAHREN,0x02,oben,Up
+BDC_G11.TAB_SPIEGEL_VERFAHREN,0x03,rechts,Right
+BDC_G11.TAB_SPIEGEL_VERFAHREN,0x04,unten,Down
+BDC_G11.TAB_SPIEGEL_VERFAHREN,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_STATUS_TASTER,0x00,Taster nicht betätigt,Button not pressed
+BDC_G11.TAB_STATUS_TASTER,0x01,Taster links betätigt,Left button pressed
+BDC_G11.TAB_STATUS_TASTER,0x02,Taster rechts betätigt,Right button pressed
 BDC_G11.TAB_STATUS_TASTER,0xFF,Signal ungültig,Signal invalid
-BDC_G11.TAB_ST_CENG_DRV,0x00,Motor steht sicher,Engine steht sicher
-BDC_G11.TAB_ST_CENG_DRV,0x01,Motor startet,Engine startet
-BDC_G11.TAB_ST_CENG_DRV,0x02,Motor läuft selbstständig,Engine läuft selbstständig
-BDC_G11.TAB_ST_CENG_DRV,0x03,Motor im Auslauf,Engine in the Auslauf
-BDC_G11.TAB_ST_CENG_DRV,0x0D,Funktionsschnittstelle ist nicht vorhanden,Function interface is not present
-BDC_G11.TAB_ST_CENG_DRV,0x0E,Reserviert,Reserviert
-BDC_G11.TAB_ST_CENG_DRV,0x0F,Signal unbefüllt,Signal unbefüllt
-BDC_G11.TAB_ST_DRVG_RDI_DRV,0x01,Keine Fahrbereitschaft,No readiness to drive
-BDC_G11.TAB_ST_DRVG_RDI_DRV,0x02,Fahrbereitschaft,Readiness to drive
+BDC_G11.TAB_ST_CENG_DRV,0x00,Motor steht sicher,Engine safely stopped
+BDC_G11.TAB_ST_CENG_DRV,0x01,Motor startet,Engine starting
+BDC_G11.TAB_ST_CENG_DRV,0x02,Motor läuft selbstständig,Engine running on its own
+BDC_G11.TAB_ST_CENG_DRV,0x03,Motor im Auslauf,Engine running down
+BDC_G11.TAB_ST_CENG_DRV,0x0D,Funktionsschnittstelle ist nicht vorhanden,Function interface not present
+BDC_G11.TAB_ST_CENG_DRV,0x0E,Reserviert,Reserved
+BDC_G11.TAB_ST_CENG_DRV,0x0F,Signal unbefüllt,Signal not populated
+BDC_G11.TAB_ST_DRVG_RDI_DRV,0x01,Keine Fahrbereitschaft,Not ready to drive
+BDC_G11.TAB_ST_DRVG_RDI_DRV,0x02,Fahrbereitschaft,Ready to drive
 BDC_G11.TAB_ST_DRVG_RDI_DRV,0x0D,Funktionsschnittstelle nicht vorhanden,Function interface not present
-BDC_G11.TAB_ST_DRVG_RDI_DRV,0x0E,Reserviert,Reserviert
-BDC_G11.TAB_ST_DRVG_RDI_DRV,0x0F,Signal unbefüllt,Signal unbefüllt
-BDC_G11.TAB_TASTER_BEMIKO,0x00,Nicht gedrückt,Not gedrückt
-BDC_G11.TAB_TASTER_BEMIKO,0x01,gedrückt,gedrückt
-BDC_G11.TAB_TASTER_BEMIKO,0x02,berührt,berührt
+BDC_G11.TAB_ST_DRVG_RDI_DRV,0x0E,Reserviert,Reserved
+BDC_G11.TAB_ST_DRVG_RDI_DRV,0x0F,Signal unbefüllt,Signal not populated
+BDC_G11.TAB_TASTER_BEMIKO,0x00,Nicht gedrückt,Not pressed
+BDC_G11.TAB_TASTER_BEMIKO,0x01,gedrückt,Pressed
+BDC_G11.TAB_TASTER_BEMIKO,0x02,berührt,Touched
 BDC_G11.TAB_TASTER_BEMIKO,0x03,Signal ungültig/Fehler/nicht vorhanden,Signal invalid/fault/not present
-BDC_G11.TAB_TASTER_MFL_1,0x00,keine Aktion,no Aktion
-BDC_G11.TAB_TASTER_MFL_1,0x01,Taster gedrückt,Button gedrückt
-BDC_G11.TAB_TASTER_MFL_1,0x03,ungültig,invalid
-BDC_G11.TAB_TASTER_MFL_2,0x00,keine Aktion,no Aktion
-BDC_G11.TAB_TASTER_MFL_2,0x01,Taste gedrückt,Taste gedrückt
-BDC_G11.TAB_TASTER_MFL_2,0x0F,ungültig,invalid
-BDC_G11.TAB_TASTER_MFL_3,0x00,keine Aktion,no Aktion
-BDC_G11.TAB_TASTER_MFL_3,0x01,Taster/Wippe oben gedrückt,Button/Wippe top gedrückt
-BDC_G11.TAB_TASTER_MFL_3,0x05,Taster/Wippe unter gedrückt,Button/Wippe under gedrückt
-BDC_G11.TAB_TASTER_MFL_3,0x0F,ungültig,invalid
-BDC_G11.TAB_TASTER_ROLLO,0x00,Taster nicht gedrückt,Button not gedrückt
-BDC_G11.TAB_TASTER_ROLLO,0x01,Taster gedrückt,Button gedrückt
-BDC_G11.TAB_TASTER_ROLLO,0x03,ungültig,invalid
-BDC_G11.TAB_TLC_STATUS,0x00,Keine Aussage,No Aussage
-BDC_G11.TAB_TLC_STATUS,0x01,Unterhalb Limit,Below Limit
-BDC_G11.TAB_TLC_STATUS,0x02,Normalzustand,Normalzustand
-BDC_G11.TAB_TLC_STATUS,0x03,Oberhalb Limit,Above Limit
-BDC_G11.TAB_TLC_STATUS,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_UGDO_LAND,0x00,Rest Europa,Rest Europa
-BDC_G11.TAB_UGDO_LAND,0x01,Frankreich,Frankreich
+BDC_G11.TAB_TASTER_MFL_1,0x00,keine Aktion,No action
+BDC_G11.TAB_TASTER_MFL_1,0x01,Taster gedrückt,Button pressed
+BDC_G11.TAB_TASTER_MFL_1,0x03,ungültig,Invalid
+BDC_G11.TAB_TASTER_MFL_2,0x00,keine Aktion,No action
+BDC_G11.TAB_TASTER_MFL_2,0x01,Taste gedrückt,Button pressed
+BDC_G11.TAB_TASTER_MFL_2,0x0F,ungültig,Invalid
+BDC_G11.TAB_TASTER_MFL_3,0x00,keine Aktion,No action
+BDC_G11.TAB_TASTER_MFL_3,0x01,Taster/Wippe oben gedrückt,Button/rocker up pressed
+BDC_G11.TAB_TASTER_MFL_3,0x05,Taster/Wippe unter gedrückt,Button/rocker down pressed
+BDC_G11.TAB_TASTER_MFL_3,0x0F,ungültig,Invalid
+BDC_G11.TAB_TASTER_ROLLO,0x00,Taster nicht gedrückt,Button not pressed
+BDC_G11.TAB_TASTER_ROLLO,0x01,Taster gedrückt,Button pressed
+BDC_G11.TAB_TASTER_ROLLO,0x03,ungültig,Invalid
+BDC_G11.TAB_TLC_STATUS,0x00,Keine Aussage,No information
+BDC_G11.TAB_TLC_STATUS,0x01,Unterhalb Limit,Below limit
+BDC_G11.TAB_TLC_STATUS,0x02,Normalzustand,Normal state
+BDC_G11.TAB_TLC_STATUS,0x03,Oberhalb Limit,Above limit
+BDC_G11.TAB_TLC_STATUS,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_UGDO_LAND,0x00,Rest Europa,Rest of Europe
+BDC_G11.TAB_UGDO_LAND,0x01,Frankreich,France
 BDC_G11.TAB_UGDO_LAND,0x02,U.K.,U.K.
-BDC_G11.TAB_UGDO_LAND,0x03,Italien,Italien
+BDC_G11.TAB_UGDO_LAND,0x03,Italien,Italy
 BDC_G11.TAB_UGDO_LAND,0x04,USA,USA
-BDC_G11.TAB_UGDO_LAND,0xFF,ungültiger Wert,invalid value
-BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x00,"ohne FBM, TP","without FBM, TP"
-BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x01,"mit FBM, TP","with FBM, TP"
-BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x02,"ohne FBM, FM/AM","without FBM, FM/AM"
-BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x03,"mit FBM, FM/AM","with FBM, FM/AM"
-BDC_G11.TAB_VIBRATIONSSTAERKE,0x00,schwach,schwach
-BDC_G11.TAB_VIBRATIONSSTAERKE,0x01,mittel,mittel
-BDC_G11.TAB_VIBRATIONSSTAERKE,0x02,stark,stark
+BDC_G11.TAB_UGDO_LAND,0xFF,ungültiger Wert,Invalid value
+BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x00,"ohne FBM, TP","Without FBM, TP"
+BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x01,"mit FBM, TP","With FBM, TP"
+BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x02,"ohne FBM, FM/AM","Without FBM, FM/AM"
+BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL,0x03,"mit FBM, FM/AM","With FBM, FM/AM"
+BDC_G11.TAB_VIBRATIONSSTAERKE,0x00,schwach,Weak
+BDC_G11.TAB_VIBRATIONSSTAERKE,0x01,mittel,Medium
+BDC_G11.TAB_VIBRATIONSSTAERKE,0x02,stark,Strong
 BDC_G11.TAB_VIBRATIONSSTAERKE,0xFF,Ungültiger Wert,Invalid value
-BDC_G11.TAB_WARNZEITPUNKT,0x00,spät,spät
-BDC_G11.TAB_WARNZEITPUNKT,0x01,mittel,mittel
-BDC_G11.TAB_WARNZEITPUNKT,0x02,früh,früh
+BDC_G11.TAB_WARNZEITPUNKT,0x00,spät,Late
+BDC_G11.TAB_WARNZEITPUNKT,0x01,mittel,Medium
+BDC_G11.TAB_WARNZEITPUNKT,0x02,früh,Early
 BDC_G11.TAB_WARNZEITPUNKT,0xFF,Ungültiger Wert,Invalid value
 BDC_G11.TAB_WARNZEITPUNKT2,0,Standard,Standard
-BDC_G11.TAB_WARNZEITPUNKT2,1,Adaptiv,Adaptiv
+BDC_G11.TAB_WARNZEITPUNKT2,1,Adaptiv,Adaptive
 BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x00,Pumpe nicht vorhanden,Pump not present
-BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x01,Pumpe an Ausgang Frontwaschen (Wi_Pu1) angeschlossen,Pump an output Frontwaschen (Wi_Pu1) angeschlossen
-BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x02,Pumpe an Ausgang Heckwaschen (Wi_Pu2) angeschlossen,Pump an output Heckwaschen (Wi_Pu2) angeschlossen
-BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x03,Pumpe an Ausgang Scheinwerferreinigung (SRA) angeschlossen,Pump an output Scheinwerferreinigung (SRA) angeschlossen
+BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x01,Pumpe an Ausgang Frontwaschen (Wi_Pu1) angeschlossen,Pump connected to front washing output (Wi_Pu1)
+BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x02,Pumpe an Ausgang Heckwaschen (Wi_Pu2) angeschlossen,Pump connected to rear washing output (Wi_Pu2)
+BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0x03,Pumpe an Ausgang Scheinwerferreinigung (SRA) angeschlossen,Pump connected to headlight cleaning output (SRA)
 BDC_G11.TAB_WASCHPUMPE_VORHANDEN,0xFF,Wert ungültig,Value invalid
-BDC_G11.TAB_WISCHEREINLERNVORGANG,0x00,Einlernvorgang erfolgreich abgeschlossen,Einlernvorgang erfolgreich abgeschlossen
-BDC_G11.TAB_WISCHEREINLERNVORGANG,0x01,Einlernvorgang nicht erfolgreich abgeschlossen,Einlernvorgang not erfolgreich abgeschlossen
-BDC_G11.TAB_WISCHEREINLERNVORGANG,0x02,Einlernvorgang noch nicht erfolgt,Einlernvorgang yet not takes place
-BDC_G11.TAB_WISCHEREINLERNVORGANG,0xFF,ungültig,invalid
-BDC_G11.TAB_WISCHER_RAENDEL,0x00,Rändel in Stufe 1,Rändel in stage 1
-BDC_G11.TAB_WISCHER_RAENDEL,0x01,Rändel in Stufe 2,Rändel in stage 2
-BDC_G11.TAB_WISCHER_RAENDEL,0x02,Rändel in Stufe 3,Rändel in stage 3
-BDC_G11.TAB_WISCHER_RAENDEL,0x03,Rändel in Stufe 4,Rändel in stage 4
-BDC_G11.TAB_WISCHER_RAENDEL,0xFF,ungültiger Wert,invalid value
+BDC_G11.TAB_WISCHEREINLERNVORGANG,0x00,Einlernvorgang erfolgreich abgeschlossen,Teach-in completed successfully
+BDC_G11.TAB_WISCHEREINLERNVORGANG,0x01,Einlernvorgang nicht erfolgreich abgeschlossen,Teach-in not completed successfully
+BDC_G11.TAB_WISCHEREINLERNVORGANG,0x02,Einlernvorgang noch nicht erfolgt,Teach-in not yet performed
+BDC_G11.TAB_WISCHEREINLERNVORGANG,0xFF,ungültig,Invalid
+BDC_G11.TAB_WISCHER_RAENDEL,0x00,Rändel in Stufe 1,Thumbwheel at level 1
+BDC_G11.TAB_WISCHER_RAENDEL,0x01,Rändel in Stufe 2,Thumbwheel at level 2
+BDC_G11.TAB_WISCHER_RAENDEL,0x02,Rändel in Stufe 3,Thumbwheel at level 3
+BDC_G11.TAB_WISCHER_RAENDEL,0x03,Rändel in Stufe 4,Thumbwheel at level 4
+BDC_G11.TAB_WISCHER_RAENDEL,0xFF,ungültiger Wert,Invalid value
 BDC_G11.TAB_ZSG_BF_WECK_GRUND,0x00,ECUMA_DEFAULT,ECUMA_DEFAULT
 BDC_G11.TAB_ZSG_BF_WECK_GRUND,0x01,ECUMA_DIAGSESSION_ACTIVE,ECUMA_DIAGSESSION_ACTIVE
 BDC_G11.TAB_ZSG_BF_WECK_GRUND,0x0F,ECUMA_GW_15_ON,ECUMA_GW_15_ON
@@ -1034,38 +1034,38 @@ BDC_G11.TAB_ZSG_BF_WECK_GRUND,0xFC,ECUMA_RESET_EXT,ECUMA_RESET_EXT
 BDC_G11.TAB_ZSG_BF_WECK_GRUND,0xFD,ECUMA_RESET_POWERON,ECUMA_RESET_POWERON
 BDC_G11.TAB_ZSG_BF_WECK_GRUND,0xFE,ECUMA_RESET_UNKOWN,ECUMA_RESET_UNKOWN
 BDC_G11.TAB_ZSG_BF_WECK_GRUND,0xFF,ECUMA_INVALID,ECUMA_INVALID
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,0,Kein Hinderungsgrund vorliegend,No Hinderungsgrund vorliegend
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,1,Aktueller Schlüssel nicht gültig,Current Schlüssel not valid
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,2,-Stillstand nicht erkannt (Signal DVCO_VEH) und kein Fe-Mode [für use-case Diagnose],-standstill not detected (signal DVCO_VEH) and no Fe-Mode [for use-case diagnosis]
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,3,Geschwindigkeit <10km/h nicht erkannt (Signal V_VEH_COG) [für use-case SST],Speed <10km/h not detected (signal V_VEH_COG) [for use-case SST]
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,4,Geschwindigkeit <10km/h ungültig (Signale V_VEH_COG/QU_V_VEH_COG) [für use-case SST],Speed <10km/h invalid (signal V_VEH_COG/QU_V_VEH_COG) [for use-case SST]
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,5,Bremse nicht gedrückt,Brake not gedrückt
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,7,Kupplung nicht gedrückt,Clutch not gedrückt
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,9,Keine Freigabe durch DME (ST_DRVG_RDI_DRV ungleich  Keine Fahrbereitschaft  in KL15-Ein),No enable by DME (ST_DRVG_RDI_DRV ungleich  no readiness to drive  in KL15-a)
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,13,Montagemodus aktiv,Montagemodus active
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,16,KL30B ein (ST_KL:  0x6...0xD),KL30B a (ST_KL:  0x6...0xD)
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,17,"Parklicht ein (ST_PLI_LH:  0x1, Ein  oder ST_PLI_RH:  0x1, Ein )","Parklicht a (ST_PLI_LH:  0x1, a  or ST_PLI_RH:  0x1, a )"
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,18,"Standlicht ein (ST_POLI:  0x1, Ein )","Standlicht a (ST_POLI:  0x1, a )"
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,19,"Warnblinken ein (ST_IDC:  0x3, Beide Blinker ein )","Warnblinken a (ST_IDC:  0x3, Beide Blinker a )"
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,20,"Aktiver Notruf (ECAL_ACV:  0x1, Notruf aktiv ) oder Notruf im Standby (ECAL_STDBY:  0x1, Standby ein )","Active emergency call (ECAL_ACV:  0x1, emergency call active ) or emergency call in the Standby (ECAL_STDBY:  0x1, Standby a )"
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,21,KL30F über Dienstenachricht mit Attribut  gesetzlich  angefordert - wird im BDC2015 nicht verwendet,KL30F via Dienstenachricht with Attribut  gesetzlich  angefordert - is in the BDC2015 not verwendet
-BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,22,Ladekabel gesteckt,Ladekabel gesteckt
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,0,Kein Hinderungsgrund vorliegend,No inhibiting condition present
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,1,Aktueller Schlüssel nicht gültig,Current key not valid
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,2,-Stillstand nicht erkannt (Signal DVCO_VEH) und kein Fe-Mode [für use-case Diagnose],Standstill not detected (signal DVCO_VEH) and no Fe mode [for diagnosis use case]
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,3,Geschwindigkeit <10km/h nicht erkannt (Signal V_VEH_COG) [für use-case SST],Speed <10 km/h not detected (signal V_VEH_COG) [for SST use case]
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,4,Geschwindigkeit <10km/h ungültig (Signale V_VEH_COG/QU_V_VEH_COG) [für use-case SST],Speed <10 km/h invalid (signals V_VEH_COG/QU_V_VEH_COG) [for SST use case]
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,5,Bremse nicht gedrückt,Brake not pressed
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,7,Kupplung nicht gedrückt,Clutch not pressed
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,9,Keine Freigabe durch DME (ST_DRVG_RDI_DRV ungleich  Keine Fahrbereitschaft  in KL15-Ein),No release from DME (ST_DRVG_RDI_DRV not equal to 'not ready to drive' with terminal 15 on)
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,13,Montagemodus aktiv,Assembly mode active
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,16,KL30B ein (ST_KL:  0x6...0xD),Terminal 30B on (ST_KL: 0x6...0xD)
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,17,"Parklicht ein (ST_PLI_LH:  0x1, Ein  oder ST_PLI_RH:  0x1, Ein )","Parking light on (ST_PLI_LH: 0x1, on or ST_PLI_RH: 0x1, on)"
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,18,"Standlicht ein (ST_POLI:  0x1, Ein )","Side lights on (ST_POLI: 0x1, on)"
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,19,"Warnblinken ein (ST_IDC:  0x3, Beide Blinker ein )","Hazard warning lights on (ST_IDC: 0x3, both turn signals on)"
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,20,"Aktiver Notruf (ECAL_ACV:  0x1, Notruf aktiv ) oder Notruf im Standby (ECAL_STDBY:  0x1, Standby ein )","Emergency call active (ECAL_ACV: 0x1, emergency call active) or emergency call on standby (ECAL_STDBY: 0x1, standby on)"
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,21,KL30F über Dienstenachricht mit Attribut  gesetzlich  angefordert - wird im BDC2015 nicht verwendet,Terminal 30F requested via service message with attribute 'statutory' - not used in BDC2015
+BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,22,Ladekabel gesteckt,Charging cable plugged in
 BDC_G11.TAB_ZSG_KLEMMEN_VERHINDERER,255,Unbekannt/Ungültig,Unknown/invalid
 BDC_G11.TAB_ZSG_ZV_ENTRIEGELT,0x00,Schloss nicht entriegelt / nicht aktiv,Lock not unlocked / not active
 BDC_G11.TAB_ZSG_ZV_ENTRIEGELT,0x01,Schloss entriegelt / aktiv,Lock unlocked / active
 BDC_G11.TAB_ZSG_ZV_ENTRIEGELT,0xFF,Signal ungültig/unplausibel,Signal invalid/implausible
 BDC_G11.TAB_ZSG_ZV_STATUS,0x00,Entriegelt,Unlocked
 BDC_G11.TAB_ZSG_ZV_STATUS,0x01,Verriegelt,Locked
-BDC_G11.TAB_ZSG_ZV_STATUS,0x02,Gesichert,Gesichert
-BDC_G11.TAB_ZSG_ZV_STATUS,0x03,Crash-Mode aktiv,Crash-Mode active
-BDC_G11.TAB_ZSG_ZV_STATUS,0x80,Klappe/Scheibe geschlossen,Flap/Scheibe closed
-BDC_G11.TAB_ZSG_ZV_STATUS,0x81,Klappe/Scheibe geöffnet,Flap/Scheibe open
-BDC_G11.TAB_ZSG_ZV_STATUS,0xC8,Klappe in Vorraststellung,Flap in Vorraststellung
-BDC_G11.TAB_ZSG_ZV_STATUS,0xC9,Klappe nicht in Vorraststellung,Flap not in Vorraststellung
-BDC_G11.TAB_ZSG_ZV_STATUS,0xFF,ungültig/unplausibel/nicht verbaut,invalid/implausible/not verbaut
+BDC_G11.TAB_ZSG_ZV_STATUS,0x02,Gesichert,Secured (deadlocked)
+BDC_G11.TAB_ZSG_ZV_STATUS,0x03,Crash-Mode aktiv,Crash mode active
+BDC_G11.TAB_ZSG_ZV_STATUS,0x80,Klappe/Scheibe geschlossen,Lid/window closed
+BDC_G11.TAB_ZSG_ZV_STATUS,0x81,Klappe/Scheibe geöffnet,Lid/window open
+BDC_G11.TAB_ZSG_ZV_STATUS,0xC8,Klappe in Vorraststellung,Lid in pre-latch position
+BDC_G11.TAB_ZSG_ZV_STATUS,0xC9,Klappe nicht in Vorraststellung,Lid not in pre-latch position
+BDC_G11.TAB_ZSG_ZV_STATUS,0xFF,ungültig/unplausibel/nicht verbaut,Invalid/implausible/not fitted
 BDC_G11.TAB_ZSG_ZV_VERRIEGELT,0x00,Schloss nicht verriegelt / nicht aktiv,Lock not locked / not active
 BDC_G11.TAB_ZSG_ZV_VERRIEGELT,0x01,Schloss verriegelt / aktiv,Lock locked / active
 BDC_G11.TAB_ZSG_ZV_VERRIEGELT,0xFF,Signal ungültig/unplausibel,Signal invalid/implausible
-BDC_G11.TAB_ZUSTAND_TASTER,0x00,Taster nicht betätigt,Button not betätigt
-BDC_G11.TAB_ZUSTAND_TASTER,0x01,Taster betätigt,Button betätigt
-BDC_G11.TAB_ZUSTAND_TASTER,0xFF,ungültig,invalid
+BDC_G11.TAB_ZUSTAND_TASTER,0x00,Taster nicht betätigt,Button not pressed
+BDC_G11.TAB_ZUSTAND_TASTER,0x01,Taster betätigt,Button pressed
+BDC_G11.TAB_ZUSTAND_TASTER,0xFF,ungültig,Invalid
