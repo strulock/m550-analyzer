@@ -22,6 +22,7 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
 """
 
 import csv
+import json
 import os
 import re
 import socket
@@ -968,3 +969,143 @@ def check_verdict(counts):
     if share < 0.5:
         return "does NOT fit (only %d%% of answers are the expected size)" % round(share * 100)
     return "unclear (%d%% of answers are the expected size)" % round(share * 100)
+
+
+# ------------------------------------------------------------ function groups
+
+# Keyword rules for grouping channels by what they measure, across modules.
+# First match wins, so specific groups come before broad ones (gearbox oil
+# temperature is Gearbox, not Oil or Temperatures). Matched against the code
+# name, the German and the English description, lower-cased.
+FUNCTION_GROUPS = [
+    ("Versions, coding & identification",
+     r"svk|sgbm|version|seriennummer|sachnummer|serial|ident|^(hu|egs|acsm|dsc|bdc|eps|vdp"
+     r"|lmv|ihka|ekp)_(prog|flash|codier|hw_|sw_)|programming|(?<![a-z])(codier|coding)|logisti"),
+    ("GPS & navigation", r"gps|navi|satell|latitude|longitude|breitengrad|laengengrad"),
+    ("Gearbox & driveline",
+     r"getriebe|gearbox|transmission|istgang|gang|wandler|converter|kupplung|clutch|"
+     r"^egs_|^lmv_|waehlhebel|schaltpaddle|kick.?down|fahrstufe|verteiler"),
+    ("Brakes & tires",
+     r"brems|brake|reifen|tire|tyre|^dsc_rdc|rdc_|epb|abs_|druck_kreis|bremsbelag|vakuum|"
+     r"radelektronik|druckcodier"),
+    ("Steering & suspension",
+     r"lenk|steer|^eps_|hoehenst|ride height|daempf|damper|^vdp_|ars_|ehc|wank|"
+     r"radbeschleunigung|stabilis"),
+    ("Speeds & wheels", r"geschwindigkeit|speed|raddreh|wheel|rad_v|rad_h"),
+    ("Lambda & exhaust",
+     r"lambda|lsu|sonde|probe|abgas|exhaust|katalys|^kat|nox|partikel|opf"),
+    ("Ignition & misfire",
+     r"zuend|ignition|aussetz|misfire|laufunruhe|iluz|ilaz|klopf|knock"),
+    ("Fuel", r"kraftstoff|fuel|tank|rail|einspritz|inject|^ekp_"),
+    ("Air, boost & throttle",
+     r"ladedruck|boost|turbo|lader|drossel|throttle|luftmasse|air mass|ansaug|intake|"
+     r"saugrohr|umgebungsdruck|ambient pressure"),
+    ("Oil", r"oel|öl|\boil"),
+    ("Cooling", r"kuehl|kühl|coolant|wasserpumpe|water pump|luefter|lüfter|\bfan\b"),
+    ("Climate", r"klima|^ihka_|kaelte|kälte|kompressor|compressor|gebläse|geblaese|heiz"),
+    ("Safety & airbag",
+     r"airbag|crash|^acsm_|gurt|belt|imu|beschleunigung|acceleration|sitzbeleg|occupan"),
+    ("Body, lights & comfort",
+     r"licht|light|lamp|leucht|spiegel|mirror|fenster|^bdc_fh|window|sitz|seat|tuer|tür|"
+     r"door|wisch|wiper|wasch|rollo|hupe|horn|schluessel|key|regen|rain"),
+    ("Electrical & battery",
+     r"spannung|voltage|strom\b|current|batter|klemme|terminal|generator|ibs|\bubat"),
+    ("Engine",
+     r"drehzahl|\brpm\b|motor|engine|nockenwell|camshaft|vanos|valvetronic|moment|torque|"
+     r"zylinder|cylinder"),
+    ("Temperatures", r"temp"),
+    ("Counters, adaptations & statistics",
+     r"zaehler|zähler|counter|statisti|histor|histogram|adapt|lern|learn|kalibr|calib"),
+]
+OTHER_GROUP = "Other"
+_FUNCTION_RES = [(name, re.compile(rx)) for name, rx in FUNCTION_GROUPS]
+
+
+def function_group(*texts):
+    """Function group for a channel, from its name and descriptions."""
+    text = " ".join(t or "" for t in texts).lower()
+    for name, rx in _FUNCTION_RES:
+        if rx.search(text):
+            return name
+    return OTHER_GROUP
+
+
+# ---------------------------------------------------- what the car answers
+
+# Which identifiers this car answers, learned from live reads, a check in
+# the GUI, or `n63read check --out` imported. Kept between sessions so the
+# picker can show only channels that work. "size" means it answers but the
+# reply is not the size the catalog expects.
+ANSWERS = ("ok", "size")
+AVAILABILITY_FILE = "availability.json"
+
+
+def availability_path():
+    base = os.environ.get("APPDATA") or os.path.expanduser("~")
+    return os.path.join(base, "n63read", AVAILABILITY_FILE)
+
+
+def _avail_key(module, did):
+    return "0x%02X:0x%04X" % (module, did)
+
+
+def load_availability(path=None):
+    """{(module, DID): status} from disk; {} if there is none yet."""
+    path = path or availability_path()
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    out = {}
+    for key, status in (raw.get("identifiers") or {}).items():
+        try:
+            module, did = (int(p, 16) for p in key.split(":"))
+        except ValueError:
+            continue
+        out[(module, did)] = status
+    return out
+
+
+def save_availability(avail, path=None):
+    path = path or availability_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    data = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "identifiers": {_avail_key(m, d): s for (m, d), s in sorted(avail.items())}}
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=0)
+    os.replace(tmp, path)
+
+
+def import_check_csv(path):
+    """{(module, DID): status} from a `n63read check --out` CSV."""
+    out = {}
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            try:
+                key = (int(row["module"], 16), int(row["did"], 16))
+            except (KeyError, ValueError):
+                continue
+            out[key] = row.get("status") or ""
+    if not out:
+        raise ValueError("no module/did/status rows - is this a `n63read check` CSV?")
+    return out
+
+
+def check_steps(h, layouts, keys=None):
+    """Generator for a check run a step at a time (GUI): yields (key, status).
+
+    Like `n63read check`, but a module that leaves three identifiers in a
+    row unanswered is skipped, so an absent module costs about 1.5 s.
+    """
+    keys = sorted(layouts) if keys is None else keys
+    silent, skip = {}, set()
+    for key in keys:
+        if key[0] in skip:
+            continue
+        status, _, _ = check_identifier(h, key, layouts[key])
+        silent[key[0]] = silent.get(key[0], 0) + 1 if status == "no answer" else 0
+        if silent[key[0]] >= 3:
+            skip.add(key[0])
+        yield key, status
