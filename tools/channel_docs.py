@@ -245,7 +245,9 @@ def main(argv=None):
     for fname, text in files.items():
         path = os.path.join(OUT, fname)
         try:
-            with open(path, encoding="utf-8", newline="") as f:
+            # Universal newlines: a Windows checkout (core.autocrlf) turns
+            # these into CRLF, which is not a change.
+            with open(path, encoding="utf-8") as f:
                 current = f.read()
         except OSError:
             current = None
