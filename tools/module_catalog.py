@@ -12,8 +12,9 @@ writes, into src/n63read/data/:
 
 and merges the module's fault texts (FORTTEXTE) into BMW_fault_code_texts.csv,
 adding codes it lacks and the module's tag to codes it already has. Where
-another variant (another car's module) words a code differently, this car's
-module wins. Run
+another variant of the same module (another car's BDC) words a code
+differently, this car's variant wins; a code another module already uses
+for something else is left as it is. Run
 tools/translate.py afterwards to fill the English columns of the fault file.
 
 Every identifier in SG_FUNKTIONEN that service 0x22 can read is included.
@@ -55,6 +56,10 @@ MODULES = {
     "acsm5": ("ACSM5", "0x01", "ACSM_", "ACSM5"),
     "dsc_g30n": ("DSC_G30N", "0x29", "DSC_", "DSC-G30N"),
     "bdc_g11": ("BDC_G11", "0x40", "BDC_", "BDC-G11"),
+    "eps_g11": ("EPS_G11", "0x30", "EPS_", "EPS-G11"),
+    "vdp_g11": ("VDP_G11", "0x76", "VDP_", "VDP-G11"),
+    "lmv_g11": ("LMV_G11", "0x19", "LMV_", "LMV-G11"),
+    "ihka_g11": ("IHKA_G11", "0x78", "IHKA_", "IHKA-G11"),
 }
 
 HEADER = ["ARG", "MODULE", "ID", "FIELD", "RESULTNAME", "INFO", "INFO_EN",
@@ -174,16 +179,26 @@ def build(tabs, name, module, prefix):
     return rows, enums
 
 
+def family(tag):
+    """BDC-G11 -> BDC: the module a fault-file tag belongs to."""
+    return tag.split("-")[0]
+
+
 def merge_faults(tabs, tag):
-    """Add the module's fault texts to the fault file. Returns (added, tagged, reworded)."""
+    """Add the module's fault texts to the fault file.
+
+    Returns (added, tagged, reworded, kept): new codes, codes that gained this
+    module's tag, codes reworded from another variant of this module, and
+    codes another module already uses for something else (left alone).
+    """
     if "FORTTEXTE" not in tabs:
-        return 0, 0, 0
+        return 0, 0, 0, 0
     path = os.path.join(DATA, FAULT_CSV)
     with open(path, encoding="utf-8-sig", newline="") as f:
         rows = list(csv.DictReader(f))
     by_code = {r["code"]: r for r in rows}
     head, ftexts = tabs["FORTTEXTE"]
-    added = tagged = clashes = 0
+    added = tagged = clashes = kept = 0
     for r in ftexts:
         code = r[0].upper().replace("0X", "").zfill(6)
         text = r[1].strip()
@@ -198,11 +213,15 @@ def merge_faults(tabs, tag):
             if row["text_de"] == text:
                 row["source_module"] += "; " + tag
                 tagged += 1
-            else:
-                # Another variant (another car) words this code differently.
-                # Every module here is this car's own, so its text wins.
+            elif family(tag) in {family(t) for t in row["source_module"].split("; ")}:
+                # Another variant of the same module (another car's BDC)
+                # words this code differently. This car's variant wins.
                 row.update(text_de=text, text_en="", source_module=tag)
                 clashes += 1
+            else:
+                # A different module uses the same code for something else.
+                # The file is keyed by code alone, so the first one stays.
+                kept += 1
     buf = io.StringIO(newline="")
     w = csv.DictWriter(buf, fieldnames=["code", "text_de", "text_en", "source_module"],
                        lineterminator="\n")
@@ -210,7 +229,7 @@ def merge_faults(tabs, tag):
     w.writerows(by_code[c] for c in sorted(by_code))
     with open(path, "w", encoding="utf-8-sig", newline="") as f:
         f.write(buf.getvalue())
-    return added, tagged, clashes
+    return added, tagged, clashes, kept
 
 
 def write_csv(path, header, rows, dicts=True):
@@ -235,11 +254,11 @@ def main(argv=None):
         write_csv(os.path.join(DATA, "%s_measurements.csv" % name), HEADER, rows)
         write_csv(os.path.join(DATA, "%s_enum_tables.csv" % name),
                   ["table_name", "value", "text_de", "text_en"], enums, dicts=False)
-        added, tagged, clashes = merge_faults(tabs, tag)
+        added, tagged, clashes, kept = merge_faults(tabs, tag)
         print("%-9s %s  %4d channels from %3d identifiers, %4d enum rows; faults: "
-              "%d added, %d tagged, %d reworded"
+              "%d added, %d tagged, %d reworded, %d kept (other module's)"
               % (name, module, len(rows), len({r["ID"] for r in rows}), len(enums),
-                 added, tagged, clashes))
+                 added, tagged, clashes, kept))
 
 
 if __name__ == "__main__":

@@ -69,7 +69,8 @@ FREEZE_CSV = "BMW_freeze_frame_fields.csv"
 MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
 # Per-module catalogs from tools/module_catalog.py: <NAME>_measurements.csv
 # and <NAME>_enum_tables.csv for each.
-MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11")
+MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
+                   "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11")
 
 DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
               MODULE_MAP_CSV)
@@ -337,9 +338,13 @@ KNOWN_MODULES = {
     0x10: "Central gateway (ZGW)",
     0x12: "Engine, master DME",
     0x18: "Transmission, ZF 8HP (EGS)",
+    0x19: "Transfer case, xDrive (LMV)",
+    0x30: "Electric power steering (EPS)",
     0x40: "Body domain controller (BDC)",
     0x60: "Instrument cluster (KOMBI)",
     0x63: "Head unit (NBT Evo)",
+    0x76: "Suspension, vertical dynamics (VDP)",
+    0x78: "Climate control (IHKA)",
 }
 
 FAULT_CSV_HEADER = ("read_at", "module", "module_name", "code", "status",
@@ -697,8 +702,9 @@ def decode(raw, meta, enums=None, lang="text_en"):
 
 # Short names for the picker, by module address.
 MODULE_LABELS = {
-    0x01: "Airbag", 0x18: "Transmission", 0x29: "DSC", 0x40: "Body",
-    0x63: "Head unit",
+    0x01: "Airbag", 0x18: "Transmission", 0x19: "Transfer case", 0x29: "DSC",
+    0x30: "Steering", 0x40: "Body", 0x63: "Head unit", 0x76: "Suspension",
+    0x78: "Climate",
 }
 
 # Channels on modules other than the DME are refreshed on these periods
@@ -708,11 +714,14 @@ FAST_PERIOD = 1.0
 SLOW_PERIOD = 10.0
 FAST_DIDS = frozenset(
     [(0x63, d) for d in (0xD030, 0xD031, 0xD032, 0xD034, 0xD038, 0xD039)]  # GPS, speeds
-    + [(0x18, d) for d in (0x6000, 0xDA12, 0xDA1C, 0xDA1F, 0xDA22, 0xDA24,
+    + [(0x18, d) for d in (0xDA12, 0xDA1C, 0xDA1F, 0xDA22, 0xDA24,
                            0xDA27, 0xDA2A, 0xDA2C, 0xDA2E, 0xDA34)]        # gear, temps, speeds
     + [(0x29, d) for d in (0xDBE4, 0xDBE5, 0xDBF4, 0xDBF5)]                # wheels, brakes
     + [(0x01, d) for d in (0x4101, 0x4102)]                                # acceleration, yaw
-    + [(0x40, d) for d in (0xD601, 0xD611)])                               # ride height, drive mode
+    + [(0x40, d) for d in (0xD601, 0xD611)]                                # ride height, drive mode
+    + [(0x30, d) for d in (0xDB57, 0xDB99, 0xDB9A)]                        # steering angle, torque
+    + [(0x76, d) for d in (0xD665, 0xDC05, 0xDC0A)]                        # wheel accel, height, dampers
+    + [(0x19, d) for d in (0xDB32, 0xDFEA)])                               # xDrive clutch torque
 SLOW_READS_PER_CYCLE = 6       # module reads allowed per DME cycle
 NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
 MODULE_TIMEOUT = 0.5           # a present module answers in milliseconds; a

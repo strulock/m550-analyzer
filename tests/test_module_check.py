@@ -100,3 +100,33 @@ def test_a_missing_module_costs_the_short_timeout_not_the_full_one():
         car.close()
     assert took < core.MODULE_TIMEOUT + 0.5
     assert s["EGS_ISTGANG.ISTGANG"][2] == "module not answering"
+
+
+def test_every_fast_identifier_is_in_a_catalog():
+    assert core.FAST_DIDS <= set(LAYOUTS)
+
+
+def test_steering_suspension_transfer_case_and_climate_channels():
+    for name in ("EPS_EPS_MOMENTENSENSOR", "VDP_STATUS_HOEHENSTAENDE_LESEN",
+                 "LMV_LMV_MOMENT", "IHKA_TEMPERATURSENSOREN_KLIMA"):
+        assert any(n == name or n.startswith(name + ".") for n in CAT), name
+
+
+def test_fault_merge_rewords_only_within_a_module_family(tmp_path, monkeypatch):
+    import os
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
+    import module_catalog as mc
+    path = tmp_path / mc.FAULT_CSV
+    path.write_text("code,text_de,text_en,source_module\n"
+                    "401111,alt,old,BDC-G05\n"
+                    "801230,DME Text,DME text,DME; DME-slave\n", encoding="utf-8-sig")
+    monkeypatch.setattr(mc, "DATA", str(tmp_path))
+    ft = (["ORT", "ORTTEXT"], [["0x401111", "neu"], ["0x801230", "IHKA Text"],
+                               ["0x781234", "Neuer Fehler"]])
+    assert mc.merge_faults({"FORTTEXTE": ft}, "BDC-G11") == (1, 0, 1, 1)
+    with open(path, encoding="utf-8-sig") as f:
+        rows = {r["code"]: r for r in csv.DictReader(f)}
+    assert rows["401111"]["text_de"] == "neu" and rows["401111"]["source_module"] == "BDC-G11"
+    assert rows["801230"]["text_de"] == "DME Text"      # another module's code: untouched
+    assert rows["781234"]["source_module"] == "BDC-G11"

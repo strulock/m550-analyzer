@@ -87,9 +87,9 @@ new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in
 one file. A fault read while connected shares the connection: logging slows
 down during it but doesn't stop.
 
-### Other modules: head unit, transmission, DSC, airbag, body
+### Other modules: head unit, transmission, chassis, body, climate
 
-Besides the DME, the channel list holds the readable values of five more
+Besides the DME, the channel list holds the readable values of nine more
 modules, generated from their SGBD files by `tools/module_catalog.py` and
 labelled by module in the picker:
 
@@ -100,6 +100,10 @@ labelled by module in the picker:
 | DSC (0x29) | `dsc_g30n` | `DSC_` | 868 | tire pressure and temperature per wheel, wheel speeds, brake pressures, pedal travel |
 | Airbag module (0x01) | `acsm5` | `ACSM_` | 565 | acceleration and yaw rate (`ACSM__IMU_WERTE.*`), seat occupancy |
 | Body controller (0x40) | `bdc_g11` | `BDC_` | 1,357 | fuel tank levels, ride height, drive mode, rain and light sensors |
+| Steering, EPS (0x30) | `eps_g11` | `EPS_` | 66 | pinion / steering angle, steering torque, rack travel |
+| Suspension, VDP (0x76) | `vdp_g11` | `VDP_` | 538 | ride height per corner, damper valve currents, wheel acceleration, roll stabilisation |
+| Transfer case, xDrive (0x19) | `lmv_g11` | `LMV_` | 224 | clutch torque and status, clutch temperature model |
+| Climate, IHKA (0x78) | `ihka_g11` | `IHKA_` | 154 | climate temperature sensors, A/C compressor speed and state |
 
 Most of the transmission's values are shift adaptation tables. Their fault
 texts are in the fault file too, so their codes now come with a description.
@@ -118,6 +122,9 @@ Useful channels for a drive log:
 | Tire pressure and temperature, per wheel | `DSC_RDC_MESSDATENBLOCK_1`...`_4.LETZTER_REIFENDRUCKWERT` / `...TEMPERATURWERT` |
 | Brake pressure; brake pedal travel | `DSC_DSC_DRUCKSENSOREN.*`; `DSC_BREMSPEDALWEGSENSOR.WEG_IST` |
 | Fuel level, left / right tank (Ohm) | `BDC_TANK_FUELLSTAND_LINKS` / `_RECHTS` |
+| Steering angle; steering torque | `EPS_EPS_RITZELWINKELSENSOR.*`; `EPS_EPS_MOMENTENSENSOR.*` |
+| Ride height per corner; damper currents | `VDP_STATUS_HOEHENSTAENDE_LESEN.*`; `VDP_VDC_2_VENTILE_STROM.*` |
+| xDrive front clutch torque | `LMV_LMV_MOMENT.*` |
 
 These channels are read alongside the DME on one connection, but not every
 cycle. What moves while driving (GPS, speeds, gear, brakes, acceleration)
@@ -199,8 +206,9 @@ rebuilding.
 
 The CSVs were extracted from BMW SGBD (`.prg`) files, mainly `dme8ff_r.prg`;
 the module catalogs (`<MODULE>_measurements.csv`, `<MODULE>_enum_tables.csv`)
-and their fault texts from `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n` and
-`bdc_g11.prg`, by `tools/module_catalog.py`.
+and their fault texts from `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`,
+`bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11` and `ihka_g11.prg`, by
+`tools/module_catalog.py`.
 They hold identifier numbers, units and scaling factors: the interface facts
 you need to talk to hardware you own. BMW's `.prg` files and SP-Daten are not
 in this repo and must not be committed.

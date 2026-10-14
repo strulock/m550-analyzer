@@ -49,6 +49,18 @@
 02180B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,GSZFB1
 02180C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,GSZFB1
 02180D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,GSZFB1
+021900,Energiesparmode aktiv,Energiesparmode active,LMV-G11
+021908,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,LMV-G11
+021909,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,LMV-G11
+02190A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,LMV-G11
+02190B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,LMV-G11
+02190C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,LMV-G11
+02190D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,LMV-G11
+021923,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),LMV-G11
+021924,"Flexray, externe Ursache (Sammelfehler)","Flexray, externe cause (group fault)",LMV-G11
+021925,"Flexray, interne Ursache (Sammelfehler)","Flexray, internal cause (group fault)",LMV-G11
+021926,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),LMV-G11
+021929,Softwarefehler (Sammelfehler),Softwarefehler (group fault),LMV-G11
 022900,Energiesparmode aktiv,Energiesparmode active,DSC-G30N
 022903,Externe SWT-Prüfbedingung nicht erfüllt,Externe SWT-Prüfbedingung not met,DSC-G30N
 022904,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check fehlgeschlagen,DSC-G30N
@@ -64,6 +76,12 @@
 022941,Spannungsversorgung - Lokale Unterspannung,Power supply - Lokale undervoltage,DSC-G30N
 022943,Spannungsversorgung - Globale Überspannung extern,Power supply - global overvoltage extern,DSC-G30N
 022945,Spannungsversorgung - Globale Unterspannung extern,Power supply - global undervoltage extern,DSC-G30N
+023000,Energiesparmode aktiv,Energiesparmode active,EPS-G11
+023008,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,EPS-G11
+023009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,EPS-G11
+02300A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,EPS-G11
+02300B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,EPS-G11
+02300C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,EPS-G11
 024000,Energiesparmode aktiv,Energiesparmode active,BDC; BDC-G05; BDC-G11
 024008,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,BDC-G11
 024009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,BDC; BDC-G05; BDC-G11
@@ -83,14 +101,31 @@
 02630A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,NBTEVO
 02630B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,NBTEVO
 02630C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,NBTEVO
+027600,Energiesparmode aktiv,Energiesparmode active,VDP-G11
+027608,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,VDP-G11
+027609,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,VDP-G11
+02760A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,VDP-G11
+02760B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,VDP-G11
+02760D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,VDP-G11
+027800,Energiesparmode aktiv,Energiesparmode active,IHKA-G11
+027808,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,IHKA-G11
+027809,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,IHKA-G11
+02780A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,IHKA-G11
+02780B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,IHKA-G11
+02780C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,IHKA-G11
+02780D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,IHKA-G11
 02FF01,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,ACSM5
 02FF12,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
 02FF13,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
 02FF18,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,GSZFB1
+02FF19,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,LMV-G11
 02FF29,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,DSC-G30N
+02FF30,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,EPS-G11
 02FF40,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,BDC; BDC-G11
 02FF60,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,KOMBI-G11; KOMBI-25
 02FF63,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,NBTEVO
+02FF76,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,VDP-G11
+02FF78,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,IHKA-G11
 030001,"FH FA, Relais Schliessen, keine Ausgangsspannung: Relaiskleber oder Sicherung defekt oder Kurzschluss nach Masse","FH FA, relay Schliessen, no output voltage: relay welded shut or fuse defective or short circuit to ground",BDC
 030003,"FH FA, Relais Schliessen: Kurzschluss nach Ubatt oder Relaiskleber","FH FA, relay Schliessen: short circuit to Ubatt or relay welded shut",BDC
 030004,"FH FA, Relais Öffnen/Schliessen: Ausgangsspannung am falschen Relais","FH FA, relay Öffnen/Schliessen: output voltage am incorrect relay",BDC
@@ -252,6 +287,29 @@
 03074E,Signalleitung 4 Switchboard Kurzschluss nach Minus,Signal line 4 Switchboard short circuit to Minus,BDC
 030751,FES Wippe Dauerbetätigung hinten,FES Wippe duration actuation rear,BDC
 030761,FES Master Softwarefehler,FES master Softwarefehler,BDC; BDC-G05; BDC-G11
+030C42,VDM-KBS - Radbeschleunigungssensor - vorn links Signalplausibilität,VDM-KBS - wheel acceleration sensor - vorn left signal plausibility,VDP-G11
+030C43,VDM-KBS - Radbeschleunigungssensor - vorn rechts Signalplausibilität,VDM-KBS - wheel acceleration sensor - vorn right signal plausibility,VDP-G11
+030C44,VDM-KBS - Radbeschleunigungssensor - hinten links Signalplausibilität,VDM-KBS - wheel acceleration sensor - rear left signal plausibility,VDP-G11
+030C45,VDM-KBS - Radbeschleunigungssensor - hinten rechts Signalplausibilität,VDM-KBS - wheel acceleration sensor - rear right signal plausibility,VDP-G11
+030C46,VDM-ARSFF: ARS Leistungsreduktion aufgrund externer Energiebegrenzung,VDM-ARSFF: ARS Leistungsreduktion due to externer energy limitation,VDP-G11
+030C47,VDM-ARSFF: ARS starke Leistungsreduktion aufgrund externer Energiebegrenzung,VDM-ARSFF: ARS starke Leistungsreduktion due to externer energy limitation,VDP-G11
+030C4B,VDM-KBS - Kodierdaten fehlerhaft - ungültige Daten,VDM-KBS - Kodierdaten faulty - invalid data,VDP-G11
+030C4C,"VDM-EARSAS - ARS Aktor Hinterachse, keine oder falsche Reaktion auf Stellbefehl","VDM-EARSAS - ARS Aktor rear axle, no or incorrect Reaktion on Stellbefehl",VDP-G11
+030C4D,"VDM-EARSAS - ARS Aktor Vorderachse, keine oder falsche Reaktion auf Stellbefehl","VDM-EARSAS - ARS Aktor front axle, no or incorrect Reaktion on Stellbefehl",VDP-G11
+030C4E,VDM-ARSFF - ARS Aktoren - Momentenverteilung kritisch Fahrsicherheitsabschaltung,VDM-ARSFF - ARS Aktoren - Momentenverteilung kritisch Fahrsicherheitsabschaltung,VDP-G11
+030C4F,VDM-ARSFF - ARS Aktor Hinterachse - Moment zu hoch Fahrsicherheitsabschaltung,VDM-ARSFF - ARS Aktor rear axle - torque too high Fahrsicherheitsabschaltung,VDP-G11
+030C54,VDM-ARSFF - ARS Aktor Vorderachse - Moment zu gering Fahrsicherheitsabschaltung,VDM-ARSFF - ARS Aktor front axle - torque to gering Fahrsicherheitsabschaltung,VDP-G11
+030C56,VDM-EARSAS - ARS Aktor Hinterachse - Abweichung von Sollvorgabe zu groß,VDM-EARSAS - ARS Aktor rear axle - deviation of Sollvorgabe too large,VDP-G11
+030C57,VDM-EARSAS - ARS Aktor Vorderachse - Abweichung von Sollvorgabe zu groß,VDM-EARSAS - ARS Aktor front axle - deviation of Sollvorgabe too large,VDP-G11
+030C59,VDM-ARSFF - ARS Aktuatoren Reduktion wegen Übertemperatur,VDM-ARSFF - ARS actuator Reduktion due to overtemperature,VDP-G11
+030C5A,VDM-KBS - Höhenstandssesnoren - vorn links Signalplausibilität,VDM-KBS - Höhenstandssesnoren - vorn left signal plausibility,VDP-G11
+030C5B,VDM-KBS - Höhenstandssensoren - vorn rechts Signalplausibilität,VDM-KBS - Höhenstandssensoren - vorn right signal plausibility,VDP-G11
+030C5C,VDM-KBS - Höhenstandssensoren - hinten links Signalplausibilität,VDM-KBS - Höhenstandssensoren - rear left signal plausibility,VDP-G11
+030C5D,VDM-KBS - Höhenstandssensoren - hinten rechts Signalplausibilität,VDM-KBS - Höhenstandssensoren - rear right signal plausibility,VDP-G11
+030C5E,VDM-ARSFF - ARS Aktuatoren starke Reduktion wegen Übertemperatur,VDM-ARSFF - ARS actuator starke Reduktion due to overtemperature,VDP-G11
+030C63,"VDM-EARSAS - ARS Aktor Vorderachse, Abweichung von Sollvorgabe zu groß, mit Abschaltung","VDM-EARSAS - ARS Aktor front axle, deviation of Sollvorgabe too large, with shutdown",VDP-G11
+030C66,VDM-EARSAS - ARS Aktor Degradation aufgrund Unterspannung,VDM-EARSAS - ARS Aktor Degradation due to undervoltage,VDP-G11
+030C68,VDM-EARSSBS - ARS Degradation aufgrund nicht abgeglichenem Querbeschleunigungssignal,VDM-EARSSBS - ARS Degradation due to not abgeglichenem lateral acceleration signal,VDP-G11
 030D80,Litium-Ionen-Batterie [Arbeitsbereich]: Spannung zu hoch,Lithium-ion-battery [working range]: voltage too high,DME; DME-slave
 030D81,Litium-Ionen-Batterie [Arbeitsbereich]: Spannung zu niedrig,Lithium-ion-battery [working range]: voltage too low,DME; DME-slave
 030D82,Litium-Ionen-Batterie [Arbeitsbereich]: Ladestrom zu hoch,Lithium-ion-battery [working range]: Ladestrom too high,DME; DME-slave
@@ -3449,6 +3507,52 @@
 421552,EGS Temperatursensor: Steuergeräteinnentemperatur LM71 zu Steuergeräteinnentemperatur CG130 und Getriebeöltemperatur unplausibel,EGS temperature sensor: Steuergeräteinnentemperatur LM71 to Steuergeräteinnentemperatur CG130 and transmission oil temperature implausible,GSZFB1
 421672,E-Schaltung: Missbrauch der elektrischen Getriebenotentriegelung,E-Schaltung: Missbrauch the electric Getriebenotentriegelung,GSZFB1
 421681,Eingeschränkte Getriebefunktion: Fahrzeug im Transportmodus,Eingeschränkte transmission function: vehicle in the Transportmodus,GSZFB1
+440200,Überspannung erkannt,Overvoltage detected,LMV-G11
+440201,Unterspannung erkannt,Undervoltage detected,LMV-G11
+440202,Steuergerät: interner Sammelfehler (Prozessor),Control unit: internal group fault (processor),LMV-G11
+440203,Steuergerät: interner Sammelfehler (Überwachungseinheit),Control unit: internal group fault (monitoring unit),LMV-G11
+440204,Steuergerät: interner Sammelfehler (Endstufe),Control unit: internal group fault (output stage),LMV-G11
+440205,Steuergerät: interner Sammelfehler (Versorgungseinheit),Control unit: internal group fault (supply unit),LMV-G11
+440206,Kupplungsfunktion: Fehler Winkelschlauch,Clutch function: fault Winkelschlauch,LMV-G11
+440207,Kupplungsfunktion: Anschlagsuche fehlerhaft,Clutch function: Anschlagsuche faulty,LMV-G11
+440208,Kupplungsfunktion: Kalibrierung fehlerhaft,Clutch function: Kalibrierung faulty,LMV-G11
+440209,Kupplungsfunktion: Kalibrierwert unplausibel,Clutch function: Kalibrierwert implausible,LMV-G11
+44020A,Kupplungsfunktion: maximaler Stellwinkel überschritten,Clutch function: maximum Stellwinkel exceeded,LMV-G11
+44020B,Kupplungsfunktion: Temperaturabschaltung erreicht,Clutch function: temperature shutdown erreicht,LMV-G11
+44020C,Steuergerät: Temperaturabschaltung erreicht,Control unit: temperature shutdown erreicht,LMV-G11
+44020D,Kupplungsfunktion: Ende Lebensdauer erreicht,Clutch function: Ende Lebensdauer erreicht,LMV-G11
+44020E,Kupplungsfunktion: Ölverschleiß,Clutch function: Ölverschleiß,LMV-G11
+44020F,Kupplungsfunktion: Drift der Initialposition,Clutch function: Drift the Initialposition,LMV-G11
+440210,Kupplungsfunktion: Getriebeklassierung ungültig,Clutch function: Getriebeklassierung invalid,LMV-G11
+440211,Kupplungsfunktion: Deaktivierung Notlauf wegen fehlender Flexray Signale,Clutch function: deactivation limp home due to missing Flexray signal,LMV-G11
+440212,Kupplungsfunktion: Initiale Kalibrierung nicht durchgeführt,Clutch function: Initiale Kalibrierung not carried out,LMV-G11
+440213,Kupplungsfunktion: Kupplungsverschleiß nicht plausibel,Clutch function: Kupplungsverschleiß not plausible,LMV-G11
+440214,Kupplungsfunktion: Timeout bei der Initialpositionserkennung,Clutch function: timeout at the Initialpositionserkennung,LMV-G11
+440215,Kupplungsfunktion: Nicht Flüchtiger Speicher in der Funktionssoftware als fehlerhaft erkannt,Clutch function: not Flüchtiger memory in the Funktionssoftware as faulty detected,LMV-G11
+440220,Steuergerät Temperatursensor: Kurzschluss Plus,Control unit temperature sensor: short circuit Plus,LMV-G11
+440221,Steuergerät Temperatursensor: Kurzschluss Minus,Control unit temperature sensor: short circuit Minus,LMV-G11
+440224,Steuergerät Temperatursensor: fehlerhafter Gradient bzw. Erkennung Temperatursprung,Control unit temperature sensor: faulty Gradient resp. detection Temperatursprung,LMV-G11
+440225,Steuergerät Temperatursensor: Plausibilisierungsfehler,Control unit temperature sensor: plausibility check fault,LMV-G11
+44022F,Steuergerät  Endstufe: Übertemperatur,Control unit  output stage: overtemperature,LMV-G11
+440246,Steuergerät  Prozessor: Speicherschutzverletzung,Control unit  processor: Speicherschutzverletzung,LMV-G11
+440250,Steuergerät  Lagesensor: Temperaturwert ausserhalb Wertebereich,Control unit  Lagesensor: temperature value outside values range,LMV-G11
+440251,Steuergerät  Lagesensor: Temperaturwert unplausibel (Vergleich),Control unit  Lagesensor: temperature value implausible (comparison),LMV-G11
+440264,Steuergerät  Prozessor: Übertemperatur Abschaltung,Control unit  processor: overtemperature shutdown,LMV-G11
+440265,Steuergerät  Prozessor: Übertemperatur Warnung,Control unit  processor: overtemperature Warnung,LMV-G11
+440274,Steuergerät Überwachungseinheit: Reset durch Versorgung Unterspannung,Control unit monitoring unit: reset by supply undervoltage,LMV-G11
+440278,Steuergerät Überwachungseinheit: Übertemperatur Abschaltung,Control unit monitoring unit: overtemperature shutdown,LMV-G11
+440279,Steuergerät Überwachungseinheit: Übertemperatur Warnung,Control unit monitoring unit: overtemperature Warnung,LMV-G11
+440281,Steuergerät: interner Sammelfehler (Rotorlagesensor),Control unit: internal group fault (Rotorlagesensor),LMV-G11
+440282,Steuergerät  Software: Kalibrierdaten ungültig,Control unit  Software: Kalibrierdaten invalid,LMV-G11
+440287,Steuergerät  Endstufe:  Fehler Motorstrom - Überstrom,Control unit  output stage:  fault engine current - overcurrent,LMV-G11
+440288,Steuergerät: permanente Temperaturabschaltung erreicht,Control unit: permanente temperature shutdown erreicht,LMV-G11
+440289,Steuergerät  Lagesensor: Temperaturwert oberhalb Wertebereich,Control unit  Lagesensor: temperature value above values range,LMV-G11
+440290,Steuergerät  Prozessor: Temperatur unplausibel,Control unit  processor: temperature implausible,LMV-G11
+440291,Steuergerät  Prozessor: Temperaturwert unterhalb Wertebereich,Control unit  processor: temperature value below values range,LMV-G11
+440292,Steuergerät Überwachungseinheit: Temperaturwert unterhalb Wertebereich,Control unit monitoring unit: temperature value below values range,LMV-G11
+440314,Kupplungsfunktion: Mechanik defekt,Clutch function: Mechanik defective,LMV-G11
+440316,Steuergerät: interner Sammelfehler (Aktuator Software),Control unit: internal group fault (actuator Software),LMV-G11
+440318,Steuergerät Software: Flashspeicher korrupt,Control unit Software: Flashspeicher korrupt,LMV-G11
 48069B,RDCi Funkverbindung durch Fremdeinfluss gestoert,RDCi Funkverbindung by Fremdeinfluss disturbed,DSC-G30N
 48069C,Rollenbetrieb - Aktiviert,Rollenbetrieb - activated,DSC-G30N
 48069E,RDCi Kalibrierung Raderkennung nicht moeglich,RDCi Kalibrierung wheel detection not possible,DSC-G30N
@@ -3723,8 +3827,490 @@
 481900,Interner Steuergerätefehler REMA rechts,Internal Steuergerätefehler REMA right,ACSM5
 481902,Temporäre Funktionsstörung REMA rechts,Temporäre Funktionsstörung REMA right,ACSM5
 481916,REMA rechts: Maximale Anzahl Straffungen erreicht,REMA right: maximum number Straffungen erreicht,ACSM5
+482280,Lenkgetriebe - Einfriererkennung,Lenkgetriebe - Einfriererkennung,EPS-G11
+482281,Steuergerät intern - Leistungsdichtebegrenzung aufgetreten,Control unit internal - Leistungsdichtebegrenzung occurred,EPS-G11
+4822A6,Spannungsversorgung - Globale Unterspannung extern,Power supply - global undervoltage extern,EPS-G11
+4822A8,Spannungsversorgung - Globale Überspannung extern,Power supply - global overvoltage extern,EPS-G11
+4822DF,Steuergerät intern - ROM fehlerhaft,Control unit internal - ROM faulty,EPS-G11
+4822E0,Steuergerät intern - NVRAM fehlerhaft,Control unit internal - NVRAM faulty,EPS-G11
+4822E1,Lenkgetriebe - Blockiererkennung,Lenkgetriebe - Blockiererkennung,EPS-G11
+4822E2,Spannungsversorgung - Status Trennelement,Power supply - status Trennelement,EPS-G11
+4822E3,Steuergerät intern - RAM fehlerhaft,Control unit internal - RAM faulty,EPS-G11
+4822E5,Sensor - Rotorlage - Lenkwinkel - Lenkgetriebemitte nicht gefunden,Sensor - Rotorlage - Lenkwinkel - Lenkgetriebemitte not gefunden,EPS-G11
+4822E7,Steuergerät intern - Watchdog Ereignis,Control unit internal - Watchdog Ereignis,EPS-G11
+4822E8,Steuergerät intern - MCU Temperatur Sensor OOR,Control unit internal - MCU temperature sensor OOR,EPS-G11
+4822E9,Steuergerät intern - Softwarefehler - OBD,Control unit internal - Softwarefehler - OBD,EPS-G11
+4822EA,Steuergerät intern - ZFLS - Hardware - Defekt - OBD,Control unit internal - ZFLS - Hardware - defective - OBD,EPS-G11
+4822EB,Fehlerverriegelung - Lenkunterstützung dauerhaft eingeschränkt,Fault locking - Lenkunterstützung permanent eingeschränkt,EPS-G11
+4822EC,Globales Powermanagement Reduzierung Lenkunterstützung,Global power management reduction Lenkunterstützung,EPS-G11
+4822EE,Steuergerät intern - Softwarefehler - Program-Flow Control,Control unit internal - Softwarefehler - Program-Flow control,EPS-G11
+4822EF,Flashen: Datenstand entspricht Anlieferzustand,Flashen: Datenstand entspricht Anlieferzustand,EPS-G11
+4822F0,Sensor - Rotorlage - Lenkwinkel - Harware defekt_OOR,Sensor - Rotorlage - Lenkwinkel - Harware defekt_OOR,EPS-G11
+4822F5,Steuergerät intern - Geschwindigkeit - Reduzierung Lenkunterstützung,Control unit internal - speed - reduction Lenkunterstützung,EPS-G11
+4822FA,Sensor - Rotorlage - Lenkwinkel - Nachsynchronisation durchgeführt,Sensor - Rotorlage - Lenkwinkel - Nachsynchronisation carried out,EPS-G11
+4822FB,Steuergerät intern - Abschaltung Momenten-Schnittstelle aufgrund Degradation Lenkunterstützung,Control unit internal - shutdown torque-interface due to Degradation Lenkunterstützung,EPS-G11
+482305,Oszillation erkannt,Oszillation detected,EPS-G11
+482306,Lenkgetriebe - Riemensprung erkannt,Lenkgetriebe - Riemensprung detected,EPS-G11
+48238D,Ruhestrom Plausibilisierung Kl15N lokal mit Bus-Signal,Ruhestrom plausibility check Kl15N lokal with bus-signal,EPS-G11
+48238F,Spannungsversorgung - Lokale Überspannung Reduzierung Lenkunterstützung,Power supply - Lokale overvoltage reduction Lenkunterstützung,EPS-G11
+482394,Sensor - Rotorlage - Lenkwinkel - Verlust Multiturnwert,Sensor - Rotorlage - Lenkwinkel - Verlust Multiturnwert,EPS-G11
+482395,Lenkgetriebe - Reibung zu hoch,Lenkgetriebe - Reibung too high,EPS-G11
+482399,Spannungsversorgung - Lokale Überspannung Abschaltung Lenkunterstützung,Power supply - Lokale overvoltage shutdown Lenkunterstützung,EPS-G11
+48239C,Sensor - Lenkwinkel Index - Defekt,Sensor - Lenkwinkel Index - defective,EPS-G11
+4823C2,Sensor - Rotorlage - Lenkwinkel - Geradeauslauf nicht gelernt,Sensor - Rotorlage - Lenkwinkel - Geradeauslauf not learned,EPS-G11
+4823D2,Sensor - Rotorlage - Lenkwinkel - Hardware defekt,Sensor - Rotorlage - Lenkwinkel - Hardware defective,EPS-G11
+4823D5,Spannungsversorgung - Steuergeräte Reset,Power supply - control unit reset,EPS-G11
+4823E1,Steuergerät intern - ZFLS - Hardware - Defekt,Control unit internal - ZFLS - Hardware - defective,EPS-G11
+4823E2,Steuergerät intern - ZFLS - Software - Fehler,Control unit internal - ZFLS - Software - fault,EPS-G11
+4823E6,Steuergerät intern - Powerpack Defekt,Control unit internal - Powerpack defective,EPS-G11
+4823EC,Sensor - Drehmoment - Lenkmoment - Defekt,Sensor - torque - Lenkmoment - defective,EPS-G11
+4823F9,Steuergerät intern - Übertemperatur Reduzierung Lenkunterstützung,Control unit internal - overtemperature reduction Lenkunterstützung,EPS-G11
+4823FC,Spannungsversorgung - Lokale Unterspannung Reduzierung Lenkunterstützung,Power supply - Lokale undervoltage reduction Lenkunterstützung,EPS-G11
+4823FD,Spannungsversorgung - Lokale Unterspannung Abschaltung Lenkunterstützung,Power supply - Lokale undervoltage shutdown Lenkunterstützung,EPS-G11
+482883,Digitaler Radbeschleunigungssensor - hinten links - Physical Layer Fehler,Digitaler wheel acceleration sensor - rear left - Physical Layer fault,VDP-G11
+482887,Digitaler Radbeschleunigungssensor - hinten links - Sensorfehler,Digitaler wheel acceleration sensor - rear left - sensor fault,VDP-G11
+482889,Steuergerät intern - Software,Control unit internal - Software,VDP-G11
+48288A,Steuergerät intern - Hardware,Control unit internal - Hardware,VDP-G11
+48288E,Digitaler Radbeschleunigungssensor - hinten links - Kommunikationsfehler,Digitaler wheel acceleration sensor - rear left - communication error,VDP-G11
+48288F,Digitaler Radbeschleunigungssensor - hinten rechts - Physical Layer Fehler,Digitaler wheel acceleration sensor - rear right - Physical Layer fault,VDP-G11
+482890,Digitaler Radbeschleunigungssensor - hinten rechts - Sensorfehler,Digitaler wheel acceleration sensor - rear right - sensor fault,VDP-G11
+482891,Digitaler Radbeschleunigungssensor - hinten rechts - Kommunikationsfehler,Digitaler wheel acceleration sensor - rear right - communication error,VDP-G11
+482892,Digitaler Radbeschleunigungssensor - vorn links - Physical Layer Fehler,Digitaler wheel acceleration sensor - vorn left - Physical Layer fault,VDP-G11
+482898,Digitaler Radbeschleunigungssensor - vorn links - Sensorfehler,Digitaler wheel acceleration sensor - vorn left - sensor fault,VDP-G11
+482899,Digitaler Radbeschleunigungssensor - vorn links - Kommunikationsfehler,Digitaler wheel acceleration sensor - vorn left - communication error,VDP-G11
+48289A,Digitaler Radbeschleunigungssensor - vorn rechts - Physical Layer Fehler,Digitaler wheel acceleration sensor - vorn right - Physical Layer fault,VDP-G11
+48289B,Digitaler Radbeschleunigungssensor - vorn rechts - Sensorfehler,Digitaler wheel acceleration sensor - vorn right - sensor fault,VDP-G11
+48289C,Digitaler Radbeschleunigungssensor - vorn rechts - Kommunikationsfehler,Digitaler wheel acceleration sensor - vorn right - communication error,VDP-G11
+48289D,Steuergerät intern - Übertemperatur,Control unit internal - overtemperature,VDP-G11
+4828E1,Ventilspule - Zugstufe - Vorn Rechts Stromreglerplausibilitätsfehler,Ventilspule - Zugstufe - Vorn right current controller plausibility fault,VDP-G11
+4828E3,Ventilspule - Zugstufe - Vorn Rechts Strommessung nicht kalibriert,Ventilspule - Zugstufe - Vorn right current measurement not kalibriert,VDP-G11
+4828E4,Ventilspule - Zugstufe - Vorn Rechts Kurzschluss KL31,Ventilspule - Zugstufe - Vorn right short circuit KL31,VDP-G11
+4828E5,Ventilspule - Zugstufe - Vorn Rechts offene Leitung,Ventilspule - Zugstufe - Vorn right open line,VDP-G11
+4828E6,Ventilspule - Zugstufe - Vorn Rechts Kurzschluss KL15/KL30,Ventilspule - Zugstufe - Vorn right short circuit KL15/KL30,VDP-G11
+4828E7,Ventilspule - Zugstufe - Vorn Rechts keine Endstufenfreigabe über Watchdog,Ventilspule - Zugstufe - Vorn right no output stage enable via Watchdog,VDP-G11
+4828E9,Ventilspule - Zugstufe - Vorn Links Stromreglerplausibilitätsfehler,Ventilspule - Zugstufe - Vorn left current controller plausibility fault,VDP-G11
+4828EB,Ventilspule - Zugstufe - Vorn Links Strommessung nicht kalibriert,Ventilspule - Zugstufe - Vorn left current measurement not kalibriert,VDP-G11
+4828EC,Ventilspule - Zugstufe - Vorn Links offene Leitung,Ventilspule - Zugstufe - Vorn left open line,VDP-G11
+4828ED,Ventilspule - Zugstufe - Vorn Rechts Kurzschluss Ventil,Ventilspule - Zugstufe - Vorn right short circuit valve,VDP-G11
+4828EE,Ventilspule - Zugstufe - Vorn Links Kurzschluss Ventil,Ventilspule - Zugstufe - Vorn left short circuit valve,VDP-G11
+4828EF,Ventilspule - Zugstufe - Vorn Links Kurzschluss KL31,Ventilspule - Zugstufe - Vorn left short circuit KL31,VDP-G11
+4828F0,Ventilspule - Zugstufe - Vorn Links Kurzschluss KL15/KL30,Ventilspule - Zugstufe - Vorn left short circuit KL15/KL30,VDP-G11
+4828F1,Ventilspule - Zugstufe - Vorn Links keine Endstufenfreigabe über Watchdog,Ventilspule - Zugstufe - Vorn left no output stage enable via Watchdog,VDP-G11
+4828F3,Ventilspule - Zugstufe - Hinten Rechts Stromreglerplausibilitätsfehler,Ventilspule - Zugstufe - rear right current controller plausibility fault,VDP-G11
+4828F4,Balgventil Hinten Rechts Stromreglerplausibilitätsfehler,Balgventil rear right current controller plausibility fault,VDP-G11
+4828F5,Ventilspule - Zugstufe - Hinten Rechts Strommessung nicht kalibriert,Ventilspule - Zugstufe - rear right current measurement not kalibriert,VDP-G11
+4828F6,Ventilspule - Zugstufe - Hinten Rechts offene Leitung,Ventilspule - Zugstufe - rear right open line,VDP-G11
+4828F7,Ventilspule - Zugstufe - Hinten Rechts Kurzschluss Ventil,Ventilspule - Zugstufe - rear right short circuit valve,VDP-G11
+4828F8,Ventilspule - Zugstufe - Hinten Rechts Kurzschluss KL31,Ventilspule - Zugstufe - rear right short circuit KL31,VDP-G11
+4828F9,Ventilspule - Zugstufe - Hinten Rechts Kurzschluss KL15/KL30,Ventilspule - Zugstufe - rear right short circuit KL15/KL30,VDP-G11
+4828FA,Ventilspule - Zugstufe - Hinten Rechts keine Endstufenfreigabe über Watchdog,Ventilspule - Zugstufe - rear right no output stage enable via Watchdog,VDP-G11
+4828FC,Ventilspule - Zugstufe - Hinten Links Stromreglerplausibilitätsfehler,Ventilspule - Zugstufe - rear left current controller plausibility fault,VDP-G11
+4828FD,Balgventil Hinten Links Stromreglerplausibilitätsfehler,Balgventil rear left current controller plausibility fault,VDP-G11
+4828FE,Ventilspule - Zugstufe - Hinten Links Strommessung nicht kalibriert,Ventilspule - Zugstufe - rear left current measurement not kalibriert,VDP-G11
+4828FF,Ventilspule - Zugstufe - Hinten Links offene Leitung,Ventilspule - Zugstufe - rear left open line,VDP-G11
+482900,Ventilspule - Zugstufe - Hinten Links Kurzschluss Ventil,Ventilspule - Zugstufe - rear left short circuit valve,VDP-G11
+482901,Ventilspule - Zugstufe - Hinten Links Kurzschluss KL31,Ventilspule - Zugstufe - rear left short circuit KL31,VDP-G11
+482902,Ventilspule - Zugstufe - Hinten Links Kurzschluss KL15/KL30,Ventilspule - Zugstufe - rear left short circuit KL15/KL30,VDP-G11
+482903,Ventilspule - Zugstufe - Hinten Links keine Endstufenfreigabe über Watchdog,Ventilspule - Zugstufe - rear left no output stage enable via Watchdog,VDP-G11
+482905,Ventilspule - Druckstufe - Vorn Rechts Stromreglerplausibilitätsfehler,Ventilspule - pressure stage - Vorn right current controller plausibility fault,VDP-G11
+482907,Ventilspule - Druckstufe - Vorn Rechts Strommessung nicht kalibriert,Ventilspule - pressure stage - Vorn right current measurement not kalibriert,VDP-G11
+482908,Ventilspule - Druckstufe - Vorn Rechts offene Leitung,Ventilspule - pressure stage - Vorn right open line,VDP-G11
+482909,Ventilspule - Druckstufe - Vorn Rechts Kurzschluss KL31,Ventilspule - pressure stage - Vorn right short circuit KL31,VDP-G11
+48290A,Ventilspule - Druckstufe - Vorn Rechts Kurzschluss KL15/KL30,Ventilspule - pressure stage - Vorn right short circuit KL15/KL30,VDP-G11
+48290B,Ventilspule - Druckstufe - Vorn Rechts keine Endstufenfreigabe über Watchdog,Ventilspule - pressure stage - Vorn right no output stage enable via Watchdog,VDP-G11
+48290D,Ventilspule - Druckstufe - Vorn Links Stromreglerplausibilitätsfehler,Ventilspule - pressure stage - Vorn left current controller plausibility fault,VDP-G11
+48290F,Ventilspule - Druckstufe - Vorn Links Strommessung nicht kalibriert,Ventilspule - pressure stage - Vorn left current measurement not kalibriert,VDP-G11
+482910,Ventilspule - Druckstufe - Vorn Links offene Leitung,Ventilspule - pressure stage - Vorn left open line,VDP-G11
+482911,Ventilspule - Druckstufe - Vorn Links Kurzschluss Ventil,Ventilspule - pressure stage - Vorn left short circuit valve,VDP-G11
+482912,Ventilspule - Druckstufe - Vorn Rechts Kurzschluss Ventil,Ventilspule - pressure stage - Vorn right short circuit valve,VDP-G11
+482913,Ventilspule - Druckstufe - Vorn Links Kurzschluss KL31,Ventilspule - pressure stage - Vorn left short circuit KL31,VDP-G11
+482914,Ventilspule - Druckstufe - Vorn Links Kurzschluss KL15/KL30,Ventilspule - pressure stage - Vorn left short circuit KL15/KL30,VDP-G11
+482915,Ventilspule - Druckstufe - Vorn Links keine Endstufenfreigabe über Watchdog,Ventilspule - pressure stage - Vorn left no output stage enable via Watchdog,VDP-G11
+482917,Ventilspule - Druckstufe - Hinten Rechts Stromreglerplausibilitätsfehler,Ventilspule - pressure stage - rear right current controller plausibility fault,VDP-G11
+482919,Ventilspule - Druckstufe - Hinten Rechts Strommessung nicht kalibriert,Ventilspule - pressure stage - rear right current measurement not kalibriert,VDP-G11
+48291A,Ventilspule - Druckstufe - Hinten Rechts offene Leitung,Ventilspule - pressure stage - rear right open line,VDP-G11
+48291B,Ventilspule - Druckstufe - Hinten Rechts Kurzschluss Ventil,Ventilspule - pressure stage - rear right short circuit valve,VDP-G11
+48291C,Ventilspule - Druckstufe - Hinten Rechts Kurzschluss KL31,Ventilspule - pressure stage - rear right short circuit KL31,VDP-G11
+48291D,Ventilspule - Druckstufe - Hinten Rechts Kurzschluss KL15/KL30,Ventilspule - pressure stage - rear right short circuit KL15/KL30,VDP-G11
+48291E,Ventilspule - Druckstufe - Hinten Rechts keine Endstufenfreigabe über Watchdog,Ventilspule - pressure stage - rear right no output stage enable via Watchdog,VDP-G11
+482920,Ventilspule - Druckstufe - Hinten Links Stromreglerplausibilitätsfehler,Ventilspule - pressure stage - rear left current controller plausibility fault,VDP-G11
+482922,Ventilspule - Druckstufe - Hinten Links Strommessung nicht kalibriert,Ventilspule - pressure stage - rear left current measurement not kalibriert,VDP-G11
+482923,Ventilspule - Druckstufe - Hinten Links offene Leitung,Ventilspule - pressure stage - rear left open line,VDP-G11
+482924,Ventilspule - Druckstufe - Hinten Links Kurzschluss Ventil,Ventilspule - pressure stage - rear left short circuit valve,VDP-G11
+482925,Ventilspule - Druckstufe - Hinten Links Kurzschluss KL31,Ventilspule - pressure stage - rear left short circuit KL31,VDP-G11
+482926,Ventilspule - Druckstufe - Hinten Links Kurzschluss KL15/KL30,Ventilspule - pressure stage - rear left short circuit KL15/KL30,VDP-G11
+482927,Ventilspule - Druckstufe - Hinten Links keine Endstufenfreigabe über Watchdog,Ventilspule - pressure stage - rear left no output stage enable via Watchdog,VDP-G11
+482928,Ablassventil Stromreglerplausibilitätsfehler,Ablassventil current controller plausibility fault,VDP-G11
+482929,Ablassventil Kurzschluss nach Plus,Ablassventil short circuit to positive,VDP-G11
+48292A,Ablassventil Kurzschluss Spulenwindung,Ablassventil short circuit Spulenwindung,VDP-G11
+48292B,Ablassventil Leitungsunterbrechung,Ablassventil open circuit,VDP-G11
+48292C,Ablassventil maximale Einschaltdauer überschritten,Ablassventil maximum Einschaltdauer exceeded,VDP-G11
+48292D,EHC-Ventile: zentraler Kurzschluss nach Masse,EHC-valve: zentraler short circuit to ground,VDP-G11
+48292E,Balgventil Hinten Links Kurzschluss nach Plus,Balgventil rear left short circuit to positive,VDP-G11
+48292F,Balgventil Hinten Links Kurzschluss Spulenwindung,Balgventil rear left short circuit Spulenwindung,VDP-G11
+482930,Balgventil Hinten Links Leitungsunterbrechung,Balgventil rear left open circuit,VDP-G11
+482931,Balgventil Hinten Links maximale Einschaltdauer überschritten,Balgventil rear left maximum Einschaltdauer exceeded,VDP-G11
+482932,EHC-Ventile: zentraler Kurzschluss nach Plus,EHC-valve: zentraler short circuit to positive,VDP-G11
+482933,Balgventil Hinten Rechts Kurzschluss nach Plus,Balgventil rear right short circuit to positive,VDP-G11
+482934,Balgventil Hinten Rechts Kurzschluss Spulenwindung,Balgventil rear right short circuit Spulenwindung,VDP-G11
+482935,Balgventil Hinten Rechts Leitungsunterbrechung,Balgventil rear right open circuit,VDP-G11
+482936,Balgventil Hinten Rechts maximale Einschaltdauer überschritten,Balgventil rear right maximum Einschaltdauer exceeded,VDP-G11
+482937,Balgventil Vorn Links Stromreglerplausibilitätsfehler,Balgventil Vorn left current controller plausibility fault,VDP-G11
+482938,Balgventil Vorn Links Kurzschluss nach Plus,Balgventil Vorn left short circuit to positive,VDP-G11
+482939,Balgventil Vorn Links Kurzschluss Spulenwindung,Balgventil Vorn left short circuit Spulenwindung,VDP-G11
+48293A,Balgventil Vorn Links Leitungsunterbrechung,Balgventil Vorn left open circuit,VDP-G11
+48293B,Balgventil Vorn Links maximale Einschaltdauer überschritten,Balgventil Vorn left maximum Einschaltdauer exceeded,VDP-G11
+48293C,Balgventil Vorn Rechts Stromreglerplausibilitätsfehler,Balgventil Vorn right current controller plausibility fault,VDP-G11
+48293D,Balgventil Vorn Rechts Kurzschluss nach Plus,Balgventil Vorn right short circuit to positive,VDP-G11
+48293E,Balgventil Vorn Rechts Kurzschluss Spulenwindung,Balgventil Vorn right short circuit Spulenwindung,VDP-G11
+48293F,Balgventil Vorn Rechts Leitungsunterbrechung,Balgventil Vorn right open circuit,VDP-G11
+482942,Balgventil Vorn Rechts maximale Einschaltdauer überschritten,Balgventil Vorn right maximum Einschaltdauer exceeded,VDP-G11
+482946,Speicherventil Stromreglerplausibilitätsfehler,Memory valve current controller plausibility fault,VDP-G11
+48294A,Speicherventil Kurzschluss nach Plus,Memory valve short circuit to positive,VDP-G11
+48294E,Speicherventil Kurzschluss Spulenwindung,Memory valve short circuit Spulenwindung,VDP-G11
+482950,Speicherventil Leitungsunterbrechung,Memory valve open circuit,VDP-G11
+482953,Speicherventil maximale Einschaltdauer überschritten,Memory valve maximum Einschaltdauer exceeded,VDP-G11
+482954,Umschaltventil Stromreglerplausibilitätsfehler,Umschaltventil current controller plausibility fault,VDP-G11
+482957,Umschaltventil Kurzschluss nach Plus,Umschaltventil short circuit to positive,VDP-G11
+482958,Umschaltventil Kurzschluss Spulenwindung,Umschaltventil short circuit Spulenwindung,VDP-G11
+48295B,Umschaltventil Leitungsunterbrechung,Umschaltventil open circuit,VDP-G11
+48295C,Umschaltventil maximale Einschaltdauer überschritten,Umschaltventil maximum Einschaltdauer exceeded,VDP-G11
+48295F,Kompressorrelais Kurzschluss nach Plus,Kompressorrelais short circuit to positive,VDP-G11
+482962,Kompressorrelais Kurzschluss nach Masse,Kompressorrelais short circuit to ground,VDP-G11
+482963,Niveauregelung - Kompressorrelais Maximale Einschaltdauer überschritten,Niveauregelung - Kompressorrelais maximum Einschaltdauer exceeded,VDP-G11
+482966,Niveauregelung - Kompressortemperatur Unplausibles Signal,Niveauregelung - Kompressortemperatur Unplausibles signal,VDP-G11
+482967,Kompressor - Temperatursensor - Kurzschluss nach Masse,Kompressor - temperature sensor - short circuit to ground,VDP-G11
+48296A,Kompressor - Temperatursensor - Kurzschluss nach Plus,Kompressor - temperature sensor - short circuit to positive,VDP-G11
+48296B,Kompressor - Temperatursensor - Unterbrechung,Kompressor - temperature sensor - interruption,VDP-G11
+48296E,Kompressor - Druckgeber - Versorgungsspannung,Kompressor - pressure sender - supply voltage,VDP-G11
+48296F,Niveauregelung Druckgeber Unplausibles Signal,Niveauregelung pressure sender Unplausibles signal,VDP-G11
+482972,Kompressor - Druckgeber - Signalspannung,Kompressor - pressure sender - signal voltage,VDP-G11
+482974,Niveauregelung - Fahrzeug-Niveau - nicht - einstellbar,Niveauregelung - vehicle-Niveau - not - einstellbar,VDP-G11
+482975,Niveauregelung - Fahrzeug-Niveau - nicht - plausibel,Niveauregelung - vehicle-Niveau - not - plausibel,VDP-G11
+482977,Systembefüllung - unplausibel,Systembefüllung - implausible,VDP-G11
+482978,System Maximale Einschaltdauer überschritten,System maximum Einschaltdauer exceeded,VDP-G11
+482979,Druckspeicherbefüllung - unplausibel,Druckspeicherbefüllung - implausible,VDP-G11
+48297A,Systementlüftung Unplausibel,Systementlüftung implausible,VDP-G11
+482980,Anzahl Schaltvorgänge EHC-Relais überschritten,Number Schaltvorgänge EHC-relay exceeded,VDP-G11
+482983,Höhenstandssensor - vorn links - Wert - unplausibel,Höhenstandssensor - vorn left - value - implausible,VDP-G11
+482987,Höhenstandssensor - vorn rechts - Wert - unplausibel,Höhenstandssensor - vorn right - value - implausible,VDP-G11
+48298B,Höhenstandssensor - hinten links - Wert - unplausibel,Höhenstandssensor - rear left - value - implausible,VDP-G11
+48298F,Höhenstandssensor - hinten rechts - Wert - unplausibel,Höhenstandssensor - rear right - value - implausible,VDP-G11
+4829A0,Höhenstandssensor - vorn links - Versorgung - Überspannung,Höhenstandssensor - vorn left - supply - overvoltage,VDP-G11
+4829A1,Höhenstandssensor - vorn links - Versorgung - Unterspannung,Höhenstandssensor - vorn left - supply - undervoltage,VDP-G11
+4829A2,Höhenstandssensor - vorn links - Signalspannung - Unterspannung,Höhenstandssensor - vorn left - signal voltage - undervoltage,VDP-G11
+4829A3,Höhenstandssensor - vorn links - Signalspannung - Überspannung,Höhenstandssensor - vorn left - signal voltage - overvoltage,VDP-G11
+4829A4,Höhenstandssensor - vorn rechts - Versorgung - Überspannung,Höhenstandssensor - vorn right - supply - overvoltage,VDP-G11
+4829A5,Höhenstandssensor - vorn rechts - Versorgung - Unterspannung,Höhenstandssensor - vorn right - supply - undervoltage,VDP-G11
+4829A6,Höhenstandssensor - vorn rechts - Signalspannung - Unterspannung,Höhenstandssensor - vorn right - signal voltage - undervoltage,VDP-G11
+4829A7,Höhenstandssensor - vorn rechts - Signalspannung - Überspannung,Höhenstandssensor - vorn right - signal voltage - overvoltage,VDP-G11
+4829A8,Höhenstandssensor - hinten links - Versorgung - Überspannung,Höhenstandssensor - rear left - supply - overvoltage,VDP-G11
+4829A9,Höhenstandssensor - hinten links - Versorgung - Unterspannung,Höhenstandssensor - rear left - supply - undervoltage,VDP-G11
+4829AA,Höhenstandssensor - hinten links - Signalspannung - Unterspannung,Höhenstandssensor - rear left - signal voltage - undervoltage,VDP-G11
+4829AB,Höhenstandssensor - hinten links - Signalspannung - Überspannung,Höhenstandssensor - rear left - signal voltage - overvoltage,VDP-G11
+4829AC,Höhenstandssensor - hinten rechts - Versorgung - Überspannung,Höhenstandssensor - rear right - supply - overvoltage,VDP-G11
+4829AD,Höhenstandssensor - hinten rechts - Versorgung - Unterspannung,Höhenstandssensor - rear right - supply - undervoltage,VDP-G11
+4829AE,Höhenstandssensor - hinten rechts - Signalspannung - Unterspannung,Höhenstandssensor - rear right - signal voltage - undervoltage,VDP-G11
+4829AF,Höhenstandssensor - hinten rechts - Signalspannung - Überspannung,Höhenstandssensor - rear right - signal voltage - overvoltage,VDP-G11
+482B23,Lokale Spannungsversorgung - Unterspannung,Lokale power supply - undervoltage,VDP-G11
+482B24,Lokale Spannungsversorgung - Überspannung,Lokale power supply - overvoltage,VDP-G11
+482B25,Globale Spannungsversorgung - Unterspannung extern,Global power supply - undervoltage extern,VDP-G11
+482B26,Globale Spannungsversorgung - Überspannung extern,Global power supply - overvoltage extern,VDP-G11
+482B27,Globale Spannungsversorgung - Unterspannung intern,Global power supply - undervoltage internal,VDP-G11
+482B28,Globale Spannungsversorgung - Überspannung intern,Global power supply - overvoltage internal,VDP-G11
+483100,Niveauregelung - Fahrzeug hinten links extrem hoch,Niveauregelung - vehicle rear left extrem high,VDP-G11
+483101,Niveauregelung - Fahrzeug hinten links extrem tief,Niveauregelung - vehicle rear left extrem tief,VDP-G11
+483102,Niveauregelung - Fahrzeug hinten rechts extrem hoch,Niveauregelung - vehicle rear right extrem high,VDP-G11
+483103,Niveauregelung - Fahrzeug hinten rechts extrem tief,Niveauregelung - vehicle rear right extrem tief,VDP-G11
+483104,Niveauregelung - Fahrzeug vorn rechts extrem hoch,Niveauregelung - vehicle vorn right extrem high,VDP-G11
+483105,Niveauregelung - Fahrzeug vorn rechts extrem tief,Niveauregelung - vehicle vorn right extrem tief,VDP-G11
+483106,Niveauregelung - Fahrzeug vorn links extrem hoch,Niveauregelung - vehicle vorn left extrem high,VDP-G11
+483107,Niveauregelung - Fahrzeug vorn links extrem tief,Niveauregelung - vehicle vorn left extrem tief,VDP-G11
+483108,Niveauregelung - Extremniveau-Überwachung nicht möglich,Niveauregelung - Extremniveau-monitoring not possible,VDP-G11
+483109,Niveauregelung - Kompressor Spannungsversorgung Überspannung,Niveauregelung - Kompressor power supply overvoltage,VDP-G11
+48310A,Niveauregelung - Kompressor Spannungsversorgung Unterspannung,Niveauregelung - Kompressor power supply undervoltage,VDP-G11
+48310E,Niveauregulierung - Komfortabsenken über ID-Geber nicht verfügbar,Niveauregulierung - Komfortabsenken via ID-sender not available,VDP-G11
+483124,Höhenstandssensor - hinten rechts - Abgleich unplausibel,Höhenstandssensor - rear right - Abgleich implausible,VDP-G11
+483125,Höhenstandssensor - hinten links - Abgleich unplausibel,Höhenstandssensor - rear left - Abgleich implausible,VDP-G11
+483126,Höhenstandssensor - vorn links - Abgleich unplausibel,Höhenstandssensor - vorn left - Abgleich implausible,VDP-G11
+483127,Höhenstandssensor - vorn rechts - Abgleich unplausibel,Höhenstandssensor - vorn right - Abgleich implausible,VDP-G11
+483129,Höhenstandssensor - Allgemein - Abgleich nicht durchgeführt,Höhenstandssensor - Allgemein - Abgleich not carried out,VDP-G11
+801100,Motor Frischluft oder Frischluft-Umluft: Blockierung,Engine Frischluft or Frischluft-Umluft: Blockierung,IHKA-G11
+801101,Motor Frischluft oder Frischluft-Umluft: interner Motorfehler,Engine Frischluft or Frischluft-Umluft: internal engine fault,IHKA-G11
+801102,Motor Frischluft oder Frischluft-Umluft: Initialisierungsfehler,Engine Frischluft or Frischluft-Umluft: Initialisierungsfehler,IHKA-G11
+801103,Motor Umluft: Blockierung,Engine Umluft: Blockierung,IHKA-G11
+801104,Motor Umluft: interner Motorfehler,Engine Umluft: internal engine fault,IHKA-G11
+801105,Motor Umluft: Initialisierungsfehler,Engine Umluft: Initialisierungsfehler,IHKA-G11
+801106,Motor Entfrostung: Blockierung,Engine Entfrostung: Blockierung,IHKA-G11
+801107,Motor Entfrostung: interner Motorfehler,Engine Entfrostung: internal engine fault,IHKA-G11
+801108,Motor Entfrostung: Initialisierungsfehler,Engine Entfrostung: Initialisierungsfehler,IHKA-G11
+801109,Motor Belüftung links oder Belüftung-Fussraum: Blockierung,Engine Belüftung left or Belüftung-Fussraum: Blockierung,IHKA-G11
+80110A,Motor Belüftung links oder Belüftung-Fussraum: Initialisierungsfehler,Engine Belüftung left or Belüftung-Fussraum: Initialisierungsfehler,IHKA-G11
+80110B,Motor Belüftung links oder Belüftung-Fussraum: Interner Motorfehler,Engine Belüftung left or Belüftung-Fussraum: internal engine fault,IHKA-G11
+80110C,Motor Belüftung rechts: Blockierung,Engine Belüftung right: Blockierung,IHKA-G11
+80110D,Motor Belüftung rechts: interner Motorfehler,Engine Belüftung right: internal engine fault,IHKA-G11
+80110E,Motor Belüftung rechts: Initialisierungsfehler,Engine Belüftung right: Initialisierungsfehler,IHKA-G11
+80110F,Motor Schichtung links oder Schichtung: Blockierung,Engine Schichtung left or Schichtung: Blockierung,IHKA-G11
+801110,Motor Schichtung links oder Schichtung: interner Motorfehler,Engine Schichtung left or Schichtung: internal engine fault,IHKA-G11
+801111,Motor Schichtung links oder Schichtung: Initialisierungsfehler,Engine Schichtung left or Schichtung: Initialisierungsfehler,IHKA-G11
+801112,Motor Schichtung rechts: Blockierung,Engine Schichtung right: Blockierung,IHKA-G11
+801113,Motor Schichtung rechts: interner Motorfehler,Engine Schichtung right: internal engine fault,IHKA-G11
+801114,Motor Schichtung rechts: Initialisierungsfehler,Engine Schichtung right: Initialisierungsfehler,IHKA-G11
+801115,Motor Fussraum links: Blockierung,Engine Fussraum left: Blockierung,IHKA-G11
+801116,Motor Fussraum links: interner Motorfehler,Engine Fussraum left: internal engine fault,IHKA-G11
+801117,Motor Fussraum links: Initialisierungsfehler,Engine Fussraum left: Initialisierungsfehler,IHKA-G11
+801118,Motor Fussraum rechts: Blockierung,Engine Fussraum right: Blockierung,IHKA-G11
+801119,Motor Fussraum rechts: interner Motorfehler,Engine Fussraum right: internal engine fault,IHKA-G11
+80111A,Motor Fussraum rechts: Initialisierungsfehler,Engine Fussraum right: Initialisierungsfehler,IHKA-G11
+80111B,Motor Luftverteilung hinten links oder Luftverteilung hinten: Blockierung,Engine Luftverteilung rear left or Luftverteilung rear: Blockierung,IHKA-G11
+80111C,Motor Luftverteilung hinten links oder Luftverteilung hinten: interner Motorfehler,Engine Luftverteilung rear left or Luftverteilung rear: internal engine fault,IHKA-G11
+80111D,Motor Luftverteilung hinten links oder Luftverteilung hinten: Initialisierungsfehler,Engine Luftverteilung rear left or Luftverteilung rear: Initialisierungsfehler,IHKA-G11
+80111E,Motor Luftverteilung hinten rechts: Blockierung,Engine Luftverteilung rear right: Blockierung,IHKA-G11
+80111F,Motor Luftverteilung hinten rechts: interner Motorfehler,Engine Luftverteilung rear right: internal engine fault,IHKA-G11
+801120,Motor Luftverteilung hinten rechts: Initialisierungsfehler,Engine Luftverteilung rear right: Initialisierungsfehler,IHKA-G11
+801121,Motor Mischluft links oder Mischluft: Blockierung,Engine Mischluft left or Mischluft: Blockierung,IHKA-G11
+801122,Motor Mischluft links oder Mischluft: Initialisierungsfehler,Engine Mischluft left or Mischluft: Initialisierungsfehler,IHKA-G11
+801123,Motor Mischluft links oder Mischluft: interner Motorfehler,Engine Mischluft left or Mischluft: internal engine fault,IHKA-G11
+801124,Motor Mischluft rechts: Blockierung,Engine Mischluft right: Blockierung,IHKA-G11
+801125,Motor Mischluft rechts: interner Motorfehler,Engine Mischluft right: internal engine fault,IHKA-G11
+801126,Motor Mischluft rechts: Initialisierungsfehler,Engine Mischluft right: Initialisierungsfehler,IHKA-G11
+801127,Motor Mischluft hinten links oder Mischluft hinten: Blockierung,Engine Mischluft rear left or Mischluft rear: Blockierung,IHKA-G11
+801128,Motor Mischluft hinten links oder Mischluft hinten: interner Motorfehler,Engine Mischluft rear left or Mischluft rear: internal engine fault,IHKA-G11
+801129,Motor Mischluft hinten links oder Mischluft hinten: Initialisierungsfehler,Engine Mischluft rear left or Mischluft rear: Initialisierungsfehler,IHKA-G11
+80112A,Motor Mischluft hinten rechts: Blockierung,Engine Mischluft rear right: Blockierung,IHKA-G11
+80112B,Motor Mischluft hinten rechts: interner Motorfehler,Engine Mischluft rear right: internal engine fault,IHKA-G11
+80112C,Motor Mischluft hinten rechts: Initialisierungsfehler,Engine Mischluft rear right: Initialisierungsfehler,IHKA-G11
+80112D,Motor Temperatur-Luftmenge hinten: Blockierung,Engine temperature-air quantity rear: Blockierung,IHKA-G11
+80112E,Motor Temperatur-Luftmenge hinten: interner Motorfehler,Engine temperature-air quantity rear: internal engine fault,IHKA-G11
+80112F,Motor Temperatur-Luftmenge hinten: Initialisierungsfehler,Engine temperature-air quantity rear: Initialisierungsfehler,IHKA-G11
+801136,Motor Indirekte Belüftung: Blockierung,Engine Indirekte Belüftung: Blockierung,IHKA-G11
+801137,Motor Indirekte Belüftung: interner Motorfehler,Engine Indirekte Belüftung: internal engine fault,IHKA-G11
+801138,Motor Indirekte Belüftung: Initialisierungsfehler,Engine Indirekte Belüftung: Initialisierungsfehler,IHKA-G11
+801139,Motor Luftverteilung links oder Luftverteilung: Blockierung,Engine Luftverteilung left or Luftverteilung: Blockierung,IHKA-G11
+80113A,Motor Luftverteilung links oder Luftverteilung: interner Motorfehler,Engine Luftverteilung left or Luftverteilung: internal engine fault,IHKA-G11
+80113B,Motor Luftverteilung links oder Luftverteilung: Initialisierungsfehler,Engine Luftverteilung left or Luftverteilung: Initialisierungsfehler,IHKA-G11
+80113C,Motor Luftverteilung rechts: Blockierung,Engine Luftverteilung right: Blockierung,IHKA-G11
+80113D,Motor Luftverteilung rechts: interner Motorfehler,Engine Luftverteilung right: internal engine fault,IHKA-G11
+80113E,Motor Luftverteilung rechts: Initialisierungsfehler,Engine Luftverteilung right: Initialisierungsfehler,IHKA-G11
+80113F,Motor Zentralantrieb: Blockierung,Engine Zentralantrieb: Blockierung,IHKA-G11
+801140,Motor Zentralantrieb: interner Motorfehler,Engine Zentralantrieb: internal engine fault,IHKA-G11
+801141,Motor Zentralantrieb: Initialisierungsfehler,Engine Zentralantrieb: Initialisierungsfehler,IHKA-G11
+80115E,Autoadressierung (LIN): Autoadressierung fehlgeschlagen,Autoadressierung (LIN): Autoadressierung fehlgeschlagen,IHKA-G11
+80115F,Mischverbau: Klappenmotoren von verschiedenen Hersteller erkannt,Mischverbau: flap engine of verschiedenen manufacturer detected,IHKA-G11
+801160,Verdampfertemperatursensor: Kurzschluss nach Minus,Verdampfertemperatursensor: short circuit to Minus,IHKA-G11
+801161,Verdampfertemperatursensor: Kurzschluss nach Plus oder Unterbrechung,Verdampfertemperatursensor: short circuit to positive or interruption,IHKA-G11
+801162,Verdampfertemperatursensor: Oberhalb des gültigen Wertebereiches,Verdampfertemperatursensor: above of the valid values range,IHKA-G11
+801163,Verdampfertemperatursensor: Plausibilität,Verdampfertemperatursensor: plausibility,IHKA-G11
+801164,Verdampfertemperatursensor: Unterhalb des gültigen Wertebereiches,Verdampfertemperatursensor: below of the valid values range,IHKA-G11
+801168,Belüftungstemperatursensor links oder Belüftungstemperatursensor: Kurzschluss nach Minus,Belüftungstemperatursensor left or Belüftungstemperatursensor: short circuit to Minus,IHKA-G11
+801169,Belüftungstemperatursensor links oder Belüftungstemperatursensor: Kurzschluss nach Plus oder Unterbrechung,Belüftungstemperatursensor left or Belüftungstemperatursensor: short circuit to positive or interruption,IHKA-G11
+80116A,Belüftungstemperatursensor rechts: Kurzschluss nach Minus,Belüftungstemperatursensor right: short circuit to Minus,IHKA-G11
+80116B,Belüftungstemperatursensor rechts: Kurzschluss nach Plus oder Unterbrechung,Belüftungstemperatursensor right: short circuit to positive or interruption,IHKA-G11
+80116C,Fussraumtemperatursensor links oder Fussraumtemperatursensor: Kurzschluss nach Minus,Fussraumtemperatursensor left or Fussraumtemperatursensor: short circuit to Minus,IHKA-G11
+80116D,Fussraumtemperatursensor links oder Fussraumtemperatursensor: Kurzschluss nach Plus oder Unterbrechung,Fussraumtemperatursensor left or Fussraumtemperatursensor: short circuit to positive or interruption,IHKA-G11
+80116E,Fussraumtemperatursensor rechts: Kurzschluss nach Minus,Fussraumtemperatursensor right: short circuit to Minus,IHKA-G11
+80116F,Fussraumtemperatursensor rechts: Kurzschluss nach Plus oder Unterbrechung,Fussraumtemperatursensor right: short circuit to positive or interruption,IHKA-G11
+801170,Belüftungstemperatursensor hinten: Kurzschluss nach Masse,Belüftungstemperatursensor rear: short circuit to ground,IHKA-G11
+801171,Belüftungstemperatursensor hinten: Kurzschluss nach Plus oder Unterbrechung,Belüftungstemperatursensor rear: short circuit to positive or interruption,IHKA-G11
+801172,Fussraumtemperatursensor hinten: Kurzschluss nach Masse,Fussraumtemperatursensor rear: short circuit to ground,IHKA-G11
+801173,Fussraumtemperatursensor hinten: Kurzschluss nach Plus oder Unterbrechung,Fussraumtemperatursensor rear: short circuit to positive or interruption,IHKA-G11
+801180,BDC Drucksensor Kältemittel: Plausibilität,BDC pressure sensor Kältemittel: plausibility,IHKA-G11
+801181,BDC Drucksensor Kältemittel: Oberhalb des gültigen Wertebereiches,BDC pressure sensor Kältemittel: above of the valid values range,IHKA-G11
+801182,BDC Drucksensor Kältemittel: Unterhalb des gültigen Wertebereiches,BDC pressure sensor Kältemittel: below of the valid values range,IHKA-G11
+801183,BDC Drucksensor Kältemittel: Kurzschluss nach Masse,BDC pressure sensor Kältemittel: short circuit to ground,IHKA-G11
+801184,BDC Drucksensor Kältemittel: Kurzschluss nach Plus oder Unterbrechung,BDC pressure sensor Kältemittel: short circuit to positive or interruption,IHKA-G11
+801198,Gebläseendstufe: Interner Fehler,Blower output stage: internal error,IHKA-G11
+801199,Gebläseendstufe: Kurzschluss oder blockiert,Blower output stage: short circuit or blocked,IHKA-G11
+80119A,Gebläseendstufe: Übertemperaturbegrenzung aktiv,Blower output stage: overtemperature limitation active,IHKA-G11
+8011A0,Schichtungspotentiometer links: Kurzschluss nach Minus,Schichtungspotentiometer left: short circuit to Minus,IHKA-G11
+8011A1,Schichtungspotentiometer links: Kurzschluss nach Plus oder Unterbrechung,Schichtungspotentiometer left: short circuit to positive or interruption,IHKA-G11
+8011A2,Schichtungspotentiometer rechts: Kurzschluss nach Minus,Schichtungspotentiometer right: short circuit to Minus,IHKA-G11
+8011A3,Schichtungspotentiometer rechts: Kurzschluss nach Plus oder Unterbrechung,Schichtungspotentiometer right: short circuit to positive or interruption,IHKA-G11
+8011B8,eKMV: OBD Temperatursensor Platine 1 Kurzschluss zu Masse,eKMV: OBD temperature sensor Platine 1 short circuit to ground,IHKA-G11
+8011B9,eKMV: OBD Temperatursensor Platine 1 Kurzschluss zu Batterie,eKMV: OBD temperature sensor Platine 1 short circuit to battery,IHKA-G11
+8011BB,eKMV: OBD Temperatursensor Platine 1 oberhalb des gültigen Wertebereiches,eKMV: OBD temperature sensor Platine 1 above of the valid values range,IHKA-G11
+8011BC,eKMV: OBD Temperatursensor Platine 1 unterhalb des gültigen Wertebereiches,eKMV: OBD temperature sensor Platine 1 below of the valid values range,IHKA-G11
+8011BD,eKMV: OBD Temperatursensor Platine 1 Plausibilität,eKMV: OBD temperature sensor Platine 1 plausibility,IHKA-G11
+8011C4,eKMV: OBD HV-Spannungssensor Kurzschluss nach Minus,eKMV: OBD HV-voltage sensor short circuit to Minus,IHKA-G11
+8011C5,eKMV: OBD HV-Spannungssensor Kurzschluss nach Plus,eKMV: OBD HV-voltage sensor short circuit to positive,IHKA-G11
+8011C7,eKMV: OBD HV-Spannungssensor oberhalb des gültigen Wertebereiches,eKMV: OBD HV-voltage sensor above of the valid values range,IHKA-G11
+8011C8,eKMV: OBD HV-Spannungssensor unterhalb des gültigen Wertebereiches,eKMV: OBD HV-voltage sensor below of the valid values range,IHKA-G11
+8011C9,eKMV: OBD HV-Spannungssensor Plausibilität,eKMV: OBD HV-voltage sensor plausibility,IHKA-G11
+8011CA,eKMV: OBD Spannungssensor am Motortreiber Kurzschluss nach Minus,eKMV: OBD voltage sensor am engine driver short circuit to Minus,IHKA-G11
+8011CB,eKMV: OBD Spannungssensor am Motortreiber Kurzschluss nach Plus,eKMV: OBD voltage sensor am engine driver short circuit to positive,IHKA-G11
+8011CD,eKMV: OBD Spannungssensor am Motortreiber oberhalb des gültigen Wertebereiches,eKMV: OBD voltage sensor am engine driver above of the valid values range,IHKA-G11
+8011CE,eKMV: OBD Spannungssensor am Motortreiber unterhalb des gültigen Wertebereiches,eKMV: OBD voltage sensor am engine driver below of the valid values range,IHKA-G11
+8011D0,eKMV: OBD Stromsensor Phase 1 Kurzschluss nach Minus,eKMV: OBD current sensor Phase 1 short circuit to Minus,IHKA-G11
+8011D1,eKMV: OBD Stromsensor Phase 1 Kurzschluss nach Plus,eKMV: OBD current sensor Phase 1 short circuit to positive,IHKA-G11
+8011D3,eKMV: OBD Stromsensor Phase 1 oberhalb des gültigen Wertebereiches,eKMV: OBD current sensor Phase 1 above of the valid values range,IHKA-G11
+8011D4,eKMV: OBD Stromsensor Phase 1 unterhalb des gültigen Wertebereiches,eKMV: OBD current sensor Phase 1 below of the valid values range,IHKA-G11
+8011D5,eKMV: OBD Stromsensor Phase 1 Plausibilität,eKMV: OBD current sensor Phase 1 plausibility,IHKA-G11
+8011D6,eKMV: OBD Stromsensor Phase 2 Kurzschluss nach Minus,eKMV: OBD current sensor Phase 2 short circuit to Minus,IHKA-G11
+8011D7,eKMV: OBD Stromsensor Phase 2 Kurzschluss nach Plus,eKMV: OBD current sensor Phase 2 short circuit to positive,IHKA-G11
+8011D9,eKMV: OBD Stromsensor Phase 2 oberhalb des gültigen Wertebereiches,eKMV: OBD current sensor Phase 2 above of the valid values range,IHKA-G11
+8011DA,eKMV: OBD Stromsensor Phase 2 unterhalb des gültigen Wertebereiches,eKMV: OBD current sensor Phase 2 below of the valid values range,IHKA-G11
+8011DB,eKMV: OBD Stromsensor Phase 2 Plausibilität,eKMV: OBD current sensor Phase 2 plausibility,IHKA-G11
+8011E2,eKMV: OBD Speicherfehler RAM,eKMV: OBD memory fault RAM,IHKA-G11
+8011E3,eKMV: OBD Speicherfehler ROM,eKMV: OBD memory fault ROM,IHKA-G11
+8011E4,eKMV: OBD Speicherfehler EEPROM,eKMV: OBD memory fault EEPROM,IHKA-G11
+8011E5,eKMV: OBD Softwarefehler Laufzeitüberwachung,eKMV: OBD Softwarefehler Laufzeitüberwachung,IHKA-G11
+8011E6,eKMV: OBD Softwarefehler Watchdog,eKMV: OBD Softwarefehler Watchdog,IHKA-G11
+8011E7,eKMV: OBD Fehler Micro-Controller-Peripherie,eKMV: OBD fault Micro-Controller-Peripherie,IHKA-G11
+8011E8,eKMV: OBD Stromsensor HV-DC Kurzschluss zu Masse,eKMV: OBD current sensor HV-DC short circuit to ground,IHKA-G11
+8011E9,eKMV: OBD Stromsensor HV-DC Kurzschluss zu Batterie,eKMV: OBD current sensor HV-DC short circuit to battery,IHKA-G11
+8011EA,eKMV: OBD Stromsensor HV-DC Unterbrechung,eKMV: OBD current sensor HV-DC interruption,IHKA-G11
+8011EB,eKMV: OBD Stromsensor HV-DC oberhalb des gültigen Wertebereiches,eKMV: OBD current sensor HV-DC above of the valid values range,IHKA-G11
+8011ED,eKMV: OBD Stromsensor HV-DC Plausibilität,eKMV: OBD current sensor HV-DC plausibility,IHKA-G11
+8011F3,eKMV: OBD Funktionsprüfung eKMV,eKMV: OBD function check eKMV,IHKA-G11
+8011F4,OBDM:eKMV Kommunikationsfehler Diagnose-Statusnachricht,OBDM:eKMV communication error diagnosis-status message,IHKA-G11
+8011F5,OBDM:eKMV Timeout OBD Diagnosebotschaft,OBDM:eKMV timeout OBD diagnosis message,IHKA-G11
+8011F6,OBDM:eKMV OBD Diagnosebotschaft - Alive Counter Fehler,OBDM:eKMV OBD diagnosis message - alive Counter fault,IHKA-G11
+801208,Kompressor: Abschaltung wegen fehlender DME-Freigabe,Kompressor: shutdown due to missing DME-enable,IHKA-G11
+801209,Kompressor: Abschaltung wegen funktionsbedingter Randbedingungen,Kompressor: shutdown due to funktionsbedingter Randbedingungen,IHKA-G11
+80120A,Kompressor: Abschaltung wegen Überdruck im Kältemittelkreislauf,Kompressor: shutdown due to Überdruck in the Kältemittelkreislauf,IHKA-G11
+80120B,Kompressor: Abschaltung wegen Unterdruck im Kältemittelkreislauf,Kompressor: shutdown due to Unterdruck in the Kältemittelkreislauf,IHKA-G11
+80120C,eKMV: Abschaltung wegen Elektronikfehler,eKMV: shutdown due to Elektronikfehler,IHKA-G11
+80120E,eKMV: Abschaltung wegen Über- oder Unterspannung HV-Versorgung,eKMV: shutdown due to via- or undervoltage HV-supply,IHKA-G11
+80120F,eKMV: Abschaltung wegen kritischer Übertemperatur Umrichter,eKMV: shutdown due to kritischer overtemperature Umrichter,IHKA-G11
+801210,eKMV: Abschaltung wegen Fehler im Kältemittelabsperrventil Klima,eKMV: shutdown due to fault in the Kältemittelabsperrventil climate,IHKA-G11
+801211,eKMV: Abschaltung wegen Fehler im Kältemittelabsperrventil Hochvoltspeicher,eKMV: shutdown due to fault in the Kältemittelabsperrventil high-voltage memory,IHKA-G11
+801212,eKMV: Abschaltung wegen Anlaufprobleme,eKMV: shutdown due to Anlaufprobleme,IHKA-G11
+801213,eKMV: Leistungsreduzierung vom Kühl- oder Heizbetrieb durch Powermanagement,eKMV: power reduction vom cooling- or Heizbetrieb by power management,IHKA-G11
+801228,IHKA Bedienteil: Interner Fehler,IHKA control panel: internal error,IHKA-G11
+801229,IHKA Bedienteil: Falsche Variante verbaut,IHKA control panel: incorrect variant verbaut,IHKA-G11
 801230,Fahrzeug Security Client Security Modul: interner Fehler,Vehicle Security Client Security module: internal error,DME; DME-slave
+801231,Ionisator: Emmitent(en) nicht gesteckt,Ionisator: Emmitent(en) not gesteckt,IHKA-G11
+801238,Bedufter: Interner Modulfehler,Bedufter: internal module fault,IHKA-G11
+801240,PTC-Modul vorn: Kurzschluss im Heizstrang,PTC-module vorn: short circuit in the Heizstrang,IHKA-G11
+801242,PTC-Modul vorn: Übertemperatur,PTC-module vorn: overtemperature,IHKA-G11
+801244,PTC-Modul vorn: Unter- oder Überspannung,PTC-module vorn: under- or overvoltage,IHKA-G11
+801246,PTC-Modul vorn: Unterbrechung im Heizstrang,PTC-module vorn: interruption in the Heizstrang,IHKA-G11
+801249,eDH: interner eDH-Fehler,eDH: internal eDH-fault,IHKA-G11
+80124A,eDH: LIN-Timeout,eDH: LIN-timeout,IHKA-G11
+80124B,eDH: HV-Spannungssensor über Betriebsbereich,eDH: HV-voltage sensor via operation range,IHKA-G11
+80124C,eDH: HV-Spannungssensor unter Betriebsbereich,eDH: HV-voltage sensor under operation range,IHKA-G11
+80124D,eDH: Degradation,eDH: Degradation,IHKA-G11
+80124E,eDH: Verriegelung wg. Systemfehler Kühlmittelfluss,eDH: locking wg. system fault Kühlmittelfluss,IHKA-G11
+80124F,eDH: Niederspannungsfehler/unplausible Prozessorkommunikation,eDH: low voltage fault/unplausible processor communication,IHKA-G11
+801250,eDH: Temperaturfühler Kühlmittel Kurzschluss/Leitungsunterbrechung,eDH: Temperaturfühler coolant short circuit/open circuit,IHKA-G11
+801252,eDH: Temperaturfühler Platine Kurzschluss/Leitungsunterbrechung,eDH: Temperaturfühler Platine short circuit/open circuit,IHKA-G11
+801253,eDH: Temperaturfühler Platine ausserhalb Betriebsbereich,eDH: Temperaturfühler Platine outside operation range,IHKA-G11
+801254,eDH: OBD Temperaturfühler Platine - Plausibilitätsfehler,eDH: OBD Temperaturfühler Platine - plausibility fault,IHKA-G11
+801255,eDH: OBD Funktionsprüfung eDH,eDH: OBD function check eDH,IHKA-G11
+801256,eDH: OBD Temperaturfühler Kühlmittel - Kurzschluss nach Minus,eDH: OBD Temperaturfühler coolant - short circuit to Minus,IHKA-G11
+801257,eDH: OBD Temperaturfühler Kühlmittel - Kurzschluss nach Plus,eDH: OBD Temperaturfühler coolant - short circuit to positive,IHKA-G11
+801258,eDH: OBD Temperaturfühler Kühlmittel - Leitungsunterbrechung,eDH: OBD Temperaturfühler coolant - open circuit,IHKA-G11
+801259,eDH: OBD Temperaturfühler Kühlmittel - oberhalb des spezifizierten Betriebsbereichs,eDH: OBD Temperaturfühler coolant - above of the spezifizierten operation range,IHKA-G11
+80125A,eDH: OBD Temperaturfühler Kühlmittel - unterhalb des spezifizierten Betriebsbereichs,eDH: OBD Temperaturfühler coolant - below of the spezifizierten operation range,IHKA-G11
+80125B,eDH: OBD Temperaturfühler Kühlmittel - Plausibilitätsfehler,eDH: OBD Temperaturfühler coolant - plausibility fault,IHKA-G11
+80125C,eDH: OBD Temperaturfühler Platine - Kurzschluss nach Minus,eDH: OBD Temperaturfühler Platine - short circuit to Minus,IHKA-G11
+80125D,eDH: OBD Temperaturfühler Platine - Kurzschluss nach Plus,eDH: OBD Temperaturfühler Platine - short circuit to positive,IHKA-G11
+80125F,eDH: OBD Temperaturfühler Platine - oberhalb des spezifizierten Betriebsbereichs,eDH: OBD Temperaturfühler Platine - above of the spezifizierten operation range,IHKA-G11
+801260,eDH: OBD Temperaturfühler Platine - unterhalb des spezifizierten Betriebsbereichs,eDH: OBD Temperaturfühler Platine - below of the spezifizierten operation range,IHKA-G11
+801263,eDH: OBD Speicherfehler RAM,eDH: OBD memory fault RAM,IHKA-G11
+801264,eDH: OBD Speicherfehler ROM,eDH: OBD memory fault ROM,IHKA-G11
+801265,eDH: OBD Speicherfehler EEPROM,eDH: OBD memory fault EEPROM,IHKA-G11
+801266,eDH: OBD Softwarefehler Laufzeitüberwachung,eDH: OBD Softwarefehler Laufzeitüberwachung,IHKA-G11
+801267,eDH: OBD Softwarefehler Watchdog,eDH: OBD Softwarefehler Watchdog,IHKA-G11
+801268,eDH: OBD Fehler in der Micro-Controller-Peripherie,eDH: OBD fault in the Micro-Controller-Peripherie,IHKA-G11
+801269,eDH: OBD Spannungssensor zwischen Mosfets Kanal 1 - Kurzschluss nach Minus,eDH: OBD voltage sensor between Mosfets channel 1 - short circuit to Minus,IHKA-G11
+80126A,eDH: OBD Spannungssensor zwischen Mosfets Kanal 1 - Kurzschluss nach Plus,eDH: OBD voltage sensor between Mosfets channel 1 - short circuit to positive,IHKA-G11
+80126E,eDH: OBD Spannungssensor zwischen Mosfets Kanal 1 - Plausibilitätsfehler,eDH: OBD voltage sensor between Mosfets channel 1 - plausibility fault,IHKA-G11
+80126F,eDH: OBD Spannungssensor zwischen Mosfets Kanal 2 - Kurzschluss nach Minus,eDH: OBD voltage sensor between Mosfets channel 2 - short circuit to Minus,IHKA-G11
+801270,eDH: OBD Spannungssensor zwischen Mosfets Kanal 2 - Kurzschluss nach Plus,eDH: OBD voltage sensor between Mosfets channel 2 - short circuit to positive,IHKA-G11
+801274,eDH: OBD Spannungssensor zwischen Mosfets Kanal 2 - Plausibilitätsfehler,eDH: OBD voltage sensor between Mosfets channel 2 - plausibility fault,IHKA-G11
+801275,eDH: OBD Spannungssensor zwischen Mosfets Kanal 3 - Kurzschluss nach Minus,eDH: OBD voltage sensor between Mosfets channel 3 - short circuit to Minus,IHKA-G11
+801276,eDH: OBD Spannungssensor zwischen Mosfets Kanal 3 - Kurzschluss nach Plus,eDH: OBD voltage sensor between Mosfets channel 3 - short circuit to positive,IHKA-G11
+80127A,eDH: OBD Spannungssensor zwischen Mosfets Kanal 3 - Plausibilitätsfehler,eDH: OBD voltage sensor between Mosfets channel 3 - plausibility fault,IHKA-G11
+80127B,eDH: OBD Stromsensor 1  Kurzschluss nach Minus,eDH: OBD current sensor 1  short circuit to Minus,IHKA-G11
+80127C,eDH: OBD Stromsensor 1 Kurzschluss nach Plus,eDH: OBD current sensor 1 short circuit to positive,IHKA-G11
+801280,eDH: OBD Stromsensor 1  Plausibilitätsfehler,eDH: OBD current sensor 1  plausibility fault,IHKA-G11
+801281,eDH: OBD Stromsensor 2 Kurzschluss nach Minus,eDH: OBD current sensor 2 short circuit to Minus,IHKA-G11
+801282,eDH: OBD Stromsensor 2 Kurzschluss nach Plus,eDH: OBD current sensor 2 short circuit to positive,IHKA-G11
+801286,eDH: OBD Stromsensor 2 Plausibilitätsfehler,eDH: OBD current sensor 2 plausibility fault,IHKA-G11
+801287,eDH: OBD Stromsensor 3 Kurzschluss nach Minus,eDH: OBD current sensor 3 short circuit to Minus,IHKA-G11
+801288,eDH: OBD Stromsensor 3 Kurzschluss nach Plus,eDH: OBD current sensor 3 short circuit to positive,IHKA-G11
+80128C,eDH: OBD Stromsensor 3 Plausibilitätsfehler,eDH: OBD current sensor 3 plausibility fault,IHKA-G11
+80128D,eDH: OBD Spannungssensor oberhalb Mosfets 1 - Kurzschluss nach Minus,eDH: OBD voltage sensor above Mosfets 1 - short circuit to Minus,IHKA-G11
+80128E,eDH: OBD Spannungssensor oberhalb Mosfets 1 - Kurzschluss nach Plus,eDH: OBD voltage sensor above Mosfets 1 - short circuit to positive,IHKA-G11
+801292,eDH: OBD Spannungssensor oberhalb Mosfets 1 - Plausibilität,eDH: OBD voltage sensor above Mosfets 1 - plausibility,IHKA-G11
+801293,eDH: OBD Spannungssensor oberhalb Mosfets 2 - Kurzschluss nach Minus,eDH: OBD voltage sensor above Mosfets 2 - short circuit to Minus,IHKA-G11
+801294,eDH: OBD Spannungssensor oberhalb Mosfets 2 - Kurzschluss nach Plus,eDH: OBD voltage sensor above Mosfets 2 - short circuit to positive,IHKA-G11
+801298,eDH: OBD Spannungssensor oberhalb Mosfets 2 - Plausibilität,eDH: OBD voltage sensor above Mosfets 2 - plausibility,IHKA-G11
+801299,eDH: OBD Spannungssensor oberhalb Mosfets 3 - Kurzschluss nach Minus,eDH: OBD voltage sensor above Mosfets 3 - short circuit to Minus,IHKA-G11
+80129A,eDH: OBD Spannungssensor oberhalb Mosfets 3 - Kurzschluss nach Plus,eDH: OBD voltage sensor above Mosfets 3 - short circuit to positive,IHKA-G11
+80129E,eDH: OBD Spannungssensor oberhalb Mosfets 3 - Plausibilität,eDH: OBD voltage sensor above Mosfets 3 - plausibility,IHKA-G11
+80129F,eDH: OBD HV Spannungssensor Kurzschluss nach Minus,eDH: OBD HV voltage sensor short circuit to Minus,IHKA-G11
+8012A0,eDH: OBD HV Spannungssensor Kurzschluss nach Plus,eDH: OBD HV voltage sensor short circuit to positive,IHKA-G11
+8012A2,eDH: OBD HV-Spannungssensor - über Betriebsbereich,eDH: OBD HV-voltage sensor - via operation range,IHKA-G11
+8012A3,eDH: OBD HV-Spannungssensor - unter Betriebsbereich,eDH: OBD HV-voltage sensor - under operation range,IHKA-G11
+8012A4,eDH: OBD HV Spannungssensor Plausibilitätsfehler,eDH: OBD HV voltage sensor plausibility fault,IHKA-G11
+8012A5,OBDM:eDH Kommunikationsfehler Diagnose-Statusnachricht,OBDM:eDH communication error diagnosis-status message,IHKA-G11
+8012A6,OBDM:eDH Timeout OBD Diagnosebotschaft,OBDM:eDH timeout OBD diagnosis message,IHKA-G11
+8012A7,OBDM:eDH OBD Diagnosebotschaft - Alive Counter Fehler,OBDM:eDH OBD diagnosis message - alive Counter fault,IHKA-G11
+801308,AC-LIN Spannungsversorgung: Kurzschluss nach Masse,AC-LIN power supply: short circuit to ground,IHKA-G11
+801309,AC-LIN Spannungsversorgung: Kurzschluss nach Plus oder Unterbrechung,AC-LIN power supply: short circuit to positive or interruption,IHKA-G11
+80130A,Keine Kommunikation über AC-LIN möglich,No communication via AC-LIN möglich,IHKA-G11
+80130B,Keine Kommunikation über AC-LIN2 möglich,No communication via AC-LIN2 möglich,IHKA-G11
+80130D,Keine Kommunikation über K-LIN möglich,No communication via K-LIN möglich,IHKA-G11
+801310,Interner Steuergerätefehler,Internal Steuergerätefehler,IHKA-G11
+801318,IHKA: 12V Unterspannung erkannt. (OBD-relevant für Hybridfahrzeuge.),IHKA: 12V undervoltage detected. (OBD-relevant for hybrid vehicle.),IHKA-G11
+801319,IHKA: 12V Überspannung erkannt. (OBD-relevant für Hybridfahrzeuge.),IHKA: 12V overvoltage detected. (OBD-relevant for hybrid vehicle.),IHKA-G11
+80131A,IHKA: 12V Spannungssensor Kurzschluss nach Masse oder Leitungsunterbrechung. (OBD-relevant für Hybridfahrzeuge.),IHKA: 12V voltage sensor short to ground or open circuit. (OBD-relevant for hybrid vehicle.),IHKA-G11
+80131C,IHKA: 12V Spannungssensor Plausibilität. (OBD-relevant für Hybridfahrzeuge.),IHKA: 12V voltage sensor plausibility. (OBD-relevant for hybrid vehicle.),IHKA-G11
+801328,Standklimatisierung: Abbruch wegen Fehler im eKMV,Standklimatisierung: abort due to fault in the eKMV,IHKA-G11
+801329,"Standklimatisierung: Abbruch, Verhinderung wegen Niedervolt-Powermanagement (Verbraucherabschaltung)","Standklimatisierung: abort, Verhinderung due to Niedervolt-power management (consumer shutdown)",IHKA-G11
+80132A,Standklimatisierung: Abbruch oder Einschaltverhinderung wegen Hochvoltpowermanagement (HVPM),Standklimatisierung: abort or Einschaltverhinderung due to high-voltage power management (HVPM),IHKA-G11
+80132B,Standklimatisierung: Abbruch wegen Fehler im eDH,Standklimatisierung: abort due to fault in the eDH,IHKA-G11
+80132D,Standklimatisierung: Abbruch wegen Fehler am Kältemittelabsperrventil,Standklimatisierung: abort due to fault am Kältemittelabsperrventil,IHKA-G11
+80132E,Standklimatisierung: Funktionsabschaltung - Maximale Laufzeit erreicht ODER Voraussetzungen nicht mehr erfüllt,Standklimatisierung: function shutdown - maximum Laufzeit erreicht ODER Voraussetzungen not mehr met,IHKA-G11
 801330,Fahrzeug Security Client Security Modul 2: interner Fehler,Vehicle Security Client Security module 2: internal error,DME; DME-slave
+801338,Heizung dritte Sitzreihe: Interner Komponentenfehler,Heating dritte Sitzreihe: internal component fault,IHKA-G11
+801339,"Heizung dritte Sitzreihe, PTC-Modul: Unterbrechung","Heating dritte Sitzreihe, PTC-module: interruption",IHKA-G11
+80133A,"Heizung dritte Sitzreihe, PTC-Modul: Kurzschluss","Heating dritte Sitzreihe, PTC-module: short circuit",IHKA-G11
+80133B,"Heizung dritte Sitzreihe, Gebläse: Kurzschluss","Heating dritte Sitzreihe, blower: short circuit",IHKA-G11
+80133C,"Heizung dritte Sitzreihe, Gebläse: Unterbrechung","Heating dritte Sitzreihe, blower: interruption",IHKA-G11
+801340,SenseTouch links: interner Komponentenfehler,SenseTouch left: internal component fault,IHKA-G11
+801341,SenseTouch rechts: interner Komponentenfehler,SenseTouch right: internal component fault,IHKA-G11
+801348,Belüftungstemperatursensor hinten links: Kurzschluss nach Masse,Belüftungstemperatursensor rear left: short circuit to ground,IHKA-G11
+801349,Belüftungstemperatursensor hinten links: Kurzschluss nach Plus oder Unterbrechung,Belüftungstemperatursensor rear left: short circuit to positive or interruption,IHKA-G11
+80134A,Belüftungstemperatursensor hinten rechts: Kurzschluss nach Masse,Belüftungstemperatursensor rear right: short circuit to ground,IHKA-G11
+80134B,Belüftungstemperatursensor hinten rechts: Kurzschluss nach Plus oder Unterbrechung,Belüftungstemperatursensor rear right: short circuit to positive or interruption,IHKA-G11
+80134C,Fussraumtemperatursensor hinten links: Kurzschluss nach Masse,Fussraumtemperatursensor rear left: short circuit to ground,IHKA-G11
+80134D,Fussraumtemperatursensor hinten links: Kurzschluss nach Plus oder Unterbrechung,Fussraumtemperatursensor rear left: short circuit to positive or interruption,IHKA-G11
+80134E,Fussraumtemperatursensor hinten rechts: Kurzschluss nach Masse,Fussraumtemperatursensor rear right: short circuit to ground,IHKA-G11
+80134F,Fussraumtemperatursensor hinten rechts: Kurzschluss nach Plus oder Unterbrechung,Fussraumtemperatursensor rear right: short circuit to positive or interruption,IHKA-G11
+801358,"Gebläseendstufe, PWM-Signalleitung: Kurzschluss nach Masse oder Unterbrechung","Blower output stage, PWM-signal line: short circuit to ground or interruption",IHKA-G11
+801359,"Gebläseendstufe, PWM-Signalleitung: Kurzschluss nach Plus","Blower output stage, PWM-signal line: short circuit to positive",IHKA-G11
+801368,FKA Bedienteil: Interner Fehler,FKA control panel: internal error,IHKA-G11
+801369,FKA Bedienteil: Falsche Variante verbaut,FKA control panel: incorrect variant verbaut,IHKA-G11
+801390,"Standheizgerät, Brennluftgebläse: Blockierschutz","Standheizgerät, combustion air blower: Blockierschutz",IHKA-G11
+801391,"Standheizgerät, Wasserpumpe: Kurzschluß nach Plus oder Unterbrechung","Standheizgerät, water pump: short circuit to positive or interruption",IHKA-G11
+801392,"Standheizgerät, Wasserpumpe: Kurzschluß nach Masse","Standheizgerät, water pump: short circuit to ground",IHKA-G11
+801393,"Standheizgerät, Umschaltventil: Kurzschluß nach Plus oder Unterbrechung","Standheizgerät, Umschaltventil: short circuit to positive or interruption",IHKA-G11
+801394,"Standheizgerät, Umschaltventil: Kurzschluß nach Masse","Standheizgerät, Umschaltventil: short circuit to ground",IHKA-G11
+801395,"Standheizgerät, Dosierpumpe: Kurschluß nach Plus oder Unterbrechung","Standheizgerät, metering pump: Kurschluß to Plus or interruption",IHKA-G11
+801396,"Standheizgerät, Dosierpumpe: Kurzschluß nach Masse","Standheizgerät, metering pump: short circuit to ground",IHKA-G11
+801397,Standheizgerät: Überspannung erkannt,Standheizgerät: overvoltage detected,IHKA-G11
+801398,Standheizgerät: Unterspannung erkannt,Standheizgerät: undervoltage detected,IHKA-G11
+801399,Standheizgerät: Überhitzung (Heizgerät verriegelt),Standheizgerät: Überhitzung (Heizgerät locked),IHKA-G11
+80139A,Standheizgerät: Heizgerät verriegelt,Standheizgerät: Heizgerät locked,IHKA-G11
+80139B,Standheizgerät: Flammabbruch,Standheizgerät: Flammabbruch,IHKA-G11
+80139C,Standheizgerät: Flammabbruch - wiederholter Abbruch im Heizzyklus,Standheizgerät: Flammabbruch - wiederholter abort in the Heizzyklus,IHKA-G11
+80139D,Standheizgerät: Flamme - kein Start,Standheizgerät: Flamme - no start,IHKA-G11
+80139E,Standheizgerät: LIN-Kommunikation - Bit Error,Standheizgerät: LIN-communication - Bit Error,IHKA-G11
+80139F,Standheizgerät: LIN-Kommunikation - Signal mit Ungültigkeitssignatur,Standheizgerät: LIN-communication - signal with Ungültigkeitssignatur,IHKA-G11
+8013A0,Standheizgerät: Überschreitung der max. Heizzeitvorgabe,Standheizgerät: Überschreitung the max. Heizzeitvorgabe,IHKA-G11
+8013A2,Standheizgerät: Systembedingte Abschaltung - Tankreserve erreicht,Standheizgerät: Systembedingte shutdown - Tankreserve erreicht,IHKA-G11
+8013A3,Standheizgerät: Unzureichender Kühlmitteldurchfluss  (Heizwasserkreislauf),Standheizgerät: Unzureichender Kühlmitteldurchfluss  (Heizwasserkreislauf),IHKA-G11
+8013A4,Standheizgerät: Falsches Heizgerät (Kraftstoffvariante) verbaut,Standheizgerät: incorrect Heizgerät (fuel variant) verbaut,IHKA-G11
+8013A5,"Standheizgerät: Interner Fehler (Sensoren, Aktoren, Elektronik)","Standheizgerät: internal error (sensor, Aktoren, Elektronik)",IHKA-G11
+8013FA,Micro-Controller Peripherie Fehler (IHKA),Micro-Controller Peripherie fault (IHKA),IHKA-G11
+8013FB,RAM Speicher Fehler (IHKA),RAM memory fault (IHKA),IHKA-G11
+8013FC,ROM/Flash Speicher Fehler (IHKA),ROM/Flash memory fault (IHKA),IHKA-G11
+8013FD,EEPROM Speicher Fehler (IHKA),EEPROM memory fault (IHKA),IHKA-G11
+8013FE,Software Laufzeitfehler (IHKA),Software Laufzeitfehler (IHKA),IHKA-G11
+8013FF,Software Watchdogfehler (IHKA),Software Watchdogfehler (IHKA),IHKA-G11
 801C00,VcmErrorWriteVcmData - Schreibfehler: Schreibzugriff auf VCM-Daten,VcmErrorWriteVcmData - Schreibfehler: Schreibzugriff on VCM-data,ZGW; ZGW-SP18
 801C02,VcmErrorNoTasResponse - Testerassistent ist beschäftigt oder antwortet nicht,VcmErrorNoTasResponse - Testerassistent is busy or antwortet not,ZGW
 801C03,Signaturprüfung: Fehlerhafte Signatur beim Schreiben eines Datums,Signaturprüfung: faulty Signatur during Schreiben of a Datums,ZGW-SP18
@@ -6595,6 +7181,92 @@ CF3A61,"Signal (Fahrer Verfügbarkeit Schnell, 0x8F) ungültig, Empfänger EGS, 
 CF3A91,"Signal (OBD Modellwert Last Motor, 0x397) ungültig, Sender DME","Signal (OBD Modellwert load engine, 0x397) invalid, sender DME",GSZFB1
 CF3AA1,"Signal (OBD Position Drosselklappe Motor, 0x397) ungültig, Sender DME","Signal (OBD position throttle valve engine, 0x397) invalid, sender DME",GSZFB1
 CF3CB1,"Signal (Temperatur Motor Antrieb, 0x3F9) ungültig, Sender DME","Signal (temperature engine drive, 0x3F9) invalid, sender DME",GSZFB1
+CF441F,FLEXRAY Physikalischer Busfehler,FLEXRAY physical bus fault,LMV-G11
+CF4420,FLEXRAY controller error,FLEXRAY controller error,LMV-G11
+CF4487,FLEXRAY StartUpFailed,FLEXRAY StartUpFailed,LMV-G11
+CF4BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,LMV-G11
+CF5400,"Botschaft (Drehmoment Kurbelwelle 1 / Winkel Fahrpedal, 40.1.4) fehlt, Empfänger LMV, Sender DME","Message (torque crankshaft 1 / angle Fahrpedal, 40.1.4) missing, receiver LMV, sender DME",LMV-G11
+CF5401,"Botschaft (Drehmoment Kurbelwelle 1, 40.1.4) Prüfsumme falsch, Empfänger LMV, Sender DME","Message (torque crankshaft 1, 40.1.4) checksum incorrect, receiver LMV, sender DME",LMV-G11
+CF5402,"Botschaft (Drehmoment Kurbelwelle 1, 40.1.4) nicht aktuell, Empfänger LMV, Sender DME","Message (torque crankshaft 1, 40.1.4) not current, receiver LMV, sender DME",LMV-G11
+CF5403,"Signal (Drehmoment Kurbelwelle 1, 40.1.4) ungültig, Empfänger LMV, Sender DME","Signal (torque crankshaft 1, 40.1.4) invalid, receiver LMV, sender DME",LMV-G11
+CF5404,"Signal (Drehmoment Kurbelwelle 1, 40.1.4) undefiniert, Empfänger LMV, Sender DME","Signal (torque crankshaft 1, 40.1.4) undefiniert, receiver LMV, sender DME",LMV-G11
+CF5408,"Botschaft (Winkel Fahrpedal, 40.1.4) Prüfsumme falsch, Empfänger LMV, Sender DME","Message (angle Fahrpedal, 40.1.4) checksum incorrect, receiver LMV, sender DME",LMV-G11
+CF5409,"Botschaft (Winkel Fahrpedal, 40.1.4) nicht aktuell, Empfänger LMV, Sender DME","Message (angle Fahrpedal, 40.1.4) not current, receiver LMV, sender DME",LMV-G11
+CF540A,"Signal (Winkel Fahrpedal, 40.1.4) ungültig, Empfänger LMV, Sender DME","Signal (angle Fahrpedal, 40.1.4) invalid, receiver LMV, sender DME",LMV-G11
+CF540B,"Signal (Winkel Fahrpedal, 40.1.4) undefiniert, Empfänger LMV, Sender DME","Signal (angle Fahrpedal, 40.1.4) undefiniert, receiver LMV, sender DME",LMV-G11
+CF5410,"Botschaft (Radmoment Antrieb 4, 40.3.4) fehlt, Empfänger LMV, Sender DME","Message (wheel torque drive 4, 40.3.4) missing, receiver LMV, sender DME",LMV-G11
+CF5411,"Botschaft (Radmoment Antrieb 4, 40.3.4) Prüfsumme falsch, Empfänger LMV, Sender DME","Message (wheel torque drive 4, 40.3.4) checksum incorrect, receiver LMV, sender DME",LMV-G11
+CF5412,"Botschaft (Radmoment Antrieb 4, 40.3.4) nicht aktuell, Empfänger LMV, Sender DME","Message (wheel torque drive 4, 40.3.4) not current, receiver LMV, sender DME",LMV-G11
+CF5413,"Signal (Radmoment Antrieb 4, 40.3.4) ungültig, Empfänger LMV, Sender DME","Signal (wheel torque drive 4, 40.3.4) invalid, receiver LMV, sender DME",LMV-G11
+CF5414,"Signal (Radmoment Antrieb 4, 40.3.4) undefiniert, Empfänger LMV, Sender DME","Signal (wheel torque drive 4, 40.3.4) undefiniert, receiver LMV, sender DME",LMV-G11
+CF5420,"Botschaft (Radmoment Antrieb 9, 41.1.2) fehlt, Empfänger LMV, Sender DME","Message (wheel torque drive 9, 41.1.2) missing, receiver LMV, sender DME",LMV-G11
+CF5421,"Botschaft (Radmoment Antrieb 9, 41.1.2) Prüfsumme falsch, Empfänger LMV, Sender DME","Message (wheel torque drive 9, 41.1.2) checksum incorrect, receiver LMV, sender DME",LMV-G11
+CF5422,"Botschaft (Radmoment Antrieb 9, 41.1.2) nicht aktuell, Empfänger LMV, Sender DME","Message (wheel torque drive 9, 41.1.2) not current, receiver LMV, sender DME",LMV-G11
+CF5423,"Signal (Radmoment Antrieb 9, 41.1.2) ungültig, Empfänger LMV, Sender DME","Signal (wheel torque drive 9, 41.1.2) invalid, receiver LMV, sender DME",LMV-G11
+CF5424,"Signal (Radmoment Antrieb 9, 41.1.2) undefiniert, Empfänger LMV, Sender DME","Signal (wheel torque drive 9, 41.1.2) undefiniert, receiver LMV, sender DME",LMV-G11
+CF5430,"Botschaft (Ist Bremsmoment Summe / Status Parametrisierung I-Brake, 43.3.4) fehlt, Empfänger LMV, Sender DSC","Message (is Bremsmoment sum / status Parametrisierung I-Brake, 43.3.4) missing, receiver LMV, sender DSC",LMV-G11
+CF5431,"Botschaft (Ist Bremsmoment Summe, 43.3.4) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (is Bremsmoment sum, 43.3.4) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5432,"Botschaft (Ist Bremsmoment Summe, 43.3.4) nicht aktuell, Empfänger LMV, Sender DSC","Message (is Bremsmoment sum, 43.3.4) not current, receiver LMV, sender DSC",LMV-G11
+CF5433,"Signal (Ist Bremsmoment Summe, 43.3.4) ungültig, Empfänger LMV, Sender DSC","Signal (is Bremsmoment sum, 43.3.4) invalid, receiver LMV, sender DSC",LMV-G11
+CF5434,"Signal (Ist Bremsmoment Summe, 43.3.4) undefiniert, Empfänger LMV, Sender DSC","Signal (is Bremsmoment sum, 43.3.4) undefiniert, receiver LMV, sender DSC",LMV-G11
+CF5440,"Botschaft (Ist Drehzahl Rad, 46.0.1) fehlt, Empfänger LMV, Sender DSC","Message (is speed wheel, 46.0.1) missing, receiver LMV, sender DSC",LMV-G11
+CF5441,"Botschaft (Ist Drehzahl Rad, 46.0.1) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (is speed wheel, 46.0.1) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5442,"Botschaft (Ist Drehzahl Rad, 46.0.1) nicht aktuell, Empfänger LMV, Sender DSC","Message (is speed wheel, 46.0.1) not current, receiver LMV, sender DSC",LMV-G11
+CF5443,"Signal (Ist Drehzahl Rad, 46.0.1) ungültig Ist_Drehzahl_Rad, Empfänger LMV, Sender DSC","Signal (is speed wheel, 46.0.1) invalid Ist_Drehzahl_Rad, receiver LMV, sender DSC",LMV-G11
+CF5444,"Signal (Ist Drehzahl Rad, 46.0.1) undefiniert Ist_Drehzahl_Rad_HL, Empfänger LMV, Sender DSC","Signal (is speed wheel, 46.0.1) undefiniert Ist_Drehzahl_Rad_HL, receiver LMV, sender DSC",LMV-G11
+CF5450,"Botschaft (Status Stabilisierung DSC / Status Stabilisierung DSC 2, 47.1.2) fehlt, Empfänger LMV, Sender DSC","Message (status stabilization DSC / status stabilization DSC 2, 47.1.2) missing, receiver LMV, sender DSC",LMV-G11
+CF5451,"Botschaft (Status Stabilisierung DSC, 47.1.2) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (status stabilization DSC, 47.1.2) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5452,"Botschaft (Status Stabilisierung DSC, 47.1.2) nicht aktuell, Empfänger LMV, Sender DSC","Message (status stabilization DSC, 47.1.2) not current, receiver LMV, sender DSC",LMV-G11
+CF5453,"Signal (Status Stabilisierung DSC, 47.1.2) ungültig, Sender DSC","Signal (status stabilization DSC, 47.1.2) invalid, sender DSC",LMV-G11
+CF5454,"Signal (Status Stabilisierung DSC, 47.1.2) undefiniert, Empfänger LMV, Sender DSC","Signal (status stabilization DSC, 47.1.2) undefiniert, receiver LMV, sender DSC",LMV-G11
+CF5470,"Botschaft (Geschwindigkeit Fahrzeug / Geschwindigkeit Fahrzeug 2, 55.3.4) fehlt, Empfänger LMV, Sender DSC","Message (speed vehicle / speed vehicle 2, 55.3.4) missing, receiver LMV, sender DSC",LMV-G11
+CF5471,"Botschaft (Geschwindigkeit Fahrzeug, 55.3.4) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (speed vehicle, 55.3.4) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5472,"Botschaft (Geschwindigkeit Fahrzeug, 55.3.4) nicht aktuell, Empfänger LMV, Sender DSC","Message (speed vehicle, 55.3.4) not current, receiver LMV, sender DSC",LMV-G11
+CF5473,"Signal (Geschwindigkeit Fahrzeug, 55.3.4) ungültig, Empfänger LMV, Sender DSC","Signal (speed vehicle, 55.3.4) invalid, receiver LMV, sender DSC",LMV-G11
+CF5474,"Signal (Geschwindigkeit Fahrzeug, 55.3.4) undefiniert, Empfänger LMV, Sender DSC","Signal (speed vehicle, 55.3.4) undefiniert, receiver LMV, sender DSC",LMV-G11
+CF5478,"Botschaft (Geschwindigkeit Fahrzeug 2, 55.3.4) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (speed vehicle 2, 55.3.4) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5479,"Botschaft (Geschwindigkeit Fahrzeug 2, 55.3.4) nicht aktuell, Empfänger LMV, Sender DSC","Message (speed vehicle 2, 55.3.4) not current, receiver LMV, sender DSC",LMV-G11
+CF547A,"Signal (Geschwindigkeit Fahrzeug 2, 55.3.4) ungültig, Empfänger LMV, Sender DSC","Signal (speed vehicle 2, 55.3.4) invalid, receiver LMV, sender DSC",LMV-G11
+CF547B,"Signal (Geschwindigkeit Fahrzeug 2, 55.3.4) undefiniert, Empfänger LMV, Sender DSC","Signal (speed vehicle 2, 55.3.4) undefiniert, receiver LMV, sender DSC",LMV-G11
+CF5490,"Botschaft (Neigung Fahrbahn / Lenkwinkel Vorderachse Effektiv,  56.1.2) fehlt, Empfänger LMV, Sender DSC","Message (inclination road / Lenkwinkel front axle Effektiv,  56.1.2) missing, receiver LMV, sender DSC",LMV-G11
+CF5491,"Botschaft (Lenkwinkel Vorderachse Effektiv,  56.1.2) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (Lenkwinkel front axle Effektiv,  56.1.2) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5492,"Botschaft (Lenkwinkel Vorderachse Effektiv,  56.1.2) nicht aktuell, Empfänger LMV, Sender DSC","Message (Lenkwinkel front axle Effektiv,  56.1.2) not current, receiver LMV, sender DSC",LMV-G11
+CF5493,"Signal (Lenkwinkel Vorderachse Effektiv,  56.1.2) ungültig, Empfänger LMV, Sender DSC","Signal (Lenkwinkel front axle Effektiv,  56.1.2) invalid, receiver LMV, sender DSC",LMV-G11
+CF5494,"Signal (Lenkwinkel Vorderachse Effektiv,  56.1.2) undefiniert, Empfänger LMV, Sender DSC","Signal (Lenkwinkel front axle Effektiv,  56.1.2) undefiniert, receiver LMV, sender DSC",LMV-G11
+CF54A0,"Botschaft (Soll Radmoment Antriebsstrang Stabilisierung, 64.1.2) fehlt, Empfänger LMV, Sender DSC","Message (target wheel torque drivetrain stabilization, 64.1.2) missing, receiver LMV, sender DSC",LMV-G11
+CF54A1,"Botschaft (Soll Radmoment Antriebsstrang Stabilisierung, 64.1.2) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (target wheel torque drivetrain stabilization, 64.1.2) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF54A2,"Botschaft Soll Radmoment Antriebsstrang Stabilisierung, 64.1.2) nicht aktuell, Empfänger LMV, Sender DSC","Message target wheel torque drivetrain stabilization, 64.1.2) not current, receiver LMV, sender DSC",LMV-G11
+CF54A3,"Signal (Soll Radmoment Antriebsstrang Stabilisierung, 64.1.2) ungültig, Empfänger LMV, Sender DSC","Signal (target wheel torque drivetrain stabilization, 64.1.2) invalid, receiver LMV, sender DSC",LMV-G11
+CF54A4,"Signal (Soll Radmoment Antriebsstrang Stabilisierung, 64.1.2) undefiniert, Empfänger LMV, Sender DSC","Signal (target wheel torque drivetrain stabilization, 64.1.2) undefiniert, receiver LMV, sender DSC",LMV-G11
+CF54B0,"Botschaft (Status Verbrennungsmotor, 117.0.2) fehlt, Empfänger LMV, Sender DME1","Message (status combustion engine, 117.0.2) missing, receiver LMV, sender DME1",LMV-G11
+CF54B1,"Botschaft (Status Verbrennungsmotor, 117.0.2) Prüfsumme falsch, Empfänger LMV, Sender DME1","Message (status combustion engine, 117.0.2) checksum incorrect, receiver LMV, sender DME1",LMV-G11
+CF54B2,"Botschaft (Status Verbrennungsmotor, 117.0.2) nicht aktuell, Empfänger LMV, Sender DME1","Message (status combustion engine, 117.0.2) not current, receiver LMV, sender DME1",LMV-G11
+CF54B3,"Signal (Status Verbrennungsmotor, 117.0.2) ungültig, Empfänger LMV, Sender DME1","Signal (status combustion engine, 117.0.2) invalid, receiver LMV, sender DME1",LMV-G11
+CF54B4,"Signal (Status Verbrennungsmotor, 117.0.2) undefiniert, Empfänger LMV, Sender DME1","Signal (status combustion engine, 117.0.2) undefiniert, receiver LMV, sender DME1",LMV-G11
+CF54C0,"Botschaft (Zustand Fahrzeug, 121.1.2) fehlt, Empfänger LMV, Sender BDC","Message (state vehicle, 121.1.2) missing, receiver LMV, sender BDC",LMV-G11
+CF54C1,"Botschaft (Zustand Fahrzeug, 121.1.2) Prüfsumme falsch, Empfänger LMV, Sender BDC","Message (state vehicle, 121.1.2) checksum incorrect, receiver LMV, sender BDC",LMV-G11
+CF54C2,"Botschaft (Zustand Fahrzeug, 121.1.2) nicht aktuell, Empfänger LMV, Sender BDC","Message (state vehicle, 121.1.2) not current, receiver LMV, sender BDC",LMV-G11
+CF54C3,"Signal (Zustand Fahrzeug 121.1.2) ungültig, Empfänger LMV, Sender BDC","Signal (state vehicle 121.1.2) invalid, receiver LMV, sender BDC",LMV-G11
+CF54C4,"Signal (Zustand Fahrzeug 121.1.2) undefiniert, Empfänger LMV, Sender BDC","Signal (state vehicle 121.1.2) undefiniert, receiver LMV, sender BDC",LMV-G11
+CF54D0,"Botschaft (Daten Antriebsstrang 2, 230.0.2) fehlt, Empfänger LMV, Sender DME","Message (data drivetrain 2, 230.0.2) missing, receiver LMV, sender DME",LMV-G11
+CF54D1,"Botschaft (Daten Antriebsstrang 2, 230.0.2) Prüfsumme falsch, Empfänger LMV, Sender DME","Message (data drivetrain 2, 230.0.2) checksum incorrect, receiver LMV, sender DME",LMV-G11
+CF54D2,"Botschaft (Daten Antriebsstrang 2, 230.0.2) nicht aktuell, Empfänger LMV, Sender DME","Message (data drivetrain 2, 230.0.2) not current, receiver LMV, sender DME",LMV-G11
+CF54D3,"Signal (Daten Antriebsstrang 2, 230.0.2) ungültig, Empfänger LMV, Sender DME","Signal (data drivetrain 2, 230.0.2) invalid, receiver LMV, sender DME",LMV-G11
+CF54D4,"Signal (Daten Antriebsstrang 2, 230.0.2) undefiniert, Empfänger LMV, Sender DME","Signal (data drivetrain 2, 230.0.2) undefiniert, receiver LMV, sender DME",LMV-G11
+CF5500,"Botschaft (Diagnose OBD Motor, 247.1.2) fehlt, Empfänger LMV, Sender DME","Message (diagnosis OBD engine, 247.1.2) missing, receiver LMV, sender DME",LMV-G11
+CF5501,"Signal (Diagnose OBD Motor, 247.1.2) ungültig, Empfänger LMV, Sender DME","Signal (diagnosis OBD engine, 247.1.2) invalid, receiver LMV, sender DME",LMV-G11
+CF5502,"Signal (Diagnose OBD Motor, 247.1.2) undefiniert, Empfänger LMV, Sender DME","Signal (diagnosis OBD engine, 247.1.2) undefiniert, receiver LMV, sender DME",LMV-G11
+CF5540,"Botschaft (Kilometerstand/Reichweite, 276.4.8) fehlt, Empfänger LMV, Sender IKE","Message (mileage/Reichweite, 276.4.8) missing, receiver LMV, sender IKE",LMV-G11
+CF5541,"Signal (Kilometerstand/Reichweite, 276.4.8) ungültig, Empfänger LMV, Sender IKE","Signal (mileage/Reichweite, 276.4.8) invalid, receiver LMV, sender IKE",LMV-G11
+CF5542,"Signal (Kilometerstand/Reichweite, 276.4.8) undefiniert, Empfänger LMV, Sender IKE","Signal (mileage/Reichweite, 276.4.8) undefiniert, receiver LMV, sender IKE",LMV-G11
+CF5560,"Botschaft (Außentemperatur, 252.1.4) fehlt, Empfänger LMV, Sender Kombi","Message (outside temperature, 252.1.4) missing, receiver LMV, sender instrument cluster",LMV-G11
+CF5561,"Signal (Außentemperatur, 252.1.4) ungültig, Empfänger LMV, Sender Kombi","Signal (outside temperature, 252.1.4) invalid, receiver LMV, sender instrument cluster",LMV-G11
+CF5562,"Signal (Außentemperatur, 252.1.4) undefiniert, Empfänger LMV, Sender Kombi","Signal (outside temperature, 252.1.4) undefiniert, receiver LMV, sender instrument cluster",LMV-G11
+CF5570,"Botschaft (Soll Verteilung Längsmoment, 97.1.2) fehlt, Empfänger LMV, Sender DSC","Message (target Verteilung longitudinal torque, 97.1.2) missing, receiver LMV, sender DSC",LMV-G11
+CF5571,"Botschaft (Soll Verteilung Längsmoment, 97.1.2) Prüfsumme falsch, Empfänger LMV, Sender DSC","Message (target Verteilung longitudinal torque, 97.1.2) checksum incorrect, receiver LMV, sender DSC",LMV-G11
+CF5572,"Botschaft (Soll Verteilung Längsmoment, 97.1.2) nicht aktuell, Empfänger LMV, Sender DSC","Message (target Verteilung longitudinal torque, 97.1.2) not current, receiver LMV, sender DSC",LMV-G11
+CF5573,"Signal (Soll Verteilung Längsmoment, 97.1.2) ungültig, Empfänger LMV, Sender DSC","Signal (target Verteilung longitudinal torque, 97.1.2) invalid, receiver LMV, sender DSC",LMV-G11
+CF5574,"Signal (Soll Verteilung Längsmoment, 97.1.2) undefiniert, Empfänger LMV, Sender DSC","Signal (target Verteilung longitudinal torque, 97.1.2) undefiniert, receiver LMV, sender DSC",LMV-G11
 D3441F,FLEXRAY Physical bus error,FLEXRAY Physical bus error,DSC-G30N
 D34420,FLEXRAY controller error,FLEXRAY controller error,DSC-G30N
 D34487,FLEXRAY StartUpFailed,FLEXRAY StartUpFailed,DSC-G30N
@@ -6845,6 +7517,72 @@ D36501,"Botschaft(xDrive Stellglied Information, ID: XDRV_ACT_INFO) Prüfsumme f
 D36502,"Botschaft(xDrive Stellglied Information, ID: XDRV_ACT_INFO) nicht aktuell","Message(xDrive actuator information, ID: XDRV_ACT_INFO) not current",DSC-G30N
 D3651D,"Signal(OBD: Diagnose OBD Motor, ID:DIAG_OBD_ENG) ungültig","Signal(OBD: diagnosis OBD engine, ID:DIAG_OBD_ENG) invalid",DSC-G30N
 D36C81,"Signal(Status Türsensoren Abgesichert, ID: STAT_DS_VRFD) ungültig","Signal(status door sensor fused, ID: STAT_DS_VRFD) invalid",DSC-G30N
+D5041F,Flexray:  Physikalischer Busfehler,Flexray:  physical bus fault,EPS-G11
+D50420,FLEXRAY Controller Error,FLEXRAY Controller Error,EPS-G11
+D50BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,EPS-G11
+D51458,"Botschaftsfehler (Offset Quadrant EPS, ID: OFFS_QUAD_EPS) - Timeout","Message fault (offset Quadrant EPS, ID: OFFS_QUAD_EPS) - timeout",EPS-G11
+D51459,"Botschaftsfehler (Offset Quadrant EPS, ID: OFFS_QUAD_EPS) - Checksumme","Message fault (offset Quadrant EPS, ID: OFFS_QUAD_EPS) - check sum",EPS-G11
+D5145A,"Botschaftsfehler (Offset Quadrant EPS, ID: OFFS_QUAD_EPS) - Alive","Message fault (offset Quadrant EPS, ID: OFFS_QUAD_EPS) - alive",EPS-G11
+D5145B,"Signalfehler (Offset Quadrant EPS, ID: OFFS_QUAD_EPS) - Ungültig","Signal fault (offset Quadrant EPS, ID: OFFS_QUAD_EPS) - invalid",EPS-G11
+D5145C,"Signalfehler (Offset Quadrant EPS, ID: OFFS_QUAD_EPS) - Undefiniert","Signal fault (offset Quadrant EPS, ID: OFFS_QUAD_EPS) - Undefiniert",EPS-G11
+D514B8,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Timeout","Message fault (speed vehicle, ID: V_VEH) - timeout",EPS-G11
+D514B9,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Checksumme","Message fault (speed vehicle, ID: V_VEH) - check sum",EPS-G11
+D514BA,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Alive","Message fault (speed vehicle, ID: V_VEH) - alive",EPS-G11
+D514BE,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Ungültig","Signal fault (speed vehicle, ID: V_VEH) - invalid",EPS-G11
+D514BF,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Undefiniert","Signal fault (speed vehicle, ID: V_VEH) - Undefiniert",EPS-G11
+D514C2,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Timeout","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - timeout",EPS-G11
+D514C3,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Checksumme","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - check sum",EPS-G11
+D514C4,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Alive","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - alive",EPS-G11
+D514C8,"Signalfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Ungültig","Signal fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - invalid",EPS-G11
+D514FF,"Botschaftsfehler (Zustand Fahrzeug, ID: CON_VEH) Checksumme","Message fault (state vehicle, ID: CON_VEH) check sum",EPS-G11
+D51565,"Botschaftsfehler (Zustand Fahrzeug, ID: CON_VEH) Alive","Message fault (state vehicle, ID: CON_VEH) alive",EPS-G11
+D51587,"Signalfehler (Soll Endanschlag Virtuell Vorderachse, ID: TAR_ESTP_VIRT_FTAX) Qualifier","Signal fault (target Endanschlag Virtuell front axle, ID: TAR_ESTP_VIRT_FTAX) Qualifier",EPS-G11
+D51600,"Botschaftsfehler (Energie Degradation Fahrdynamik, ID: ENERG_DGR_DRDY) Timeout","Message fault (energy Degradation driving dynamics, ID: ENERG_DGR_DRDY) timeout",EPS-G11
+D5160C,"Botschaftsfehler (Zustand Fahrzeug, ID: CON_VEH) Timeout","Message fault (state vehicle, ID: CON_VEH) timeout",EPS-G11
+D51634,"Botschaftsfehler (Konfiguration Stellhebel Fahrdynamik Fahrerlebnis, ID: SU_CLE_DRDY_DXP) Timeout","Message fault (configuration Stellhebel driving dynamics Fahrerlebnis, ID: SU_CLE_DRDY_DXP) timeout",EPS-G11
+D51645,"Signalfehler (Energie Degradation Fahrdynamik, ID: ENERG_DGR_DRDY) Ungültig","Signal fault (energy Degradation driving dynamics, ID: ENERG_DGR_DRDY) invalid",EPS-G11
+D5165E,"Signalfehler (Zustand Fahrzeug, ID: CON_VEH) Ungültig","Signal fault (state vehicle, ID: CON_VEH) invalid",EPS-G11
+D51678,"Botschaftsfehler (Soll Endanschlag Virtuell Vorderachse, ID: TAR_ESTP_VIRT_FTAX) Checksumme","Message fault (target Endanschlag Virtuell front axle, ID: TAR_ESTP_VIRT_FTAX) check sum",EPS-G11
+D5169B,"Botschaftsfehler (Diagnose OBD Motor, ID: DIAG_OBD_ENG) - Timeout","Message fault (diagnosis OBD engine, ID: DIAG_OBD_ENG) - timeout",EPS-G11
+D51793,"Signalfehler (Steuerung Diagnose OBD Fahrdynamik, ID: CTR_DIAG_OBD_DRDY) - Ungültig","Signal fault (control diagnosis OBD driving dynamics, ID: CTR_DIAG_OBD_DRDY) - invalid",EPS-G11
+D51799,"Signalfehler (Diagnose OBD Motor, ID: DIAG_OBD_ENG) - Ungültig","Signal fault (diagnosis OBD engine, ID: DIAG_OBD_ENG) - invalid",EPS-G11
+D517C1,"Botschaftsfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Timeout","Message fault (is speed wheel, ID: AVL_RPM_WHL) - timeout",EPS-G11
+D517C2,"Botschaftsfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Checksumme","Message fault (is speed wheel, ID: AVL_RPM_WHL) - check sum",EPS-G11
+D517C3,"Botschaftsfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Alive","Message fault (is speed wheel, ID: AVL_RPM_WHL) - alive",EPS-G11
+D517C5,"Signalfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Ungültig","Signal fault (is speed wheel, ID: AVL_RPM_WHL) - invalid",EPS-G11
+D517C6,"Signalfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Undefiniert","Signal fault (is speed wheel, ID: AVL_RPM_WHL) - Undefiniert",EPS-G11
+D5183A,"Signalfehler (Steuerung Diagnose OBD Fahrdynamik, ID: CTR_DIAG_OBD_DRDY) - Undefiniert","Signal fault (control diagnosis OBD driving dynamics, ID: CTR_DIAG_OBD_DRDY) - Undefiniert",EPS-G11
+D51845,"Signalfehler (Diagnose OBD Motor, ID: DIAG_OBD_ENG) - Undefiniert","Signal fault (diagnosis OBD engine, ID: DIAG_OBD_ENG) - Undefiniert",EPS-G11
+D51853,"Signalfehler (Energie Degradation Fahrdynamik, ID: ENERG_DGR_DRDY) Undefiniert","Signal fault (energy Degradation driving dynamics, ID: ENERG_DGR_DRDY) Undefiniert",EPS-G11
+D51858,"Signalfehler (Zustand Fahrzeug, ID: CON_VEH) Undefiniert","Signal fault (state vehicle, ID: CON_VEH) Undefiniert",EPS-G11
+D5186E,"Botschaftsfehler (Soll Endanschlag Virtuell Vorderachse, ID: TAR_ESTP_VIRT_FTAX) Timeout","Message fault (target Endanschlag Virtuell front axle, ID: TAR_ESTP_VIRT_FTAX) timeout",EPS-G11
+D5187D,"Signalfehler (Konfiguration Stellhebel Fahrdynamik Fahrerlebnis, ID: SU_CLE_DRDY_DXP) Ungültig","Signal fault (configuration Stellhebel driving dynamics Fahrerlebnis, ID: SU_CLE_DRDY_DXP) invalid",EPS-G11
+D51896,"Signalfehler (Konfiguration Stellhebel Fahrdynamik Fahrerlebnis, ID: SU_CLE_DRDY_DXP) Undefiniert","Signal fault (configuration Stellhebel driving dynamics Fahrerlebnis, ID: SU_CLE_DRDY_DXP) Undefiniert",EPS-G11
+D518FF,"Signalfehler (Soll Endanschlag Virtuell Vorderachse, ID: TAR_ESTP_VIRT_FTAX) Undefiniert","Signal fault (target Endanschlag Virtuell front axle, ID: TAR_ESTP_VIRT_FTAX) Undefiniert",EPS-G11
+D51934,"Signalfehler (Soll Endanschlag Virtuell Vorderachse, ID: TAR_ESTP_VIRT_FTAX) Ungültig","Signal fault (target Endanschlag Virtuell front axle, ID: TAR_ESTP_VIRT_FTAX) invalid",EPS-G11
+D51966,"Signalfehler (Status Verbrennungsmotor, ID: ST_CENG) Ungültig","Signal fault (status combustion engine, ID: ST_CENG) invalid",EPS-G11
+D51971,"Botschaftsfehler (Soll Endanschlag Virtuell Vorderachse, ID: TAR_ESTP_VIRT_FTAX) Alive","Message fault (target Endanschlag Virtuell front axle, ID: TAR_ESTP_VIRT_FTAX) alive",EPS-G11
+D519CC,"Botschaftsfehler (Status Verbrennungsmotor, ID: ST_CENG) Timeout","Message fault (status combustion engine, ID: ST_CENG) timeout",EPS-G11
+D51A38,"Signalfehler (Status Verbrennungsmotor, ID: ST_CENG) Undefiniert","Signal fault (status combustion engine, ID: ST_CENG) Undefiniert",EPS-G11
+D51A3E,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Qualifier","Signal fault (speed vehicle, ID: V_VEH) - Qualifier",EPS-G11
+D51A3F,"Signalfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Qualifier","Signal fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - Qualifier",EPS-G11
+D51A4B,"Botschaftsfehler (Status Verbrennungsmotor, ID: ST_CENG) Alive","Message fault (status combustion engine, ID: ST_CENG) alive",EPS-G11
+D51A58,Botschaftsfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Alive,Message fault (speed vehicle 2 ID:V_VEH_2) alive,EPS-G11
+D51A8C,Botschaftsfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Checksumme,Message fault (speed vehicle 2 ID:V_VEH_2) check sum,EPS-G11
+D51AD3,Signalfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Undefiniert,Signal fault (speed vehicle 2 ID:V_VEH_2) Undefiniert,EPS-G11
+D51C12,"Botschaftsfehler (Soll Anteil Lenkmoment Fahrer, ID: TAR_QTA_STRMOM_DV) - Timeout","Message fault (target component Lenkmoment driver, ID: TAR_QTA_STRMOM_DV) - timeout",EPS-G11
+D51C13,"Botschaftsfehler (Soll Anteil Lenkmoment Fahrer, ID: TAR_QTA_STRMOM_DV) - Checksumme","Message fault (target component Lenkmoment driver, ID: TAR_QTA_STRMOM_DV) - check sum",EPS-G11
+D51C14,"Botschaftsfehler (Soll Anteil Lenkmoment Fahrer, ID: TAR_QTA_STRMOM_DV) - Alive","Message fault (target component Lenkmoment driver, ID: TAR_QTA_STRMOM_DV) - alive",EPS-G11
+D51C20,"Botschaftsfehler (Soll Lenkmoment Fahrer Stellglied, ID: TAR_STMOM_DV_ACT) - Timeout","Message fault (target Lenkmoment driver actuator, ID: TAR_STMOM_DV_ACT) - timeout",EPS-G11
+D51C21,"Botschaftsfehler (Soll Lenkmoment Fahrer Stellglied, ID: TAR_STMOM_DV_ACT) - Checksumme","Message fault (target Lenkmoment driver actuator, ID: TAR_STMOM_DV_ACT) - check sum",EPS-G11
+D51C22,"Botschaftsfehler (Soll Lenkmoment Fahrer Stellglied, ID: TAR_STMOM_DV_ACT) - Alive","Message fault (target Lenkmoment driver actuator, ID: TAR_STMOM_DV_ACT) - alive",EPS-G11
+D52C3D,"Signalfehler (Soll Anteil Lenkmoment Fahrer, ID: TAR_QTA_STRMOM_DV) - Ungültig","Signal fault (target component Lenkmoment driver, ID: TAR_QTA_STRMOM_DV) - invalid",EPS-G11
+D52C3E,"Signalfehler (Soll Anteil Lenkmoment Fahrer, ID: TAR_QTA_STRMOM_DV) - Undefiniert","Signal fault (target component Lenkmoment driver, ID: TAR_QTA_STRMOM_DV) - Undefiniert",EPS-G11
+D52C3F,"Signalfehler (Soll Lenkmoment Fahrer Stellglied, ID: TAR_STMOM_DV_ACT) - Ungültig","Signal fault (target Lenkmoment driver actuator, ID: TAR_STMOM_DV_ACT) - invalid",EPS-G11
+D52C40,"Signalfehler (Soll Lenkmoment Fahrer Stellglied, ID: TAR_STMOM_DV_ACT) - Undefiniert","Signal fault (target Lenkmoment driver actuator, ID: TAR_STMOM_DV_ACT) - Undefiniert",EPS-G11
+D52C78,"Signalfehler (Soll Anteil Lenkmoment Fahrer, ID: TAR_QTA_STRMOM_DV) - Qualifier","Signal fault (target component Lenkmoment driver, ID: TAR_QTA_STRMOM_DV) - Qualifier",EPS-G11
+D52C83,"Signalfehler (Soll Lenkmoment Fahrer Stellglied, ID: TAR_STMOM_DV_ACT) - Qualifier","Signal fault (target Lenkmoment driver actuator, ID: TAR_STMOM_DV_ACT) - Qualifier",EPS-G11
+D52D05,"Signalfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Qualifier","Signal fault (is speed wheel, ID: AVL_RPM_WHL) - Qualifier",EPS-G11
 D9040A,FA-CAN Control Module Bus OFF,FA-CAN control module bus OFF,BDC; BDC-G05; BDC-G11
 D9050A,ZSG-CAN Control Module Bus OFF,ZSG-CAN control module bus OFF,BDC-G11
 D9060A,CAS-CAN Control Module Bus OFF,CAS-CAN control module bus OFF,BDC-G11
@@ -7373,6 +8111,257 @@ E1C602,Ethernet: Link-Qualität niedrig,Ethernet: Link-quality low,NBTEVO
 E1C603,Ethernet: Kommunikationsfehler (Link-Abbruch) durch Steuergeräte-Reset,Ethernet: communication error (Link-abort) by control unit-reset,NBTEVO
 E1C604,Ethernet: Unerwarteter Link aufgebaut,Ethernet: unexpected Link aufgebaut,NBTEVO
 E1CBFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,NBTEVO
+E6841F,Flexray:  Physikalischer Busfehler,Flexray:  physical bus fault,VDP-G11
+E68420,FLEXRAY controller error,FLEXRAY controller error,VDP-G11
+E68519,VD-CAN  Physikalischer Busfehler,VD-CAN  physical bus fault,VDP-G11
+E68520,VD-CAN Control Module Bus OFF,VD-CAN control module bus OFF,VDP-G11
+E68BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,VDP-G11
+E69416,"Botschaftsfehler (Status Cabrio Dach, ID: ST_CABRF) - Timeout","Message fault (status Cabrio roof, ID: ST_CABRF) - timeout",VDP-G11
+E69417,"Botschaftsfehler (Status Cabrio Dach, ID: ST_CABRF) - Alive","Message fault (status Cabrio roof, ID: ST_CABRF) - alive",VDP-G11
+E69428,"Botschaftsfehler (Außentemperatur, ID: A_TEMP) - Timeout","Message fault (outside temperature, ID: A_TEMP) - timeout",VDP-G11
+E6942C,"Signalfehler (Außentemperatur, ID: A_TEMP) - Ungültig","Signal fault (outside temperature, ID: A_TEMP) - invalid",VDP-G11
+E6943A,"Signalfehler (Daten Einspurmodell Fahrdynamik, ID: DT_STMD_DRDY) - Ungültig","Signal fault (data Einspurmodell driving dynamics, ID: DT_STMD_DRDY) - invalid",VDP-G11
+E69452,"Botschaftsfehler (Daten Antriebsstrang 3, ID: DT_PT_3) - Timeout","Message fault (data drivetrain 3, ID: DT_PT_3) - timeout",VDP-G11
+E6947D,"Botschaftsfehler (Anforderung Verteilung Wankmoment, ID: RQ_REPAT_MX) - Timeout","Message fault (request Verteilung Wankmoment, ID: RQ_REPAT_MX) - timeout",VDP-G11
+E69480,"Botschaftsfehler (Anforderung Verteilung Wankmoment, ID: RQ_REPAT_MX) - Checksumme","Message fault (request Verteilung Wankmoment, ID: RQ_REPAT_MX) - check sum",VDP-G11
+E69481,"Botschaftsfehler (Anforderung Verteilung Wankmoment, ID: RQ_REPAT_MX) - Alive","Message fault (request Verteilung Wankmoment, ID: RQ_REPAT_MX) - alive",VDP-G11
+E69486,"Signalfehler (Anforderung Verteilung Wankmoment, ID: RQ_REPAT_MX) - Ungültig","Signal fault (request Verteilung Wankmoment, ID: RQ_REPAT_MX) - invalid",VDP-G11
+E694A9,"Botschaftsfehler (Fehlerspeicher Bordnetz Spannung, ID: ERRM_BN_U) - Timeout","Message fault (fault memory electrical system voltage, ID: ERRM_BN_U) - timeout",VDP-G11
+E694AA,"Signalfehler (Fehlerspeicher Bordnetz Spannung, ID: ERRM_BN_U) - Ungültig","Signal fault (fault memory electrical system voltage, ID: ERRM_BN_U) - invalid",VDP-G11
+E694B8,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Timeout","Message fault (speed vehicle, ID: V_VEH) - timeout",VDP-G11
+E694B9,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Checksumme","Message fault (speed vehicle, ID: V_VEH) - check sum",VDP-G11
+E694BA,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Alive","Message fault (speed vehicle, ID: V_VEH) - alive",VDP-G11
+E694BE,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Ungültig","Signal fault (speed vehicle, ID: V_VEH) - invalid",VDP-G11
+E694C2,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Timeout","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - timeout",VDP-G11
+E694C3,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Checksumme","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - check sum",VDP-G11
+E694C4,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Alive","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - alive",VDP-G11
+E694C8,"Signalfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Ungültig","Signal fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - invalid",VDP-G11
+E694E8,"Botschaftsfehler (Ist Lenkwinkel Vorderachse, ID: AVL_STEA_FTAX) - Timeout","Message fault (is Lenkwinkel front axle, ID: AVL_STEA_FTAX) - timeout",VDP-G11
+E694EE,"Signalfehler (Ist Lenkwinkel Vorderachse, ID: AVL_STEA_FTAX) - Ungültig","Signal fault (is Lenkwinkel front axle, ID: AVL_STEA_FTAX) - invalid",VDP-G11
+E694FF,"Botschaftsfehler (Zustand Fahrzeug, ID: CON_VEH) Checksumme","Message fault (state vehicle, ID: CON_VEH) check sum",VDP-G11
+E6951C,"Signalfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Ungültig","Signal fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - invalid",VDP-G11
+E69528,"Botschaftsfehler (Masse/Gewicht Fahrzeug, ID: MASS_VEH) - Timeout","Message fault (ground/Gewicht vehicle, ID: MASS_VEH) - timeout",VDP-G11
+E69529,"Botschaftsfehler (Masse/Gewicht Fahrzeug, ID: MASS_VEH) - Checksumme","Message fault (ground/Gewicht vehicle, ID: MASS_VEH) - check sum",VDP-G11
+E6952A,"Botschaftsfehler (Masse/Gewicht Fahrzeug, ID: MASS_VEH) - Alive","Message fault (ground/Gewicht vehicle, ID: MASS_VEH) - alive",VDP-G11
+E6952E,"Signalfehler (Masse/Gewicht Fahrzeug, ID: MASS_VEH) - Ungültig","Signal fault (ground/Gewicht vehicle, ID: MASS_VEH) - invalid",VDP-G11
+E69538,"Botschaftsfehler (Neigung Fahrbahn, ID: TLT_RW) - Timeout","Message fault (inclination road, ID: TLT_RW) - timeout",VDP-G11
+E6953E,"Signalfehler (Neigung Fahrbahn, ID: TLT_RW) - Ungültig","Signal fault (inclination road, ID: TLT_RW) - invalid",VDP-G11
+E69542,"Botschaftsfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Timeout","Message fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - timeout",VDP-G11
+E69543,"Botschaftsfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Checksumme","Message fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - check sum",VDP-G11
+E69544,"Botschaftsfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Alive","Message fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - alive",VDP-G11
+E69548,"Signalfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Ungültig","Signal fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - invalid",VDP-G11
+E69565,"Botschaftsfehler (Zustand Fahrzeug, ID: CON_VEH) Alive","Message fault (state vehicle, ID: CON_VEH) alive",VDP-G11
+E69598,"Botschaftsfehler (Soll Anteil Steuerung Lenkung, ID: TAR_QTA_CTR_STE) - Timeout","Message fault (target component control steering, ID: TAR_QTA_CTR_STE) - timeout",VDP-G11
+E69599,"Botschaftsfehler (Soll Anteil Steuerung Lenkung, ID: TAR_QTA_CTR_STE) - Checksumme","Message fault (target component control steering, ID: TAR_QTA_CTR_STE) - check sum",VDP-G11
+E6959A,"Botschaftsfehler (Soll Anteil Steuerung Lenkung, ID: TAR_QTA_CTR_STE) - Alive","Message fault (target component control steering, ID: TAR_QTA_CTR_STE) - alive",VDP-G11
+E6959C,"Signalfehler (Soll Anteil Steuerung Lenkung, ID: TAR_QTA_CTR_STE) - Ungültig","Signal fault (target component control steering, ID: TAR_QTA_CTR_STE) - invalid",VDP-G11
+E695A0,"Botschaftsfehler (Status Anhänger, ID: STAT_ANHAENGER) - Timeout","Message fault (status Anhänger, ID: STAT_ANHAENGER) - timeout",VDP-G11
+E695A4,"Signalfehler (Status Anhänger, ID: STAT_ANHAENGER) - Ungültig","Signal fault (status Anhänger, ID: STAT_ANHAENGER) - invalid",VDP-G11
+E695A5,"Signalfehler (Status Anhänger, ID: STAT_ANHAENGER) - Undefiniert","Signal fault (status Anhänger, ID: STAT_ANHAENGER) - Undefiniert",VDP-G11
+E695BC,"Botschaftsfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Timeout","Message fault (status stabilization DSC, ID: ST_STAB_DSC) - timeout",VDP-G11
+E695BD,"Botschaftsfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Checksumme","Message fault (status stabilization DSC, ID: ST_STAB_DSC) - check sum",VDP-G11
+E695BE,"Botschaftsfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Alive","Message fault (status stabilization DSC, ID: ST_STAB_DSC) - alive",VDP-G11
+E695C2,"Signalfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Ungültig","Signal fault (status stabilization DSC, ID: ST_STAB_DSC) - invalid",VDP-G11
+E695DC,"Botschaftsfehler (Status Parametrisierung I-Brake, ID: ST_PRMSN_IBRK) - Timeout","Message fault (status Parametrisierung I-Brake, ID: ST_PRMSN_IBRK) - timeout",VDP-G11
+E69600,"Botschaftsfehler (Energie Degradation Fahrdynamik, ID: ENERG_DGR_DRDY) Timeout","Message fault (energy Degradation driving dynamics, ID: ENERG_DGR_DRDY) timeout",VDP-G11
+E69605,"Botschaftsfehler (Odometrie Fahrzeug 1, ID: ODO_VEH_1) Alive","Message fault (Odometrie vehicle 1, ID: ODO_VEH_1) alive",VDP-G11
+E69606,"Botschaftsfehler (Odometrie Fahrzeug 2, ID: ODO_VEH_2) Alive","Message fault (Odometrie vehicle 2, ID: ODO_VEH_2) alive",VDP-G11
+E6960C,"Botschaftsfehler (Zustand Fahrzeug, ID: CON_VEH) Timeout","Message fault (state vehicle, ID: CON_VEH) timeout",VDP-G11
+E69634,"Botschaftsfehler (Konfiguration Stellhebel Fahrdynamik Fahrerlebnis, ID: SU_CLE_DRDY_DXP) Timeout","Message fault (configuration Stellhebel driving dynamics Fahrerlebnis, ID: SU_CLE_DRDY_DXP) timeout",VDP-G11
+E69637,Botschaftsfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Timeout,Message fault (speed vehicle 2 ID:V_VEH_2) timeout,VDP-G11
+E69640,Signalfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Ungültig,Signal fault (speed vehicle 2 ID:V_VEH_2) invalid,VDP-G11
+E69645,"Signalfehler (Energie Degradation Fahrdynamik, ID: ENERG_DGR_DRDY) Ungültig","Signal fault (energy Degradation driving dynamics, ID: ENERG_DGR_DRDY) invalid",VDP-G11
+E69652,"Botschaftsfehler (ZV und Klappenzustand, ID: STAT_ZV_KLAPPEN) - Timeout","Message fault (ZV and flap state, ID: STAT_ZV_KLAPPEN) - timeout",VDP-G11
+E69654,"Botschaftsfehler (Odometrie Fahrzeug 1, ID: ODO_VEH_1) Checksumme","Message fault (Odometrie vehicle 1, ID: ODO_VEH_1) check sum",VDP-G11
+E69655,"Botschaftsfehler (Odometrie Fahrzeug 2, ID: ODO_VEH_2) Checksumme","Message fault (Odometrie vehicle 2, ID: ODO_VEH_2) check sum",VDP-G11
+E69656,"Signalfehler (ZV und Klappenzustand, ID: STAT_ZV_KLAPPEN) - Ungültig","Signal fault (ZV and flap state, ID: STAT_ZV_KLAPPEN) - invalid",VDP-G11
+E6965E,"Signalfehler (Zustand Fahrzeug, ID: CON_VEH) Ungültig","Signal fault (state vehicle, ID: CON_VEH) invalid",VDP-G11
+E6969C,"Botschaftsfehler (Fahrzeug Dynamik Daten Längs, ID: VEH_DYNMC_DT_LN_1) - Timeout","Message fault (vehicle Dynamik data longitudinal, ID: VEH_DYNMC_DT_LN_1) - timeout",VDP-G11
+E696D4,"Botschaftsfehler (Daten Einspurmodell Fahrdynamik, ID: DT_STMD_DRDY) - Timeout","Message fault (data Einspurmodell driving dynamics, ID: DT_STMD_DRDY) - timeout",VDP-G11
+E696D5,"Botschaftsfehler (Daten Einspurmodell Fahrdynamik, ID: DT_STMD_DRDY) - Alive","Message fault (data Einspurmodell driving dynamics, ID: DT_STMD_DRDY) - alive",VDP-G11
+E696D8,"Botschaftsfehler (Daten Einspurmodell Fahrdynamik, ID: DT_STMD_DRDY) - Checksumme","Message fault (data Einspurmodell driving dynamics, ID: DT_STMD_DRDY) - check sum",VDP-G11
+E696DA,"Botschaftsfehler (Fahrzeug Dynamik Daten Längs, ID: VEH_DYNMC_DT_LN_1) - Checksumme","Message fault (vehicle Dynamik data longitudinal, ID: VEH_DYNMC_DT_LN_1) - check sum",VDP-G11
+E69737,"Botschaftsfehler (Fahrzeug Dynamik Daten Längs, ID: VEH_DYNMC_DT_LN_1) - Alive","Message fault (vehicle Dynamik data longitudinal, ID: VEH_DYNMC_DT_LN_1) - alive",VDP-G11
+E69744,"Botschaftsfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Timeout","Message fault (data drivetrain 2, ID: DT_PT_2) - timeout",VDP-G11
+E69745,"Botschaftsfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Checksumme","Message fault (data drivetrain 2, ID: DT_PT_2) - check sum",VDP-G11
+E69746,"Botschaftsfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Alive","Message fault (data drivetrain 2, ID: DT_PT_2) - alive",VDP-G11
+E6977C,"Signalfehler (Fahrzeug Dynamik Daten Längs, ID: VEH_DYNMC_DT_LN_1) - Ungültig","Signal fault (vehicle Dynamik data longitudinal, ID: VEH_DYNMC_DT_LN_1) - invalid",VDP-G11
+E697C1,"Botschaftsfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Timeout","Message fault (is speed wheel, ID: AVL_RPM_WHL) - timeout",VDP-G11
+E697C2,"Botschaftsfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Checksumme","Message fault (is speed wheel, ID: AVL_RPM_WHL) - check sum",VDP-G11
+E697C3,"Botschaftsfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Alive","Message fault (is speed wheel, ID: AVL_RPM_WHL) - alive",VDP-G11
+E697C5,"Signalfehler (Ist Drehzahl Rad, ID: AVL_RPM_WHL) - Ungültig","Signal fault (is speed wheel, ID: AVL_RPM_WHL) - invalid",VDP-G11
+E69866,"Botschaftsfehler (Sektor Gruppe ** Links Erkennung Bodenunebenheit, ID: SCT_GRP_**_LH_RCOG_GUE) Timeout","Message fault (Sektor Gruppe ** left detection Bodenunebenheit, ID: SCT_GRP_**_LH_RCOG_GUE) timeout",VDP-G11
+E6987D,"Signalfehler (Konfiguration Stellhebel Fahrdynamik Fahrerlebnis, ID: SU_CLE_DRDY_DXP) Ungültig","Signal fault (configuration Stellhebel driving dynamics Fahrerlebnis, ID: SU_CLE_DRDY_DXP) invalid",VDP-G11
+E69890,"Botschaftsfehler (Odometrie Fahrzeug 1, ID: ODO_VEH_1) Timeout","Message fault (Odometrie vehicle 1, ID: ODO_VEH_1) timeout",VDP-G11
+E6989E,"Botschaftsfehler (Odometrie Fahrzeug 2, ID: ODO_VEH_2) Timeout","Message fault (Odometrie vehicle 2, ID: ODO_VEH_2) timeout",VDP-G11
+E69929,"Signalfehler (Sektor Gruppe ** Links Erkennung Bodenunebenheit, ID: SCT_GRP_**_LH_RCOG_GUE) Ungültig","Signal fault (Sektor Gruppe ** left detection Bodenunebenheit, ID: SCT_GRP_**_LH_RCOG_GUE) invalid",VDP-G11
+E6992C,"Signalfehler (Odometrie Fahrzeug 1, ID: ODO_VEH_1) Ungültig","Signal fault (Odometrie vehicle 1, ID: ODO_VEH_1) invalid",VDP-G11
+E6992D,"Signalfehler (Odometrie Fahrzeug 2, ID: ODO_VEH_2) Ungültig","Signal fault (Odometrie vehicle 2, ID: ODO_VEH_2) invalid",VDP-G11
+E6994D,"Signalfehler (Status Erkennung Bodenunebenheit, ID: ST_RCOG_GUE) Ungültig","Signal fault (status detection Bodenunebenheit, ID: ST_RCOG_GUE) invalid",VDP-G11
+E69957,"Signalfehler (Status Hinterachse ARS, ID: ST_BAX_ARS) Ungültig","Signal fault (status rear axle ARS, ID: ST_BAX_ARS) invalid",VDP-G11
+E69966,"Signalfehler (Status Verbrennungsmotor, ID: ST_CENG) Ungültig","Signal fault (status combustion engine, ID: ST_CENG) invalid",VDP-G11
+E69967,"Signalfehler (Status Vorderachse ARS, ID: ST_FTAX_ARS) Ungültig","Signal fault (status front axle ARS, ID: ST_FTAX_ARS) invalid",VDP-G11
+E6998C,"Botschaftsfehler (Status Hinterachse ARS, ID: ST_BAX_ARS) Alive","Message fault (status rear axle ARS, ID: ST_BAX_ARS) alive",VDP-G11
+E69995,"Signalfehler (Status Parametrisierung I-Brake, ID: ST_PRMSN_IBRK) - Ungültig","Signal fault (status Parametrisierung I-Brake, ID: ST_PRMSN_IBRK) - invalid",VDP-G11
+E699A4,"Botschaftsfehler (Status Hinterachse ARS, ID: ST_BAX_ARS) Checksumme","Message fault (status rear axle ARS, ID: ST_BAX_ARS) check sum",VDP-G11
+E699AB,"Signalfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Ungültig","Signal fault (data drivetrain 2, ID: DT_PT_2) - invalid",VDP-G11
+E699B6,"Botschaftsfehler (Status Erkennung Bodenunebenheit, ID: ST_RCOG_GUE) Timeout","Message fault (status detection Bodenunebenheit, ID: ST_RCOG_GUE) timeout",VDP-G11
+E699C6,"Botschaftsfehler (Status Hinterachse ARS, ID: ST_BAX_ARS) Timeout","Message fault (status rear axle ARS, ID: ST_BAX_ARS) timeout",VDP-G11
+E699CC,"Botschaftsfehler (Status Verbrennungsmotor, ID: ST_CENG) Timeout","Message fault (status combustion engine, ID: ST_CENG) timeout",VDP-G11
+E699D6,"Botschaftsfehler (Status Vorderachse ARS, ID: ST_FTAX_ARS) Timeout","Message fault (status front axle ARS, ID: ST_FTAX_ARS) timeout",VDP-G11
+E699DF,"Botschaftsfehler (Relativzeit BN2020, ID: RELATIVZEIT) - Timeout","Message fault (Relativzeit BN2020, ID: RELATIVZEIT) - timeout",VDP-G11
+E69A4B,"Botschaftsfehler (Status Verbrennungsmotor, ID: ST_CENG) Alive","Message fault (status combustion engine, ID: ST_CENG) alive",VDP-G11
+E69A4C,"Botschaftsfehler (Status Vorderachse ARS, ID: ST_FTAX_ARS) Alive","Message fault (status front axle ARS, ID: ST_FTAX_ARS) alive",VDP-G11
+E69A58,Botschaftsfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Alive,Message fault (speed vehicle 2 ID:V_VEH_2) alive,VDP-G11
+E69A80,"Botschaftsfehler (Status Verbrennungsmotor, ID: ST_CENG) Checksumme","Message fault (status combustion engine, ID: ST_CENG) check sum",VDP-G11
+E69A81,"Botschaftsfehler (Status Vorderachse ARS, ID: ST_FTAX_ARS) Checksumme","Message fault (status front axle ARS, ID: ST_FTAX_ARS) check sum",VDP-G11
+E69A8C,Botschaftsfehler (Geschwindigkeit Fahrzeug 2 ID:V_VEH_2) Checksumme,Message fault (speed vehicle 2 ID:V_VEH_2) check sum,VDP-G11
+E69AE9,"Signalfehler (Relativzeit BN2020, ID: RELATIVZEIT) - Ungültig","Signal fault (Relativzeit BN2020, ID: RELATIVZEIT) - invalid",VDP-G11
+E69B2C,"Botschaftsfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Timeout","Message fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - timeout",VDP-G11
+E69B2E,"Botschaftsfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Checksumme","Message fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - check sum",VDP-G11
+E69B2F,"Botschaftsfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Alive","Message fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - alive",VDP-G11
+E69C1B,"Botschaftsfehler (Status Energieerzeugung, ID: ST_ENERG_GEN) - Timeout","Message fault (status Energieerzeugung, ID: ST_ENERG_GEN) - timeout",VDP-G11
+E69C63,"Botschaftsfehler (Daten Hydraulikmodell Bremskraftmodell Unterdrucksensor, ID: DT_HYDM_BRKM_LPS) Timeout","Message fault (data Hydraulikmodell Bremskraftmodell Unterdrucksensor, ID: DT_HYDM_BRKM_LPS) timeout",VDP-G11
+E69C67,"Botschaftsfehler (Information Reifen, ID: INFO_TYR) Timeout","Message fault (information tire, ID: INFO_TYR) timeout",VDP-G11
+E69C71,"Botschaftsfehler (Radmoment Antrieb 9, ID: WMOM_DRV_9) Timeout","Message fault (wheel torque drive 9, ID: WMOM_DRV_9) timeout",VDP-G11
+E69C80,"Botschaftsfehler (Erkennung Bodenunebenheit Delta, ID: RCOG_GUE_DELTA) Timeout","Message fault (detection Bodenunebenheit Delta, ID: RCOG_GUE_DELTA) timeout",VDP-G11
+E69C82,"Botschaftsfehler (Sektor Gruppe ** Rechts Erkennung Bodenunebenheit, ID: SCT_GRP_**_RH_RCOG_GUE) Timeout","Message fault (Sektor Gruppe ** right detection Bodenunebenheit, ID: SCT_GRP_**_RH_RCOG_GUE) timeout",VDP-G11
+E69CA3,"Botschaftsfehler (Status Funktion Vorderachse ARS, ID: ST_FN_FTAX_ARS) Timeout","Message fault (status function front axle ARS, ID: ST_FN_FTAX_ARS) timeout",VDP-G11
+E69CA4,"Botschaftsfehler (Odometrie Fahrzeug 3, ID: ODO_VEH_3) Timeout","Message fault (Odometrie vehicle 3, ID: ODO_VEH_3) timeout",VDP-G11
+E69CB0,"Botschaftsfehler (Status Funktion Hinterachse ARS, ID: ST_FN_BAX_ARS) Timeout","Message fault (status function rear axle ARS, ID: ST_FN_BAX_ARS) timeout",VDP-G11
+E69CC1,"Botschaftsfehler (Druck Luftfeder, ID: P_AISP) Timeout","Message fault (pressure Luftfeder, ID: P_AISP) timeout",VDP-G11
+E69CC2,"Signalfehler (Druck Luftfeder, ID: P_AISP) Ungültig","Signal fault (pressure Luftfeder, ID: P_AISP) invalid",VDP-G11
+E69CC3,"Botschaftsfehler (Energie Vertikal Dynamik CHC, ID: ENERG_VE_DYNMC_CHC) Timeout","Message fault (energy Vertikal Dynamik CHC, ID: ENERG_VE_DYNMC_CHC) timeout",VDP-G11
+E69CDD,"Botschaftsfehler (Status Niveauregulierung Fahrzeug 2, ID: ST_LCS_VEH_2) Timeout","Message fault (status Niveauregulierung vehicle 2, ID: ST_LCS_VEH_2) timeout",VDP-G11
+E69CDF,"Botschaftsfehler (Daten Fahrdynamiksensor Erweitert, ID: DT_DRDYSEN_EXT) Timeout","Message fault (data driving dynamics sensor Erweitert, ID: DT_DRDYSEN_EXT) timeout",VDP-G11
+E69CE6,"Botschaftsfehler (Radmoment Antrieb 9, ID: WMOM_DRV_9) Alive","Message fault (wheel torque drive 9, ID: WMOM_DRV_9) alive",VDP-G11
+E69D1D,"Botschaftsfehler (Status Funktion Vorderachse ARS, ID: ST_FN_FTAX_ARS) Alive","Message fault (status function front axle ARS, ID: ST_FN_FTAX_ARS) alive",VDP-G11
+E69D2F,"Botschaftsfehler (Status Niveauregulierung Fahrzeug 2, ID: ST_LCS_VEH_2) Alive","Message fault (status Niveauregulierung vehicle 2, ID: ST_LCS_VEH_2) alive",VDP-G11
+E69D32,"Botschaftsfehler (Information Reifen, ID: INFO_TYR) Alive","Message fault (information tire, ID: INFO_TYR) alive",VDP-G11
+E69D36,"Botschaftsfehler (Status Funktion Hinterachse ARS, ID: ST_FN_BAX_ARS) Alive","Message fault (status function rear axle ARS, ID: ST_FN_BAX_ARS) alive",VDP-G11
+E69D4A,"Botschaftsfehler (Status Anhänger, ID: STAT_ANHAENGER) Alive","Message fault (status Anhänger, ID: STAT_ANHAENGER) alive",VDP-G11
+E69D9E,"Signalfehler (Information Reifen, ID: INFO_TYR) Ungültig","Signal fault (information tire, ID: INFO_TYR) invalid",VDP-G11
+E69D9F,"Signalfehler (Sektor Gruppe ** Rechts Erkennung Bodenunebenheit, ID: SCT_GRP_**_RH_RCOG_GUE) Ungültig","Signal fault (Sektor Gruppe ** right detection Bodenunebenheit, ID: SCT_GRP_**_RH_RCOG_GUE) invalid",VDP-G11
+E69DA9,"Signalfehler (Radmoment Antrieb 9, ID: WMOM_DRV_9) Ungültig","Signal fault (wheel torque drive 9, ID: WMOM_DRV_9) invalid",VDP-G11
+E69DB7,"Signalfehler (Daten Hydraulikmodell Bremskraftmodell Unterdrucksensor, ID: DT_HYDM_BRKM_LPS) Ungültig","Signal fault (data Hydraulikmodell Bremskraftmodell Unterdrucksensor, ID: DT_HYDM_BRKM_LPS) invalid",VDP-G11
+E69DBE,"Signalfehler (Erkennung Bodenunebenheit Delta, ID: RCOG_GUE_DELTA) Ungültig","Signal fault (detection Bodenunebenheit Delta, ID: RCOG_GUE_DELTA) invalid",VDP-G11
+E69DD1,"Signalfehler (Bedienung Taster Niveauwechsel, ID:OP_PUBU_LVCH) Ungültig","Signal fault (Bedienung button Niveauwechsel, ID:OP_PUBU_LVCH) invalid",VDP-G11
+E69DD6,"Signalfehler (Odometrie Fahrzeug 3, ID: ODO_VEH_3) Ungültig","Signal fault (Odometrie vehicle 3, ID: ODO_VEH_3) invalid",VDP-G11
+E69DDC,"Signalfehler (Status Funktion Vorderachse ARS, ID: ST_FN_FTAX_ARS) Ungültig","Signal fault (status function front axle ARS, ID: ST_FN_FTAX_ARS) invalid",VDP-G11
+E69DE3,"Signalfehler (Status Funktion Hinterachse ARS, ID: ST_FN_BAX_ARS) Ungültig","Signal fault (status function rear axle ARS, ID: ST_FN_BAX_ARS) invalid",VDP-G11
+E69DEB,"Signalfehler (Daten Fahrdynamiksensor Erweitert, ID: DT_DRDYSEN_EXT) Ungültig","Signal fault (data driving dynamics sensor Erweitert, ID: DT_DRDYSEN_EXT) invalid",VDP-G11
+E69E30,"Botschaftsfehler (Information Reifen, ID: INFO_TYR) Checksumme","Message fault (information tire, ID: INFO_TYR) check sum",VDP-G11
+E69E4D,"Botschaftsfehler (Radmoment Antrieb 9, ID: WMOM_DRV_9) Checksumme","Message fault (wheel torque drive 9, ID: WMOM_DRV_9) check sum",VDP-G11
+E69E6A,"Botschaftsfehler (Status Anhänger, ID: STAT_ANHAENGER) Checksumme","Message fault (status Anhänger, ID: STAT_ANHAENGER) check sum",VDP-G11
+E69F0B,"Signalfehler (Status Niveauregulierung Fahrzeug 2, ID: ST_LCS_VEH_2) Ungültig","Signal fault (status Niveauregulierung vehicle 2, ID: ST_LCS_VEH_2) invalid",VDP-G11
+E69F19,"Signalfehler (Energie Vertikal Dynamik CHC, ID: ENERG_VE_DYNMC_CHC) Ungültig","Signal fault (energy Vertikal Dynamik CHC, ID: ENERG_VE_DYNMC_CHC) invalid",VDP-G11
+E69F76,"Botschaftsfehler (Status Funktion Vorderachse ARS, ID: ST_FN_FTAX_ARS) Checksumme","Message fault (status function front axle ARS, ID: ST_FN_FTAX_ARS) check sum",VDP-G11
+E69F77,"Botschaftsfehler (Status Funktion Hinterachse ARS, ID: ST_FN_BAX_ARS) Checksumme","Message fault (status function rear axle ARS, ID: ST_FN_BAX_ARS) check sum",VDP-G11
+E69F85,"Botschaftsfehler (Status Cabrio Dach, ID: ST_CABRF) Checksumme","Message fault (status Cabrio roof, ID: ST_CABRF) check sum",VDP-G11
+E69F91,"Botschaftsfehler (Status Niveauregulierung Fahrzeug 2, ID: ST_LCS_VEH_2) Checksumme","Message fault (status Niveauregulierung vehicle 2, ID: ST_LCS_VEH_2) check sum",VDP-G11
+E6AC44,"Signalfehler (Status Energieerzeugung, ID: ST_ENERG_GEN) - Ungültig","Signal fault (status Energieerzeugung, ID: ST_ENERG_GEN) - invalid",VDP-G11
+E6AC7B,"Signalfehler (Status Cabrio Dach, ID: ST_CABRF) - Ungültig","Signal fault (status Cabrio roof, ID: ST_CABRF) - invalid",VDP-G11
+E6AD43,"Botschaftsfehler (Sensorclusterdaten Erweitert Rohwerte, ID: SEN_CLU_DT_EXT_RAW ) - Timeout","Message fault (Sensorclusterdaten Erweitert raw value, ID: SEN_CLU_DT_EXT_RAW ) - timeout",VDP-G11
+E6AD45,"Botschaftsfehler (Sensorclusterdaten Erweitert Rohwerte, ID: SEN_CLU_DT_EXT_RAW ) - Checksumme","Message fault (Sensorclusterdaten Erweitert raw value, ID: SEN_CLU_DT_EXT_RAW ) - check sum",VDP-G11
+E6AD46,"Botschaftsfehler (Sensorclusterdaten Erweitert Rohwerte, ID: SEN_CLU_DT_EXT_RAW ) - Alive","Message fault (Sensorclusterdaten Erweitert raw value, ID: SEN_CLU_DT_EXT_RAW ) - alive",VDP-G11
+E6AD49,"Signalfehler (Sensorclusterdaten Erweitert Rohwerte, ID: SEN_CLU_DT_EXT_RAW ) - Ungültig","Signal fault (Sensorclusterdaten Erweitert raw value, ID: SEN_CLU_DT_EXT_RAW ) - invalid",VDP-G11
+E70415,IuK-CAN Physikalischer Busfehler,IuK-CAN physical bus fault,IHKA-G11
+E7041E,IuK-CAN Control Module Bus OFF,IuK-CAN control module bus OFF,IHKA-G11
+E70BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,IHKA-G11
+E70C00,AC-LIN: Motor Frischluft oder Frischluft-Umluft antwortet nicht,AC-LIN: engine Frischluft or Frischluft-Umluft antwortet not,IHKA-G11
+E70C01,AC-LIN: Motor Umluft antwortet nicht,AC-LIN: engine Umluft antwortet not,IHKA-G11
+E70C02,AC-LIN: Motor Entfrostung antwortet nicht,AC-LIN: engine Entfrostung antwortet not,IHKA-G11
+E70C03,AC-LIN: Motor Belüftung links oder Belüftung-Fussraum antwortet nicht,AC-LIN: engine Belüftung left or Belüftung-Fussraum antwortet not,IHKA-G11
+E70C04,AC-LIN: Motor Belüftung rechts antwortet nicht,AC-LIN: engine Belüftung right antwortet not,IHKA-G11
+E70C05,AC-LIN: Motor Schichtung links oder Schichtung antwortet nicht,AC-LIN: engine Schichtung left or Schichtung antwortet not,IHKA-G11
+E70C06,AC-LIN: Motor Schichtung rechts antwortet nicht,AC-LIN: engine Schichtung right antwortet not,IHKA-G11
+E70C07,AC-LIN: Motor Fussraum links antwortet nicht,AC-LIN: engine Fussraum left antwortet not,IHKA-G11
+E70C08,AC-LIN: Motor Fussraum rechts antwortet nicht,AC-LIN: engine Fussraum right antwortet not,IHKA-G11
+E70C09,AC-LIN: Motor Luftverteilung hinten links oder Luftverteilung hinten antwortet nicht,AC-LIN: engine Luftverteilung rear left or Luftverteilung rear antwortet not,IHKA-G11
+E70C0A,AC-LIN: Motor Luftverteilung hinten rechts antwortet nicht,AC-LIN: engine Luftverteilung rear right antwortet not,IHKA-G11
+E70C0B,AC-LIN: Motor Mischluft links oder Mischluft antwortet nicht,AC-LIN: engine Mischluft left or Mischluft antwortet not,IHKA-G11
+E70C0C,AC-LIN: Motor Mischluft rechts antwortet nicht,AC-LIN: engine Mischluft right antwortet not,IHKA-G11
+E70C0D,AC-LIN: Motor Mischluft hinten links oder Mischluft hinten antwortet nicht,AC-LIN: engine Mischluft rear left or Mischluft rear antwortet not,IHKA-G11
+E70C0E,AC-LIN: Motor Mischluft hinten rechts antwortet nicht,AC-LIN: engine Mischluft rear right antwortet not,IHKA-G11
+E70C0F,AC-LIN: Motor Temperatur-Luftmenge hinten antwortet nicht,AC-LIN: engine temperature-air quantity rear antwortet not,IHKA-G11
+E70C12,AC-LIN: Motor Indirekte Belüftung antwortet nicht,AC-LIN: engine Indirekte Belüftung antwortet not,IHKA-G11
+E70C13,AC-LIN: Motor Luftverteilung links oder Luftverteilung antwortet nicht,AC-LIN: engine Luftverteilung left or Luftverteilung antwortet not,IHKA-G11
+E70C14,AC-LIN: Motor Luftverteilung rechts antwortet nicht,AC-LIN: engine Luftverteilung right antwortet not,IHKA-G11
+E70C15,AC-LIN: Motor Zentralantrieb antwortet nicht,AC-LIN: engine Zentralantrieb antwortet not,IHKA-G11
+E70C2D,AC-LIN: Gebläseendstufe antwortet nicht,AC-LIN: blower output stage antwortet not,IHKA-G11
+E70C2E,AC-LIN: Elektrischer Zuheizer antwortet nicht,AC-LIN: electric auxiliary heater antwortet not,IHKA-G11
+E70C2F,AC-LIN: Standheizung antwortet nicht,AC-LIN: Standheizung antwortet not,IHKA-G11
+E70C30,AC-LIN: eKMV antwortet nicht,AC-LIN: eKMV antwortet not,IHKA-G11
+E70C32,K-LIN: IHKA-Bedienteil antwortet nicht,K-LIN: IHKA-control panel antwortet not,IHKA-G11
+E70C33,K-LIN: FKA-Bedienteil antwortet nicht,K-LIN: FKA-control panel antwortet not,IHKA-G11
+E70C3A,AC-LIN: EDH antwortet nicht,AC-LIN: EDH antwortet not,IHKA-G11
+E70C3B,AC-LIN: Ionisator antwortet nicht,AC-LIN: Ionisator antwortet not,IHKA-G11
+E70C3C,AC-LIN: Bedufter antwortet nicht,AC-LIN: Bedufter antwortet not,IHKA-G11
+E70C3D,K-LIN: Heizung dritte Sitzreihe antwortet nicht,K-LIN: heating dritte Sitzreihe antwortet not,IHKA-G11
+E70C3E,K-LIN: SenseTouch Modul links antwortet nicht,K-LIN: SenseTouch module left antwortet not,IHKA-G11
+E70C3F,K-LIN: SenseTouch Modul rechts antwortet nicht,K-LIN: SenseTouch module right antwortet not,IHKA-G11
+E71400,"Botschaft (0x2CA, Außentemperatur): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x2CA, outside temperature): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71401,"Botschaft (0x202, Dimmung): Ausfall","Message (0x202, Dimmung): failure",IHKA-G11
+E71402,"Botschaft (0x3F9, Daten Antriebsstrang 2): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x3F9, data drivetrain 2): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71403,"Botschaft (0x330, Kilometerstand/Reichweite): Ausfall","Message (0x330, mileage/Reichweite): failure",IHKA-G11
+E71405,"Botschaft (0x393, LCD Helligkeit Regelung): Ausfall","Message (0x393, LCD Helligkeit control): failure",IHKA-G11
+E71406,"Botschaft (0x3B3, Powermanagement Verbrauchersteuerung): Ausfall","Message (0x3B3, power management consumer control): failure",IHKA-G11
+E71407,"Botschaft (0x3D3, Status Solarsensor): Ausfall","Message (0x3D3, status Solarsensor): failure",IHKA-G11
+E71408,"Botschaft (0x22A, Status BFS): Ausfall","Message (0x22A, status BFS): failure",IHKA-G11
+E71409,Botschaft (0x2D2 Status Druck Kältekreislauf): Ausfall. (OBD-relevant für Hybridfahrzeuge.),Message (0x2D2 status pressure Kältekreislauf): failure. (OBD-relevant for hybrid vehicle.),IHKA-G11
+E7140A,"Botschaft (0x232, Status FAS): Ausfall","Message (0x232, status FAS): failure",IHKA-G11
+E7140B,"Botschaft (0x2D1, Status Beschlag Scheibe V): Ausfall","Message (0x2D1, status Beschlag Scheibe V): failure",IHKA-G11
+E7140D,"Botschaft (0x2D3, Status Schichtung Fond): Ausfall","Message (0x2D3, status Schichtung rear compartment): failure",IHKA-G11
+E7140E,"Botschaft (0x2D0, Status Sensor AUC): Ausfall","Message (0x2D0, status sensor AUC): failure",IHKA-G11
+E71410,"Botschaft (0x2D6, Status Ventil Klimakompressor): Ausfall","Message (0x2D6, status valve Klimakompressor): failure",IHKA-G11
+E71411,"Botschaft (0x2CF, Status Zusatzwasserpumpe): Ausfall","Message (0x2CF, status Zusatzwasserpumpe): failure",IHKA-G11
+E71413,"Botschaft (0x0A5, Drehmoment Kurbelwelle 1): Ausfall","Message (0x0A5, torque crankshaft 1): failure",IHKA-G11
+E71414,"Botschaft (0x1A1, Geschwindigkeit Fahrzeug): Ausfall","Message (0x1A1, speed vehicle): failure",IHKA-G11
+E71415,"Botschaft (0x3FB, Daten Antriebsstrang 1): Ausfall","Message (0x3FB, data drivetrain 1): failure",IHKA-G11
+E71416,"Botschaft (0x1B9, Wärmemanagement Motorsteuerung): Ausfall","Message (0x1B9, heat management engine control): failure",IHKA-G11
+E71417,Signal (Temperatur_Außen in 0x2CA): ungültig empfangen,Signal (Temperatur_Außen in 0x2CA): invalid empfangen,IHKA-G11
+E71418,Signal (Steuerung_Beleuchtung_Schalter in 0x202): ungültig empfangen,Signal (Steuerung_Beleuchtung_Schalter in 0x202): invalid empfangen,IHKA-G11
+E7141A,Signal (Temperatur_Motor_Antrieb in 0x3F9): ungültig empfangen,Signal (Temperatur_Motor_Antrieb in 0x3F9): invalid empfangen,IHKA-G11
+E7141C,Signal (Status_Solarsensor_BF in 0x3D3): ungültig empfangen,Signal (Status_Solarsensor_BF in 0x3D3): invalid empfangen,IHKA-G11
+E7141D,Signal (Status_Solarsensor_FA in 0x3D3): ungültig empfangen,Signal (Status_Solarsensor_FA in 0x3D3): invalid empfangen,IHKA-G11
+E7141E,Signal (Status_Sitzheizung_BF in 0x22A): ungültig empfangen,Signal (Status_Sitzheizung_BF in 0x22A): invalid empfangen,IHKA-G11
+E7141F,Signal (Status_Sitzklima_BF in 0x22A): ungültig empfangen,Signal (Status_Sitzklima_BF in 0x22A): invalid empfangen,IHKA-G11
+E71420,Signal (Daten_Drucksensor_Kältekreislauf in 0x2D2): ungültig empfangen,Signal (Daten_Drucksensor_Kältekreislauf in 0x2D2): invalid empfangen,IHKA-G11
+E71421,Signal (Status_Sitzheizung_FA in 0x232): ungültig empfangen,Signal (Status_Sitzheizung_FA in 0x232): invalid empfangen,IHKA-G11
+E71422,Signal (Status_Sitzklima_FA in 0x232): ungültig empfangen,Signal (Status_Sitzklima_FA in 0x232): invalid empfangen,IHKA-G11
+E71423,Signal (Daten_Beschlag_Scheibe_V in 0x2D1): ungültig empfangen,Signal (Daten_Beschlag_Scheibe_V in 0x2D1): invalid empfangen,IHKA-G11
+E71427,Signal (Daten_Schichtung_Fond_Klima in 0x2D3): ungültig empfangen,Signal (Daten_Schichtung_Fond_Klima in 0x2D3): invalid empfangen,IHKA-G11
+E71428,Signal (Status_Schichtung_Fond_Klima in 0x2D3): ungültig empfangen,Signal (Status_Schichtung_Fond_Klima in 0x2D3): invalid empfangen,IHKA-G11
+E71429,Signal (Daten_Sensor_AUC in 0x2D0): ungültig empfangen,Signal (Daten_Sensor_AUC in 0x2D0): invalid empfangen,IHKA-G11
+E7142C,Signal (Status_Klima_Kompressor_Kupplung in 0x2D6): ungültig empfangen,Signal (Status_Klima_Kompressor_Kupplung in 0x2D6): invalid empfangen,IHKA-G11
+E7142D,Signal (Status_Zusatzwasserpumpe in 0x2CF): ungültig empfangen,Signal (Status_Zusatzwasserpumpe in 0x2CF): invalid empfangen,IHKA-G11
+E71431,Signal (Ist_Drehzahl_Motor_Kurbelwelle in 0x0A5): ungültig empfangen,Signal (Ist_Drehzahl_Motor_Kurbelwelle in 0x0A5): invalid empfangen,IHKA-G11
+E71432,Signal (Geschwindigkeit_Fahrzeug_Schwerpunkt in 0x1A1): ungültig empfangen,Signal (Geschwindigkeit_Fahrzeug_Schwerpunkt in 0x1A1): invalid empfangen,IHKA-G11
+E71433,Signal (Ziel_LCD_Leuchtdichte in 0x393): ungültig empfangen,Signal (Ziel_LCD_Leuchtdichte in 0x393): invalid empfangen,IHKA-G11
+E71434,Signal (Dämpfung_LCD_Leuchtdichte in 0x393): ungültig empfangen,Signal (Dämpfung_LCD_Leuchtdichte in 0x393): invalid empfangen,IHKA-G11
+E71436,Signal (Steuerung_Standverbraucher in 0x3B3): ungültig empfangen,Signal (Steuerung_Standverbraucher in 0x3B3): invalid empfangen,IHKA-G11
+E71439,"Botschaft (0x3A0, Fahrzeugzustand): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x3A0, vehicle state): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E7143A,"Botschaft (0x38C, Steuerung Klimakompressor): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x38C, control Klimakompressor): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E7143B,Signal (Freigabe_Klimakompressor in 0x38C): ungültig empfangen,Signal (Freigabe_Klimakompressor in 0x38C): invalid empfangen,IHKA-G11
+E7143D,"Botschaft (0x1FA, Status Hochvoltspeicher 1): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x1FA, status high-voltage memory 1): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E7143E,Signal (Ist_Temperatur_Wärmetauscher_Hochvoltspeicher  in 0x1FA): ungültig empfangen,Signal (Ist_Temperatur_Wärmetauscher_Hochvoltspeicher  in 0x1FA): invalid empfangen,IHKA-G11
+E7143F,Signal (Anforderung_Kühlung_Hochvoltspeicher in 0x1FA): ungültig empfangen,Signal (Anforderung_Kühlung_Hochvoltspeicher in 0x1FA): invalid empfangen,IHKA-G11
+E71440,"Botschaft (0x389, Status Ventil Hochvoltbatterie-Kühlung): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x389, status valve high-voltage battery-cooling): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71441,Signal (Status_Kälteabsperrventil_Klima in 0x389): ungültig empfangen,Signal (Status_Kälteabsperrventil_Klima in 0x389): invalid empfangen,IHKA-G11
+E71448,"Botschaft (0x30B, Status Motor Start Auto): Ausfall","Message (0x30B, status engine start Auto): failure",IHKA-G11
+E71449,Signal (Status_Funktion_MSA in 0x30B): ungültig empfangen,Signal (Status_Funktion_MSA in 0x30B): invalid empfangen,IHKA-G11
+E7144A,"Botschaft (0x1B2, Status Klima Kälteabsperrventile): Ausfall","Message (0x1B2, status climate Kälteabsperrventile): failure",IHKA-G11
+E7144B,Signal (Status_Kälteabsperrventil_Front in 0x1B2): ungültig empfangen,Signal (Status_Kälteabsperrventil_Front in 0x1B2): invalid empfangen,IHKA-G11
+E7144C,Signal (Status_Kälteabsperrventil_Fond in 0x1B2): ungültig empfangen,Signal (Status_Kälteabsperrventil_Fond in 0x1B2): invalid empfangen,IHKA-G11
+E7144D,Signal (Daten_Temperatur_Scheibe_V in 0x2D1): ungültig empfangen,Signal (Daten_Temperatur_Scheibe_V in 0x2D1): invalid empfangen,IHKA-G11
+E7144E,"Botschaft (0x397, Diagnose OBD Motor): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x397, diagnosis OBD engine): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E7144F,"Botschaft (0x3E8, Diagnose OBD Motorsteuerung Elektrisch): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x3E8, diagnosis OBD engine control electric): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71450,"Botschaft (0x2DF, Freigabe Leistung Funktionen Klima 1): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x2DF, enable power function climate 1): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71451,"Botschaft (0x12F, Klemmen): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x12F, terminal): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71452,"Botschaft (0x328, Relativzeit BN2020): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x328, Relativzeit BN2020): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71453,"Botschaft (0x112, Status Hochvoltspeicher 2): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x112, status high-voltage memory 2): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71454,"Botschaft (0x1B9, Wärmemanagement Motorsteuerung): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x1B9, heat management engine control): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
+E71455,"Botschaft (0x304, DME IBS_1): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x304, DME IBS_1): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
 F00384,CANIF_E_INVALID_DLC,CANIF_E_INVALID_DLC,BDC-G11
 F00386,ADC_E_TIMEOUT,ADC_E_TIMEOUT,BDC-G11
 F00388,MCU_E_TIMEOUT_TRANSITION,MCU_E_TIMEOUT_TRANSITION,BDC-G05

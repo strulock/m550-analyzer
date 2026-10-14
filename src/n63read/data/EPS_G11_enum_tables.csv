@@ -1,0 +1,26 @@
+﻿table_name,value,text_de,text_en
+EPS_G11.RDBI_ADS_DOP,0,ISOSAEReserved_00,ISOSAEReserved_00
+EPS_G11.RDBI_ADS_DOP,1,defaultSession,defaultSession
+EPS_G11.RDBI_ADS_DOP,2,programmingSession,programmingSession
+EPS_G11.RDBI_ADS_DOP,3,extendedDiagnosticSession,extendedDiagnosticSession
+EPS_G11.RDBI_ADS_DOP,4,safetySystemDiagnosticSession,safetySystemDiagnosticSession
+EPS_G11.RDBI_ADS_DOP,64,vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
+EPS_G11.RDBI_ADS_DOP,65,codingSession,codingSession
+EPS_G11.RDBI_ADS_DOP,66,SWTSession,SWTSession
+EPS_G11.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
+EPS_G11.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
+EPS_G11.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
+EPS_G11.TAB_EPS_ENDANSCHLAEGE_GELERNT,0,nicht gelernt,not learned
+EPS_G11.TAB_EPS_ENDANSCHLAEGE_GELERNT,1,gelernt,learned
+EPS_G11.TAB_EPS_ENDANSCHLAEGE_GELERNT,2,gelernt in Fahrt,learned in Fahrt
+EPS_G11.TAB_EPS_ENDANSCHLAEGE_GELERNT,0xFF,ungültig,invalid
+EPS_G11.TAB_EPS_MOMENTENSENSOR,0x00,OK,OK
+EPS_G11.TAB_EPS_MOMENTENSENSOR,0x01,NOK,NOK
+EPS_G11.TAB_EPS_WERT,0x00,Geradeauslauf-Offset nicht geschrieben und Index Position bzw Zahnstangenmitte nicht gefunden,Geradeauslauf-offset not geschrieben and Index position resp Zahnstangenmitte not gefunden
+EPS_G11.TAB_EPS_WERT,0x01,Geradeauslauf-Offset nicht geschrieben und Index Position bzw Zahnstangenmitte gefunden,Geradeauslauf-offset not geschrieben and Index position resp Zahnstangenmitte gefunden
+EPS_G11.TAB_EPS_WERT,0x02,Geradeauslauf-Offset geschrieben und Index Position bzw Zahnstangenmitte nicht gefunden,Geradeauslauf-offset geschrieben and Index position resp Zahnstangenmitte not gefunden
+EPS_G11.TAB_EPS_WERT,0x03,Geradeauslauf-Offset geschrieben und Index Position bzw Zahnstangenmitte gefunden und gespeichert und Ist_Position_EPS gültig,Geradeauslauf-offset geschrieben and Index position resp Zahnstangenmitte gefunden and stored and Ist_Position_EPS valid
+EPS_G11.TAB_EPS_WERT,0xFF,ungültig,invalid
+EPS_G11.TAB_INIT,0x00,nicht initialisiert,not initialisiert
+EPS_G11.TAB_INIT,0x01,Initialisierung in Ordnung,Initialisierung in Ordnung
+EPS_G11.TAB_INIT,0xFF,Initialisierung nicht in Ordnung,Initialisierung not in Ordnung
