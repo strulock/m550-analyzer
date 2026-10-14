@@ -116,8 +116,10 @@ class Poller(threading.Thread):
 
     def run(self):
         t0 = time.time()
+        connected = False
         try:
             with core.Hsfz(self.ip, source=self.source, timeout=self.timeout) as h:
+                connected = True
                 self.out_q.put(("status", "connected"))
                 while not self._stop_event.is_set():
                     self._run_jobs(h)
@@ -134,7 +136,10 @@ class Poller(threading.Thread):
                     self._write_log(elapsed, chans, sample)
                     time.sleep(self.interval)
         except Exception as e:                                      # noqa: BLE001
-            self.out_q.put(("error", str(e)))
+            if connected:
+                self.out_q.put(("error", str(e)))
+            else:
+                self.out_q.put(("error", no_answer_text(self.ip, e)))
         finally:
             self.stop_log()
             self.out_q.put(("status", "disconnected"))
@@ -168,6 +173,15 @@ class Poller(threading.Thread):
                 self.last_flush = now
 
 
+def no_answer_text(ip, error):
+    """What a failed connect means, for someone at the car."""
+    return ("Nothing answered at %s (port %d): %s.\n\n"
+            "Check that the IP box holds the car's address, not this PC's "
+            "(press Discover to find it), that the ignition is on, and that "
+            "Windows Firewall allows n63read on this network."
+            % (ip, core.HSFZ_DIAG_PORT, error))
+
+
 # ---------------------------------------------------------------------- app
 
 class App(tk.Tk):
@@ -187,6 +201,7 @@ class App(tk.Tk):
         self.avail = core.load_availability()   # (module, DID) -> what the car said
         self._avail_dirty = False
         self._checking = None                    # stop flag of a running check
+        self._no_enet_address = False            # last Discover found no 169.254.x.x
         self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
         self.series = {}                     # name -> [values]
@@ -638,6 +653,8 @@ class App(tk.Tk):
         if not ip and not self.poller:
             messagebox.showinfo("Check car", "Enter or discover an IP first.")
             return
+        if not self.poller and self._own_address(ip, "Check car"):
+            return
         layouts = core.check_layouts(self.catalog, self._dme_target())
         if not messagebox.askyesno(
                 "Check car", "Ask the car for all %d identifiers?\n\n"
@@ -811,32 +828,45 @@ class App(tk.Tk):
     # -- connection ------------------------------------------------------
 
     def _refresh_interfaces(self):
-        """List local IPv4s. The ENET adapter self-assigns 169.254.x.x."""
+        """List local IPv4s and keep 'via' on one that exists. Returns them.
+
+        The ENET adapter self-assigns 169.254.x.x, and picks a new one when
+        the link resets (unplugged, ignition cycled), so a remembered
+        address can vanish. Then, as for "auto", take the adapter's current
+        address; only with no adapter address at all fall back to "auto".
+        """
         try:
             addrs = core.local_ipv4s()
         except Exception:                                           # noqa: BLE001
             addrs = []
         self.bind_combo["values"] = ["auto"] + addrs
-        if self.bind_var.get() not in (["auto"] + addrs):
-            self.bind_var.set("auto")
-        elif addrs and self.bind_var.get() == "auto":
-            link = [a for a in addrs if a.startswith("169.254.")]
-            if link:
-                self.bind_var.set(link[0])
+        link = core.link_local(addrs)
+        if self.bind_var.get() not in addrs:
+            self.bind_var.set(link[0] if link else "auto")
+        return addrs
 
     def _discover(self):
-        self.status.config(text="\u25cf searching...", foreground="#b8860b")
+        # Re-read the addresses first: the one in 'via' may have gone since
+        # start-up (WinError 10049 when sending from it).
+        before = self.bind_var.get()
+        addrs = self._refresh_interfaces()
+        bind = self.bind_var.get()
+        self._no_enet_address = not core.link_local(addrs)
+        if before not in ("auto", bind):
+            note = "\u25cf %s is gone; searching via %s..." % (before, bind)
+        else:
+            note = "\u25cf searching..."
+        self.status.config(text=note, foreground="#b8860b")
         self.update_idletasks()
 
         def work():
-            bind = self.bind_var.get()
-            bind = None if bind == "auto" else bind
             try:
-                hits = core.discover(3.0, bind)
+                hits = core.discover(3.0, None if bind == "auto" else bind)
             except Exception as e:                                  # noqa: BLE001
                 self.q.put(("joberror", "discover failed: %s" % e))
                 return
-            self.q.put(("discovered", hits))
+            near = [] if hits or bind == "auto" else core.link_neighbours(bind)
+            self.q.put(("discovered", hits, near))
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -896,6 +926,23 @@ class App(tk.Tk):
 
         threading.Thread(target=work, daemon=True).start()
 
+    def _own_address(self, ip, title):
+        """True (after saying so) if `ip` is this PC's, not the car's.
+
+        Easy to do: ipconfig shows the adapter's 169.254.x.x, and the car's
+        address looks just the same.
+        """
+        try:
+            mine = ip in core.local_ipv4s()
+        except Exception:                                           # noqa: BLE001
+            return False
+        if mine:
+            messagebox.showinfo(
+                title, "%s is this PC's own address (the ENET adapter).\n\n"
+                "The car has its own 169.254.x.x address. Pick this one under "
+                "'via' and press Discover to find the car's." % ip)
+        return mine
+
     def _toggle(self):
         if self.poller:
             self.poller.stop()
@@ -906,6 +953,8 @@ class App(tk.Tk):
         ip = self.ip_var.get().strip()
         if not ip:
             messagebox.showinfo("Connect", "Enter an IP, or press Discover.")
+            return
+        if self._own_address(ip, "Connect"):
             return
         try:
             target = int(self.target_var.get(), 0)
@@ -929,6 +978,8 @@ class App(tk.Tk):
         ip = self.ip_var.get().strip()
         if not ip and not self.poller:
             messagebox.showinfo("Faults", "Enter or discover an IP first.")
+            return
+        if not self.poller and self._own_address(ip, "Faults"):
             return
         wait = self._probe_wait("Faults")
         if wait is None:
@@ -1102,11 +1153,35 @@ class App(tk.Tk):
 
                 elif kind == "discovered":
                     hits = msg[1]
-                    if not hits:
+                    near = msg[2] if len(msg) > 2 else []
+                    hsfz = [h for h in hits if core.reply_protocol(h[1]) == "HSFZ"]
+                    if hits and not hsfz:
+                        self.ip_var.set(hits[0][0])
+                        self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
+                        messagebox.showinfo(
+                            "Discover",
+                            "The car at %s answered with DoIP (port 13400), not "
+                            "HSFZ, which is what this tool speaks. Please report "
+                            "this: DoIP support can be added." % hits[0][0])
+                    elif not hits and near:
+                        self.ip_var.set(near[0])
+                        self.status.config(text="\u25cf no reply; %s is on the link"
+                                           % near[0], foreground="#b8860b")
+                        messagebox.showinfo(
+                            "Discover",
+                            "The car didn't answer Discover, but %s is on the car's "
+                            "link, so it's probably the car. It's in the IP box: "
+                            "press Connect.%s" % (near[0], "\n\nAlso seen: " +
+                                                  ", ".join(near[1:]) if near[1:] else ""))
+                    elif not hits:
                         messagebox.showinfo(
                             "Discover",
                             "No reply.\n\n"
-                            "1. Ignition on (position 2)\n"
+                            + ("This PC has no 169.254.x.x (ENET) address yet: "
+                               "the adapter isn't connected or Windows hasn't "
+                               "set it up (it takes 30-60 s after plugging in).\n\n"
+                               if self._no_enet_address else "")
+                            + "1. Ignition on (position 2)\n"
                             "2. USB ENET adapter plugged into car and PC\n"
                             "3. Pick the 169.254.x.x address in 'via' - an "
                             "auto broadcast leaves over WiFi instead\n"

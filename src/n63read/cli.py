@@ -58,13 +58,23 @@ def op_discover(args):
         for a in core.local_ipv4s():
             print("   ", a)
         return
-    hits = core.discover(args.timeout, args.bind)
+    try:
+        hits = core.discover(args.timeout, args.bind)
+    except core.AddressNotAvailable as e:
+        link = core.link_local(core.local_ipv4s())
+        sys.exit("discover: %s\n%s" % (e, "ENET addresses on this PC now: " + ", ".join(link)
+                                        if link else "This PC has no 169.254.x.x "
+                                        "(ENET) address right now."))
     if not hits:
         print("No response. Check you're on the adapter's network and the "
               "ignition is on (position 2).")
+        near = core.link_neighbours(args.bind) if args.bind else []
+        if near:
+            print("But these are on the car's link (probably the car): %s\n"
+                  "Try: n63read read --ip %s ILAG1" % (", ".join(near), near[0]))
         return
     for ip, payload in hits:
-        print("%-16s %s" % (ip, payload.hex()))
+        print("%-16s %-5s %s" % (ip, core.reply_protocol(payload), payload.hex()))
         tail = payload[6:]
         printable = bytes(c if 32 <= c < 127 else 0x2E for c in tail)
         print(" " * 17 + printable.decode("ascii", "replace"))

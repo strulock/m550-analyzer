@@ -29,6 +29,13 @@ Implementation: `core.Hsfz`, `core.discover`.
   `169.254.x.x` address (GUI *via*, CLI `--bind`). The reply is also dropped
   unless that network is set to *Private* and Python / the exe is allowed
   through Windows Firewall.
+- **WinError 10049, "The requested address is not valid in its context".**
+  Discover tried to send from an address the PC doesn't have (any more).
+  The adapter picks a new `169.254.x.x` whenever the link resets (unplugged,
+  ignition cycled), and a remembered address goes stale. The GUI now
+  re-reads the addresses on every Discover and switches to the adapter's
+  current one; if there is none, the adapter isn't connected or Windows
+  hasn't set it up yet (30–60 s after plugging in).
 
 ## Frames
 
