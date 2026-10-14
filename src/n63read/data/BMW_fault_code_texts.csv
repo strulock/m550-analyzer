@@ -42,6 +42,7 @@
 021326,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),DME-slave
 021328,"LIN, interne Ursache (Sammelfehler)","LIN, internal cause (group fault)",DME-slave
 021329,Softwarefehler (Sammelfehler),Softwarefehler (group fault),DME-slave
+021700,Energiesparmode aktiv,Energiesparmode active,EKP301
 021800,Energiesparmode aktiv,Energiesparmode active,GSZFB1
 021808,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,GSZFB1
 021809,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,GSZFB1
@@ -117,6 +118,7 @@
 02FF01,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,ACSM5
 02FF12,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
 02FF13,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
+02FF17,DM_TEST_APPL,DM_TEST_APPL,EKP301
 02FF18,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,GSZFB1
 02FF19,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,LMV-G11
 02FF29,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,DSC-G30N
@@ -3827,6 +3829,33 @@
 481900,Interner Steuergerätefehler REMA rechts,Internal Steuergerätefehler REMA right,ACSM5
 481902,Temporäre Funktionsstörung REMA rechts,Temporäre Funktionsstörung REMA right,ACSM5
 481916,REMA rechts: Maximale Anzahl Straffungen erreicht,REMA right: maximum number Straffungen erreicht,ACSM5
+481B00,Motorspannung zu hoch,Engine voltage too high,EKP301
+481B01,Motorspannung zu niedrig,Engine voltage too low,EKP301
+481B02,Motorstrom zu hoch,Engine current too high,EKP301
+481B03,Motorstrom zu niedrig,Engine current too low,EKP301
+481B04,Motorstrom fehlt,Engine current missing,EKP301
+481B05,Drehzahl fehlt,Speed missing,EKP301
+481B06,Drehzahl zu hoch,Speed too high,EKP301
+481B07,Drehzahl zu niedrig,Speed too low,EKP301
+481B08,Übertemperatur Level 3,Overtemperature Level 3,EKP301
+481B09,Übertemperatur Level 2,Overtemperature Level 2,EKP301
+481B0A,Notlauf-/Testkodierung,Limp home-/test coding,EKP301
+481B0B,Kodierdaten defekt (CRC-Fehler),Kodierdaten defective (CRC-fault),EKP301
+481B0C,SG unkodiert,SG unkodiert,EKP301
+481B0D,Crash- Abschaltung,Crash- shutdown,EKP301
+481B0E,Regelart unplausibel,Regelart implausible,EKP301
+481B13,Tankleerfahrt,Tankleerfahrt,EKP301
+481B20,MOTORSPANNUNG_B_ZU_NIEDRIG,MOTORSPANNUNG_B_ZU_NIEDRIG,EKP301
+481B21,MOTORSPANNUNG_C_ZU_NIEDRIG,MOTORSPANNUNG_C_ZU_NIEDRIG,EKP301
+481B22,MOTORSTROM_B_ZU_HOCH,MOTORSTROM_B_ZU_HOCH,EKP301
+481B23,MOTORSTROM_C_ZU_HOCH,MOTORSTROM_C_ZU_HOCH,EKP301
+481B24,MOTORSTROM_B_ZU_NIEDRIG,MOTORSTROM_B_ZU_NIEDRIG,EKP301
+481B25,MOTORSTROM_C_ZU_NIEDRIG,MOTORSTROM_C_ZU_NIEDRIG,EKP301
+481B26,MOTORSTROM_B_FEHLT,MOTORSTROM_B_FEHLT,EKP301
+481B27,MOTORSTROM_C_FEHLT,MOTORSTROM_C_FEHLT,EKP301
+481B28,KODIERUNGSFEHLER_EC_DC,KODIERUNGSFEHLER_EC_DC,EKP301
+481B2B,Saugstrahlpumpenfunktion defekt,Saugstrahlpumpenfunktion defective,EKP301
+481B2C,Montagemode Werk / Pumpensperre,Montagemode Werk / Pumpensperre,EKP301
 482280,Lenkgetriebe - Einfriererkennung,Lenkgetriebe - Einfriererkennung,EPS-G11
 482281,Steuergerät intern - Leistungsdichtebegrenzung aufgetreten,Control unit internal - Leistungsdichtebegrenzung occurred,EPS-G11
 4822A6,Spannungsversorgung - Globale Unterspannung extern,Power supply - global undervoltage extern,EPS-G11
@@ -7079,6 +7108,10 @@ CDF80E,"LP-CAN, Botschaft (Status Energiebordnetz, 0x43E): fehlt","LP-CAN, messa
 CDF80F,"LP-CAN, Botschaften (Getriebe): fehlen","LP-CAN, message (transmission): fehlen",DME; DME-slave
 CDF810,"LP-CAN, Botschaft (Daten Getriebestrang, 0x1AF) bei Unterspannung: fehlt","LP-CAN, message (data transmission train, 0x1AF) at undervoltage: missing",DME; DME-slave
 CDFA04,"FA-CAN, Botschaft (Schlafbereitschaft Global FZM, 0x3A5): fehlt","FA-CAN, message (Schlafbereitschaft global FZM, 0x3A5): missing",DME; DME-slave
+CEC40A,FA-CAN Control Module Bus OFF,FA-CAN control module bus OFF,EKP301
+CEC486,A-CAN Control Module Bus OFF,A-CAN control module bus OFF,EKP301
+CECBFF,DM_TEST_COM,DM_TEST_COM,EKP301
+CED400,Timeout CAN-Botschaft Fördermenge,Timeout CAN-message Fördermenge,EKP301
 CF0469,LP-CAN Physikalischer Busfehler,LP-CAN physical bus fault,GSZFB1
 CF0472,LP-CAN Control Module Bus OFF,LP-CAN control module bus OFF,GSZFB1
 CF0BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,GSZFB1

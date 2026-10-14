@@ -50,7 +50,7 @@ COLUMNS = {
 }
 # Module catalogs from tools/module_catalog.py.
 for _name in ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
-              "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11"):
+              "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301"):
     COLUMNS[_name + "_measurements.csv"] = ("INFO", "INFO_EN")
     COLUMNS[_name + "_enum_tables.csv"] = ("text_de", "text_en")
 

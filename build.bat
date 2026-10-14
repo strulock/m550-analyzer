@@ -11,7 +11,7 @@ set ADD=--add-data "%DATA%\N63TU2_DME_readable_measurements.csv;." ^
  --add-data "%DATA%\BMW_freeze_frame_fields.csv;." ^
  --add-data "%DATA%\G30_module_sgbd_map.csv;."
 rem Module catalogs from tools\module_catalog.py.
-for %%M in (NBTEVO GSZFB1 ACSM5 DSC_G30N BDC_G11 EPS_G11 VDP_G11 LMV_G11 IHKA_G11) do call set ADD=%%ADD%% ^
+for %%M in (NBTEVO GSZFB1 ACSM5 DSC_G30N BDC_G11 EPS_G11 VDP_G11 LMV_G11 IHKA_G11 EKP301) do call set ADD=%%ADD%% ^
  --add-data "%DATA%\%%M_measurements.csv;." --add-data "%DATA%\%%M_enum_tables.csv;."
 
 python -m PyInstaller --noconfirm --onefile --windowed --name n63read --paths src %ADD% src\n63read\gui.py || exit /b 1

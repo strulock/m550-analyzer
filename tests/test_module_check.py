@@ -130,3 +130,17 @@ def test_fault_merge_rewords_only_within_a_module_family(tmp_path, monkeypatch):
     assert rows["401111"]["text_de"] == "neu" and rows["401111"]["source_module"] == "BDC-G11"
     assert rows["801230"]["text_de"] == "DME Text"      # another module's code: untouched
     assert rows["781234"]["source_module"] == "BDC-G11"
+
+
+def test_fuel_pump_record_uses_the_jobs_byte_positions():
+    fields = LAYOUTS[(0x17, 0x4010)]
+    raw = bytearray(47)
+    raw[2], raw[11], raw[14], raw[20], raw[44] = 125, 42, 80, 138, 0
+    rec = core.decode_record(bytes(raw), fields)
+    assert rec["EKP_STATUS_ADC_BEWERTET.MOTOR_SPANNUNG_A"][0] == pytest.approx(12.5)
+    assert rec["EKP_STATUS_ADC_BEWERTET.MOTOR_STROM_A"][0] == pytest.approx(4.2)
+    assert rec["EKP_STATUS_ADC_BEWERTET.TEMPERATUR_A"][0] == 30
+    assert rec["EKP_STATUS_ADC_BEWERTET.SPANNUNG_KL30"][0] == pytest.approx(13.8)
+    assert core.expected_size(fields) == (45, False)       # last used byte is 44
+    assert core.decode_record(b"\x00" * 30, fields)[
+        "EKP_STATUS_ADC_BEWERTET.MOTOR_STROM_C"] == (None, "", "short reply")

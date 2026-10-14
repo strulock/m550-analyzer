@@ -89,7 +89,7 @@ down during it but doesn't stop.
 
 ### Other modules: head unit, transmission, chassis, body, climate
 
-Besides the DME, the channel list holds the readable values of nine more
+Besides the DME, the channel list holds the readable values of ten more
 modules, generated from their SGBD files by `tools/module_catalog.py` and
 labelled by module in the picker:
 
@@ -104,6 +104,7 @@ labelled by module in the picker:
 | Suspension, VDP (0x76) | `vdp_g11` | `VDP_` | 538 | ride height per corner, damper valve currents, wheel acceleration, roll stabilisation |
 | Transfer case, xDrive (0x19) | `lmv_g11` | `LMV_` | 224 | clutch torque and status, clutch temperature model |
 | Climate, IHKA (0x78) | `ihka_g11` | `IHKA_` | 154 | climate temperature sensors, A/C compressor speed and state |
+| Fuel pump, EKP (0x17) | `ekp301` | `EKP_` | 13 | pump motor voltages and currents, battery voltage, tank senders, temperatures |
 
 Most of the transmission's values are shift adaptation tables. Their fault
 texts are in the fault file too, so their codes now come with a description.
@@ -125,6 +126,7 @@ Useful channels for a drive log:
 | Steering angle; steering torque | `EPS_EPS_RITZELWINKELSENSOR.*`; `EPS_EPS_MOMENTENSENSOR.*` |
 | Ride height per corner; damper currents | `VDP_STATUS_HOEHENSTAENDE_LESEN.*`; `VDP_VDC_2_VENTILE_STROM.*` |
 | xDrive front clutch torque | `LMV_LMV_MOMENT.*` |
+| Fuel pump current; voltage at the pump | `EKP_STATUS_ADC_BEWERTET.MOTOR_STROM_A`...; `.SPANNUNG_KL30` |
 
 These channels are read alongside the DME on one connection, but not every
 cycle. What moves while driving (GPS, speeds, gear, brakes, acceleration)
@@ -134,8 +136,10 @@ DME rate up. A module read waits at most half a second, an identifier the
 module refuses as unsupported is not asked for again, and a module that
 stops answering is left alone for 30 seconds.
 
-The GPS position comes from a hand-coded job, not a table, so its layout was
-worked out by disassembling `STATUS_GPS_POSITION`; see `core.py`.
+The GPS position and the fuel pump's values come from hand-coded jobs, not
+tables, so their layouts were worked out by disassembling
+`STATUS_GPS_POSITION` (see `core.py`) and `STATUS_ADC_BEWERTET` (see
+`tools/module_catalog.py`).
 `n63read gps --watch` prints the raw bytes next to the decoded position.
 
 **None of these catalogs has been checked against the car yet.** BMW ships
@@ -207,7 +211,7 @@ rebuilding.
 The CSVs were extracted from BMW SGBD (`.prg`) files, mainly `dme8ff_r.prg`;
 the module catalogs (`<MODULE>_measurements.csv`, `<MODULE>_enum_tables.csv`)
 and their fault texts from `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`,
-`bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11` and `ihka_g11.prg`, by
+`bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11` and `ekp301.prg`, by
 `tools/module_catalog.py`.
 They hold identifier numbers, units and scaling factors: the interface facts
 you need to talk to hardware you own. BMW's `.prg` files and SP-Daten are not

@@ -70,7 +70,7 @@ MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
 # Per-module catalogs from tools/module_catalog.py: <NAME>_measurements.csv
 # and <NAME>_enum_tables.csv for each.
 MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
-                   "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11")
+                   "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301")
 
 DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
               MODULE_MAP_CSV)
@@ -337,6 +337,7 @@ KNOWN_MODULES = {
     0x01: "Airbag / crash safety (ACSM)",
     0x10: "Central gateway (ZGW)",
     0x12: "Engine, master DME",
+    0x17: "Fuel pump control (EKP)",
     0x18: "Transmission, ZF 8HP (EGS)",
     0x19: "Transfer case, xDrive (LMV)",
     0x30: "Electric power steering (EPS)",
@@ -702,7 +703,7 @@ def decode(raw, meta, enums=None, lang="text_en"):
 
 # Short names for the picker, by module address.
 MODULE_LABELS = {
-    0x01: "Airbag", 0x18: "Transmission", 0x19: "Transfer case", 0x29: "DSC",
+    0x01: "Airbag", 0x17: "Fuel pump", 0x18: "Transmission", 0x19: "Transfer case", 0x29: "DSC",
     0x30: "Steering", 0x40: "Body", 0x63: "Head unit", 0x76: "Suspension",
     0x78: "Climate",
 }
@@ -721,7 +722,8 @@ FAST_DIDS = frozenset(
     + [(0x40, d) for d in (0xD601, 0xD611)]                                # ride height, drive mode
     + [(0x30, d) for d in (0xDB57, 0xDB99, 0xDB9A)]                        # steering angle, torque
     + [(0x76, d) for d in (0xD665, 0xDC05, 0xDC0A)]                        # wheel accel, height, dampers
-    + [(0x19, d) for d in (0xDB32, 0xDFEA)])                               # xDrive clutch torque
+    + [(0x19, d) for d in (0xDB32, 0xDFEA)]                                # xDrive clutch torque
+    + [(0x17, 0x4010)])                                                    # fuel pump current
 SLOW_READS_PER_CYCLE = 6       # module reads allowed per DME cycle
 NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
 MODULE_TIMEOUT = 0.5           # a present module answers in milliseconds; a
@@ -785,6 +787,13 @@ def field_size(dtype, raw, pos):
     return None
 
 
+def _field_pos(meta, pos):
+    """A field's offset: its POS column if set (fields taken from a hand-coded
+    job, which skips bytes), otherwise right after the previous field."""
+    given = (meta.get("POS") or "").strip()
+    return int(given) if given else pos
+
+
 def decode_record(raw, fields):
     """Split one identifier's reply into its fields, in order.
 
@@ -795,6 +804,7 @@ def decode_record(raw, fields):
     out, pos = {}, 0
     for i, meta in enumerate(fields):
         dtype = (meta.get("DATENTYP") or "").strip().lower()
+        pos = _field_pos(meta, pos)
         size = field_size(dtype, raw, pos)
         if size is None:
             for rest in fields[i:]:
@@ -894,17 +904,23 @@ class ChannelReader:
 
 def expected_size(fields):
     """(bytes, exact) a record's reply should have. `exact` is False when an
-    unsized string or a field of unknown size makes `bytes` only a minimum."""
-    total = 0
+    unsized string, a field of unknown size, or fields at given positions
+    (the rest of the reply undescribed) make `bytes` only a minimum."""
+    pos = end = 0
+    exact = True
     for f in fields:
         dtype = (f.get("DATENTYP") or "").strip().lower()
+        if (f.get("POS") or "").strip():
+            exact = False
+        pos = _field_pos(f, pos)
         if dtype == "string":
-            return total, False
+            return max(end, pos), False
         size = field_size(dtype, b"", 0)
         if size is None:
-            return total, False
-        total += size
-    return total, True
+            return max(end, pos), False
+        pos += size
+        end = max(end, pos)
+    return end, exact
 
 
 def check_layouts(catalog, target=DME_MASTER):

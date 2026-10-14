@@ -23,9 +23,11 @@ its own channel, named <PREFIX><job>.<result>, with FIELD giving its place in
 the record. The reader splits the reply in that order, so a channel can only
 be decoded if every field before it has a known size.
 
-The head unit's GPS position (0xD039) is read by a hand-coded job rather than
-a table, so its rows are added by hand from a disassembly of
-STATUS_GPS_POSITION; see core.py.
+The head unit's GPS position (0xD039) and the fuel pump's values (0x4010)
+are read by hand-coded jobs rather than tables, so their rows are added by
+hand from disassemblies of STATUS_GPS_POSITION (see core.py) and
+STATUS_ADC_BEWERTET (see EKP_ROWS). A POS column gives a field's offset when
+the job skips bytes; otherwise fields follow one another.
 
 The table directory here is [name: 64 bytes][offset][0][cols][rows], i.e.
 the numbers follow the name. sgbd_tables.table_directory() reads the 16
@@ -60,10 +62,11 @@ MODULES = {
     "vdp_g11": ("VDP_G11", "0x76", "VDP_", "VDP-G11"),
     "lmv_g11": ("LMV_G11", "0x19", "LMV_", "LMV-G11"),
     "ihka_g11": ("IHKA_G11", "0x78", "IHKA_", "IHKA-G11"),
+    "ekp301": ("EKP301", "0x17", "EKP_", "EKP301"),
 }
 
 HEADER = ["ARG", "MODULE", "ID", "FIELD", "RESULTNAME", "INFO", "INFO_EN",
-          "EINHEIT", "L/H", "DATENTYP", "NAME", "MUL", "DIV", "ADD", "JOB"]
+          "EINHEIT", "L/H", "DATENTYP", "NAME", "MUL", "DIV", "ADD", "JOB", "POS"]
 
 # Head unit 0xD039, STATUS_GPS_POSITION. Layout in core.py's GPS section.
 GPS_ROWS = [
@@ -74,6 +77,28 @@ GPS_ROWS = [
     ("LONGITUDE", "STAT_GPS_POSITION_LONGITUDE", "GPS Laengengrad (Ost positiv)",
      "deg", "gps_dms", "-"),
     ("HEIGHT", "STAT_GPS_POSITION_HEIGHT", "GPS Hoehe", "m", "unsigned int", "-"),
+]
+
+
+# Fuel pump 0x4010, STATUS_ADC_BEWERTET. ekp301.prg has no SG_FUNKTIONEN; this
+# hand-coded job reads one scaled byte out of each 3-byte group of the reply,
+# at these payload offsets (its own indices minus the 3-byte 62 40 10 header).
+# Temperatures are the byte - 50; a 0 byte means no value (shows -50).
+EKP_ROWS = [
+    # suffix, result, German description, unit, offset, MUL, ADD
+    ("MOTOR_SPANNUNG_A", "Kraftstoffpumpe Spannung Phase A", "V", 2, "0.1", "0.0"),
+    ("MOTOR_SPANNUNG_B", "Kraftstoffpumpe Spannung Phase B", "V", 5, "0.1", "0.0"),
+    ("MOTOR_SPANNUNG_C", "Kraftstoffpumpe Spannung Phase C", "V", 8, "0.1", "0.0"),
+    ("MOTOR_STROM_A", "Kraftstoffpumpe Strom Phase A", "A", 11, "0.1", "0.0"),
+    ("TEMPERATUR_A", "Temperatur A (0 = kein Wert)", "°C", 14, "1.0", "-50.0"),
+    ("SPANNUNG_TDS", "Spannung Tankdrucksensor", "V", 17, "0.1", "0.0"),
+    ("SPANNUNG_KL30", "Spannung Klemme 30", "V", 20, "0.1", "0.0"),
+    ("TEMPERATUR_B", "Temperatur B (0 = kein Wert)", "°C", 29, "1.0", "-50.0"),
+    ("MOTOR_STROM_B", "Kraftstoffpumpe Strom Phase B", "A", 32, "0.1", "0.0"),
+    ("TANK_GEBER_1", "Tankgeber 1", "V", 35, "0.1", "0.0"),
+    ("TANK_GEBER_2", "Tankgeber 2", "V", 38, "0.1", "0.0"),
+    ("TEMPERATUR_C", "Temperatur C (0 = kein Wert)", "°C", 41, "1.0", "-50.0"),
+    ("MOTOR_STROM_C", "Kraftstoffpumpe Strom Phase C", "A", 44, "0.1", "0.0"),
 ]
 
 
@@ -114,7 +139,10 @@ def short(result):
 def build(tabs, name, module, prefix):
     """Catalog rows and enum rows for one module."""
     enum_prefix = name + "."
-    head, funcs = tabs["SG_FUNKTIONEN"]
+    # Older-style files (the fuel pump) have no SG_FUNKTIONEN; rows come
+    # from hand-decoded jobs below.
+    head, funcs = tabs.get("SG_FUNKTIONEN", (["ARG", "ID", "RESULTNAME", "SERVICE",
+                                                "RES_TABELLE"], []))
     col = {c: i for i, c in enumerate(head)}
     rows, used_enums = [], set()
 
@@ -122,12 +150,13 @@ def build(tabs, name, module, prefix):
         n = (n or "").strip()
         return "-" if n in ("", "-") else enum_prefix + n.upper()
 
-    def add(arg, did, field, result, info, unit, lh, dtype, ename, mul, div, add_, job):
+    def add(arg, did, field, result, info, unit, lh, dtype, ename, mul, div, add_, job,
+            pos=""):
         rows.append({"ARG": arg, "MODULE": module, "ID": did, "FIELD": field,
                      "RESULTNAME": result, "INFO": info, "INFO_EN": translate(info),
                      "EINHEIT": unit, "L/H": lh, "DATENTYP": dtype,
                      "NAME": enum_name(ename), "MUL": mul, "DIV": div, "ADD": add_,
-                     "JOB": job})
+                     "JOB": job, "POS": pos})
         if ename not in ("", "-"):
             used_enums.add(ename.upper())
 
@@ -159,6 +188,12 @@ def build(tabs, name, module, prefix):
         for i, (suffix, result, info, unit, dtype, ename) in enumerate(GPS_ROWS):
             add("%sSTATUS_GPS_POSITION.%s" % (prefix, suffix), "0xD039", i, result, info,
                 unit, "high", dtype, ename, "1.0", "1.0", "0.0", "STATUS_GPS_POSITION")
+
+    if name == "EKP301":
+        for i, (suffix, info, unit, pos, mul, add_) in enumerate(EKP_ROWS):
+            add("%sSTATUS_ADC_BEWERTET.%s" % (prefix, suffix), "0x4010", i,
+                "STAT_" + suffix, info, unit, "high", "unsigned char", "-", mul, "1.0",
+                add_, "STATUS_ADC_BEWERTET", pos)
 
     names = [r["ARG"] for r in rows]
     dupes = sorted({n for n in names if names.count(n) > 1})
