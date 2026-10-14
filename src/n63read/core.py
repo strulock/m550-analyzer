@@ -428,6 +428,48 @@ def write_fault_csv(path, rows):
         w.writerows(rows)
 
 
+# --------------------------------------------------------- head unit GPS
+#
+# From the NBT Evo SGBD (nbtevo.prg). Its STATUS_GPS_POSITION job is
+# hand-coded rather than table-driven, so the layout below comes from
+# disassembling that job: it sends 22 D0 39 and reads, after the echoed DID,
+#   [0]      validity, 0x00 = valid, 0x01 = not valid
+#   [1..5]   latitude:  0x00 N / 0x01 S, degrees, minutes, seconds, 1/100 s
+#   [6..10]  longitude: 0x00 E / 0x01 W, degrees, minutes, seconds, 1/100 s
+#   [11..12] height, unsigned big-endian, unit not stated (presumably m)
+
+HEAD_UNIT = 0x63
+GPS_POSITION_DID = 0xD039
+GPS_STATUS_DID = 0xD038        # one byte, see GPS_FIX below
+
+GPS_FIX = {
+    0x00: "not supported: no GPS", 0x01: "not supported: communication error",
+    0x02: "receiver error", 0x03: "no almanac", 0x04: "searching for satellites",
+    0x05: "tracking 1 satellite", 0x06: "tracking 2 satellites",
+    0x07: "tracking 3 satellites", 0x08: "tracking 4 satellites",
+    0x09: "tracking 5 satellites", 0x0A: "tracking 6 satellites",
+    0x0B: "2D position", 0x0C: "3D position",
+}
+
+
+def _dms(b):
+    """5 bytes (hemisphere, deg, min, sec, 1/100 s) to signed decimal degrees."""
+    deg = b[1] + b[2] / 60 + (b[3] + b[4] / 100) / 3600
+    return -deg if b[0] == 0x01 else deg
+
+
+def parse_gps_position(payload):
+    """Decode a 0xD039 payload. Returns a dict, or raises ValueError if short."""
+    if len(payload) < 13:
+        raise ValueError("GPS position needs 13 bytes, got %d" % len(payload))
+    return {
+        "valid": payload[0] == 0x00,
+        "lat": round(_dms(payload[1:6]), 7),
+        "lon": round(_dms(payload[6:11]), 7),
+        "height": (payload[11] << 8) | payload[12],
+    }
+
+
 # --------------------------------------------------------------- discovery
 
 def local_ipv4s():

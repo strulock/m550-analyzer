@@ -19,6 +19,9 @@ Usage
   # 5. Read fault memory, decoded against the SGBD text catalog
   n63read faults --ip 169.254.x.x --target 0x12
 
+  # 6. GPS position from the head unit (0x63); --watch to keep reading
+  n63read gps --ip 169.254.x.x --watch
+
   # Target a module other than the master DME (0x12)
   n63read read --ip 169.254.x.x --target 0x13 ILAG2
 """
@@ -225,6 +228,29 @@ def op_log(args):
         print("wrote %d samples to %s" % (n, args.out))
 
 
+def op_gps(args):
+    """Read the head unit's GPS fix and position. Raw bytes shown for checking."""
+    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+        while True:
+            try:
+                status = h.read_did(args.target, core.GPS_STATUS_DID)
+                fix = core.GPS_FIX.get(status[0], "0x%02X" % status[0]) if status else "?"
+                raw = h.read_did(args.target, core.GPS_POSITION_DID)
+            except NegativeResponse as e:
+                sys.exit("module 0x%02X refused: %s"
+                         % (args.target, NRC.get(e.code, "nrc 0x%02X" % e.code)))
+            try:
+                p = core.parse_gps_position(raw)
+                print("%-24s %s  lat %.6f  lon %.6f  height %d   raw=%s"
+                      % (fix, "valid  " if p["valid"] else "INVALID", p["lat"], p["lon"],
+                         p["height"], raw.hex()))
+            except ValueError as e:
+                print("%-24s %s   raw=%s" % (fix, e, raw.hex()))
+            if not args.watch:
+                return
+            time.sleep(args.interval)
+
+
 # --------------------------------------------------------------------- CLI
 
 def hexint(s):
@@ -288,6 +314,13 @@ def build_parser():
     sp.add_argument("--out", default="n63log.csv")
     sp.add_argument("names", nargs="+")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("gps", help="read GPS position from the head unit (NBT Evo)")
+    common(sp)
+    sp.add_argument("--target", type=hexint, default=core.HEAD_UNIT)
+    sp.add_argument("--watch", action="store_true", help="keep reading until Ctrl-C")
+    sp.add_argument("--interval", type=float, default=1.0)
+    sp.set_defaults(func=op_gps)
     return p
 
 
