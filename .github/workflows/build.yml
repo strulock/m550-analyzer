@@ -33,7 +33,12 @@ jobs:
       # channels at runtime, so check the built exe has them all.
       - name: Self-test the built exe
         shell: cmd
-        run: dist\n63read-cli.exe selftest
+        run: '"dist\BMW Analyzer\n63read-cli.exe" selftest'
+
+      # The same folder, zipped, for running without installing.
+      - name: Portable zip
+        shell: pwsh
+        run: Compress-Archive -Path "dist\BMW Analyzer" -DestinationPath dist\BMW-Analyzer-portable.zip
 
       # The per-user installer, BMW-Analyzer-Setup.exe, versioned from pyproject.
       - name: Installer
@@ -58,10 +63,17 @@ jobs:
           if ($LASTEXITCODE) { exit 1 }
           $docs = [Environment]::GetFolderPath("MyDocuments")
           if (-not (Test-Path "$docs\BMW Analyzer Logs")) { throw "no logs folder" }
+          if (-not (Test-Path "$app\_internal")) { throw "no _internal folder" }
           $key = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{15CE8A75-71CE-4317-BF3E-1730307815CD}_is1"
-          "installed version: " + (Get-ItemProperty $key).DisplayVersion
+          $entry = Get-ItemProperty $key
+          "installed version $($entry.DisplayVersion) in $($entry.InstallLocation)"
+          # The app updates itself this way: the same installer, silent, over itself.
+          Start-Process dist\BMW-Analyzer-Setup.exe -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/NORESTART", "/CLOSEAPPLICATIONS"
+          & "$app\n63read-cli.exe" --version
+          if ($LASTEXITCODE) { exit 1 }
           Start-Process "$app\unins000.exe" -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"
           if (Test-Path "$app\n63read.exe") { throw "uninstall left the exe" }
+          if (Test-Path "$app\_internal") { throw "uninstall left _internal" }
 
       # Checksums for the app's self-update, which also uses GitHub's own
       # asset digests when they are there.
@@ -69,15 +81,14 @@ jobs:
         run: >
           python -c "import hashlib; open('dist/SHA256SUMS.txt', 'w').write(''.join(
           '%s  %s\n' % (hashlib.sha256(open('dist/' + n, 'rb').read()).hexdigest(), n)
-          for n in ('n63read.exe', 'n63read-cli.exe', 'BMW-Analyzer-Setup.exe')))"
+          for n in ('BMW-Analyzer-Setup.exe', 'BMW-Analyzer-portable.zip')))"
 
       - uses: actions/upload-artifact@v4
         with:
           name: n63read
           path: |
-            dist/n63read.exe
-            dist/n63read-cli.exe
             dist/BMW-Analyzer-Setup.exe
+            dist/BMW-Analyzer-portable.zip
             dist/SHA256SUMS.txt
 
       - name: Attach to release
@@ -85,7 +96,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/n63read.exe
-            dist/n63read-cli.exe
             dist/BMW-Analyzer-Setup.exe
+            dist/BMW-Analyzer-portable.zip
             dist/SHA256SUMS.txt

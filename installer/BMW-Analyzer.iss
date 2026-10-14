@@ -2,8 +2,9 @@
 ;   iscc /DAppVersion=0.3.3 installer\BMW-Analyzer.iss
 ; -> dist\BMW-Analyzer-Setup.exe
 ;
-; Per-user: no admin prompt, installs to %LOCALAPPDATA%\Programs\BMW Analyzer,
-; a folder the app can write to, so it can keep itself up to date there.
+; Per-user: no admin prompt, installs to %LOCALAPPDATA%\Programs\BMW Analyzer.
+; The app updates itself by downloading the next release's installer and
+; running it silently.
 ; The AppId must not change: it ties upgrades and the uninstall entry together
 ; (n63read.update.APP_ID refers to it).
 
@@ -28,7 +29,7 @@ DefaultGroupName=BMW Analyzer
 DisableProgramGroupPage=yes
 UninstallDisplayName=BMW Analyzer
 UninstallDisplayIcon={app}\n63read.exe
-CloseApplications=yes
+CloseApplications=force
 RestartApplications=no
 LicenseFile=..\LICENSE
 OutputDir=..\dist
@@ -44,8 +45,16 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\dist\n63read.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\dist\n63read-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
+; The folder build: n63read.exe, n63read-cli.exe and _internal\.
+Source: "..\dist\BMW Analyzer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[InstallDelete]
+; Start each version clean: nothing left over from the one before. The *.old,
+; *.previous and *.new files are what the one-file builds' self-update left.
+Type: filesandordirs; Name: "{app}\_internal"
+Type: files; Name: "{app}\*.old"
+Type: files; Name: "{app}\*.previous"
+Type: files; Name: "{app}\*.new"
 
 [Dirs]
 ; Drive logs, fault lists and diagnostics reports go here by default. Never
@@ -60,10 +69,16 @@ Name: "{group}\Uninstall BMW Analyzer"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\BMW Analyzer"; Filename: "{app}\n63read.exe"; Tasks: desktopicon
 
 [UninstallDelete]
-; What the app's self-update leaves next to the exes.
-Type: files; Name: "{app}\*.old"
-Type: files; Name: "{app}\*.previous"
-Type: files; Name: "{app}\*.new"
+Type: filesandordirs; Name: "{app}\_internal"
+Type: filesandordirs; Name: "{localappdata}\n63read\updates"
 
 [Run]
 Filename: "{app}\n63read.exe"; Description: "{cm:LaunchProgram,BMW Analyzer}"; Flags: nowait postinstall skipifsilent
+; The app's "Restart to update" runs this silently with /RELAUNCH=1.
+Filename: "{app}\n63read.exe"; Flags: nowait; Check: Relaunch
+
+[Code]
+function Relaunch: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:relaunch|0}') = '1');
+end;
