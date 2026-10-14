@@ -177,6 +177,10 @@ class App(tk.Tk):
         self.geometry("1060x680")
         self.minsize(900, 560)
 
+        self.settings = core.load_settings()
+        self.lang = self.settings.get("language", "en")
+        if self.lang not in core.LANGUAGES:
+            self.lang = "en"
         self.catalog = self._load_catalog()
         self.layouts = core.record_layouts(self.catalog)
         self._info, self._order = self._index_catalog()
@@ -252,6 +256,11 @@ class App(tk.Tk):
         self.status = ttk.Label(bar, text="\u25cf not connected", foreground="#999")
         self.status.pack(side="left")
 
+        self.lang_var = tk.StringVar(value=core.LANGUAGES[self.lang])
+        lang = ttk.Combobox(bar, textvariable=self.lang_var, width=8, state="readonly",
+                            values=list(core.LANGUAGES.values()))
+        lang.pack(side="right", padx=(8, 0))
+        lang.bind("<<ComboboxSelected>>", lambda e: self._set_language())
         ttk.Button(bar, text="Faults", command=self._faults).pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Scan modules", command=self._scan).pack(side="right")
         self.replay_btn = ttk.Button(bar, text="Open log...", command=self._toggle_replay)
@@ -338,13 +347,34 @@ class App(tk.Tk):
 
     # -- picker ----------------------------------------------------------
 
-    @staticmethod
-    def _english(meta):
-        """English description, falling back to BMW's German where it's blank."""
-        text = (meta.get("INFO_EN") or "").strip()
+    def _describe(self, meta):
+        """The description in the display language, else the other one."""
+        first, second = ("INFO", "INFO_EN") if self.lang == "de" else ("INFO_EN", "INFO")
+        text = (meta.get(first) or "").strip()
         if text in ("", "-"):
-            text = (meta.get("INFO") or "").strip()
+            text = (meta.get(second) or "").strip()
         return "" if text == "-" else text
+
+    def _enum_lang(self):
+        return "text_de" if self.lang == "de" else "text_en"
+
+    def _set_language(self):
+        """Switch descriptions and value texts between English and German."""
+        code = next(c for c, n in core.LANGUAGES.items() if n == self.lang_var.get())
+        if code == self.lang:
+            return
+        self.lang = code
+        self.settings["language"] = code
+        try:
+            core.save_settings(self.settings)
+        except OSError:
+            pass                        # the choice still applies this session
+        self._info, self._order = self._index_catalog()
+        self._refilter()
+        for name, _did, meta in self.watch:
+            if self.tree.exists(name):
+                self.tree.item(name, text=self._describe(meta) or name)
+                self.tree.set(name, "note", "")     # refilled in this language
 
     def _index_catalog(self):
         """Per channel: module label, function group, record, label, search text.
@@ -356,7 +386,7 @@ class App(tk.Tk):
         """
         info, record_group = {}, {}
         for name, meta in self.catalog.items():
-            english = self._english(meta)
+            english = self._describe(meta)
             label = "%s  -  %s" % (english[:70], name) if english else name
             if meta.get("MODULE"):
                 module = int(meta["MODULE"], 16)
@@ -378,12 +408,12 @@ class App(tk.Tk):
                 module_label = DME_LABEL
                 func = core.function_group(name, meta.get("INFO"), english)
                 record = None
-            # Search the German and the code name too: the English is a
-            # glossary translation and sometimes leaves words untranslated.
-            hay = " ".join((label, module_label, func, meta.get("INFO") or "")).lower()
+            # Search both languages and the code name, whichever is shown.
+            hay = " ".join((label, module_label, func, meta.get("INFO") or "",
+                            meta.get("INFO_EN") or "")).lower()
             info[name] = (module_label, func, record, label, hay)
         # Undescribed channels sort last and show just their code name.
-        order = sorted(info, key=lambda n: (not self._english(self.catalog[n]),
+        order = sorted(info, key=lambda n: (not self._describe(self.catalog[n]),
                                             info[n][3].lower()))
         return info, order
 
@@ -679,7 +709,7 @@ class App(tk.Tk):
             meta = self.catalog[name]
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
-            self.tree.insert("", "end", iid=name, text=self._english(meta) or name,
+            self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
                              values=("", meta["EINHEIT"], name, meta["ID"], ""))
         self._push_channels()
 
@@ -709,7 +739,7 @@ class App(tk.Tk):
             meta = self.catalog[name]
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
-            self.tree.insert("", "end", iid=name, text=self._english(meta) or name,
+            self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
                              values=("", meta["EINHEIT"], name, meta["ID"], ""))
         self._push_channels()
 
@@ -941,7 +971,9 @@ class App(tk.Tk):
         tree = parts["tree"]
         for r in rows:
             tree.insert("", "end", values=(r["module"], r["module_name"], r["code"],
-                                           r["state"], r["text_en"] or r["text_de"]))
+                                           r["state"], (r["text_de"] or r["text_en"])
+                                           if self.lang == "de" else
+                                           (r["text_en"] or r["text_de"])))
         n_faults = sum(1 for r in rows if r["code"])
         n_mods = len({r["module"] for r in rows})
         parts["msg"].config(text="%d fault(s) across %d module(s)." % (n_faults, n_mods))
@@ -1114,7 +1146,7 @@ class App(tk.Tk):
             if not note:
                 # Enumerated values stay numbers (they log and plot); the
                 # words go in Status.
-                note = core.enum_text(value, meta, self.enums) or ""
+                note = core.enum_text(value, meta, self.enums, self._enum_lang()) or ""
             self.tree.set(name, "v", shown)
             self.tree.set(name, "note", note)
             if isinstance(value, (int, float)):

@@ -7,24 +7,24 @@ IHKA_G11.RDBI_ADS_DOP,4,safetySystemDiagnosticSession,safetySystemDiagnosticSess
 IHKA_G11.RDBI_ADS_DOP,64,vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
 IHKA_G11.RDBI_ADS_DOP,65,codingSession,codingSession
 IHKA_G11.RDBI_ADS_DOP,66,SWTSession,SWTSession
-IHKA_G11.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECUMehrmalsProgrammierbar
-IHKA_G11.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECUMindestensEinmalVollstaendigProgrammierbar
-IHKA_G11.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECUNichtMehrProgrammierbar
-IHKA_G11.TAB_AKS_EKMV,0x00,kein aktiver Kurzschluss,no active short circuit
-IHKA_G11.TAB_AKS_EKMV,0x01,aktiver Kurzschluss Low-Side,active short circuit Low-Side
-IHKA_G11.TAB_AKS_EKMV,0x02,aktiver Kurzschluss High-Side,active short circuit High-Side
+IHKA_G11.RDBI_PC_PCS_DOP,0,ECUMehrmalsProgrammierbar,ECU programmable multiple times
+IHKA_G11.RDBI_PC_PCS_DOP,1,ECUMindestensEinmalVollstaendigProgrammierbar,ECU fully programmable at least once
+IHKA_G11.RDBI_PC_PCS_DOP,2,ECUNichtMehrProgrammierbar,ECU no longer programmable
+IHKA_G11.TAB_AKS_EKMV,0x00,kein aktiver Kurzschluss,No active short circuit
+IHKA_G11.TAB_AKS_EKMV,0x01,aktiver Kurzschluss Low-Side,Active short circuit low side
+IHKA_G11.TAB_AKS_EKMV,0x02,aktiver Kurzschluss High-Side,Active short circuit high side
 IHKA_G11.TAB_FAHRZEUGART_KLIMA,0x00,Verbrennungsmotor,Combustion engine
 IHKA_G11.TAB_FAHRZEUGART_KLIMA,0x01,Hybrid,Hybrid
-IHKA_G11.TAB_FAHRZEUGART_KLIMA,0x02,Plug-In-Hybrid,Plug-in-hybrid
+IHKA_G11.TAB_FAHRZEUGART_KLIMA,0x02,Plug-In-Hybrid,Plug-in hybrid
 IHKA_G11.TAB_FAHRZEUGART_KLIMA,0x03,Elektrisch,Electric
-IHKA_G11.TAB_FAHRZEUGART_KLIMA,0xFF,ungltiger Wert,ungltiger value
-IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x01,IHKA High mit 3te LIN,IHKA High with 3te LIN
-IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x02,IHKA High ohne 3te LIN,IHKA High without 3te LIN
-IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x03,IHKA Low mit 3te LIN,IHKA Low with 3te LIN
-IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x04,IHKA Low ohne 3te LIN,IHKA Low without 3te LIN
+IHKA_G11.TAB_FAHRZEUGART_KLIMA,0xFF,ungltiger Wert,Invalid value
+IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x01,IHKA High mit 3te LIN,IHKA High with 3rd LIN
+IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x02,IHKA High ohne 3te LIN,IHKA High without 3rd LIN
+IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x03,IHKA Low mit 3te LIN,IHKA Low with 3rd LIN
+IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x04,IHKA Low ohne 3te LIN,IHKA Low without 3rd LIN
 IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x05,HKA,HKA
-IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x06,IHKA Mid mit 3te LIN,IHKA Mid with 3te LIN
-IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x07,IHKA Mid ohne 3te LIN,IHKA Mid without 3te LIN
+IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x06,IHKA Mid mit 3te LIN,IHKA Mid with 3rd LIN
+IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0x07,IHKA Mid ohne 3te LIN,IHKA Mid without 3rd LIN
 IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE,0xFF,Ungültiger Wert,Invalid value
 IHKA_G11.TAB_KLIMA_KAELTEMITTEL,0x00,R134A,R134A
 IHKA_G11.TAB_KLIMA_KAELTEMITTEL,0x01,R1234YF,R1234YF
@@ -32,23 +32,23 @@ IHKA_G11.TAB_KLIMA_KAELTEMITTEL,0x02,CO2,CO2
 IHKA_G11.TAB_KLIMA_KAELTEMITTEL,0xFF,Ungültiger Wert,Invalid value
 IHKA_G11.TAB_KLIMA_SCHEIBENHEIZUNG,0x00,AUS,OFF
 IHKA_G11.TAB_KLIMA_SCHEIBENHEIZUNG,0x01,EIN,ON
-IHKA_G11.TAB_KLIMA_SCHEIBENHEIZUNG,0x02,Getaktet,Getaktet
+IHKA_G11.TAB_KLIMA_SCHEIBENHEIZUNG,0x02,Getaktet,Pulsed
 IHKA_G11.TAB_KLIMA_SCHEIBENHEIZUNG,0xFF,Ungültiger Wert,Invalid value
 IHKA_G11.TAB_KLIMA_VARIANTEN,0x00,IHKR,IHKR
-IHKA_G11.TAB_KLIMA_VARIANTEN,0x01,IHKA 1-zonig,IHKA 1-zonig
-IHKA_G11.TAB_KLIMA_VARIANTEN,0x02,IHKA 2-zonig,IHKA 2-zonig
-IHKA_G11.TAB_KLIMA_VARIANTEN,0x03,"IHKA 2,5-zonig","IHKA 2,5-zonig"
-IHKA_G11.TAB_KLIMA_VARIANTEN,0x04,IHKA 3-zonig,IHKA 3-zonig
-IHKA_G11.TAB_KLIMA_VARIANTEN,0x05,IHKA 4-zonig,IHKA 4-zonig
-IHKA_G11.TAB_KLIMA_VARIANTEN,0xFF,ungltiger Wert,ungltiger value
+IHKA_G11.TAB_KLIMA_VARIANTEN,0x01,IHKA 1-zonig,IHKA 1-zone
+IHKA_G11.TAB_KLIMA_VARIANTEN,0x02,IHKA 2-zonig,IHKA 2-zone
+IHKA_G11.TAB_KLIMA_VARIANTEN,0x03,"IHKA 2,5-zonig",IHKA 2.5-zone
+IHKA_G11.TAB_KLIMA_VARIANTEN,0x04,IHKA 3-zonig,IHKA 3-zone
+IHKA_G11.TAB_KLIMA_VARIANTEN,0x05,IHKA 4-zonig,IHKA 4-zone
+IHKA_G11.TAB_KLIMA_VARIANTEN,0xFF,ungltiger Wert,Invalid value
 IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x00,Keine Wasserpumpe,No water pump
-IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x01,Schaltbare mechanische Wasserpumpe,Schaltbare mechanical water pump
-IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x02,Zusatzwasserpumpe,Zusatzwasserpumpe
-IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x03,Zusatzwasserpumpe PWM,Zusatzwasserpumpe PWM
+IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x01,Schaltbare mechanische Wasserpumpe,Switchable mechanical water pump
+IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x02,Zusatzwasserpumpe,Auxiliary water pump
+IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x03,Zusatzwasserpumpe PWM,Auxiliary water pump PWM
 IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x04,Elektrische Motorwasserpumpe,Electric engine water pump
-IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x05,Wasserpumpe von Standheizung,Water pump of Standheizung
-IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x06,LIN-Zusatzwasserpumpe,LIN-Zusatzwasserpumpe
-IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x07,LIN-Zusatzwasserpumpe und Wasserpumpe von Standheizung,LIN-Zusatzwasserpumpe and water pump of Standheizung
+IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x05,Wasserpumpe von Standheizung,Water pump from auxiliary heater
+IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x06,LIN-Zusatzwasserpumpe,LIN auxiliary water pump
+IHKA_G11.TAB_KLIMA_WASSERPUMPE,0x07,LIN-Zusatzwasserpumpe und Wasserpumpe von Standheizung,LIN auxiliary water pump and water pump from auxiliary heater
 IHKA_G11.TAB_KLIMA_WASSERPUMPE,0xFF,Ungültiger Wert,Invalid value
 IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0x00,LG_G,LG_G
 IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0x01,LK_M,LK_M
@@ -58,177 +58,177 @@ IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0x04,LR,LR
 IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0x05,LU_BMW,LU_BMW
 IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0x06,LK_S,LK_S
 IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0x07,LK_X,LK_X
-IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0xFF,ungültiger Wert,invalid value
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x00,AUS-Bereit,AUS-Bereit
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x01,AUS-Nachlauf,AUS-run-on
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x02,AUS-Störungsnachlauf_Gemeldet,AUS-Störungsnachlauf_Gemeldet
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x03,AUS-Störungsnachlauf-Quittiert,AUS-Störungsnachlauf-Quittiert
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x04,EIN-Start,EIN-start
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x05,EIN-Regelpause,EIN-Regelpause
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x06,EIN-Heizgerät aktiv,EIN-Heizgerät active
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x08,AUS-Heizgeräteverriegelung,AUS-Heizgeräteverriegelung
-IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x09,EIN-Nachlauf-Regelpause,EIN-run-on-Regelpause
+IHKA_G11.TAB_PRODUKTLINIE_KLIMA,0xFF,ungültiger Wert,Invalid value
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x00,AUS-Bereit,OFF - ready
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x01,AUS-Nachlauf,OFF - run-on
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x02,AUS-Störungsnachlauf_Gemeldet,OFF - fault run-on reported
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x03,AUS-Störungsnachlauf-Quittiert,OFF - fault run-on acknowledged
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x04,EIN-Start,ON - start
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x05,EIN-Regelpause,ON - control pause
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x06,EIN-Heizgerät aktiv,ON - heater active
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x08,AUS-Heizgeräteverriegelung,OFF - heater lockout
+IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x09,EIN-Nachlauf-Regelpause,ON - run-on control pause
 IHKA_G11.TAB_SH_BETRIEBSZUSTAND,0x0F,Signal ungültig,Signal invalid
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x00,Ausbrennen,Ausbrennen
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x00,Ausbrennen,Burn-out
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x01,Abschaltung,Shutdown
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x02,Ausbrennen TRS,Ausbrennen TRS
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x03,Ausbrennrampe,Ausbrennrampe
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x04,Auszustand,Auszustand
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x05,Brennbetrieb Teillast,Combustion operation Teillast
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x06,Brennbetrieb Volllast,Combustion operation Volllast
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x07,Brennstofffördern,Brennstofffördern
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x08,Brennermotorstart (Losreissen),Brennermotorstart (Losreissen)
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x09,Brennstoffunterbrechung,Brennstoffunterbrechung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0A,Diagnosezustand,Diagnosis state
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x02,Ausbrennen TRS,Burn-out TRS
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x03,Ausbrennrampe,Burn-out ramp
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x04,Auszustand,Off state
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x05,Brennbetrieb Teillast,Combustion mode partial load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x06,Brennbetrieb Volllast,Combustion mode full load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x07,Brennstofffördern,Fuel delivery
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x08,Brennermotorstart (Losreissen),Burner motor start (breakaway)
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x09,Brennstoffunterbrechung,Fuel interruption
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0A,Diagnosezustand,Diagnostic state
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0B,Dosierpumpenunterbrechung,Metering pump interruption
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0C,EMK-Messung,EMK-measurement
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0D,Entprellen,Entprellen
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0C,EMK-Messung,EMF measurement
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0D,Entprellen,Debouncing
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0E,EXIT,EXIT
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0F,Flammwächterabfrage,Flammwächterabfrage
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x10,Flammwächterkühlung,Flammwächterkühlung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x11,Flammwächter Messphase,Flammwächter Messphase
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x12,Flammabfrage bei ZUE,Flammabfrage at ZUE
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x13,Gebläseanlauf,Gebläseanlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x14,Glühstiftrampe,Glühstiftrampe
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x15,Heizgeräteverriegelung,Heizgeräteverriegelung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x16,Initialisierung,Initialisierung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x17,Kraftstoffblasenüberbrückung,Kraftstoffblasenüberbrückung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x18,Kaltgebläseanlauf,Kaltgebläseanlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x19,Kaltstartanreicherung,Kaltstartanreicherung
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x0F,Flammwächterabfrage,Flame monitor query
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x10,Flammwächterkühlung,Flame monitor cooling
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x11,Flammwächter Messphase,Flame monitor measuring phase
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x12,Flammabfrage bei ZUE,Flame query at ZUE
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x13,Gebläseanlauf,Blower start-up
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x14,Glühstiftrampe,Glow plug ramp
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x15,Heizgeräteverriegelung,Heater lockout
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x16,Initialisierung,Initialisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x17,Kraftstoffblasenüberbrückung,Fuel bubble bridging
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x18,Kaltgebläseanlauf,Cold blower start-up
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x19,Kaltstartanreicherung,Cold start enrichment
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1A,Kühlung,Cooling
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1B,LastwechselTeil-/Volllast,LastwechselTeil-/Volllast
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1C,Lüften,Lüften
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1D,LastwechselVoll-/Teillast,LastwechselVoll-/Teillast
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1E,NeueInitialisierung,NeueInitialisierung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1F,Regelbetrieb,Closed-loop operation
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x20,Regelpause,Regelpause
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x21,Sanftanlauf,Sanftanlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x22,Sicherheitszeit,Sicherheitszeit
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x23,Spülen,Spülen
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1B,LastwechselTeil-/Volllast,Load change partial/full load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1C,Lüften,Ventilation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1D,LastwechselVoll-/Teillast,Load change full/partial load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1E,NeueInitialisierung,New initialisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x1F,Regelbetrieb,Control mode
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x20,Regelpause,Control pause
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x21,Sanftanlauf,Soft start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x22,Sicherheitszeit,Safety time
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x23,Spülen,Purging
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x24,Start,Start
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x25,Stabilisierung,Stabilization
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x26,Startrampe,Startrampe
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x27,Stromlos,Stromlos
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x28,Störverriegelung,Störverriegelung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x29,Störverriegelung TRS,Störverriegelung TRS
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2A,Stabilisierungszeit,Stabilization time
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2B,Übergang Regelbetrieb,Übergang closed-loop operation
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2C,Entscheidungsknoten,Entscheidungsknoten
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2D,Vorfördern,Vorfördern
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2E,Vorglühen,Vorglühen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2F,Vorglühen Leistungsregelung,Vorglühen power control
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x30,VerzögerungvorAbregeln,VerzögerungvorAbregeln
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x31,Zähgebläseanlauf,Zähgebläseanlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x32,Zuglühen,Zuglühen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x33,Zündpause,Zündpause
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x25,Stabilisierung,Stabilisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x26,Startrampe,Start ramp
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x27,Stromlos,De-energised
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x28,Störverriegelung,Fault lockout
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x29,Störverriegelung TRS,Fault lockout TRS
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2A,Stabilisierungszeit,Stabilisation time
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2B,Übergang Regelbetrieb,Transition to control mode
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2C,Entscheidungsknoten,Decision node
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2D,Vorfördern,Pre-delivery
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2E,Vorglühen,Pre-glow
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x2F,Vorglühen Leistungsregelung,Pre-glow power control
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x30,VerzögerungvorAbregeln,Delay before derating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x31,Zähgebläseanlauf,Sluggish blower start-up
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x32,Zuglühen,Post-ignition glow
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x33,Zündpause,Ignition pause
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x34,Zündung,Ignition
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x35,Zwischenglühen,Zwischenglühen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x36,Applikationsüberwachung,Applikationsüberwachung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x37,Heizgeräteverriegelungsabspeicherung,Heizgeräteverriegelungsabspeicherung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x38,Heizgeräteentriegelung,Heizgeräteentriegelung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x39,Heizleistungsregelung,Heizleistungsregelung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3A,Umwälzpumpenregelung,Umwälzpumpenregelung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3B,InitialisierungµP,InitialisierungµP
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3C,Fremdlichtabfrage,Fremdlichtabfrage
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3D,Vorlauf,Vorlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3E,Vorzündung,Vorzündung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3F,Flammzündung,Flammzündung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x40,Flammstabilisierung,Flammstabilisierung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x41,Brennbetrieb Standheizen,Combustion operation Standheizen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x42,Brennbetrieb Zuheizen,Combustion operation Zuheizen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x43,Brennstörung Standheizen,Brennstörung Standheizen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x44,Brennstörung Zuheizen,Brennstörung Zuheizen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x45,AusNachlauf,AusNachlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x46,Regelpause Nachlauf,Regelpause run-on
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x47,Störnachlauf,Störnachlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x48,Zeitlicher Störnachlauf,Zeitlicher Störnachlauf
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x49,StörverriegelungUmwälzpumpe,StörverriegelungUmwälzpumpe
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4A,Regelpause Standheizen,Regelpause Standheizen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4B,Regelpause Zuheizen,Regelpause Zuheizen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4C,RegelpauseZuheizenmitUmwälzpumpe,RegelpauseZuheizenmitUmwälzpumpe
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4D,Umwälzpumpe ohne Heizfunktion,Umwälzpumpe without Heizfunktion
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4E,WarteschleifeÜberspannung,WarteschleifeÜberspannung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4F,Fehlerspeicher aktualisieren,Fault memory aktualisieren
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x50,Warteschleife,Warteschleife
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x35,Zwischenglühen,Intermediate glow
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x36,Applikationsüberwachung,Application monitoring
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x37,Heizgeräteverriegelungsabspeicherung,Heater lockout storage
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x38,Heizgeräteentriegelung,Heater unlocking
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x39,Heizleistungsregelung,Heat output control
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3A,Umwälzpumpenregelung,Circulation pump control
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3B,InitialisierungµP,Initialisation µP
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3C,Fremdlichtabfrage,Extraneous light query
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3D,Vorlauf,Pre-run
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3E,Vorzündung,Pre-ignition
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x3F,Flammzündung,Flame ignition
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x40,Flammstabilisierung,Flame stabilisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x41,Brennbetrieb Standheizen,Combustion mode auxiliary heating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x42,Brennbetrieb Zuheizen,Combustion mode supplementary heating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x43,Brennstörung Standheizen,Combustion fault auxiliary heating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x44,Brennstörung Zuheizen,Combustion fault supplementary heating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x45,AusNachlauf,Off run-on
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x46,Regelpause Nachlauf,Control pause run-on
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x47,Störnachlauf,Fault run-on
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x48,Zeitlicher Störnachlauf,Timed fault run-on
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x49,StörverriegelungUmwälzpumpe,Fault lockout circulation pump
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4A,Regelpause Standheizen,Control pause auxiliary heating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4B,Regelpause Zuheizen,Control pause supplementary heating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4C,RegelpauseZuheizenmitUmwälzpumpe,Control pause supplementary heating with circulation pump
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4D,Umwälzpumpe ohne Heizfunktion,Circulation pump without heating function
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4E,WarteschleifeÜberspannung,Wait loop overvoltage
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x4F,Fehlerspeicher aktualisieren,Update fault memory
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x50,Warteschleife,Wait loop
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x51,Komponententest,Component test
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x52,Boostbetrieb,Boostbetrieb
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x53,Abkühlen,Abkühlen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x54,Heizgeräteverriegelung permanent,Heizgeräteverriegelung permanent
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x52,Boostbetrieb,Boost mode
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x53,Abkühlen,Cooling down
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x54,Heizgeräteverriegelung permanent,Heater lockout permanent
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x55,Gebläseunterbrechung,Blower interruption
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x56,Brennermotor losreissen,Brennermotor losreissen
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x57,Temperaturabfrage,Temperaturabfrage
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x58,Vorlauf Unterspannung,Vorlauf undervoltage
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x59,Unfallabfrage,Unfallabfrage
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5A,Störnachlauf Magnetventil,Störnachlauf solenoid valve
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5B,Fehlerspeicher aktualisieren Magnetventil,Fault memory aktualisieren solenoid valve
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5C,Zeitlicher Störnachlauf Magnetventil,Zeitlicher Störnachlauf solenoid valve
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5D,Startversuch,Startversuch
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5E,Vorlaufverlängerung,Vorlaufverlängerung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5F,Brennbetrieb,Combustion operation
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x60,zeitlicher Störnachlauf bei Unterspannung,zeitlicher Störnachlauf at undervoltage
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x61,Fehlerspeicher aktualisieren beim Ausschalten,Fault memory aktualisieren during Ausschalten
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x62,Rampe Vollast,Rampe Vollast
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x63,TRS-Kühlung,TRS-cooling
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x64,Restwärmenutzung,Restwärmenutzung
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x65,ADR-Zustand aktiviert,ADR-state activated
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x66,Bereit,Bereit
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x67,Brennerregeneration ,Brennerregeneration 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x68,Initialisierung_Prozess ,Initialisierung_Prozess 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x69,Sleep_Mode ,Sleep_Mode 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6A,Fortsetzung Brennstofffördern ,Fortsetzung Brennstofffördern 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6B,"Fortsetzung Stabilisierung, Kaltstart ","Fortsetzung stabilization, cold start "
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6C,"Fortsetzung Stabilisierung, Warmstart ","Fortsetzung stabilization, Warmstart "
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6D,Nachlauframpe ,Nachlauframpe 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6E,Restwärmenutzung ,Restwärmenutzung 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6F,"Stabilisierung, Kaltstart ","Stabilization, cold start "
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x70,PROCESSOR OFF ,PROCESSOR OFF 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x71,WAIT STATE ,WAIT STATE 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x72,Fortsetzung Stabilisierung ,Fortsetzung stabilization 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x73,MOTOR CHECK ,MOTOR CHECK 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x74,FLAME MONITOR COOLING ,FLAME MONITOR COOLING 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x75,PRE-GLOWING1 ,PRE-GLOWING1 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x76,PRE-GLOWING2 ,PRE-GLOWING2 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x77,PRE-GLOWING2 Partial Load Start ,PRE-GLOWING2 Partial Load start 
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x56,Brennermotor losreissen,Burner motor breakaway
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x57,Temperaturabfrage,Temperature query
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x58,Vorlauf Unterspannung,Pre-run undervoltage
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x59,Unfallabfrage,Accident query
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5A,Störnachlauf Magnetventil,Fault run-on solenoid valve
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5B,Fehlerspeicher aktualisieren Magnetventil,Update fault memory solenoid valve
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5C,Zeitlicher Störnachlauf Magnetventil,Timed fault run-on solenoid valve
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5D,Startversuch,Start attempt
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5E,Vorlaufverlängerung,Pre-run extension
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x5F,Brennbetrieb,Combustion mode
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x60,zeitlicher Störnachlauf bei Unterspannung,Timed fault run-on at undervoltage
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x61,Fehlerspeicher aktualisieren beim Ausschalten,Update fault memory on switch-off
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x62,Rampe Vollast,Ramp full load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x63,TRS-Kühlung,TRS cooling
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x64,Restwärmenutzung,Residual heat utilisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x65,ADR-Zustand aktiviert,ADR state activated
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x66,Bereit,Ready
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x67,Brennerregeneration ,Burner regeneration
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x68,Initialisierung_Prozess ,Initialisation process
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x69,Sleep_Mode ,Sleep mode
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6A,Fortsetzung Brennstofffördern ,Continuation fuel delivery
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6B,"Fortsetzung Stabilisierung, Kaltstart ","Continuation stabilisation, cold start"
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6C,"Fortsetzung Stabilisierung, Warmstart ","Continuation stabilisation, warm start"
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6D,Nachlauframpe ,Run-on ramp
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6E,Restwärmenutzung ,Residual heat utilisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x6F,"Stabilisierung, Kaltstart ","Stabilisation, cold start"
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x70,PROCESSOR OFF ,PROCESSOR OFF
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x71,WAIT STATE ,WAIT STATE
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x72,Fortsetzung Stabilisierung ,Continuation stabilisation
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x73,MOTOR CHECK ,MOTOR CHECK
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x74,FLAME MONITOR COOLING ,FLAME MONITOR COOLING
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x75,PRE-GLOWING1 ,PRE-GLOWING1
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x76,PRE-GLOWING2 ,PRE-GLOWING2
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x77,PRE-GLOWING2 Partial Load Start ,PRE-GLOWING2 partial load start
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x78,FLAME MONITOR CALIBRATION START,FLAME MONITOR CALIBRATION START
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x79,START1 ,START1 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7A,START2 ,START2 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7B,START3 ,START3 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7C,START4 ,START4 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7D,START5 ,START5 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7E,START6 ,START6 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7F,GLOW PLUG RAMP ,GLOW PLUG RAMP 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x80,FLAME MONITOR MEASURUEMENT1,FLAME MONITOR MEASURUEMENT1
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x81,FLAME MONITOR MEASURUEMENT2,FLAME MONITOR MEASURUEMENT2
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x82,START1 Partial Load Start ,START1 Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x83,START2 Partial Load Start ,START2 Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x84,START3 Partial Load Start ,START3 Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x85,START4 Partial Load Start ,START4 Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x86,START5 Partial Load Start ,START5 Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x87,START6 Partial Load Start ,START6 Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x88,GLOW PLUG RAMP Partial Load Start,GLOW PLUG RAMP Partial Load start
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x89,FLAME MONITOR MEASUREMENT1 Partial Load,FLAME MONITOR MEASUREMENT1 Partial Load
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8A,FLAME MONITOR MEASUREMENT2 Partial Load,FLAME MONITOR MEASUREMENT2 Partial Load
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8B,FULL LOAD ,FULL LOAD 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8C,RAMP DOWN ,RAMP DOWN 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8D,PARTIAL LOAD ,PARTIAL LOAD 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8E,RAMP UP ,RAMP UP 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8F,PAUSE ,PAUSE 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x90,BURN-OUT Full Load ,BURN-OUT Full Load 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x91,BURN-OUT Partial Load ,BURN-OUT Partial Load 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x92,BURN-OUT Start ,BURN-OUT start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x93,BURN-OUT Partial Load Start ,BURN-OUT Partial Load start 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x94,BURN-OUT Overheating ,BURN-OUT Overheating 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x95,COOL1 ,COOL1 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x96,FLAME MONITOR CALIBRATION ,FLAME MONITOR CALIBRATION 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x97,COOL2 ,COOL2 
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x98,BOOST ,BOOST 
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x79,START1 ,START1
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7A,START2 ,START2
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7B,START3 ,START3
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7C,START4 ,START4
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7D,START5 ,START5
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7E,START6 ,START6
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x7F,GLOW PLUG RAMP ,GLOW PLUG RAMP
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x80,FLAME MONITOR MEASURUEMENT1,FLAME MONITOR MEASUREMENT1
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x81,FLAME MONITOR MEASURUEMENT2,FLAME MONITOR MEASUREMENT2
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x82,START1 Partial Load Start ,START1 partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x83,START2 Partial Load Start ,START2 partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x84,START3 Partial Load Start ,START3 partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x85,START4 Partial Load Start ,START4 partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x86,START5 Partial Load Start ,START5 partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x87,START6 Partial Load Start ,START6 partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x88,GLOW PLUG RAMP Partial Load Start,GLOW PLUG RAMP partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x89,FLAME MONITOR MEASUREMENT1 Partial Load,FLAME MONITOR MEASUREMENT1 partial load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8A,FLAME MONITOR MEASUREMENT2 Partial Load,FLAME MONITOR MEASUREMENT2 partial load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8B,FULL LOAD ,FULL LOAD
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8C,RAMP DOWN ,RAMP DOWN
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8D,PARTIAL LOAD ,PARTIAL LOAD
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8E,RAMP UP ,RAMP UP
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x8F,PAUSE ,PAUSE
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x90,BURN-OUT Full Load ,BURN-OUT full load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x91,BURN-OUT Partial Load ,BURN-OUT partial load
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x92,BURN-OUT Start ,BURN-OUT start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x93,BURN-OUT Partial Load Start ,BURN-OUT partial load start
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x94,BURN-OUT Overheating ,BURN-OUT overheating
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x95,COOL1 ,COOL1
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x96,FLAME MONITOR CALIBRATION ,FLAME MONITOR CALIBRATION
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x97,COOL2 ,COOL2
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x98,BOOST ,BOOST
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x99,CONTINUOUS COOLANT TEMPERATURE CONTROL,CONTINUOUS COOLANT TEMPERATURE CONTROL
 IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0x9A,CONTINUOUS COOLANT TEMPERATURE CONTROL-HOLD,CONTINUOUS COOLANT TEMPERATURE CONTROL-HOLD
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA0,"Stabilisierung, Warmstart ","Stabilization, Warmstart "
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA1,"Startrampe, Kaltstart ","Startrampe, cold start "
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA2,"Startrampe, Warmstart ","Startrampe, Warmstart "
-IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA3,Test Restwärmenutzung ,Test Restwärmenutzung 
-IHKA_G11.TAB_SH_KRAFTSTOFFART,0x01,Benzin,Benzin
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA0,"Stabilisierung, Warmstart ","Stabilisation, warm start"
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA1,"Startrampe, Kaltstart ","Start ramp, cold start"
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA2,"Startrampe, Warmstart ","Start ramp, warm start"
+IHKA_G11.TAB_SH_FUNKTIONSZUSTAND,0xA3,Test Restwärmenutzung ,Test residual heat utilisation
+IHKA_G11.TAB_SH_KRAFTSTOFFART,0x01,Benzin,Gasoline
 IHKA_G11.TAB_SH_KRAFTSTOFFART,0x02,Diesel,Diesel
 IHKA_G11.TAB_SH_KRAFTSTOFFART,0x03,RME,RME
-IHKA_G11.TAB_SH_KRAFTSTOFFART,0xFF,ungültig,invalid
+IHKA_G11.TAB_SH_KRAFTSTOFFART,0xFF,ungültig,Invalid

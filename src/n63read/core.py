@@ -71,7 +71,8 @@ MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
 # Per-module catalogs from tools/module_catalog.py: <NAME>_measurements.csv
 # and <NAME>_enum_tables.csv for each.
 MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
-                   "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301")
+                   "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301",
+                   "PMA_20")
 
 DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
               MODULE_MAP_CSV)
@@ -341,6 +342,7 @@ KNOWN_MODULES = {
     0x17: "Fuel pump control (EKP)",
     0x18: "Transmission, ZF 8HP (EGS)",
     0x19: "Transfer case, xDrive (LMV)",
+    0x2C: "Park assist (PMA / PDC)",
     0x30: "Electric power steering (EPS)",
     0x40: "Body domain controller (BDC)",
     0x60: "Instrument cluster (KOMBI)",
@@ -650,7 +652,18 @@ _WIDTH = {
     "unsigned char": (1, False), "signed char": (1, True),
     "unsigned int": (2, False), "signed int": (2, True),
     "unsigned long": (4, False), "signed long": (4, True),
+    "int": (2, True),               # EDIABAS shorthand for signed 16-bit
 }
+def _scale(meta, key, default):
+    """MUL / DIV / ADD as a number; "-" or blank means the default."""
+    try:
+        return float((meta.get(key) or "").strip())
+    except ValueError:
+        return default
+
+
+# IEEE 754 single precision; "motorola" = most significant byte first.
+_FLOAT = {"motorola float": ">f", "intel float": "<f"}
 
 
 def decode(raw, meta, enums=None, lang="text_en"):
@@ -669,6 +682,12 @@ def decode(raw, meta, enums=None, lang="text_en"):
         return raw.split(b"\x00")[0].decode("latin-1").strip(), unit
     if dtype == GPS_DMS:
         return (round(_dms(raw), 7), unit) if len(raw) >= 5 else (raw.hex(), unit)
+    if dtype in _FLOAT:
+        if len(raw) < 4:
+            return raw.hex(), unit
+        value = struct.unpack(_FLOAT[dtype], raw[:4])[0]
+        mul, div, add = (_scale(meta, k, d) for k, d in (("MUL", 1.0), ("DIV", 1.0), ("ADD", 0.0)))
+        return value * mul / (div or 1.0) + add, unit
 
     if dtype not in _WIDTH:
         # data[n], strings, bitfields - hand back hex, don't guess.
@@ -682,14 +701,8 @@ def decode(raw, meta, enums=None, lang="text_en"):
     order = "little" if (meta.get("L/H") or "").strip().lower() == "low" else "big"
     value = int.from_bytes(raw[:width], order, signed=signed)
 
-    def num(key, default):
-        v = (meta.get(key) or "").strip()
-        try:
-            return float(v)
-        except ValueError:
-            return default
-
-    mul, div, add = num("MUL", 1.0), num("DIV", 1.0), num("ADD", 0.0)
+    mul, div, add = (_scale(meta, "MUL", 1.0), _scale(meta, "DIV", 1.0),
+                     _scale(meta, "ADD", 0.0))
     if div == 0:
         div = 1.0
     scaled = value * mul / div + add
@@ -705,7 +718,7 @@ def decode(raw, meta, enums=None, lang="text_en"):
 # Short names for the picker, by module address.
 MODULE_LABELS = {
     0x01: "Airbag", 0x17: "Fuel pump", 0x18: "Transmission", 0x19: "Transfer case", 0x29: "DSC",
-    0x30: "Steering", 0x40: "Body", 0x63: "Head unit", 0x76: "Suspension",
+    0x2C: "Park assist", 0x30: "Steering", 0x40: "Body", 0x63: "Head unit", 0x76: "Suspension",
     0x78: "Climate",
 }
 
@@ -724,7 +737,9 @@ FAST_DIDS = frozenset(
     + [(0x30, d) for d in (0xDB57, 0xDB99, 0xDB9A)]                        # steering angle, torque
     + [(0x76, d) for d in (0xD665, 0xDC05, 0xDC0A)]                        # wheel accel, height, dampers
     + [(0x19, d) for d in (0xDB32, 0xDFEA)]                                # xDrive clutch torque
-    + [(0x17, 0x4010)])                                                    # fuel pump current
+    + [(0x17, 0x4010)]                                                     # fuel pump current
+    + [(0x2C, d) for d in (0xD645, 0xD646, 0xD647, 0xD648, 0xD64A, 0xD64B,
+                           0xD64C, 0xD64D, 0xD64E, 0xD64F, 0xD65C, 0xD65E)])  # parking distances
 SLOW_READS_PER_CYCLE = 6       # module reads allowed per DME cycle
 NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
 MODULE_TIMEOUT = 0.5           # a present module answers in milliseconds; a
@@ -785,6 +800,8 @@ def field_size(dtype, raw, pos):
         return len(raw) - pos if end < 0 else end - pos + 1
     if dtype == GPS_DMS:
         return 5
+    if dtype in _FLOAT:
+        return 4
     return None
 
 
@@ -1043,6 +1060,35 @@ AVAILABILITY_FILE = "availability.json"
 def availability_path():
     base = os.environ.get("APPDATA") or os.path.expanduser("~")
     return os.path.join(base, "n63read", AVAILABILITY_FILE)
+
+
+# ------------------------------------------------------------------ settings
+
+SETTINGS_FILE = "settings.json"
+LANGUAGES = {"en": "English", "de": "Deutsch"}
+
+
+def settings_path():
+    return os.path.join(os.path.dirname(availability_path()), SETTINGS_FILE)
+
+
+def load_settings(path=None):
+    """GUI preferences ({"language": "en"}...); {} if none saved yet."""
+    try:
+        with open(path or settings_path(), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_settings(settings, path=None):
+    path = path or settings_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(settings, f, indent=1)
+    os.replace(tmp, path)
 
 
 def _avail_key(module, did):

@@ -21,18 +21,18 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
 
 ## EPS_G11.TAB_EPS_ENDANSCHLAEGE_GELERNT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not learned | nicht gelernt |
-| 1 | learned | gelernt |
-| 2 | learned in Fahrt | gelernt in Fahrt |
-| 255 | invalid | ungültig |
+| 0 | Not learned | nicht gelernt |
+| 1 | Learned | gelernt |
+| 2 | Learned while driving | gelernt in Fahrt |
+| 255 | Invalid | ungültig |
 
 ## EPS_G11.TAB_EPS_MOMENTENSENSOR
 
@@ -45,16 +45,16 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Geradeauslauf-offset not geschrieben and Index position resp Zahnstangenmitte not gefunden | Geradeauslauf-Offset nicht geschrieben und Index Position bzw Zahnstangenmitte nicht gefunden |
-| 1 | Geradeauslauf-offset not geschrieben and Index position resp Zahnstangenmitte gefunden | Geradeauslauf-Offset nicht geschrieben und Index Position bzw Zahnstangenmitte gefunden |
-| 2 | Geradeauslauf-offset geschrieben and Index position resp Zahnstangenmitte not gefunden | Geradeauslauf-Offset geschrieben und Index Position bzw Zahnstangenmitte nicht gefunden |
-| 3 | Geradeauslauf-offset geschrieben and Index position resp Zahnstangenmitte gefunden and stored and Ist_Position_EPS valid | Geradeauslauf-Offset geschrieben und Index Position bzw Zahnstangenmitte gefunden und gespeichert und Ist_Position_EPS gültig |
-| 255 | invalid | ungültig |
+| 0 | Straight-ahead offset not written and index position or rack centre not found | Geradeauslauf-Offset nicht geschrieben und Index Position bzw Zahnstangenmitte nicht gefunden |
+| 1 | Straight-ahead offset not written and index position or rack centre found | Geradeauslauf-Offset nicht geschrieben und Index Position bzw Zahnstangenmitte gefunden |
+| 2 | Straight-ahead offset written and index position or rack centre not found | Geradeauslauf-Offset geschrieben und Index Position bzw Zahnstangenmitte nicht gefunden |
+| 3 | Straight-ahead offset written, index position or rack centre found and stored, and Ist_Position_EPS valid | Geradeauslauf-Offset geschrieben und Index Position bzw Zahnstangenmitte gefunden und gespeichert und Ist_Position_EPS gültig |
+| 255 | Invalid | ungültig |
 
 ## EPS_G11.TAB_INIT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not initialisiert | nicht initialisiert |
-| 1 | Initialisierung in Ordnung | Initialisierung in Ordnung |
-| 255 | Initialisierung not in Ordnung | Initialisierung nicht in Ordnung |
+| 0 | Not initialised | nicht initialisiert |
+| 1 | Initialisation OK | Initialisierung in Ordnung |
+| 255 | Initialisation not OK | Initialisierung nicht in Ordnung |

@@ -54,7 +54,8 @@ Fault texts (`FORTTEXTE`) include a generic *"Energiesparmode aktiv"*
 (energy-saving mode active) code of the form `0x02AA00`, where `AA` is the
 module's diagnostic address. It held for every file checked: DME `021200`,
 gateway `021000`, ACSM `020100`, transmission `021800`, DSC `022900`, EPS
-`023000`, VDP `027600`, IHKA `027800`, LMV `021900`, fuel pump `021700`.
+`023000`, VDP `027600`, IHKA `027800`, LMV `021900`, fuel pump `021700`,
+park assist `022C00`.
 
 ## Tables
 

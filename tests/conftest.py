@@ -57,6 +57,9 @@ def reset_app(a):
     a.filter_var.set("")
     a.group_var.set("Module")
     a.only_var.set(False)
+    if a.lang != "en":
+        a.lang_var.set(core.LANGUAGES["en"])
+        a._set_language()
     while True:
         try:
             a.q.get_nowait()

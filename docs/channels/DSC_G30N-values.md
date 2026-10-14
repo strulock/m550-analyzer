@@ -17,45 +17,45 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 65 | codingSession | codingSession |
 | 66 | SWTSession | SWTSession |
 | 67 | HDDUpdateSession | HDDUpdateSession |
-| 255 | invalid | ungültig |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.RDBI_PC_PCS_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECU mehrmals programmierbar | ECU mehrmals programmierbar |
-| 1 | ECU mindestens einmal vollstaendig programmierbar | ECU mindestens einmal vollstaendig programmierbar |
-| 2 | ECU not mehr programmierbar | ECU nicht mehr programmierbar |
-| 255 | invalid | ungültig |
+| 0 | ECU programmable several times | ECU mehrmals programmierbar |
+| 1 | ECU fully programmable at least once more | ECU mindestens einmal vollstaendig programmierbar |
+| 2 | ECU no longer programmable | ECU nicht mehr programmierbar |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.TAB_ABS_FUNKTION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not available | nicht verfügbar |
-| 1 | available | verfügbar |
-| 2 | available Rückfallebene | verfügbar Rückfallebene |
-| 255 | invalid | ungültig |
+| 0 | Not available | nicht verfügbar |
+| 1 | Available | verfügbar |
+| 2 | Available, fallback level | verfügbar Rückfallebene |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.TAB_ASC_FUNKTION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not available | nicht verfügbar |
-| 1 | available | verfügbar |
-| 2 | available Rückfallebene | verfügbar Rückfallebene |
-| 3 | available Schlupf aufgeweitet | verfügbar Schlupf aufgeweitet |
-| 4 | available Rückfallebene Schlupf aufgeweitet | verfügbar Rückfallebene Schlupf aufgeweitet |
-| 255 | invalid | ungültig |
+| 0 | Not available | nicht verfügbar |
+| 1 | Available | verfügbar |
+| 2 | Available, fallback level | verfügbar Rückfallebene |
+| 3 | Available, extended slip | verfügbar Schlupf aufgeweitet |
+| 4 | Available, fallback level, extended slip | verfügbar Rückfallebene Schlupf aufgeweitet |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.TAB_AUTOHOLDTASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Button not betätigt | Taster nicht betätigt |
-| 1 | Button gedrückt | Taster gedrückt |
+| 0 | Button not pressed | Taster nicht betätigt |
+| 1 | Button pressed | Taster gedrückt |
 | 2 | Button defective | Taster defekt |
-| 3 | Signalmuster invalid | Signalmuster ungültig |
+| 3 | Signal pattern invalid | Signalmuster ungültig |
 
 ## DSC_G30N.TAB_AXLE_RESULT
 
@@ -63,24 +63,24 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | false | false |
 | 1 | true | true |
-| 255 | Undefiniert | Undefiniert |
+| 255 | Undefined | Undefiniert |
 
 ## DSC_G30N.TAB_BREMSBELAGVERSCHLEISSSENSOR
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | OK | OK |
-| 1 | Pille durchgeschliffen | Pille durchgeschliffen |
-| 255 | invalid | ungültig |
+| 1 | Sensor contact worn through | Pille durchgeschliffen |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.TAB_DREHRICHTUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Stand | Stand |
-| 1 | Vorwaerts | Vorwaerts |
-| 2 | Rueckwaerts | Rueckwaerts |
-| 3 | not definiert | nicht definiert |
+| 0 | Stationary | Stand |
+| 1 | Forwards | Vorwaerts |
+| 2 | Reverse | Rueckwaerts |
+| 3 | Not defined | nicht definiert |
 
 ## DSC_G30N.TAB_DSC_ECU_TYP
 
@@ -95,39 +95,39 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | active | aktiv |
-| 1 | Stage 1 | Stufe 1 |
-| 2 | Stage 2 | Stufe 2 |
-| 3 | Stage 3 | Stufe 3 |
-| 4 | Stage 4 | Stufe 4 |
-| 5 | Stage 5 | Stufe 5 |
-| 6 | Stage 6 | Stufe 6 |
-| 255 | not active | nicht aktiv |
+| 0 | Active | aktiv |
+| 1 | Level 1 | Stufe 1 |
+| 2 | Level 2 | Stufe 2 |
+| 3 | Level 3 | Stufe 3 |
+| 4 | Level 4 | Stufe 4 |
+| 5 | Level 5 | Stufe 5 |
+| 6 | Level 6 | Stufe 6 |
+| 255 | Not active | nicht aktiv |
 
 ## DSC_G30N.TAB_EMF_POSITION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Angelegt | Angelegt |
-| 1 | during Schließen | beim Schließen |
+| 0 | Applied | Angelegt |
+| 1 | While closing | beim Schließen |
 | 2 | Closed | Geschlossen |
-| 3 | Open | Geöffnet |
-| 4 | during Öffnen | beim Öffnen |
-| 5 | Initialisierung | Initialisierung |
-| 6 | unknown / faulty | unbekannt / fehlerhaft |
-| 7 | Montageposition | Montageposition |
-| 8 | during Anfahren Montageposition | beim Anfahren Montageposition |
-| 255 | not definiert | nicht definiert |
+| 3 | Opened | Geöffnet |
+| 4 | While opening | beim Öffnen |
+| 5 | Initialisation | Initialisierung |
+| 6 | Unknown / faulty | unbekannt / fehlerhaft |
+| 7 | Assembly position | Montageposition |
+| 8 | Assembly position when driving off | beim Anfahren Montageposition |
+| 255 | Not defined | nicht definiert |
 
 ## DSC_G30N.TAB_EMF_TASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | neutral | neutral |
-| 1 | gezogen | gezogen |
-| 2 | gedrueckt | gedrueckt |
+| 0 | Neutral | neutral |
+| 1 | Pulled | gezogen |
+| 2 | Pressed | gedrueckt |
 | 3 | Fault | Fehler |
-| 255 | undefinierter state | undefinierter Zustand |
+| 255 | Undefined state | undefinierter Zustand |
 
 ## DSC_G30N.TAB_EPB_LED
 
@@ -136,23 +136,23 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 0 | Off | Aus |
 | 1 | On | Ein |
 | 2 | Defective | Defekt |
-| 255 | Signalmuster invalid | Signalmuster ungültig |
+| 255 | Signal pattern invalid | Signalmuster ungültig |
 
 ## DSC_G30N.TAB_EPB_TASTER_FEHLER
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No fault | Kein Fehler |
-| 1 | Drücken defective | Drücken defekt |
-| 2 | Ziehen defective | Ziehen defekt |
-| 255 | Signalmuster invalid | Signalmuster ungültig |
+| 1 | Press function defective | Drücken defekt |
+| 2 | Pull function defective | Ziehen defekt |
+| 255 | Signal pattern invalid | Signalmuster ungültig |
 
 ## DSC_G30N.TAB_ERFS_AKT_VERBAUT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Nein | Nein |
-| 1 | Ja | Ja |
+| 0 | No | Nein |
+| 1 | Yes | Ja |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_ERFS_GESCHW_IDX
@@ -180,7 +180,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Normal load | Normal Last |
+| 0 | Standard load | Normal Last |
 | 1 | Extra load | Extra Last |
 | 255 | Invalid | Ungültig |
 
@@ -198,93 +198,93 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sommer | Sommer |
+| 0 | Summer | Sommer |
 | 1 | Winter | Winter |
-| 2 | Ganzjahres | Ganzjahres |
+| 2 | All-season | Ganzjahres |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_ERFS_WERKSAUSLIEFERUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Nein | Nein |
-| 1 | Ja | Ja |
+| 0 | No | Nein |
+| 1 | Yes | Ja |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_FDR_FUNKTION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not available | nicht verfügbar |
-| 1 | available | verfügbar |
-| 3 | available Schlupf aufgeweitet | verfügbar Schlupf aufgeweitet |
-| 255 | invalid | ungültig |
+| 0 | Not available | nicht verfügbar |
+| 1 | Available | verfügbar |
+| 3 | Available, extended slip | verfügbar Schlupf aufgeweitet |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.TAB_HDC_FUNKTION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not available | nicht verfügbar |
-| 1 | available | verfügbar |
-| 255 | invalid | ungültig |
+| 0 | Not available | nicht verfügbar |
+| 1 | Available | verfügbar |
+| 255 | Invalid | ungültig |
 
 ## DSC_G30N.TAB_KALIBRIERUNG
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | RDC interrupted with fault | RDC unterbrochen mit Fehler |
-| 1 | RDC reset Erfolgreich abgeschlossen | RDC Reset Erfolgreich abgeschlossen |
-| 2 | eRFS - Auswahl via ABK | eRFS - Auswahl über ABK |
-| 3 | eRFS - Auswahl via diagnosis | eRFS - Auswahl über Diagnose |
-| 4 | Steuegerät yet not kalibriert | Steuegerät noch nicht kalibriert |
-| 5 | Automatische Befüllerkennung RE0 | Automatische Befüllerkennung RE0 |
-| 6 | Automatische Befüllerkennung RE1 | Automatische Befüllerkennung RE1 |
-| 7 | Automatische Befüllerkennung RE2 | Automatische Befüllerkennung RE2 |
-| 8 | Automatische Befüllerkennung RE3 | Automatische Befüllerkennung RE3 |
-| 9 | NVM beschädigt | NVM beschädigt |
-| 10 | RID - detection without Fortschrittsanzeige | RID - Erkennung ohne Fortschrittsanzeige |
-| 11 | RID - detection with Fortschrittsanzeige | RID - Erkennung mit Fortschrittsanzeige |
-| 129 | RDC reset abgeschlossen - RE position vermutet | RDC Reset abgeschlossen - RE Positionen vermutet |
-| 130 | eRFS - Auswahl via ABK - RE position vermutet | eRFS - Auswahl über ABK - RE Positionen vermutet |
-| 131 | eRFS - Auswahl via diagnosis - RE position vermutet | eRFS - Auswahl über Diagnose - RE Positionen vermutet |
-| 132 | Steuegerät yet not kalibriert - RE position vermutet | Steuegerät noch nicht kalibriert - RE Positionen vermutet |
-| 133 | Automatische Befüllerkennung RE0 - RE position vermutet | Automatische Befüllerkennung RE0 - RE Positionen vermutet |
-| 134 | Automatische Befüllerkennung RE1 - RE position vermutet | Automatische Befüllerkennung RE1 - RE Positionen vermutet |
-| 135 | Automatische Befüllerkennung RE2 - RE position vermutet | Automatische Befüllerkennung RE2 - RE Positionen vermutet |
-| 136 | Automatische Befüllerkennung RE3 - RE position vermutet | Automatische Befüllerkennung RE3 - RE Positionen vermutet |
-| 138 | RID - detection without Fortschrittsanzeige - RE position vermutet | RID - Erkennung ohne Fortschrittsanzeige - RE Positionen vermutet |
-| 139 | RID - detection with Fortschrittsanzeige - RE position vermutet | RID - Erkennung with Fortschrittsanzeige - RE Positionen vermutet |
-| 254 | Kalibrierung läuft | Kalibrierung läuft |
+| 1 | RDC reset completed successfully | RDC Reset Erfolgreich abgeschlossen |
+| 2 | eRFS - selection via ABK | eRFS - Auswahl über ABK |
+| 3 | eRFS - selection via diagnosis | eRFS - Auswahl über Diagnose |
+| 4 | Control unit not yet calibrated | Steuegerät noch nicht kalibriert |
+| 5 | Automatic inflation detection RE0 | Automatische Befüllerkennung RE0 |
+| 6 | Automatic inflation detection RE1 | Automatische Befüllerkennung RE1 |
+| 7 | Automatic inflation detection RE2 | Automatische Befüllerkennung RE2 |
+| 8 | Automatic inflation detection RE3 | Automatische Befüllerkennung RE3 |
+| 9 | NVM corrupted | NVM beschädigt |
+| 10 | RID - detection without progress indicator | RID - Erkennung ohne Fortschrittsanzeige |
+| 11 | RID - detection with progress indicator | RID - Erkennung mit Fortschrittsanzeige |
+| 129 | RDC reset completed - wheel electronics positions assumed | RDC Reset abgeschlossen - RE Positionen vermutet |
+| 130 | eRFS - selection via ABK - wheel electronics positions assumed | eRFS - Auswahl über ABK - RE Positionen vermutet |
+| 131 | eRFS - selection via diagnosis - wheel electronics positions assumed | eRFS - Auswahl über Diagnose - RE Positionen vermutet |
+| 132 | Control unit not yet calibrated - wheel electronics positions assumed | Steuegerät noch nicht kalibriert - RE Positionen vermutet |
+| 133 | Automatic inflation detection RE0 - wheel electronics positions assumed | Automatische Befüllerkennung RE0 - RE Positionen vermutet |
+| 134 | Automatic inflation detection RE1 - wheel electronics positions assumed | Automatische Befüllerkennung RE1 - RE Positionen vermutet |
+| 135 | Automatic inflation detection RE2 - wheel electronics positions assumed | Automatische Befüllerkennung RE2 - RE Positionen vermutet |
+| 136 | Automatic inflation detection RE3 - wheel electronics positions assumed | Automatische Befüllerkennung RE3 - RE Positionen vermutet |
+| 138 | RID - detection without progress indicator - wheel electronics positions assumed | RID - Erkennung ohne Fortschrittsanzeige - RE Positionen vermutet |
+| 139 | RID - detection with progress indicator - wheel electronics positions assumed | RID - Erkennung with Fortschrittsanzeige - RE Positionen vermutet |
+| 254 | Calibration in progress | Kalibrierung läuft |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_LLA_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Andere | Andere |
-| 1 | Anlern fault | Anlern Fehler |
-| 2 | Lokalisierung fault | Lokalisierung Fehler |
-| 3 | Erfolgreich | Erfolgreich |
+| 0 | Other | Andere |
+| 1 | Teach-in fault | Anlern Fehler |
+| 2 | Localisation fault | Lokalisierung Fehler |
+| 3 | Successful | Erfolgreich |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_PAL_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Initialisierung | Initialisierung |
-| 1 | Warten | Warten |
-| 3 | Laeuft | Laeuft |
-| 4 | Abgeschlossen i.O. | Abgeschlossen i.O. |
-| 5 | Time Out | Time Out |
-| 6 | Aufgehaengt | Aufgehaengt |
-| 255 | Undefiniert | Undefiniert |
+| 0 | Initialisation | Initialisierung |
+| 1 | Waiting | Warten |
+| 3 | Running | Laeuft |
+| 4 | Completed OK | Abgeschlossen i.O. |
+| 5 | Timeout | Time Out |
+| 6 | Hung | Aufgehaengt |
+| 255 | Undefined | Undefiniert |
 
 ## DSC_G30N.TAB_PCIB_START_STATE
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No entry | Kein Eintrag |
-| 1 | Brake genutzt | Bremse genutzt |
+| 1 | Brake used | Bremse genutzt |
 | 255 | Value invalid | Wert ungültig |
 
 ## DSC_G30N.TAB_PCIB_STOP_STATE
@@ -292,33 +292,33 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No entry | Kein Eintrag |
-| 1 | Ziel Anhaltegeschwindigkeit erreicht | Ziel Anhaltegeschwindigkeit erreicht |
-| 2 | übersteuert by Gaspedal actuation | übersteuert durch Gaspedal Betätigung |
-| 3 | übersteuert by Bremspedal actuation | übersteuert durch Bremspedal Betätigung |
-| 4 | Verbindung to Gas- and Bremspedal verloren | Verbindung zu Gas- und Bremspedal verloren |
-| 5 | Abwürgverhinderung | Abwürgverhinderung |
+| 1 | Target stopping speed reached | Ziel Anhaltegeschwindigkeit erreicht |
+| 2 | Overridden by accelerator pedal | übersteuert durch Gaspedal Betätigung |
+| 3 | Overridden by brake pedal | übersteuert durch Bremspedal Betätigung |
+| 4 | Connection to accelerator and brake pedal lost | Verbindung zu Gas- und Bremspedal verloren |
+| 5 | Stall prevention | Abwürgverhinderung |
 | 255 | Value invalid | Wert ungültig |
 
 ## DSC_G30N.TAB_PLAUSI_DRUCK
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Fehlgeschlagen | Fehlgeschlagen |
-| 1 | Erfolgreich | Erfolgreich |
-| 2 | Manuelle Kalibrierung fehlgeschlagen | Manuelle Kalibrierung fehlgeschlagen |
-| 3 | Manuelle Kalibrierung erfolgreich | Manuelle Kalibrierung erfolgreich |
-| 254 | Läuft | Läuft |
+| 0 | Failed | Fehlgeschlagen |
+| 1 | Successful | Erfolgreich |
+| 2 | Manual calibration failed | Manuelle Kalibrierung fehlgeschlagen |
+| 3 | Manual calibration successful | Manuelle Kalibrierung erfolgreich |
+| 254 | Running | Läuft |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_POSITION_RAD
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no | keine |
-| 1 | vorn left | vorn links |
-| 2 | vorn right | vorn rechts |
-| 3 | rear left | hinten links |
-| 4 | rear right | hinten rechts |
+| 0 | None | keine |
+| 1 | Front left | vorn links |
+| 2 | Front right | vorn rechts |
+| 3 | Rear left | hinten links |
+| 4 | Rear right | hinten rechts |
 
 ## DSC_G30N.TAB_RDC_AKTIV_INAKTIV
 
@@ -327,40 +327,40 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 0 | Inactive | Inaktiv |
 | 1 | Active | Aktiv |
 | 3 | Gateway or antenna fault | Gateway oder Antenne Fehler |
-| 4 | Weiche Warnung active | Weiche Warnung aktiv |
+| 4 | Soft warning active | Weiche Warnung aktiv |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RDC_BANDMODE_ACTIVE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Bandmode not active | Bandmode nicht aktiv |
-| 1 | Bandmode active | Bandmode aktiv |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Production line mode not active | Bandmode nicht aktiv |
+| 1 | Production line mode active | Bandmode aktiv |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_BEKANNT_NICHT_BEKANNT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not bekannt | Nicht bekannt |
-| 1 | Bekannt | Bekannt |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Not known | Nicht bekannt |
+| 1 | Known | Bekannt |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_CAL_ACTIVE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Kalibrieranforderung inaktiv | Kalibrieranforderung inaktiv |
-| 1 | Kalibrieranforderung active | Kalibrieranforderung aktiv |
-| 2 | Kalibrierung abgewiesen | Kalibrierung abgewiesen |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Calibration request inactive | Kalibrieranforderung inaktiv |
+| 1 | Calibration request active | Kalibrieranforderung aktiv |
+| 2 | Calibration rejected | Kalibrierung abgewiesen |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_CHANGED
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not geändert | Nicht geändert |
-| 1 | Geändert | Geändert |
+| 0 | Not changed | Nicht geändert |
+| 1 | Changed | Geändert |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RDC_DETECTED
@@ -369,73 +369,73 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Not detected | Nicht erkannt |
 | 1 | Detected | Erkannt |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_DTC_ACTIVE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Bandmode Eigenradprüfung i.O. (in customer operation: DTC not active). | Bandmode Eigenradprüfung i.O. (in Kundenbetrieb: DTC nicht aktiv). |
-| 1 | Bandmode Eigenradprüfung - sensor defective entdeckt. (in customer operation: DTC active). | Bandmode Eigenradprüfung - Sensor Defekt entdeckt. (in Kundenbetrieb: DTC aktiv). |
-| 16 | Bandmode: sensor HL not empfangen. | Bandmode: Sensoren HL nicht empfangen. |
-| 17 | Bandmode: sensor HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren HL nicht empfangen. - Sensor Defekt entdeckt |
-| 32 | Bandmode: sensor HR not empfangen. | Bandmode: Sensoren HR nicht empfangen. |
-| 33 | Bandmode: sensor HR not empfangen. - sensor defective entdeckt | Bandmode: Sensoren HR nicht empfangen. - Sensor Defekt entdeckt |
-| 48 | Bandmode: sensor HR, HL not empfangen. | Bandmode: Sensoren HR, HL nicht empfangen. |
-| 49 | Bandmode: sensor HR, HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren HR, HL nicht empfangen. - Sensor Defekt entdeckt |
-| 64 | Bandmode: sensor VR not empfangen. | Bandmode: Sensoren VR nicht empfangen. |
-| 65 | Bandmode: sensor VR not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VR nicht empfangen. - Sensor Defekt entdeckt |
-| 80 | Bandmode: sensor VR, HL not empfangen. | Bandmode: Sensoren VR, HL nicht empfangen. |
-| 81 | Bandmode: sensor VR, HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VR, HL nicht empfangen. - Sensor Defekt entdeckt |
-| 96 | Bandmode: sensor VR, HR not empfangen. | Bandmode: Sensoren VR, HR nicht empfangen. |
-| 97 | Bandmode: sensor VR, HR not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VR, HR nicht empfangen. - Sensor Defekt entdeckt |
-| 112 | Bandmode: sensor VR, HR, HL not empfangen. | Bandmode: Sensoren VR, HR, HL nicht empfangen. |
-| 113 | Bandmode: sensor VR, HR, HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VR, HR, HL nicht empfangen. - Sensor Defekt entdeckt |
-| 128 | Bandmode: sensor VL not empfangen. | Bandmode: Sensoren VL nicht empfangen. |
-| 129 | Bandmode: sensor VL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL nicht empfangen. - Sensor Defekt entdeckt |
-| 144 | Bandmode: sensor VL, HL not empfangen. | Bandmode: Sensoren VL, HL nicht empfangen. |
-| 145 | Bandmode: sensor VL, HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL, HL nicht empfangen. - Sensor Defekt entdeckt |
-| 160 | Bandmode: sensor VL, HR not empfangen. | Bandmode: Sensoren VL, HR nicht empfangen. |
-| 161 | Bandmode: sensor VL, HR not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL, HR nicht empfangen. - Sensor Defekt entdeckt |
-| 176 | Bandmode: sensor VL, HR, HL not empfangen. | Bandmode: Sensoren VL, HR, HL nicht empfangen. |
-| 177 | Bandmode: sensor VL, HR, HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL, HR, HL nicht empfangen. - Sensor Defekt entdeckt |
-| 192 | Bandmode: sensor VL, VR not empfangen. | Bandmode: Sensoren VL, VR nicht empfangen. |
-| 193 | Bandmode: sensor VL, VR not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL, VR nicht empfangen. - Sensor Defekt entdeckt |
-| 208 | Bandmode: sensor VL, VR, HL not empfangen. | Bandmode: Sensoren VL, VR, HL nicht empfangen. |
-| 209 | Bandmode: sensor VL, VR, HL not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL, VR, HL nicht empfangen. - Sensor Defekt entdeckt |
-| 224 | Bandmode: sensor VL, VR, HR not empfangen. | Bandmode: Sensoren VL, VR, HR nicht empfangen. |
-| 225 | Bandmode: sensor VL, VR, HR not empfangen. - sensor defective entdeckt | Bandmode: Sensoren VL, VR, HR nicht empfangen. - Sensor Defekt entdeckt |
-| 240 | Bandmode: sensor VL, VR, HR, HL not empfangen (in customer operation: DTC not active). | Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC nicht aktiv). |
-| 241 | Bandmode: sensor VL, VR, HR, HL not empfangen (in customer operation: DTC active). | Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC aktiv). |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Production line mode own-wheel check OK (in customer operation: DTC not active). | Bandmode Eigenradprüfung i.O. (in Kundenbetrieb: DTC nicht aktiv). |
+| 1 | Production line mode own-wheel check - sensor defect detected (in customer operation: DTC active). | Bandmode Eigenradprüfung - Sensor Defekt entdeckt. (in Kundenbetrieb: DTC aktiv). |
+| 16 | Production line mode: sensors RL not received. | Bandmode: Sensoren HL nicht empfangen. |
+| 17 | Production line mode: sensors RL not received. - Sensor defect detected | Bandmode: Sensoren HL nicht empfangen. - Sensor Defekt entdeckt |
+| 32 | Production line mode: sensors RR not received. | Bandmode: Sensoren HR nicht empfangen. |
+| 33 | Production line mode: sensors RR not received. - Sensor defect detected | Bandmode: Sensoren HR nicht empfangen. - Sensor Defekt entdeckt |
+| 48 | Production line mode: sensors RR, RL not received. | Bandmode: Sensoren HR, HL nicht empfangen. |
+| 49 | Production line mode: sensors RR, RL not received. - Sensor defect detected | Bandmode: Sensoren HR, HL nicht empfangen. - Sensor Defekt entdeckt |
+| 64 | Production line mode: sensors FR not received. | Bandmode: Sensoren VR nicht empfangen. |
+| 65 | Production line mode: sensors FR not received. - Sensor defect detected | Bandmode: Sensoren VR nicht empfangen. - Sensor Defekt entdeckt |
+| 80 | Production line mode: sensors FR, RL not received. | Bandmode: Sensoren VR, HL nicht empfangen. |
+| 81 | Production line mode: sensors FR, RL not received. - Sensor defect detected | Bandmode: Sensoren VR, HL nicht empfangen. - Sensor Defekt entdeckt |
+| 96 | Production line mode: sensors FR, RR not received. | Bandmode: Sensoren VR, HR nicht empfangen. |
+| 97 | Production line mode: sensors FR, RR not received. - Sensor defect detected | Bandmode: Sensoren VR, HR nicht empfangen. - Sensor Defekt entdeckt |
+| 112 | Production line mode: sensors FR, RR, RL not received. | Bandmode: Sensoren VR, HR, HL nicht empfangen. |
+| 113 | Production line mode: sensors FR, RR, RL not received. - Sensor defect detected | Bandmode: Sensoren VR, HR, HL nicht empfangen. - Sensor Defekt entdeckt |
+| 128 | Production line mode: sensors FL not received. | Bandmode: Sensoren VL nicht empfangen. |
+| 129 | Production line mode: sensors FL not received. - Sensor defect detected | Bandmode: Sensoren VL nicht empfangen. - Sensor Defekt entdeckt |
+| 144 | Production line mode: sensors FL, RL not received. | Bandmode: Sensoren VL, HL nicht empfangen. |
+| 145 | Production line mode: sensors FL, RL not received. - Sensor defect detected | Bandmode: Sensoren VL, HL nicht empfangen. - Sensor Defekt entdeckt |
+| 160 | Production line mode: sensors FL, RR not received. | Bandmode: Sensoren VL, HR nicht empfangen. |
+| 161 | Production line mode: sensors FL, RR not received. - Sensor defect detected | Bandmode: Sensoren VL, HR nicht empfangen. - Sensor Defekt entdeckt |
+| 176 | Production line mode: sensors FL, RR, RL not received. | Bandmode: Sensoren VL, HR, HL nicht empfangen. |
+| 177 | Production line mode: sensors FL, RR, RL not received. - Sensor defect detected | Bandmode: Sensoren VL, HR, HL nicht empfangen. - Sensor Defekt entdeckt |
+| 192 | Production line mode: sensors FL, FR not received. | Bandmode: Sensoren VL, VR nicht empfangen. |
+| 193 | Production line mode: sensors FL, FR not received. - Sensor defect detected | Bandmode: Sensoren VL, VR nicht empfangen. - Sensor Defekt entdeckt |
+| 208 | Production line mode: sensors FL, FR, RL not received. | Bandmode: Sensoren VL, VR, HL nicht empfangen. |
+| 209 | Production line mode: sensors FL, FR, RL not received. - Sensor defect detected | Bandmode: Sensoren VL, VR, HL nicht empfangen. - Sensor Defekt entdeckt |
+| 224 | Production line mode: sensors FL, FR, RR not received. | Bandmode: Sensoren VL, VR, HR nicht empfangen. |
+| 225 | Production line mode: sensors FL, FR, RR not received. - Sensor defect detected | Bandmode: Sensoren VL, VR, HR nicht empfangen. - Sensor Defekt entdeckt |
+| 240 | Production line mode: sensors FL, FR, RR, RL not received (in customer operation: DTC not active). | Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC nicht aktiv). |
+| 241 | Production line mode: sensors FL, FR, RR, RL not received (in customer operation: DTC active). | Bandmode: Sensoren VL, VR, HR, HL nicht empfangen (in Kundenbetrieb: DTC aktiv). |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_INT_FEHLER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Radelektronik 0 mute | Radelektronik 0 mute |
-| 1 | Radelektronik 1 mute | Radelektronik 1 mute |
-| 2 | Radelektronik 2 mute | Radelektronik 2 mute |
-| 3 | Radelektronik 3 mute | Radelektronik 3 mute |
-| 4 | not benutzt | nicht benutzt |
-| 5 | Radelektronik 0 defective | Radelektronik 0 defekt |
-| 6 | Radelektronik 1 defective | Radelektronik 1 defekt |
-| 7 | Radelektronik 2 defective | Radelektronik 2 defekt |
-| 8 | Radelektronik 3 defective | Radelektronik 3 defekt |
-| 9 | RDCi Bandmode active | RDCi Bandmode aktiv |
-| 10 | Eigenrad Einlernfehler | Eigenrad Einlernfehler |
+| 0 | Wheel electronics 0 mute | Radelektronik 0 mute |
+| 1 | Wheel electronics 1 mute | Radelektronik 1 mute |
+| 2 | Wheel electronics 2 mute | Radelektronik 2 mute |
+| 3 | Wheel electronics 3 mute | Radelektronik 3 mute |
+| 4 | Not used | nicht benutzt |
+| 5 | Wheel electronics 0 defective | Radelektronik 0 defekt |
+| 6 | Wheel electronics 1 defective | Radelektronik 1 defekt |
+| 7 | Wheel electronics 2 defective | Radelektronik 2 defekt |
+| 8 | Wheel electronics 3 defective | Radelektronik 3 defekt |
+| 9 | RDCi production line mode active | RDCi Bandmode aktiv |
+| 10 | Own-wheel teach-in fault | Eigenrad Einlernfehler |
 | 11 | Gateway / antenna fault | Gateway / Antenne Fehler |
 | 12 | Input signal missing | Eingangssignal fehlt |
 | 13 | Input signal invalid | Eingangssignal ungültig |
-| 14 | Input signal alive fault | Eingangssignal Alive Fehler |
+| 14 | Input signal alive counter fault | Eingangssignal Alive Fehler |
 | 15 | Input signal CRC fault | Eingangssignal CRC Fehler |
-| 16 | HF Überdeckung | HF Überdeckung |
+| 16 | RF interference (overlap) | HF Überdeckung |
 | 17 | Speed signal fault | Geschwindigkeitssignal Fehler |
-| 128 | Geschütztes RAM range fault | Geschütztes RAM Bereich Fehler |
-| 129 | EEPROM fault during Initialisierung | EEPROM Fehler beim Initialisierung |
-| 130 | EEPROM fault during Laufzeit | EEPROM Fehler beim Laufzeit |
-| 131 | Operation system Task fault | Betriebssystem Task Fehler |
-| 132 | SW Watchdog fault | SW Watchdog Fehler |
+| 128 | Protected RAM area fault | Geschütztes RAM Bereich Fehler |
+| 129 | EEPROM fault during initialisation | EEPROM Fehler beim Initialisierung |
+| 130 | EEPROM fault during runtime | EEPROM Fehler beim Laufzeit |
+| 131 | Operating system task fault | Betriebssystem Task Fehler |
+| 132 | SW watchdog fault | SW Watchdog Fehler |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RDC_ON_OFF
@@ -444,57 +444,57 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Off | Aus |
 | 1 | On | Ein |
-| 9 | Not bedient | Nicht bedient |
-| 255 | Not definiert | Nicht definiert |
+| 9 | Not supported | Nicht bedient |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_RAD_POSITION_NR
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | vorn left | vorn links |
-| 1 | vorn right | vorn rechts |
-| 2 | rear left | hinten links |
-| 3 | rear right | hinten rechts |
-| 4 | Reserverad (nur RDC Gen2) | Reserverad (nur RDC Gen2) |
-| 5 | unknown 1 | unbekannt 1 |
-| 6 | unknown 2 | unbekannt 2 |
-| 7 | unknown 3 | unbekannt 3 |
-| 8 | unknown 4 | unbekannt 4 |
-| 9 | unknown 5 (nur RDC Gen2) | unbekannt 5 (nur RDC Gen2) |
+| 0 | Front left | vorn links |
+| 1 | Front right | vorn rechts |
+| 2 | Rear left | hinten links |
+| 3 | Rear right | hinten rechts |
+| 4 | Spare wheel (RDC Gen2 only) | Reserverad (nur RDC Gen2) |
+| 5 | Unknown 1 | unbekannt 1 |
+| 6 | Unknown 2 | unbekannt 2 |
+| 7 | Unknown 3 | unbekannt 3 |
+| 8 | Unknown 4 | unbekannt 4 |
+| 9 | Unknown 5 (RDC Gen2 only) | unbekannt 5 (nur RDC Gen2) |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RDC_RE_SENDEMODE_AK
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Stationär | Stationär |
-| 1 | Stationär TFA | Stationär TFA |
-| 2 | Einlernen Fahren | Einlernen Fahren |
-| 3 | Normal Fahren | Normal Fahren |
-| 4 | Einlernen Interim | Einlernen Interim |
-| 5 | Normal Interim | Normal Interim |
+| 0 | Stationary | Stationär |
+| 1 | Stationary TFA | Stationär TFA |
+| 2 | Teach-in driving | Einlernen Fahren |
+| 3 | Normal driving | Normal Fahren |
+| 4 | Teach-in interim | Einlernen Interim |
+| 5 | Normal interim | Normal Interim |
 | 6 | Delta P | Delta P |
 | 7 | OFF mode | OFF Modus |
-| 8 | Via LF angefordert | Über LF angefordert |
+| 8 | Requested via LF | Über LF angefordert |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RDC_RE_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Radelektronik i.O. | Radelektronik i.O. |
-| 1 | Radelektronik mute | Radelektronik mute |
-| 2 | Radelektronik defective | Radelektronik defekt |
-| 3 | Radelektronik data yet not empfangen | Radelektronik Daten noch nicht empfangen |
+| 0 | Wheel electronics OK | Radelektronik i.O. |
+| 1 | Wheel electronics mute | Radelektronik mute |
+| 2 | Wheel electronics defective | Radelektronik defekt |
+| 3 | Wheel electronics data not yet received | Radelektronik Daten noch nicht empfangen |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RDC_STARTED
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not gestartet | Nicht gestartet |
-| 1 | Gestartet | Gestartet |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Not started | Nicht gestartet |
+| 1 | Started | Gestartet |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_TIMEOUT
 
@@ -502,15 +502,15 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | No timeout | Kein Timeout |
 | 1 | Timeout | Timeout |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_VEHICLE_RUNNING
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Vehicle steht | Fahrzeug steht |
-| 1 | Vehicle fährt | Fahrzeug fährt |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Vehicle stationary | Fahrzeug steht |
+| 1 | Vehicle moving | Fahrzeug fährt |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RDC_ZUSTAND
 
@@ -519,14 +519,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 0 | Inactive | Inaktiv |
 | 1 | Active | Aktiv |
 | 3 | Gateway or antenna fault | Gateway oder Antenne Fehler |
-| 4 | Weiche Warnung active | Weiche Warnung aktiv |
-| 255 | Not definiert | Nicht definiert |
+| 4 | Soft warning active | Weiche Warnung aktiv |
+| 255 | Not defined | Nicht definiert |
 
 ## DSC_G30N.TAB_RE_HERSTELLER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not bedient | nicht bedient |
+| 0 | Not supported | nicht bedient |
 | 1 | Autonet | Autonet |
 | 2 | HUF | HUF |
 | 3 | Continental | Continental |
@@ -541,31 +541,31 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | AK35 default | AK35 default |
 | 130 | HUF G3 | HUF G3 |
-| 136 | AK35 HUF lang | AK35 HUF lang |
-| 160 | AK35 HUF mittel | AK35 HUF mittel |
-| 193 | AK35 HUF kurz | AK35 HUF kurz |
+| 136 | AK35 HUF long | AK35 HUF lang |
+| 160 | AK35 HUF medium | AK35 HUF mittel |
+| 193 | AK35 HUF short | AK35 HUF kurz |
 | 255 | Invalid | Ungültig |
 
 ## DSC_G30N.TAB_RF_BASIS_STATE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not unterstützt | Nicht unterstützt |
+| 0 | Not supported | Nicht unterstützt |
 | 1 | Off | Aus |
-| 2 | Stationär | Stationär |
-| 3 | Lokalisierung with Bewegung | Lokalisierung mit Bewegung |
-| 4 | Lokalisierung without Bewegung | Lokalisierung ohne Bewegung |
-| 5 | Fahrt with Bewegung | Fahrt mit Bewegung |
-| 6 | Fahrt without Bewegung | Fahrt ohne Bewegung |
-| 7 | Reserviert | Reserviert |
+| 2 | Stationary | Stationär |
+| 3 | Localisation with movement | Lokalisierung mit Bewegung |
+| 4 | Localisation without movement | Lokalisierung ohne Bewegung |
+| 5 | Driving with movement | Fahrt mit Bewegung |
+| 6 | Driving without movement | Fahrt ohne Bewegung |
+| 7 | Reserved | Reserviert |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_RF_BATTERIE_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not unterstützt | Nicht unterstützt |
-| 1 | Not i.O. <=10% | Nicht i.O. <=10% |
+| 0 | Not supported | Nicht unterstützt |
+| 1 | Not OK <=10% | Nicht i.O. <=10% |
 | 2 | 0.2 | 0.2 |
 | 3 | 0.3 | 0.3 |
 | 4 | 0.4 | 0.4 |
@@ -575,30 +575,30 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 8 | 0.8 | 0.8 |
 | 9 | 0.9 | 0.9 |
 | 16 | 1.0 | 1.0 |
-| 17 | i.O. | i.O. |
-| 18 | Reserviert | Reserviert |
-| 19 | Reserviert | Reserviert |
-| 20 | Reserviert | Reserviert |
+| 17 | OK | i.O. |
+| 18 | Reserved | Reserviert |
+| 19 | Reserved | Reserviert |
+| 20 | Reserved | Reserviert |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_RF_LTS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not unterstützt | Nicht unterstützt |
+| 0 | Not supported | Nicht unterstützt |
 | 1 | Not LTS | Nicht LTS |
-| 2 | LTS Parkdauer > 7 days | LTS Parkdauer > 7 Tage |
-| 3 | LTS Parkdauer > 30 days | LTS Parkdauer > 30 Tage |
+| 2 | LTS parking duration > 7 days | LTS Parkdauer > 7 Tage |
+| 3 | LTS parking time > 30 days | LTS Parkdauer > 30 Tage |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_RF_TX_TRIGGER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not unterstützt | Nicht unterstützt |
-| 1 | Neu messen (Delta P) | Neu messen (Delta P) |
-| 2 | LF Trigger | LF Trigger |
-| 3 | Geplante Sendung | Geplante Sendung |
+| 0 | Not supported | Nicht unterstützt |
+| 1 | Measure again (delta P) | Neu messen (Delta P) |
+| 2 | LF trigger | LF Trigger |
+| 3 | Scheduled transmission | Geplante Sendung |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_STATUS_SEC_ZUGRIFF
@@ -606,44 +606,44 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Locked | Verriegelt |
-| 1 | Open | Geöffnet |
+| 1 | Opened | Geöffnet |
 
 ## DSC_G30N.TAB_WU_POSITION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | front left | vorne links |
-| 1 | front right | vorne rechts |
-| 2 | rear left | hinten links |
-| 3 | rear right | hinten rechts |
-| 4 | Position bekannt | Position bekannt |
-| 5 | unknown 1 | unbekannt 1 |
-| 6 | unknown 2 | unbekannt 2 |
-| 7 | unknown 3 | unbekannt 3 |
-| 8 | unknown 4 | unbekannt 4 |
-| 255 | undefiniert | undefiniert |
+| 0 | Front left | vorne links |
+| 1 | Front right | vorne rechts |
+| 2 | Rear left | hinten links |
+| 3 | Rear right | hinten rechts |
+| 4 | Position known | Position bekannt |
+| 5 | Unknown 1 | unbekannt 1 |
+| 6 | Unknown 2 | unbekannt 2 |
+| 7 | Unknown 3 | unbekannt 3 |
+| 8 | Unknown 4 | unbekannt 4 |
+| 255 | Undefined | undefiniert |
 
 ## DSC_G30N.TAB_WU_PREWARN_WARN_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | i.O. | i.O. |
-| 1 | Warnung | Warnung |
-| 2 | Vorwarnung 1 | Vorwarnung 1 |
-| 3 | Vorwarnung 2 | Vorwarnung 2 |
-| 4 | Vorwarnung 3 | Vorwarnung 3 |
-| 5 | Vorwarnung 4 | Vorwarnung 4 |
+| 0 | OK | i.O. |
+| 1 | Warning | Warnung |
+| 2 | Pre-warning 1 | Vorwarnung 1 |
+| 3 | Pre-warning 2 | Vorwarnung 2 |
+| 4 | Pre-warning 3 | Vorwarnung 3 |
+| 5 | Pre-warning 4 | Vorwarnung 4 |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_WU_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | i.O. | i.O. |
+| 0 | OK | i.O. |
 | 1 | Missing | Fehlt |
 | 2 | Defective | Defekt |
 | 3 | Unknown | Unbekannt |
-| 4 | Disturbed | Gestoert |
+| 4 | Faulty | Gestoert |
 | 255 | Invalid | Ungueltig |
 
 ## DSC_G30N.TAB_ZUSTAND
@@ -651,5 +651,5 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Off | Aus |
-| 1 | Pump Vollansteuerung | Pumpe Vollansteuerung |
-| 2 | Pump EMV-operation (Teilansteuerung) | Pumpe EMV-Betrieb (Teilansteuerung) |
+| 1 | Pump full activation | Pumpe Vollansteuerung |
+| 2 | Pump EMC mode (partial activation) | Pumpe EMV-Betrieb (Teilansteuerung) |

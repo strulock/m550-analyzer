@@ -162,3 +162,16 @@ def test_reader_over_hsfz_with_the_fake_car():
     assert s["HU_STATUS_GPS_POSITION.LATITUDE"][0] == pytest.approx(30.13460, abs=1e-5)
     assert s["HU_STATUS_SPEED.GPS_SPEED"][0] == 98
     assert s["HU_STATUS_GPS"][0] == 12
+
+
+def test_float_and_int_types():
+    import struct
+    meta = {"DATENTYP": "motorola float", "MUL": "2.0", "DIV": "-", "ADD": "1.0"}
+    assert core.decode(struct.pack(">f", 1.5), meta)[0] == pytest.approx(4.0)
+    assert core.decode(struct.pack("<f", -2.25), {"DATENTYP": "intel float"})[0] == -2.25
+    assert core.decode(b"\xff\xfe", {"DATENTYP": "int"})[0] == -2
+    # A float in the middle of a record no longer stops the fields after it.
+    fields = [{"ARG": "a", "DATENTYP": "motorola float"}, {"ARG": "b", "DATENTYP": "unsigned char"}]
+    rec = core.decode_record(struct.pack(">f", 3.0) + b"\x07", fields)
+    assert rec["a"][0] == 3.0 and rec["b"][0] == 7
+    assert core.expected_size(fields) == (5, True)

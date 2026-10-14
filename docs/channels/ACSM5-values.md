@@ -8,10 +8,10 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 2 | signal valid | signal valid |
-| 4 | signal substituted | signal substituted |
-| 6 | signal invalid | signal invalid |
-| 7 | sensor missing | sensor missing |
+| 2 | Signal valid | signal valid |
+| 4 | Signal substituted | signal substituted |
+| 6 | Signal invalid | signal invalid |
+| 7 | Sensor missing | sensor missing |
 | 8 | Init | Init |
 | 15 | Invalid | Invalid |
 
@@ -33,20 +33,20 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
 
 ## ACSM5.TAB_EDR_ADDRESS_FORMAT
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | 11bit normal addressing | 11bit normal addressing |
-| 2 | 11bit extended addressing | 11bit extended addressing |
-| 3 | 11bit mixed addressing | 11bit mixed addressing |
-| 4 | 29bit normal fixed addressing | 29bit normal fixed addressing |
-| 5 | 29bit mixed addressing | 29bit mixed addressing |
-| 6 | 29bit unique addressing | 29bit unique addressing |
+| 1 | 11-bit normal addressing | 11bit normal addressing |
+| 2 | 11-bit extended addressing | 11bit extended addressing |
+| 3 | 11-bit mixed addressing | 11bit mixed addressing |
+| 4 | 29-bit normal fixed addressing | 29bit normal fixed addressing |
+| 5 | 29-bit mixed addressing | 29bit mixed addressing |
+| 6 | 29-bit unique addressing | 29bit unique addressing |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## ACSM5.TAB_OEM_IDENTIFICATION
@@ -69,82 +69,82 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Position Airbag Off  (codiert + verbaut) | Stellung Airbag Off  (codiert + verbaut) |
-| 1 | Position Airbag ON (codiert + verbaut) | Stellung Airbag ON (codiert + verbaut) |
-| 251 | Fault (codiert but not gesteckt or defective) | Fehler (codiert aber nicht gesteckt oder Defekt) |
-| 252 | Verbaufehler (not codiert+verbaut) | Verbaufehler (nicht codiert+verbaut) |
-| 253 | not verbaut (not verbaut+not codiert) | nicht verbaut (nicht verbaut+nicht codiert) |
-| 255 | invalid | ungültig |
+| 0 | Airbag OFF position (coded + fitted) | Stellung Airbag Off  (codiert + verbaut) |
+| 1 | Airbag ON position (coded + fitted) | Stellung Airbag ON (codiert + verbaut) |
+| 251 | Fault (coded but not connected or defective) | Fehler (codiert aber nicht gesteckt oder Defekt) |
+| 252 | Installation fault (not coded + fitted) | Verbaufehler (nicht codiert+verbaut) |
+| 253 | Not fitted (not fitted + not coded) | nicht verbaut (nicht verbaut+nicht codiert) |
+| 255 | Invalid | ungültig |
 
 ## ACSM5.TAB_SITZBELEGUNG_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not belegt (codiert + verbaut) | nicht belegt (codiert + verbaut) |
-| 1 | belegt (codiert + verbaut) | belegt (codiert + verbaut) |
-| 251 | Fault (codiert but not empfangen/gesteckt or signal invalid/defective) | Fehler (codiert aber nicht empfangen/gesteckt oder Signal ungültig/Defekt) |
-| 252 | Verbaufehler (not codiert+verbaut) | Verbaufehler (nicht codiert+verbaut) |
-| 253 | not verbaut (not verbaut+not codiert) | nicht verbaut (nicht verbaut+nicht codiert) |
-| 255 | invalid | ungültig |
+| 0 | Not occupied (coded + fitted) | nicht belegt (codiert + verbaut) |
+| 1 | Occupied (coded + fitted) | belegt (codiert + verbaut) |
+| 251 | Fault (coded but not received/connected or signal invalid/defective) | Fehler (codiert aber nicht empfangen/gesteckt oder Signal ungültig/Defekt) |
+| 252 | Installation fault (not coded + fitted) | Verbaufehler (nicht codiert+verbaut) |
+| 253 | Not fitted (not fitted + not coded) | nicht verbaut (nicht verbaut+nicht codiert) |
+| 255 | Invalid | ungültig |
 
 ## ACSM5.TAB_SITZLEHNENVERRIEGELUNG_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Lehne not locked (codiert + verbaut) | Lehne nicht verriegelt (codiert + verbaut) |
-| 1 | Lehne locked (codiert + verbaut) | Lehne verriegelt (codiert + verbaut) |
-| 251 | Fault (codiert but not empfangen or signal invalid) | Fehler (codiert aber nicht empfangen oder Signal ungültig) |
+| 0 | Backrest not locked (coded + fitted) | Lehne nicht verriegelt (codiert + verbaut) |
+| 1 | Backrest locked (coded + fitted) | Lehne verriegelt (codiert + verbaut) |
+| 251 | Fault (coded but not received or signal invalid) | Fehler (codiert aber nicht empfangen oder Signal ungültig) |
 | 252 | n/a | n/a |
-| 253 | not verwendet (not codiert) | nicht verwendet (nicht codiert) |
-| 255 | invalid | ungültig |
+| 253 | Not used (not coded) | nicht verwendet (nicht codiert) |
+| 255 | Invalid | ungültig |
 
 ## ACSM5.TAB_SITZPOS_SENSOR_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Seat position front (codiert + verbaut) | Sitzposition vorne (codiert + verbaut) |
-| 1 | Seat position rear (codiert + verbaut) | Sitzposition hinten (codiert + verbaut) |
-| 251 | Fault (codiert but not gesteckt or defective) | Fehler (codiert aber nicht gesteckt oder Defekt) |
-| 252 | Verbaufehler (not codiert+verbaut) | Verbaufehler (nicht codiert+verbaut) |
-| 253 | not verbaut (not verbaut+not codiert) | nicht verbaut (nicht verbaut+nicht codiert) |
-| 255 | invalid | ungültig |
+| 0 | Seat position forward (coded + fitted) | Sitzposition vorne (codiert + verbaut) |
+| 1 | Seat position rearward (coded + fitted) | Sitzposition hinten (codiert + verbaut) |
+| 251 | Fault (coded but not connected or defective) | Fehler (codiert aber nicht gesteckt oder Defekt) |
+| 252 | Installation fault (not coded + fitted) | Verbaufehler (nicht codiert+verbaut) |
+| 253 | Not fitted (not fitted + not coded) | nicht verbaut (nicht verbaut+nicht codiert) |
+| 255 | Invalid | ungültig |
 
 ## ACSM5.TAB_SITZPOS_SM_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Seat position front (codiert + verbaut) | Sitzposition vorne (codiert + verbaut) |
-| 1 | Seat position rear (codiert + verbaut) | Sitzposition hinten (codiert + verbaut) |
-| 251 | Fault (codiert but not empfangen or signal invalid) | Fehler (codiert aber nicht empfangen oder Signal ungültig) |
+| 0 | Seat position forward (coded + fitted) | Sitzposition vorne (codiert + verbaut) |
+| 1 | Seat position rearward (coded + fitted) | Sitzposition hinten (codiert + verbaut) |
+| 251 | Fault (coded but not received or signal invalid) | Fehler (codiert aber nicht empfangen oder Signal ungültig) |
 | 252 | n/a | n/a |
-| 253 | not verwendet (not codiert) | nicht verwendet (nicht codiert) |
+| 253 | Not used (not coded) | nicht verwendet (nicht codiert) |
 | 255 | Invalid | Ungültig |
 
 ## ACSM5.TAB_STEUERGERAET_TYP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Seriensteuergeraet | Seriensteuergeraet |
-| 1 | Entwicklungssteuergeraet | Entwicklungssteuergeraet |
+| 0 | Series production control unit | Seriensteuergeraet |
+| 1 | Development control unit | Entwicklungssteuergeraet |
 
 ## ACSM5._GURTZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | nicht_gesteckt | nicht_gesteckt |
-| 1 | gesteckt | gesteckt |
-| 2 | nicht_verbaut | nicht_verbaut |
-| 3 | invalid | ungueltig |
+| 0 | Not buckled | nicht_gesteckt |
+| 1 | Buckled | gesteckt |
+| 2 | Not fitted | nicht_verbaut |
+| 3 | Invalid | ungueltig |
 
 ## ACSM5._SITZBELEGUNG_2
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | nicht_belegt | nicht_belegt |
-| 1 | Sitz_mit_Kindersitz_belegt | Sitz_mit_Kindersitz_belegt |
-| 2 | na | na |
-| 3 | Sitz_belegt | Sitz_belegt |
-| 4 | Erkennungssystem_nicht_vorhanden | Erkennungssystem_nicht_vorhanden |
-| 5 | na | na |
-| 6 | Wert_Initialisierung | Wert_Initialisierung |
-| 7 | Signal_ungueltig | Signal_ungueltig |
+| 0 | Not occupied | nicht_belegt |
+| 1 | Seat occupied by child seat | Sitz_mit_Kindersitz_belegt |
+| 2 | n/a | na |
+| 3 | Seat occupied | Sitz_belegt |
+| 4 | Detection system not present | Erkennungssystem_nicht_vorhanden |
+| 5 | n/a | na |
+| 6 | Value initialisation | Wert_Initialisierung |
+| 7 | Signal invalid | Signal_ungueltig |

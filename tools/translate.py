@@ -23,6 +23,12 @@ Usage:
   python tools/translate.py            rewrite the English columns
   python tools/translate.py --check    exit 1 if any file is out of date
   python tools/translate.py --report   most frequent words left in German
+  python tools/translate.py --uncurated  channel/value texts without a curated translation
+
+Channel descriptions and value texts are translated by hand (curated) in
+tools/translations_en.csv, keyed by the exact German text; that wins over
+the glossary. The glossary is the fallback for anything new, and for the
+fault texts.
 """
 
 import argparse
@@ -50,7 +56,7 @@ COLUMNS = {
 }
 # Module catalogs from tools/module_catalog.py.
 for _name in ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
-              "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301"):
+              "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301", "PMA_20"):
     COLUMNS[_name + "_measurements.csv"] = ("INFO", "INFO_EN")
     COLUMNS[_name + "_enum_tables.csv"] = ("text_de", "text_en")
 
@@ -169,7 +175,28 @@ def translate_word(word):
     return word if en is None else en
 
 
+def _load_curated():
+    """German text -> curated English, from tools/translations_en.csv."""
+    path = os.path.join(HERE, CURATED)
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        return {r["de"]: r["en"] for r in csv.DictReader(f) if r.get("de") and r.get("en")}
+
+
+CURATED = "translations_en.csv"
+CURATED_EN = _load_curated()
+
+
 def translate(text):
+    """German -> English: the curated translation of this exact text if there
+    is one, otherwise the glossary."""
+    if not text or text.strip() in ("", "-"):
+        return text
+    return CURATED_EN.get(text.strip()) or glossary_translate(text)
+
+
+def glossary_translate(text):
     """German -> English by phrase, word, inflection and compound lookup."""
     if not text or text.strip() in ("", "-"):
         return text
@@ -234,6 +261,25 @@ def regenerate(name):
     return old, _render(rows)
 
 
+CURATED_FILES = [n for n in COLUMNS if n.endswith(("_measurements.csv", "_enum_tables.csv"))]
+
+
+def uncurated():
+    """Channel descriptions and value texts with no curated English.
+
+    Fault texts are left to the glossary for now, so they aren't listed.
+    """
+    out = set()
+    for name in CURATED_FILES:
+        rows = _read(os.path.join(DATA, name))
+        di = rows[0].index(COLUMNS[name][0])
+        for row in rows[1:]:
+            text = row[di].strip() if len(row) > di else ""
+            if text not in ("", "-") and text not in CURATED_EN:
+                out.add(text)
+    return out
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -241,7 +287,17 @@ def main(argv=None):
                    help="exit 1 if any English column is out of date")
     p.add_argument("--report", type=int, nargs="?", const=60, metavar="N",
                    help="list the N most frequent words left untranslated")
+    p.add_argument("--uncurated", action="store_true",
+                   help="list channel and value texts with no curated translation")
     args = p.parse_args(argv)
+
+    if args.uncurated:
+        missing = sorted(uncurated())
+        for text in missing:
+            print(text)
+        print("%d text(s) fall back to the glossary; add them to tools/%s"
+              % (len(missing), CURATED), file=sys.stderr)
+        return 0
 
     if args.report:
         counts = collections.Counter()

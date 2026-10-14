@@ -77,6 +77,7 @@
 022941,Spannungsversorgung - Lokale Unterspannung,Power supply - Lokale undervoltage,DSC-G30N
 022943,Spannungsversorgung - Globale Überspannung extern,Power supply - global overvoltage extern,DSC-G30N
 022945,Spannungsversorgung - Globale Unterspannung extern,Power supply - global undervoltage extern,DSC-G30N
+022C00,Energiesparmode aktiv,Energiesparmode active,PMA-20
 023000,Energiesparmode aktiv,Energiesparmode active,EPS-G11
 023008,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,EPS-G11
 023009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,EPS-G11
@@ -122,6 +123,7 @@
 02FF18,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,GSZFB1
 02FF19,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,LMV-G11
 02FF29,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,DSC-G30N
+02FF2C,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,PMA-20
 02FF30,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,EPS-G11
 02FF40,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,BDC; BDC-G11
 02FF60,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,KOMBI-G11; KOMBI-25
@@ -3856,6 +3858,56 @@
 481B28,KODIERUNGSFEHLER_EC_DC,KODIERUNGSFEHLER_EC_DC,EKP301
 481B2B,Saugstrahlpumpenfunktion defekt,Saugstrahlpumpenfunktion defective,EKP301
 481B2C,Montagemode Werk / Pumpensperre,Montagemode Werk / Pumpensperre,EKP301
+481E02,PMA Funktion Hands-on erkannt,PMA function Hands-on detected,PMA-20
+481E03,PMA Funktion Geöffnete Tür,PMA function open door,PMA-20
+481E04,PMA Funktion Falsche Gangwahl,PMA function incorrect Gangwahl,PMA-20
+481E05,PMA Funktion Falsche Blinkerwahl,PMA function incorrect Blinkerwahl,PMA-20
+481E06,PMA Funktion Erkannter Schlupf,PMA function detected Schlupf,PMA-20
+481E07,PMA Funktion Keine geeignete Einparkroute vorhanden,PMA function no geeignete Einparkroute present,PMA-20
+481E11,PMA Codierung ungueltige Daten,PMA coding invalid data,PMA-20
+481E12,PMA Codierung Steuergerät nicht codiert,PMA coding control unit not codiert,PMA-20
+481E13,Spannungsversorgung Globale Unterspannung extern,Power supply global undervoltage extern,PMA-20
+481E14,Spannungsversorgung Globale Überspannung extern,Power supply global overvoltage extern,PMA-20
+481E15,Spannungsversorgung Lokale Unterspannung,Power supply Lokale undervoltage,PMA-20
+481E16,Spannungsversorgung Lokale Überspannung,Power supply Lokale overvoltage,PMA-20
+481E31,PMA Codierung Transaktion gescheitert,PMA coding Transaktion gescheitert,PMA-20
+481E32,PMA Codierung Signatur fehlerhaft,PMA coding Signatur faulty,PMA-20
+481E33,PMA Codierung falsches Fahrzeug,PMA coding incorrect vehicle,PMA-20
+481E45,PMA Funktion max. Einparkgeschwindigkeit überschritten,PMA function max. Einparkgeschwindigkeit exceeded,PMA-20
+481E4D,PMA Steuergerät inter Interner ASIC Fehler,PMA control unit inter internal ASIC fault,PMA-20
+481E4E,PMA Steuergerät inter SPI-Kommunikation ASIC-Prozessor fehlerhaft,PMA control unit inter SPI-communication ASIC-processor faulty,PMA-20
+481E4F,PMA Sensorversorgungsspannung Kurzschluss nach Minus oder Übertemperatur,PMA sensor supply voltage short circuit to Minus or overtemperature,PMA-20
+481E50,PMA Sensorversorgungsspannung Kurzschluss nach Plus oder Übertemperatur,PMA sensor supply voltage short circuit to positive or overtemperature,PMA-20
+481E51,PMA Sensorversorgungsspannung Überspannung,PMA sensor supply voltage overvoltage,PMA-20
+481E52,PMA Sensorversorgungsspannung Unterspannung,PMA sensor supply voltage undervoltage,PMA-20
+481E55,CANIF - CAN Interface - CAN Interface - Sendepuffer voll,CANIF - CAN Interface - CAN Interface - Sendepuffer voll,PMA-20
+481E56,CANIF - CAN Interface - CAN Interface - ungültige ID bei PDU-Senden,CANIF - CAN Interface - CAN Interface - invalid ID at PDU-Senden,PMA-20
+481E57,CANIF - CAN Interface - CAN Interface - ungültige ID bei PDU-Empfang,CANIF - CAN Interface - CAN Interface - invalid ID at PDU-Empfang,PMA-20
+481E5A,CANTP - CAN Transportprotokoll - CAN Transportprotokoll - fehlerhaft,CANTP - CAN Transportprotokoll - CAN Transportprotokoll - faulty,PMA-20
+481E5C,Flashprozess Löschen gescheitert,Flashprozess Löschen gescheitert,PMA-20
+481E5E,Flashprozess Schreiben gescheitert,Flashprozess Schreiben gescheitert,PMA-20
+481E60,Flashprozess Lesen gescheitert,Flashprozess reading gescheitert,PMA-20
+481E61,NVM - Nichtflüchtiger Speicher - Integrität gescheitert,NVM - Nichtflüchtiger memory - Integrität gescheitert,PMA-20
+481E62,NVM - Nichtflüchtiger Speicher - Anfrage gescheitert,NVM - Nichtflüchtiger memory - Anfrage gescheitert,PMA-20
+481E63,Flashprozess Vergleich gescheitert,Flashprozess comparison gescheitert,PMA-20
+481E64,PMA Steuergerät Intern - Initialisierung fehlgeschlagen Parameter,PMA control unit internal - Initialisierung fehlgeschlagen Parameter,PMA-20
+481E65,PMA Steuergerät Intern - Flash Parameter-Sektion inkompatibel zu Software,PMA control unit internal - Flash Parameter-Sektion inkompatibel to Software,PMA-20
+481E66,PMA Steuergerät Intern - Initialisierung fehlgeschlagen Hardware Ursache,PMA control unit internal - Initialisierung fehlgeschlagen Hardware cause,PMA-20
+481E67,PMA Steuergerät Intern - NVM Parameter-Sektion inkompatibel zu Software,PMA control unit internal - NVM Parameter-Sektion inkompatibel to Software,PMA-20
+481E68,PMA Steuergerät Intern - RAM Fehler,PMA control unit internal - RAM fault,PMA-20
+481E69,PMA Steuergerät Intern - ROM Flash Checksummenfehler,PMA control unit internal - ROM Flash check sum fault,PMA-20
+481E6A,PMA Steuergerät Intern - ADC Fehler Referenzspannung,PMA control unit internal - ADC fault reference voltage,PMA-20
+481E6B,PMA Steuergerät Intern - ADC Fehler Timeout,PMA control unit internal - ADC fault timeout,PMA-20
+481E6C,PMA Codierung Fehlerhaft,PMA coding faulty,PMA-20
+481E6E,PMA Steuergerät Intern Software Fehler,PMA control unit internal Software fault,PMA-20
+481E6F,CAN - CAN - Zeitüberschreitung,CAN - CAN - timeout,PMA-20
+481E72,PMA Funktion - Bewegungsrichtung unbekannt,PMA function - Bewegungsrichtung unknown,PMA-20
+481E73,PMA Funktion - Wegstreckensignal unplausibel,PMA function - distance signal implausible,PMA-20
+481E74,PMA Funktion - Lenkwinkel VA unplausibel,PMA function - Lenkwinkel VA implausible,PMA-20
+481E75,PMA Funktion - Gangsignal unplausibel,PMA function - gear signal implausible,PMA-20
+481E76,PMA Funktion - Geschwindigkeit unplausibel,PMA function - speed implausible,PMA-20
+481E77,PMA Funktion - Abbruch Fehlbedienung Sammelfehler,PMA function - abort Fehlbedienung group fault,PMA-20
+481E78,PMA Funktion - Abbruch Systemereignis Sammelfehler,PMA function - abort Systemereignis group fault,PMA-20
 482280,Lenkgetriebe - Einfriererkennung,Lenkgetriebe - Einfriererkennung,EPS-G11
 482281,Steuergerät intern - Leistungsdichtebegrenzung aufgetreten,Control unit internal - Leistungsdichtebegrenzung occurred,EPS-G11
 4822A6,Spannungsversorgung - Globale Unterspannung extern,Power supply - global undervoltage extern,EPS-G11
@@ -4369,6 +4421,143 @@
 801C80,Anforderung RemoteSoftwareUpdate,Request RemoteSoftwareUpdate,ZGW-SP18
 803185,Aktivierung Auto PDC nicht möglich wegen Kommunikationsfehler,Activation Auto PDC not possible due to communication error,ACSM5
 803186,Aktivierung Parkfunktionen nicht möglich (Teilnetz nicht verfügbar),Activation Parkfunktionen not possible (Teilnetz not available),ACSM5
+803209,"Ultraschallsensor hinten Außen links, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor rear outside left, signal line: short circuit to positive",PMA-20
+80320B,Ultraschallsensor hinten Außen links: Ausschwingzeit zu kurz,Ultraschallsensor rear outside left: Ausschwingzeit too short,PMA-20
+80320D,Ultraschallsensor hinten Außen links: Sensor antwortet nicht,Ultraschallsensor rear outside left: sensor antwortet not,PMA-20
+80320E,Ultraschallsensor hinten Außen links: Programmierung fehlerhaft,Ultraschallsensor rear outside left: Programmierung faulty,PMA-20
+80320F,"Ultraschallsensor hinten Mitte links, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor rear center left, signal line: short circuit to positive",PMA-20
+803211,Ultraschallsensor hinten Mitte links: Ausschwingzeit zu kurz,Ultraschallsensor rear center left: Ausschwingzeit too short,PMA-20
+803213,Ultraschallsensor hinten Mitte links: Sensor antwortet nicht,Ultraschallsensor rear center left: sensor antwortet not,PMA-20
+803214,Ultraschallsensor hinten Mitte links: Programmierung fehlerhaft,Ultraschallsensor rear center left: Programmierung faulty,PMA-20
+803215,"Ultraschallsensor hinten Mitte rechts, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor rear center right, signal line: short circuit to positive",PMA-20
+803217,Ultraschallsensor hinten Mitte rechts: Ausschwingzeit zu kurz,Ultraschallsensor rear center right: Ausschwingzeit too short,PMA-20
+803219,Ultraschallsensor hinten Mitte rechts: Sensor antwortet nicht,Ultraschallsensor rear center right: sensor antwortet not,PMA-20
+80321A,Ultraschallsensor hinten Mitte rechts: Programmierung fehlerhaft,Ultraschallsensor rear center right: Programmierung faulty,PMA-20
+80321B,"Ultraschallsensor hinten Außen rechts, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor rear outside right, signal line: short circuit to positive",PMA-20
+80321D,Ultraschallsensor hinten Außen rechts: Ausschwingzeit zu kurz,Ultraschallsensor rear outside right: Ausschwingzeit too short,PMA-20
+80321F,Ultraschallsensor hinten Außen rechts: Sensor antwortet nicht,Ultraschallsensor rear outside right: sensor antwortet not,PMA-20
+803220,Ultraschallsensor hinten Außen rechts: Programmierung fehlerhaft,Ultraschallsensor rear outside right: Programmierung faulty,PMA-20
+80322D,"Ultraschallsensor vorn Außen links, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor vorn outside left, signal line: short circuit to positive",PMA-20
+80322F,Ultraschallsensor vorn Außen links: Ausschwingzeit zu kurz,Ultraschallsensor vorn outside left: Ausschwingzeit too short,PMA-20
+803231,Ultraschallsensor vorn Außen links: Sensor antwortet nicht,Ultraschallsensor vorn outside left: sensor antwortet not,PMA-20
+803232,Ultraschallsensor vorn Außen links: Programmierung fehlerhaft,Ultraschallsensor vorn outside left: Programmierung faulty,PMA-20
+803233,"Ultraschallsensor vorn Mitte links, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor vorn center left, signal line: short circuit to positive",PMA-20
+803235,Ultraschallsensor vorn Mitte links: Ausschwingzeit zu kurz,Ultraschallsensor vorn center left: Ausschwingzeit too short,PMA-20
+803237,Ultraschallsensor vorn Mitte links: Sensor antwortet nicht,Ultraschallsensor vorn center left: sensor antwortet not,PMA-20
+803238,Ultraschallsensor vorn Mitte links: Programmierung fehlerhaft,Ultraschallsensor vorn center left: Programmierung faulty,PMA-20
+803239,"Ultraschallsensor vorn Mitte rechts, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor vorn center right, signal line: short circuit to positive",PMA-20
+80323B,Ultraschallsensor vorn Mitte rechts: Ausschwingzeit zu kurz,Ultraschallsensor vorn center right: Ausschwingzeit too short,PMA-20
+80323D,Ultraschallsensor vorn Mitte rechts: Sensor antwortet nicht,Ultraschallsensor vorn center right: sensor antwortet not,PMA-20
+80323E,Ultraschallsensor vorn Mitte rechts: Programmierung fehlerhaft,Ultraschallsensor vorn center right: Programmierung faulty,PMA-20
+80323F,"Ultraschallsensor vorn Außen rechts, Signalleitung: Kurzschluss nach Plus","Ultraschallsensor vorn outside right, signal line: short circuit to positive",PMA-20
+803241,Ultraschallsensor vorn Außen rechts: Ausschwingzeit zu kurz,Ultraschallsensor vorn outside right: Ausschwingzeit too short,PMA-20
+803243,Ultraschallsensor vorn Außen rechts: Sensor antwortet nicht,Ultraschallsensor vorn outside right: sensor antwortet not,PMA-20
+803244,Ultraschallsensor vorn Außen rechts: Programmierung fehlerhaft,Ultraschallsensor vorn outside right: Programmierung faulty,PMA-20
+803249,PMA Sensor vorn Seite links Signalleitung Kurzschluss nach Plus,PMA sensor vorn side left signal line short circuit to positive,PMA-20
+80324B,PMA Sensor vorn Seite links Ausschwingzeit zu kurz,PMA sensor vorn side left Ausschwingzeit too short,PMA-20
+80324D,PMA Sensor vorn Seite links Kommunikationsfehler,PMA sensor vorn side left communication error,PMA-20
+80324E,PMA Sensor vorn Seite links Programmierung fehlerhaft,PMA sensor vorn side left Programmierung faulty,PMA-20
+80324F,PMA Sensor vorn Seite rechts Signalleitung Kurzschluss nach Plus,PMA sensor vorn side right signal line short circuit to positive,PMA-20
+803251,PMA Sensor vorn Seite rechts Ausschwingzeit zu kurz,PMA sensor vorn side right Ausschwingzeit too short,PMA-20
+803253,PMA Sensor vorn Seite rechts Kommunikationsfehler,PMA sensor vorn side right communication error,PMA-20
+803254,PMA Sensor vorn Seite rechts Programmierung fehlerhaft,PMA sensor vorn side right Programmierung faulty,PMA-20
+803271,Akustische Abstandswarnung nicht möglich,Akustische Abstandswarnung not possible,PMA-20
+803280,PDC nicht aktivierbar,PDC not aktivierbar,PMA-20
+803281,TVC nicht aktivierbar,TVC not aktivierbar,PMA-20
+803282,RVC nicht aktivierbar,RVC not aktivierbar,PMA-20
+803283,PMA nicht aktivierbar,PMA not aktivierbar,PMA-20
+803294,PDC aktiv ohne Aktivierung,PDC active without activation,PMA-20
+803295,TVC aktiv ohne Aktivierung,TVC active without activation,PMA-20
+803296,RVC aktiv ohne Aktivierung,RVC active without activation,PMA-20
+803297,PMA aktiv ohne Aktivierung,PMA active without activation,PMA-20
+8032B0,"Ultraschallsensor hinten Außen links, Leitung: Unterbrechung","Ultraschallsensor rear outside left, line: interruption",PMA-20
+8032B1,"Ultraschallsensor hinten Außen links, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor rear outside left, signal line: short circuit to Minus",PMA-20
+8032B2,Ultraschallsensor hinten Außen links: Ausschwingzeit zu lang,Ultraschallsensor rear outside left: Ausschwingzeit too long,PMA-20
+8032B3,Ultraschallsensor hinten Außen links: Interner Sensorabgleich nicht möglich,Ultraschallsensor rear outside left: internal Sensorabgleich not possible,PMA-20
+8032B4,Ultraschallsensor hinten Außen links: Falscher Sensortyp verbaut,Ultraschallsensor rear outside left: incorrect Sensortyp verbaut,PMA-20
+8032B5,Ultraschallsensor hinten Außen links: Akustische oder elektromagnetische Störung,Ultraschallsensor rear outside left: Akustische or elektromagnetische Störung,PMA-20
+8032B6,"Ultraschallsensor hinten Außen links: Nebenschluss Datenleitung (Signalpegel n,i.O.)","Ultraschallsensor rear outside left: Nebenschluss data line (Signalpegel n,i.O.)",PMA-20
+8032B8,"Ultraschallsensor hinten Mitte links, Leitung: Unterbrechung","Ultraschallsensor rear center left, line: interruption",PMA-20
+8032B9,"Ultraschallsensor hinten Mitte links, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor rear center left, signal line: short circuit to Minus",PMA-20
+8032BA,Ultraschallsensor hinten Mitte links: Ausschwingzeit zu lang,Ultraschallsensor rear center left: Ausschwingzeit too long,PMA-20
+8032BB,Ultraschallsensor hinten Mitte links: Interner Sensorabgleich nicht möglich,Ultraschallsensor rear center left: internal Sensorabgleich not possible,PMA-20
+8032BC,Ultraschallsensor hinten Mitte links: Falscher Sensortyp verbaut,Ultraschallsensor rear center left: incorrect Sensortyp verbaut,PMA-20
+8032BD,Ultraschallsensor hinten Mitte links: Akustische oder elektromagnetische Störung,Ultraschallsensor rear center left: Akustische or elektromagnetische Störung,PMA-20
+8032BE,Ultraschallsensor hinten Mitte links: Nebenschluss Datenleitung  (Signalpegel n.i.O.),Ultraschallsensor rear center left: Nebenschluss data line  (Signalpegel n.i.O.),PMA-20
+8032C0,"Ultraschallsensor hinten Mitte rechts, Leitung: Unterbrechung","Ultraschallsensor rear center right, line: interruption",PMA-20
+8032C1,"Ultraschallsensor hinten Mitte rechts, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor rear center right, signal line: short circuit to Minus",PMA-20
+8032C2,Ultraschallsensor hinten Mitte rechts: Ausschwingzeit zu lang,Ultraschallsensor rear center right: Ausschwingzeit too long,PMA-20
+8032C3,Ultraschallsensor hinten Mitte rechts: Interner Sensorabgleich nicht möglich,Ultraschallsensor rear center right: internal Sensorabgleich not possible,PMA-20
+8032C4,Ultraschallsensor hinten Mitte rechts: Falscher Sensortyp verbaut,Ultraschallsensor rear center right: incorrect Sensortyp verbaut,PMA-20
+8032C5,Ultraschallsensor hinten Mitte rechts: Akustische oder elektromagnetische Störung,Ultraschallsensor rear center right: Akustische or elektromagnetische Störung,PMA-20
+8032C6,Ultraschallsensor hinten Mitte rechts: Nebenschluss Datenleitung (Signalpegel n.i.O.),Ultraschallsensor rear center right: Nebenschluss data line (Signalpegel n.i.O.),PMA-20
+8032C8,"Ultraschallsensor hinten Außen rechts, Leitung: Unterbrechung","Ultraschallsensor rear outside right, line: interruption",PMA-20
+8032C9,"Ultraschallsensor hinten Außen rechts, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor rear outside right, signal line: short circuit to Minus",PMA-20
+8032CA,Ultraschallsensor hinten Außen rechts: Ausschwingzeit zu lang,Ultraschallsensor rear outside right: Ausschwingzeit too long,PMA-20
+8032CB,Ultraschallsensor hinten Außen rechts: Interner Sensorabgleich nicht möglich,Ultraschallsensor rear outside right: internal Sensorabgleich not possible,PMA-20
+8032CC,Ultraschallsensor hinten Außen rechts: Falscher Sensortyp verbaut,Ultraschallsensor rear outside right: incorrect Sensortyp verbaut,PMA-20
+8032CD,Ultraschallsensor hinten Außen rechts: Akustische oder elektromagnetische Störung,Ultraschallsensor rear outside right: Akustische or elektromagnetische Störung,PMA-20
+8032CE,Ultraschallsensor hinten Außen rechts: Nebenschluss Datenleitung (Signalpegel n.i.O.),Ultraschallsensor rear outside right: Nebenschluss data line (Signalpegel n.i.O.),PMA-20
+8032D0,"Ultraschallsensor vorn Außen links, Leitung: Unterbrechung","Ultraschallsensor vorn outside left, line: interruption",PMA-20
+8032D1,"Ultraschallsensor vorn Außen links, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor vorn outside left, signal line: short circuit to Minus",PMA-20
+8032D2,Ultraschallsensor vorn Außen links: Ausschwingzeit zu lang,Ultraschallsensor vorn outside left: Ausschwingzeit too long,PMA-20
+8032D3,Ultraschallsensor vorn Außen links: Interner Sensorabgleich nicht möglich,Ultraschallsensor vorn outside left: internal Sensorabgleich not possible,PMA-20
+8032D4,Ultraschallsensor vorn Außen links: Falscher Sensortyp verbaut,Ultraschallsensor vorn outside left: incorrect Sensortyp verbaut,PMA-20
+8032D5,Ultraschallsensor vorn Außen links: Akustische oder elektromagnetische Störung,Ultraschallsensor vorn outside left: Akustische or elektromagnetische Störung,PMA-20
+8032D6,Ultraschallsensor vorn Außen links: Nebenschluss Datenleitung (Signalpegel n.i.O.),Ultraschallsensor vorn outside left: Nebenschluss data line (Signalpegel n.i.O.),PMA-20
+8032D8,"Ultraschallsensor vorn Mitte links, Leitung: Unterbrechung","Ultraschallsensor vorn center left, line: interruption",PMA-20
+8032D9,"Ultraschallsensor vorn Mitte links, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor vorn center left, signal line: short circuit to Minus",PMA-20
+8032DA,Ultraschallsensor vorn Mitte links: Ausschwingzeit zu lang,Ultraschallsensor vorn center left: Ausschwingzeit too long,PMA-20
+8032DB,Ultraschallsensor vorn Mitte links: Interner Sensorabgleich nicht möglich,Ultraschallsensor vorn center left: internal Sensorabgleich not possible,PMA-20
+8032DC,Ultraschallsensor vorn Mitte links: Falscher Sensortyp verbaut,Ultraschallsensor vorn center left: incorrect Sensortyp verbaut,PMA-20
+8032DD,Ultraschallsensor vorn Mitte links: Akustische oder elektromagnetische Störung,Ultraschallsensor vorn center left: Akustische or elektromagnetische Störung,PMA-20
+8032DE,Ultraschallsensor vorn Mitte links: Nebenschluss Datenleitung (Signalpegel n.i.O.),Ultraschallsensor vorn center left: Nebenschluss data line (Signalpegel n.i.O.),PMA-20
+8032E0,"Ultraschallsensor vorn Mitte rechts, Leitung: Unterbrechung","Ultraschallsensor vorn center right, line: interruption",PMA-20
+8032E1,"Ultraschallsensor vorn Mitte rechts, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor vorn center right, signal line: short circuit to Minus",PMA-20
+8032E2,Ultraschallsensor vorn Mitte rechts: Ausschwingzeit zu lang,Ultraschallsensor vorn center right: Ausschwingzeit too long,PMA-20
+8032E3,Ultraschallsensor vorn Mitte rechts: Interner Sensorabgleich nicht möglich,Ultraschallsensor vorn center right: internal Sensorabgleich not possible,PMA-20
+8032E4,Ultraschallsensor vorn Mitte rechts: Falscher Sensortyp verbaut,Ultraschallsensor vorn center right: incorrect Sensortyp verbaut,PMA-20
+8032E5,Ultraschallsensor vorn Mitte rechts: Akustische oder elektromagnetische Störung,Ultraschallsensor vorn center right: Akustische or elektromagnetische Störung,PMA-20
+8032E6,Ultraschallsensor vorn Mitte rechts: Nebenschluss Datenleitung (Signalpegel n.i.O.),Ultraschallsensor vorn center right: Nebenschluss data line (Signalpegel n.i.O.),PMA-20
+8032E8,"Ultraschallsensor vorn Außen rechts, Leitung: Unterbrechung","Ultraschallsensor vorn outside right, line: interruption",PMA-20
+8032E9,"Ultraschallsensor vorn Außen rechts, Signalleitung: Kurzschluss nach Minus","Ultraschallsensor vorn outside right, signal line: short circuit to Minus",PMA-20
+8032EA,Ultraschallsensor vorn Außen rechts: Ausschwingzeit zu lang,Ultraschallsensor vorn outside right: Ausschwingzeit too long,PMA-20
+8032EB,Ultraschallsensor vorn Außen rechts: Interner Sensorabgleich nicht möglich,Ultraschallsensor vorn outside right: internal Sensorabgleich not possible,PMA-20
+8032EC,Ultraschallsensor vorn Außen rechts: Falscher Sensortyp verbaut,Ultraschallsensor vorn outside right: incorrect Sensortyp verbaut,PMA-20
+8032ED,Ultraschallsensor vorn Außen rechts: Akustische oder elektromagnetische Störung,Ultraschallsensor vorn outside right: Akustische or elektromagnetische Störung,PMA-20
+8032EE,Ultraschallsensor vorn Außen rechts: Nebenschluss Datenleitung (Signalpegel n.i.O.),Ultraschallsensor vorn outside right: Nebenschluss data line (Signalpegel n.i.O.),PMA-20
+8032F0,PMA Sensor vorn Seite links Leitung Unterbrechung,PMA sensor vorn side left line interruption,PMA-20
+8032F1,PMA Sensor vorn Seite links Signalleitung Kurzschluss nach Minus,PMA sensor vorn side left signal line short circuit to Minus,PMA-20
+8032F2,PMA Sensor vorn Seite links Ausschwingzeit zu lang,PMA sensor vorn side left Ausschwingzeit too long,PMA-20
+8032F3,PMA Sensor vorn Seite links Interner Sensorabgleich nicht möglich,PMA sensor vorn side left internal Sensorabgleich not possible,PMA-20
+8032F4,PMA Sensor vorn Seite links Falscher Sensortyp verbaut,PMA sensor vorn side left incorrect Sensortyp verbaut,PMA-20
+8032F5,PMA Sensor vorn Seite links Akustischer oder elektromagnetische Störung,PMA sensor vorn side left Akustischer or elektromagnetische Störung,PMA-20
+8032F6,PMA Sensor vorn Seite links Nebenschluss Datenleitung Signalpegel n.i.O.,PMA sensor vorn side left Nebenschluss data line Signalpegel n.i.O.,PMA-20
+8032F8,PMA Sensor vorn Seite rechts Leitung Unterbrechung,PMA sensor vorn side right line interruption,PMA-20
+8032F9,PMA Sensor vorn Seite rechts Signalleitung Kurzschluss nach Minus,PMA sensor vorn side right signal line short circuit to Minus,PMA-20
+8032FA,PMA Sensor vorn Seite rechts Ausschwingzeit zu lang,PMA sensor vorn side right Ausschwingzeit too long,PMA-20
+8032FB,PMA Sensor vorn Seite rechts Interner Sensorabgleich nicht möglich,PMA sensor vorn side right internal Sensorabgleich not possible,PMA-20
+8032FC,PMA Sensor vorn Seite rechts Falscher Sensortyp verbaut,PMA sensor vorn side right incorrect Sensortyp verbaut,PMA-20
+8032FD,PMA Sensor vorn Seite rechts Akustischer oder elektromagnetische Störung,PMA sensor vorn side right Akustischer or elektromagnetische Störung,PMA-20
+8032FE,PMA Sensor vorn Seite rechts Nebenschluss Datenleitung Signalpegel n.i.O.,PMA sensor vorn side right Nebenschluss data line Signalpegel n.i.O.,PMA-20
+803300,Ultraschallsensor hinten Seite links Signalleitung Kurzschluss nach Plus,Ultraschallsensor rear side left signal line short circuit to positive,PMA-20
+803301,Ultraschallsensor hinten Seite links Ausschwingzeit zu kurz,Ultraschallsensor rear side left Ausschwingzeit too short,PMA-20
+803302,Ultraschallsensor hinten Seite links Kommunikationsfehler,Ultraschallsensor rear side left communication error,PMA-20
+803303,Ultraschallsensor hinten Seite links Programmierung fehlerhaft,Ultraschallsensor rear side left Programmierung faulty,PMA-20
+803304,Ultraschallsensor hinten Seite links Leitung Unterbrechung,Ultraschallsensor rear side left line interruption,PMA-20
+803305,Ultraschallsensor hinten Seite links Signalleitung Kurzschluss nach Minus,Ultraschallsensor rear side left signal line short circuit to Minus,PMA-20
+803307,Ultraschallsensor hinten Seite links Interner Sensorabgleich nicht möglich,Ultraschallsensor rear side left internal Sensorabgleich not possible,PMA-20
+803308,Ultraschallsensor hinten Seite links Falscher Sensortyp verbaut,Ultraschallsensor rear side left incorrect Sensortyp verbaut,PMA-20
+80330A,Ultraschallsensor hinten Seite links Nebenschluss Datenleitung Signalpegel n.i.O.,Ultraschallsensor rear side left Nebenschluss data line Signalpegel n.i.O.,PMA-20
+80330B,Ultraschallsensor hinten Seite rechts Signalleitung Kurzschluss nach Plus,Ultraschallsensor rear side right signal line short circuit to positive,PMA-20
+80330C,Ultraschallsensor hinten Seite rechts Ausschwingzeit zu kurz,Ultraschallsensor rear side right Ausschwingzeit too short,PMA-20
+80330D,Ultraschallsensor hinten Seite rechts Kommunikationsfehler,Ultraschallsensor rear side right communication error,PMA-20
+80330E,Ultraschallsensor hinten Seite rechts Programmierung fehlerhaft,Ultraschallsensor rear side right Programmierung faulty,PMA-20
+80330F,Ultraschallsensor hinten Seite rechts Leitung Unterbrechung,Ultraschallsensor rear side right line interruption,PMA-20
+803310,Ultraschallsensor hinten Seite rechts Signalleitung Kurzschluss nach Minus,Ultraschallsensor rear side right signal line short circuit to Minus,PMA-20
+803312,Ultraschallsensor hinten Seite rechts Interner Sensorabgleich nicht möglich,Ultraschallsensor rear side right internal Sensorabgleich not possible,PMA-20
+803313,Ultraschallsensor hinten Seite rechts Falscher Sensortyp verbaut,Ultraschallsensor rear side right incorrect Sensortyp verbaut,PMA-20
+803315,Ultraschallsensor hinten Seite rechts Nebenschluss Datenleitung Signalpegel n.i.O.,Ultraschallsensor rear side right Nebenschluss data line Signalpegel n.i.O.,PMA-20
 804000,Reset aus sonstigen Gründen,Reset from sonstigen Gründen,BDC-G05
 804001,Reset wegen Aufstart,Reset due to Aufstart,BDC; BDC-G11
 804002,Reset durch Extern,Reset by Extern,BDC-G05
@@ -7550,6 +7739,105 @@ D36501,"Botschaft(xDrive Stellglied Information, ID: XDRV_ACT_INFO) Prüfsumme f
 D36502,"Botschaft(xDrive Stellglied Information, ID: XDRV_ACT_INFO) nicht aktuell","Message(xDrive actuator information, ID: XDRV_ACT_INFO) not current",DSC-G30N
 D3651D,"Signal(OBD: Diagnose OBD Motor, ID:DIAG_OBD_ENG) ungültig","Signal(OBD: diagnosis OBD engine, ID:DIAG_OBD_ENG) invalid",DSC-G30N
 D36C81,"Signal(Status Türsensoren Abgesichert, ID: STAT_DS_VRFD) ungültig","Signal(status door sensor fused, ID: STAT_DS_VRFD) invalid",DSC-G30N
+D40468,BODY-CAN Control Module Bus OFF,BODY-CAN control module bus OFF,PMA-20
+D40BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,PMA-20
+D41428,"Botschaftsfehler (Außentemperatur, ID: A_TEMP) - Timeout","Message fault (outside temperature, ID: A_TEMP) - timeout",PMA-20
+D4142C,"Signalfehler (Außentemperatur, ID: A_TEMP) - Ungültig","Signal fault (outside temperature, ID: A_TEMP) - invalid",PMA-20
+D41450,"Signalfehler (Blinken, ID: BLINKEN) - Ungültig","Signal fault (Blinken, ID: BLINKEN) - invalid",PMA-20
+D41451,"Botschaftsfehler (Blinken, ID: BLINKEN) - Timeout","Message fault (Blinken, ID: BLINKEN) - timeout",PMA-20
+D41482,"Botschaftsfehler (Fahrgestellnummer, ID: FAHRGESTELLNUMMER) - Timeout","Message fault (Fahrgestellnummer, ID: FAHRGESTELLNUMMER) - timeout",PMA-20
+D4149D,"Signalfehler (Status Elektrische-Lenkung Vorderachse, ID: ST_EST) - Qualifier","Signal fault (status electric-steering front axle, ID: ST_EST) - Qualifier",PMA-20
+D414A4,"Signalfehler (Anfrage Aktivierung Funktion Parken, ID: RQ_ACTVN_FN_PKG) - Ungültig","Signal fault (Anfrage activation function Parken, ID: RQ_ACTVN_FN_PKG) - invalid",PMA-20
+D414A5,"Signalfehler (Anfrage Aktivierung Funktion Parken, ID: RQ_ACTVN_FN_PKG) - Undefiniert","Signal fault (Anfrage activation function Parken, ID: RQ_ACTVN_FN_PKG) - Undefiniert",PMA-20
+D414A6,"Botschaftsfehler (Bedienung Taster Parken, ID: OP_PUBU_PKG) - Timeout","Message fault (Bedienung button Parken, ID: OP_PUBU_PKG) - timeout",PMA-20
+D414A7,"Signalfehler  (Bedienung Taster Parken, ID: OP_PUBU_PKG) - Ungültig","Signal fault  (Bedienung button Parken, ID: OP_PUBU_PKG) - invalid",PMA-20
+D414A8,"Signalfehler (Bedienung Taster Parken, ID: OP_PUBU_PKG) - Undefiniert","Signal fault (Bedienung button Parken, ID: OP_PUBU_PKG) - Undefiniert",PMA-20
+D414AC,"Botschaftsfehler (Fahrzeugzustand, ID: FZZSTD) - Timeout","Message fault (vehicle state, ID: FZZSTD) - timeout",PMA-20
+D414AD,"Signalfehler (Status MMI Funktion PDC, ID: ST_MMI_FN_PDC ) - Ungültig","Signal fault (status MMI function PDC, ID: ST_MMI_FN_PDC ) - invalid",PMA-20
+D414AE,"Signalfehler (Status MMI Funktion PDC, ID: ST_MMI_FN_PDC ) - Undefiniert","Signal fault (status MMI function PDC, ID: ST_MMI_FN_PDC ) - Undefiniert",PMA-20
+D414B2,"Signalfehler (Fahrzeugzustand, ID: FZZSTD) - Ungültig","Signal fault (vehicle state, ID: FZZSTD) - invalid",PMA-20
+D414B4,"Botschaftsfehler (Status Qualifier Rear-View, ID: ST_QU_RV) - Timeout","Message fault (status Qualifier Rear-View, ID: ST_QU_RV) - timeout",PMA-20
+D414B5,"Botschaftsfehler (Status Qualifier Rear-View, ID: ST_QU_RV) - Checksumme","Message fault (status Qualifier Rear-View, ID: ST_QU_RV) - check sum",PMA-20
+D414B8,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Timeout","Message fault (speed vehicle, ID: V_VEH) - timeout",PMA-20
+D414BA,"Botschaftsfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Alive","Message fault (speed vehicle, ID: V_VEH) - alive",PMA-20
+D414BC,"Botschaftsfehler (Status Qualifier Rear-View, ID: ST_QU_RV) - Alive","Message fault (status Qualifier Rear-View, ID: ST_QU_RV) - alive",PMA-20
+D414BD,"Signalfehler (Status Qualifier Rear-View, ID: ST_QU_RV) - Ungültig","Signal fault (status Qualifier Rear-View, ID: ST_QU_RV) - invalid",PMA-20
+D414BE,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Ungültig","Signal fault (speed vehicle, ID: V_VEH) - invalid",PMA-20
+D414BF,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Undefiniert","Signal fault (speed vehicle, ID: V_VEH) - Undefiniert",PMA-20
+D414C0,"Signalfehler (Status Qualifier Rear-View, ID: ST_QU_RV) - Undefiniert","Signal fault (status Qualifier Rear-View, ID: ST_QU_RV) - Undefiniert",PMA-20
+D414C2,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Timeout","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - timeout",PMA-20
+D414C4,"Botschaftsfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Alive","Message fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - alive",PMA-20
+D414C6,"Botschaftsfehler (Status Qualifier Top-View, ID: ST_QU_TVIEW) - Timeout","Message fault (status Qualifier Top-View, ID: ST_QU_TVIEW) - timeout",PMA-20
+D414C7,"Botschaftsfehler (Status Qualifier Top-View, ID: ST_QU_TVIEW) - Checksumme","Message fault (status Qualifier Top-View, ID: ST_QU_TVIEW) - check sum",PMA-20
+D414C8,"Signalfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Ungültig","Signal fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - invalid",PMA-20
+D414C9,"Signalfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Undefiniert","Signal fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - Undefiniert",PMA-20
+D414CA,"Botschaftsfehler (Status Qualifier Top-View, ID: ST_QU_TVIEW) - Alive","Message fault (status Qualifier Top-View, ID: ST_QU_TVIEW) - alive",PMA-20
+D414CB,"Signalfehler (Status Qualifier Top-View, ID: ST_QU_TVIEW) - Ungültig","Signal fault (status Qualifier Top-View, ID: ST_QU_TVIEW) - invalid",PMA-20
+D414CF,"Signalfehler (Status Qualifier Top-View, ID: ST_QU_TVIEW) - Undefiniert","Signal fault (status Qualifier Top-View, ID: ST_QU_TVIEW) - Undefiniert",PMA-20
+D414D3,"Botschaftsfehler (Wegstrecke Fahrzeug, ID: MILE_VEH) - Timeout","Message fault (distance vehicle, ID: MILE_VEH) - timeout",PMA-20
+D414D4,"Signalfehler (Wegstrecke Fahrzeug, ID: MILE_VEH) - Ungültig","Signal fault (distance vehicle, ID: MILE_VEH) - invalid",PMA-20
+D414D9,"Botschaftsfehler (Wegstrecke Rad Hinterachse, ID: MILE_WHL_BAX) - Timeout","Message fault (distance wheel rear axle, ID: MILE_WHL_BAX) - timeout",PMA-20
+D414DA,"Signalfehler (Wegstrecke Rad Hinterachse, ID: MILE_WHL_BAX) - Ungültig","Signal fault (distance wheel rear axle, ID: MILE_WHL_BAX) - invalid",PMA-20
+D414DB,"Signalfehler (Wegstrecke Rad Hinterachse, ID: MILE_WHL_BAX) - Undefiniert","Signal fault (distance wheel rear axle, ID: MILE_WHL_BAX) - Undefiniert",PMA-20
+D414E1,"Signalfehler (Wegstrecke Rad Hinterachse, ID: MILE_WHL_BAX) - Qualifier","Signal fault (distance wheel rear axle, ID: MILE_WHL_BAX) - Qualifier",PMA-20
+D414E2,"Botschaftsfehler (Wegstrecke Rad Vorderachse, ID: MILE_WHL_FTAX) - Timeout","Message fault (distance wheel front axle, ID: MILE_WHL_FTAX) - timeout",PMA-20
+D414E3,"Signalfehler (Wegstrecke Rad Vorderachse, ID: MILE_WHL_FTAX) - Ungültig","Signal fault (distance wheel front axle, ID: MILE_WHL_FTAX) - invalid",PMA-20
+D414E4,"Signalfehler (Wegstrecke Rad Vorderachse, ID: MILE_WHL_FTAX) - Undefiniert","Signal fault (distance wheel front axle, ID: MILE_WHL_FTAX) - Undefiniert",PMA-20
+D414E6,"Signalfehler (Wegstrecke Rad Vorderachse, ID: MILE_WHL_FTAX) - Qualifier","Signal fault (distance wheel front axle, ID: MILE_WHL_FTAX) - Qualifier",PMA-20
+D414F2,"Botschaftsfehler (Kilometerstand/Reichweite, ID: KILOMETERSTAND) - Timeout","Message fault (mileage/Reichweite, ID: KILOMETERSTAND) - timeout",PMA-20
+D414F8,"Botschaftsfehler (Klemmen, ID: KLEMMEN) - Timeout","Message fault (terminal, ID: KLEMMEN) - timeout",PMA-20
+D414FA,"Botschaftsfehler (Klemmen, ID: KLEMMEN) - Alive","Message fault (terminal, ID: KLEMMEN) - alive",PMA-20
+D414FC,"Signalfehler (Klemmen, ID: KLEMMEN) - Ungültig","Signal fault (terminal, ID: KLEMMEN) - invalid",PMA-20
+D414FD,"Signalfehler (Klemmen, ID: KLEMMEN) - Undefiniert","Signal fault (terminal, ID: KLEMMEN) - Undefiniert",PMA-20
+D4151C,"Signalfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Ungültig","Signal fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - invalid",PMA-20
+D4151D,"Signalfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Undefiniert","Signal fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - Undefiniert",PMA-20
+D41526,"Signalfehler (Lenkwinkel Vorderachse Effektiv, ID: STEA_FTAX_EFFV) - Ungültig","Signal fault (Lenkwinkel front axle Effektiv, ID: STEA_FTAX_EFFV) - invalid",PMA-20
+D41527,"Signalfehler (Lenkwinkel Vorderachse Effektiv, ID: STEA_FTAX_EFFV) - Undefiniert","Signal fault (Lenkwinkel front axle Effektiv, ID: STEA_FTAX_EFFV) - Undefiniert",PMA-20
+D41542,"Botschaftsfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Timeout","Message fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - timeout",PMA-20
+D41544,"Botschaftsfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Alive","Message fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - alive",PMA-20
+D41548,"Signalfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Ungültig","Signal fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - invalid",PMA-20
+D41549,"Signalfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Undefiniert","Signal fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - Undefiniert",PMA-20
+D4158C,"Botschaftsfehler (Relativzeit, ID: RELATIVZEIT) - Timeout","Message fault (Relativzeit, ID: RELATIVZEIT) - timeout",PMA-20
+D415A0,"Botschaftsfehler (Status Anhänger, ID: STAT_ANHAENGER) - Timeout","Message fault (status Anhänger, ID: STAT_ANHAENGER) - timeout",PMA-20
+D415A4,"Signalfehler (Status Anhänger, ID: STAT_ANHAENGER) - Ungültig","Signal fault (status Anhänger, ID: STAT_ANHAENGER) - invalid",PMA-20
+D415A5,"Signalfehler (Status Anhänger, ID: STAT_ANHAENGER) - Undefiniert","Signal fault (status Anhänger, ID: STAT_ANHAENGER) - Undefiniert",PMA-20
+D415BC,"Botschaftsfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Timeout","Message fault (status stabilization DSC, ID: ST_STAB_DSC) - timeout",PMA-20
+D415C2,"Signalfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Ungültig","Signal fault (status stabilization DSC, ID: ST_STAB_DSC) - invalid",PMA-20
+D415C3,"Signalfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Undefiniert","Signal fault (status stabilization DSC, ID: ST_STAB_DSC) - Undefiniert",PMA-20
+D415C4,"Botschaftsfehler (Status Elektrische-Lenkung Vorderachse, ID: ST_EST) - Timeout","Message fault (status electric-steering front axle, ID: ST_EST) - timeout",PMA-20
+D415C6,"Botschaftsfehler (Status Elektrische-Lenkung Vorderachse, ID: ST_EST) - Alive","Message fault (status electric-steering front axle, ID: ST_EST) - alive",PMA-20
+D415C8,"Signalfehler (Status Elektrische-Lenkung Vorderachse, ID: ST_EST) - Ungültig","Signal fault (status electric-steering front axle, ID: ST_EST) - invalid",PMA-20
+D415C9,"Signalfehler (Status Elektrische-Lenkung Vorderachse, ID: ST_EST) - Undefiniert","Signal fault (status electric-steering front axle, ID: ST_EST) - Undefiniert",PMA-20
+D4161C,"Botschaftsfehler (Toleranzabgleich Rad, ID: TOMA_WHL) - Timeout","Message fault (Toleranzabgleich wheel, ID: TOMA_WHL) - timeout",PMA-20
+D41620,"Signalfehler (Toleranzabgleich Rad, ID: TOMA_WHL) - Ungültig","Signal fault (Toleranzabgleich wheel, ID: TOMA_WHL) - invalid",PMA-20
+D41621,"Signalfehler (Toleranzabgleich Rad, ID: TOMA_WHL) - Undefiniert","Signal fault (Toleranzabgleich wheel, ID: TOMA_WHL) - Undefiniert",PMA-20
+D41652,"Botschaftsfehler (ZV und Klappenzustand, ID: STAT_ZV_KLAPPEN) - Timeout","Message fault (ZV and flap state, ID: STAT_ZV_KLAPPEN) - timeout",PMA-20
+D41656,"Signalfehler (ZV und Klappenzustand, ID: STAT_ZV_KLAPPEN) - Ungültig","Signal fault (ZV and flap state, ID: STAT_ZV_KLAPPEN) - invalid",PMA-20
+D41657,"Signalfehler (ZV und Klappenzustand, ID: STAT_ZV_KLAPPEN) - Undefiniert","Signal fault (ZV and flap state, ID: STAT_ZV_KLAPPEN) - Undefiniert",PMA-20
+D4167B,"Botschaftsfehler (Anfrage Aktivierung Funktion Parken 2, ID: RQ_ACTVN_FN_PKG_2) - Timeout","Message fault (Anfrage activation function Parken 2, ID: RQ_ACTVN_FN_PKG_2) - timeout",PMA-20
+D4170F,"Botschaftsfehler (Anfrage Aktivierung Funktion Parken 2, ID: RQ_ACTVN_FN_PKG_2) - Alive","Message fault (Anfrage activation function Parken 2, ID: RQ_ACTVN_FN_PKG_2) - alive",PMA-20
+D41711,"Signalfehler (Anfrage Aktivierung Funktion Parken 2, ID: RQ_ACTVN_FN_PKG_2) - Ungültig","Signal fault (Anfrage activation function Parken 2, ID: RQ_ACTVN_FN_PKG_2) - invalid",PMA-20
+D41744,"Botschaftsfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Timeout","Message fault (data drivetrain 2, ID: DT_PT_2) - timeout",PMA-20
+D4180D,"Signalfehler (Anfrage Aktivierung Funktion Parken 2, ID: RQ_ACTVN_FN_PKG_2) - Undefiniert","Signal fault (Anfrage activation function Parken 2, ID: RQ_ACTVN_FN_PKG_2) - Undefiniert",PMA-20
+D419AB,"Signalfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Ungültig","Signal fault (data drivetrain 2, ID: DT_PT_2) - invalid",PMA-20
+D41A3E,"Signalfehler (Geschwindigkeit Fahrzeug, ID: V_VEH) - Qualifier","Signal fault (speed vehicle, ID: V_VEH) - Qualifier",PMA-20
+D41A3F,"Signalfehler (Giergeschwindigkeit Fahrzeug, ID: VYAW_VEH) - Qualifier","Signal fault (Giergeschwindigkeit vehicle, ID: VYAW_VEH) - Qualifier",PMA-20
+D41A57,"Signalfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Qualifier","Signal fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - Qualifier",PMA-20
+D41A62,"Signalfehler (Querbeschleunigung Schwerpunkt, ID: ACLNY_MASSCNTR) - Qualifier","Signal fault (lateral acceleration Schwerpunkt, ID: ACLNY_MASSCNTR) - Qualifier",PMA-20
+D41A84,"Signalfehler (Toleranzabgleich Rad, ID: TOMA_WHL) - Qualifier","Signal fault (Toleranzabgleich wheel, ID: TOMA_WHL) - Qualifier",PMA-20
+D41B2C,"Botschaftsfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Timeout","Message fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - timeout",PMA-20
+D41B2F,"Botschaftsfehler (Längsbeschleunigung Schwerpunkt, ID: ACLNX_MASSCNTR) - Alive","Message fault (longitudinal acceleration Schwerpunkt, ID: ACLNX_MASSCNTR) - alive",PMA-20
+D41B36,"Botschaftsfehler (Lenkwinkel Vorderachse Effektiv, ID: STEA_FTAX_EFFV) - Timeout","Message fault (Lenkwinkel front axle Effektiv, ID: STEA_FTAX_EFFV) - timeout",PMA-20
+D41B38,"Botschaftsfehler (Lenkwinkel Vorderachse Effektiv, ID: STEA_FTAX_EFFV) - Alive","Message fault (Lenkwinkel front axle Effektiv, ID: STEA_FTAX_EFFV) - alive",PMA-20
+D41C16,"Botschaftsfehler (Einheiten, ID: EINHEITEN) - Timeout","Message fault (unit, ID: EINHEITEN) - timeout",PMA-20
+D41C1C,"Botschaftsfehler (Status Gang Rückwärts, ID: STAT_GANG_RUECKWAERTS) - Timeout","Message fault (status gear Rückwärts, ID: STAT_GANG_RUECKWAERTS) - timeout",PMA-20
+D42C05,"Signalfehler (Außentemperatur, ID: A_TEMP) - Undefiniert","Signal fault (outside temperature, ID: A_TEMP) - Undefiniert",PMA-20
+D42C0A,"Signalfehler (Blinken, ID: BLINKEN) - Undefiniert","Signal fault (Blinken, ID: BLINKEN) - Undefiniert",PMA-20
+D42C0D,"Signalfehler (Daten Antriebsstrang 2, ID: DT_PT_2) - Undefiniert","Signal fault (data drivetrain 2, ID: DT_PT_2) - Undefiniert",PMA-20
+D42C49,"Signalfehler (Status Gang Rückwärts, ID: STAT_GANG_RUECKWAERTS) - Ungültig","Signal fault (status gear Rückwärts, ID: STAT_GANG_RUECKWAERTS) - invalid",PMA-20
+D42C4A,"Signalfehler (Status Gang Rückwärts, ID: STAT_GANG_RUECKWAERTS) - Undefiniert","Signal fault (status gear Rückwärts, ID: STAT_GANG_RUECKWAERTS) - Undefiniert",PMA-20
+D42C65,"Signalfehler (Lenkwinkel Vorderachse Effektiv, ID: STEA_FTAX_EFFV) - Qualifier","Signal fault (Lenkwinkel front axle Effektiv, ID: STEA_FTAX_EFFV) - Qualifier",PMA-20
+D42C67,"Signalfehler (Status Stabilisierung DSC, ID: ST_STAB_DSC) - Qualifier","Signal fault (status stabilization DSC, ID: ST_STAB_DSC) - Qualifier",PMA-20
 D5041F,Flexray:  Physikalischer Busfehler,Flexray:  physical bus fault,EPS-G11
 D50420,FLEXRAY Controller Error,FLEXRAY Controller Error,EPS-G11
 D50BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,EPS-G11

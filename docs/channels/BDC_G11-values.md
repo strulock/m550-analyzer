@@ -8,122 +8,122 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Thermoschwelle active (übersteuert) | Keine Thermoschwelle aktiv (übersteuert) |
-| 1 | Thermo 90 active (übersteuert) | Thermo 90 aktiv (übersteuert) |
-| 2 | Thermo 100 active (übersteuert) | Thermo 100 aktiv (übersteuert) |
-| 3 | Normalbetrieb threshold be entsprechend the Ergebnis the Berechnung set | Normalbetrieb Schwellen werden entsprechend dem Ergebnis der Berechnung gesetzt |
-| 4 | Thermo 90 active, not übersteuert | Thermo 90 aktiv, nicht übersteuert |
-| 5 | Thermo 100 active, not übersteuert | Thermo 100 aktiv, nicht übersteuert |
+| 0 | No thermal threshold active (overridden) | Keine Thermoschwelle aktiv (übersteuert) |
+| 1 | Thermo 90 active (overridden) | Thermo 90 aktiv (übersteuert) |
+| 2 | Thermo 100 active (overridden) | Thermo 100 aktiv (übersteuert) |
+| 3 | Normal operation: thresholds are set according to the calculation result | Normalbetrieb Schwellen werden entsprechend dem Ergebnis der Berechnung gesetzt |
+| 4 | Thermo 90 active, not overridden | Thermo 90 aktiv, nicht übersteuert |
+| 5 | Thermo 100 active, not overridden | Thermo 100 aktiv, nicht übersteuert |
 | 255 | Invalid | Ungültig |
 
 ## BDC_G11.HOD_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Handsoff detected, QU_HOFF_RCOG_SEN_LIN = 0x9 | Handsoff erkannt, QU_HOFF_RCOG_SEN_LIN = 0x9 |
-| 1 | Handsoff funktionsbereit, QU_HOFF_RCOG_SEN_LIN = 0x1 | Handsoff funktionsbereit, QU_HOFF_RCOG_SEN_LIN = 0x1 |
-| 2 | Handsoff not funktionsbereit or Energiesparmode, QU_HOFF_RCOG_SEN_LIN = 0x5 or 0xD or 0xE or 0xF | Handsoff nicht funktionsbereit oder Energiesparmode, QU_HOFF_RCOG_SEN_LIN = 0x5 oder 0xD oder 0xE oder 0xF |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Hands-off detected, QU_HOFF_RCOG_SEN_LIN = 0x9 | Handsoff erkannt, QU_HOFF_RCOG_SEN_LIN = 0x9 |
+| 1 | Hands-off ready for operation, QU_HOFF_RCOG_SEN_LIN = 0x1 | Handsoff funktionsbereit, QU_HOFF_RCOG_SEN_LIN = 0x1 |
+| 2 | Hands-off not ready for operation or energy saving mode, QU_HOFF_RCOG_SEN_LIN = 0x5 or 0xD or 0xE or 0xF | Handsoff nicht funktionsbereit oder Energiesparmode, QU_HOFF_RCOG_SEN_LIN = 0x5 oder 0xD oder 0xE oder 0xF |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.HSS_TYPE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Höhenstandssensoren | Keine Höhenstandssensoren |
-| 1 | Höhenstandssensoren by CAN | Höhenstandssensoren durch CAN |
-| 2 | Höhenstandssensoren an BDC | Höhenstandssensoren an BDC |
+| 0 | No ride height sensors | Keine Höhenstandssensoren |
+| 1 | Ride height sensors via CAN | Höhenstandssensoren durch CAN |
+| 2 | Ride height sensors on BDC | Höhenstandssensoren an BDC |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.LICHTSPERRE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Lichtsperre not active | Lichtsperre nicht aktiv |
-| 1 | Lichtsperre active | Lichtsperre aktiv |
-| 255 | invalid | ungültig |
+| 0 | Light lock not active | Lichtsperre nicht aktiv |
+| 1 | Light lock active | Lichtsperre aktiv |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.PWF_MESSEMODUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | MESSEMODUS_NICHT_AKTIV | MESSEMODUS_NICHT_AKTIV |
-| 1 | MESSEMODUS_AKTIV | MESSEMODUS_AKTIV |
+| 0 | Showroom mode not active | MESSEMODUS_NICHT_AKTIV |
+| 1 | Showroom mode active | MESSEMODUS_AKTIV |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.PWF_ZUSTAND_FAHRZEUG_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | reserviert | reserviert |
-| 1 | Parken_BN_niO | Parken_BN_niO |
-| 2 | Parken_BN_iO | Parken_BN_iO |
-| 3 | Standfunktionen_Kunde_nicht_im_FZG | Standfunktionen_Kunde_nicht_im_FZG |
-| 4 | reserviert | reserviert |
-| 5 | Wohnen | Wohnen |
-| 6 | reserviert | reserviert |
-| 7 | Pruefen_Analyse_Diagnose | Pruefen_Analyse_Diagnose |
-| 8 | Fahrbereitschaft_herstellen | Fahrbereitschaft_herstellen |
-| 9 | reserviert | reserviert |
-| 10 | Fahren | Fahren |
-| 11 | reserviert | reserviert |
-| 12 | Fahrbereitschaft_beenden | Fahrbereitschaft_beenden |
-| 13 | reserviert | reserviert |
-| 14 | not available | nicht verfügbar |
-| 15 | invalid | ungültig |
+| 0 | Reserved | reserviert |
+| 1 | Parking, vehicle electrical system not OK | Parken_BN_niO |
+| 2 | Parking, vehicle electrical system OK | Parken_BN_iO |
+| 3 | Stationary functions, customer not in vehicle | Standfunktionen_Kunde_nicht_im_FZG |
+| 4 | Reserved | reserviert |
+| 5 | Residing | Wohnen |
+| 6 | Reserved | reserviert |
+| 7 | Testing/analysis/diagnosis | Pruefen_Analyse_Diagnose |
+| 8 | Establishing drive readiness | Fahrbereitschaft_herstellen |
+| 9 | Reserved | reserviert |
+| 10 | Driving | Fahren |
+| 11 | Reserved | reserviert |
+| 12 | Ending drive readiness | Fahrbereitschaft_beenden |
+| 13 | Reserved | reserviert |
+| 14 | Not available | nicht verfügbar |
+| 15 | Invalid | ungültig |
 
 ## BDC_G11.RDBI_PC_PCS_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
 
 ## BDC_G11.TAB_ANTENNA_LOCATION
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Innenraum front | Innenraum vorne |
-| 2 | Innenraum rear | Innenraum hinten |
-| 3 | Aussenraum left | Aussenraum links |
-| 4 | Aussenraum right | Aussenraum rechts |
-| 5 | Kofferraum mittig | Kofferraum mittig |
-| 6 | Bumper rear | Stossfänger hinten |
-| 7 | Kofferraum left | Kofferraum links |
-| 8 | Kofferraum right | Kofferraum rechts |
-| 9 | Hutablage | Hutablage |
-| 255 | not verbaut | nicht verbaut |
+| 1 | Interior front | Innenraum vorne |
+| 2 | Interior rear | Innenraum hinten |
+| 3 | Exterior left | Aussenraum links |
+| 4 | Exterior right | Aussenraum rechts |
+| 5 | Luggage compartment centre | Kofferraum mittig |
+| 6 | Rear bumper | Stossfänger hinten |
+| 7 | Luggage compartment left | Kofferraum links |
+| 8 | Luggage compartment right | Kofferraum rechts |
+| 9 | Rear parcel shelf | Hutablage |
+| 255 | Not fitted | nicht verbaut |
 
 ## BDC_G11.TAB_ARMAUFLAGEHEIZUNG_VORH
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not present | nicht vorhanden |
-| 1 | present (2 getrennte Heizflächen in the Mittelarmlehne rear) | vorhanden (2 getrennte Heizflächen in der Mittelarmlehne hinten) |
-| 2 | present (1 gemeinsame Heizfläche in the Mittelarmlehne rear) | vorhanden (1 gemeinsame Heizfläche in der Mittelarmlehne hinten) |
-| 3 | present (2 gemeinsame Heizflächen in the Mittelarmlehne rear) | vorhanden (2 gemeinsame Heizflächen in der Mittelarmlehne hinten) |
-| 255 | invalid | ungültig |
+| 0 | Not present | nicht vorhanden |
+| 1 | Present (2 separate heating surfaces in the rear centre armrest) | vorhanden (2 getrennte Heizflächen in der Mittelarmlehne hinten) |
+| 2 | Present (1 common heating surface in the rear centre armrest) | vorhanden (1 gemeinsame Heizfläche in der Mittelarmlehne hinten) |
+| 3 | Present (2 common heating surfaces in the rear centre armrest) | vorhanden (2 gemeinsame Heizflächen in der Mittelarmlehne hinten) |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_AUC_STUFE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Luftgütestufe 0 | Luftgütestufe 0 |
-| 1 | Luftgütestufe 1 | Luftgütestufe 1 |
-| 2 | Luftgütestufe 2 | Luftgütestufe 2 |
-| 3 | Luftgütestufe 3 | Luftgütestufe 3 |
-| 4 | Luftgütestufe 4 | Luftgütestufe 4 |
-| 5 | Luftgütestufe 5 | Luftgütestufe 5 |
-| 6 | Luftgütestufe 6 | Luftgütestufe 6 |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Air quality level 0 | Luftgütestufe 0 |
+| 1 | Air quality level 1 | Luftgütestufe 1 |
+| 2 | Air quality level 2 | Luftgütestufe 2 |
+| 3 | Air quality level 3 | Luftgütestufe 3 |
+| 4 | Air quality level 4 | Luftgütestufe 4 |
+| 5 | Air quality level 5 | Luftgütestufe 5 |
+| 6 | Air quality level 6 | Luftgütestufe 6 |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_AUSSENSPIEGEL_ABBLENDEN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Abblendenfunktion | Keine Abblendenfunktion |
-| 1 | Abblendfunktion beide exterior mirror present | Abblendfunktion beide Außenspiegel vorhanden |
-| 2 | Abblendfunktion nur exterior mirror driver side  present | Abblendfunktion nur Außenspiegel Fahrerseite  vorhanden |
+| 0 | No dimming function | Keine Abblendenfunktion |
+| 1 | Dimming function present for both exterior mirrors | Abblendfunktion beide Außenspiegel vorhanden |
+| 2 | Dimming function present for driver's side exterior mirror only | Abblendfunktion nur Außenspiegel Fahrerseite  vorhanden |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_CARCODE_WISCHERMOTOR
@@ -148,91 +148,91 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 15 | F26 | F26 |
 | 16 | G11, G12 | G11, G12 |
 | 17 | G30, G31 | G30, G31 |
-| 255 | invalid | ungültig |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_CARGO_SG_ANTIRUTSCHMATTE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Antirutschmatte eingefahren | Antirutschmatte eingefahren |
-| 1 | Antirutschmatte ausgefahren | Antirutschmatte ausgefahren |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Anti-slip mat retracted | Antirutschmatte eingefahren |
+| 1 | Anti-slip mat extended | Antirutschmatte ausgefahren |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_CAS_DIGITAL_EINGANG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not active / not betätigt | nicht aktiv / nicht betätigt |
-| 1 | active / betätigt | aktiv / betätigt |
-| 2 | not verbaut / status not available | nicht verbaut / Status nicht verfügbar |
-| 3 | invalid | ungültig |
-| 255 | invalid / fault detected | ungültig / Fehler erkannt |
+| 0 | Not active / not operated | nicht aktiv / nicht betätigt |
+| 1 | Active / operated | aktiv / betätigt |
+| 2 | Not fitted / status not available | nicht verbaut / Status nicht verfügbar |
+| 3 | Invalid | ungültig |
+| 255 | Invalid / fault detected | ungültig / Fehler erkannt |
 
 ## BDC_G11.TAB_CAS_DIGITAL_EINGANG_PEGEL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Low-Pegel | Low-Pegel |
-| 1 | High-Pegel | High-Pegel |
-| 255 | invalid / fault detected | ungültig / Fehler erkannt |
+| 0 | Low level | Low-Pegel |
+| 1 | High level | High-Pegel |
+| 255 | Invalid / fault detected | ungültig / Fehler erkannt |
 
 ## BDC_G11.TAB_CAS_FH_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Closed | Geschlossen |
-| 1 | Zwischenstellung | Zwischenstellung |
+| 1 | Intermediate position | Zwischenstellung |
 | 2 | Open | Offen |
-| 255 | invalid/unknown | ungültig/unbekannt |
+| 255 | Invalid/unknown | ungültig/unbekannt |
 
 ## BDC_G11.TAB_CAS_GANG
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | N - no Kraftschluss | N - Kein Kraftschluss |
-| 2 | R - Rückwärtsgang | R - Rückwärtsgang |
-| 3 | P - Parkposition | P - Parkposition |
-| 5 | 1. gear | 1. Gang |
-| 6 | 2. gear | 2. Gang |
-| 7 | 3. gear | 3. Gang |
-| 8 | 4. gear | 4. Gang |
-| 9 | 5. gear | 5. Gang |
-| 10 | 6. gear | 6. Gang |
-| 11 | 7. gear | 7. Gang |
-| 12 | 8. gear | 8. Gang |
-| 13 | 9. gear | 9. Gang |
-| 15 | invalid | ungültig |
-| 255 | invalid | ungültig |
+| 1 | N - no power transmission | N - Kein Kraftschluss |
+| 2 | R - reverse gear | R - Rückwärtsgang |
+| 3 | P - park position | P - Parkposition |
+| 5 | Gear 1 | 1. Gang |
+| 6 | Gear 2 | 2. Gang |
+| 7 | Gear 3 | 3. Gang |
+| 8 | Gear 4 | 4. Gang |
+| 9 | Gear 5 | 5. Gang |
+| 10 | Gear 6 | 6. Gang |
+| 11 | Gear 7 | 7. Gang |
+| 12 | Gear 8 | 8. Gang |
+| 13 | Gear 9 | 9. Gang |
+| 15 | Invalid | ungültig |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_CAS_GESCHW_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Vehicle steht | Fahrzeug steht |
-| 1 | Vehicle fährt vorwärts | Fahrzeug fährt vorwärts |
-| 2 | Vehicle fährt rückwärts | Fahrzeug fährt rückwärts |
-| 3 | Vehicle fährt | Fahrzeug fährt |
-| 4 | Vehicle steht, rear axle on Rollenprüfstand detected | Fahrzeug steht, Hinterachse auf Rollenprüfstand erkannt |
-| 5 | Vehicle steht, Zwei-Achs-Rollenbetrieb set | Fahrzeug steht, Zwei-Achs-Rollenbetrieb gesetzt |
-| 6 | Vehicle steht, front axle on Rollenprüfstand detected | Fahrzeug steht, Vorderachse auf Rollenprüfstand erkannt |
+| 0 | Vehicle stationary | Fahrzeug steht |
+| 1 | Vehicle moving forwards | Fahrzeug fährt vorwärts |
+| 2 | Vehicle moving backwards | Fahrzeug fährt rückwärts |
+| 3 | Vehicle moving | Fahrzeug fährt |
+| 4 | Vehicle stationary, rear axle on roller dynamometer detected | Fahrzeug steht, Hinterachse auf Rollenprüfstand erkannt |
+| 5 | Vehicle stationary, two-axle roller mode set | Fahrzeug steht, Zwei-Achs-Rollenbetrieb gesetzt |
+| 6 | Vehicle stationary, front axle on roller dynamometer detected | Fahrzeug steht, Vorderachse auf Rollenprüfstand erkannt |
 | 255 | Signal invalid/unknown | Signal ungültig/unbekannt |
 
 ## BDC_G11.TAB_CAS_HALL_SENSOR
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sensor not verbaut/ not present (Open Load) | Sensor nicht verbaut/ nicht vorhanden (Open Load) |
+| 0 | Sensor not fitted/not present (open load) | Sensor nicht verbaut/ nicht vorhanden (Open Load) |
 | 2 | Sensor not active | Sensor nicht aktiv |
 | 4 | Sensor active | Sensor aktiv |
 | 6 | Short circuit | Kurzschluss |
-| 255 | invalid / implausible / unknown | ungültig / unplausibel / unbekannt |
+| 255 | Invalid / implausible / unknown | ungültig / unplausibel / unbekannt |
 
 ## BDC_G11.TAB_CAS_HECKKLAPPENSENSOR
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Closed | Geschlossen |
-| 1 | Open | Geöffnet |
+| 1 | Opened | Geöffnet |
 | 2 | Fault | Fehler |
 | 255 | Invalid | Ungültig |
 
@@ -240,12 +240,12 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Leitungsbruch / short circuit to battery voltage | Leitungsbruch / Kurzschluss nach Batteriespannung |
+| 0 | Open circuit / short circuit to battery voltage | Leitungsbruch / Kurzschluss nach Batteriespannung |
 | 2 | Door closed | Tür geschlossen |
 | 4 | Door open | Tür offen |
 | 6 | Short circuit to ground | Kurzschluss nach Masse |
-| 8 | Contact not verbaut | Kontakt nicht verbaut |
-| 255 | invalid / implausible / unknown | ungültig / unplausibel / unbekannt |
+| 8 | Contact not fitted | Kontakt nicht verbaut |
+| 255 | Invalid / implausible / unknown | ungültig / unplausibel / unbekannt |
 
 ## BDC_G11.TAB_CAS_KLEMMENSTATUS
 
@@ -253,18 +253,18 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | INIT | INIT |
 | 1 | Reserve | Reserve |
-| 2 | KL30 alle terminal from | KL30 alle Klemmen aus |
-| 3 | KL30F-Änderung | KL30F-Änderung |
-| 4 | KL30F | KL30F |
-| 5 | KL30B-Änderung | KL30B-Änderung |
-| 6 | KL30B | KL30B |
-| 7 | KLR-Änderung | KLR-Änderung |
-| 8 | KLR | KLR |
-| 9 | KL15-Änderung | KL15-Änderung |
-| 10 | KL15 | KL15 |
-| 11 | KL50-Verzögerung | KL50-Verzögerung |
-| 12 | KL50-Änderung | KL50-Änderung |
-| 13 | KL50 | KL50 |
+| 2 | Terminal 30, all terminals off | KL30 alle Klemmen aus |
+| 3 | Terminal 30F change | KL30F-Änderung |
+| 4 | Terminal 30F | KL30F |
+| 5 | Terminal 30B change | KL30B-Änderung |
+| 6 | Terminal 30B | KL30B |
+| 7 | Terminal R change | KLR-Änderung |
+| 8 | Terminal R | KLR |
+| 9 | Terminal 15 change | KL15-Änderung |
+| 10 | Terminal 15 | KL15 |
+| 11 | Terminal 50 delay | KL50-Verzögerung |
+| 12 | Terminal 50 change | KL50-Änderung |
+| 13 | Terminal 50 | KL50 |
 | 14 | Fault | Fehler |
 | 15 | Invalid | Ungültig |
 
@@ -272,39 +272,39 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Normalbetrieb - Alle Montagemodi deactivated | Normalbetrieb - Alle Montagemodi deaktiviert |
-| 1 | KL50-Sperre/readiness to drive-Sperre  active | KL50-Sperre/Fahrbereitschafts-Sperre  aktiv |
-| 2 | ELV_KL50-Montagemodus - Entfällt ab SP2015 | ELV_KL50-Montagemodus - Entfällt ab SP2015 |
-| 3 | Präsentations-mode | Präsentations-Modus |
+| 0 | Normal operation - all assembly modes deactivated | Normalbetrieb - Alle Montagemodi deaktiviert |
+| 1 | Terminal 50 lock/drive readiness lock active | KL50-Sperre/Fahrbereitschafts-Sperre  aktiv |
+| 2 | ELV_KL50 assembly mode - discontinued from SP2015 | ELV_KL50-Montagemodus - Entfällt ab SP2015 |
+| 3 | Presentation mode | Präsentations-Modus |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_CAS_MOTOR_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Engine from | Motor aus |
-| 1 | Engine startet | Motor startet |
-| 2 | Engine läuft | Motor läuft |
-| 3 | Initialisierung / invalid / unknown | Initialisierung / Ungültig / Unbekannt |
-| 255 | invalid/unknown | ungültig/unbekannt |
+| 0 | Engine off | Motor aus |
+| 1 | Engine starting | Motor startet |
+| 2 | Engine running | Motor läuft |
+| 3 | Initialisation / invalid / unknown | Initialisierung / Ungültig / Unbekannt |
+| 255 | Invalid/unknown | ungültig/unbekannt |
 
 ## BDC_G11.TAB_CAS_PIA_NUMMER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Personalisierungskonfiguration 0 | Personalisierungskonfiguration 0 |
-| 1 | Personalisierungskonfiguration 1 | Personalisierungskonfiguration 1 |
-| 2 | Personalisierungskonfiguration 2 | Personalisierungskonfiguration 2 |
-| 10 | Gast | Gast |
-| 15 | No Personalisierung zugewiesen - unpersonalisiertes Profil | Keine Personalisierung zugewiesen - unpersonalisiertes Profil |
-| 255 | invalid | ungültig |
+| 0 | Personalisation configuration 0 | Personalisierungskonfiguration 0 |
+| 1 | Personalisation configuration 1 | Personalisierungskonfiguration 1 |
+| 2 | Personalisation configuration 2 | Personalisierungskonfiguration 2 |
+| 10 | Guest | Gast |
+| 15 | No personalisation assigned - unpersonalised profile | Keine Personalisierung zugewiesen - unpersonalisiertes Profil |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_CAS_TAGE_SPERRSTATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Blocked | Gesperrt |
-| 1 | Freigegeben | Freigegeben |
+| 0 | Locked | Gesperrt |
+| 1 | Enabled | Freigegeben |
 | 255 | Invalid/unknown | Ungültig/Unbekannt |
 
 ## BDC_G11.TAB_CA_CAR_CONFIG
@@ -312,14 +312,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 1 | CG-only | CG-only |
-| 2 | CA - one trunk antenna -  short side antennas | CA - one trunk antenna -  short side antennas |
+| 2 | CA - one trunk antenna - short side antennas | CA - one trunk antenna -  short side antennas |
 | 4 | CA+RCP - one trunk antenna - short side antennas | CA+RCP - one trunk antenna - short side antennas |
-| 6 | CA-  two trunk antennas - short side antennas | CA-  two trunk antennas - short side antennas |
+| 6 | CA - two trunk antennas - short side antennas | CA-  two trunk antennas - short side antennas |
 | 7 | CA+RCP - two trunk antennas - short side antennas | CA+RCP - two trunk antennas - short side antennas |
-| 34 | CA - one trunk antenna -  long side antennas | CA - one trunk antenna -  long side antennas |
-| 36 | CA+RCP - one trunk antenna -  long side antennas | CA+RCP - one trunk antenna -  long side antennas |
-| 38 | CA - two trunk antennas -  long side antennas | CA - two trunk antennas -  long side antennas |
-| 39 | CA+RCP - two trunk antennas -  long side antennas | CA+RCP - two trunk antennas -  long side antennas |
+| 34 | CA - one trunk antenna - long side antennas | CA - one trunk antenna -  long side antennas |
+| 36 | CA+RCP - one trunk antenna - long side antennas | CA+RCP - one trunk antenna -  long side antennas |
+| 38 | CA - two trunk antennas - long side antennas | CA - two trunk antennas -  long side antennas |
+| 39 | CA+RCP - two trunk antennas - long side antennas | CA+RCP - two trunk antennas -  long side antennas |
 | 255 | Invalid/unknown | Ungültig/Unbekannt |
 
 ## BDC_G11.TAB_CA_HW_VARIANT
@@ -331,59 +331,59 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 2 | CA56 | CA56 |
 | 3 | CA57 | CA57 |
 | 4 | CA567 | CA567 |
-| 7 | undefined | undefined |
-| 255 | invalid | invalid |
+| 7 | Undefined | undefined |
+| 255 | Invalid | invalid |
 
 ## BDC_G11.TAB_CA_TAGE_ER_LEITUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | CA-button and TAGE not verbaut | CA-Taster und TAGE nicht verbaut |
-| 1 | CA-button or TAGE betätigt | CA-Taster oder TAGE betätigt |
-| 2 | CA-button or TAGE not betätigt | CA-Taster oder TAGE nicht betätigt |
-| 3 | CA-button or TAGE short circuit | CA-Taster oder TAGE Kurzschluss |
-| 255 | CA-button or TAGE outside values range | CA-Taster oder TAGE ausserhalb Wertebereich |
+| 0 | CA button and TAGE not fitted | CA-Taster und TAGE nicht verbaut |
+| 1 | CA button or TAGE pressed | CA-Taster oder TAGE betätigt |
+| 2 | CA button or TAGE not pressed | CA-Taster oder TAGE nicht betätigt |
+| 3 | CA button or TAGE short circuit | CA-Taster oder TAGE Kurzschluss |
+| 255 | CA button or TAGE out of value range | CA-Taster oder TAGE ausserhalb Wertebereich |
 
 ## BDC_G11.TAB_CA_TAGE_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No status (no actuation) | Kein Status (keine Betätigung) |
-| 1 | CA-button or TAGE-Zugsensor (Hall) betätigt | CA-Taster oder TAGE-Zugsensor (Hall) betätigt |
-| 2 | TAGE-Sichern sensor betätigt (VR-Kap-sensor) | TAGE-Sichern Sensor betätigt (VR-Kap-Sensor) |
-| 3 | TAGE-Entriegeln sensor betätigt (ER-Kap-sensor) | TAGE-Entriegeln Sensor betätigt (ER-Kap-Sensor) |
-| 4 | CA-button or TAGE not verbaut | CA-Taster oder TAGE nicht verbaut |
+| 0 | No status (not operated) | Kein Status (keine Betätigung) |
+| 1 | CA button or TAGE pull sensor (Hall) operated | CA-Taster oder TAGE-Zugsensor (Hall) betätigt |
+| 2 | TAGE lock sensor operated (VR capacitive sensor) | TAGE-Sichern Sensor betätigt (VR-Kap-Sensor) |
+| 3 | TAGE unlock sensor operated (ER capacitive sensor) | TAGE-Entriegeln Sensor betätigt (ER-Kap-Sensor) |
+| 4 | CA button or TAGE not fitted | CA-Taster oder TAGE nicht verbaut |
 
 ## BDC_G11.TAB_CURRENT_STATE_OF_OP_STM
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | undefined | undefined |
-| 1 | OutputPermanentlyDisabled | OutputPermanentlyDisabled |
-| 2 | MeasurementPending | MeasurementPending |
+| 0 | Undefined | undefined |
+| 1 | Output permanently disabled | OutputPermanentlyDisabled |
+| 2 | Measurement pending | MeasurementPending |
 | 3 | Healthy | Healthy |
-| 4 | ShortCircuit | ShortCircuit |
+| 4 | Short circuit | ShortCircuit |
 | 5 | Restarting | Restarting |
-| 6 | NoRestartBeforCl15 | NoRestartBeforCl15 |
-| 7 | OpenLoadDebouncing | OpenLoadDebouncing |
-| 8 | LocalHealingOpenLoad | LocalHealingOpenLoad |
-| 9 | OpenLoad | OpenLoad |
+| 6 | No restart before terminal 15 | NoRestartBeforCl15 |
+| 7 | Open load debouncing | OpenLoadDebouncing |
+| 8 | Local healing, open load | LocalHealingOpenLoad |
+| 9 | Open load | OpenLoad |
 
 ## BDC_G11.TAB_DIGITAL_DIAGNOSE_VALUE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ShortcutOvertemperature | ShortcutOvertemperature |
-| 1 | PreShortcutOvertemperature | PreShortcutOvertemperature |
-| 2 | LampOk | LampOk |
-| 3 | OpenLoad | OpenLoad |
-| 4 | DeviceError | DeviceError |
+| 0 | Short circuit overtemperature | ShortcutOvertemperature |
+| 1 | Pre-short-circuit overtemperature | PreShortcutOvertemperature |
+| 2 | Lamp OK | LampOk |
+| 3 | Open load | OpenLoad |
+| 4 | Device error | DeviceError |
 
 ## BDC_G11.TAB_DISP_PO_GRB
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Dunkelschaltung (from) | Dunkelschaltung (aus) |
+| 0 | Dimmed display (off) | Dunkelschaltung (aus) |
 | 1 | P | P |
 | 2 | R | R |
 | 3 | N | N |
@@ -394,96 +394,96 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Initalisierung | Initalisierung |
-| 1 | ELSV normiert | ELSV normiert |
-| 2 | ELSV teilnormiert Länge | ELSV teilnormiert Länge |
-| 3 | ELSV teilnormiert inclination | ELSV teilnormiert Neigung |
-| 4 | ELSV denormiert | ELSV denormiert |
+| 0 | Initialisation | Initalisierung |
+| 1 | ELSV initialised | ELSV normiert |
+| 2 | ELSV partially initialised, length | ELSV teilnormiert Länge |
+| 3 | ELSV partially initialised, tilt | ELSV teilnormiert Neigung |
+| 4 | ELSV not initialised | ELSV denormiert |
 | 15 | Signal invalid | Signal ungültig |
 
 ## BDC_G11.TAB_ELSV_TASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Button not betätigt | Taster nicht betätigt |
-| 1 | Button to rear | Taster nach hinten |
-| 2 | Button to top | Taster nach oben |
-| 3 | Button to front | Taster nach vorne |
-| 4 | Button to bottom | Taster nach unten |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Button not pressed | Taster nicht betätigt |
+| 1 | Button backwards | Taster nach hinten |
+| 2 | Button up | Taster nach oben |
+| 3 | Button forwards | Taster nach vorne |
+| 4 | Button down | Taster nach unten |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_ENERGIE_BETEILIGTE_BEL
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Standlicht | Standlicht |
-| 2 | Parklicht | Parklicht |
-| 3 | Parklicht and Standlicht | Parklicht und Standlicht |
-| 4 | Warnblinken | Warnblinken |
-| 5 | Warnblinken and Standlicht | Warnblinken und Standlicht |
-| 6 | Warnblinken and Parklicht | Warnblinken und Parklicht |
-| 7 | Warnblinken, Standlicht and Parklicht | Warnblinken, Standlicht und Parklicht |
+| 1 | Side lights | Standlicht |
+| 2 | Parking lights | Parklicht |
+| 3 | Parking lights and side lights | Parklicht und Standlicht |
+| 4 | Hazard warning lights | Warnblinken |
+| 5 | Hazard warning lights and side lights | Warnblinken und Standlicht |
+| 6 | Hazard warning lights and parking lights | Warnblinken und Parklicht |
+| 7 | Hazard warning lights, side lights and parking lights | Warnblinken, Standlicht und Parklicht |
 | 255 | Invalid | Ungültig |
 
 ## BDC_G11.TAB_ERROR_STATE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Lamp_Ok | Lamp_Ok |
-| 1 | Lamp_OpenLoad | Lamp_OpenLoad |
-| 2 | Lamp_ShortToGndSoft | Lamp_ShortToGndSoft |
-| 3 | Lamp_ShortToGndHard | Lamp_ShortToGndHard |
-| 4 | Lamp_ShortToPlus | Lamp_ShortToPlus |
-| 5 | Lamp_Invalid | Lamp_Invalid |
-| 6 | Lamp_Init | Lamp_Init |
-| 7 | Lamp_DebounceOpenLoad | Lamp_DebounceOpenLoad |
-| 8 | Lamp_DebounceShortToGndSoft | Lamp_DebounceShortToGndSoft |
-| 9 | Lamp_DebounceShortToGndHard | Lamp_DebounceShortToGndHard |
-| 16 | Lamp_ShortToGndSoftReenable | Lamp_ShortToGndSoftReenable |
-| 17 | Lamp_ShortToGndHardReenable | Lamp_ShortToGndHardReenable |
+| 0 | Lamp OK | Lamp_Ok |
+| 1 | Lamp open load | Lamp_OpenLoad |
+| 2 | Lamp short to ground, soft | Lamp_ShortToGndSoft |
+| 3 | Lamp short to ground, hard | Lamp_ShortToGndHard |
+| 4 | Lamp short to positive | Lamp_ShortToPlus |
+| 5 | Lamp invalid | Lamp_Invalid |
+| 6 | Lamp init | Lamp_Init |
+| 7 | Lamp debouncing open load | Lamp_DebounceOpenLoad |
+| 8 | Lamp debouncing short to ground, soft | Lamp_DebounceShortToGndSoft |
+| 9 | Lamp debouncing short to ground, hard | Lamp_DebounceShortToGndHard |
+| 16 | Lamp short to ground, soft re-enable | Lamp_ShortToGndSoftReenable |
+| 17 | Lamp short to ground, hard re-enable | Lamp_ShortToGndHardReenable |
 
 ## BDC_G11.TAB_FAHRLICHTSITUATION_2
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Vorgabe | Keine Vorgabe |
-| 1 | Schlechtwetter C1 | Schlechtwetter C1 |
-| 2 | Schlechtwetter C2 | Schlechtwetter C2 |
-| 3 | Stadt V | Stadt V |
-| 4 | Touristenmodus  SAE - Semi-Autonomes Einparkenv | Touristenmodus  SAE - Semi-Autonomes Einparkenv |
-| 5 | H-10 Landstraßenlicht C | H-10 Landstraßenlicht C |
-| 6 | H-8 Autobahnlicht E3 | H-8 Autobahnlicht E3 |
-| 7 | H-6 Autobahnlicht E2 | H-6 Autobahnlicht E2 |
-| 8 | H-5 Autobahnlicht E1 | H-5 Autobahnlicht E1 |
-| 9 | H-4 Autobahnlicht E | H-4 Autobahnlicht E |
-| 10 | Lichtverteilung H-2 | Lichtverteilung H-2 |
-| 11 | Lichtverteilung H-0 | Lichtverteilung H-0 |
-| 12 | Lichtverteilung H+2 | Lichtverteilung H+2 |
-| 13 | Lichtverteilung H+4 | Lichtverteilung H+4 |
-| 14 | Blendfreies Fernlicht | Blendfreies Fernlicht |
-| 15 | Automatisches Volles Fernlicht | Automatisches Volles Fernlicht |
-| 16 | Manuelles Fernlicht | Manuelles Fernlicht |
-| 17 | Lichthupe | Lichthupe |
-| 18 | Blendfreies Fernlicht Dimmung 1 | Blendfreies Fernlicht Dimmung 1 |
-| 19 | Blendfreies Fernlicht Dimmung 2 | Blendfreies Fernlicht Dimmung 2 |
-| 20 | Automatisches Volles Fernlicht Dimmung 1 | Automatisches Volles Fernlicht Dimmung 1 |
-| 21 | Automatisches Volles Fernlicht Dimmung 2 | Automatisches Volles Fernlicht Dimmung 2 |
-| 22 | Blendfreies Fernlicht 5 | Blendfreies Fernlicht 5 |
-| 23 | Blendfreies Fernlicht 6 | Blendfreies Fernlicht 6 |
-| 24 | Blendfreies Fernlicht 7 | Blendfreies Fernlicht 7 |
-| 25 | Blendfreies Fernlicht 8 | Blendfreies Fernlicht 8 |
-| 26 | Blendfreies Fernlicht 9 | Blendfreies Fernlicht 9 |
-| 27 | Blendfreies Fernlicht 10 | Blendfreies Fernlicht 10 |
-| 28 | Blendfreies Fernlicht 11 | Blendfreies Fernlicht 11 |
-| 29 | Abblendlicht at DLS active | Abblendlicht bei DLS aktiv |
-| 30 | Teilfernlicht at DLS active | Teilfernlicht bei DLS aktiv |
-| 255 | invalid value | ungültiger Wert |
+| 0 | No setting | Keine Vorgabe |
+| 1 | Bad weather C1 | Schlechtwetter C1 |
+| 2 | Bad weather C2 | Schlechtwetter C2 |
+| 3 | Town V | Stadt V |
+| 4 | Tourist mode SAE - semi-autonomous parking | Touristenmodus  SAE - Semi-Autonomes Einparkenv |
+| 5 | H-10 country road light C | H-10 Landstraßenlicht C |
+| 6 | H-8 motorway light E3 | H-8 Autobahnlicht E3 |
+| 7 | H-6 motorway light E2 | H-6 Autobahnlicht E2 |
+| 8 | H-5 motorway light E1 | H-5 Autobahnlicht E1 |
+| 9 | H-4 motorway light E | H-4 Autobahnlicht E |
+| 10 | Light distribution H-2 | Lichtverteilung H-2 |
+| 11 | Light distribution H-0 | Lichtverteilung H-0 |
+| 12 | Light distribution H+2 | Lichtverteilung H+2 |
+| 13 | Light distribution H+4 | Lichtverteilung H+4 |
+| 14 | Glare-free high beam | Blendfreies Fernlicht |
+| 15 | Automatic full high beam | Automatisches Volles Fernlicht |
+| 16 | Manual high beam | Manuelles Fernlicht |
+| 17 | Headlight flasher | Lichthupe |
+| 18 | Glare-free high beam dimming 1 | Blendfreies Fernlicht Dimmung 1 |
+| 19 | Glare-free high beam dimming 2 | Blendfreies Fernlicht Dimmung 2 |
+| 20 | Automatic full high beam dimming 1 | Automatisches Volles Fernlicht Dimmung 1 |
+| 21 | Automatic full high beam dimming 2 | Automatisches Volles Fernlicht Dimmung 2 |
+| 22 | Glare-free high beam 5 | Blendfreies Fernlicht 5 |
+| 23 | Glare-free high beam 6 | Blendfreies Fernlicht 6 |
+| 24 | Glare-free high beam 7 | Blendfreies Fernlicht 7 |
+| 25 | Glare-free high beam 8 | Blendfreies Fernlicht 8 |
+| 26 | Glare-free high beam 9 | Blendfreies Fernlicht 9 |
+| 27 | Glare-free high beam 10 | Blendfreies Fernlicht 10 |
+| 28 | Glare-free high beam 11 | Blendfreies Fernlicht 11 |
+| 29 | Low beam with DLS active | Abblendlicht bei DLS aktiv |
+| 30 | Partial high beam with DLS active | Teilfernlicht bei DLS aktiv |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FES_MODE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Initialisierung | Initialisierung |
+| 0 | Initialisation | Initialisierung |
 | 1 | Sport Dynamic | Sport Dynamic |
 | 2 | Sport Expert | Sport Expert |
 | 3 | Sport Individual | Sport Individual |
@@ -500,57 +500,57 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No window lifter present/kodiert | Keine Fensterheber vorhanden/kodiert |
-| 1 | Window lifter for FA and BF present/kodiert | Fensterheber für FA und BF vorhanden/kodiert |
-| 2 | Window lifter for FA, BF and FAH, BFH present/kodiert | Fensterheber für FA, BF und FAH, BFH vorhanden/kodiert |
-| 3 | Window lifter for FAH and BFH present/kodiert | Fensterheber für FAH und BFH vorhanden/kodiert |
+| 0 | No window lifters present/coded | Keine Fensterheber vorhanden/kodiert |
+| 1 | Window lifters for driver and front passenger present/coded | Fensterheber für FA und BF vorhanden/kodiert |
+| 2 | Window lifters for driver, front passenger, rear driver side and rear passenger side present/coded | Fensterheber für FA, BF und FAH, BFH vorhanden/kodiert |
+| 3 | Window lifters for rear driver side and rear passenger side present/coded | Fensterheber für FAH und BFH vorhanden/kodiert |
 
 ## BDC_G11.TAB_FH_BEWEGUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Window steht | Fenster steht |
-| 1 | Window lifter fährt on | Fensterheber fährt auf |
-| 2 | Reversieren Mautlauf | Reversieren Mautlauf |
-| 3 | Reversieren Emergency-Mode | Reversieren Emergency-Mode |
-| 4 | Window fährt to | Fenster fährt zu |
-| 5 | Window fährt to Emergency-Mode | Fenster fährt zu Emergency-Mode |
-| 6 | Window fährt to Panic-Mode | Fenster fährt zu Panic-Mode |
-| 7 | Einlernvorgang active | Einlernvorgang aktiv |
-| 8 | stellt from | stellt aus |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Window stationary | Fenster steht |
+| 1 | Window lifter opening | Fensterheber fährt auf |
+| 2 | Reversing, toll mode | Reversieren Mautlauf |
+| 3 | Reversing, emergency mode | Reversieren Emergency-Mode |
+| 4 | Window closing | Fenster fährt zu |
+| 5 | Window closing, emergency mode | Fenster fährt zu Emergency-Mode |
+| 6 | Window closing, panic mode | Fenster fährt zu Panic-Mode |
+| 7 | Learning procedure active | Einlernvorgang aktiv |
+| 8 | Tilting open | stellt aus |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_FENSTER_GS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | closed | geschlossen |
-| 1 | teilweise open | teilweise geöffnet |
-| 2 | vollständig open | vollständig geöffnet |
-| 255 | invalid | ungültig |
+| 0 | Closed | geschlossen |
+| 1 | Partially open | teilweise geöffnet |
+| 2 | Fully open | vollständig geöffnet |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_FH_INIT
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Window lifter normiert, adaptation data Schließen valid, adaptation data Senken valid | Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig |
-| 2 | Window lifter denormiert, adaptation data Schließen valid, adaptation data Senken valid | Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig |
-| 3 | Window lifter normiert, adaptation data Schließen invalid, adaptation data Senken valid | Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig |
-| 4 | Window lifter denormiert, adaptation data Schließen invalid, adaptation data Senken valid | Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig |
-| 5 | Window lifter normiert, adaptation data Schließen valid, adaptation data Senken invalid | Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig |
-| 6 | Window lifter denormiert, adaptation data Schließen valid, adaptation data Senken invalid | Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig |
-| 7 | Window lifter normiert, adaptation data Schließen invalid, adaptation data Senken invalid | Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig |
-| 8 | Window lifter denormiert, adaptation data Schließen invalid, adaptation data Senken invalid | Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig |
-| 255 | invalid value | ungültiger Wert |
+| 1 | Window lifter initialised, closing adaptation data valid, lowering adaptation data valid | Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig |
+| 2 | Window lifter not initialised, closing adaptation data valid, lowering adaptation data valid | Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken gültig |
+| 3 | Window lifter initialised, closing adaptation data invalid, lowering adaptation data valid | Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig |
+| 4 | Window lifter not initialised, closing adaptation data invalid, lowering adaptation data valid | Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken gültig |
+| 5 | Window lifter initialised, closing adaptation data valid, lowering adaptation data invalid | Fensterheber normiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig |
+| 6 | Window lifter not initialised, closing adaptation data valid, lowering adaptation data invalid | Fensterheber denormiert, Adaptionsdaten Schließen gültig, Adaptionsdaten Senken ungültig |
+| 7 | Window lifter initialised, closing adaptation data invalid, lowering adaptation data invalid | Fensterheber normiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig |
+| 8 | Window lifter not initialised, closing adaptation data invalid, lowering adaptation data invalid | Fensterheber denormiert, Adaptionsdaten Schließen ungültig, Adaptionsdaten Senken ungültig |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_MOTORTEMPERATUR
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Engine temperature OK | Motortemperatur OK |
-| 2 | Engine temperature 90% of the maximum permissible value erreicht | Motortemperatur 90% des maximal zulässigen Wertes erreicht |
-| 3 | Engine temperature 100% of the maximum permissible value erreicht | Motortemperatur 100% des maximal zulässigen Wertes erreicht |
-| 255 | Engine temperature invalid | Motortemperatur ungültig |
+| 1 | Motor temperature OK | Motortemperatur OK |
+| 2 | Motor temperature reached 90% of maximum permissible value | Motortemperatur 90% des maximal zulässigen Wertes erreicht |
+| 3 | Motor temperature reached 100% of maximum permissible value | Motortemperatur 100% des maximal zulässigen Wertes erreicht |
+| 255 | Motor temperature invalid | Motortemperatur ungültig |
 
 ## BDC_G11.TAB_FH_MT_LIEFERANT
 
@@ -563,63 +563,63 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 6 | Arvin Meritor | Arvin Meritor |
 | 7 | Lames | Lames |
 | 31 | Brose | Brose |
-| 254 | Dummy engine driver | Dummy Motortreiber |
-| 255 | invalid manufacturer | ungültiger Hersteller |
+| 254 | Dummy motor driver | Dummy Motortreiber |
+| 255 | Invalid manufacturer | ungültiger Hersteller |
 
 ## BDC_G11.TAB_FH_PANIKMODUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Panikmodus not freigeschalten | Panikmodus nicht freigeschalten |
-| 1 | Panikmodus freigeschalten | Panikmodus freigeschalten |
-| 3 | Enable Panikmodus invalid | Freigabe Panikmodus ungültig |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Panic mode not enabled | Panikmodus nicht freigeschalten |
+| 1 | Panic mode enabled | Panikmodus freigeschalten |
+| 3 | Panic mode enable invalid | Freigabe Panikmodus ungültig |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_POSITION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Window in Bewegung | Fenster in Bewegung |
-| 1 | Window komplett closed | Fenster komplett geschlossen |
-| 2 | Window komplett open | Fenster komplett offen |
-| 3 | Window steht in Zwischenpositon | Fenster steht in Zwischenpositon |
-| 4 | Window steht on position Kurzhub | Fenster steht auf Position Kurzhub |
-| 5 | Window steht on position Langhub | Fenster steht auf Position Langhub |
-| 6 | Window steht on position Cabrio | Fenster steht auf Position Cabrio |
-| 7 | Window steht in Ausstellage | Fenster steht in Ausstellage |
-| 10 | Window steht in Crash-position | Fenster steht in Crash-Position |
-| 160 | Window steht in Demontageposition | Fenster steht in Demontageposition |
-| 161 | Window steht in service position A | Fenster steht in Serviceposition A |
-| 162 | Window steht in service position B | Fenster steht in Serviceposition B |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Window moving | Fenster in Bewegung |
+| 1 | Window fully closed | Fenster komplett geschlossen |
+| 2 | Window fully open | Fenster komplett offen |
+| 3 | Window in intermediate position | Fenster steht in Zwischenpositon |
+| 4 | Window in short-stroke position | Fenster steht auf Position Kurzhub |
+| 5 | Window in long-stroke position | Fenster steht auf Position Langhub |
+| 6 | Window in convertible position | Fenster steht auf Position Cabrio |
+| 7 | Window in tilted position | Fenster steht in Ausstellage |
+| 10 | Window in crash position | Fenster steht in Crash-Position |
+| 160 | Window in removal position | Fenster steht in Demontageposition |
+| 161 | Window in service position A | Fenster steht in Serviceposition A |
+| 162 | Window in service position B | Fenster steht in Serviceposition B |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_SHD_ESH_LAGE_NR
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Ausstelllage | Ausstelllage |
-| 2 | Schiebelage | Schiebelage |
-| 255 | Function not unterstützt | Funktion nicht unterstützt |
+| 1 | Tilted position | Ausstelllage |
+| 2 | Sliding position | Schiebelage |
+| 255 | Function not supported | Funktion nicht unterstützt |
 
 ## BDC_G11.TAB_FH_SHD_ESH_POSITION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Element in Bewegung | Element in Bewegung |
-| 1 | Element komplett closed | Element komplett geschlossen |
-| 2 | Element komplett open | Element komplett offen |
-| 3 | Element steht in Zwischenpositon | Element steht in Zwischenpositon |
-| 4 | Element steht on position Kurzhub  nur FH | Element steht auf Position Kurzhub  nur FH |
-| 5 | Element steht on position Langhub  nur FH | Element steht auf Position Langhub  nur FH |
-| 6 | Element steht on position Cabrio nur FH | Element steht auf Position Cabrio nur FH |
-| 7 | Element steht in Ausstellage nur SHD/PDK | Element steht in Ausstellage nur SHD/PDK |
-| 8 | Element steht in Komfortposition nur PDK | Element steht in Komfortposition nur PDK |
-| 9 | Element steht in Anti-Wummer position nur SHD | Element steht in Anti-Wummer Position nur SHD |
-| 10 | Element steht in Crash-position | Element steht in Crash-Position |
-| 160 | Element steht in Demontageposition | Element steht in Demontageposition |
-| 161 | Element steht in service position A | Element steht in Serviceposition A |
-| 162 | Element steht in service position B | Element steht in Serviceposition B |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Element moving | Element in Bewegung |
+| 1 | Element fully closed | Element komplett geschlossen |
+| 2 | Element fully open | Element komplett offen |
+| 3 | Element in intermediate position | Element steht in Zwischenpositon |
+| 4 | Element in short-stroke position (window lifter only) | Element steht auf Position Kurzhub  nur FH |
+| 5 | Element in long-stroke position (window lifter only) | Element steht auf Position Langhub  nur FH |
+| 6 | Element in convertible position (window lifter only) | Element steht auf Position Cabrio nur FH |
+| 7 | Element in tilted position (sunroof/PDK only) | Element steht in Ausstellage nur SHD/PDK |
+| 8 | Element in comfort position (PDK only) | Element steht in Komfortposition nur PDK |
+| 9 | Element in anti-buffeting position (sunroof only) | Element steht in Anti-Wummer Position nur SHD |
+| 10 | Element in crash position | Element steht in Crash-Position |
+| 160 | Element in removal position | Element steht in Demontageposition |
+| 161 | Element in service position A | Element steht in Serviceposition A |
+| 162 | Element in service position B | Element steht in Serviceposition B |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_SHD_ESH_ZUSTAND_TUER
 
@@ -627,7 +627,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Door closed | Tür geschlossen |
 | 1 | Door open | Tür offen |
-| 2 | Door in Vorraste | Tür in Vorraste |
+| 2 | Door in pre-latch position | Tür in Vorraste |
 | 3 | Door status invalid | Türstatus ungültig |
 | 255 | Signal invalid | Signal ungültig |
 
@@ -635,39 +635,39 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Check sum IO | Checksumme IO |
-| 2 | Check sum NIO | Checksumme NIO |
-| 255 | invalid value | ungültiger Wert |
+| 1 | Checksum OK | Checksumme IO |
+| 2 | Checksum not OK | Checksumme NIO |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_SYSTEMTYP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | EKS with 2-Hall sensor | EKS mit 2-Hallsensoren |
-| 1 | Nur Motorschutz with 1-Hall sensor | Nur Motorschutz mit 1-Hallsensor |
-| 2 | Nur Motorschutz with current measurement | Nur Motorschutz mit Strommessung |
-| 255 | invalid | ungültig |
+| 0 | Anti-trap system with 2 Hall sensors | EKS mit 2-Hallsensoren |
+| 1 | Motor protection only, with 1 Hall sensor | Nur Motorschutz mit 1-Hallsensor |
+| 2 | Motor protection only, with current measurement | Nur Motorschutz mit Strommessung |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_FH_VERFAHREN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Aktion | Keine Aktion |
-| 1 | Öffnen | Öffnen |
-| 2 | Schliessen | Schliessen |
-| 3 | Maut öffnen | Maut öffnen |
-| 4 | Maut schliessen | Maut schliessen |
-| 5 | Heben / Ausstellen | Heben / Ausstellen |
-| 254 | Element not unterstützt | Element nicht unterstützt |
-| 255 | invalid value | ungültiger Wert |
+| 0 | No action | Keine Aktion |
+| 1 | Open | Öffnen |
+| 2 | Close | Schliessen |
+| 3 | Toll open | Maut öffnen |
+| 4 | Toll close | Maut schliessen |
+| 5 | Raise / tilt | Heben / Ausstellen |
+| 254 | Element not supported | Element nicht unterstützt |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_FH_WACHHALTEN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | off | aus |
-| 1 | on | ein |
-| 2 | invalid | ungültig |
+| 0 | Off | aus |
+| 1 | On | ein |
+| 2 | Invalid | ungültig |
 
 ## BDC_G11.TAB_FH_ZUSTAND_TUER
 
@@ -675,7 +675,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Door closed | Tür geschlossen |
 | 1 | Door open | Tür offen |
-| 2 | Door status unplausiebel | Türstatus unplausiebel |
+| 2 | Door status implausible | Türstatus unplausiebel |
 | 3 | Door status invalid | Türstatus ungültig |
 | 255 | Signal invalid | Signal ungültig |
 
@@ -683,42 +683,42 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | NotActive | NotActive |
+| 0 | Not active | NotActive |
 | 1 | Active | Active |
-| 2 | NotAvailable | NotAvailable |
+| 2 | Not available | NotAvailable |
 
 ## BDC_G11.TAB_HECKROLLO_VORHANDEN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Heckrollo not present | Heckrollo nicht vorhanden |
-| 1 | Heckrollo via BDC | Heckrollo über BDC |
-| 2 | Heckrollo via HKFM | Heckrollo über HKFM |
+| 0 | Rear window blind not present | Heckrollo nicht vorhanden |
+| 1 | Rear window blind via BDC | Heckrollo über BDC |
+| 2 | Rear window blind via HKFM | Heckrollo über HKFM |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## BDC_G11.TAB_HK_WIPPE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No actuation | Keine Betätigung |
-| 1 | Button gedrückt | Taster gedrückt |
-| 2 | Button gezogen | Taster gezogen |
+| 0 | Not operated | Keine Betätigung |
+| 1 | Button pressed | Taster gedrückt |
+| 2 | Button pulled | Taster gezogen |
 | 3 | Signal invalid | Signal ungültig |
 
 ## BDC_G11.TAB_HOEHENSTAND_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Kalibrierung offset not erfolgreich | Kalibrierung Offset nicht erfolgreich |
-| 1 | Kalibrierung offset erfolgreich | Kalibrierung Offset erfolgreich |
-| 2 | Sensor ausstattungsbedingt (coding) not verbaut | Sensor ausstattungsbedingt (Codierung) nicht verbaut |
-| 255 | unknown state | unbekannter Zustand |
+| 0 | Offset calibration not successful | Kalibrierung Offset nicht erfolgreich |
+| 1 | Offset calibration successful | Kalibrierung Offset erfolgreich |
+| 2 | Sensor not fitted due to equipment (coding) | Sensor ausstattungsbedingt (Codierung) nicht verbaut |
+| 255 | Unknown state | unbekannter Zustand |
 
 ## BDC_G11.TAB_HOHENSTAND_SENSOR
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sensor in Ordnung | Sensor in Ordnung |
+| 0 | Sensor OK | Sensor in Ordnung |
 | 1 | Sensor faulty | Sensor fehlerhaft |
 | 255 | Sensor faulty | Sensor fehlerhaft |
 
@@ -726,12 +726,12 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Erreichen the Startfähigkeitsgrenze 1 | Erreichen der Startfähigkeitsgrenze 1 |
-| 2 | Erreichen the Startfähigkeitsgrenze 2 | Erreichen der Startfähigkeitsgrenze 2 |
-| 3 | Ruhestromverletzung | Ruhestromverletzung |
-| 4 | Nachladefunktion | Nachladefunktion |
-| 5 | Fremdladeerkennung 48V | Fremdladeerkennung 48V |
-| 6 | Reserviert for zukünftige values | Reserviert für zukünftige Werte |
+| 1 | Starting capability limit 1 reached | Erreichen der Startfähigkeitsgrenze 1 |
+| 2 | Starting capability limit 2 reached | Erreichen der Startfähigkeitsgrenze 2 |
+| 3 | Quiescent current violation | Ruhestromverletzung |
+| 4 | Recharging function | Nachladefunktion |
+| 5 | External charging detection 48V | Fremdladeerkennung 48V |
+| 6 | Reserved for future values | Reserviert für zukünftige Werte |
 | 255 | Invalid/unknown | Ungültig/Unbekannt |
 
 ## BDC_G11.TAB_IFK_TEMP_EINHEIT
@@ -747,107 +747,107 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Authentication-Device 0 | Authentisierungs-Device 0 |
-| 1 | Authentication-Device 1 | Authentisierungs-Device 1 |
-| 2 | Authentication-Device 2 | Authentisierungs-Device 2 |
-| 3 | Authentication-Device 3 | Authentisierungs-Device 3 |
-| 4 | Authentication-Device 4 | Authentisierungs-Device 4 |
-| 5 | Authentication-Device 5 | Authentisierungs-Device 5 |
-| 6 | Authentication-Device 6 | Authentisierungs-Device 6 |
-| 7 | Authentication-Device 7 | Authentisierungs-Device 7 |
-| 8 | Authentication-Device 8 | Authentisierungs-Device 8 |
-| 9 | Authentication-Device 9 | Authentisierungs-Device 9 |
-| 10 | Authentication-Device 10 | Authentisierungs-Device 10 |
-| 11 | Authentication-Device 11 | Authentisierungs-Device 11 |
-| 12 | Authentication-Device 12 | Authentisierungs-Device 12 |
-| 13 | Authentication-Device 13 | Authentisierungs-Device 13 |
-| 14 | Authentication-Device 14 | Authentisierungs-Device 14 |
-| 15 | Authentication-Device 15 | Authentisierungs-Device 15 |
-| 16 | Authentication-Device 16 | Authentisierungs-Device 16 |
-| 17 | Authentication-Device 17 | Authentisierungs-Device 17 |
-| 18 | Authentication-Device 18 | Authentisierungs-Device 18 |
-| 19 | Authentication-Device 19 | Authentisierungs-Device 19 |
-| 255 | unknown / invalid | unbekannt / ungültig |
+| 0 | Authentication device 0 | Authentisierungs-Device 0 |
+| 1 | Authentication device 1 | Authentisierungs-Device 1 |
+| 2 | Authentication device 2 | Authentisierungs-Device 2 |
+| 3 | Authentication device 3 | Authentisierungs-Device 3 |
+| 4 | Authentication device 4 | Authentisierungs-Device 4 |
+| 5 | Authentication device 5 | Authentisierungs-Device 5 |
+| 6 | Authentication device 6 | Authentisierungs-Device 6 |
+| 7 | Authentication device 7 | Authentisierungs-Device 7 |
+| 8 | Authentication device 8 | Authentisierungs-Device 8 |
+| 9 | Authentication device 9 | Authentisierungs-Device 9 |
+| 10 | Authentication device 10 | Authentisierungs-Device 10 |
+| 11 | Authentication device 11 | Authentisierungs-Device 11 |
+| 12 | Authentication device 12 | Authentisierungs-Device 12 |
+| 13 | Authentication device 13 | Authentisierungs-Device 13 |
+| 14 | Authentication device 14 | Authentisierungs-Device 14 |
+| 15 | Authentication device 15 | Authentisierungs-Device 15 |
+| 16 | Authentication device 16 | Authentisierungs-Device 16 |
+| 17 | Authentication device 17 | Authentisierungs-Device 17 |
+| 18 | Authentication device 18 | Authentisierungs-Device 18 |
+| 19 | Authentication device 19 | Authentisierungs-Device 19 |
+| 255 | Unknown / invalid | unbekannt / ungültig |
 
 ## BDC_G11.TAB_INNENLICHT_MAPPING
 
 | Value | Meaning | German |
 |---|---|---|
-| 21 | Suchbeleuchtung | Suchbeleuchtung |
-| 22 | Interior lighting front | Innenbeleuchtung Front |
-| 23 | Interior lighting rear compartment | Innenbeleuchtung Fond |
-| 24 | Optische Vorfeld lighting (OVT) | Optische Vorfeld Beleuchtung (OVT) |
-| 25 | Fußraumleuchte front | Fußraumleuchte Front |
-| 26 | Fußraumleuchte rear compartment | Fußraumleuchte Fond |
+| 21 | Search lighting | Suchbeleuchtung |
+| 22 | Front interior lighting | Innenbeleuchtung Front |
+| 23 | Rear interior lighting | Innenbeleuchtung Fond |
+| 24 | Optical approach lighting (OVT) | Optische Vorfeld Beleuchtung (OVT) |
+| 25 | Front footwell light | Fußraumleuchte Front |
+| 26 | Rear footwell light | Fußraumleuchte Fond |
 | 27 | Colourswitch 1 | Colourswitch 1 |
 | 28 | Colourswitch 2 | Colourswitch 2 |
 | 29 | Colourswitch 3 | Colourswitch 3 |
-| 30 | separate Welcomeleuchte | separate Welcomeleuchte |
+| 30 | Separate welcome light | separate Welcomeleuchte |
 | 31 | CORONA_1_LED | CORONA_1_LED |
 | 32 | CORONA_2_LED | CORONA_2_LED |
-| 255 | invalid | ungültig |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_INNENLICHT_VERBAUORT_LIN
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Interior lighting Fußraum driver front | Innenbeleuchtung Fußraum Fahrer vorne |
-| 2 | Interior lighting Fußraum driver rear | Innenbeleuchtung Fußraum Fahrer hinten |
-| 3 | Interior lighting Fußraum passenger front | Innenbeleuchtung Fußraum Beifahrer vorne |
-| 4 | Interior lighting Fußraum passenger rear | Innenbeleuchtung Fußraum Beifahrer hinten |
-| 5 | Interior lighting driver door front top | Innenbeleuchtung Fahrertür vorne oben |
-| 6 | Interior lighting driver door front center | Innenbeleuchtung Fahrertür vorne Mitte |
-| 7 | Interior lighting driver door front bottom | Innenbeleuchtung Fahrertür vorne unten |
-| 8 | Interior lighting driver door front Kartentasche | Innenbeleuchtung Fahrertür vorne Kartentasche |
-| 9 | Interior lighting driver door rear top | Innenbeleuchtung Fahrertür hinten oben |
-| 10 | Interior lighting driver door rear bottom | Innenbeleuchtung Fahrertür hinten unten |
-| 11 | Interior lighting driver door rear Kartentasche | Innenbeleuchtung Fahrertür hinten Kartentasche |
-| 12 | Interior lighting passenger door front top | Innenbeleuchtung Beifahrertür vorne oben |
-| 13 | Interior lighting passenger door front center | Innenbeleuchtung Beifahrertür vorne Mitte |
-| 14 | Interior lighting passenger door front bottom | Innenbeleuchtung Beifahrertür vorne unten |
-| 15 | Interior lighting passenger door front Kartentasche | Innenbeleuchtung Beifahrertür vorne Kartentasche |
-| 16 | Interior lighting passenger door rear top | Innenbeleuchtung Beifahrertür hinten oben |
-| 17 | Interior lighting passenger door rear bottom | Innenbeleuchtung Beifahrertür hinten unten |
-| 18 | Interior lighting passenger door rear Kartentasche | Innenbeleuchtung Beifahrertür hinten Kartentasche |
-| 19 | Interior lighting I-Tafel driver top | Innenbeleuchtung I-Tafel Fahrer oben |
-| 20 | Interior lighting I-Tafel driver bottom | Innenbeleuchtung I-Tafel Fahrer unten |
-| 21 | Interior lighting I-Tafel top center | Innenbeleuchtung I-Tafel oben Mitte |
-| 22 | Interior lighting I-Tafel bottom center | Innenbeleuchtung I-Tafel unten Mitte |
-| 23 | Interior lighting I-Tafel top passenger | Innenbeleuchtung I-Tafel oben Beifahrer |
-| 24 | Interior lighting I-Tafel bottom passenger | Innenbeleuchtung I-Tafel unten Beifahrer |
-| 25 | Interior lighting B-pillar driver | Innenbeleuchtung B-Säule Fahrer |
-| 26 | Interior lighting B-pillar passenger | Innenbeleuchtung B-Säule Beifahrer |
-| 27 | Interior lighting Lehne driver seat | Innenbeleuchtung Lehne Fahrersitz |
-| 28 | Interior lighting Lehne passenger seat | Innenbeleuchtung Lehne Beifahrersitz |
-| 29 | Interior lighting Centerstack | Innenbeleuchtung Centerstack |
-| 30 | Interior lighting center console Ablagefach | Innenbeleuchtung Mittelkonsole Ablagefach |
-| 31 | Interior lighting Gangwahlschalter left | Innenbeleuchtung Gangwahlschalter links |
-| 32 | Interior lighting Gangwahlschalter right | Innenbeleuchtung Gangwahlschalter rechts |
+| 1 | Interior lighting, footwell driver side front | Innenbeleuchtung Fußraum Fahrer vorne |
+| 2 | Interior lighting, footwell driver side rear | Innenbeleuchtung Fußraum Fahrer hinten |
+| 3 | Interior lighting, footwell passenger side front | Innenbeleuchtung Fußraum Beifahrer vorne |
+| 4 | Interior lighting, footwell passenger side rear | Innenbeleuchtung Fußraum Beifahrer hinten |
+| 5 | Interior lighting, driver's door front top | Innenbeleuchtung Fahrertür vorne oben |
+| 6 | Interior lighting, driver's door front middle | Innenbeleuchtung Fahrertür vorne Mitte |
+| 7 | Interior lighting, driver's door front bottom | Innenbeleuchtung Fahrertür vorne unten |
+| 8 | Interior lighting, driver's door front map pocket | Innenbeleuchtung Fahrertür vorne Kartentasche |
+| 9 | Interior lighting, driver's side rear door top | Innenbeleuchtung Fahrertür hinten oben |
+| 10 | Interior lighting, driver's side rear door bottom | Innenbeleuchtung Fahrertür hinten unten |
+| 11 | Interior lighting, driver's side rear door map pocket | Innenbeleuchtung Fahrertür hinten Kartentasche |
+| 12 | Interior lighting, front passenger door top | Innenbeleuchtung Beifahrertür vorne oben |
+| 13 | Interior lighting, front passenger door middle | Innenbeleuchtung Beifahrertür vorne Mitte |
+| 14 | Interior lighting, front passenger door bottom | Innenbeleuchtung Beifahrertür vorne unten |
+| 15 | Interior lighting, front passenger door map pocket | Innenbeleuchtung Beifahrertür vorne Kartentasche |
+| 16 | Interior lighting, passenger side rear door top | Innenbeleuchtung Beifahrertür hinten oben |
+| 17 | Interior lighting, passenger side rear door bottom | Innenbeleuchtung Beifahrertür hinten unten |
+| 18 | Interior lighting, passenger side rear door map pocket | Innenbeleuchtung Beifahrertür hinten Kartentasche |
+| 19 | Interior lighting, instrument panel driver side top | Innenbeleuchtung I-Tafel Fahrer oben |
+| 20 | Interior lighting, instrument panel driver side bottom | Innenbeleuchtung I-Tafel Fahrer unten |
+| 21 | Interior lighting, instrument panel top centre | Innenbeleuchtung I-Tafel oben Mitte |
+| 22 | Interior lighting, instrument panel bottom centre | Innenbeleuchtung I-Tafel unten Mitte |
+| 23 | Interior lighting, instrument panel top passenger side | Innenbeleuchtung I-Tafel oben Beifahrer |
+| 24 | Interior lighting, instrument panel bottom passenger side | Innenbeleuchtung I-Tafel unten Beifahrer |
+| 25 | Interior lighting, B-pillar driver side | Innenbeleuchtung B-Säule Fahrer |
+| 26 | Interior lighting, B-pillar passenger side | Innenbeleuchtung B-Säule Beifahrer |
+| 27 | Interior lighting, driver's seat backrest | Innenbeleuchtung Lehne Fahrersitz |
+| 28 | Interior lighting, front passenger seat backrest | Innenbeleuchtung Lehne Beifahrersitz |
+| 29 | Interior lighting, centre stack | Innenbeleuchtung Centerstack |
+| 30 | Interior lighting, centre console storage compartment | Innenbeleuchtung Mittelkonsole Ablagefach |
+| 31 | Interior lighting, gear selector switch left | Innenbeleuchtung Gangwahlschalter links |
+| 32 | Interior lighting, gear selector switch right | Innenbeleuchtung Gangwahlschalter rechts |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_JBR_STATUS_RELAY
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Relay ausgeschaltet | Relais ausgeschaltet |
+| 0 | Relay switched off | Relais ausgeschaltet |
 | 1 | Relay switched on | Relais eingeschaltet |
-| 2 | Relay not verbaut/diagnostiziert | Relais nicht verbaut/diagnostiziert |
-| 3 | invalid | ungültig |
+| 2 | Relay not fitted/diagnosed | Relais nicht verbaut/diagnostiziert |
+| 3 | Invalid | ungültig |
 
 ## BDC_G11.TAB_KOMPASS_LENKUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Rechtslenker | Rechtslenker |
-| 1 | Linkslenker | Linkslenker |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Right-hand drive | Rechtslenker |
+| 1 | Left-hand drive | Linkslenker |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_KOMPASS_SPRACHE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sprache Englisch | Sprache Englisch |
-| 1 | Sprache Deutsch | Sprache Deutsch |
+| 0 | Language English | Sprache Englisch |
+| 1 | Language German | Sprache Deutsch |
 
 ## BDC_G11.TAB_LA_ERRORBITS
 
@@ -914,83 +914,83 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Steering wheel heating LED from | Lenkradheizung LED aus |
-| 1 | Steering wheel heating LED a | Lenkradheizung LED ein |
-| 3 | Steering wheel heating LED not verbaut | Lenkradheizung LED nicht verbaut |
+| 0 | Steering wheel heating LED off | Lenkradheizung LED aus |
+| 1 | Steering wheel heating LED on | Lenkradheizung LED ein |
+| 3 | Steering wheel heating LED not fitted | Lenkradheizung LED nicht verbaut |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_LENKSTOCK_BLINKER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Lenkstock in Nullstellung | Lenkstock in Nullstellung |
-| 1 | Blinker right tipp | Blinker rechts tipp |
-| 2 | Blinker right duration | Blinker rechts Dauer |
-| 3 | Blinker left tipp | Blinker links tipp |
-| 4 | Blinker left duration | Blinker links Dauer |
-| 5 | Fernlicht | Fernlicht |
-| 6 | Lichthupe | Lichthupe |
-| 7 | Mehrfachbetätigung | Mehrfachbetätigung |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Steering column stalk in neutral position | Lenkstock in Nullstellung |
+| 1 | Turn signal right, tap | Blinker rechts tipp |
+| 2 | Turn signal right, continuous | Blinker rechts Dauer |
+| 3 | Turn signal left, tap | Blinker links tipp |
+| 4 | Turn signal left, continuous | Blinker links Dauer |
+| 5 | High beam | Fernlicht |
+| 6 | Headlight flasher | Lichthupe |
+| 7 | Multiple operation | Mehrfachbetätigung |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_LENKSTOCK_BLINKER_WIPPE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not betätigt | nicht betätigt |
-| 1 | to top | nach oben |
-| 2 | to bottom | nach unten |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Not pressed | nicht betätigt |
+| 1 | Up | nach oben |
+| 2 | Down | nach unten |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_LENKSTOCK_WISCHER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Nullstellung | Nullstellung |
-| 1 | Tippwischen | Tippwischen |
-| 2 | Wiper stage 1 | Wischer Stufe 1 |
-| 3 | Wiper stage 2 | Wischer Stufe 2 |
-| 4 | Frontwaschen | Frontwaschen |
-| 5 | Intervall | Intervall |
-| 6 | Heckwischen | Heckwischen |
-| 7 | Heckwaschen | Heckwaschen |
-| 8 | Mehrfachbetätigung | Mehrfachbetätigung |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Neutral position | Nullstellung |
+| 1 | Single wipe | Tippwischen |
+| 2 | Wiper speed 1 | Wischer Stufe 1 |
+| 3 | Wiper speed 2 | Wischer Stufe 2 |
+| 4 | Front washing | Frontwaschen |
+| 5 | Interval | Intervall |
+| 6 | Rear wiping | Heckwischen |
+| 7 | Rear washing | Heckwaschen |
+| 8 | Multiple operation | Mehrfachbetätigung |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_LENKSTOCK_WISCHER_AXIAL_TASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not betätigt | Nicht betätigt |
-| 1 | Betätigt | Betätigt |
-| 255 | Element not unterstützt | Element nicht unterstützt |
+| 0 | Not pressed | Nicht betätigt |
+| 1 | Pressed | Betätigt |
+| 255 | Element not supported | Element nicht unterstützt |
 
 ## BDC_G11.TAB_LICHTSCHALTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Position Neutral | Stellung Neutral |
-| 1 | Position Standlicht | Stellung Standlicht |
-| 2 | Position Abblendlicht | Stellung Abblendlicht |
-| 3 | Position Fahrlichtkontrolle | Stellung Fahrlichtkontrolle |
-| 255 | invalid signal | ungültiges Signal |
+| 0 | Position neutral | Stellung Neutral |
+| 1 | Position parking lights | Stellung Standlicht |
+| 2 | Position low beam | Stellung Abblendlicht |
+| 3 | Position automatic driving lights | Stellung Fahrlichtkontrolle |
+| 255 | Invalid signal | ungültiges Signal |
 
 ## BDC_G11.TAB_LIMIT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Aussage | keine Aussage |
-| 1 | below Limit | unterhalb Limit |
-| 2 | normal state | normal Zustand |
-| 3 | above Limit | oberhalb Limit |
-| 255 | invalid value | ungültiger Wert |
+| 0 | No information | keine Aussage |
+| 1 | Below limit | unterhalb Limit |
+| 2 | Normal state | normal Zustand |
+| 3 | Above limit | oberhalb Limit |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_LIN_METHODE_ADRESSIERUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Busshunt | Busshunt |
-| 1 | extra wire daisy chain | extra wire daisy chain |
+| 0 | Bus shunt | Busshunt |
+| 1 | Extra wire daisy chain | extra wire daisy chain |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_MAGNETZONE
@@ -1008,308 +1008,308 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 8 | Zone 8 | Zone 8 |
 | 9 | Zone 9 | Zone 9 |
 | 10 | Zone 10 | Zone 10 |
-| 11 | Zone  11 | Zone  11 |
+| 11 | Zone 11 | Zone  11 |
 | 12 | Zone 12 | Zone 12 |
 | 13 | Zone 13 | Zone 13 |
 | 14 | Zone 14 | Zone 14 |
 | 15 | Zone 15 | Zone 15 |
-| 255 | invalid value | ungültiger Wert |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_MFL_RAENDEL_FGR
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No actuation | Keine Betätigung |
-| 1 | Rändel on stage 2 bottom | Rändel auf Stufe 2 unten |
-| 2 | Rändel on stage 1 bottom | Rändel auf Stufe 1 unten |
-| 3 | Rändel on stage 1 top | Rändel auf Stufe 1 oben |
-| 4 | Rändel on stage 2 top | Rändel auf Stufe 2 oben |
-| 5 | invalid position | ungültige Position |
+| 0 | Not operated | Keine Betätigung |
+| 1 | Thumbwheel at level 2 down | Rändel auf Stufe 2 unten |
+| 2 | Thumbwheel at level 1 down | Rändel auf Stufe 1 unten |
+| 3 | Thumbwheel at level 1 up | Rändel auf Stufe 1 oben |
+| 4 | Thumbwheel at level 2 up | Rändel auf Stufe 2 oben |
+| 5 | Invalid position | ungültige Position |
 
 ## BDC_G11.TAB_MFL_TASTEN1
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No actuation | Keine Betätigung |
-| 1 | Taste FGR SET betätigt | Taste FGR SET betätigt |
-| 2 | Umschalttaste ACC / DCC betätigt | Umschalttaste ACC / DCC betätigt |
-| 3 | Taste FGR RES betätigt | Taste FGR RES betätigt |
-| 4 | Taste ACC-Abstand betätigt | Taste ACC-Abstand betätigt |
-| 5 | Rändel FGR stage 2 bottom betätigt | Rändel FGR Stufe 2 unten betätigt |
-| 6 | Rändel FGR stage 1 bottom betätigt | Rändel FGR Stufe 1 unten betätigt |
-| 7 | Rändel FGR stage 1 top betätigt | Rändel FGR Stufe 1 oben betätigt |
-| 8 | Rändel FGR stage 2 top betätigt | Rändel FGR Stufe 2 oben betätigt |
-| 9 | Taste FGR OFF betätigt | Taste FGR OFF betätigt |
-| 10 | Mehrfachbetätigung | Mehrfachbetätigung |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Not operated | Keine Betätigung |
+| 1 | Cruise control SET button pressed | Taste FGR SET betätigt |
+| 2 | ACC / DCC toggle button pressed | Umschalttaste ACC / DCC betätigt |
+| 3 | Cruise control RES button pressed | Taste FGR RES betätigt |
+| 4 | ACC distance button pressed | Taste ACC-Abstand betätigt |
+| 5 | Cruise control thumbwheel level 2 down operated | Rändel FGR Stufe 2 unten betätigt |
+| 6 | Cruise control thumbwheel level 1 down operated | Rändel FGR Stufe 1 unten betätigt |
+| 7 | Cruise control thumbwheel level 1 up operated | Rändel FGR Stufe 1 oben betätigt |
+| 8 | Cruise control thumbwheel level 2 up operated | Rändel FGR Stufe 2 oben betätigt |
+| 9 | Cruise control OFF button pressed | Taste FGR OFF betätigt |
+| 10 | Multiple operation | Mehrfachbetätigung |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_MFL_TASTEN2
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No actuation | Keine Betätigung |
-| 1 | Taste Source / Mode betätigt | Taste Source / Mode betätigt |
-| 2 | BC-Rändel gedrückt | BC-Rändel gedrückt |
-| 3 | BC-Rändel to bottom | BC-Rändel nach unten |
-| 4 | BC-Rändel to top | BC-Rändel nach oben |
-| 5 | Taste Telefon betätigt | Taste Telefon betätigt |
-| 6 | Taste Volume Minus betätigt | Taste Volume Minus betätigt |
-| 7 | Taste Volume Plus betätigt | Taste Volume Plus betätigt |
-| 8 | Taste Push-To-talk betätigt | Taste Push-To-talk betätigt |
-| 9 | Mehrfachbetätigung | Mehrfachbetätigung |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Not operated | Keine Betätigung |
+| 1 | Source / Mode button pressed | Taste Source / Mode betätigt |
+| 2 | On-board computer thumbwheel pressed | BC-Rändel gedrückt |
+| 3 | On-board computer thumbwheel down | BC-Rändel nach unten |
+| 4 | On-board computer thumbwheel up | BC-Rändel nach oben |
+| 5 | Telephone button pressed | Taste Telefon betätigt |
+| 6 | Volume minus button pressed | Taste Volume Minus betätigt |
+| 7 | Volume plus button pressed | Taste Volume Plus betätigt |
+| 8 | Push-to-talk button pressed | Taste Push-To-talk betätigt |
+| 9 | Multiple operation | Mehrfachbetätigung |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_MFL_TIPPRAENDEL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Tipprändel BC not betätigt | Tipprändel BC nicht betätigt |
-| 1 | Tipprändel BC gedrückt | Tipprändel BC gedrückt |
-| 2 | Tipprändel to bottom | Tipprändel nach unten |
-| 3 | Tipprändel to top | Tipprändel nach oben |
-| 255 | invalid value | ungültiger Wert |
+| 0 | On-board computer thumbwheel not operated | Tipprändel BC nicht betätigt |
+| 1 | On-board computer thumbwheel pressed | Tipprändel BC gedrückt |
+| 2 | Thumbwheel down | Tipprändel nach unten |
+| 3 | Thumbwheel up | Tipprändel nach oben |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_M_TASTER_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not gedrückt | Nicht gedrückt |
-| 1 | Gedrückt | Gedrückt |
+| 0 | Not pressed | Nicht gedrückt |
+| 1 | Pressed | Gedrückt |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_PWF_TRIGGER_ZUSTANDSWECHSEL
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Wohnen_durch_Betätigung_Schiebehebedach-Taster_PWF_MASTER_544 | Wohnen_durch_Betätigung_Schiebehebedach-Taster_PWF_MASTER_544 |
-| 2 | Wohnen_durch_Betätigung_des_Innenlichttasters_PWF_MASTER_126 | Wohnen_durch_Betätigung_des_Innenlichttasters_PWF_MASTER_126 |
-| 3 | Wohnen_durch_Betätigung_Cabrioverdeck-Taster_PWF_MASTER_553 | Wohnen_durch_Betätigung_Cabrioverdeck-Taster_PWF_MASTER_553 |
-| 4 | Wohnen_durch_Betätigung_Lenkstockhebel_links_PWF_MASTER_560 | Wohnen_durch_Betätigung_Lenkstockhebel_links_PWF_MASTER_560 |
-| 5 | Wohnen_durch_Betätigung_Fernlicht-Assistent-Taste_PWF_MASTER_564 | Wohnen_durch_Betätigung_Fernlicht-Assistent-Taste_PWF_MASTER_564 |
-| 6 | Wohnen_durch_Betätigung_Lenkstockhebel_rechts_PWF_MASTER_565 | Wohnen_durch_Betätigung_Lenkstockhebel_rechts_PWF_MASTER_565 |
-| 7 | Wohnen_durch_Betätigung_Drehschalter_Licht_PWF_MASTER_570 | Wohnen_durch_Betätigung_Drehschalter_Licht_PWF_MASTER_570 |
-| 8 | Wohnen_durch_Betätigung_Nebelscheinwerfer_PWF_MASTER_571 | Wohnen_durch_Betätigung_Nebelscheinwerfer_PWF_MASTER_571 |
-| 9 | Wohnen_durch_Betätigung_Nebelschlussleuchte_PWF_MASTER_572 | Wohnen_durch_Betätigung_Nebelschlussleuchte_PWF_MASTER_572 |
-| 10 | Wohnen_durch_Betätigung_Leuchtweitenregulierung_PWF_MASTER_559 | Wohnen_durch_Betätigung_Leuchtweitenregulierung_PWF_MASTER_559 |
-| 11 | Wohnen_durch_Bedienen_eines_Fensterhebers_PWF_MASTER_500 | Wohnen_durch_Bedienen_eines_Fensterhebers_PWF_MASTER_500 |
-| 12 | Wohnen_durch_Betätigung_Rollo-Tasten_PWF_MASTER_573 | Wohnen_durch_Betätigung_Rollo-Tasten_PWF_MASTER_573 |
-| 13 | Wohnen_durch_Betätigung_Spiegelverstellung_PWF_MASTER_574 | Wohnen_durch_Betätigung_Spiegelverstellung_PWF_MASTER_574 |
-| 14 | Wohnen_durch_Betätigung_Spiegel-Beiklappen_PWF_MASTER_575 | Wohnen_durch_Betätigung_Spiegel-Beiklappen_PWF_MASTER_575 |
-| 17 | Wohnen_durch_Bedienen_des_Sarah-Tasters_PWF_MASTER_497 | Wohnen_durch_Bedienen_des_Sarah-Tasters_PWF_MASTER_497 |
-| 18 | Wohnen_durch_Betätigung_Modus-Taste_PWF_MASTER_379 | Wohnen_durch_Betätigung_Modus-Taste_PWF_MASTER_379 |
-| 19 | Wohnen_durch_Betätigung_Eject-Button_PWF_MASTER_377 | Wohnen_durch_Betätigung_Eject-Button_PWF_MASTER_377 |
-| 20 | Wohnen_durch_Betätigung_AM_FM_Verkehrsinformationen-Taste_PWF_MASTER_380 | Wohnen_durch_Betätigung_AM_FM_Verkehrsinformationen-Taste_PWF_MASTER_380 |
-| 21 | Wohnen_durch_Betätigung_Functional-Bookmark-Taste_PWF_MASTER_381 | Wohnen_durch_Betätigung_Functional-Bookmark-Taste_PWF_MASTER_381 |
-| 24 | Wohnen_durch_Betätigung_einer_BE_MIKO-Taste_PWF_MASTER_628 | Wohnen_durch_Betätigung_einer_BE_MIKO-Taste_PWF_MASTER_628 |
-| 25 | Wohnen_durch_Betätigung_Heckspoiler-Taster_PWF_MASTER_549 | Wohnen_durch_Betätigung_Heckspoiler-Taster_PWF_MASTER_549 |
-| 26 | Wohnen_durch_Betätigung_MSA-Taster_PWF_MASTER_552 | Wohnen_durch_Betätigung_MSA-Taster_PWF_MASTER_552 |
-| 27 | Wohnen_durch_Betätigung_ZBE-Taste_Front_PWF_MASTER_382 | Wohnen_durch_Betätigung_ZBE-Taste_Front_PWF_MASTER_382 |
-| 28 | Wohnen_durch_Betätigung_ZBE-Taste_Fond_PWF_MASTER_414 | Wohnen_durch_Betätigung_ZBE-Taste_Fond_PWF_MASTER_414 |
-| 29 | Wohnen_durch_Schieben_des_ZBE-Drehstellers_Front_PWF_MASTER_383 | Wohnen_durch_Schieben_des_ZBE-Drehstellers_Front_PWF_MASTER_383 |
-| 30 | Wohnen_durch_Schieben_des_ZBE-Drehstellers_Fond_PWF_MASTER_415 | Wohnen_durch_Schieben_des_ZBE-Drehstellers_Fond_PWF_MASTER_415 |
-| 31 | Wohnen_durch_Drehen_des_ZBE-Drehstellers_Front_PWF_MASTER_384 | Wohnen_durch_Drehen_des_ZBE-Drehstellers_Front_PWF_MASTER_384 |
-| 32 | Wohnen_durch_Drehen_des_ZBE-Drehstellers_Fond_PWF_MASTER_416 | Wohnen_durch_Drehen_des_ZBE-Drehstellers_Fond_PWF_MASTER_416 |
-| 33 | Wohnen_durch_Betätigung_Lautstärke-Wippe_PWF_MASTER_554 | Wohnen_durch_Betätigung_Lautstärke-Wippe_PWF_MASTER_554 |
-| 34 | Wohnen_durch_Betätigung_Toggle-Taste_PWF_MASTER_555 | Wohnen_durch_Betätigung_Toggle-Taste_PWF_MASTER_555 |
-| 35 | Wohnen_durch_Betätigung_Menu-Walze_PWF_MASTER_556 | Wohnen_durch_Betätigung_Menu-Walze_PWF_MASTER_556 |
-| 36 | Wohnen_durch_Betätigung_Telefon-Taste_PWF_MASTER_557 | Wohnen_durch_Betätigung_Telefon-Taste_PWF_MASTER_557 |
-| 37 | Wohnen_durch_Betätigung_Push-to-talk-Taste_PWF_MASTER_558 | Wohnen_durch_Betätigung_Push-to-talk-Taste_PWF_MASTER_558 |
-| 38 | Wohnen_durch_Betätigung_Start-Stopp-Taster_PWF_MASTER_104 | Wohnen_durch_Betätigung_Start-Stopp-Taster_PWF_MASTER_104 |
-| 39 | Wohnen_durch_Betätigung_Entertainment-Button_(Kurzdruck)_PWF_MASTER_378 | Wohnen_durch_Betätigung_Entertainment-Button_(Kurzdruck)_PWF_MASTER_378 |
-| 40 | Wohnen_durch_Betätigung_Zentralverriegelungstaster/-wippe_PWF_MASTER_625 | Wohnen_durch_Betätigung_Zentralverriegelungstaster/-wippe_PWF_MASTER_625 |
-| 41 | Wohnen_durch_Betätigung_Motorhaube_PWF_MASTER_124 | Wohnen_durch_Betätigung_Motorhaube_PWF_MASTER_124 |
-| 42 | Standfunktion_durch_Betätigung_Motorhaube_PWF_MASTER_124 | Standfunktion_durch_Betätigung_Motorhaube_PWF_MASTER_124 |
-| 43 | Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 | Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 |
-| 44 | Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 | Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 |
-| 45 | Wohnen_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116 | Wohnen_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116 |
-| 46 | Wohnen_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117 | Wohnen_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117 |
-| 47 | Wohnen_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125 | Wohnen_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125 |
-| 48 | Wohnen_durch_Betätigung_Funkschlüssel_PWF_MASTER_118 | Wohnen_durch_Betätigung_Funkschlüssel_PWF_MASTER_118 |
-| 49 | Wohnen_durch_ZV_entriegeln_PWF_MASTER_221 | Wohnen_durch_ZV_entriegeln_PWF_MASTER_221 |
-| 50 | Wohnen_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109 | Wohnen_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109 |
-| 51 | Wohnen_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110 | Wohnen_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110 |
-| 52 | Wohnen_durch_Schließen_der_Fahrertür_PWF_MASTER_650 | Wohnen_durch_Schließen_der_Fahrertür_PWF_MASTER_650 |
-| 53 | Wohnen_durch_Schließen_der_Beifahrertür_PWF_MASTER_651 | Wohnen_durch_Schließen_der_Beifahrertür_PWF_MASTER_651 |
-| 54 | Wohnen_durch_RCP-TasteBedienen_PWF_MASTER_652 | Wohnen_durch_RCP-TasteBedienen_PWF_MASTER_652 |
-| 55 | Wohnen_durch_Öffnen_der_Fahrertür_PWF_MASTER_107 | Wohnen_durch_Öffnen_der_Fahrertür_PWF_MASTER_107 |
-| 56 | Wohnen_durch_Öffnen_der_Beifahrertür_PWF_MASTER_108 | Wohnen_durch_Öffnen_der_Beifahrertür_PWF_MASTER_108 |
-| 57 | Parken_durch_ZV_sichern_PWF_MASTER_130 | Parken_durch_ZV_sichern_PWF_MASTER_130 |
-| 58 | Standfunktion_durch_ZV_sichern_PWF_MASTER_130 | Standfunktion_durch_ZV_sichern_PWF_MASTER_130 |
-| 59 | Fahren_durch_Fahrbereitschaft_hergestellt_PWF_MASTER_132 | Fahren_durch_Fahrbereitschaft_hergestellt_PWF_MASTER_132 |
-| 60 | Fahrbereitschaft_beenden_durch_Fahrbereitschaft_beendet_PWF_MASTER_275 | Fahrbereitschaft_beenden_durch_Fahrbereitschaft_beendet_PWF_MASTER_275 |
-| 61 | Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134 | Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134 |
-| 62 | Wohnen_durch_Analyse_beenden_PWF_MASTER_285 | Wohnen_durch_Analyse_beenden_PWF_MASTER_285 |
-| 63 | Fahrbereitschaft_herstellen_durch_Fahrwunsch_erkannt_PWF_MASTER_136 | Fahrbereitschaft_herstellen_durch_Fahrwunsch_erkannt_PWF_MASTER_136 |
-| 64 | Wohnen_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278 | Wohnen_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278 |
-| 65 | Fahrbereitschaft_beenden_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278 | Fahrbereitschaft_beenden_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278 |
-| 66 | Standfunktion_durch_Timeout_Wohnen_Kunde_anwesend_PWF_MASTER_145 | Standfunktion_durch_Timeout_Wohnen_Kunde_anwesend_PWF_MASTER_145 |
-| 67 | Parken_BN_iO_durch_Timeout_Kunde_abwesend_abgelaufen_PWF_MASTER_146 | Parken_BN_iO_durch_Timeout_Kunde_abwesend_abgelaufen_PWF_MASTER_146 |
-| 68 | Standfunktion_durch_Nachladegrenze_erreicht_PWF_MASTER_507 | Standfunktion_durch_Nachladegrenze_erreicht_PWF_MASTER_507 |
-| 69 | Parken_BN_niO_durch_Bordnetzfehler_erkannt_PWF_MASTER_238 | Parken_BN_niO_durch_Bordnetzfehler_erkannt_PWF_MASTER_238 |
-| 70 | Parken_BN_iO_durch_Pruefung_BN_Fehler_PWF_MASTER_534 | Parken_BN_iO_durch_Pruefung_BN_Fehler_PWF_MASTER_534 |
-| 71 | Parken_BN_niO_durch_TimeOutTransportModus_PWF_MASTER_412 | Parken_BN_niO_durch_TimeOutTransportModus_PWF_MASTER_412 |
-| 72 | Wohnen_durch_Erstes_Oeffnen_FAT_nach_Fahrt_PWF_MASTER_493 | Wohnen_durch_Erstes_Oeffnen_FAT_nach_Fahrt_PWF_MASTER_493 |
-| 73 | Standfunktion_durch_Abschaltung_durch_Kunden_PWF_MASTER_517 | Standfunktion_durch_Abschaltung_durch_Kunden_PWF_MASTER_517 |
-| 74 | Standfunktion_durch_Insassenausstieg_PWF_MASTER_629 | Standfunktion_durch_Insassenausstieg_PWF_MASTER_629 |
-| 75 | Standfunktion_durch_OSFG_erreicht_PWF_MASTER_200 | Standfunktion_durch_OSFG_erreicht_PWF_MASTER_200 |
-| 76 | Standfunktion_durch_Virtuelle_Batterie_entleert_PWF_MASTER_532 | Standfunktion_durch_Virtuelle_Batterie_entleert_PWF_MASTER_532 |
-| 77 | Standfunktion_durch_Standfunktion_aktiv_PWF_MASTER_196 | Standfunktion_durch_Standfunktion_aktiv_PWF_MASTER_196 |
-| 78 | Standfunktion_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 | Standfunktion_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 |
-| 79 | Standfunktion_durch_Änderung_des_Heckscheibenkontakts_PWF_MASTER_115 | Standfunktion_durch_Änderung_des_Heckscheibenkontakts_PWF_MASTER_115 |
-| 80 | Standfunktion_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116 | Standfunktion_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116 |
-| 81 | Standfunktion_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117 | Standfunktion_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117 |
-| 82 | Standfunktion_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125 | Standfunktion_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125 |
-| 83 | Standfunktion_durch_FunkschlüsselBedienen_PWF_MASTER_118 | Standfunktion_durch_FunkschlüsselBedienen_PWF_MASTER_118 |
-| 84 | Standfunktion_durch_ZV_entriegeln_PWF_MASTER_221 | Standfunktion_durch_ZV_entriegeln_PWF_MASTER_221 |
-| 85 | Standfunktion_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109 | Standfunktion_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109 |
-| 86 | Standfunktion_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110 | Standfunktion_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110 |
-| 87 | Standfunktion_durch_Schließen_der_Fahrertür_PWF_MASTER_650 | Standfunktion_durch_Schließen_der_Fahrertür_PWF_MASTER_650 |
-| 88 | Standfunktion_durch_Schließen_der_Beifahrertür_PWF_MASTER_651 | Standfunktion_durch_Schließen_der_Beifahrertür_PWF_MASTER_651 |
-| 89 | Standfunktion_durch_RCP-TasteBedienen_PWF_MASTER_652 | Standfunktion_durch_RCP-TasteBedienen_PWF_MASTER_652 |
-| 90 | Parken_BN_niO_durch_Diagnose_PWF_MASTER_403 | Parken_BN_niO_durch_Diagnose_PWF_MASTER_403 |
-| 91 | Parken_BN_iO_durch_Diagnose_PWF_MASTER_403 | Parken_BN_iO_durch_Diagnose_PWF_MASTER_403 |
-| 92 | Standfunktion_durch_Diagnose_PWF_MASTER_403 | Standfunktion_durch_Diagnose_PWF_MASTER_403 |
-| 93 | Wohnen_durch_Diagnose_PWF_MASTER_403 | Wohnen_durch_Diagnose_PWF_MASTER_403 |
-| 94 | Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403 | Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403 |
-| 97 | Fahrbereitschaft_beenden_durch_Diagnose_PWF_MASTER_403 | Fahrbereitschaft_beenden_durch_Diagnose_PWF_MASTER_403 |
-| 98 | Parken_BN_niO_durch_Dienst_PWF_MASTER_430 | Parken_BN_niO_durch_Dienst_PWF_MASTER_430 |
-| 99 | Parken_BN_iO_durch_Dienst_PWF_MASTER_430 | Parken_BN_iO_durch_Dienst_PWF_MASTER_430 |
-| 100 | Standfunktion_durch_Dienst_PWF_MASTER_430 | Standfunktion_durch_Dienst_PWF_MASTER_430 |
-| 101 | Wohnen_durch_Dienst_PWF_MASTER_430 | Wohnen_durch_Dienst_PWF_MASTER_430 |
-| 106 | Wohnen_durch_beenden_Fahrbereitschaft | Wohnen_durch_beenden_Fahrbereitschaft |
-| 107 | Wohnen_durch_Klemme15HW_PWF_MASTER_750 | Wohnen_durch_Klemme15HW_PWF_MASTER_750 |
-| 108 | Wohnen_durch_Betätigung_Heckklappentaster_Fußraum_Fahrer_PWF_MASTER_744 | Wohnen_durch_Betätigung_Heckklappentaster_Fußraum_Fahrer_PWF_MASTER_744 |
+| 1 | Residing: sunroof button pressed (PWF_MASTER_544) | Wohnen_durch_Betätigung_Schiebehebedach-Taster_PWF_MASTER_544 |
+| 2 | Residing: interior light button pressed (PWF_MASTER_126) | Wohnen_durch_Betätigung_des_Innenlichttasters_PWF_MASTER_126 |
+| 3 | Residing: convertible top button pressed (PWF_MASTER_553) | Wohnen_durch_Betätigung_Cabrioverdeck-Taster_PWF_MASTER_553 |
+| 4 | Residing: left steering column stalk operated (PWF_MASTER_560) | Wohnen_durch_Betätigung_Lenkstockhebel_links_PWF_MASTER_560 |
+| 5 | Residing: high-beam assistant button pressed (PWF_MASTER_564) | Wohnen_durch_Betätigung_Fernlicht-Assistent-Taste_PWF_MASTER_564 |
+| 6 | Residing: right steering column stalk operated (PWF_MASTER_565) | Wohnen_durch_Betätigung_Lenkstockhebel_rechts_PWF_MASTER_565 |
+| 7 | Residing: light rotary switch operated (PWF_MASTER_570) | Wohnen_durch_Betätigung_Drehschalter_Licht_PWF_MASTER_570 |
+| 8 | Residing: fog lights operated (PWF_MASTER_571) | Wohnen_durch_Betätigung_Nebelscheinwerfer_PWF_MASTER_571 |
+| 9 | Residing: rear fog light operated (PWF_MASTER_572) | Wohnen_durch_Betätigung_Nebelschlussleuchte_PWF_MASTER_572 |
+| 10 | Residing: headlight range control operated (PWF_MASTER_559) | Wohnen_durch_Betätigung_Leuchtweitenregulierung_PWF_MASTER_559 |
+| 11 | Residing: window lifter operated (PWF_MASTER_500) | Wohnen_durch_Bedienen_eines_Fensterhebers_PWF_MASTER_500 |
+| 12 | Residing: roller sunblind buttons pressed (PWF_MASTER_573) | Wohnen_durch_Betätigung_Rollo-Tasten_PWF_MASTER_573 |
+| 13 | Residing: mirror adjustment operated (PWF_MASTER_574) | Wohnen_durch_Betätigung_Spiegelverstellung_PWF_MASTER_574 |
+| 14 | Residing: mirror fold-in operated (PWF_MASTER_575) | Wohnen_durch_Betätigung_Spiegel-Beiklappen_PWF_MASTER_575 |
+| 17 | Residing: SARAH button operated (PWF_MASTER_497) | Wohnen_durch_Bedienen_des_Sarah-Tasters_PWF_MASTER_497 |
+| 18 | Residing: mode button pressed (PWF_MASTER_379) | Wohnen_durch_Betätigung_Modus-Taste_PWF_MASTER_379 |
+| 19 | Residing: eject button pressed (PWF_MASTER_377) | Wohnen_durch_Betätigung_Eject-Button_PWF_MASTER_377 |
+| 20 | Residing: AM/FM traffic information button pressed (PWF_MASTER_380) | Wohnen_durch_Betätigung_AM_FM_Verkehrsinformationen-Taste_PWF_MASTER_380 |
+| 21 | Residing: functional bookmark button pressed (PWF_MASTER_381) | Wohnen_durch_Betätigung_Functional-Bookmark-Taste_PWF_MASTER_381 |
+| 24 | Residing: BE_MIKO button pressed (PWF_MASTER_628) | Wohnen_durch_Betätigung_einer_BE_MIKO-Taste_PWF_MASTER_628 |
+| 25 | Residing: rear spoiler button pressed (PWF_MASTER_549) | Wohnen_durch_Betätigung_Heckspoiler-Taster_PWF_MASTER_549 |
+| 26 | Residing: MSA button pressed (PWF_MASTER_552) | Wohnen_durch_Betätigung_MSA-Taster_PWF_MASTER_552 |
+| 27 | Residing: front controller (ZBE) button pressed (PWF_MASTER_382) | Wohnen_durch_Betätigung_ZBE-Taste_Front_PWF_MASTER_382 |
+| 28 | Residing: rear controller (ZBE) button pressed (PWF_MASTER_414) | Wohnen_durch_Betätigung_ZBE-Taste_Fond_PWF_MASTER_414 |
+| 29 | Residing: front controller (ZBE) pushed (PWF_MASTER_383) | Wohnen_durch_Schieben_des_ZBE-Drehstellers_Front_PWF_MASTER_383 |
+| 30 | Residing: rear controller (ZBE) pushed (PWF_MASTER_415) | Wohnen_durch_Schieben_des_ZBE-Drehstellers_Fond_PWF_MASTER_415 |
+| 31 | Residing: front controller (ZBE) turned (PWF_MASTER_384) | Wohnen_durch_Drehen_des_ZBE-Drehstellers_Front_PWF_MASTER_384 |
+| 32 | Residing: rear controller (ZBE) turned (PWF_MASTER_416) | Wohnen_durch_Drehen_des_ZBE-Drehstellers_Fond_PWF_MASTER_416 |
+| 33 | Residing: volume rocker operated (PWF_MASTER_554) | Wohnen_durch_Betätigung_Lautstärke-Wippe_PWF_MASTER_554 |
+| 34 | Residing: toggle button pressed (PWF_MASTER_555) | Wohnen_durch_Betätigung_Toggle-Taste_PWF_MASTER_555 |
+| 35 | Residing: menu roller operated (PWF_MASTER_556) | Wohnen_durch_Betätigung_Menu-Walze_PWF_MASTER_556 |
+| 36 | Residing: telephone button pressed (PWF_MASTER_557) | Wohnen_durch_Betätigung_Telefon-Taste_PWF_MASTER_557 |
+| 37 | Residing: push-to-talk button pressed (PWF_MASTER_558) | Wohnen_durch_Betätigung_Push-to-talk-Taste_PWF_MASTER_558 |
+| 38 | Residing: Start/Stop button pressed (PWF_MASTER_104) | Wohnen_durch_Betätigung_Start-Stopp-Taster_PWF_MASTER_104 |
+| 39 | Residing: entertainment button pressed (short press) (PWF_MASTER_378) | Wohnen_durch_Betätigung_Entertainment-Button_(Kurzdruck)_PWF_MASTER_378 |
+| 40 | Residing: central locking button/rocker operated (PWF_MASTER_625) | Wohnen_durch_Betätigung_Zentralverriegelungstaster/-wippe_PWF_MASTER_625 |
+| 41 | Residing: bonnet operated (PWF_MASTER_124) | Wohnen_durch_Betätigung_Motorhaube_PWF_MASTER_124 |
+| 42 | Standby functions: bonnet operated (PWF_MASTER_124) | Standfunktion_durch_Betätigung_Motorhaube_PWF_MASTER_124 |
+| 43 | Residing: tailgate contact changed (PWF_MASTER_114) | Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 |
+| 44 | Residing: tailgate contact changed (PWF_MASTER_114) | Wohnen_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 |
+| 45 | Residing: rear window button pressed (PWF_MASTER_116) | Wohnen_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116 |
+| 46 | Residing: tailgate button pressed (PWF_MASTER_117) | Wohnen_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117 |
+| 47 | Residing: secure switch on tailgate operated (PWF_MASTER_125) | Wohnen_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125 |
+| 48 | Residing: remote key operated (PWF_MASTER_118) | Wohnen_durch_Betätigung_Funkschlüssel_PWF_MASTER_118 |
+| 49 | Residing: central locking unlocked (PWF_MASTER_221) | Wohnen_durch_ZV_entriegeln_PWF_MASTER_221 |
+| 50 | Residing: driver's side rear door opened or closed (PWF_MASTER_109) | Wohnen_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109 |
+| 51 | Residing: passenger side rear door opened or closed (PWF_MASTER_110) | Wohnen_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110 |
+| 52 | Residing: driver's door closed (PWF_MASTER_650) | Wohnen_durch_Schließen_der_Fahrertür_PWF_MASTER_650 |
+| 53 | Residing: front passenger door closed (PWF_MASTER_651) | Wohnen_durch_Schließen_der_Beifahrertür_PWF_MASTER_651 |
+| 54 | Residing: RCP button operated (PWF_MASTER_652) | Wohnen_durch_RCP-TasteBedienen_PWF_MASTER_652 |
+| 55 | Residing: driver's door opened (PWF_MASTER_107) | Wohnen_durch_Öffnen_der_Fahrertür_PWF_MASTER_107 |
+| 56 | Residing: front passenger door opened (PWF_MASTER_108) | Wohnen_durch_Öffnen_der_Beifahrertür_PWF_MASTER_108 |
+| 57 | Parking: central locking secured (PWF_MASTER_130) | Parken_durch_ZV_sichern_PWF_MASTER_130 |
+| 58 | Standby functions: central locking secured (PWF_MASTER_130) | Standfunktion_durch_ZV_sichern_PWF_MASTER_130 |
+| 59 | Driving: ready to drive established (PWF_MASTER_132) | Fahren_durch_Fahrbereitschaft_hergestellt_PWF_MASTER_132 |
+| 60 | End ready to drive: ready to drive ended (PWF_MASTER_275) | Fahrbereitschaft_beenden_durch_Fahrbereitschaft_beendet_PWF_MASTER_275 |
+| 61 | Test/analysis/diagnosis: analysis started (PWF_MASTER_134) | Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134 |
+| 62 | Residing: analysis ended (PWF_MASTER_285) | Wohnen_durch_Analyse_beenden_PWF_MASTER_285 |
+| 63 | Establish ready to drive: drive request detected (PWF_MASTER_136) | Fahrbereitschaft_herstellen_durch_Fahrwunsch_erkannt_PWF_MASTER_136 |
+| 64 | Residing: drive request withdrawn (PWF_MASTER_278) | Wohnen_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278 |
+| 65 | End ready to drive: drive request withdrawn (PWF_MASTER_278) | Fahrbereitschaft_beenden_durch_Fahrwunsch_zurueckgenommen_PWF_MASTER_278 |
+| 66 | Standby functions: residing timeout, customer present (PWF_MASTER_145) | Standfunktion_durch_Timeout_Wohnen_Kunde_anwesend_PWF_MASTER_145 |
+| 67 | Parking, electrical system OK: customer-absent timeout expired (PWF_MASTER_146) | Parken_BN_iO_durch_Timeout_Kunde_abwesend_abgelaufen_PWF_MASTER_146 |
+| 68 | Standby functions: recharge limit reached (PWF_MASTER_507) | Standfunktion_durch_Nachladegrenze_erreicht_PWF_MASTER_507 |
+| 69 | Parking, electrical system not OK: electrical system fault detected (PWF_MASTER_238) | Parken_BN_niO_durch_Bordnetzfehler_erkannt_PWF_MASTER_238 |
+| 70 | Parking, electrical system OK: electrical system fault check (PWF_MASTER_534) | Parken_BN_iO_durch_Pruefung_BN_Fehler_PWF_MASTER_534 |
+| 71 | Parking, electrical system not OK: transport mode timeout (PWF_MASTER_412) | Parken_BN_niO_durch_TimeOutTransportModus_PWF_MASTER_412 |
+| 72 | Residing: first opening of driver's door after drive (PWF_MASTER_493) | Wohnen_durch_Erstes_Oeffnen_FAT_nach_Fahrt_PWF_MASTER_493 |
+| 73 | Standby functions: switched off by customer (PWF_MASTER_517) | Standfunktion_durch_Abschaltung_durch_Kunden_PWF_MASTER_517 |
+| 74 | Standby functions: occupants exited (PWF_MASTER_629) | Standfunktion_durch_Insassenausstieg_PWF_MASTER_629 |
+| 75 | Standby functions: OSFG reached (PWF_MASTER_200) | Standfunktion_durch_OSFG_erreicht_PWF_MASTER_200 |
+| 76 | Standby functions: virtual battery depleted (PWF_MASTER_532) | Standfunktion_durch_Virtuelle_Batterie_entleert_PWF_MASTER_532 |
+| 77 | Standby functions: standby function active (PWF_MASTER_196) | Standfunktion_durch_Standfunktion_aktiv_PWF_MASTER_196 |
+| 78 | Standby functions: tailgate contact changed (PWF_MASTER_114) | Standfunktion_durch_Änderung_des_Heckklappenkontakts_PWF_MASTER_114 |
+| 79 | Standby functions: rear window contact changed (PWF_MASTER_115) | Standfunktion_durch_Änderung_des_Heckscheibenkontakts_PWF_MASTER_115 |
+| 80 | Standby functions: rear window button pressed (PWF_MASTER_116) | Standfunktion_durch_Betätigung_des_Heckscheibentasters_PWF_MASTER_116 |
+| 81 | Standby functions: tailgate button pressed (PWF_MASTER_117) | Standfunktion_durch_Betätigung_des_Heckklappentasters_PWF_MASTER_117 |
+| 82 | Standby functions: secure switch on tailgate operated (PWF_MASTER_125) | Standfunktion_durch_Betätigung_des_Sichern-Schalters_an_der_Heckklappe_PWF_MASTER_125 |
+| 83 | Standby functions: remote key operated (PWF_MASTER_118) | Standfunktion_durch_FunkschlüsselBedienen_PWF_MASTER_118 |
+| 84 | Standby functions: central locking unlocked (PWF_MASTER_221) | Standfunktion_durch_ZV_entriegeln_PWF_MASTER_221 |
+| 85 | Standby functions: driver's side rear door opened or closed (PWF_MASTER_109) | Standfunktion_durch_Öffnen_oder_Schließen_der_Fahrertür_hinten_PWF_MASTER_109 |
+| 86 | Standby functions: passenger side rear door opened or closed (PWF_MASTER_110) | Standfunktion_durch_Öffnen_oder_Schließen_der_Beifahrertür_hinten_PWF_MASTER_110 |
+| 87 | Standby functions: driver's door closed (PWF_MASTER_650) | Standfunktion_durch_Schließen_der_Fahrertür_PWF_MASTER_650 |
+| 88 | Standby functions: front passenger door closed (PWF_MASTER_651) | Standfunktion_durch_Schließen_der_Beifahrertür_PWF_MASTER_651 |
+| 89 | Standby functions: RCP button operated (PWF_MASTER_652) | Standfunktion_durch_RCP-TasteBedienen_PWF_MASTER_652 |
+| 90 | Parking, electrical system not OK: by diagnosis (PWF_MASTER_403) | Parken_BN_niO_durch_Diagnose_PWF_MASTER_403 |
+| 91 | Parking, electrical system OK: by diagnosis (PWF_MASTER_403) | Parken_BN_iO_durch_Diagnose_PWF_MASTER_403 |
+| 92 | Standby functions: by diagnosis (PWF_MASTER_403) | Standfunktion_durch_Diagnose_PWF_MASTER_403 |
+| 93 | Residing: by diagnosis (PWF_MASTER_403) | Wohnen_durch_Diagnose_PWF_MASTER_403 |
+| 94 | Test/analysis/diagnosis: by diagnosis (PWF_MASTER_403) | Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403 |
+| 97 | End ready to drive: by diagnosis (PWF_MASTER_403) | Fahrbereitschaft_beenden_durch_Diagnose_PWF_MASTER_403 |
+| 98 | Parking, electrical system not OK: by service (PWF_MASTER_430) | Parken_BN_niO_durch_Dienst_PWF_MASTER_430 |
+| 99 | Parking, electrical system OK: by service (PWF_MASTER_430) | Parken_BN_iO_durch_Dienst_PWF_MASTER_430 |
+| 100 | Standby functions: by service (PWF_MASTER_430) | Standfunktion_durch_Dienst_PWF_MASTER_430 |
+| 101 | Residing: by service (PWF_MASTER_430) | Wohnen_durch_Dienst_PWF_MASTER_430 |
+| 106 | Residing: ready to drive ended | Wohnen_durch_beenden_Fahrbereitschaft |
+| 107 | Residing: terminal 15 hardware (PWF_MASTER_750) | Wohnen_durch_Klemme15HW_PWF_MASTER_750 |
+| 108 | Residing: tailgate button in driver's footwell pressed (PWF_MASTER_744) | Wohnen_durch_Betätigung_Heckklappentaster_Fußraum_Fahrer_PWF_MASTER_744 |
 
 ## BDC_G11.TAB_RESERVE_RESULT
 
 | Value | Meaning | German |
 |---|---|---|
-| 253 | Reserve Byte due to SGBD-Kompatibilität. | Reserve Byte wegen SGBD-Kompatibilität. |
+| 253 | Reserve byte for SGBD compatibility. | Reserve Byte wegen SGBD-Kompatibilität. |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_ROLLO_VERFAHREN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No actuation | Keine Betätigung |
-| 1 | Betätigt | Betätigt |
+| 0 | Not operated | Keine Betätigung |
+| 1 | Pressed | Betätigt |
 | 7 | Signal invalid | Signal ungültig |
-| 255 | invalid value | ungültiger Wert |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_SARAH_LED
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Off | Aus |
-| 1 | Gruen | Gruen |
+| 1 | Green | Gruen |
 | 2 | Defective | Defekt |
 | 3 | Orange | Orange |
-| 255 | invalid | ungueltig |
+| 255 | Invalid | ungueltig |
 
 ## BDC_G11.TAB_SARAH_ZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Alle function from | Alle Funktionen aus |
-| 1 | Benutzerdefiniert | Benutzerdefiniert |
-| 2 | Alle function an | Alle Funktionen an |
+| 0 | All functions off | Alle Funktionen aus |
+| 1 | User-defined | Benutzerdefiniert |
+| 2 | All functions on | Alle Funktionen an |
 
 ## BDC_G11.TAB_SCHALTWIPPE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Schaltpaddles not betätigt | Schaltpaddles nicht betätigt |
-| 3 | Fault Schaltpaddle | Fehler Schaltpaddle |
-| 5 | Schaltwippe Tip minus betätigt and entprellt | Schaltwippe Tip minus betätigt und entprellt |
-| 6 | Schaltwippe Tip plus betätigt and entprellt | Schaltwippe Tip plus betätigt und entprellt |
+| 0 | Shift paddles not operated | Schaltpaddles nicht betätigt |
+| 3 | Shift paddle fault | Fehler Schaltpaddle |
+| 5 | Shift paddle tip minus operated and debounced | Schaltwippe Tip minus betätigt und entprellt |
+| 6 | Shift paddle tip plus operated and debounced | Schaltwippe Tip plus betätigt und entprellt |
 | 255 | Signal invalid | Signal ungültig |
 
 ## BDC_G11.TAB_SHD_FH_LAGE_NR
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Ausstelllage | Ausstelllage |
-| 2 | Schiebelage | Schiebelage |
-| 255 | Function not unterstützt | Funktion nicht unterstützt |
+| 1 | Tilted position | Ausstelllage |
+| 2 | Sliding position | Schiebelage |
+| 255 | Function not supported | Funktion nicht unterstützt |
 
 ## BDC_G11.TAB_SITZEXT_HINTEN_VORHANDEN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not kodiert (FAH and BFH) | Nicht kodiert (FAH und BFH) |
-| 1 | Kodiert (FAH and BFH) | Kodiert (FAH und BFH) |
-| 2 | Nur FAH kodiert | Nur FAH kodiert |
-| 3 | Nur BFH kodiert | Nur BFH kodiert |
+| 0 | Not coded (rear driver side and rear passenger side) | Nicht kodiert (FAH und BFH) |
+| 1 | Coded (rear driver side and rear passenger side) | Kodiert (FAH und BFH) |
+| 2 | Only rear driver side coded | Nur FAH kodiert |
+| 3 | Only rear passenger side coded | Nur BFH kodiert |
 
 ## BDC_G11.TAB_SITZEXT_TASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not gedrückt | nicht gedrückt |
-| 1 | Gedrückt / Betätigt | Gedrückt / Betätigt |
+| 0 | Not pressed | nicht gedrückt |
+| 1 | Pressed / operated | Gedrückt / Betätigt |
 | 3 | Invalid | Ungültig |
 
 ## BDC_G11.TAB_SITZEXT_VORHANDEN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not kodiert (FA and BF) | Nicht kodiert (FA und BF) |
-| 1 | Kodiert  (FA and BF) | Kodiert  (FA und BF) |
-| 2 | Nur FA kodiert | Nur FA kodiert |
-| 3 | Nur BF kodiert | Nur BF kodiert |
+| 0 | Not coded (driver and front passenger) | Nicht kodiert (FA und BF) |
+| 1 | Coded (driver and front passenger) | Kodiert  (FA und BF) |
+| 2 | Only driver coded | Nur FA kodiert |
+| 3 | Only front passenger coded | Nur BF kodiert |
 
 ## BDC_G11.TAB_SITZHEIZUNG_STUFE
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Off | Aus |
-| 1 | Stage 1 | Stufe 1 |
-| 2 | Stage 2 | Stufe 2 |
-| 3 | Stage 3 | Stufe 3 |
-| 255 | invalid value | ungültiger Wert |
+| 1 | Level 1 | Stufe 1 |
+| 2 | Level 2 | Stufe 2 |
+| 3 | Level 3 | Stufe 3 |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_SITZMEMORY_TASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not gedrückt | Nicht gedrückt |
+| 0 | Not pressed | Nicht gedrückt |
 | 1 | Button 1 | Taster 1 |
 | 2 | Button 2 | Taster 2 |
 | 3 | Button 3 | Taster 3 |
 | 4 | Button M | Taster M |
-| 21 | Signal invalid/ fault / not present | Signal Ungültig/ Fehler / nicht vorhanden |
+| 21 | Signal invalid / fault / not present | Signal Ungültig/ Fehler / nicht vorhanden |
 
 ## BDC_G11.TAB_SLEEP_MODE_NRC
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Positive Response | Positive Response |
-| 1 | Light Switch in position 2 | Light Switch in Position 2 |
-| 2 | Relay Stuck Hw Failure | Relay Stuck Hw Failure |
-| 3 | Power Window Activated | Power Window Activated |
+| 0 | Positive response | Positive Response |
+| 1 | Light switch in position 2 | Light Switch in Position 2 |
+| 2 | Relay stuck hardware failure | Relay Stuck Hw Failure |
+| 3 | Power window activated | Power Window Activated |
 | 255 | Invalid | Invalid |
 
 ## BDC_G11.TAB_SMO_ANFORDERUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no request message of SMO erhalten | keine Anforderungsbotschaft von SMO erhalten |
-| 1 | Request message of SMO erhalten | Anforderungsbotschaft von SMO erhalten |
+| 0 | No request message received from SMO | keine Anforderungsbotschaft von SMO erhalten |
+| 1 | Request message received from SMO | Anforderungsbotschaft von SMO erhalten |
 | 255 | Invalid/unknown | Ungültig/Unbekannt |
 
 ## BDC_G11.TAB_SMO_FAHRZEUGTYP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Fahrzeugtyp definiert | Kein Fahrzeugtyp definiert |
-| 254 | Dynamic Parametrierung | Dynamische Parametrierung |
+| 0 | No vehicle type defined | Kein Fahrzeugtyp definiert |
+| 254 | Dynamic parameterisation | Dynamische Parametrierung |
 | 255 | Invalid signal | Ungültiger Signal |
 
 ## BDC_G11.TAB_SMO_VERBAU
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Smart Opener/Closer present | kein Smart Opener/Closer vorhanden |
+| 0 | No Smart Opener/Closer present | kein Smart Opener/Closer vorhanden |
 | 1 | Smart Opener/Closer present | Smart Opener/Closer vorhanden |
 | 255 | Invalid/unknown | Ungültig/Unbekannt |
 
@@ -1318,10 +1318,10 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Off | Aus |
-| 1 | An no Blinken | An Kein Blinken |
-| 2 | An Blinken stage 1 | An Blinken Stufe 1 |
-| 3 | An Blinken stage 2 | An Blinken Stufe 2 |
-| 4 | An Blinken stage 3 | An Blinken Stufe 3 |
+| 1 | On, no flashing | An Kein Blinken |
+| 2 | On, flashing level 1 | An Blinken Stufe 1 |
+| 3 | On, flashing level 2 | An Blinken Stufe 2 |
+| 4 | On, flashing level 3 | An Blinken Stufe 3 |
 | 13 | Display fault | Anzeigefehler |
 | 255 | Signal invalid | Signal ungültig |
 
@@ -1329,132 +1329,132 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No actuation | Keine Ansteuerung |
-| 1 | left | links |
-| 2 | top | oben |
-| 3 | right | rechts |
-| 4 | bottom | unten |
-| 255 | invalid value | ungültiger Wert |
+| 0 | No activation | Keine Ansteuerung |
+| 1 | Left | links |
+| 2 | Up | oben |
+| 3 | Right | rechts |
+| 4 | Down | unten |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_STATUS_TASTER
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Button not betätigt | Taster nicht betätigt |
-| 1 | Button left betätigt | Taster links betätigt |
-| 2 | Button right betätigt | Taster rechts betätigt |
+| 0 | Button not pressed | Taster nicht betätigt |
+| 1 | Left button pressed | Taster links betätigt |
+| 2 | Right button pressed | Taster rechts betätigt |
 | 255 | Signal invalid | Signal ungültig |
 
 ## BDC_G11.TAB_ST_CENG_DRV
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Engine steht sicher | Motor steht sicher |
-| 1 | Engine startet | Motor startet |
-| 2 | Engine läuft selbstständig | Motor läuft selbstständig |
-| 3 | Engine in the Auslauf | Motor im Auslauf |
-| 13 | Function interface is not present | Funktionsschnittstelle ist nicht vorhanden |
-| 14 | Reserviert | Reserviert |
-| 15 | Signal unbefüllt | Signal unbefüllt |
+| 0 | Engine safely stopped | Motor steht sicher |
+| 1 | Engine starting | Motor startet |
+| 2 | Engine running on its own | Motor läuft selbstständig |
+| 3 | Engine running down | Motor im Auslauf |
+| 13 | Function interface not present | Funktionsschnittstelle ist nicht vorhanden |
+| 14 | Reserved | Reserviert |
+| 15 | Signal not populated | Signal unbefüllt |
 
 ## BDC_G11.TAB_ST_DRVG_RDI_DRV
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | No readiness to drive | Keine Fahrbereitschaft |
-| 2 | Readiness to drive | Fahrbereitschaft |
+| 1 | Not ready to drive | Keine Fahrbereitschaft |
+| 2 | Ready to drive | Fahrbereitschaft |
 | 13 | Function interface not present | Funktionsschnittstelle nicht vorhanden |
-| 14 | Reserviert | Reserviert |
-| 15 | Signal unbefüllt | Signal unbefüllt |
+| 14 | Reserved | Reserviert |
+| 15 | Signal not populated | Signal unbefüllt |
 
 ## BDC_G11.TAB_TASTER_BEMIKO
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not gedrückt | Nicht gedrückt |
-| 1 | gedrückt | gedrückt |
-| 2 | berührt | berührt |
+| 0 | Not pressed | Nicht gedrückt |
+| 1 | Pressed | gedrückt |
+| 2 | Touched | berührt |
 | 3 | Signal invalid/fault/not present | Signal ungültig/Fehler/nicht vorhanden |
 
 ## BDC_G11.TAB_TASTER_MFL_1
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Aktion | keine Aktion |
-| 1 | Button gedrückt | Taster gedrückt |
-| 3 | invalid | ungültig |
+| 0 | No action | keine Aktion |
+| 1 | Button pressed | Taster gedrückt |
+| 3 | Invalid | ungültig |
 
 ## BDC_G11.TAB_TASTER_MFL_2
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Aktion | keine Aktion |
-| 1 | Taste gedrückt | Taste gedrückt |
-| 15 | invalid | ungültig |
+| 0 | No action | keine Aktion |
+| 1 | Button pressed | Taste gedrückt |
+| 15 | Invalid | ungültig |
 
 ## BDC_G11.TAB_TASTER_MFL_3
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Aktion | keine Aktion |
-| 1 | Button/Wippe top gedrückt | Taster/Wippe oben gedrückt |
-| 5 | Button/Wippe under gedrückt | Taster/Wippe unter gedrückt |
-| 15 | invalid | ungültig |
+| 0 | No action | keine Aktion |
+| 1 | Button/rocker up pressed | Taster/Wippe oben gedrückt |
+| 5 | Button/rocker down pressed | Taster/Wippe unter gedrückt |
+| 15 | Invalid | ungültig |
 
 ## BDC_G11.TAB_TASTER_ROLLO
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Button not gedrückt | Taster nicht gedrückt |
-| 1 | Button gedrückt | Taster gedrückt |
-| 3 | invalid | ungültig |
+| 0 | Button not pressed | Taster nicht gedrückt |
+| 1 | Button pressed | Taster gedrückt |
+| 3 | Invalid | ungültig |
 
 ## BDC_G11.TAB_TLC_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Aussage | Keine Aussage |
-| 1 | Below Limit | Unterhalb Limit |
-| 2 | Normalzustand | Normalzustand |
-| 3 | Above Limit | Oberhalb Limit |
-| 255 | invalid value | ungültiger Wert |
+| 0 | No information | Keine Aussage |
+| 1 | Below limit | Unterhalb Limit |
+| 2 | Normal state | Normalzustand |
+| 3 | Above limit | Oberhalb Limit |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_UGDO_LAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Rest Europa | Rest Europa |
-| 1 | Frankreich | Frankreich |
+| 0 | Rest of Europe | Rest Europa |
+| 1 | France | Frankreich |
 | 2 | U.K. | U.K. |
-| 3 | Italien | Italien |
+| 3 | Italy | Italien |
 | 4 | USA | USA |
-| 255 | invalid value | ungültiger Wert |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_VARIANTE_AUDIOBEDIENTEIL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | without FBM, TP | ohne FBM, TP |
-| 1 | with FBM, TP | mit FBM, TP |
-| 2 | without FBM, FM/AM | ohne FBM, FM/AM |
-| 3 | with FBM, FM/AM | mit FBM, FM/AM |
+| 0 | Without FBM, TP | ohne FBM, TP |
+| 1 | With FBM, TP | mit FBM, TP |
+| 2 | Without FBM, FM/AM | ohne FBM, FM/AM |
+| 3 | With FBM, FM/AM | mit FBM, FM/AM |
 
 ## BDC_G11.TAB_VIBRATIONSSTAERKE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | schwach | schwach |
-| 1 | mittel | mittel |
-| 2 | stark | stark |
+| 0 | Weak | schwach |
+| 1 | Medium | mittel |
+| 2 | Strong | stark |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## BDC_G11.TAB_WARNZEITPUNKT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | spät | spät |
-| 1 | mittel | mittel |
-| 2 | früh | früh |
+| 0 | Late | spät |
+| 1 | Medium | mittel |
+| 2 | Early | früh |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## BDC_G11.TAB_WARNZEITPUNKT2
@@ -1462,36 +1462,36 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Standard | Standard |
-| 1 | Adaptiv | Adaptiv |
+| 1 | Adaptive | Adaptiv |
 
 ## BDC_G11.TAB_WASCHPUMPE_VORHANDEN
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Pump not present | Pumpe nicht vorhanden |
-| 1 | Pump an output Frontwaschen (Wi_Pu1) angeschlossen | Pumpe an Ausgang Frontwaschen (Wi_Pu1) angeschlossen |
-| 2 | Pump an output Heckwaschen (Wi_Pu2) angeschlossen | Pumpe an Ausgang Heckwaschen (Wi_Pu2) angeschlossen |
-| 3 | Pump an output Scheinwerferreinigung (SRA) angeschlossen | Pumpe an Ausgang Scheinwerferreinigung (SRA) angeschlossen |
+| 1 | Pump connected to front washing output (Wi_Pu1) | Pumpe an Ausgang Frontwaschen (Wi_Pu1) angeschlossen |
+| 2 | Pump connected to rear washing output (Wi_Pu2) | Pumpe an Ausgang Heckwaschen (Wi_Pu2) angeschlossen |
+| 3 | Pump connected to headlight cleaning output (SRA) | Pumpe an Ausgang Scheinwerferreinigung (SRA) angeschlossen |
 | 255 | Value invalid | Wert ungültig |
 
 ## BDC_G11.TAB_WISCHEREINLERNVORGANG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Einlernvorgang erfolgreich abgeschlossen | Einlernvorgang erfolgreich abgeschlossen |
-| 1 | Einlernvorgang not erfolgreich abgeschlossen | Einlernvorgang nicht erfolgreich abgeschlossen |
-| 2 | Einlernvorgang yet not takes place | Einlernvorgang noch nicht erfolgt |
-| 255 | invalid | ungültig |
+| 0 | Teach-in completed successfully | Einlernvorgang erfolgreich abgeschlossen |
+| 1 | Teach-in not completed successfully | Einlernvorgang nicht erfolgreich abgeschlossen |
+| 2 | Teach-in not yet performed | Einlernvorgang noch nicht erfolgt |
+| 255 | Invalid | ungültig |
 
 ## BDC_G11.TAB_WISCHER_RAENDEL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Rändel in stage 1 | Rändel in Stufe 1 |
-| 1 | Rändel in stage 2 | Rändel in Stufe 2 |
-| 2 | Rändel in stage 3 | Rändel in Stufe 3 |
-| 3 | Rändel in stage 4 | Rändel in Stufe 4 |
-| 255 | invalid value | ungültiger Wert |
+| 0 | Thumbwheel at level 1 | Rändel in Stufe 1 |
+| 1 | Thumbwheel at level 2 | Rändel in Stufe 2 |
+| 2 | Thumbwheel at level 3 | Rändel in Stufe 3 |
+| 3 | Thumbwheel at level 4 | Rändel in Stufe 4 |
+| 255 | Invalid value | ungültiger Wert |
 
 ## BDC_G11.TAB_ZSG_BF_WECK_GRUND
 
@@ -1653,22 +1653,22 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Hinderungsgrund vorliegend | Kein Hinderungsgrund vorliegend |
-| 1 | Current Schlüssel not valid | Aktueller Schlüssel nicht gültig |
-| 2 | -standstill not detected (signal DVCO_VEH) and no Fe-Mode [for use-case diagnosis] | -Stillstand nicht erkannt (Signal DVCO_VEH) und kein Fe-Mode [für use-case Diagnose] |
-| 3 | Speed <10km/h not detected (signal V_VEH_COG) [for use-case SST] | Geschwindigkeit <10km/h nicht erkannt (Signal V_VEH_COG) [für use-case SST] |
-| 4 | Speed <10km/h invalid (signal V_VEH_COG/QU_V_VEH_COG) [for use-case SST] | Geschwindigkeit <10km/h ungültig (Signale V_VEH_COG/QU_V_VEH_COG) [für use-case SST] |
-| 5 | Brake not gedrückt | Bremse nicht gedrückt |
-| 7 | Clutch not gedrückt | Kupplung nicht gedrückt |
-| 9 | No enable by DME (ST_DRVG_RDI_DRV ungleich  no readiness to drive  in KL15-a) | Keine Freigabe durch DME (ST_DRVG_RDI_DRV ungleich  Keine Fahrbereitschaft  in KL15-Ein) |
-| 13 | Montagemodus active | Montagemodus aktiv |
-| 16 | KL30B a (ST_KL:  0x6...0xD) | KL30B ein (ST_KL:  0x6...0xD) |
-| 17 | Parklicht a (ST_PLI_LH:  0x1, a  or ST_PLI_RH:  0x1, a ) | Parklicht ein (ST_PLI_LH:  0x1, Ein  oder ST_PLI_RH:  0x1, Ein ) |
-| 18 | Standlicht a (ST_POLI:  0x1, a ) | Standlicht ein (ST_POLI:  0x1, Ein ) |
-| 19 | Warnblinken a (ST_IDC:  0x3, Beide Blinker a ) | Warnblinken ein (ST_IDC:  0x3, Beide Blinker ein ) |
-| 20 | Active emergency call (ECAL_ACV:  0x1, emergency call active ) or emergency call in the Standby (ECAL_STDBY:  0x1, Standby a ) | Aktiver Notruf (ECAL_ACV:  0x1, Notruf aktiv ) oder Notruf im Standby (ECAL_STDBY:  0x1, Standby ein ) |
-| 21 | KL30F via Dienstenachricht with Attribut  gesetzlich  angefordert - is in the BDC2015 not verwendet | KL30F über Dienstenachricht mit Attribut  gesetzlich  angefordert - wird im BDC2015 nicht verwendet |
-| 22 | Ladekabel gesteckt | Ladekabel gesteckt |
+| 0 | No inhibiting condition present | Kein Hinderungsgrund vorliegend |
+| 1 | Current key not valid | Aktueller Schlüssel nicht gültig |
+| 2 | Standstill not detected (signal DVCO_VEH) and no Fe mode [for diagnosis use case] | -Stillstand nicht erkannt (Signal DVCO_VEH) und kein Fe-Mode [für use-case Diagnose] |
+| 3 | Speed <10 km/h not detected (signal V_VEH_COG) [for SST use case] | Geschwindigkeit <10km/h nicht erkannt (Signal V_VEH_COG) [für use-case SST] |
+| 4 | Speed <10 km/h invalid (signals V_VEH_COG/QU_V_VEH_COG) [for SST use case] | Geschwindigkeit <10km/h ungültig (Signale V_VEH_COG/QU_V_VEH_COG) [für use-case SST] |
+| 5 | Brake not pressed | Bremse nicht gedrückt |
+| 7 | Clutch not pressed | Kupplung nicht gedrückt |
+| 9 | No release from DME (ST_DRVG_RDI_DRV not equal to 'not ready to drive' with terminal 15 on) | Keine Freigabe durch DME (ST_DRVG_RDI_DRV ungleich  Keine Fahrbereitschaft  in KL15-Ein) |
+| 13 | Assembly mode active | Montagemodus aktiv |
+| 16 | Terminal 30B on (ST_KL: 0x6...0xD) | KL30B ein (ST_KL:  0x6...0xD) |
+| 17 | Parking light on (ST_PLI_LH: 0x1, on or ST_PLI_RH: 0x1, on) | Parklicht ein (ST_PLI_LH:  0x1, Ein  oder ST_PLI_RH:  0x1, Ein ) |
+| 18 | Side lights on (ST_POLI: 0x1, on) | Standlicht ein (ST_POLI:  0x1, Ein ) |
+| 19 | Hazard warning lights on (ST_IDC: 0x3, both turn signals on) | Warnblinken ein (ST_IDC:  0x3, Beide Blinker ein ) |
+| 20 | Emergency call active (ECAL_ACV: 0x1, emergency call active) or emergency call on standby (ECAL_STDBY: 0x1, standby on) | Aktiver Notruf (ECAL_ACV:  0x1, Notruf aktiv ) oder Notruf im Standby (ECAL_STDBY:  0x1, Standby ein ) |
+| 21 | Terminal 30F requested via service message with attribute 'statutory' - not used in BDC2015 | KL30F über Dienstenachricht mit Attribut  gesetzlich  angefordert - wird im BDC2015 nicht verwendet |
+| 22 | Charging cable plugged in | Ladekabel gesteckt |
 | 255 | Unknown/invalid | Unbekannt/Ungültig |
 
 ## BDC_G11.TAB_ZSG_ZV_ENTRIEGELT
@@ -1685,13 +1685,13 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Unlocked | Entriegelt |
 | 1 | Locked | Verriegelt |
-| 2 | Gesichert | Gesichert |
-| 3 | Crash-Mode active | Crash-Mode aktiv |
-| 128 | Flap/Scheibe closed | Klappe/Scheibe geschlossen |
-| 129 | Flap/Scheibe open | Klappe/Scheibe geöffnet |
-| 200 | Flap in Vorraststellung | Klappe in Vorraststellung |
-| 201 | Flap not in Vorraststellung | Klappe nicht in Vorraststellung |
-| 255 | invalid/implausible/not verbaut | ungültig/unplausibel/nicht verbaut |
+| 2 | Secured (deadlocked) | Gesichert |
+| 3 | Crash mode active | Crash-Mode aktiv |
+| 128 | Lid/window closed | Klappe/Scheibe geschlossen |
+| 129 | Lid/window open | Klappe/Scheibe geöffnet |
+| 200 | Lid in pre-latch position | Klappe in Vorraststellung |
+| 201 | Lid not in pre-latch position | Klappe nicht in Vorraststellung |
+| 255 | Invalid/implausible/not fitted | ungültig/unplausibel/nicht verbaut |
 
 ## BDC_G11.TAB_ZSG_ZV_VERRIEGELT
 
@@ -1705,6 +1705,6 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Button not betätigt | Taster nicht betätigt |
-| 1 | Button betätigt | Taster betätigt |
-| 255 | invalid | ungültig |
+| 0 | Button not pressed | Taster nicht betätigt |
+| 1 | Button pressed | Taster betätigt |
+| 255 | Invalid | ungültig |

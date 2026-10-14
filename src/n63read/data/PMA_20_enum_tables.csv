@@ -1,0 +1,18 @@
+﻿table_name,value,text_de,text_en
+PMA_20.TAB_NVM_INTEGRITY_TEST,0x00,Test nicht angefordert  oder Test  beendet als in Ordnung,"Test not requested, or test finished OK"
+PMA_20.TAB_NVM_INTEGRITY_TEST,0x01,Test beendet als nicht in Ordnung,"Test finished, not OK"
+PMA_20.TAB_NVM_INTEGRITY_TEST,0x02,Test läuft,Test running
+PMA_20.TAB_PDC_ROLLEN,0x00,Fahrzeug steht,Vehicle stationary
+PMA_20.TAB_PDC_ROLLEN,0x01,Fahrzeug fährt vorwärts,Vehicle moving forwards
+PMA_20.TAB_PDC_ROLLEN,0x02,Fahrzeug fährt rückwärts,Vehicle moving backwards
+PMA_20.TAB_PDC_ROLLEN,0x03,Fahrzeug fährt,Vehicle moving
+PMA_20.TAB_PDC_ROLLEN,0xFF,ungültiger Wert,Invalid value
+PMA_20.TAB_PDC_SENSORTEST,0x00,Test nicht angefordert,Test not requested
+PMA_20.TAB_PDC_SENSORTEST,0x01,Test läuft,Test running
+PMA_20.TAB_PDC_SENSORTEST,0x02,Test Ergebnis OK,Test result OK
+PMA_20.TAB_PDC_SENSORTEST,0x03,Test Ergebnis nicht OK,Test result not OK
+PMA_20.TAB_PDC_SENSORTEST,0x04,Test Stopp. System aktuell nicht bereit den Test zu starten oder Test abgebrochen.,"Test stopped: system not ready to start the test, or test aborted"
+PMA_20.TAB_PDC_SENSORTEST,0xFF,Ungültiger Wert,Invalid value
+PMA_20.TAB_PDC_STATUS,0x00,PDC nicht aktiv,PDC not active
+PMA_20.TAB_PDC_STATUS,0x01,PDC aktiv,PDC active
+PMA_20.TAB_PDC_STATUS,0x02,PDC hat Fehler erkannt,PDC has detected a fault

@@ -12,92 +12,92 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (1
 
 | Channel | ID | Field | Type | Unit | Scaling | Values | Description | German |
 |---|---|---|---|---|---|---|---|---|
-| `LMV_PROGRAMMING_COUNTER.RESERVE` | 0x2502 | 0 | unsigned char |  |  |  | Reserve. Konstante = 0x00 | Reserve. Konstante = 0x00 |
-| `LMV_PROGRAMMING_COUNTER.PROG_ZAEHLER_STATUS` | 0x2502 | 1 | unsigned char | 0-n |  | 0 = ECUMehrmalsProgrammierbar; 1 = ECUMindestensEinmalVollstaendigProgrammierbar; 2 = ECUNichtMehrProgrammierbar | ProgrammingCounterStatus | ProgrammingCounterStatus |
-| `LMV_PROGRAMMING_COUNTER.PROG_ZAEHLER` | 0x2502 | 2 | unsigned int |  |  |  | ProgrammingCounter | ProgrammingCounter |
-| `LMV_PROGRAMMING_COUNTER_MAX_VALUE` | 0x2503 | 0 | unsigned int |  |  |  | maximum number of Programmiervorgängen | maximalen Anzahl von Programmiervorgängen |
-| `LMV_FLASH_TIMING_PARAMETER.ERASE_MEMORY_TIME` | 0x2504 | 0 | unsigned int | s |  |  | EraseMemoryTime, maximum SWE-Löschzeit with Ablaufkontrolle in the control unit. | EraseMemoryTime, maximale SWE-Löschzeit mit Ablaufkontrolle im Steuergerät. |
-| `LMV_FLASH_TIMING_PARAMETER.CHECK_MEMORY_TIME` | 0x2504 | 1 | unsigned int | s |  |  | CheckMemoryTime (Bsp.: Signaturprüfung), maximum Speicherprüfzeit with Ablaufkontrolle in the control unit. | CheckMemoryTime (Bsp.: Signaturprüfung), maximale Speicherprüfzeit mit Ablaufkontrolle im Steuergerät. |
-| `LMV_FLASH_TIMING_PARAMETER.BOOTLOADER_INSTALLATION_TIME` | 0x2504 | 2 | unsigned int | s |  |  | BootloaderInstallationTime the time, the to the reset benötigt is, damit the Hilfsbootloader gestartet is, the Bootloader löscht, the neuen Bootloader kopiert, dessen Signatur prüf and the neue Bootloader gestartet is bis er wieder diagnosefähig is. Angabe is verpflichtend for alle control unit, auch if the control unit no Bootloader Update geplant has. a value of 0x0000 is verboten. | BootloaderInstallationTime Die Zeit, die nach dem Reset benötigt wird, damit der Hilfsbootloader gestartet wird, den Bootloader löscht, den neuen Bootloader kopiert, dessen Signatur prüf und der neue Bootloader gestartet wird bis er wieder diagnosefähig ist. Angabe ist verpflichtend für alle Steuergeräte, auch wenn das Steuergerät keinen Bootloader Update geplant hat. Ein Wert von 0x0000 ist verboten. |
-| `LMV_FLASH_TIMING_PARAMETER.AUTHENTICATION_TIME` | 0x2504 | 3 | unsigned int | s |  |  | AuthenticationTime, the maximum time, the the control unit to check the authentication (sendKey) benötigt with Ablaufkontrolle in the control unit. | AuthenticationTime, die maximale Zeit, die das Steuergerät zur Prüfung der Authentisierung (sendKey) benötigt mit Ablaufkontrolle im Steuergerät. |
-| `LMV_FLASH_TIMING_PARAMETER.RESET_TIME` | 0x2504 | 4 | unsigned int | s |  |  | ResetTime the Zeitangabe bezieht sich on the Übergang of the ApplicationExtendedSesssion in the ProgrammingSession resp. at Übergang of the ProgrammingSession in the DefaultSession. Es is the maximum value auszugeben. to Ablauf the ResetTime is the control unit by diagnosis ansprechbar. | ResetTime Die Zeitangabe bezieht sich auf den Übergang von der ApplicationExtendedSesssion in die ProgrammingSession bzw. bei Übergang von der ProgrammingSession in die DefaultSession. Es ist der Maximalwert auszugeben. Nach Ablauf der ResetTime ist das Steuergerät durch Diagnose ansprechbar. |
-| `LMV_FLASH_TIMING_PARAMETER.TRANSFER_DATA_TIME` | 0x2504 | 5 | unsigned int | s |  |  | TransferDataTime the Angabe has sich to beziehen on a TransferData with maximum Blocklänge on the Zeitspanne vom vollständigen Empfang the data in the control unit via the ggf. erforderliche Dekomprimieren and the vollständigen memory in the nichtflüchtigen memory bis einschließlich the Senden the positive Response. | TransferDataTime Die Angabe hat sich zu beziehen auf einen TransferData mit maximaler Blocklänge auf die Zeitspanne vom vollständigen Empfang der Daten im Steuergerät über das ggf. erforderliche Dekomprimieren und dem vollständigen Speichern im nichtflüchtigen Speicher bis einschließlich dem Senden der positiven Response. |
+| `LMV_PROGRAMMING_COUNTER.RESERVE` | 0x2502 | 0 | unsigned char |  |  |  | Reserve. Constant = 0x00 | Reserve. Konstante = 0x00 |
+| `LMV_PROGRAMMING_COUNTER.PROG_ZAEHLER_STATUS` | 0x2502 | 1 | unsigned char | 0-n |  | 0 = ECU programmable multiple times; 1 = ECU fully programmable at least once; 2 = ECU no longer programmable | Programming counter status | ProgrammingCounterStatus |
+| `LMV_PROGRAMMING_COUNTER.PROG_ZAEHLER` | 0x2502 | 2 | unsigned int |  |  |  | Programming counter | ProgrammingCounter |
+| `LMV_PROGRAMMING_COUNTER_MAX_VALUE` | 0x2503 | 0 | unsigned int |  |  |  | Maximum number of programming operations | maximalen Anzahl von Programmiervorgängen |
+| `LMV_FLASH_TIMING_PARAMETER.ERASE_MEMORY_TIME` | 0x2504 | 0 | unsigned int | s |  |  | EraseMemoryTime: maximum SWE erase time with sequence monitoring in the control unit | EraseMemoryTime, maximale SWE-Löschzeit mit Ablaufkontrolle im Steuergerät. |
+| `LMV_FLASH_TIMING_PARAMETER.CHECK_MEMORY_TIME` | 0x2504 | 1 | unsigned int | s |  |  | CheckMemoryTime (e.g. signature check): maximum memory check time with sequence monitoring in the control unit | CheckMemoryTime (Bsp.: Signaturprüfung), maximale Speicherprüfzeit mit Ablaufkontrolle im Steuergerät. |
+| `LMV_FLASH_TIMING_PARAMETER.BOOTLOADER_INSTALLATION_TIME` | 0x2504 | 2 | unsigned int | s |  |  | BootloaderInstallationTime: the time needed after reset for the auxiliary bootloader to start, erase the bootloader, copy the new bootloader, check its signature and start the new bootloader until it is diagnosable again. Mandatory for all control units, even if no bootloader update is planned. A value of 0x0000 is not allowed. | BootloaderInstallationTime Die Zeit, die nach dem Reset benötigt wird, damit der Hilfsbootloader gestartet wird, den Bootloader löscht, den neuen Bootloader kopiert, dessen Signatur prüf und der neue Bootloader gestartet wird bis er wieder diagnosefähig ist. Angabe ist verpflichtend für alle Steuergeräte, auch wenn das Steuergerät keinen Bootloader Update geplant hat. Ein Wert von 0x0000 ist verboten. |
+| `LMV_FLASH_TIMING_PARAMETER.AUTHENTICATION_TIME` | 0x2504 | 3 | unsigned int | s |  |  | AuthenticationTime: maximum time the control unit needs to check authentication (sendKey), with sequence monitoring in the control unit | AuthenticationTime, die maximale Zeit, die das Steuergerät zur Prüfung der Authentisierung (sendKey) benötigt mit Ablaufkontrolle im Steuergerät. |
+| `LMV_FLASH_TIMING_PARAMETER.RESET_TIME` | 0x2504 | 4 | unsigned int | s |  |  | ResetTime: refers to the transition from ApplicationExtendedSession to ProgrammingSession, or from ProgrammingSession to DefaultSession. The maximum value is to be output. After ResetTime has elapsed, the control unit can be addressed by diagnosis. | ResetTime Die Zeitangabe bezieht sich auf den Übergang von der ApplicationExtendedSesssion in die ProgrammingSession bzw. bei Übergang von der ProgrammingSession in die DefaultSession. Es ist der Maximalwert auszugeben. Nach Ablauf der ResetTime ist das Steuergerät durch Diagnose ansprechbar. |
+| `LMV_FLASH_TIMING_PARAMETER.TRANSFER_DATA_TIME` | 0x2504 | 5 | unsigned int | s |  |  | TransferDataTime: refers to a TransferData with maximum block length, covering the period from complete reception of the data in the control unit, through any decompression and complete storage in non-volatile memory, up to and including sending the positive response. | TransferDataTime Die Angabe hat sich zu beziehen auf einen TransferData mit maximaler Blocklänge auf die Zeitspanne vom vollständigen Empfang der Daten im Steuergerät über das ggf. erforderliche Dekomprimieren und dem vollständigen Speichern im nichtflüchtigen Speicher bis einschließlich dem Senden der positiven Response. |
 
 ## Gearbox & driveline
 
 | Channel | ID | Field | Type | Unit | Scaling | Values | Description | German |
 |---|---|---|---|---|---|---|---|---|
-| `LMV_STATUS_CC_ECU_DATA.TMPBLADE` | 0x4004 | 0 | signed long | °C | ÷ 4.1943e+06 |  | Temperature the Lamellen | Temperatur der Lamellen |
+| `LMV_STATUS_CC_ECU_DATA.TMPBLADE` | 0x4004 | 0 | signed long | °C | ÷ 4.1943e+06 |  | Clutch plate temperature | Temperatur der Lamellen |
 | `LMV_STATUS_CC_ECU_DATA.CNTMISUSEDETLOW` | 0x4004 | 1 | unsigned int | count |  |  | EE_cntMisUseDetLow | EE_cntMisUseDetLow |
-| `LMV_STATUS_CC_ECU_DATA.WORKCHAIN` | 0x4004 | 2 | unsigned long | kWh | ÷ 100 |  | Work chain lifetime integration value | Work chain lifetime integration value |
-| `LMV_STATUS_CC_ECU_DATA.WORKCLUTCH` | 0x4004 | 3 | unsigned long | kWh | ÷ 100 |  | Kupplungsarbeit Lebenszeit Integratorwert | Kupplungsarbeit Lebenszeit Integratorwert |
+| `LMV_STATUS_CC_ECU_DATA.WORKCHAIN` | 0x4004 | 2 | unsigned long | kWh | ÷ 100 |  | Chain work lifetime integrator value | Work chain lifetime integration value |
+| `LMV_STATUS_CC_ECU_DATA.WORKCLUTCH` | 0x4004 | 3 | unsigned long | kWh | ÷ 100 |  | Clutch work lifetime integrator value | Kupplungsarbeit Lebenszeit Integratorwert |
 | `LMV_STATUS_CC_ECU_DATA.WORKOIL` | 0x4004 | 4 | unsigned int | kWh | ÷ 2 |  | Oil work | Oil work |
 | `LMV_STATUS_CC_ECU_DATA.CMDBACKUPFCN` | 0x4004 | 5 | unsigned char |  |  |  | Backup function request | Backup function request |
-| `LMV_STATUS_CC_ECU_DATA.DELTAPHICLUTCH` | 0x4004 | 6 | signed int |  | ÷ 4096 |  | Clutch differential speed in wheel per 10 ms | Clutch differential speed in rad per 10 ms |
+| `LMV_STATUS_CC_ECU_DATA.DELTAPHICLUTCH` | 0x4004 | 6 | signed int |  | ÷ 4096 |  | Clutch differential speed in rad per 10 ms | Clutch differential speed in rad per 10 ms |
 | `LMV_STATUS_CC_ECU_DATA.PRCTMPSTRESSCLUTCH` | 0x4004 | 7 | unsigned char | % | ÷ 2 |  | V_GuardCluC10_prcTmpStressClu | V_GuardCluC10_prcTmpStressClu |
 | `LMV_STATUS_CC_ECU_DATA.IBLDC` | 0x4004 | 8 | signed int | A | ÷ 512 |  | Measured actuator current | Measured actuator current |
-| `LMV_STATUS_CC_ECU_DATA.NATR` | 0x4004 | 9 | signed int |  | ÷ 128 |  | Measured and worm gear ratio corrected actuator rotational speed | Measured and worm gear ratio corrected actuator rotational speed |
+| `LMV_STATUS_CC_ECU_DATA.NATR` | 0x4004 | 9 | signed int |  | ÷ 128 |  | Measured actuator rotational speed, corrected for worm gear ratio | Measured and worm gear ratio corrected actuator rotational speed |
 | `LMV_STATUS_CC_ECU_DATA.PHIATR` | 0x4004 | 10 | signed int | ° | ÷ 64 |  | Measured actuator angle | Measured actuator angle |
 | `LMV_STATUS_CC_ECU_DATA.UBATT` | 0x4004 | 11 | signed int | V | ÷ 1024 |  | Measured battery voltage | Measured battery voltage |
-| `LMV_STATUS_CC_ECU_DATA.UBLDC` | 0x4004 | 12 | signed int | V | ÷ 1024 |  | Measured actuator voltage (currently not in use) | Measured actuator voltage (currently not in use) |
+| `LMV_STATUS_CC_ECU_DATA.UBLDC` | 0x4004 | 12 | signed int | V | ÷ 1024 |  | Measured actuator voltage (currently not used) | Measured actuator voltage (currently not in use) |
 | `LMV_STATUS_CC_ECU_DATA.DLTNFRAX2RAX` | 0x4004 | 13 | signed int |  | ÷ 2 |  | Front to rear axle rotational speed difference | Front to rear axle rotational speed difference |
-| `LMV_STATUS_CC_ECU_DATA.NENGINE` | 0x4004 | 14 | signed int |  | ÷ 2 |  | Engine Speed in rpm | Engine Speed in rpm |
-| `LMV_STATUS_CC_ECU_DATA.NENGINE_QF` | 0x4004 | 15 | unsigned char |  |  |  | Qualifier of engine speed | Qualifier of engine speed |
+| `LMV_STATUS_CC_ECU_DATA.NENGINE` | 0x4004 | 14 | signed int |  | ÷ 2 |  | Engine speed in rpm | Engine Speed in rpm |
+| `LMV_STATUS_CC_ECU_DATA.NENGINE_QF` | 0x4004 | 15 | unsigned char |  |  |  | Engine speed qualifier | Qualifier of engine speed |
 | `LMV_STATUS_CC_ECU_DATA.NFRAX` | 0x4004 | 16 | signed int |  | ÷ 2 |  | Front axle rotational speed | Front axle rotational speed |
-| `LMV_STATUS_CC_ECU_DATA.STPTENGAGED` | 0x4004 | 17 | unsigned char |  |  |  | powertrain engaged | powertrain engaged |
-| `LMV_STATUS_CC_ECU_DATA.STPTENGAGED_QF` | 0x4004 | 18 | unsigned char |  |  |  | Qualifier of powertrain engaged | Qualifier of powertrain engaged |
+| `LMV_STATUS_CC_ECU_DATA.STPTENGAGED` | 0x4004 | 17 | unsigned char |  |  |  | Powertrain engaged | powertrain engaged |
+| `LMV_STATUS_CC_ECU_DATA.STPTENGAGED_QF` | 0x4004 | 18 | unsigned char |  |  |  | Powertrain engaged qualifier | Qualifier of powertrain engaged |
 | `LMV_STATUS_CC_ECU_DATA.TMPBRIDGE` | 0x4004 | 19 | signed int | °C | ÷ 64 |  | Measured bridge temperature | Measured bridge temperature |
-| `LMV_STATUS_CC_ECU_DATA.TRQBRAKEDRIVERREQ` | 0x4004 | 20 | signed int | Nm |  |  | Torque Brake driver request | Torque Brake driver request |
-| `LMV_STATUS_CC_ECU_DATA.TRQBRAKEDRIVERREQ_QF` | 0x4004 | 21 | unsigned char |  |  |  | Qualifier of torque Brake driver request | Qualifier of torque Brake driver request |
-| `LMV_STATUS_CC_ECU_DATA.TYPEGEARBOX` | 0x4004 | 22 | unsigned char |  |  |  | Type Gearbox | Type Gearbox |
+| `LMV_STATUS_CC_ECU_DATA.TRQBRAKEDRIVERREQ` | 0x4004 | 20 | signed int | Nm |  |  | Driver brake torque request | Torque Brake driver request |
+| `LMV_STATUS_CC_ECU_DATA.TRQBRAKEDRIVERREQ_QF` | 0x4004 | 21 | unsigned char |  |  |  | Driver brake torque request qualifier | Qualifier of torque Brake driver request |
+| `LMV_STATUS_CC_ECU_DATA.TYPEGEARBOX` | 0x4004 | 22 | unsigned char |  |  |  | Gearbox type | Type Gearbox |
 | `LMV_STATUS_CC_ECU_DATA.VFRONTMIN` | 0x4004 | 23 | signed int | km/h | ÷ 64 |  | Minimum front vehicle speed | Minimum front vehicle speed |
-| `LMV_STATUS_CC_ECU_DATA.VFRONTMIN_QF` | 0x4004 | 24 | unsigned char |  |  |  | Qualifier of minimum front vehicle speed | Qualifier of minimum front vehicle speed |
-| `LMV_STATUS_CC_ECU_DATA.STMISUSELOWTEMPACTIVE` | 0x4004 | 25 | unsigned char |  |  |  | Low temperature conpensation is set (SR-FF) | Low temperature conpensation is set (SR-FF) |
-| `LMV_STATUS_CC_ECU_DATA.TRQMISUSESETPOINTMAX` | 0x4004 | 26 | signed int | Nm | ÷ 4 |  | Maximum allowed torque | Maximum allowed torque |
+| `LMV_STATUS_CC_ECU_DATA.VFRONTMIN_QF` | 0x4004 | 24 | unsigned char |  |  |  | Minimum front vehicle speed qualifier | Qualifier of minimum front vehicle speed |
+| `LMV_STATUS_CC_ECU_DATA.STMISUSELOWTEMPACTIVE` | 0x4004 | 25 | unsigned char |  |  |  | Low temperature compensation set (SR-FF) | Low temperature conpensation is set (SR-FF) |
+| `LMV_STATUS_CC_ECU_DATA.TRQMISUSESETPOINTMAX` | 0x4004 | 26 | signed int | Nm | ÷ 4 |  | Maximum permitted torque | Maximum allowed torque |
 | `LMV_STATUS_CC_ECU_DATA.WEAROILGAIN` | 0x4004 | 27 | unsigned int |  | ÷ 64 |  | W_CharCorr_WearOilGain | W_CharCorr_WearOilGain |
 | `LMV_STATUS_CC_ECU_DATA.WEAROILOFFSET` | 0x4004 | 28 | signed int |  | ÷ 2 |  | W_CharCorr_WearOilOffset | W_CharCorr_WearOilOffset |
 | `LMV_STATUS_CC_ECU_DATA.PHIINT` | 0x4004 | 29 | unsigned int |  | ÷ 4096 |  | W_MisuseDetC10_phiInt | W_MisuseDetC10_phiInt |
 | `LMV_STATUS_CC_ECU_DATA.MISUSE_TMPBLADE` | 0x4004 | 30 | signed int | °C | ÷ 64 |  | W_MisuseDetC10_tmpBlade | W_MisuseDetC10_tmpBlade |
-| `LMV_STATUS_NIA.BLDC_STROM` | 0x4005 | 0 | signed long | A | ÷ 512 |  | gemessener current in the Fußpunkt the BLDC Halbbrücke | gemessener Strom im Fußpunkt der BLDC Halbbrücke |
-| `LMV_STATUS_NIA.BLDC_RPS_WINKEL` | 0x4005 | 1 | signed int | ° |  |  | internal gemessener angle an the Rotorwelle | intern gemessener Winkel an der Rotorwelle |
-| `LMV_STATUS_NIA.BLDC_BD_STATUS` | 0x4005 | 2 | unsigned char |  |  |  | Status of the Brückentreibers (TLE9180) | Status des Brückentreibers (TLE9180) |
-| `LMV_STATUS_NIA.HS_STROM` | 0x4005 | 3 | signed long | A | ÷ 512 |  | High Side current | High Side Strom |
-| `LMV_STATUS_NIA.UDC` | 0x4005 | 4 | unsigned int | V | ÷ 1024 |  | Zwischenkreisspannung | Zwischenkreisspannung |
+| `LMV_STATUS_NIA.BLDC_STROM` | 0x4005 | 0 | signed long | A | ÷ 512 |  | Current measured at the base of the BLDC half-bridge | gemessener Strom im Fußpunkt der BLDC Halbbrücke |
+| `LMV_STATUS_NIA.BLDC_RPS_WINKEL` | 0x4005 | 1 | signed int | ° |  |  | Internally measured rotor shaft angle | intern gemessener Winkel an der Rotorwelle |
+| `LMV_STATUS_NIA.BLDC_BD_STATUS` | 0x4005 | 2 | unsigned char |  |  |  | Bridge driver status (TLE9180) | Status des Brückentreibers (TLE9180) |
+| `LMV_STATUS_NIA.HS_STROM` | 0x4005 | 3 | signed long | A | ÷ 512 |  | High-side current | High Side Strom |
+| `LMV_STATUS_NIA.UDC` | 0x4005 | 4 | unsigned int | V | ÷ 1024 |  | DC link voltage | Zwischenkreisspannung |
 | `LMV_STATUS_NIA.UKL30` | 0x4005 | 5 | unsigned int | V | ÷ 1024 |  | Terminal 30 voltage | Klemme 30 Spannung |
-| `LMV_STATUS_NIA.TEMP_NTC` | 0x4005 | 6 | signed int | °C | × 0.0625 |  | temperature gemessen in the Nähe the Halbbrücke | temperatur gemessen in der Nähe der Halbbrücke |
-| `LMV_STATUS_NIA.TEMP_CONTROLLER` | 0x4005 | 7 | signed int | °C |  |  | temperature micro controller | temperatur micro controller |
-| `LMV_STATUS_NIA.TEMP_RPS` | 0x4005 | 8 | signed int | °C |  |  | temperature position sensor | temperatur position sensor |
-| `LMV_STATUS_NIA.TEMP_SBC` | 0x4005 | 9 | signed int | °C |  |  | temperature external monitoring unit (SBC) | temperatur external monitoring unit (SBC) |
-| `LMV_STATUS_NIA.EXTERNAL_SENSOR_SIGNAL` | 0x4005 | 10 | unsigned int | V | ÷ 1024 |  | Vorhalt (not belegt) - external sensor signal voltage | Vorhalt (nicht belegt) - external sensor signalspannung |
-| `LMV_STATUS_NIA.EXTERNAL_SENSOR_SUPPLY` | 0x4005 | 11 | unsigned int | V | ÷ 1024 |  | Vorhalt (not belegt) - external sensor supply voltage | Vorhalt (nicht belegt) - external sensor Versorgungsspannung |
-| `LMV_STATUS_NIA.EXTERNAL_SENSOR` | 0x4005 | 12 | unsigned long |  |  |  | Vorhalt (not belegt) - current value of the externen sensor | Vorhalt (nicht belegt) - aktueller Wert des externen Sensors |
-| `LMV_STATUS_NIA.ACTIVE_BF` | 0x4005 | 13 | unsigned char |  |  |  | active Schutzfunktion in NIA SW | aktive Schutzfunktion in NIA SW |
-| `LMV_STATUS_NIA.ISR_WECT` | 0x4005 | 14 | unsigned long |  |  |  | maximum Laufzeit Kommutier Interrupt | maximal Laufzeit Kommutier Interrupt |
-| `LMV_STATUS_NIA.ISR_WEP` | 0x4005 | 15 | unsigned long |  |  |  | maximum Latenzzeit | maximal Latenzzeit |
-| `LMV_STATUS_NIA.SBC_STATUS_BITS` | 0x4005 | 16 | unsigned long |  |  |  | kombinierter status SBC | kombinierter Status SBC |
-| `LMV_STATUS_NIA.BLDC_BD_STATUS_BITS` | 0x4005 | 17 | unsigned long |  |  |  | kombinierter status Brückentreiber | kombinierter Status Brückentreiber |
-| `LMV_STATUS_NIA.RPS_STATUS_BITS` | 0x4005 | 18 | unsigned long |  |  |  | kombinierter status RPS | kombinierter Status RPS |
-| `LMV_STATUS_NIA.SBC_AUFWACH_GRUND` | 0x4005 | 19 | unsigned char |  |  |  | Aufwachgrund ECU (SBC) | Aufwachgrund ECU (SBC) |
+| `LMV_STATUS_NIA.TEMP_NTC` | 0x4005 | 6 | signed int | °C | × 0.0625 |  | Temperature measured near the half-bridge | temperatur gemessen in der Nähe der Halbbrücke |
+| `LMV_STATUS_NIA.TEMP_CONTROLLER` | 0x4005 | 7 | signed int | °C |  |  | Microcontroller temperature | temperatur micro controller |
+| `LMV_STATUS_NIA.TEMP_RPS` | 0x4005 | 8 | signed int | °C |  |  | Position sensor temperature | temperatur position sensor |
+| `LMV_STATUS_NIA.TEMP_SBC` | 0x4005 | 9 | signed int | °C |  |  | External monitoring unit (SBC) temperature | temperatur external monitoring unit (SBC) |
+| `LMV_STATUS_NIA.EXTERNAL_SENSOR_SIGNAL` | 0x4005 | 10 | unsigned int | V | ÷ 1024 |  | Reserved (not assigned) - external sensor signal voltage | Vorhalt (nicht belegt) - external sensor signalspannung |
+| `LMV_STATUS_NIA.EXTERNAL_SENSOR_SUPPLY` | 0x4005 | 11 | unsigned int | V | ÷ 1024 |  | Reserved (not assigned) - external sensor supply voltage | Vorhalt (nicht belegt) - external sensor Versorgungsspannung |
+| `LMV_STATUS_NIA.EXTERNAL_SENSOR` | 0x4005 | 12 | unsigned long |  |  |  | Reserved (not assigned) - current value of the external sensor | Vorhalt (nicht belegt) - aktueller Wert des externen Sensors |
+| `LMV_STATUS_NIA.ACTIVE_BF` | 0x4005 | 13 | unsigned char |  |  |  | Active protection function in NIA SW | aktive Schutzfunktion in NIA SW |
+| `LMV_STATUS_NIA.ISR_WECT` | 0x4005 | 14 | unsigned long |  |  |  | Maximum run time of commutation interrupt | maximal Laufzeit Kommutier Interrupt |
+| `LMV_STATUS_NIA.ISR_WEP` | 0x4005 | 15 | unsigned long |  |  |  | Maximum latency | maximal Latenzzeit |
+| `LMV_STATUS_NIA.SBC_STATUS_BITS` | 0x4005 | 16 | unsigned long |  |  |  | Combined SBC status | kombinierter Status SBC |
+| `LMV_STATUS_NIA.BLDC_BD_STATUS_BITS` | 0x4005 | 17 | unsigned long |  |  |  | Combined bridge driver status | kombinierter Status Brückentreiber |
+| `LMV_STATUS_NIA.RPS_STATUS_BITS` | 0x4005 | 18 | unsigned long |  |  |  | Combined RPS status | kombinierter Status RPS |
+| `LMV_STATUS_NIA.SBC_AUFWACH_GRUND` | 0x4005 | 19 | unsigned char |  |  |  | ECU wake-up reason (SBC) | Aufwachgrund ECU (SBC) |
 | `LMV_STATUS_NIA.ECU_OVERTEMP_COUNTER` | 0x4005 | 20 | unsigned int |  |  |  | Overtemperature counter | Übertemperatur Zähler |
-| `LMV_STATUS_NIA_IEM` | 0x400B | 0 | data[200] | DATA |  |  | internal Fehlerzustände (Pointer Address to literal string) | interne Fehlerzustände (Pointer Address to literal string) |
-| `LMV_STATUS_NIA_MST` | 0x400C | 0 | data[80] | DATA |  |  | Status CDD Events (MPT Qualifier) | Status CDD Events (MPT Qualifier) |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_0` | 0x4010 | 0 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 0 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 0 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_1` | 0x4010 | 1 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 1 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 1 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_2` | 0x4010 | 2 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 2 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 2 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_3` | 0x4010 | 3 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 3 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 3 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_4` | 0x4010 | 4 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 4 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 4 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_5` | 0x4010 | 5 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 5 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 5 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_6` | 0x4010 | 6 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 6 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 6 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_7` | 0x4010 | 7 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 7 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 7 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_8` | 0x4010 | 8 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 8 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 8 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_9` | 0x4010 | 9 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 9 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 9 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_10` | 0x4010 | 10 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 10 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 10 |
-| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_11` | 0x4010 | 11 | unsigned long |  |  |  | Number Umdrehungen of the Vorderachstrieblings in the Momentenbereich 11 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 11 |
-| `LMV_GETRIEBEKLASSE.CLASSGEARBOX` | 0xDB30 | 0 | unsigned int |  |  |  | Getriebeklasse Verteilergetriebe | Getriebeklasse Verteilergetriebe |
-| `LMV_LMV_MOMENT.ISTMOMENT` | 0xDB32 | 0 | signed int | Nm | ÷ 4 |  | Actual value of the torque to front axle - LMV | Istwert des Moments zur Vorderachse - LMV |
-| `LMV_LMV_MOMENT.QUALIFIER_ISTMOMENT` | 0xDB32 | 1 | unsigned int |  |  |  | Signalqualifier to Istmoment | Signalqualifier zum Istmoment |
-| `LMV_LMV_MOMENT.SOLLMOMENT` | 0xDB32 | 2 | signed int | Nm | ÷ 4 |  | Setpoint of the torque to front axle - LMV | Sollwert des Moments zur Vorderachse - LMV |
-| `LMV_LMV_MOMENT.QUALIFIER_SOLLMOMENT` | 0xDB32 | 3 | unsigned int |  |  |  | Signalqualifier to target torque | Signalqualifier zum Sollmoment |
+| `LMV_STATUS_NIA_IEM` | 0x400B | 0 | data[200] | DATA |  |  | Internal fault states (pointer address to literal string) | interne Fehlerzustände (Pointer Address to literal string) |
+| `LMV_STATUS_NIA_MST` | 0x400C | 0 | data[80] | DATA |  |  | CDD events status (MPT qualifier) | Status CDD Events (MPT Qualifier) |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_0` | 0x4010 | 0 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 0 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 0 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_1` | 0x4010 | 1 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 1 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 1 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_2` | 0x4010 | 2 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 2 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 2 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_3` | 0x4010 | 3 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 3 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 3 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_4` | 0x4010 | 4 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 4 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 4 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_5` | 0x4010 | 5 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 5 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 5 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_6` | 0x4010 | 6 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 6 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 6 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_7` | 0x4010 | 7 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 7 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 7 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_8` | 0x4010 | 8 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 8 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 8 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_9` | 0x4010 | 9 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 9 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 9 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_10` | 0x4010 | 10 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 10 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 10 |
+| `LMV_STATUS_HISTOGRAMM_CNTTRQRNG.CNTTRQRNG_11` | 0x4010 | 11 | unsigned long |  |  |  | Number of revolutions of the front axle drive pinion in torque range 11 | Anzahl Umdrehungen des Vorderachstrieblings im Momentenbereich 11 |
+| `LMV_GETRIEBEKLASSE.CLASSGEARBOX` | 0xDB30 | 0 | unsigned int |  |  |  | Transfer case transmission class | Getriebeklasse Verteilergetriebe |
+| `LMV_LMV_MOMENT.ISTMOMENT` | 0xDB32 | 0 | signed int | Nm | ÷ 4 |  | Actual torque to the front axle - LMV | Istwert des Moments zur Vorderachse - LMV |
+| `LMV_LMV_MOMENT.QUALIFIER_ISTMOMENT` | 0xDB32 | 1 | unsigned int |  |  |  | Signal qualifier for actual torque | Signalqualifier zum Istmoment |
+| `LMV_LMV_MOMENT.SOLLMOMENT` | 0xDB32 | 2 | signed int | Nm | ÷ 4 |  | Target torque to the front axle - LMV | Sollwert des Moments zur Vorderachse - LMV |
+| `LMV_LMV_MOMENT.QUALIFIER_SOLLMOMENT` | 0xDB32 | 3 | unsigned int |  |  |  | Signal qualifier for target torque | Signalqualifier zum Sollmoment |
 | `LMV_NIA_ENERGY.BLDC_ENERGY_CONST_IGN` | 0xDFDC | 0 | signed long | kWh | ÷ 3.6e+06 |  | STAT_BLDC_ENERGY_CONST_IGN | STAT_BLDC_ENERGY_CONST_IGN |
 | `LMV_NIA_ENERGY.HSIDE_ENERGY_CONST_IGN` | 0xDFDC | 1 | signed long | kWh | ÷ 3.6e+06 |  | STAT_HSIDE_ENERGY_CONST_IGN | STAT_HSIDE_ENERGY_CONST_IGN |
 | `LMV_NIA_ENERGY.LOGIC_ENERGY_CONST_IGN` | 0xDFDC | 2 | signed long | kWh | ÷ 3.6e+06 |  | STAT_LOGIC_ENERGY_CONST_IGN | STAT_LOGIC_ENERGY_CONST_IGN |
@@ -117,127 +117,127 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (1
 | `LMV_STATUS_HISTOGRAM_2WD.TIMEDELTA_N_HIGH_4` | 0xDFDE | 8 | unsigned int | s |  |  | STAT_TIMEDELTA_N_HIGH_4_WERT | STAT_TIMEDELTA_N_HIGH_4_WERT |
 | `LMV_STATUS_HISTOGRAM_2WD.TIMEDELTA_N_HIGH_5` | 0xDFDE | 9 | unsigned int | s |  |  | STAT_TIMEDELTA_N_HIGH_5_WERT | STAT_TIMEDELTA_N_HIGH_5_WERT |
 | `LMV_STATUS_HISTOGRAM_2WD.2WD_DISTANCE_TOTAL` | 0xDFDE | 10 | unsigned long | m |  |  | STAT_2WD_DISTANCE_TOTAL_WERT | STAT_2WD_DISTANCE_TOTAL_WERT |
-| `LMV_DATEN_VERTEILERGETRIEBE.DELTAPHICAL` | 0xDFE7 | 0 | unsigned int | ° | ÷ 64 |  | Current Kalibrierwinkel | Aktueller Kalibrierwinkel |
-| `LMV_DATEN_VERTEILERGETRIEBE.DELTAPHICALFIRST` | 0xDFE7 | 1 | unsigned int | ° | ÷ 64 |  | Erst-Kalibrierwinkel | Erst-Kalibrierwinkel |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_CALOK` | 0xDFE7 | 2 | unsigned long |  |  |  | Number the carried out Nachlaufkalibrierungen | Anzahl der durchgeführten Nachlaufkalibrierungen |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_CALNOK` | 0xDFE7 | 3 | unsigned int |  |  |  | Number, due to of condition, not carried out Kalibrierungen | Anzahl, aufgrund von Bedingungen, nicht durchgeführte Kalibrierungen |
-| `LMV_DATEN_VERTEILERGETRIEBE.DELTAPHICALRAW` | 0xDFE7 | 4 | unsigned int | ° | ÷ 64 |  | Ungefilterter Kalibrierwinkel | Ungefilterter Kalibrierwinkel |
-| `LMV_DATEN_VERTEILERGETRIEBE.EOL_DELTAPHICALEOL` | 0xDFE7 | 5 | unsigned int | ° | ÷ 64 |  | ErstKalibrierwinkel - am EOL ermittelt, to EOL Einlauf | ErstKalibrierwinkel - am EOL ermittelt, nach EOL Einlauf |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKOIL4DIAG` | 0xDFE7 | 6 | unsigned int | kWh | ÷ 10 |  | Ölverschleiß | Ölverschleiß |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKCHAIN` | 0xDFE7 | 7 | unsigned long | kWh | ÷ 100 |  | Kettenarbeit Lebenszeit Integratorwert | Kettenarbeit Lebenszeit Integratorwert |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKCLUTCH` | 0xDFE7 | 8 | unsigned long | kWh | ÷ 100 |  | Kupplungsarbeit Lebenszeit Integratorwert | Kupplungsarbeit Lebenszeit Integratorwert |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKOIL` | 0xDFE7 | 9 | unsigned int | kWh | ÷ 2 |  | Oil-Verschleißintegrator | Öl-Verschleißintegrator |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKDISC1` | 0xDFE7 | 10 | unsigned long | kWh | ÷ 100 |  | Lamellen Verschleißintegrator 1 | Lamellen Verschleißintegrator 1 |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKDISC2` | 0xDFE7 | 11 | unsigned long | kWh | ÷ 100 |  | Lamellen Verschleißintegrator 2 | Lamellen Verschleißintegrator 2 |
-| `LMV_DATEN_VERTEILERGETRIEBE.WORKDISC3` | 0xDFE7 | 12 | unsigned long | kWh | ÷ 100 |  | Lamellen Verschleißintegrator 3 | Lamellen Verschleißintegrator 3 |
-| `LMV_DATEN_VERTEILERGETRIEBE.KMVEHICLE_SINCE_OILCHANGE` | 0xDFE7 | 13 | unsigned long | km |  |  | Gefahrene kilometers seit letztem Wechsel of the transmission oil | Gefahrene Kilometer seit letztem Wechsel des Getriebeöls |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_1` | 0xDFE7 | 14 | unsigned int |  |  |  | Number activation the Manövererkennung | Anzahl Aktivierungen der Manövererkennung |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_2` | 0xDFE7 | 15 | unsigned int |  |  |  | Number deactivation the Manövererkennung (Abschaltpfad Verdrehwinkel) | Anzahl Deaktivierungen der Manövererkennung (Abschaltpfad Verdrehwinkel) |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_3` | 0xDFE7 | 16 | unsigned int |  |  |  | Vorhalt  - Manövererkennung counter | Vorhalt  - Manövererkennung Zähler |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_4` | 0xDFE7 | 17 | unsigned int |  |  |  | Vorhalt  - Manövererkennung counter | Vorhalt  - Manövererkennung Zähler |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNTINITPOS_OK` | 0xDFE7 | 18 | unsigned long |  |  |  | Number the Anschlagsuchen | Anzahl der Anschlagsuchen |
-| `LMV_DATEN_VERTEILERGETRIEBE.FLOAT_CONST` | 0xDFE7 | 19 | unsigned int |  | ÷ 1.3107e+06 |  | NIA-Momentenkonstante; Flußkonstante [Nm/A] | NIA-Momentenkonstante; Flußkonstante [Nm/A] |
-| `LMV_DATEN_VERTEILERGETRIEBE.OPERATION_TIME` | 0xDFE7 | 20 | unsigned long | ms |  |  | Vorhalt  - not belegt | Vorhalt  - Nicht belegt |
-| `LMV_DATEN_VERTEILERGETRIEBE.TIME_REL` | 0xDFE7 | 21 | unsigned long | s |  |  | Relativzeit from message | Relativzeit aus Botschaft |
-| `LMV_DATEN_VERTEILERGETRIEBE.MILE_KM` | 0xDFE7 | 22 | unsigned long | km |  |  | current FZG mileage from bus message | aktueller FZG Kilometerstand aus Busbotschaft |
-| `LMV_DATEN_VERTEILERGETRIEBE.LT_INTEGRATOR_KM_TC` | 0xDFE7 | 23 | unsigned long | km |  |  | Distance - transmission mileage berechnet from bus message | Wegstrecke - Getriebe Kilometerstand berechnet aus Busbotschaft |
-| `LMV_DATEN_VERTEILERGETRIEBE.ZEIT_ROLLENERKENNUNG_EINACHSROLLE` | 0xDFE7 | 24 | unsigned long | s |  |  | Counter: time Rollenerkennung active - Einachsrolle | Zähler: Zeit Rollenerkennung aktiv - Einachsrolle |
-| `LMV_DATEN_VERTEILERGETRIEBE.ZEIT_ROLLENERKENNUNG_BREMSPRUEFSTAND` | 0xDFE7 | 25 | unsigned long | s |  |  | Counter: time Rollenerkennung active - Bremsenprüfstand | Zähler: Zeit Rollenerkennung aktiv - Bremsenprüfstand |
-| `LMV_DATEN_VERTEILERGETRIEBE.ANZAHL_SOLLPOSITION_NICHT_ERREICHT_AUFBAU` | 0xDFE7 | 26 | unsigned int |  |  |  | Counter: in the Momentaufbau target position (+/-0,25°) not erreicht | Zähler: Im Momentaufbau Sollposition (+/-0,25°) nicht erreicht |
-| `LMV_DATEN_VERTEILERGETRIEBE.ANZAHL_SOLLPOSITION_NICHT_ERREICHT_ABBAU` | 0xDFE7 | 27 | unsigned int |  |  |  | Counter: in the Momentabbau target position (+/-0,25°) not erreicht | Zähler: Im Momentabbau Sollposition (+/-0,25°) nicht erreicht |
-| `LMV_DATEN_VERTEILERGETRIEBE.MOM_UEBERGLZ_1` | 0xDFE7 | 28 | unsigned long |  |  |  | Übergleitungszähler 1 | Übergleitungszähler 1 |
-| `LMV_DATEN_VERTEILERGETRIEBE.MOM_UEBERGLZ_2` | 0xDFE7 | 29 | unsigned long |  |  |  | Übergleitungszähler 2 | Übergleitungszähler 2 |
-| `LMV_DATEN_VERTEILERGETRIEBE.MOM_UEBERGLZ_3` | 0xDFE7 | 30 | unsigned long |  |  |  | Übergleitungszähler 3 | Übergleitungszähler 3 |
-| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKCHAIN` | 0xDFE7 | 31 | unsigned long | kWh | ÷ 100 |  | Kettenarbeit Lebensdauer Integratorwert | Kettenarbeit Lebensdauer Integratorwert |
-| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKCLUTCH` | 0xDFE7 | 32 | unsigned long | kWh | ÷ 100 |  | Kupplungsarbeit Lebensdauer Integratorwert | Kupplungsarbeit Lebensdauer Integratorwert |
-| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKDISC1` | 0xDFE7 | 33 | unsigned long | kWh | ÷ 100 |  | Lamellen Verschleißintegrator 1 Lebensdauer | Lamellen Verschleißintegrator 1 Lebensdauer |
-| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKDISC2` | 0xDFE7 | 34 | unsigned long | kWh | ÷ 100 |  | Lamellen Verschleißintegrator 2 Lebensdauer | Lamellen Verschleißintegrator 2 Lebensdauer |
-| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKDISC3` | 0xDFE7 | 35 | unsigned long | kWh | ÷ 100 |  | Lamellen Verschleißintegrator 3 Lebensdauer | Lamellen Verschleißintegrator 3 Lebensdauer |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_EFF_MODE` | 0xDFE7 | 36 | unsigned long |  |  |  | Counter Efficiency Mode | Zähler Efficiency Mode |
-| `LMV_DATEN_VERTEILERGETRIEBE.KM_TC_EFF_MODE` | 0xDFE7 | 37 | unsigned long | m |  |  | Distance in the Efficiency Mode | Wegstrecke im Efficiency Mode |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_NLR_MODE` | 0xDFE7 | 38 | unsigned long |  |  |  | Counter NLR Mode | Zähler NLR Mode |
-| `LMV_DATEN_VERTEILERGETRIEBE.KM_TC_NLR_MODE` | 0xDFE7 | 39 | unsigned long | m |  |  | Distance NLR Mode | Wegstrecke NLR Mode |
-| `LMV_DATEN_VERTEILERGETRIEBE.KM_TC_NLR20KMH_MODE` | 0xDFE7 | 40 | unsigned long | m |  |  | Distance NLR Mode under 20 km/h | Wegstrecke NLR Mode unter 20 km/h |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCHIGH` | 0xDFE7 | 41 | unsigned long | ms | × 10 |  | Counter time actuator current high | Zähler Zeit Aktuatorstrom hoch |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCVERYHIGH` | 0xDFE7 | 42 | unsigned long | ms | × 10 |  | Counter time actuator current sehr high | Zähler Zeit Aktuatorstrom sehr hoch |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCLOW` | 0xDFE7 | 43 | unsigned long | ms | × 10 |  | Counter time actuator current low | Zähler Zeit Aktuatorstrom niedrig |
-| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCVERYLOW` | 0xDFE7 | 44 | unsigned long | ms | × 10 |  | Counter time actuator current sehr low | Zähler Zeit Aktuatorstrom sehr niedrig |
-| `LMV_KALIBRIERUNG.KALIBRIERUNG` | 0xDFE8 | 0 | unsigned int | 0-n |  | 0 = not iO; 1 = iO | Current Kalibrierwinkelstatus, abgeleitetet of current Kalibrierwinkel | Aktueller Kalibrierwinkelstatus, abgeleitetet von aktuellem Kalibrierwinkel |
-| `LMV_KALIBRIERUNG.EOL_ERSTKAL` | 0xDFE8 | 1 | signed int | ° | ÷ 64 |  | Erstkalibrierwinkel - am EOL test ermittelt to EOL Einlauf | Erstkalibrierwinkel - am EOL Test ermittelt nach EOL Einlauf |
-| `LMV_KALIBRIERUNG.DELTAPHICAL` | 0xDFE8 | 2 | signed int | ° | ÷ 64 |  | Current Kalibrierwinkel | Aktueller Kalibrierwinkel |
-| `LMV_KALIBRIERUNG.DELTAPHICALFIRST` | 0xDFE8 | 3 | signed int | ° | ÷ 64 |  | Erst-Kalibrierwinkel | Erst-Kalibrierwinkel |
-| `LMV_KALIBRIERUNG.DELTAPHICALRAW` | 0xDFE8 | 4 | signed int | ° | ÷ 64 |  | Ungefilterter Kalibrierwinkel | Ungefilterter Kalibrierwinkel |
-| `LMV_KALIBRIERUNG.CNT_CALOK` | 0xDFE8 | 5 | unsigned long |  |  |  | Number ausgeführte Kalibrierungen | Anzahl ausgeführte Kalibrierungen |
-| `LMV_KALIBRIERUNG.CNT_CALNOK` | 0xDFE8 | 6 | unsigned int |  |  |  | Number, due to of condition, not carried out Kalibrierungen | Anzahl, aufgrund von Bedingungen, nicht durchgeführte Kalibrierungen |
-| `LMV_KUPPLUNGSSTATUS.QU_SER_BASIS` | 0xDFEA | 0 | unsigned char |  |  |  | Service Basis - Qualifier of the LMV | Service Basis - Qualifier des LMV |
-| `LMV_KUPPLUNGSSTATUS.QU_SER_NOTLAUF` | 0xDFEA | 1 | unsigned char |  |  |  | Limp home controller | Notlaufregler |
-| `LMV_KUPPLUNGSSTATUS.QU_SER_POSITION` | 0xDFEA | 2 | unsigned char |  |  |  | Position LMV actuator | Position LMV Stellglied |
-| `LMV_KUPPLUNGSSTATUS.QU_SER_SCHUTZ` | 0xDFEA | 3 | unsigned char |  |  |  | LMV Schutzfunktion | LMV Schutzfunktion |
-| `LMV_KUPPLUNGSSTATUS.QU_LMV_LUEFTSTATUS` | 0xDFEA | 4 | unsigned char |  |  |  | Position LMV gelüftet/not gelüftet (Normalbetrieb) | Position LMV gelüftet/nicht gelüftet (Normalbetrieb) |
-| `LMV_KUPPLUNGSSTATUS.QU_SER_VV_KUPPLUNG` | 0xDFEA | 5 | unsigned char |  |  |  | Verfügbarkeit clutch | Verfügbarkeit Kupplung |
-| `LMV_KUPPLUNGSSTATUS.QU_SER_VV_STELLGLIED` | 0xDFEA | 6 | unsigned char |  |  |  | Verfügbarkeit actuator | Verfügbarkeit Stellglied |
-| `LMV_VTG_SN.VTG_SN_TEXT` | 0xDFED | 0 | string[12] | TEXT |  |  | Seriennummer of the transmission | Seriennummer des Getriebes |
+| `LMV_DATEN_VERTEILERGETRIEBE.DELTAPHICAL` | 0xDFE7 | 0 | unsigned int | ° | ÷ 64 |  | Current calibration angle | Aktueller Kalibrierwinkel |
+| `LMV_DATEN_VERTEILERGETRIEBE.DELTAPHICALFIRST` | 0xDFE7 | 1 | unsigned int | ° | ÷ 64 |  | Initial calibration angle | Erst-Kalibrierwinkel |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_CALOK` | 0xDFE7 | 2 | unsigned long |  |  |  | Number of after-run calibrations performed | Anzahl der durchgeführten Nachlaufkalibrierungen |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_CALNOK` | 0xDFE7 | 3 | unsigned int |  |  |  | Number of calibrations not performed due to conditions | Anzahl, aufgrund von Bedingungen, nicht durchgeführte Kalibrierungen |
+| `LMV_DATEN_VERTEILERGETRIEBE.DELTAPHICALRAW` | 0xDFE7 | 4 | unsigned int | ° | ÷ 64 |  | Unfiltered calibration angle | Ungefilterter Kalibrierwinkel |
+| `LMV_DATEN_VERTEILERGETRIEBE.EOL_DELTAPHICALEOL` | 0xDFE7 | 5 | unsigned int | ° | ÷ 64 |  | Initial calibration angle - determined at EOL, after EOL run-in | ErstKalibrierwinkel - am EOL ermittelt, nach EOL Einlauf |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKOIL4DIAG` | 0xDFE7 | 6 | unsigned int | kWh | ÷ 10 |  | Oil wear | Ölverschleiß |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKCHAIN` | 0xDFE7 | 7 | unsigned long | kWh | ÷ 100 |  | Chain work lifetime integrator value | Kettenarbeit Lebenszeit Integratorwert |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKCLUTCH` | 0xDFE7 | 8 | unsigned long | kWh | ÷ 100 |  | Clutch work lifetime integrator value | Kupplungsarbeit Lebenszeit Integratorwert |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKOIL` | 0xDFE7 | 9 | unsigned int | kWh | ÷ 2 |  | Oil wear integrator | Öl-Verschleißintegrator |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKDISC1` | 0xDFE7 | 10 | unsigned long | kWh | ÷ 100 |  | Clutch plate wear integrator 1 | Lamellen Verschleißintegrator 1 |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKDISC2` | 0xDFE7 | 11 | unsigned long | kWh | ÷ 100 |  | Clutch plate wear integrator 2 | Lamellen Verschleißintegrator 2 |
+| `LMV_DATEN_VERTEILERGETRIEBE.WORKDISC3` | 0xDFE7 | 12 | unsigned long | kWh | ÷ 100 |  | Clutch plate wear integrator 3 | Lamellen Verschleißintegrator 3 |
+| `LMV_DATEN_VERTEILERGETRIEBE.KMVEHICLE_SINCE_OILCHANGE` | 0xDFE7 | 13 | unsigned long | km |  |  | Distance driven since last transmission oil change | Gefahrene Kilometer seit letztem Wechsel des Getriebeöls |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_1` | 0xDFE7 | 14 | unsigned int |  |  |  | Number of maneuver detection activations | Anzahl Aktivierungen der Manövererkennung |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_2` | 0xDFE7 | 15 | unsigned int |  |  |  | Number of maneuver detection deactivations (twist angle shut-off path) | Anzahl Deaktivierungen der Manövererkennung (Abschaltpfad Verdrehwinkel) |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_3` | 0xDFE7 | 16 | unsigned int |  |  |  | Reserved - maneuver detection counter | Vorhalt  - Manövererkennung Zähler |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_MISUSEDET_4` | 0xDFE7 | 17 | unsigned int |  |  |  | Reserved - maneuver detection counter | Vorhalt  - Manövererkennung Zähler |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNTINITPOS_OK` | 0xDFE7 | 18 | unsigned long |  |  |  | Number of end stop searches | Anzahl der Anschlagsuchen |
+| `LMV_DATEN_VERTEILERGETRIEBE.FLOAT_CONST` | 0xDFE7 | 19 | unsigned int |  | ÷ 1.3107e+06 |  | NIA torque constant; flux constant [Nm/A] | NIA-Momentenkonstante; Flußkonstante [Nm/A] |
+| `LMV_DATEN_VERTEILERGETRIEBE.OPERATION_TIME` | 0xDFE7 | 20 | unsigned long | ms |  |  | Reserved - not assigned | Vorhalt  - Nicht belegt |
+| `LMV_DATEN_VERTEILERGETRIEBE.TIME_REL` | 0xDFE7 | 21 | unsigned long | s |  |  | Relative time from message | Relativzeit aus Botschaft |
+| `LMV_DATEN_VERTEILERGETRIEBE.MILE_KM` | 0xDFE7 | 22 | unsigned long | km |  |  | Current vehicle mileage from bus message | aktueller FZG Kilometerstand aus Busbotschaft |
+| `LMV_DATEN_VERTEILERGETRIEBE.LT_INTEGRATOR_KM_TC` | 0xDFE7 | 23 | unsigned long | km |  |  | Distance - transmission mileage calculated from bus message | Wegstrecke - Getriebe Kilometerstand berechnet aus Busbotschaft |
+| `LMV_DATEN_VERTEILERGETRIEBE.ZEIT_ROLLENERKENNUNG_EINACHSROLLE` | 0xDFE7 | 24 | unsigned long | s |  |  | Counter: time dynamometer detection active - single-axle dyno | Zähler: Zeit Rollenerkennung aktiv - Einachsrolle |
+| `LMV_DATEN_VERTEILERGETRIEBE.ZEIT_ROLLENERKENNUNG_BREMSPRUEFSTAND` | 0xDFE7 | 25 | unsigned long | s |  |  | Counter: time dynamometer detection active - brake test stand | Zähler: Zeit Rollenerkennung aktiv - Bremsenprüfstand |
+| `LMV_DATEN_VERTEILERGETRIEBE.ANZAHL_SOLLPOSITION_NICHT_ERREICHT_AUFBAU` | 0xDFE7 | 26 | unsigned int |  |  |  | Counter: target position (+/-0.25°) not reached during torque build-up | Zähler: Im Momentaufbau Sollposition (+/-0,25°) nicht erreicht |
+| `LMV_DATEN_VERTEILERGETRIEBE.ANZAHL_SOLLPOSITION_NICHT_ERREICHT_ABBAU` | 0xDFE7 | 27 | unsigned int |  |  |  | Counter: target position (+/-0.25°) not reached during torque reduction | Zähler: Im Momentabbau Sollposition (+/-0,25°) nicht erreicht |
+| `LMV_DATEN_VERTEILERGETRIEBE.MOM_UEBERGLZ_1` | 0xDFE7 | 28 | unsigned long |  |  |  | Overslip counter 1 | Übergleitungszähler 1 |
+| `LMV_DATEN_VERTEILERGETRIEBE.MOM_UEBERGLZ_2` | 0xDFE7 | 29 | unsigned long |  |  |  | Overslip counter 2 | Übergleitungszähler 2 |
+| `LMV_DATEN_VERTEILERGETRIEBE.MOM_UEBERGLZ_3` | 0xDFE7 | 30 | unsigned long |  |  |  | Overslip counter 3 | Übergleitungszähler 3 |
+| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKCHAIN` | 0xDFE7 | 31 | unsigned long | kWh | ÷ 100 |  | Chain work lifetime integrator value | Kettenarbeit Lebensdauer Integratorwert |
+| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKCLUTCH` | 0xDFE7 | 32 | unsigned long | kWh | ÷ 100 |  | Clutch work lifetime integrator value | Kupplungsarbeit Lebensdauer Integratorwert |
+| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKDISC1` | 0xDFE7 | 33 | unsigned long | kWh | ÷ 100 |  | Clutch plate wear integrator 1, lifetime | Lamellen Verschleißintegrator 1 Lebensdauer |
+| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKDISC2` | 0xDFE7 | 34 | unsigned long | kWh | ÷ 100 |  | Clutch plate wear integrator 2, lifetime | Lamellen Verschleißintegrator 2 Lebensdauer |
+| `LMV_DATEN_VERTEILERGETRIEBE.LT_WORKDISC3` | 0xDFE7 | 35 | unsigned long | kWh | ÷ 100 |  | Clutch plate wear integrator 3, lifetime | Lamellen Verschleißintegrator 3 Lebensdauer |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_EFF_MODE` | 0xDFE7 | 36 | unsigned long |  |  |  | Efficiency mode counter | Zähler Efficiency Mode |
+| `LMV_DATEN_VERTEILERGETRIEBE.KM_TC_EFF_MODE` | 0xDFE7 | 37 | unsigned long | m |  |  | Distance in efficiency mode | Wegstrecke im Efficiency Mode |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_NLR_MODE` | 0xDFE7 | 38 | unsigned long |  |  |  | NLR mode counter | Zähler NLR Mode |
+| `LMV_DATEN_VERTEILERGETRIEBE.KM_TC_NLR_MODE` | 0xDFE7 | 39 | unsigned long | m |  |  | Distance in NLR mode | Wegstrecke NLR Mode |
+| `LMV_DATEN_VERTEILERGETRIEBE.KM_TC_NLR20KMH_MODE` | 0xDFE7 | 40 | unsigned long | m |  |  | Distance in NLR mode below 20 km/h | Wegstrecke NLR Mode unter 20 km/h |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCHIGH` | 0xDFE7 | 41 | unsigned long | ms | × 10 |  | Counter: time with actuator current high | Zähler Zeit Aktuatorstrom hoch |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCVERYHIGH` | 0xDFE7 | 42 | unsigned long | ms | × 10 |  | Counter: time with actuator current very high | Zähler Zeit Aktuatorstrom sehr hoch |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCLOW` | 0xDFE7 | 43 | unsigned long | ms | × 10 |  | Counter: time with actuator current low | Zähler Zeit Aktuatorstrom niedrig |
+| `LMV_DATEN_VERTEILERGETRIEBE.CNT_IBLDCVERYLOW` | 0xDFE7 | 44 | unsigned long | ms | × 10 |  | Counter: time with actuator current very low | Zähler Zeit Aktuatorstrom sehr niedrig |
+| `LMV_KALIBRIERUNG.KALIBRIERUNG` | 0xDFE8 | 0 | unsigned int | 0-n |  | 0 = Not OK; 1 = OK | Current calibration angle status, derived from the current calibration angle | Aktueller Kalibrierwinkelstatus, abgeleitetet von aktuellem Kalibrierwinkel |
+| `LMV_KALIBRIERUNG.EOL_ERSTKAL` | 0xDFE8 | 1 | signed int | ° | ÷ 64 |  | Initial calibration angle - determined in EOL test after EOL run-in | Erstkalibrierwinkel - am EOL Test ermittelt nach EOL Einlauf |
+| `LMV_KALIBRIERUNG.DELTAPHICAL` | 0xDFE8 | 2 | signed int | ° | ÷ 64 |  | Current calibration angle | Aktueller Kalibrierwinkel |
+| `LMV_KALIBRIERUNG.DELTAPHICALFIRST` | 0xDFE8 | 3 | signed int | ° | ÷ 64 |  | Initial calibration angle | Erst-Kalibrierwinkel |
+| `LMV_KALIBRIERUNG.DELTAPHICALRAW` | 0xDFE8 | 4 | signed int | ° | ÷ 64 |  | Unfiltered calibration angle | Ungefilterter Kalibrierwinkel |
+| `LMV_KALIBRIERUNG.CNT_CALOK` | 0xDFE8 | 5 | unsigned long |  |  |  | Number of calibrations performed | Anzahl ausgeführte Kalibrierungen |
+| `LMV_KALIBRIERUNG.CNT_CALNOK` | 0xDFE8 | 6 | unsigned int |  |  |  | Number of calibrations not performed due to conditions | Anzahl, aufgrund von Bedingungen, nicht durchgeführte Kalibrierungen |
+| `LMV_KUPPLUNGSSTATUS.QU_SER_BASIS` | 0xDFEA | 0 | unsigned char |  |  |  | Service base - LMV qualifier | Service Basis - Qualifier des LMV |
+| `LMV_KUPPLUNGSSTATUS.QU_SER_NOTLAUF` | 0xDFEA | 1 | unsigned char |  |  |  | Limp-home controller | Notlaufregler |
+| `LMV_KUPPLUNGSSTATUS.QU_SER_POSITION` | 0xDFEA | 2 | unsigned char |  |  |  | LMV actuator position | Position LMV Stellglied |
+| `LMV_KUPPLUNGSSTATUS.QU_SER_SCHUTZ` | 0xDFEA | 3 | unsigned char |  |  |  | LMV protection function | LMV Schutzfunktion |
+| `LMV_KUPPLUNGSSTATUS.QU_LMV_LUEFTSTATUS` | 0xDFEA | 4 | unsigned char |  |  |  | LMV position released/not released (normal operation) | Position LMV gelüftet/nicht gelüftet (Normalbetrieb) |
+| `LMV_KUPPLUNGSSTATUS.QU_SER_VV_KUPPLUNG` | 0xDFEA | 5 | unsigned char |  |  |  | Clutch availability | Verfügbarkeit Kupplung |
+| `LMV_KUPPLUNGSSTATUS.QU_SER_VV_STELLGLIED` | 0xDFEA | 6 | unsigned char |  |  |  | Actuator availability | Verfügbarkeit Stellglied |
+| `LMV_VTG_SN.VTG_SN_TEXT` | 0xDFED | 0 | string[12] | TEXT |  |  | Transmission serial number | Seriennummer des Getriebes |
 | `LMV_SPANNUNG.UKL30` | 0xDFEE | 0 | unsigned int | V | ÷ 1024 |  | LMV terminal voltage | LMV Klemmenspannung |
-| `LMV_SPANNUNG.UKL30_VPS` | 0xDFEE | 1 | unsigned int | V | ÷ 1024 |  | Voltage to the Verpolschutz | Spannung nach dem Verpolschutz |
-| `LMV_FAHRZEUGZUSTAND.ST_CON_VEH` | 0xDFF4 | 0 | unsigned char | HEX |  |  | Signal Status_Zustand_Fahrzeug beschreibt the vehicle state (Lastenheft Parken, Wohnen, Fahren, 10000924) from Kundensicht. Anhand dieses state is festgelegt, welche (customer-)function current available sein target. | Signal Status_Zustand_Fahrzeug beschreibt den Fahrzeugzustand (Lastenheft Parken, Wohnen, Fahren, 10000924) aus Kundensicht. Anhand dieses Zustandes wird festgelegt, welche (Kunden-)Funktionen aktuell verfügbar sein sollen. |
-| `LMV_FAHRZEUGZUSTAND.NM3_BS_PRTNT_AFR` | 0xDFF4 | 1 | unsigned int | HEX |  |  | State the communication. signal gibt information zurück, ob in current vehicle state communication benötigt is (Definition of a Basisteilnetzes). | Zustand der Kommunikation. Signal gibt Information zurück, ob in aktuellem Fahrzeugzustand Kommunikation benötigt wird (Definition eines Basisteilnetzes). |
-| `LMV_FAHRZEUGZUSTAND.NM3_FKTN_PRTNT_AFR` | 0xDFF4 | 2 | unsigned long | HEX |  |  | Signal gibt the information zurück welche funktionalen Teilnetze (z.B. Entertainment, charging) active sind. | Signal gibt die Information zurück welche funktionalen Teilnetze (z.B. Entertainment, Laden) aktiv sind. |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_0` | 0xDFF7 | 0 | unsigned long | s | × 2 |  | Intervallzähler temperature range 1 | Intervallzähler Temperaturbereich 1 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_1` | 0xDFF7 | 1 | unsigned long | s | × 2 |  | Intervallzähler temperature range 2 | Intervallzähler Temperaturbereich 2 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_2` | 0xDFF7 | 2 | unsigned long | s | × 2 |  | Intervallzähler temperature range 3 | Intervallzähler Temperaturbereich 3 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_3` | 0xDFF7 | 3 | unsigned long | s | × 2 |  | Intervallzähler temperature range 4 | Intervallzähler Temperaturbereich 4 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_4` | 0xDFF7 | 4 | unsigned long | s | × 2 |  | Intervallzähler temperature range 5 | Intervallzähler Temperaturbereich 5 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_5` | 0xDFF7 | 5 | unsigned long | s | × 2 |  | Intervallzähler temperature range 6 | Intervallzähler Temperaturbereich 6 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_6` | 0xDFF7 | 6 | unsigned long | s | × 2 |  | Intervallzähler temperature range 7 | Intervallzähler Temperaturbereich 7 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_7` | 0xDFF7 | 7 | unsigned long | s | × 2 |  | Intervallzähler temperature range 8 | Intervallzähler Temperaturbereich 8 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_8` | 0xDFF7 | 8 | unsigned long | s | × 2 |  | Intervallzähler temperature range 9 | Intervallzähler Temperaturbereich 9 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_9` | 0xDFF7 | 9 | unsigned long | s | × 2 |  | Intervallzähler temperature range 10 | Intervallzähler Temperaturbereich 10 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_10` | 0xDFF7 | 10 | unsigned long | s | × 2 |  | Intervallzähler temperature range 11 | Intervallzähler Temperaturbereich 11 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_11` | 0xDFF7 | 11 | unsigned long | s | × 2 |  | Intervallzähler temperature range 12 | Intervallzähler Temperaturbereich 12 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_12` | 0xDFF7 | 12 | unsigned long | s | × 2 |  | Intervallzähler temperature range 13 | Intervallzähler Temperaturbereich 13 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_13` | 0xDFF7 | 13 | unsigned long | s | × 2 |  | Intervallzähler temperature range 14 | Intervallzähler Temperaturbereich 14 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_14` | 0xDFF7 | 14 | unsigned long | s | × 2 |  | Intervallzähler temperature range 15 | Intervallzähler Temperaturbereich 15 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_15` | 0xDFF7 | 15 | unsigned long | s | × 2 |  | Intervallzähler temperature range 16 | Intervallzähler Temperaturbereich 16 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_16` | 0xDFF7 | 16 | unsigned long | s | × 2 |  | Intervallzähler temperature range 17 | Intervallzähler Temperaturbereich 17 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_17` | 0xDFF7 | 17 | unsigned long | s | × 2 |  | Intervallzähler temperature range 18 | Intervallzähler Temperaturbereich 18 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_18` | 0xDFF7 | 18 | unsigned long | s | × 2 |  | Intervallzähler temperature range 19 | Intervallzähler Temperaturbereich 19 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_19` | 0xDFF7 | 19 | unsigned long | s | × 2 |  | Intervallzähler temperature range 20 | Intervallzähler Temperaturbereich 20 |
-| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_20` | 0xDFF7 | 20 | unsigned long | s | × 2 |  | Intervallzähler temperature range 21 | Intervallzähler Temperaturbereich 21 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH11_HISTORY` | 0xDFF8 | 0 | unsigned long | Ws |  |  | Delta angle clutch Historie 11 | Delta Winkel Kupplung Historie 11 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH12_HISTORY` | 0xDFF8 | 1 | unsigned long | Ws |  |  | Delta angle clutch Historie 12 | Delta Winkel Kupplung Historie 12 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH13_HISTORY` | 0xDFF8 | 2 | unsigned long | Ws |  |  | Delta angle clutch Historie 13 | Delta Winkel Kupplung Historie 13 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH14_HISTORY` | 0xDFF8 | 3 | unsigned long | Ws |  |  | Delta angle clutch Historie 14 | Delta Winkel Kupplung Historie 14 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH15_HISTORY` | 0xDFF8 | 4 | unsigned long | Ws |  |  | Delta angle clutch Historie 15 | Delta Winkel Kupplung Historie 15 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH21_HISTORY` | 0xDFF8 | 5 | unsigned long | Ws |  |  | Delta angle clutch Historie 21 | Delta Winkel Kupplung Historie 21 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH22_HISTORY` | 0xDFF8 | 6 | unsigned long | Ws |  |  | Delta angle clutch Historie 22 | Delta Winkel Kupplung Historie 22 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH23_HISTORY` | 0xDFF8 | 7 | unsigned long | Ws |  |  | Delta angle clutch Historie 23 | Delta Winkel Kupplung Historie 23 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH24_HISTORY` | 0xDFF8 | 8 | unsigned long | Ws |  |  | Delta angle clutch Historie 24 | Delta Winkel Kupplung Historie 24 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH25_HISTORY` | 0xDFF8 | 9 | unsigned long | Ws |  |  | Delta angle clutch Historie 25 | Delta Winkel Kupplung Historie 25 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH31_HISTORY` | 0xDFF8 | 10 | unsigned long | Ws |  |  | Delta angle clutch Historie 31 | Delta Winkel Kupplung Historie 31 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH32_HISTORY` | 0xDFF8 | 11 | unsigned long | Ws |  |  | Delta angle clutch Historie 32 | Delta Winkel Kupplung Historie 32 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH33_HISTORY` | 0xDFF8 | 12 | unsigned long | Ws |  |  | Delta angle clutch Historie 33 | Delta Winkel Kupplung Historie 33 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH34_HISTORY` | 0xDFF8 | 13 | unsigned long | Ws |  |  | Delta angle clutch Historie 34 | Delta Winkel Kupplung Historie 34 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH35_HISTORY` | 0xDFF8 | 14 | unsigned long | Ws |  |  | Delta angle clutch Historie 35 | Delta Winkel Kupplung Historie 35 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH41_HISTORY` | 0xDFF8 | 15 | unsigned long | Ws |  |  | Delta angle clutch Historie 41 | Delta Winkel Kupplung Historie 41 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH42_HISTORY` | 0xDFF8 | 16 | unsigned long | Ws |  |  | Delta angle clutch Historie 42 | Delta Winkel Kupplung Historie 42 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH43_HISTORY` | 0xDFF8 | 17 | unsigned long | Ws |  |  | Delta angle clutch Historie 43 | Delta Winkel Kupplung Historie 43 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH44_HISTORY` | 0xDFF8 | 18 | unsigned long | Ws |  |  | Delta angle clutch Historie 44 | Delta Winkel Kupplung Historie 44 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH45_HISTORY` | 0xDFF8 | 19 | unsigned long | Ws |  |  | Delta angle clutch Historie 45 | Delta Winkel Kupplung Historie 45 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH51_HISTORY` | 0xDFF8 | 20 | unsigned long | Ws |  |  | Delta angle clutch Historie 51 | Delta Winkel Kupplung Historie 51 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH52_HISTORY` | 0xDFF8 | 21 | unsigned long | Ws |  |  | Delta angle clutch Historie 52 | Delta Winkel Kupplung Historie 52 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH53_HISTORY` | 0xDFF8 | 22 | unsigned long | Ws |  |  | Delta angle clutch Historie 53 | Delta Winkel Kupplung Historie 53 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH54_HISTORY` | 0xDFF8 | 23 | unsigned long | Ws |  |  | Delta angle clutch Historie 54 | Delta Winkel Kupplung Historie 54 |
-| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH55_HISTORY` | 0xDFF8 | 24 | unsigned long | Ws |  |  | Delta angle clutch Historie 55 | Delta Winkel Kupplung Historie 55 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_0` | 0xDFF9 | 0 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 0 | Zähler Zeit Stahllamellentemperatur Bereich 0 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_1` | 0xDFF9 | 1 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 1 | Zähler Zeit Stahllamellentemperatur Bereich 1 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_2` | 0xDFF9 | 2 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 2 | Zähler Zeit Stahllamellentemperatur Bereich 2 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_3` | 0xDFF9 | 3 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 3 | Zähler Zeit Stahllamellentemperatur Bereich 3 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_4` | 0xDFF9 | 4 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 4 | Zähler Zeit Stahllamellentemperatur Bereich 4 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_5` | 0xDFF9 | 5 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 5 | Zähler Zeit Stahllamellentemperatur Bereich 5 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_6` | 0xDFF9 | 6 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 6 | Zähler Zeit Stahllamellentemperatur Bereich 6 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_7` | 0xDFF9 | 7 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 7 | Zähler Zeit Stahllamellentemperatur Bereich 7 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_8` | 0xDFF9 | 8 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 8 | Zähler Zeit Stahllamellentemperatur Bereich 8 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_9` | 0xDFF9 | 9 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 9 | Zähler Zeit Stahllamellentemperatur Bereich 9 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_10` | 0xDFF9 | 10 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 10 | Zähler Zeit Stahllamellentemperatur Bereich 10 |
-| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_11` | 0xDFF9 | 11 | unsigned long | s |  |  | Counter time Stahllamellentemperatur range 11 | Zähler Zeit Stahllamellentemperatur Bereich 11 |
-| `LMV_ACTIVE_DIAGNOSTIC_SESSION` | 0xF186 | 0 | unsigned char | 0-n |  | 0 = ISOSAEReserved_00; 1 = defaultSession; 2 = programmingSession; 3 = extendedDiagnosticSession; 4 = safetySystemDiagnosticSession; 64 = vehicleManufacturerSpecific_40; 65 = codingSession; 66 = SWTSession | activeDiagnosticSession | activeDiagnosticSession |
+| `LMV_SPANNUNG.UKL30_VPS` | 0xDFEE | 1 | unsigned int | V | ÷ 1024 |  | Voltage after reverse polarity protection | Spannung nach dem Verpolschutz |
+| `LMV_FAHRZEUGZUSTAND.ST_CON_VEH` | 0xDFF4 | 0 | unsigned char | HEX |  |  | Signal Status_Zustand_Fahrzeug describes the vehicle state (specification Parking, Living, Driving, 10000924) from the customer's point of view. This state determines which (customer) functions should currently be available. | Signal Status_Zustand_Fahrzeug beschreibt den Fahrzeugzustand (Lastenheft Parken, Wohnen, Fahren, 10000924) aus Kundensicht. Anhand dieses Zustandes wird festgelegt, welche (Kunden-)Funktionen aktuell verfügbar sein sollen. |
+| `LMV_FAHRZEUGZUSTAND.NM3_BS_PRTNT_AFR` | 0xDFF4 | 1 | unsigned int | HEX |  |  | Communication status. The signal indicates whether communication is required in the current vehicle state (definition of a base partial network). | Zustand der Kommunikation. Signal gibt Information zurück, ob in aktuellem Fahrzeugzustand Kommunikation benötigt wird (Definition eines Basisteilnetzes). |
+| `LMV_FAHRZEUGZUSTAND.NM3_FKTN_PRTNT_AFR` | 0xDFF4 | 2 | unsigned long | HEX |  |  | The signal indicates which functional partial networks (e.g. entertainment, charging) are active. | Signal gibt die Information zurück welche funktionalen Teilnetze (z.B. Entertainment, Laden) aktiv sind. |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_0` | 0xDFF7 | 0 | unsigned long | s | × 2 |  | Interval counter, temperature range 1 | Intervallzähler Temperaturbereich 1 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_1` | 0xDFF7 | 1 | unsigned long | s | × 2 |  | Interval counter, temperature range 2 | Intervallzähler Temperaturbereich 2 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_2` | 0xDFF7 | 2 | unsigned long | s | × 2 |  | Interval counter, temperature range 3 | Intervallzähler Temperaturbereich 3 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_3` | 0xDFF7 | 3 | unsigned long | s | × 2 |  | Interval counter, temperature range 4 | Intervallzähler Temperaturbereich 4 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_4` | 0xDFF7 | 4 | unsigned long | s | × 2 |  | Interval counter, temperature range 5 | Intervallzähler Temperaturbereich 5 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_5` | 0xDFF7 | 5 | unsigned long | s | × 2 |  | Interval counter, temperature range 6 | Intervallzähler Temperaturbereich 6 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_6` | 0xDFF7 | 6 | unsigned long | s | × 2 |  | Interval counter, temperature range 7 | Intervallzähler Temperaturbereich 7 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_7` | 0xDFF7 | 7 | unsigned long | s | × 2 |  | Interval counter, temperature range 8 | Intervallzähler Temperaturbereich 8 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_8` | 0xDFF7 | 8 | unsigned long | s | × 2 |  | Interval counter, temperature range 9 | Intervallzähler Temperaturbereich 9 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_9` | 0xDFF7 | 9 | unsigned long | s | × 2 |  | Interval counter, temperature range 10 | Intervallzähler Temperaturbereich 10 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_10` | 0xDFF7 | 10 | unsigned long | s | × 2 |  | Interval counter, temperature range 11 | Intervallzähler Temperaturbereich 11 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_11` | 0xDFF7 | 11 | unsigned long | s | × 2 |  | Interval counter, temperature range 12 | Intervallzähler Temperaturbereich 12 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_12` | 0xDFF7 | 12 | unsigned long | s | × 2 |  | Interval counter, temperature range 13 | Intervallzähler Temperaturbereich 13 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_13` | 0xDFF7 | 13 | unsigned long | s | × 2 |  | Interval counter, temperature range 14 | Intervallzähler Temperaturbereich 14 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_14` | 0xDFF7 | 14 | unsigned long | s | × 2 |  | Interval counter, temperature range 15 | Intervallzähler Temperaturbereich 15 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_15` | 0xDFF7 | 15 | unsigned long | s | × 2 |  | Interval counter, temperature range 16 | Intervallzähler Temperaturbereich 16 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_16` | 0xDFF7 | 16 | unsigned long | s | × 2 |  | Interval counter, temperature range 17 | Intervallzähler Temperaturbereich 17 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_17` | 0xDFF7 | 17 | unsigned long | s | × 2 |  | Interval counter, temperature range 18 | Intervallzähler Temperaturbereich 18 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_18` | 0xDFF7 | 18 | unsigned long | s | × 2 |  | Interval counter, temperature range 19 | Intervallzähler Temperaturbereich 19 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_19` | 0xDFF7 | 19 | unsigned long | s | × 2 |  | Interval counter, temperature range 20 | Intervallzähler Temperaturbereich 20 |
+| `LMV_HISTOGRAMM_TIMETEMP.TIMETEMP_HISTORY_20` | 0xDFF7 | 20 | unsigned long | s | × 2 |  | Interval counter, temperature range 21 | Intervallzähler Temperaturbereich 21 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH11_HISTORY` | 0xDFF8 | 0 | unsigned long | Ws |  |  | Clutch delta angle history 11 | Delta Winkel Kupplung Historie 11 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH12_HISTORY` | 0xDFF8 | 1 | unsigned long | Ws |  |  | Clutch delta angle history 12 | Delta Winkel Kupplung Historie 12 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH13_HISTORY` | 0xDFF8 | 2 | unsigned long | Ws |  |  | Clutch delta angle history 13 | Delta Winkel Kupplung Historie 13 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH14_HISTORY` | 0xDFF8 | 3 | unsigned long | Ws |  |  | Clutch delta angle history 14 | Delta Winkel Kupplung Historie 14 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH15_HISTORY` | 0xDFF8 | 4 | unsigned long | Ws |  |  | Clutch delta angle history 15 | Delta Winkel Kupplung Historie 15 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH21_HISTORY` | 0xDFF8 | 5 | unsigned long | Ws |  |  | Clutch delta angle history 21 | Delta Winkel Kupplung Historie 21 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH22_HISTORY` | 0xDFF8 | 6 | unsigned long | Ws |  |  | Clutch delta angle history 22 | Delta Winkel Kupplung Historie 22 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH23_HISTORY` | 0xDFF8 | 7 | unsigned long | Ws |  |  | Clutch delta angle history 23 | Delta Winkel Kupplung Historie 23 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH24_HISTORY` | 0xDFF8 | 8 | unsigned long | Ws |  |  | Clutch delta angle history 24 | Delta Winkel Kupplung Historie 24 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH25_HISTORY` | 0xDFF8 | 9 | unsigned long | Ws |  |  | Clutch delta angle history 25 | Delta Winkel Kupplung Historie 25 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH31_HISTORY` | 0xDFF8 | 10 | unsigned long | Ws |  |  | Clutch delta angle history 31 | Delta Winkel Kupplung Historie 31 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH32_HISTORY` | 0xDFF8 | 11 | unsigned long | Ws |  |  | Clutch delta angle history 32 | Delta Winkel Kupplung Historie 32 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH33_HISTORY` | 0xDFF8 | 12 | unsigned long | Ws |  |  | Clutch delta angle history 33 | Delta Winkel Kupplung Historie 33 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH34_HISTORY` | 0xDFF8 | 13 | unsigned long | Ws |  |  | Clutch delta angle history 34 | Delta Winkel Kupplung Historie 34 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH35_HISTORY` | 0xDFF8 | 14 | unsigned long | Ws |  |  | Clutch delta angle history 35 | Delta Winkel Kupplung Historie 35 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH41_HISTORY` | 0xDFF8 | 15 | unsigned long | Ws |  |  | Clutch delta angle history 41 | Delta Winkel Kupplung Historie 41 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH42_HISTORY` | 0xDFF8 | 16 | unsigned long | Ws |  |  | Clutch delta angle history 42 | Delta Winkel Kupplung Historie 42 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH43_HISTORY` | 0xDFF8 | 17 | unsigned long | Ws |  |  | Clutch delta angle history 43 | Delta Winkel Kupplung Historie 43 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH44_HISTORY` | 0xDFF8 | 18 | unsigned long | Ws |  |  | Clutch delta angle history 44 | Delta Winkel Kupplung Historie 44 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH45_HISTORY` | 0xDFF8 | 19 | unsigned long | Ws |  |  | Clutch delta angle history 45 | Delta Winkel Kupplung Historie 45 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH51_HISTORY` | 0xDFF8 | 20 | unsigned long | Ws |  |  | Clutch delta angle history 51 | Delta Winkel Kupplung Historie 51 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH52_HISTORY` | 0xDFF8 | 21 | unsigned long | Ws |  |  | Clutch delta angle history 52 | Delta Winkel Kupplung Historie 52 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH53_HISTORY` | 0xDFF8 | 22 | unsigned long | Ws |  |  | Clutch delta angle history 53 | Delta Winkel Kupplung Historie 53 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH54_HISTORY` | 0xDFF8 | 23 | unsigned long | Ws |  |  | Clutch delta angle history 54 | Delta Winkel Kupplung Historie 54 |
+| `LMV_HISTOGRAMM_TRQDELTAPHICLUTCH.TRQDELTAPHICLUTCH55_HISTORY` | 0xDFF8 | 24 | unsigned long | Ws |  |  | Clutch delta angle history 55 | Delta Winkel Kupplung Historie 55 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_0` | 0xDFF9 | 0 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 0 | Zähler Zeit Stahllamellentemperatur Bereich 0 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_1` | 0xDFF9 | 1 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 1 | Zähler Zeit Stahllamellentemperatur Bereich 1 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_2` | 0xDFF9 | 2 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 2 | Zähler Zeit Stahllamellentemperatur Bereich 2 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_3` | 0xDFF9 | 3 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 3 | Zähler Zeit Stahllamellentemperatur Bereich 3 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_4` | 0xDFF9 | 4 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 4 | Zähler Zeit Stahllamellentemperatur Bereich 4 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_5` | 0xDFF9 | 5 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 5 | Zähler Zeit Stahllamellentemperatur Bereich 5 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_6` | 0xDFF9 | 6 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 6 | Zähler Zeit Stahllamellentemperatur Bereich 6 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_7` | 0xDFF9 | 7 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 7 | Zähler Zeit Stahllamellentemperatur Bereich 7 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_8` | 0xDFF9 | 8 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 8 | Zähler Zeit Stahllamellentemperatur Bereich 8 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_9` | 0xDFF9 | 9 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 9 | Zähler Zeit Stahllamellentemperatur Bereich 9 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_10` | 0xDFF9 | 10 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 10 | Zähler Zeit Stahllamellentemperatur Bereich 10 |
+| `LMV_HISTOGRAMM_TEMP_STDISC.TIMETEMP_STDISC_11` | 0xDFF9 | 11 | unsigned long | s |  |  | Counter: time in steel clutch plate temperature range 11 | Zähler Zeit Stahllamellentemperatur Bereich 11 |
+| `LMV_ACTIVE_DIAGNOSTIC_SESSION` | 0xF186 | 0 | unsigned char | 0-n |  | 0 = ISOSAEReserved_00; 1 = defaultSession; 2 = programmingSession; 3 = extendedDiagnosticSession; 4 = safetySystemDiagnosticSession; 64 = vehicleManufacturerSpecific_40; 65 = codingSession; 66 = SWTSession | Active diagnostic session | activeDiagnosticSession |

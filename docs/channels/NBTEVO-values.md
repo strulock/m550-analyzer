@@ -8,40 +8,40 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Learning erfolgreich | Lernen erfolgreich |
-| 1 | Learning not erfolgreich or yet not learned | Lernen nicht erfolgreich oder noch nicht gelernt |
+| 0 | Learning successful | Lernen erfolgreich |
+| 1 | Learning not successful or not yet learned | Lernen nicht erfolgreich oder noch nicht gelernt |
 
 ## NBTEVO.STATUS_LIFECYCLE_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Application Mode | Application Mode |
-| 1 | Flash Mode | Flash Mode |
-| 2 | Coding Mode | Coding Mode |
+| 0 | Application mode | Application Mode |
+| 1 | Flash mode | Flash Mode |
+| 2 | Coding mode | Coding Mode |
 
 ## NBTEVO.TAB_APPLICATION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Sprachverarbeitung | Sprachverarbeitung |
-| 1 | Navi Applikation | Navi Applikation |
-| 2 | Navi Karte | Navi Karte |
-| 3 | Online Browser | Online Browser |
-| 4 | AudioPlayer | AudioPlayer |
-| 5 | Telefon Applikation | Telefon Applikation |
+| 0 | Speech processing | Sprachverarbeitung |
+| 1 | Navigation application | Navi Applikation |
+| 2 | Navigation map | Navi Karte |
+| 3 | Online browser | Online Browser |
+| 4 | Audio player | AudioPlayer |
+| 5 | Telephone application | Telefon Applikation |
 | 6 | SDARS | SDARS |
 | 7 | A4A | A4A |
 | 8 | Driver update (KISU) | Driver update (KISU) |
 | 9 | DAB | DAB |
 | 10 | Video_in | Video_in |
-| 11 | Sprachpaket Arabisch | Sprachpaket Arabisch |
-| 12 | TextToSpeech | TextToSpeech |
+| 11 | Arabic language pack | Sprachpaket Arabisch |
+| 12 | Text-to-speech | TextToSpeech |
 | 13 | M Laptimer | M Laptimer |
 | 14 | Log & Trace | Log & Trace |
 | 15 | CarPlay | CarPlay |
-| 16 | Navi Permanent SLI Display ECE | Navi Permanent SLI Display ECE |
+| 16 | Navigation permanent SLI display ECE | Navi Permanent SLI Display ECE |
 | 17 | Reinitialisation | Reinitialisation |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAB_APPLICATION_ACTIVATION_STATUS
 
@@ -50,67 +50,67 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 1 | Deactivated by coding | Deaktiviert durch Codierung |
 | 2 | Activated by coding | Aktiviert durch Codierung |
 | 4 | Deactivated by SWT | Deaktiviert durch SWT |
-| 5 | Deactivated by coding and  deactivated by SWT | Deaktiviert durch Codierung und  Deaktiviert durch SWT |
+| 5 | Deactivated by coding and deactivated by SWT | Deaktiviert durch Codierung und  Deaktiviert durch SWT |
 | 6 | Activated by coding and deactivated by SWT | Aktiviert durch Codierung und Deaktiviert durch SWT |
 | 8 | Activated by SWT | Aktiviert durch SWT |
 | 9 | Deactivated by coding and activated by SWT | Deaktiviert durch Codierung und Aktiviert durch SWT |
 | 10 | Activated by coding and activated by SWT | Aktiviert durch Codierung und Aktiviert durch SWT |
-| 16 | Teilweise activated by SWT | Teilweise Aktiviert durch SWT |
-| 18 | Activated by coding and Teilweise activated by SWT | Aktiviert durch Codierung und Teilweise Aktiviert durch SWT |
-| 32 | SWT Freischaltcode eingespielt | SWT Freischaltcode eingespielt |
-| 34 | Activated by coding and SWT Freischaltcode eingespielt | Aktiviert durch Codierung und SWT Freischaltcode eingespielt |
-| 255 | Not definiert | Nicht definiert |
+| 16 | Partially activated by SWT | Teilweise Aktiviert durch SWT |
+| 18 | Activated by coding and partially activated by SWT | Aktiviert durch Codierung und Teilweise Aktiviert durch SWT |
+| 32 | SWT enabling code imported | SWT Freischaltcode eingespielt |
+| 34 | Activated by coding and SWT enabling code imported | Aktiviert durch Codierung und SWT Freischaltcode eingespielt |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAB_APPLICATION_RUNNING_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Applikation not gestartet | Applikation nicht gestartet |
-| 1 | Applikation gestartet | Applikation gestartet |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Application not started | Applikation nicht gestartet |
+| 1 | Application started | Applikation gestartet |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAB_AUTO_MAN
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | automatic | automatic |
-| 1 | manual | manual |
-| 255 | not defined | not defined |
+| 0 | Automatic | automatic |
+| 1 | Manual | manual |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_CIDDISPLAYREADY
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not ready | not ready |
-| 1 | ready | ready |
-| 255 | not defined | not defined |
+| 0 | Not ready | not ready |
+| 1 | Ready | ready |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_CID_VERBINDUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | CID-Verbindung in Ordnung, Bild is angezeigt | CID-Verbindung in Ordnung, Bild wird angezeigt |
-| 1 | No activation the Bildausgabe | Keine Aktivierung der Bildausgabe |
-| 2 | Display device not anzeigebereit | Anzeigegerät nicht anzeigebereit |
+| 0 | CID connection OK, image is displayed | CID-Verbindung in Ordnung, Bild wird angezeigt |
+| 1 | Image output not activated | Keine Aktivierung der Bildausgabe |
+| 2 | Display device not ready to display | Anzeigegerät nicht anzeigebereit |
 | 3 | No communication with display device | Keine Kommunikation mit Anzeigegerät |
-| 4 | Bilddaten invalid | Bilddaten ungültig |
-| 255 | Ungültigkeitswert | Ungültigkeitswert |
+| 4 | Image data invalid | Bilddaten ungültig |
+| 255 | Invalid value | Ungültigkeitswert |
 
 ## NBTEVO.TAB_HU_DEMUTESTATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Head-Unit from | Head-Unit aus |
-| 1 | Head-Unit a | Head-Unit ein |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Head unit off | Head-Unit aus |
+| 1 | Head unit on | Head-Unit ein |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAB_INITIALISIERUNG
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not initialisiert | nicht initialisiert |
-| 1 | IO initialisiert | IO initialisiert |
-| 255 | not definiert | nicht definiert |
+| 0 | Not initialised | nicht initialisiert |
+| 1 | Initialised OK | IO initialisiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_INSERTEDMEDIUM
 
@@ -130,9 +130,9 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no | no |
-| 1 | yes | yes |
-| 255 | not defined | not defined |
+| 0 | No | no |
+| 1 | Yes | yes |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_OKNOK
 
@@ -140,7 +140,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | OK | OK |
 | 1 | NOK | NOK |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAB_ONOFF
 
@@ -148,18 +148,18 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | OFF | AUS |
 | 1 | ON | EIN |
-| 255 | NICHT DEFINIERT | NICHT DEFINIERT |
+| 255 | NOT DEFINED | NICHT DEFINIERT |
 
 ## NBTEVO.TAB_STATEFMPHASANTENNA
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | open line (Verbindung Radio - Antennenverstärker.) | offene Leitung (Verbindung Radio - Antennenverstärker.) |
-| 1 | Antenna missing (Verbindung Antennenverstärker - antenna) | Antenne fehlt (Verbindung Antennenverstärker - Antenne) |
-| 2 | Antenna Ok with passiver FM antenna | Antenne Ok mit passiver FM Antenne |
-| 3 | Antenna Ok with active FM antenna | Antenne Ok mit aktiver FM Antenne |
-| 4 | Short circuit to ground (Verbindung HU - Antennenverstärker) | Kurzschluss nach Masse (Verbindung HU - Antennenverstärker) |
-| 255 | not definiert | nicht definiert |
+| 0 | Open circuit (radio - antenna amplifier connection) | offene Leitung (Verbindung Radio - Antennenverstärker.) |
+| 1 | Antenna missing (antenna amplifier - antenna connection) | Antenne fehlt (Verbindung Antennenverstärker - Antenne) |
+| 2 | Antenna OK with passive FM antenna | Antenne Ok mit passiver FM Antenne |
+| 3 | Antenna OK with active FM antenna | Antenne Ok mit aktiver FM Antenne |
+| 4 | Short circuit to ground (HU - antenna amplifier connection) | Kurzschluss nach Masse (Verbindung HU - Antennenverstärker) |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_STATUSCIDCOMSTATE
 
@@ -169,7 +169,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 1 | CIDCOM_CRC_ERROR | CIDCOM_CRC_ERROR |
 | 2 | CIDCOM_NO_SYNC | CIDCOM_NO_SYNC |
 | 3 | CIDCOM_NO_COM | CIDCOM_NO_COM |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDFADESTATE
 
@@ -180,15 +180,15 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 2 | CIDDIM_FADE_DISPLAY_T1 | CIDDIM_FADE_DISPLAY_T1 |
 | 3 | CIDDIM_FADE_DISPLAY_ON | CIDDIM_FADE_DISPLAY_ON |
 | 4 | CIDDIM_FADE_DISPLAY_T2 | CIDDIM_FADE_DISPLAY_T2 |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDFLASHDATACHANGE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not changed | not changed |
-| 1 | changed | changed |
-| 255 | not defined | not defined |
+| 0 | Not changed | not changed |
+| 1 | Changed | changed |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDFLASHSTATE
 
@@ -199,7 +199,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 2 | CIDGDC_FLASH_READY | CIDGDC_FLASH_READY |
 | 3 | CIDGDC_FLASH_CRC_OK | CIDGDC_FLASH_CRC_OK |
 | 4 | CIDGDC_FLASH_CRC_NOK | CIDGDC_FLASH_CRC_NOK |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDINITSTATE
 
@@ -210,7 +210,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 2 | CIDMAIN_READ_BASICFLASHDATA_INITSTATE | CIDMAIN_READ_BASICFLASHDATA_INITSTATE |
 | 3 | CIDMAIN_READ_ALLFLASHDATA_INITSTATE | CIDMAIN_READ_ALLFLASHDATA_INITSTATE |
 | 4 | CIDMAIN_WAIT_FOR_TIMING_INITSTATE | CIDMAIN_WAIT_FOR_TIMING_INITSTATE |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDMAINSTATE
 
@@ -222,7 +222,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 3 | CIDMAIN_FLASHDATA_ERROR_STATE | CIDMAIN_FLASHDATA_ERROR_STATE |
 | 4 | CIDMAIN_COMM_FAIL_STATE | CIDMAIN_COMM_FAIL_STATE |
 | 5 | CIDMAIN_DIAGFLASH_STATE | CIDMAIN_DIAGFLASH_STATE |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDOPERATIONSTATE
 
@@ -233,7 +233,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 2 | CIDMAIN_BLACK_PANEL_OPSTATE | CIDMAIN_BLACK_PANEL_OPSTATE |
 | 3 | CIDMAIN_DISPLAY_ON_OPSTATE | CIDMAIN_DISPLAY_ON_OPSTATE |
 | 4 | CIDMAIN_DISPLAY_OFF_OPSTATE | CIDMAIN_DISPLAY_OFF_OPSTATE |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TAB_STATUSCIDPOWERMODE
 
@@ -258,40 +258,40 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no USB HUB codiert | kein USB HUB codiert |
-| 1 | USB HUB codiert | USB HUB codiert |
-| 255 | not definiert | nicht definiert |
+| 0 | No USB hub coded | kein USB HUB codiert |
+| 1 | USB hub coded | USB HUB codiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_TDAACTIVATIONSTATE
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Idle, derzeit not active | Leerlauf, derzeit nicht aktiv |
-| 2 | Activation läuft | Aktivierung läuft |
-| 3 | Activation fehlgeschlagen | Aktivierung fehlgeschlagen |
-| 4 | Activation erfolgreich | Aktivierung erfolgreich |
-| 255 | not definiert | nicht definiert |
+| 1 | Idle, currently not active | Leerlauf, derzeit nicht aktiv |
+| 2 | Activation in progress | Aktivierung läuft |
+| 3 | Activation failed | Aktivierung fehlgeschlagen |
+| 4 | Activation successful | Aktivierung erfolgreich |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_USBTEST_STATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no device verbunden | kein Gerät verbunden |
-| 1 | Device angeschlossen, detection in the gear | Gerät angeschlossen, Erkennung im Gange |
-| 2 | detected device is a ground memory | erkanntes Gerät ist ein Massenspeicher |
-| 3 | detected device is a HUB | erkanntes Gerät ist ein HUB |
-| 254 | Device detected, but weder ground memory yet HUB | Gerät erkannt, aber weder Massenspeicher noch HUB |
-| 255 | not definiert | nicht definiert |
+| 0 | No device connected | kein Gerät verbunden |
+| 1 | Device connected, detection in progress | Gerät angeschlossen, Erkennung im Gange |
+| 2 | Detected device is a mass storage device | erkanntes Gerät ist ein Massenspeicher |
+| 3 | Detected device is a hub | erkanntes Gerät ist ein HUB |
+| 254 | Device detected, but neither mass storage nor hub | Gerät erkannt, aber weder Massenspeicher noch HUB |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_WLAN_ENCRYPTION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no Verschlüsselung | keine Verschlüsselung |
+| 0 | No encryption | keine Verschlüsselung |
 | 1 | WEP | WEP |
 | 2 | WPA | WPA |
 | 3 | WPA2 | WPA2 |
-| 255 | not definiert | nicht definiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_WLAN_PAIRABLE
 
@@ -299,79 +299,79 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | AP_MODE | AP_MODE |
 | 1 | WIFI_DIRECT_MODE | WIFI_DIRECT_MODE |
-| 2 | beide | beide |
-| 255 | not definiert | nicht definiert |
+| 2 | Both | beide |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TAB_ZIN_DIAGNOSTIC_FLAG
 
 | Value | Meaning | German |
 |---|---|---|
-| 10 | No ZIN fault and no communication error | Kein ZIN Fehler und kein Kommunikationsfehler |
-| 11 | ZIN communication error | ZIN Kommunikationsfehler |
-| 26 | ZIN internal error, self test vom ZIN fehlgeschlagen | ZIN interner Fehler, Selbsttest vom ZIN fehlgeschlagen |
-| 42 | tbd | tbd |
-| 74 | tbd | tbd |
-| 138 | tbd | tbd |
-| 255 | invalid | ungültig |
+| 10 | No ZIN fault and no communication fault | Kein ZIN Fehler und kein Kommunikationsfehler |
+| 11 | ZIN communication fault | ZIN Kommunikationsfehler |
+| 26 | ZIN internal fault, ZIN self-test failed | ZIN interner Fehler, Selbsttest vom ZIN fehlgeschlagen |
+| 42 | TBD | tbd |
+| 74 | TBD | tbd |
+| 138 | TBD | tbd |
+| 255 | Invalid | ungültig |
 
 ## NBTEVO.TAB_ZIN_VARIANT
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no ZIN | kein ZIN |
-| 1 | 6,5  ZIN | 6,5  ZIN |
-| 2 | 8,8  ZIN | 8,8  ZIN |
+| 0 | No ZIN | kein ZIN |
+| 1 | 6.5 ZIN | 6,5  ZIN |
+| 2 | 8.8 ZIN | 8,8  ZIN |
 | 3 | Radio ZIN | Radio ZIN |
 
 ## NBTEVO.TAF
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | AF from | AF aus |
-| 1 | AF a | AF ein |
-| 2 | AF no Änderung | AF keine Änderung |
-| 255 | Not definiert | Nicht definiert |
+| 0 | AF off | AF aus |
+| 1 | AF on | AF ein |
+| 2 | AF no change | AF keine Änderung |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAKTIVEANTENNEDAB
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No antenna | Keine Antenne |
-| 1 | L-Band antenna | L-Band Antenne |
+| 1 | L-band antenna | L-Band Antenne |
 | 2 | Band III antenna | Band III Antenne |
-| 3 | Beide antenna | Beide Antennen |
-| 255 | Not definiert | Nicht definiert |
+| 3 | Both antennas | Beide Antennen |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAUDIOKANAL
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Alle Kanäle | Alle Kanäle |
-| 1 | Left front (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner) | Links vorne (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 2 | Right front (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner) | Rechts vorne (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 4 | Center front (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner) | Center vorne (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 8 | Side left (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner) | Seite links (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 16 | Side right (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner) | Seite rechts (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 32 | Left rear (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner) | Links hinten (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 64 | Right rear (Standardkanal, speziell Mitteltöner if getrennte high/Mitteltöner) | Rechts hinten (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 128 | Left front Bass (Erweiterter channel) | Links vorne Bass (Erweiterter Kanal) |
-| 256 | Right front Bass (Erweiterter channel) | Rechts vorne Bass (Erweiterter Kanal) |
-| 512 | Left rear Bass (Erweiterter channel) | Links hinten Bass (Erweiterter Kanal) |
-| 1024 | Right rear Bass (Erweiterter channel) | Rechts hinten Bass (Erweiterter Kanal) |
-| 2048 | Center rear (Erweiterter channel, speziell Mitteltöner if getrennte high/Mitteltöner) | Center hinten (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
-| 4096 | Left Kopfhörer left | Linker Kopfhörer links |
-| 8192 | Left Kopfhörer right | Linker Kopfhörer rechts |
-| 16384 | Right Kopfhörer left | Rechter Kopfhörer links |
-| 32768 | Right Kopfhörer right | Rechter Kopfhörer rechts |
-| 65536 | Left front (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Links vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 131072 | Right front (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Rechts vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 262144 | Center front (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Center vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 524288 | Side left (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Seite links (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 1048576 | Side right (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Seite rechts (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 2097152 | Left rear (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Links hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 4194304 | Right rear (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Rechts hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 8388608 | Center rear (Erweiterter channel, speziell Hochtöner if getrennte high/Mitteltöner) | Center hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
-| 4294967295 | Not definiert | Nicht definiert |
+| 0 | All channels | Alle Kanäle |
+| 1 | Front left (standard channel, midrange specifically if separate tweeter/midrange) | Links vorne (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 2 | Front right (standard channel, midrange specifically if separate tweeter/midrange) | Rechts vorne (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 4 | Front centre (extended channel, midrange specifically if separate tweeter/midrange) | Center vorne (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 8 | Side left (extended channel, midrange specifically if separate tweeter/midrange) | Seite links (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 16 | Side right (extended channel, midrange specifically if separate tweeter/midrange) | Seite rechts (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 32 | Rear left (standard channel, midrange specifically if separate tweeter/midrange) | Links hinten (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 64 | Rear right (standard channel, midrange specifically if separate tweeter/midrange) | Rechts hinten (Standardkanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 128 | Front left bass (extended channel) | Links vorne Bass (Erweiterter Kanal) |
+| 256 | Front right bass (extended channel) | Rechts vorne Bass (Erweiterter Kanal) |
+| 512 | Rear left bass (extended channel) | Links hinten Bass (Erweiterter Kanal) |
+| 1024 | Rear right bass (extended channel) | Rechts hinten Bass (Erweiterter Kanal) |
+| 2048 | Rear centre (extended channel, midrange specifically if separate tweeter/midrange) | Center hinten (Erweiterter Kanal, speziell Mitteltöner wenn getrennte Hoch/Mitteltöner) |
+| 4096 | Left headphones, left | Linker Kopfhörer links |
+| 8192 | Left headphones, right | Linker Kopfhörer rechts |
+| 16384 | Right headphones, left | Rechter Kopfhörer links |
+| 32768 | Right headphones, right | Rechter Kopfhörer rechts |
+| 65536 | Front left (extended channel, tweeter specifically if separate tweeter/midrange) | Links vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 131072 | Front right (extended channel, tweeter specifically if separate tweeter/midrange) | Rechts vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 262144 | Front centre (extended channel, tweeter specifically if separate tweeter/midrange) | Center vorne (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 524288 | Side left (extended channel, tweeter specifically if separate tweeter/midrange) | Seite links (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 1048576 | Side right (extended channel, tweeter specifically if separate tweeter/midrange) | Seite rechts (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 2097152 | Rear left (extended channel, tweeter specifically if separate tweeter/midrange) | Links hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 4194304 | Rear right (extended channel, tweeter specifically if separate tweeter/midrange) | Rechts hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 8388608 | Rear centre (extended channel, tweeter specifically if separate tweeter/midrange) | Center hinten (Erweiterter Kanal, speziell Hochtöner wenn getrennte Hoch/Mitteltöner) |
+| 4294967295 | Not defined | Nicht definiert |
 
 ## NBTEVO.TAUDIOSYSTEM
 
@@ -383,8 +383,8 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 3 | M INDIVIDUAL SOUND | M INDIVIDUAL SOUND |
 | 4 | HK-SURROUND | HK-SURROUND |
 | 5 | HIGH PREMIUM | HIGH PREMIUM |
-| 6 | HIFI-SYSTEM HARMAN KARDON | HIFI-SYSTEM HARMAN KARDON |
-| 255 | Not definiert | Nicht definiert |
+| 6 | HIFI SYSTEM HARMAN KARDON | HIFI-SYSTEM HARMAN KARDON |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TCIDONOFFACTION
 
@@ -392,14 +392,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Off | Off |
 | 1 | On | On |
-| 255 | not defined | not defined |
+| 255 | Not defined | not defined |
 
 ## NBTEVO.TDIRECTIONSOURCE
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | Transmission | Getriebe |
-| 255 | not definiert | nicht definiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TEXTGYROSIGNAL
 
@@ -407,34 +407,34 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Signal available | Signal verfügbar |
 | 1 | Signal not available | Signal nicht verfügbar |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TFOLLOWINGDABDAB
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | DAB DAB Following from | DAB DAB Following aus |
-| 1 | DAB DAB Following a | DAB DAB Following ein |
-| 2 | DAB DAB Following no Änderung | DAB DAB Following keine Änderung |
-| 255 | Not definiert | Nicht definiert |
+| 0 | DAB-DAB following off | DAB DAB Following aus |
+| 1 | DAB-DAB following on | DAB DAB Following ein |
+| 2 | DAB-DAB following no change | DAB DAB Following keine Änderung |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TFOLLOWINGDABFM
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | DAB FM Following from | DAB FM Following aus |
-| 1 | DAB FM Following a | DAB FM Following ein |
-| 2 | DAB FM Following no Änderung | DAB FM Following keine Änderung |
-| 255 | Not definiert | Nicht definiert |
+| 0 | DAB-FM following off | DAB FM Following aus |
+| 1 | DAB-FM following on | DAB FM Following ein |
+| 2 | DAB-FM following no change | DAB FM Following keine Änderung |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TGEARTYPE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Rückwärts-gear | Rückwärts-Gang |
-| 1 | Vorwärts-gear | Vorwärts-Gang |
-| 2 | Idle | Leerlauf |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Reverse gear | Rückwärts-Gang |
+| 1 | Forward gear | Vorwärts-Gang |
+| 2 | Neutral | Leerlauf |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TGPSPOSITIONVALIDITY
 
@@ -442,42 +442,42 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | GPS position is valid | GPS Position ist gueltig |
 | 1 | GPS position is not valid | GPS Position ist nicht gueltig |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TGPSSTATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Not unterstuetzt: no GPS | Nicht unterstuetzt: Kein GPS |
-| 1 | Not unterstuetzt: communication error | Nicht unterstuetzt: Kommunikationsfehler |
-| 2 | Receiverfehler | Receiverfehler |
+| 0 | Not supported: no GPS | Nicht unterstuetzt: Kein GPS |
+| 1 | Not supported: communication fault | Nicht unterstuetzt: Kommunikationsfehler |
+| 2 | Receiver fault | Receiverfehler |
 | 3 | No almanac | Kein almanac |
-| 4 | Suche satellites | Suche Satelliten |
-| 5 | Ortung satellite 1 | Ortung Satellit 1 |
-| 6 | Ortung satellite 2 | Ortung Satellit 2 |
-| 7 | Ortung satellite 3 | Ortung Satellit 3 |
-| 8 | Ortung satellite 4 | Ortung Satellit 4 |
-| 9 | Ortung satellite 5 | Ortung Satellit 5 |
-| 10 | Ortung satellite 6 | Ortung Satellit 6 |
+| 4 | Searching for satellites | Suche Satelliten |
+| 5 | Tracking satellite 1 | Ortung Satellit 1 |
+| 6 | Tracking satellite 2 | Ortung Satellit 2 |
+| 7 | Tracking satellite 3 | Ortung Satellit 3 |
+| 8 | Tracking satellite 4 | Ortung Satellit 4 |
+| 9 | Tracking satellite 5 | Ortung Satellit 5 |
+| 10 | Tracking satellite 6 | Ortung Satellit 6 |
 | 11 | 2D position | 2D Position |
 | 12 | 3D position | 3D Position |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.THUBCONNECTIONSTATE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | HUB angeschlossen | HUB angeschlossen |
-| 1 | HUB not angeschlossen | HUB nicht angeschlossen |
-| 4 | HUB not codiert | HUB nicht codiert |
-| 255 | not definiert | nicht definiert |
+| 0 | Hub connected | HUB angeschlossen |
+| 1 | Hub not connected | HUB nicht angeschlossen |
+| 4 | Hub not coded | HUB nicht codiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TLAUFWERK
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | No Laufwerk | Kein Laufwerk |
-| 1 | Kassette | Kassette |
+| 0 | No drive | Kein Laufwerk |
+| 1 | Cassette | Kassette |
 | 2 | CD | CD |
 | 4 | DVD | DVD |
 | 8 | MD | MD |
@@ -490,84 +490,84 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 50 | CD, HDD and USB | CD, HDD und USB |
 | 52 | DVD, HDD and USB | DVD, HDD und USB |
 | 64 | Flash memory | Flash Speicher |
-| 66 | CD and Flash memory | CD und Flash Speicher |
-| 68 | DVD and Flash memory | DVD und Flash Speicher |
-| 80 | HDD and Flash memory | HDD und Flash Speicher |
-| 84 | DVD, HDD and Flash memory | DVD, HDD und Flash Speicher |
-| 98 | CD, USB and Flash memory | CD, USB und Flash Speicher |
-| 100 | DVD, USB and Flash memory | DVD, USB und Flash Speicher |
-| 128 | Blu-Ray | Blu-Ray |
-| 144 | Blu-Ray and HDD | Blu-Ray und HDD |
-| 160 | Blu-Ray and USB | Blu-Ray und USB |
-| 176 | Blu-Ray, HDD and USB | Blu-Ray, HDD und USB |
-| 192 | Blu-Ray and Flash memory | Blu-Ray und Flash Speicher |
-| 208 | Blu-Ray, HDD and Flash memory | Blu-Ray, HDD und Flash Speicher |
-| 224 | Blu-Ray, USB and Flash memory | Blu-Ray, USB und Flash Speicher |
-| 65535 | Not definiert | Nicht definiert |
+| 66 | CD and flash memory | CD und Flash Speicher |
+| 68 | DVD and flash memory | DVD und Flash Speicher |
+| 80 | HDD and flash memory | HDD und Flash Speicher |
+| 84 | DVD, HDD and flash memory | DVD, HDD und Flash Speicher |
+| 98 | CD, USB and flash memory | CD, USB und Flash Speicher |
+| 100 | DVD, USB and flash memory | DVD, USB und Flash Speicher |
+| 128 | Blu-ray | Blu-Ray |
+| 144 | Blu-ray and HDD | Blu-Ray und HDD |
+| 160 | Blu-ray and USB | Blu-Ray und USB |
+| 176 | Blu-ray, HDD and USB | Blu-Ray, HDD und USB |
+| 192 | Blu-ray and flash memory | Blu-Ray und Flash Speicher |
+| 208 | Blu-ray, HDD and flash memory | Blu-Ray, HDD und Flash Speicher |
+| 224 | Blu-ray, USB and flash memory | Blu-Ray, USB und Flash Speicher |
+| 65535 | Not defined | Nicht definiert |
 
 ## NBTEVO.TNAVICALIBRATION
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Positionierprozess kalibriert | Positionierprozess kalibriert |
-| 1 | Positionierprozess not kalibriert | Positionierprozess nicht kalibriert |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Positioning process calibrated | Positionierprozess kalibriert |
+| 1 | Positioning process not calibrated | Positionierprozess nicht kalibriert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TRADONLEAD
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | off | aus |
-| 1 | on | ein |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Off | aus |
+| 1 | On | ein |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TRDS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | RDS from | RDS aus |
-| 1 | RDS a | RDS ein |
-| 2 | RDS no Änderung | RDS keine Änderung |
-| 255 | Not definiert | Nicht definiert |
+| 0 | RDS off | RDS aus |
+| 1 | RDS on | RDS ein |
+| 2 | RDS no change | RDS keine Änderung |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TROUTEDOWNLOAD
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Route download not gestartet | Route download nicht gestartet |
-| 1 | Route download läuft | Route download läuft |
-| 2 | Route download beendet without fault | Route download beendet ohne Fehler |
-| 3 | Route download beendet with fault | Route download beendet mit Fehler |
+| 0 | Route download not started | Route download nicht gestartet |
+| 1 | Route download running | Route download läuft |
+| 2 | Route download finished without errors | Route download beendet ohne Fehler |
+| 3 | Route download finished with errors | Route download beendet mit Fehler |
 | 4 | Route download interrupted | Route download unterbrochen |
-| 255 | not definiert | nicht definiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TSATELLITSTATUS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Erkennbar | Erkennbar |
-| 1 | Aufgestoebert | Aufgestoebert |
-| 255 | Not definiert | Nicht definiert |
+| 0 | Detectable | Erkennbar |
+| 1 | Acquired | Aufgestoebert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TSDARSCHANNELTUNESUCCESS
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Kanaleinstellung erfolgreich | Kanaleinstellung erfolgreich |
-| 1 | Channel not aboniert | Kanal nicht aboniert |
+| 0 | Channel tuning successful | Kanaleinstellung erfolgreich |
+| 1 | Channel not subscribed | Kanal nicht aboniert |
 | 2 | Channel invalid | Kanal ungueltig |
-| 3 | Kanaleinstellung läuft | Kanaleinstellung läuft |
-| 255 | not definiert | nicht definiert |
+| 3 | Channel tuning in progress | Kanaleinstellung läuft |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TSDARSSIGNALQUALITY
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no signal | kein Signal |
-| 1 | schwaches signal | schwaches Signal |
-| 2 | gutes signal | gutes Signal |
-| 3 | exzellentes signal | exzellentes Signal |
-| 255 | not definiert | nicht definiert |
+| 0 | No signal | kein Signal |
+| 1 | Weak signal | schwaches Signal |
+| 2 | Good signal | gutes Signal |
+| 3 | Excellent signal | exzellentes Signal |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TSDARSSIGNALQUALITYGLOBALSTATUS
 
@@ -575,86 +575,86 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Mute | Mute |
 | 1 | Audio | Audio |
-| 255 | not definiert | nicht definiert |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TSIGNALDAB
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No signal | Kein Signal |
-| 1 | valid signal | gueltiges Signal |
-| 255 | Not definiert | Nicht definiert |
+| 1 | Valid signal | gueltiges Signal |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TSOFTWAREUPDATEERRORCODE
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No fault | Kein Fehler |
-| 1 | Vehicle during Update not in standstill | Fahrzeug während Update nicht in Stillstand |
-| 2 | Update abort | Update Abbruch |
-| 3 | MOST communication error | MOST Kommunikationsfehler |
-| 4 | SWUP Quelle antwortet not | SWUP Quelle antwortet nicht |
-| 5 | Device ausgelastet | Gerät ausgelastet |
-| 15 | Unspezifizierter Umwelt-fault | Unspezifizierter Umwelt-Fehler |
-| 16 | Neueste Version schon installiert | Neueste Version schon installiert |
-| 17 | SWUP Package Container veraltet | SWUP Package Container veraltet |
-| 31 | Unspezifizierter Versions-fault | Unspezifizierter Versions-Fehler |
-| 32 | Neue I-stage nötig | Neue I-Stufe nötig |
-| 33 | SWUP - Zielgerät not available | SWUP - Zielgerät nicht verfügbar |
-| 34 | Abhängigkeiten not met | Abhängigkeiten nicht erfüllt |
-| 35 | Betroffene SWE not gefunden | Betroffene SWE nicht gefunden |
-| 36 | Pre-Installation Skripte fault | Pre-Installation Skripte Fehler |
-| 37 | Post-Installation Skripte fault | Post-Installation Skripte Fehler |
-| 38 | Fahrgestellnummer stimmt not | Fahrgestellnummer stimmt nicht |
-| 47 | Unspezifizierbarer fault: Updatekompatibiliät | Unspezifizierbarer Fehler: Updatekompatibiliät |
-| 48 | SWUP Weiterleitung not unterstützt | SWUP Weiterleitung nicht unterstützt |
-| 49 | Not genug RAM | Nicht genug RAM |
-| 50 | Not genug Flashspeicher | Nicht genug Flashspeicher |
-| 51 | System überlastet | System überlastet |
-| 52 | SWUP-Paket too large | SWUP-Paket zu groß |
-| 63 | Unspezifizierbarer fault: Ressourcebeschränkungen | Unspezifizierbarer Fehler: Ressourcebeschränkungen |
-| 64 | SWIP Signaturverifikation fehlgeschlagen | SWIP Signaturverifikation fehlgeschlagen |
-| 65 | SWIP XML-Datei korrupt | SWIP XML-Datei korrupt |
-| 66 | SWUP Hash Value stimmt not | SWUP Hash Value stimmt nicht |
-| 67 | SGBM korrupt or unexpected Format | SGBM korrupt oder unerwartetes Format |
-| 68 | SWUP Signaturverifikation fehlgeschlagen | SWUP Signaturverifikation fehlgeschlagen |
-| 79 | Unspezifizierter fault: Integrität or authentication | Unspezifizierter Fehler: Integrität oder Authentisierung |
-| 80 | SWUP Download abgebrochen | SWUP Download abgebrochen |
-| 95 | Unspezifizierter Over-The-Air-fault | Unspezifizierter Over-The-Air-Fehler |
-| 96 | No Deinstallationinformationen available | Keine Deinstallationinformationen verfügbar |
-| 97 | Pre-Deinstallation Skripte fault | Pre-Deinstallation Skripte Fehler |
-| 98 | Post-Deinstallation Skripte fault | Post-Deinstallation Skripte Fehler |
-| 111 | Unspezifierter Deinstallationfehler | Unspezifierter Deinstallationfehler |
-| 112 | No Update-Datei available | Keine Update-Datei verfügbar |
-| 113 | Update läuft | Update läuft |
-| 114 | USB device not angeschlossen | USB Gerät nicht angeschlossen |
-| 127 | Unspezifierter operation system fault | Unspezifierter Betriebsystemfehler |
-| 224 | Memory or Filesystem defective | Speicher oder Filesystem defekt |
-| 225 | Inkonsistenter system status | Inkonsistenter System Status |
-| 239 | Unspezifierter system defective or inkonsistenter system status | Unspezifierter Systemdefekt oder inkonsistenter Systemstatus |
-| 255 | Unspezifizierter fault | Unspezifizierter Fehler |
+| 1 | Vehicle not at standstill during update | Fahrzeug während Update nicht in Stillstand |
+| 2 | Update aborted | Update Abbruch |
+| 3 | MOST communication fault | MOST Kommunikationsfehler |
+| 4 | SWUP source not responding | SWUP Quelle antwortet nicht |
+| 5 | Device busy | Gerät ausgelastet |
+| 15 | Unspecified environment error | Unspezifizierter Umwelt-Fehler |
+| 16 | Latest version already installed | Neueste Version schon installiert |
+| 17 | SWUP package container out of date | SWUP Package Container veraltet |
+| 31 | Unspecified version error | Unspezifizierter Versions-Fehler |
+| 32 | New I-level required | Neue I-Stufe nötig |
+| 33 | SWUP - target device not available | SWUP - Zielgerät nicht verfügbar |
+| 34 | Dependencies not met | Abhängigkeiten nicht erfüllt |
+| 35 | Affected SWE not found | Betroffene SWE nicht gefunden |
+| 36 | Pre-installation script error | Pre-Installation Skripte Fehler |
+| 37 | Post-installation script error | Post-Installation Skripte Fehler |
+| 38 | VIN does not match | Fahrgestellnummer stimmt nicht |
+| 47 | Unspecified error: update compatibility | Unspezifizierbarer Fehler: Updatekompatibiliät |
+| 48 | SWUP forwarding not supported | SWUP Weiterleitung nicht unterstützt |
+| 49 | Not enough RAM | Nicht genug RAM |
+| 50 | Not enough flash memory | Nicht genug Flashspeicher |
+| 51 | System overloaded | System überlastet |
+| 52 | SWUP package too large | SWUP-Paket zu groß |
+| 63 | Unspecified error: resource limitations | Unspezifizierbarer Fehler: Ressourcebeschränkungen |
+| 64 | SWIP signature verification failed | SWIP Signaturverifikation fehlgeschlagen |
+| 65 | SWIP XML file corrupt | SWIP XML-Datei korrupt |
+| 66 | SWUP hash value does not match | SWUP Hash Value stimmt nicht |
+| 67 | SGBM corrupt or unexpected format | SGBM korrupt oder unerwartetes Format |
+| 68 | SWUP signature verification failed | SWUP Signaturverifikation fehlgeschlagen |
+| 79 | Unspecified error: integrity or authentication | Unspezifizierter Fehler: Integrität oder Authentisierung |
+| 80 | SWUP download aborted | SWUP Download abgebrochen |
+| 95 | Unspecified over-the-air error | Unspezifizierter Over-The-Air-Fehler |
+| 96 | No uninstall information available | Keine Deinstallationinformationen verfügbar |
+| 97 | Pre-uninstall script error | Pre-Deinstallation Skripte Fehler |
+| 98 | Post-uninstall script error | Post-Deinstallation Skripte Fehler |
+| 111 | Unspecified uninstall error | Unspezifierter Deinstallationfehler |
+| 112 | No update file available | Keine Update-Datei verfügbar |
+| 113 | Update running | Update läuft |
+| 114 | USB device not connected | USB Gerät nicht angeschlossen |
+| 127 | Unspecified operating system error | Unspezifierter Betriebsystemfehler |
+| 224 | Memory or file system defective | Speicher oder Filesystem defekt |
+| 225 | Inconsistent system status | Inkonsistenter System Status |
+| 239 | Unspecified system defect or inconsistent system status | Unspezifierter Systemdefekt oder inkonsistenter Systemstatus |
+| 255 | Unspecified error | Unspezifizierter Fehler |
 
 ## NBTEVO.TSOFTWAREUPDATETYP
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 |  |  |
-| 1 | USB Installation | USB Installation |
-| 2 | OTA Installation | OTA Installation |
-| 3 | Auto-Reinstallation | Auto-Reinstallation |
-| 4 | Entfernen of the letzten Update | Entfernen des letzten Update |
-| 5 | Entfernen aller Benutzerupdates per diagnosis | Entfernen aller Benutzerupdates per Diagnose |
-| 6 | Auto-Deinstallation | Auto-Deinstallation |
-| 7 | Entfernung aller Updates by the customer | Entfernung aller Updates durch den Kunden |
-| 255 | undefiniert | undefiniert |
+| 1 | USB installation | USB Installation |
+| 2 | OTA installation | OTA Installation |
+| 3 | Auto-reinstallation | Auto-Reinstallation |
+| 4 | Removal of the last update | Entfernen des letzten Update |
+| 5 | Removal of all user updates via diagnostics | Entfernen aller Benutzerupdates per Diagnose |
+| 6 | Auto-uninstall | Auto-Deinstallation |
+| 7 | Removal of all updates by the customer | Entfernung aller Updates durch den Kunden |
+| 255 | Undefined | undefiniert |
 
 ## NBTEVO.TSTATUSDISPLAYACTIVATIONMODE
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | CID from | CID aus |
-| 1 | CID an | CID an |
-| 255 | not definiert | nicht definiert |
+| 0 | CID off | CID aus |
+| 1 | CID on | CID an |
+| 255 | Not defined | nicht definiert |
 
 ## NBTEVO.TTMCACTIVATIONSTATE
 
@@ -662,22 +662,22 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Not activated | Nicht aktiviert |
 | 1 | Activated | Aktiviert |
-| 255 | Not definiert | Nicht definiert |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TTP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | TP from | TP aus |
-| 1 | TP a | TP ein |
-| 2 | TP no Änderung | TP keine Änderung |
-| 255 | Not definiert | Nicht definiert |
+| 0 | TP off | TP aus |
+| 1 | TP on | TP ein |
+| 2 | TP no change | TP keine Änderung |
+| 255 | Not defined | Nicht definiert |
 
 ## NBTEVO.TTPDAB
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | TP DAB from | TP DAB aus |
-| 1 | TP DAB a | TP DAB ein |
-| 2 | TP DAB no Änderung | TP DAB keine Änderung |
-| 255 | Not definiert | Nicht definiert |
+| 0 | TP DAB off | TP DAB aus |
+| 1 | TP DAB on | TP DAB ein |
+| 2 | TP DAB no change | TP DAB keine Änderung |
+| 255 | Not defined | Nicht definiert |

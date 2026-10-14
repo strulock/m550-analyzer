@@ -21,17 +21,17 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
 
 ## IHKA_G11.TAB_AKS_EKMV
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | no active short circuit | kein aktiver Kurzschluss |
-| 1 | active short circuit Low-Side | aktiver Kurzschluss Low-Side |
-| 2 | active short circuit High-Side | aktiver Kurzschluss High-Side |
+| 0 | No active short circuit | kein aktiver Kurzschluss |
+| 1 | Active short circuit low side | aktiver Kurzschluss Low-Side |
+| 2 | Active short circuit high side | aktiver Kurzschluss High-Side |
 
 ## IHKA_G11.TAB_FAHRZEUGART_KLIMA
 
@@ -39,21 +39,21 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | Combustion engine | Verbrennungsmotor |
 | 1 | Hybrid | Hybrid |
-| 2 | Plug-in-hybrid | Plug-In-Hybrid |
+| 2 | Plug-in hybrid | Plug-In-Hybrid |
 | 3 | Electric | Elektrisch |
-| 255 | ungltiger value | ungltiger Wert |
+| 255 | Invalid value | ungltiger Wert |
 
 ## IHKA_G11.TAB_KLIMA_ECU_HW_VARIANTE
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | IHKA High with 3te LIN | IHKA High mit 3te LIN |
-| 2 | IHKA High without 3te LIN | IHKA High ohne 3te LIN |
-| 3 | IHKA Low with 3te LIN | IHKA Low mit 3te LIN |
-| 4 | IHKA Low without 3te LIN | IHKA Low ohne 3te LIN |
+| 1 | IHKA High with 3rd LIN | IHKA High mit 3te LIN |
+| 2 | IHKA High without 3rd LIN | IHKA High ohne 3te LIN |
+| 3 | IHKA Low with 3rd LIN | IHKA Low mit 3te LIN |
+| 4 | IHKA Low without 3rd LIN | IHKA Low ohne 3te LIN |
 | 5 | HKA | HKA |
-| 6 | IHKA Mid with 3te LIN | IHKA Mid mit 3te LIN |
-| 7 | IHKA Mid without 3te LIN | IHKA Mid ohne 3te LIN |
+| 6 | IHKA Mid with 3rd LIN | IHKA Mid mit 3te LIN |
+| 7 | IHKA Mid without 3rd LIN | IHKA Mid ohne 3te LIN |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## IHKA_G11.TAB_KLIMA_KAELTEMITTEL
@@ -71,7 +71,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 |---|---|---|
 | 0 | OFF | AUS |
 | 1 | ON | EIN |
-| 2 | Getaktet | Getaktet |
+| 2 | Pulsed | Getaktet |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## IHKA_G11.TAB_KLIMA_VARIANTEN
@@ -79,25 +79,25 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | Value | Meaning | German |
 |---|---|---|
 | 0 | IHKR | IHKR |
-| 1 | IHKA 1-zonig | IHKA 1-zonig |
-| 2 | IHKA 2-zonig | IHKA 2-zonig |
-| 3 | IHKA 2,5-zonig | IHKA 2,5-zonig |
-| 4 | IHKA 3-zonig | IHKA 3-zonig |
-| 5 | IHKA 4-zonig | IHKA 4-zonig |
-| 255 | ungltiger value | ungltiger Wert |
+| 1 | IHKA 1-zone | IHKA 1-zonig |
+| 2 | IHKA 2-zone | IHKA 2-zonig |
+| 3 | IHKA 2.5-zone | IHKA 2,5-zonig |
+| 4 | IHKA 3-zone | IHKA 3-zonig |
+| 5 | IHKA 4-zone | IHKA 4-zonig |
+| 255 | Invalid value | ungltiger Wert |
 
 ## IHKA_G11.TAB_KLIMA_WASSERPUMPE
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | No water pump | Keine Wasserpumpe |
-| 1 | Schaltbare mechanical water pump | Schaltbare mechanische Wasserpumpe |
-| 2 | Zusatzwasserpumpe | Zusatzwasserpumpe |
-| 3 | Zusatzwasserpumpe PWM | Zusatzwasserpumpe PWM |
+| 1 | Switchable mechanical water pump | Schaltbare mechanische Wasserpumpe |
+| 2 | Auxiliary water pump | Zusatzwasserpumpe |
+| 3 | Auxiliary water pump PWM | Zusatzwasserpumpe PWM |
 | 4 | Electric engine water pump | Elektrische Motorwasserpumpe |
-| 5 | Water pump of Standheizung | Wasserpumpe von Standheizung |
-| 6 | LIN-Zusatzwasserpumpe | LIN-Zusatzwasserpumpe |
-| 7 | LIN-Zusatzwasserpumpe and water pump of Standheizung | LIN-Zusatzwasserpumpe und Wasserpumpe von Standheizung |
+| 5 | Water pump from auxiliary heater | Wasserpumpe von Standheizung |
+| 6 | LIN auxiliary water pump | LIN-Zusatzwasserpumpe |
+| 7 | LIN auxiliary water pump and water pump from auxiliary heater | LIN-Zusatzwasserpumpe und Wasserpumpe von Standheizung |
 | 255 | Invalid value | Ungültiger Wert |
 
 ## IHKA_G11.TAB_PRODUKTLINIE_KLIMA
@@ -112,147 +112,147 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 5 | LU_BMW | LU_BMW |
 | 6 | LK_S | LK_S |
 | 7 | LK_X | LK_X |
-| 255 | invalid value | ungültiger Wert |
+| 255 | Invalid value | ungültiger Wert |
 
 ## IHKA_G11.TAB_SH_BETRIEBSZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | AUS-Bereit | AUS-Bereit |
-| 1 | AUS-run-on | AUS-Nachlauf |
-| 2 | AUS-Störungsnachlauf_Gemeldet | AUS-Störungsnachlauf_Gemeldet |
-| 3 | AUS-Störungsnachlauf-Quittiert | AUS-Störungsnachlauf-Quittiert |
-| 4 | EIN-start | EIN-Start |
-| 5 | EIN-Regelpause | EIN-Regelpause |
-| 6 | EIN-Heizgerät active | EIN-Heizgerät aktiv |
-| 8 | AUS-Heizgeräteverriegelung | AUS-Heizgeräteverriegelung |
-| 9 | EIN-run-on-Regelpause | EIN-Nachlauf-Regelpause |
+| 0 | OFF - ready | AUS-Bereit |
+| 1 | OFF - run-on | AUS-Nachlauf |
+| 2 | OFF - fault run-on reported | AUS-Störungsnachlauf_Gemeldet |
+| 3 | OFF - fault run-on acknowledged | AUS-Störungsnachlauf-Quittiert |
+| 4 | ON - start | EIN-Start |
+| 5 | ON - control pause | EIN-Regelpause |
+| 6 | ON - heater active | EIN-Heizgerät aktiv |
+| 8 | OFF - heater lockout | AUS-Heizgeräteverriegelung |
+| 9 | ON - run-on control pause | EIN-Nachlauf-Regelpause |
 | 15 | Signal invalid | Signal ungültig |
 
 ## IHKA_G11.TAB_SH_FUNKTIONSZUSTAND
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Ausbrennen | Ausbrennen |
+| 0 | Burn-out | Ausbrennen |
 | 1 | Shutdown | Abschaltung |
-| 2 | Ausbrennen TRS | Ausbrennen TRS |
-| 3 | Ausbrennrampe | Ausbrennrampe |
-| 4 | Auszustand | Auszustand |
-| 5 | Combustion operation Teillast | Brennbetrieb Teillast |
-| 6 | Combustion operation Volllast | Brennbetrieb Volllast |
-| 7 | Brennstofffördern | Brennstofffördern |
-| 8 | Brennermotorstart (Losreissen) | Brennermotorstart (Losreissen) |
-| 9 | Brennstoffunterbrechung | Brennstoffunterbrechung |
-| 10 | Diagnosis state | Diagnosezustand |
+| 2 | Burn-out TRS | Ausbrennen TRS |
+| 3 | Burn-out ramp | Ausbrennrampe |
+| 4 | Off state | Auszustand |
+| 5 | Combustion mode partial load | Brennbetrieb Teillast |
+| 6 | Combustion mode full load | Brennbetrieb Volllast |
+| 7 | Fuel delivery | Brennstofffördern |
+| 8 | Burner motor start (breakaway) | Brennermotorstart (Losreissen) |
+| 9 | Fuel interruption | Brennstoffunterbrechung |
+| 10 | Diagnostic state | Diagnosezustand |
 | 11 | Metering pump interruption | Dosierpumpenunterbrechung |
-| 12 | EMK-measurement | EMK-Messung |
-| 13 | Entprellen | Entprellen |
+| 12 | EMF measurement | EMK-Messung |
+| 13 | Debouncing | Entprellen |
 | 14 | EXIT | EXIT |
-| 15 | Flammwächterabfrage | Flammwächterabfrage |
-| 16 | Flammwächterkühlung | Flammwächterkühlung |
-| 17 | Flammwächter Messphase | Flammwächter Messphase |
-| 18 | Flammabfrage at ZUE | Flammabfrage bei ZUE |
-| 19 | Gebläseanlauf | Gebläseanlauf |
-| 20 | Glühstiftrampe | Glühstiftrampe |
-| 21 | Heizgeräteverriegelung | Heizgeräteverriegelung |
-| 22 | Initialisierung | Initialisierung |
-| 23 | Kraftstoffblasenüberbrückung | Kraftstoffblasenüberbrückung |
-| 24 | Kaltgebläseanlauf | Kaltgebläseanlauf |
-| 25 | Kaltstartanreicherung | Kaltstartanreicherung |
+| 15 | Flame monitor query | Flammwächterabfrage |
+| 16 | Flame monitor cooling | Flammwächterkühlung |
+| 17 | Flame monitor measuring phase | Flammwächter Messphase |
+| 18 | Flame query at ZUE | Flammabfrage bei ZUE |
+| 19 | Blower start-up | Gebläseanlauf |
+| 20 | Glow plug ramp | Glühstiftrampe |
+| 21 | Heater lockout | Heizgeräteverriegelung |
+| 22 | Initialisation | Initialisierung |
+| 23 | Fuel bubble bridging | Kraftstoffblasenüberbrückung |
+| 24 | Cold blower start-up | Kaltgebläseanlauf |
+| 25 | Cold start enrichment | Kaltstartanreicherung |
 | 26 | Cooling | Kühlung |
-| 27 | LastwechselTeil-/Volllast | LastwechselTeil-/Volllast |
-| 28 | Lüften | Lüften |
-| 29 | LastwechselVoll-/Teillast | LastwechselVoll-/Teillast |
-| 30 | NeueInitialisierung | NeueInitialisierung |
-| 31 | Closed-loop operation | Regelbetrieb |
-| 32 | Regelpause | Regelpause |
-| 33 | Sanftanlauf | Sanftanlauf |
-| 34 | Sicherheitszeit | Sicherheitszeit |
-| 35 | Spülen | Spülen |
+| 27 | Load change partial/full load | LastwechselTeil-/Volllast |
+| 28 | Ventilation | Lüften |
+| 29 | Load change full/partial load | LastwechselVoll-/Teillast |
+| 30 | New initialisation | NeueInitialisierung |
+| 31 | Control mode | Regelbetrieb |
+| 32 | Control pause | Regelpause |
+| 33 | Soft start | Sanftanlauf |
+| 34 | Safety time | Sicherheitszeit |
+| 35 | Purging | Spülen |
 | 36 | Start | Start |
-| 37 | Stabilization | Stabilisierung |
-| 38 | Startrampe | Startrampe |
-| 39 | Stromlos | Stromlos |
-| 40 | Störverriegelung | Störverriegelung |
-| 41 | Störverriegelung TRS | Störverriegelung TRS |
-| 42 | Stabilization time | Stabilisierungszeit |
-| 43 | Übergang closed-loop operation | Übergang Regelbetrieb |
-| 44 | Entscheidungsknoten | Entscheidungsknoten |
-| 45 | Vorfördern | Vorfördern |
-| 46 | Vorglühen | Vorglühen |
-| 47 | Vorglühen power control | Vorglühen Leistungsregelung |
-| 48 | VerzögerungvorAbregeln | VerzögerungvorAbregeln |
-| 49 | Zähgebläseanlauf | Zähgebläseanlauf |
-| 50 | Zuglühen | Zuglühen |
-| 51 | Zündpause | Zündpause |
+| 37 | Stabilisation | Stabilisierung |
+| 38 | Start ramp | Startrampe |
+| 39 | De-energised | Stromlos |
+| 40 | Fault lockout | Störverriegelung |
+| 41 | Fault lockout TRS | Störverriegelung TRS |
+| 42 | Stabilisation time | Stabilisierungszeit |
+| 43 | Transition to control mode | Übergang Regelbetrieb |
+| 44 | Decision node | Entscheidungsknoten |
+| 45 | Pre-delivery | Vorfördern |
+| 46 | Pre-glow | Vorglühen |
+| 47 | Pre-glow power control | Vorglühen Leistungsregelung |
+| 48 | Delay before derating | VerzögerungvorAbregeln |
+| 49 | Sluggish blower start-up | Zähgebläseanlauf |
+| 50 | Post-ignition glow | Zuglühen |
+| 51 | Ignition pause | Zündpause |
 | 52 | Ignition | Zündung |
-| 53 | Zwischenglühen | Zwischenglühen |
-| 54 | Applikationsüberwachung | Applikationsüberwachung |
-| 55 | Heizgeräteverriegelungsabspeicherung | Heizgeräteverriegelungsabspeicherung |
-| 56 | Heizgeräteentriegelung | Heizgeräteentriegelung |
-| 57 | Heizleistungsregelung | Heizleistungsregelung |
-| 58 | Umwälzpumpenregelung | Umwälzpumpenregelung |
-| 59 | InitialisierungµP | InitialisierungµP |
-| 60 | Fremdlichtabfrage | Fremdlichtabfrage |
-| 61 | Vorlauf | Vorlauf |
-| 62 | Vorzündung | Vorzündung |
-| 63 | Flammzündung | Flammzündung |
-| 64 | Flammstabilisierung | Flammstabilisierung |
-| 65 | Combustion operation Standheizen | Brennbetrieb Standheizen |
-| 66 | Combustion operation Zuheizen | Brennbetrieb Zuheizen |
-| 67 | Brennstörung Standheizen | Brennstörung Standheizen |
-| 68 | Brennstörung Zuheizen | Brennstörung Zuheizen |
-| 69 | AusNachlauf | AusNachlauf |
-| 70 | Regelpause run-on | Regelpause Nachlauf |
-| 71 | Störnachlauf | Störnachlauf |
-| 72 | Zeitlicher Störnachlauf | Zeitlicher Störnachlauf |
-| 73 | StörverriegelungUmwälzpumpe | StörverriegelungUmwälzpumpe |
-| 74 | Regelpause Standheizen | Regelpause Standheizen |
-| 75 | Regelpause Zuheizen | Regelpause Zuheizen |
-| 76 | RegelpauseZuheizenmitUmwälzpumpe | RegelpauseZuheizenmitUmwälzpumpe |
-| 77 | Umwälzpumpe without Heizfunktion | Umwälzpumpe ohne Heizfunktion |
-| 78 | WarteschleifeÜberspannung | WarteschleifeÜberspannung |
-| 79 | Fault memory aktualisieren | Fehlerspeicher aktualisieren |
-| 80 | Warteschleife | Warteschleife |
+| 53 | Intermediate glow | Zwischenglühen |
+| 54 | Application monitoring | Applikationsüberwachung |
+| 55 | Heater lockout storage | Heizgeräteverriegelungsabspeicherung |
+| 56 | Heater unlocking | Heizgeräteentriegelung |
+| 57 | Heat output control | Heizleistungsregelung |
+| 58 | Circulation pump control | Umwälzpumpenregelung |
+| 59 | Initialisation µP | InitialisierungµP |
+| 60 | Extraneous light query | Fremdlichtabfrage |
+| 61 | Pre-run | Vorlauf |
+| 62 | Pre-ignition | Vorzündung |
+| 63 | Flame ignition | Flammzündung |
+| 64 | Flame stabilisation | Flammstabilisierung |
+| 65 | Combustion mode auxiliary heating | Brennbetrieb Standheizen |
+| 66 | Combustion mode supplementary heating | Brennbetrieb Zuheizen |
+| 67 | Combustion fault auxiliary heating | Brennstörung Standheizen |
+| 68 | Combustion fault supplementary heating | Brennstörung Zuheizen |
+| 69 | Off run-on | AusNachlauf |
+| 70 | Control pause run-on | Regelpause Nachlauf |
+| 71 | Fault run-on | Störnachlauf |
+| 72 | Timed fault run-on | Zeitlicher Störnachlauf |
+| 73 | Fault lockout circulation pump | StörverriegelungUmwälzpumpe |
+| 74 | Control pause auxiliary heating | Regelpause Standheizen |
+| 75 | Control pause supplementary heating | Regelpause Zuheizen |
+| 76 | Control pause supplementary heating with circulation pump | RegelpauseZuheizenmitUmwälzpumpe |
+| 77 | Circulation pump without heating function | Umwälzpumpe ohne Heizfunktion |
+| 78 | Wait loop overvoltage | WarteschleifeÜberspannung |
+| 79 | Update fault memory | Fehlerspeicher aktualisieren |
+| 80 | Wait loop | Warteschleife |
 | 81 | Component test | Komponententest |
-| 82 | Boostbetrieb | Boostbetrieb |
-| 83 | Abkühlen | Abkühlen |
-| 84 | Heizgeräteverriegelung permanent | Heizgeräteverriegelung permanent |
+| 82 | Boost mode | Boostbetrieb |
+| 83 | Cooling down | Abkühlen |
+| 84 | Heater lockout permanent | Heizgeräteverriegelung permanent |
 | 85 | Blower interruption | Gebläseunterbrechung |
-| 86 | Brennermotor losreissen | Brennermotor losreissen |
-| 87 | Temperaturabfrage | Temperaturabfrage |
-| 88 | Vorlauf undervoltage | Vorlauf Unterspannung |
-| 89 | Unfallabfrage | Unfallabfrage |
-| 90 | Störnachlauf solenoid valve | Störnachlauf Magnetventil |
-| 91 | Fault memory aktualisieren solenoid valve | Fehlerspeicher aktualisieren Magnetventil |
-| 92 | Zeitlicher Störnachlauf solenoid valve | Zeitlicher Störnachlauf Magnetventil |
-| 93 | Startversuch | Startversuch |
-| 94 | Vorlaufverlängerung | Vorlaufverlängerung |
-| 95 | Combustion operation | Brennbetrieb |
-| 96 | zeitlicher Störnachlauf at undervoltage | zeitlicher Störnachlauf bei Unterspannung |
-| 97 | Fault memory aktualisieren during Ausschalten | Fehlerspeicher aktualisieren beim Ausschalten |
-| 98 | Rampe Vollast | Rampe Vollast |
-| 99 | TRS-cooling | TRS-Kühlung |
-| 100 | Restwärmenutzung | Restwärmenutzung |
-| 101 | ADR-state activated | ADR-Zustand aktiviert |
-| 102 | Bereit | Bereit |
-| 103 | Brennerregeneration | Brennerregeneration |
-| 104 | Initialisierung_Prozess | Initialisierung_Prozess |
-| 105 | Sleep_Mode | Sleep_Mode |
-| 106 | Fortsetzung Brennstofffördern | Fortsetzung Brennstofffördern |
-| 107 | Fortsetzung stabilization, cold start | Fortsetzung Stabilisierung, Kaltstart |
-| 108 | Fortsetzung stabilization, Warmstart | Fortsetzung Stabilisierung, Warmstart |
-| 109 | Nachlauframpe | Nachlauframpe |
-| 110 | Restwärmenutzung | Restwärmenutzung |
-| 111 | Stabilization, cold start | Stabilisierung, Kaltstart |
+| 86 | Burner motor breakaway | Brennermotor losreissen |
+| 87 | Temperature query | Temperaturabfrage |
+| 88 | Pre-run undervoltage | Vorlauf Unterspannung |
+| 89 | Accident query | Unfallabfrage |
+| 90 | Fault run-on solenoid valve | Störnachlauf Magnetventil |
+| 91 | Update fault memory solenoid valve | Fehlerspeicher aktualisieren Magnetventil |
+| 92 | Timed fault run-on solenoid valve | Zeitlicher Störnachlauf Magnetventil |
+| 93 | Start attempt | Startversuch |
+| 94 | Pre-run extension | Vorlaufverlängerung |
+| 95 | Combustion mode | Brennbetrieb |
+| 96 | Timed fault run-on at undervoltage | zeitlicher Störnachlauf bei Unterspannung |
+| 97 | Update fault memory on switch-off | Fehlerspeicher aktualisieren beim Ausschalten |
+| 98 | Ramp full load | Rampe Vollast |
+| 99 | TRS cooling | TRS-Kühlung |
+| 100 | Residual heat utilisation | Restwärmenutzung |
+| 101 | ADR state activated | ADR-Zustand aktiviert |
+| 102 | Ready | Bereit |
+| 103 | Burner regeneration | Brennerregeneration |
+| 104 | Initialisation process | Initialisierung_Prozess |
+| 105 | Sleep mode | Sleep_Mode |
+| 106 | Continuation fuel delivery | Fortsetzung Brennstofffördern |
+| 107 | Continuation stabilisation, cold start | Fortsetzung Stabilisierung, Kaltstart |
+| 108 | Continuation stabilisation, warm start | Fortsetzung Stabilisierung, Warmstart |
+| 109 | Run-on ramp | Nachlauframpe |
+| 110 | Residual heat utilisation | Restwärmenutzung |
+| 111 | Stabilisation, cold start | Stabilisierung, Kaltstart |
 | 112 | PROCESSOR OFF | PROCESSOR OFF |
 | 113 | WAIT STATE | WAIT STATE |
-| 114 | Fortsetzung stabilization | Fortsetzung Stabilisierung |
+| 114 | Continuation stabilisation | Fortsetzung Stabilisierung |
 | 115 | MOTOR CHECK | MOTOR CHECK |
 | 116 | FLAME MONITOR COOLING | FLAME MONITOR COOLING |
 | 117 | PRE-GLOWING1 | PRE-GLOWING1 |
 | 118 | PRE-GLOWING2 | PRE-GLOWING2 |
-| 119 | PRE-GLOWING2 Partial Load start | PRE-GLOWING2 Partial Load Start |
+| 119 | PRE-GLOWING2 partial load start | PRE-GLOWING2 Partial Load Start |
 | 120 | FLAME MONITOR CALIBRATION START | FLAME MONITOR CALIBRATION START |
 | 121 | START1 | START1 |
 | 122 | START2 | START2 |
@@ -261,43 +261,43 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 125 | START5 | START5 |
 | 126 | START6 | START6 |
 | 127 | GLOW PLUG RAMP | GLOW PLUG RAMP |
-| 128 | FLAME MONITOR MEASURUEMENT1 | FLAME MONITOR MEASURUEMENT1 |
-| 129 | FLAME MONITOR MEASURUEMENT2 | FLAME MONITOR MEASURUEMENT2 |
-| 130 | START1 Partial Load start | START1 Partial Load Start |
-| 131 | START2 Partial Load start | START2 Partial Load Start |
-| 132 | START3 Partial Load start | START3 Partial Load Start |
-| 133 | START4 Partial Load start | START4 Partial Load Start |
-| 134 | START5 Partial Load start | START5 Partial Load Start |
-| 135 | START6 Partial Load start | START6 Partial Load Start |
-| 136 | GLOW PLUG RAMP Partial Load start | GLOW PLUG RAMP Partial Load Start |
-| 137 | FLAME MONITOR MEASUREMENT1 Partial Load | FLAME MONITOR MEASUREMENT1 Partial Load |
-| 138 | FLAME MONITOR MEASUREMENT2 Partial Load | FLAME MONITOR MEASUREMENT2 Partial Load |
+| 128 | FLAME MONITOR MEASUREMENT1 | FLAME MONITOR MEASURUEMENT1 |
+| 129 | FLAME MONITOR MEASUREMENT2 | FLAME MONITOR MEASURUEMENT2 |
+| 130 | START1 partial load start | START1 Partial Load Start |
+| 131 | START2 partial load start | START2 Partial Load Start |
+| 132 | START3 partial load start | START3 Partial Load Start |
+| 133 | START4 partial load start | START4 Partial Load Start |
+| 134 | START5 partial load start | START5 Partial Load Start |
+| 135 | START6 partial load start | START6 Partial Load Start |
+| 136 | GLOW PLUG RAMP partial load start | GLOW PLUG RAMP Partial Load Start |
+| 137 | FLAME MONITOR MEASUREMENT1 partial load | FLAME MONITOR MEASUREMENT1 Partial Load |
+| 138 | FLAME MONITOR MEASUREMENT2 partial load | FLAME MONITOR MEASUREMENT2 Partial Load |
 | 139 | FULL LOAD | FULL LOAD |
 | 140 | RAMP DOWN | RAMP DOWN |
 | 141 | PARTIAL LOAD | PARTIAL LOAD |
 | 142 | RAMP UP | RAMP UP |
 | 143 | PAUSE | PAUSE |
-| 144 | BURN-OUT Full Load | BURN-OUT Full Load |
-| 145 | BURN-OUT Partial Load | BURN-OUT Partial Load |
+| 144 | BURN-OUT full load | BURN-OUT Full Load |
+| 145 | BURN-OUT partial load | BURN-OUT Partial Load |
 | 146 | BURN-OUT start | BURN-OUT Start |
-| 147 | BURN-OUT Partial Load start | BURN-OUT Partial Load Start |
-| 148 | BURN-OUT Overheating | BURN-OUT Overheating |
+| 147 | BURN-OUT partial load start | BURN-OUT Partial Load Start |
+| 148 | BURN-OUT overheating | BURN-OUT Overheating |
 | 149 | COOL1 | COOL1 |
 | 150 | FLAME MONITOR CALIBRATION | FLAME MONITOR CALIBRATION |
 | 151 | COOL2 | COOL2 |
 | 152 | BOOST | BOOST |
 | 153 | CONTINUOUS COOLANT TEMPERATURE CONTROL | CONTINUOUS COOLANT TEMPERATURE CONTROL |
 | 154 | CONTINUOUS COOLANT TEMPERATURE CONTROL-HOLD | CONTINUOUS COOLANT TEMPERATURE CONTROL-HOLD |
-| 160 | Stabilization, Warmstart | Stabilisierung, Warmstart |
-| 161 | Startrampe, cold start | Startrampe, Kaltstart |
-| 162 | Startrampe, Warmstart | Startrampe, Warmstart |
-| 163 | Test Restwärmenutzung | Test Restwärmenutzung |
+| 160 | Stabilisation, warm start | Stabilisierung, Warmstart |
+| 161 | Start ramp, cold start | Startrampe, Kaltstart |
+| 162 | Start ramp, warm start | Startrampe, Warmstart |
+| 163 | Test residual heat utilisation | Test Restwärmenutzung |
 
 ## IHKA_G11.TAB_SH_KRAFTSTOFFART
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | Benzin | Benzin |
+| 1 | Gasoline | Benzin |
 | 2 | Diesel | Diesel |
 | 3 | RME | RME |
-| 255 | invalid | ungültig |
+| 255 | Invalid | ungültig |

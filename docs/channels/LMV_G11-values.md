@@ -8,8 +8,8 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | not iO | nicht iO |
-| 1 | iO | iO |
+| 0 | Not OK | nicht iO |
+| 1 | OK | iO |
 
 ## LMV_G11.RDBI_ADS_DOP
 
@@ -28,6 +28,6 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | ECUMehrmalsProgrammierbar | ECUMehrmalsProgrammierbar |
-| 1 | ECUMindestensEinmalVollstaendigProgrammierbar | ECUMindestensEinmalVollstaendigProgrammierbar |
-| 2 | ECUNichtMehrProgrammierbar | ECUNichtMehrProgrammierbar |
+| 0 | ECU programmable multiple times | ECUMehrmalsProgrammierbar |
+| 1 | ECU fully programmable at least once | ECUMindestensEinmalVollstaendigProgrammierbar |
+| 2 | ECU no longer programmable | ECUNichtMehrProgrammierbar |
