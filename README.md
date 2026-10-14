@@ -62,6 +62,13 @@ watch table, and press **Start logging** to write a CSV.
   modules from the last scan, or sweeps first if there wasn't one (about a
   minute). While logging, the fault list is saved next to the log as
   `<log>_faults_<time>.csv`; otherwise you're asked where to save it.
+- **Open log...** replays a CSV the GUI logged earlier through the table and
+  chart at the speed it was recorded (pauses over 2 s are shortened).
+
+Until you connect, the table and chart run on made-up **demo data** (engine
+speed, pedal, road speed, boost setpoint, bank 2 lambda, oil temperature),
+marked "DEMO DATA" on the chart. It stops the moment you press **Connect** or
+open a log, and its points are dropped so they never mix with real ones.
 
 The log is written to disk about once a second, so a crash or flat battery
 loses at most a second. Changing the watched channels while logging starts a
