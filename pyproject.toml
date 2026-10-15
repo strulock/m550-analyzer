@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "n63read"
-version = "0.3.5"
+version = "0.3.6"
 description = "Read-only BMW N63TU2 DME reader over ENET (HSFZ)"
 readme = "README.md"
 license = "MIT"
