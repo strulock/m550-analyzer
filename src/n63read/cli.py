@@ -35,9 +35,9 @@ import os
 import sys
 import time
 
-from n63read import __version__, core, diag, update
+from n63read import __version__, core, diag, share, update
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
-                          Hsfz, HsfzError, NegativeResponse, decode)
+                          HsfzError, NegativeResponse, decode)
 
 
 def _catalog(path):
@@ -47,7 +47,14 @@ def _catalog(path):
     except FileNotFoundError as e:
         sys.exit(str(e))
     cat.update(core.load_module_catalogs())
-    return cat
+    return core.add_bank2(cat)
+
+
+def _tester(args, timeout=None):
+    """The car: shared from the app or a running log if one holds it, else
+    this command's own connections."""
+    return share.open_tester(args.ip, args.source,
+                             args.timeout if timeout is None else timeout)
 
 
 # -------------------------------------------------------------- operations
@@ -88,15 +95,21 @@ def op_faults(args):
     texts = core.load_fault_texts()
     lang = "text_de" if args.german else "text_en"
 
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+    with _tester(args) as h:
         try:
             dtcs = h.read_dtcs(args.target, args.mask)
         except NegativeResponse as e:
             sys.exit("module 0x%02X refused 0x19: %s"
                      % (args.target, NRC.get(e.code, "nrc 0x%02X" % e.code)))
 
+    hidden = 0
+    if not args.every_code:
+        kept = [d for d in dtcs if core.dtc_failed(d[1])]
+        hidden, dtcs = len(dtcs) - len(kept), kept
     if not dtcs:
-        print("No fault codes reported by module 0x%02X." % args.target)
+        print("No fault codes reported by module 0x%02X%s." % (
+            args.target, " (%d listed codes never failed; --every-code shows them)"
+            % hidden if hidden else ""))
         return
 
     if not texts:
@@ -115,6 +128,8 @@ def op_faults(args):
         print("  %-8s status 0x%02X - %s" % ("", status, core.dtc_status_summary(status)))
         if args.verbose:
             print("  %-8s %s" % ("", ", ".join(core.dtc_status_flags(status)) or "no bits set"))
+    if hidden:
+        print("\n%d listed code(s) never failed; --every-code shows them." % hidden)
     if unknown:
         print("\n%d code(s) had no catalog entry. The SGBD for this module "
               "may not be among those extracted - see PROJECT.md." % unknown)
@@ -123,7 +138,7 @@ def op_faults(args):
 def _faults_report(args):
     """faults --all / --out: every module (or one), printed and optionally saved."""
     lang = "text_de" if args.german else "text_en"
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+    with _tester(args) as h:
         if args.all:
             lo, hi = core.SWEEP_RANGE
             print("Finding modules 0x%02X-0x%02X, waiting %g s per address..."
@@ -135,7 +150,8 @@ def _faults_report(args):
         else:
             modules = [args.target]
         rows = core.read_all_faults(
-            h, modules, progress=lambda a: print("Reading 0x%02X..." % a, end="\r", flush=True))
+            h, modules, progress=lambda a: print("Reading 0x%02X..." % a, end="\r", flush=True),
+            everything=args.every_code)
 
     current = None
     for r in rows:
@@ -168,7 +184,7 @@ def op_scan(args):
     alive = []
     # The per-address wait is the probe timeout, not --timeout: most
     # addresses are empty and each one costs the full wait.
-    with Hsfz(args.ip, source=args.source, timeout=args.probe_timeout) as h:
+    with _tester(args, args.probe_timeout) as h:
         for target in range(lo, hi + 1):
             try:
                 h.tester_present(target)
@@ -191,14 +207,14 @@ def op_read(args):
     layouts = core.record_layouts(cat)
     enums = core.load_enum_tables()
     lang = "text_de" if args.german else "text_en"
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+    with _tester(args) as h:
         for name in args.names:
             meta = cat.get(name)
             if not meta:
                 print("%-34s UNKNOWN (not in catalog)" % name)
                 continue
             did = int(meta["ID"], 16)
-            module = int(meta["MODULE"], 16) if meta.get("MODULE") else args.target
+            module = core.channel_target(meta, args.target)
             try:
                 raw = h.read_did(module, did)
             except HsfzError as e:
@@ -234,10 +250,17 @@ def op_log(args):
 
     t0 = last_flush = time.time()
     n = 0
+    host = None
     try:
         reader = core.ChannelReader(core.record_layouts(cat), args.target)
-        with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+        with _tester(args) as h:
+            if not getattr(h, "shared", False):
+                # We hold the car: lend it to other n63read processes.
+                host = share.Host(args.ip).start()
             while True:
+                if host:
+                    host.serve(h)
+                    h.tidy()
                 row = [round(time.time() - t0, 3)]
                 sample = reader.read(h, chans)
                 for name, _, _ in chans:
@@ -255,6 +278,8 @@ def op_log(args):
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
+        if host:
+            host.stop()
         out.close()
         print("wrote %d samples to %s" % (n, args.out))
 
@@ -377,7 +402,7 @@ def op_check(args):
         w = csv.writer(out)
         w.writerow(["module", "did", "job", "status", "detail", "reply_bytes", "raw"])
     try:
-        with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+        with _tester(args) as h:
             for module in modules:
                 keys = sorted(k for k in layouts if k[0] == module)
                 name = core.MODULE_LABELS.get(module, "DME" if module == args.target
@@ -412,7 +437,7 @@ def op_check(args):
 
 def op_gps(args):
     """Read the head unit's GPS fix and position. Raw bytes shown for checking."""
-    with Hsfz(args.ip, source=args.source, timeout=args.timeout) as h:
+    with _tester(args) as h:
         while True:
             try:
                 status = h.read_did(args.target, core.GPS_STATUS_DID)
@@ -507,6 +532,9 @@ def build_parser():
                     help="also list the individual statusOfDTC bits")
     sp.add_argument("--all", action="store_true",
                     help="find every module that answers and read them all")
+    sp.add_argument("--every-code", action="store_true",
+                    help="also list codes that never failed (modules list every "
+                         "code they can raise)")
     probe_arg(sp)
     sp.add_argument("--out", metavar="CSV",
                     help="also save the faults to a CSV file")
@@ -575,7 +603,9 @@ def main(argv=None):
         args.func(args)
     except (ConnectionError, TimeoutError, HsfzError) as e:
         # No car, wrong IP, or firewall: a message, not a traceback.
-        sys.exit("cannot talk to %s: %s" % (getattr(args, "ip", "the car"), e))
+        why = core.connection_problem(e)
+        sys.exit("cannot talk to %s: %s%s" % (getattr(args, "ip", "the car"), e,
+                                              "\n" + why if why else ""))
 
 
 if __name__ == "__main__":

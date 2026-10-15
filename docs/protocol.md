@@ -94,6 +94,30 @@ RAM). The SGBDs define hundreds of jobs using these. The catalogs keep only
 the `0x22`-readable entries, and a catalog row is only ever read with
 `0x22`. A job like `SVK_LESEN` that BMW lists as "22;2E" is still only read.
 
+## Two connections
+
+The gateway takes two diagnostic connections at once, each from its own
+tester address. A third is reset at once (`WinError 10054`). Two from the
+same address knock one of them off without an error: its replies just stop.
+(Seen on the car, October 2026.)
+
+n63read's `Tester` uses them like this:
+
+| Connection | Tester address | Carries |
+|---|---|---|
+| 1 | `0xF4` | the master DME `0x12` and every other module |
+| 2 | `0xF5` | the slave DME `0x13` (bank 2), opened on its first request and closed after 10 s unused |
+
+Each request names its module, so one connection reaches any number of
+modules; bank 2 has its own connection by design.
+
+Other n63read processes don't connect while one holds the car: the app
+(while connected) or a running `n63read log` lends its connections through
+`n63read.share`, a localhost port whose number and token are in
+`%APPDATA%\n63read\tester.json`. The CLI and Claude's tools borrow it if it's
+there and connect themselves only if it isn't (Claude's as `0xF6`/`0xF7`).
+Borrowed requests go through the same read-only check.
+
 ## Fault memory (0x19)
 
 `19 02 FF` returns `59 02 <availability mask>` then 4-byte records:
@@ -102,6 +126,14 @@ the `0x22`-readable entries, and a catalog row is only ever read with
 bitfield (testFailed, pending, confirmed...), and `BMW_dtc_status_byte.csv`
 gives BMW's own wording for each combination. `0x05` is "currently present
 and stored", `0x04` "not present now, stored".
+
+`FF` as the mask returns every code a module can raise, mostly ones that
+never failed (status `0x50`, `0x40`: not tested yet). n63read shows a code
+only if it failed: now, this or last cycle, or since the memory was cleared
+(`--every-code` lists the rest). The DSC (`0x29`) on this car reports most
+of its list as `0x58`: *confirmed* together with *not tested since the
+clear*, test entries ("Dummy-Fehlerspeichereintrag") included. That
+combination doesn't count as failed.
 
 Many fault codes embed the module address: the generic *Energiesparmode
 aktiv* (energy-saving mode active) code is `02AA00`, where `AA` is the

@@ -101,18 +101,32 @@ them. Three unanswered identifiers in a row skip the rest of that module.
 ### Bank 2 and the slave DME
 
 The project began because BimmerLink doesn't show bank 2 values for this
-engine. On the N63TU2 the master DME (`0x12`) answers bank 2 identifiers
-directly: `ILAG2` (`0x588A`, lambda bank 2) is verified on the car. The older
-N63TU used a master/slave pair with identical identifier tables on both, plus
-values the two exchange over CAN ("Koppelgrößen": e.g. `0x5922` lambda bank 1
-coupling value, `0x591B` normalised pedal). If a module scan of this car ever
-shows a second engine computer near `0x12`, reading the same identifiers at
-its address is the first thing to try.
+engine. This car has two engine computers: the master DME at `0x12` (bank 1)
+and the slave at `0x13` (bank 2), with the same identifier table.
+
+- A few bank 2 values have identifiers of their own on the master: `ILAG2`
+  (`0x588A`, lambda bank 2) reads from `0x12`.
+- Most don't. The catalog's `_BANK2` / `_2` identifiers (for example
+  `SPG_POS_SENS_EWG_BANK2`, `0x4655`) are refused on both DMEs. Bank 2's
+  values come from `0x13` under the bank-1 identifier: `SPG_POS_SENS_EWG`
+  (`0x4653`) is bank 1's wastegate position voltage at `0x12` and bank 2's at
+  `0x13` (4.37 V and 4.19 V at idle, so not an echo). Knock levels for
+  cylinders 5–8 (`IUKZ5`...) likewise answer nothing at `0x12`.
+- n63read lists every DME channel a second time as `NAME@0x13` (the GUI's
+  *Engine bank 2* group), read from the slave over its own connection; see
+  [protocol](protocol.md#two-connections).
+- Not readable on either DME in the default session: `SOLL_POS_EWG`
+  (`0x4659`). `I_EWG_POS` (`0x5927`) at `0x13` replies with the wrong
+  identifier (`0x4653`).
+
+When a bank 2 value looks unavailable, try the bank-1 name with `@0x13`
+before concluding it can't be read.
 
 ## Modules not covered yet
 
 ARS active roll stabilisation as its own module (`0x04`/`0x25`; the
 suspension module reports some roll signals), the instrument
-cluster's live values (only its fault texts are in), the gateway, and any
-second DME. Send the `.prg` for any of these and it can be added the same way
+cluster's live values (only its fault texts are in), and the gateway. The
+car's fault memory also has codes from `0x56`, `0x5D`, `0x61` and `0x6D`,
+which have no texts yet. Send the `.prg` for any of these and it can be added the same way
 (add it to `MODULES` in `tools/module_catalog.py`).

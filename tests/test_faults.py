@@ -98,19 +98,16 @@ gui = pytest.importorskip("n63read.gui")
 def poller_for(car, q):
     p = gui.Poller("127.0.0.1", 0x12, 0xF4, 1.0, q)
     p.interval = 0.05
-    real = core.Hsfz
-
     # Point the poller's connection at the fake car.
-    def hsfz(ip, source, timeout, **kw):
-        return real(ip, port=car.port, source=source, timeout=timeout, **kw)
-    gui.core = type("C", (), dict(vars(core), Hsfz=staticmethod(hsfz)))
+    core.Hsfz.__init__.__defaults__ = (car.port, core.TESTER_ADDR, 3.0)
     return p
 
 
 @pytest.fixture
 def restore_gui_core():
+    saved = core.Hsfz.__init__.__defaults__
     yield
-    gui.core = core
+    core.Hsfz.__init__.__defaults__ = saved
 
 
 def chan(name):

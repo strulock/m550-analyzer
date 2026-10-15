@@ -23,6 +23,11 @@ def quick_diagnostics(tmp_path, monkeypatch):
     monkeypatch.setattr(update, "latest_release", offline)
     updates = str(tmp_path / "updates")
     monkeypatch.setattr(update, "updates_dir", lambda: updates)
+    # Each test has its own shared-tester file, so a poller never borrows
+    # another test's connection, and nothing lands in the real %APPDATA%.
+    from n63read import share
+    tester = str(tmp_path / "tester.json")
+    monkeypatch.setattr(share, "state_path", lambda: tester)
     # Logs go under a temp "Documents", never the real one.
     docs = str(tmp_path / "Documents")
     monkeypatch.setattr(core, "documents_dir", lambda: docs)
