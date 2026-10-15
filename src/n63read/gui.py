@@ -26,6 +26,7 @@ UPDATE_FIRST_CHECK_MS = 10000       # first update check after start
 CHART_LINES = 6                     # lines drawn at once; select rows to choose
 DME_LABEL = "Engine (DME)"
 BANK2_LABEL = "Engine bank 2 (DME 0x13)"
+RECORD_LABEL_MAX = 70                   # characters of a record's description shown
 CHECK_BATCH = 10                    # identifiers checked per poll cycle while logging
 # Picker marks for what the car said about a channel's identifier.
 ANSWER_MARKS = {"ok": "\u2713  ", "size": "\u2260  ", "refused": "\u2717  ",
@@ -675,6 +676,17 @@ class App(tk.Tk):
             text = (meta.get(second) or "").strip()
         return "" if text == "-" else text
 
+    def _record_label(self, record, meta):
+        """A record's folder: what the module says it is, then its job name."""
+        first, second = (("JOB_INFO", "JOB_INFO_EN") if self.lang == "de"
+                         else ("JOB_INFO_EN", "JOB_INFO"))
+        text = (meta.get(first) or meta.get(second) or "").strip()
+        if not text or text == "-" or text.upper() == text:
+            return record                   # no description, or just the name again
+        if len(text) > RECORD_LABEL_MAX:
+            text = text[:RECORD_LABEL_MAX].rsplit(" ", 1)[0].rstrip(",;:") + "\u2026"
+        return "%s  -  %s" % (text, record)
+
     def _enum_lang(self):
         return "text_de" if self.lang == "de" else "text_en"
 
@@ -730,7 +742,8 @@ class App(tk.Tk):
                 record = None
             # Search both languages and the code name, whichever is shown.
             hay = " ".join((label, module_label, func, meta.get("INFO") or "",
-                            meta.get("INFO_EN") or "")).lower()
+                            meta.get("INFO_EN") or "", meta.get("JOB_INFO") or "",
+                            meta.get("JOB_INFO_EN") or "")).lower()
             info[name] = (module_label, func, record, label, hay)
         # Undescribed channels sort last and show just their code name.
         order = sorted(info, key=lambda n: (not self._describe(self.catalog[n]),
@@ -835,7 +848,10 @@ class App(tk.Tk):
         if records is None:
             return
         self.picker.delete(*self.picker.get_children(iid))
-        for record in sorted(records, key=lambda r: (r is not None, r or "")):
+        labels = {r: self._record_label(r, self.catalog[records[r][0]])
+                  for r in records if r is not None}
+        for record in sorted(records, key=lambda r: (r is not None,
+                                                     (labels.get(r) or "").lower())):
             names = records[record]
             parent = iid
             if record is not None and len(self.layouts.get(
@@ -844,7 +860,7 @@ class App(tk.Tk):
                 parent = "%s|%s" % (iid, record)
                 self._members[parent] = names
                 self.picker.insert(iid, "end", iid=parent, open=self._expand,
-                                   text="%s  (%d)" % (record, len(names)))
+                                   text="%s  (%d)" % (labels[record], len(names)))
             for name in names:
                 self.picker.insert(parent, "end", iid="c|" + name,
                                    text=self._answer_mark(name) + self._info[name][3])

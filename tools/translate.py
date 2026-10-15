@@ -59,6 +59,15 @@ for _name in ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
               "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301", "PMA_20"):
     COLUMNS[_name + "_measurements.csv"] = ("INFO", "INFO_EN")
     COLUMNS[_name + "_enum_tables.csv"] = ("text_de", "text_en")
+# Further column pairs: the module catalogs also describe each record.
+EXTRA = {name: [("JOB_INFO", "JOB_INFO_EN")]
+         for name in COLUMNS if name.endswith("_measurements.csv")
+         and name != "N63TU2_DME_readable_measurements.csv"}
+
+
+def pairs(name):
+    """Every (German, English) column pair of a data file."""
+    return [COLUMNS[name]] + EXTRA.get(name, [])
 
 # Glossary words that must never be a piece of a compound: articles,
 # prepositions and conjunctions. Without this, "Austria" would split into
@@ -252,12 +261,14 @@ def regenerate(name):
     with open(path, "rb") as f:
         old = f.read()
     rows = _read(path)
-    de_col, en_col = COLUMNS[name]
     header = rows[0]
-    di, ei = header.index(de_col), header.index(en_col)
-    for row in rows[1:]:
-        if len(row) > max(di, ei):
-            row[ei] = translate(row[di])
+    for de_col, en_col in pairs(name):
+        if de_col not in header:
+            continue
+        di, ei = header.index(de_col), header.index(en_col)
+        for row in rows[1:]:
+            if len(row) > max(di, ei):
+                row[ei] = translate(row[di])
     return old, _render(rows)
 
 
@@ -272,11 +283,14 @@ def uncurated():
     out = set()
     for name in CURATED_FILES:
         rows = _read(os.path.join(DATA, name))
-        di = rows[0].index(COLUMNS[name][0])
-        for row in rows[1:]:
-            text = row[di].strip() if len(row) > di else ""
-            if text not in ("", "-") and text not in CURATED_EN:
-                out.add(text)
+        for de_col, _ in pairs(name):
+            if de_col not in rows[0]:
+                continue
+            di = rows[0].index(de_col)
+            for row in rows[1:]:
+                text = row[di].strip() if len(row) > di else ""
+                if text not in ("", "-") and text not in CURATED_EN:
+                    out.add(text)
     return out
 
 
