@@ -14,6 +14,7 @@ src/n63read/
   playback.py   demo data and log replay (no Tk, testable)
   diag.py       connection diagnostics: journal, network snapshot, verdicts,
                 packet capture, the `n63read diag` check
+  graph.py      a channel's pop-out graph: unit conversion, axes, the window
   share.py      lends the car's connections (core.Tester) to other n63read
                 processes on this PC, so there are never more than two
   mcp.py        `n63read mcp`: an MCP server so Claude can use the read-only

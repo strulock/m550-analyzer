@@ -28,6 +28,8 @@ def quick_diagnostics(tmp_path, monkeypatch):
     from n63read import share
     tester = str(tmp_path / "tester.json")
     monkeypatch.setattr(share, "state_path", lambda: tester)
+    templates = str(tmp_path / "templates.json")
+    monkeypatch.setattr(core, "templates_path", lambda: templates)
     # Logs go under a temp "Documents", never the real one.
     docs = str(tmp_path / "Documents")
     monkeypatch.setattr(core, "documents_dir", lambda: docs)
@@ -81,6 +83,7 @@ def reset_app(a):
     a.series.clear()
     a.modules = []
     a.logging_to = None
+    a.template_name = ""
     a.log_btn.config(text="Start logging")
     a.replay_btn.config(text="Open log...")
     a.connect_btn.config(text="Connect")
@@ -120,6 +123,8 @@ def app(shared_app, monkeypatch):
     for name in ("showinfo", "showerror", "showwarning", "askyesno",
                  "askokcancel", "askquestion", "askretrycancel", "askyesnocancel"):
         monkeypatch.setattr(gui.messagebox, name, unexpected(name))
+    for name in ("askstring", "askinteger", "askfloat"):
+        monkeypatch.setattr(gui.simpledialog, name, unexpected(name))
 
     reset_app(shared_app)
     yield shared_app

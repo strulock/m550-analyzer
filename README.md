@@ -113,6 +113,20 @@ in `Documents\BMW Analyzer Logs`.
 - **Open log...** replays a CSV the GUI logged earlier through the table and
   chart at the speed it was recorded (pauses over 2 s are shortened).
 
+- **Templates ▾** saves the watch list under a name and brings it back for
+  the next run (it replaces the watch list). **Delete** removes one. They're
+  kept in `%APPDATA%
+63read	emplates.json`, and `n63read log --template
+  NAME` logs one from the command line.
+- **Graph** (or double-click a row) opens the selected channels in windows of
+  their own, live. Each has a time window (30 s to 1 h, or everything) in
+  seconds, minutes or hours; a value scale that fits what's shown or a
+  fixed range you type in; and, where it makes sense, other units (°C/°F/K,
+  hPa/mbar/bar/kPa/psi, km/h/mph, V/mV, A/mA, kg/h/g/s, Nm/lb-ft...).
+  Hover to read a point off; **Pause** holds the view while data keeps
+  coming; the line under the graph gives min, mean, max and last of what's
+  shown. They keep the last 20,000 points per channel.
+
 - **Add all shown** adds every channel the filter shows, except private head
   unit values (Wi-Fi password and PIN, SIM identity, previous destinations,
   paired devices), which can still be added one at a time.
@@ -340,6 +354,9 @@ n63read faults --ip 169.254.x.x -v           DME fault memory, decoded (codes th
                                              failed; --every-code for all)
 n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
+n63read log --ip 169.254.x.x --template "Idle check"
+                                             log a template saved in the app
+n63read templates                            list the saved templates
 n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
                                              log to Documents\BMW Analyzer Logs
                                              (or --out run.csv)

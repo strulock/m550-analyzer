@@ -1368,6 +1368,42 @@ def save_settings(settings, path=None):
     os.replace(tmp, path)
 
 
+# ---------------------------------------------------------------- templates
+
+def templates_path():
+    return os.path.join(os.path.dirname(availability_path()), "templates.json")
+
+
+def load_templates(path=None):
+    """Saved channel sets: {name: [channel, ...]}; {} if none."""
+    try:
+        with open(path or templates_path(), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {str(k): [str(c) for c in v] for k, v in data.items() if isinstance(v, list)}
+
+
+def save_template(name, channels, path=None):
+    """Save (or replace) one template. Returns all of them."""
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("a template needs a name")
+    templates = load_templates(path)
+    templates[name] = list(channels)
+    save_settings(templates, path or templates_path())
+    return templates
+
+
+def delete_template(name, path=None):
+    templates = load_templates(path)
+    if templates.pop(name, None) is not None:
+        save_settings(templates, path or templates_path())
+    return templates
+
+
 def _avail_key(module, did):
     return "0x%02X:0x%04X" % (module, did)
 

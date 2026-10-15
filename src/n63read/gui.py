@@ -14,14 +14,16 @@ import sys
 import threading
 import time
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
+from collections import deque
 
 import webbrowser
 
-from n63read import __version__, core, diag, playback, share, update
+from n63read import __version__, core, diag, graph, playback, share, update
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
+HISTORY_POINTS = 20000          # timed points kept per channel for pop-out graphs
 UPDATE_FIRST_CHECK_MS = 10000       # first update check after start
 CHART_LINES = 6                     # lines drawn at once; select rows to choose
 DME_LABEL = "Engine (DME)"
@@ -260,6 +262,8 @@ class App(tk.Tk):
         self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
         self.series = {}                     # name -> [values]
+        self.history = {}                    # name -> deque of (seconds, value)
+        self.graphs = {}                     # name -> its pop-out GraphWindow
         self.q = queue.Queue()
         self.poller = None
         self.modules = []                    # addresses found by the last scan
@@ -443,11 +447,20 @@ class App(tk.Tk):
             self.tree.column(c, width=w, anchor="w")
         self.tree.column("#0", width=260)
         self.tree.pack(fill="both", expand=True)
+        self.tree.bind("<Double-Button-1>", lambda e: self._pop_out(
+            [self.tree.identify_row(e.y)] if self.tree.identify_row(e.y) else None))
 
         row = ttk.Frame(right)
         row.pack(fill="x", pady=4)
         ttk.Button(row, text="Remove", command=self._remove).pack(side="left")
         ttk.Button(row, text="Clear", command=self._clear).pack(side="left", padx=4)
+        ttk.Button(row, text="Graph", command=self._pop_out).pack(side="left")
+        self.templates_btn = ttk.Menubutton(row, text="Templates \u25be")
+        self.templates_menu = tk.Menu(self.templates_btn, tearoff=False,
+                                      postcommand=self._fill_templates_menu)
+        self.templates_btn["menu"] = self.templates_menu
+        self.templates_btn.pack(side="left", padx=4)
+        self.template_name = ""
         self.log_btn = ttk.Button(row, text="Start logging", command=self._toggle_log)
         self.log_btn.pack(side="right")
         self.logging_to = None
@@ -1047,6 +1060,7 @@ class App(tk.Tk):
             meta = self.catalog[name]
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
+            self.history[name] = deque(maxlen=HISTORY_POINTS)
             self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
                              values=("", meta["EINHEIT"], name, meta["ID"], ""))
         self._push_channels()
@@ -1055,14 +1069,99 @@ class App(tk.Tk):
         for name in self.tree.selection():
             self.watch = [c for c in self.watch if c[0] != name]
             self.series.pop(name, None)
+            self._forget_history(name)
             self.tree.delete(name)
         self._push_channels()
 
     def _clear(self):
+        for name in list(self.history):
+            self._forget_history(name)
         self.watch.clear()
         self.series.clear()
         self.tree.delete(*self.tree.get_children())
         self._push_channels()
+
+    def _forget_history(self, name):
+        self.history.pop(name, None)
+        window = self.graphs.pop(name, None)
+        if window is not None:
+            try:
+                window.close()
+            except tk.TclError:
+                pass
+
+    # -- pop-out graphs ----------------------------------------------------
+
+    def _pop_out(self, names=None):
+        """A window per chosen channel (the selected rows, else the first)."""
+        names = [n for n in (names or self.tree.selection() or self.tree.get_children()[:1])
+                 if n in self.history]
+        for i, name in enumerate(names):
+            window = self.graphs.get(name)
+            if window is not None and window.winfo_exists():
+                window.lift()
+                continue
+            meta = self.catalog.get(name, {})
+            window = graph.GraphWindow(self, name, self._describe(meta), meta.get("EINHEIT"),
+                                       self.history[name], COLORS[i % len(COLORS)])
+            self.graphs[name] = window
+        return [self.graphs[n] for n in names]
+
+    # -- templates ---------------------------------------------------------
+
+    def _fill_templates_menu(self):
+        m = self.templates_menu
+        m.delete(0, "end")
+        m.add_command(label="Save watch list as template...", command=self._save_template,
+                      state="normal" if self.watch else "disabled")
+        templates = core.load_templates()
+        if not templates:
+            m.add_command(label="(no templates saved yet)", state="disabled")
+            return
+        m.add_separator()
+        for name in sorted(templates, key=str.lower):
+            m.add_command(label="%s  (%d)" % (name, len(templates[name])),
+                          command=lambda n=name: self._load_template(n))
+        delete = tk.Menu(m, tearoff=False)
+        for name in sorted(templates, key=str.lower):
+            delete.add_command(label=name, command=lambda n=name: self._delete_template(n))
+        m.add_separator()
+        m.add_cascade(label="Delete", menu=delete)
+
+    def _save_template(self):
+        if not self.watch:
+            return
+        name = simpledialog.askstring(
+            "Save template", "Name for these %d channels:" % len(self.watch),
+            initialvalue=self.template_name, parent=self)
+        name = (name or "").strip()
+        if not name:
+            return
+        if name in core.load_templates() and not messagebox.askyesno(
+                "Save template", "Replace the template \"%s\"?" % name):
+            return
+        try:
+            core.save_template(name, [n for n, _, _ in self.watch])
+        except OSError as e:
+            messagebox.showerror("Save template", "Could not save: %s" % e)
+            return
+        self.template_name = name
+        self.status.config(text="\u25cf saved template \"%s\" (%d channels)"
+                           % (name, len(self.watch)), foreground="#2d7dd2")
+
+    def _load_template(self, name):
+        names = core.load_templates().get(name, [])
+        known = [n for n in names if n in self.catalog]
+        self._set_watch(known)
+        self.template_name = name
+        missing = len(names) - len(known)
+        self.status.config(text="\u25cf template \"%s\": %d channels%s" % (
+            name, len(known), ", %d no longer in the catalog" % missing if missing else ""),
+            foreground="#2d7dd2")
+
+    def _delete_template(self, name):
+        if messagebox.askyesno("Delete template", "Delete the template \"%s\"?" % name):
+            core.delete_template(name)
 
     def _push_channels(self):
         if self.poller:
@@ -1077,6 +1176,7 @@ class App(tk.Tk):
             meta = self.catalog[name]
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
+            self.history[name] = deque(maxlen=HISTORY_POINTS)
             self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
                              values=("", meta["EINHEIT"], name, meta["ID"], ""))
         self._push_channels()
@@ -1105,6 +1205,8 @@ class App(tk.Tk):
         self.feed = None
         for s in self.series.values():
             s.clear()
+        for h in self.history.values():
+            h.clear()
         self._plot()
 
     def _toggle_replay(self):
@@ -1428,7 +1530,7 @@ class App(tk.Tk):
 
                 if kind == "sample":
                     self._learn(msg[2])
-                    self._show_sample(msg[2])
+                    self._show_sample(msg[2], msg[1])
 
                 elif kind == "checkres":
                     _, key, status, i, total = msg
@@ -1454,7 +1556,7 @@ class App(tk.Tk):
                     _, feed, elapsed, sample = msg
                     if feed is not self.feed:
                         continue                # left over from a stopped feed
-                    self._show_sample(sample)
+                    self._show_sample(sample, elapsed)
                     if feed.kind == "replay":
                         self.status.config(
                             text="● replaying %s  %s / %s" % (
@@ -1570,7 +1672,7 @@ class App(tk.Tk):
             pass
         self.after(60, self._drain)
 
-    def _show_sample(self, sample):
+    def _show_sample(self, sample, elapsed=None):
         for name, (value, unit, note) in sample.items():
             if not self.tree.exists(name):
                 continue
@@ -1589,6 +1691,11 @@ class App(tk.Tk):
                 s = self.series.setdefault(name, [])
                 s.append(float(value))
                 del s[:-PLOT_POINTS]
+                h = self.history.get(name)
+                if h is not None and elapsed is not None:
+                    if h and elapsed < h[-1][0]:
+                        h.clear()               # a new session: its clock restarted
+                    h.append((float(elapsed), float(value)))
         self._plot()
 
     # -- chart -----------------------------------------------------------
