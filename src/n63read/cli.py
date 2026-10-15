@@ -320,6 +320,11 @@ def op_update(args):
         info = update.update(progress=lambda got, size: print(
             "\r  %d / %d KB" % (got // 1024, size // 1024), end="", flush=True))
         if info["setup"]:
+            others = update.others_running()
+            if others:
+                sys.exit("\nnot installing yet: close these first (the installer can't "
+                         "replace files they use):\n%s\nthen run `n63read update` again."
+                         % "\n".join("  %s (process %d)" % (n, p) for p, n in others))
             update.install(info["setup"])
     except update.UpdateError as e:
         diag.record("update", state="failed", error=str(e))

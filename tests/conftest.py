@@ -24,6 +24,8 @@ def quick_diagnostics(tmp_path, monkeypatch):
     monkeypatch.setattr(update, "latest_release", offline)
     updates = str(tmp_path / "updates")
     monkeypatch.setattr(update, "updates_dir", lambda: updates)
+    # No other n63read is running from the app's folder, unless a test says so.
+    monkeypatch.setattr(update, "others_running", lambda folder=None: [])
     # Each test has its own shared-tester file, so a poller never borrows
     # another test's connection, and nothing lands in the real %APPDATA%.
     from n63read import share

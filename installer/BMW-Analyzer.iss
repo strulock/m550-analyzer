@@ -49,9 +49,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\dist\BMW Analyzer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [InstallDelete]
-; Start each version clean: nothing left over from the one before. The *.old,
-; *.previous and *.new files are what the one-file builds' self-update left.
-Type: filesandordirs; Name: "{app}\_internal"
+; Not _internal: emptying it first meant an install that couldn't finish (a
+; file in use) left the app unable to start. New files overwrite the old;
+; anything left over is harmless. The *.old, *.previous and *.new files are
+; what the one-file builds' self-update left.
 Type: files; Name: "{app}\*.old"
 Type: files; Name: "{app}\*.previous"
 Type: files; Name: "{app}\*.new"

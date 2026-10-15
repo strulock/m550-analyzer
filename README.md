@@ -268,6 +268,15 @@ checks for a newer release. If there is one:
 2. **Restart to update** runs it silently, closes n63read, and the installer
    starts it again when it's done. Otherwise it installs when you close
    n63read, ready for next time.
+3. Not while another n63read from the same folder runs (Claude's
+   connection, a command-line `log`): the installer can't replace files in
+   use, and a half-finished update leaves the app unable to start. **Restart
+   to update** offers to close them; closing the app waits for next time;
+   `n63read update` says what to close.
+
+If the app ever says "Failed to start embedded python interpreter", an
+update didn't finish: close n63read and Claude and run the latest
+`BMW-Analyzer-Setup.exe`.
 
 To roll back, install an older release's setup over it.
 

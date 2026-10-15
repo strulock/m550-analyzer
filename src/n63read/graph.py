@@ -172,6 +172,8 @@ class GraphWindow(tk.Toplevel):
         self.hover = None
         self.last_range = (0.0, 1.0)
 
+        self.heading = ttk.Label(self, padding=(8, 6, 8, 0), font=("TkDefaultFont", 10, "bold"))
+        self.heading.pack(fill="x")
         bar = ttk.Frame(self, padding=(8, 6))
         bar.pack(fill="x")
         self.time_label = ttk.Label(bar)
@@ -231,6 +233,7 @@ class GraphWindow(tk.Toplevel):
         if title is not None:
             self.title("%s  -  %s" % (title, self.name) if title and title != self.name
                        else self.name)
+            self.heading.config(text=title or self.name)
         index = self.window_box.current() if self.window_var.get() else 2   # 2 min
         labels = [self._t("all") if seconds is None else label
                   for label, seconds in TIME_WINDOWS]

@@ -77,9 +77,34 @@ jobs:
           $key = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{15CE8A75-71CE-4317-BF3E-1730307815CD}_is1"
           $entry = Get-ItemProperty $key
           "installed version $($entry.DisplayVersion) in $($entry.InstallLocation)"
-          # The app updates itself this way: the same installer, silent, over itself.
+          # The app itself starts and opens its window, not just the CLI.
+          $gui = Start-Process "$app\n63read.exe" -PassThru
+          Start-Sleep 8
+          $gui.Refresh()
+          if ($gui.HasExited) { throw "the app exited at start (code $($gui.ExitCode))" }
+          "app window: " + (Get-Process -Id $gui.Id).MainWindowTitle
+          Stop-Process -Id $gui.Id -Force
+          Start-Sleep 1
+          # The app updates itself this way: the same installer, silent, over
+          # itself. Do it while Claude's n63read connection (n63read-cli mcp)
+          # holds files in the folder, as on the car laptop: the app must still
+          # start afterwards.
+          $psi = [System.Diagnostics.ProcessStartInfo]::new("$app\n63read-cli.exe", "mcp")
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          # Its own (hidden) console: the installer closes it with Ctrl+C, which
+          # would otherwise reach this script too.
+          $psi.CreateNoWindow = $true
+          $mcp = [System.Diagnostics.Process]::Start($psi)
+          Start-Sleep 3
           Start-Process dist\BMW-Analyzer-Setup.exe -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/NORESTART", "/CLOSEAPPLICATIONS"
+          if (-not $mcp.HasExited) { $mcp.Kill(); $mcp.WaitForExit() }
+          if (-not (Test-Path "$app\_internal\base_library.zip")) { throw "the update left _internal incomplete" }
           & "$app\n63read-cli.exe" --version
+          if ($LASTEXITCODE) { exit 1 }
+          Start-Process dist\BMW-Analyzer-Setup.exe -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/NORESTART", "/CLOSEAPPLICATIONS"
+          & "$app\n63read-cli.exe" selftest
           if ($LASTEXITCODE) { exit 1 }
           Start-Process "$app\unins000.exe" -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"
           if (Test-Path "$app\n63read.exe") { throw "uninstall left the exe" }

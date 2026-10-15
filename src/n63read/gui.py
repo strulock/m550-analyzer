@@ -29,6 +29,7 @@ CHART_LINES = 6                     # lines drawn at once; select rows to choose
 DME_LABEL = "Engine (DME)"
 BANK2_LABEL = "Engine bank 2 (DME 0x13)"
 RECORD_LABEL_MAX = 70                   # characters of a record's description shown
+CHART_NAME_MAX = 30                     # ...and of a line's name on the chart
 CHECK_BATCH = 10                    # identifiers checked per poll cycle while logging
 # Picker marks for what the car said about a channel's identifier.
 ANSWER_MARKS = {"ok": "\u2713  ", "size": "\u2260  ", "refused": "\u2717  ",
@@ -572,6 +573,17 @@ class App(tk.Tk):
                 "Restart", "This disconnects from the car%s. Restart now?"
                 % (" and stops logging" if self.logging_to else "")):
             return
+        # The installer can't replace files another n63read is using (Claude's
+        # connection, a command-line log); a half-done update breaks the app.
+        others = update.others_running()
+        if others:
+            if not messagebox.askyesno(
+                    "Restart", "Other n63read programs are running from this folder:\n\n%s"
+                    "\n\nThey have to close for the update. Close them and update now? "
+                    "(Claude reconnects to n63read when you restart it.)"
+                    % "\n".join("  %s (process %d)" % (name, pid) for pid, name in others)):
+                return
+            update.stop([pid for pid, _ in others])
         try:
             update.install(self._update_setup, relaunch=True)
         except update.UpdateError as e:
@@ -1867,7 +1879,7 @@ class App(tk.Tk):
                 c.create_line(*pts, fill=color, width=2, smooth=False)
             meta = self.catalog.get(name, {})
             unit = self._shown_unit(meta)
-            label = "%s  %.5g\u2013%.5g %s" % (name.split(".")[-1][:18],
+            label = "%s  %.5g\u2013%.5g %s" % (self._chart_name(name, meta),
                                                self._shown_value(lo, meta),
                                                self._shown_value(hi, meta), unit)
             c.create_text(pad + (i % 3) * col_w, 8 + (i // 3) * 11, anchor="w",
@@ -1878,7 +1890,7 @@ class App(tk.Tk):
                 c.create_oval(pad + hover * step - 3, y - 3, pad + hover * step + 3, y + 3,
                               outline=color, width=2)
                 readings.append((color, "%s %.5g %s" % (
-                    name.split(".")[-1][:18], self._shown_value(vals[k], meta), unit)))
+                    self._chart_name(name, meta), self._shown_value(vals[k], meta), unit)))
         if readings:
             x = pad + hover * step
             right = x > w / 2
@@ -1886,6 +1898,14 @@ class App(tk.Tk):
                 c.create_text(x - 6 if right else x + 6, h - pad - 4 - 12 * (len(readings) - 1 - j),
                               anchor="se" if right else "sw", fill=color,
                               font=("TkDefaultFont", 8, "bold"), text=text)
+
+    def _chart_name(self, name, meta):
+        """A line's name on the chart: its description in the display
+        language, short; the code name if it has none."""
+        text = self._describe(meta) or name.split(".")[-1]
+        if len(text) > CHART_NAME_MAX:
+            text = text[:CHART_NAME_MAX].rsplit(" ", 1)[0].rstrip(",;:") + "\u2026"
+        return text
 
     def _chart_hover(self, x):
         self.chart_hover = x
@@ -1901,12 +1921,20 @@ class App(tk.Tk):
         if self.poller:
             self.poller.stop()
         self._stop_feed()
-        if self._update_setup:              # a downloaded update installs on the way out
-            try:
-                update.install(self._update_setup)
-            except update.UpdateError:
-                pass
+        self._install_on_exit()
         self.destroy()
+
+    def _install_on_exit(self):
+        """A downloaded update installs on the way out, unless another n63read
+        from this folder is still running: then it waits for next time.
+        Returns True if the installer was started."""
+        if not self._update_setup or update.others_running():
+            return False
+        try:
+            update.install(self._update_setup)
+        except update.UpdateError:
+            return False
+        return True
 
 
 def _clock(seconds):
