@@ -19,7 +19,7 @@ from collections import deque
 
 import webbrowser
 
-from n63read import __version__, core, diag, graph, playback, share, update
+from n63read import __version__, core, diag, graph, playback, share, theme, update
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
@@ -250,6 +250,10 @@ class App(tk.Tk):
         threading.Thread(target=diag.prune, daemon=True).start()
         self._capture = None
         self.lang = self.settings.get("language", "en")
+        self.units = self.settings.get("units", "metric")         # or "imperial"
+        self.theme_name = self.settings.get("theme", "light")     # light, dark, system
+        self.palette = theme.palette(self.theme_name)
+        self.chart_hover = None                                   # x over the chart
         if self.lang not in core.LANGUAGES:
             self.lang = "en"
         self.catalog = self._load_catalog()
@@ -271,6 +275,7 @@ class App(tk.Tk):
         self.feed = None                     # DemoFeed or ReplayFeed while not connected
 
         self._build()
+        self.palette = theme.apply(self, self.theme_name)
         self._start_demo()
         self.after(60, self._drain)
         self.after(10000, self._save_answers)
@@ -342,6 +347,8 @@ class App(tk.Tk):
                             values=list(core.LANGUAGES.values()))
         lang.pack(side="right", padx=(8, 0))
         lang.bind("<<ComboboxSelected>>", lambda e: self._set_language())
+        ttk.Button(bar, text="Settings", command=self._open_settings).pack(
+            side="right", padx=(8, 0))
         self.diag_btn = ttk.Menubutton(bar, text="Diagnostics \u25be")
         dmenu = tk.Menu(self.diag_btn, tearoff=False)
         self.diag_var = tk.BooleanVar(value=diag.enabled)
@@ -468,6 +475,8 @@ class App(tk.Tk):
         self.canvas = tk.Canvas(right, height=200, bg="#fbfbfb",
                                 highlightthickness=1, highlightbackground="#ddd")
         self.canvas.pack(fill="x", pady=(6, 0))
+        self.canvas.bind("<Motion>", lambda e: self._chart_hover(e.x))
+        self.canvas.bind("<Leave>", lambda e: self._chart_hover(None))
 
         self._refilter()
 
@@ -720,6 +729,102 @@ class App(tk.Tk):
             if self.tree.exists(name):
                 self.tree.item(name, text=self._describe(meta) or name)
                 self.tree.set(name, "note", "")     # refilled in this language
+        for name, window in list(self.graphs.items()):
+            if window.winfo_exists():
+                window.set_language(code, self._describe(self.catalog.get(name, {})))
+        self._plot()
+
+    # -- settings --------------------------------------------------------
+
+    def _shown_unit(self, meta):
+        """The unit a channel is displayed in, for the chosen unit system."""
+        return graph.display_unit(meta.get("EINHEIT"), self.units)
+
+    def _shown_value(self, value, meta):
+        """A number in the displayed unit (the logged one stays the car's)."""
+        try:
+            return graph.converter(meta.get("EINHEIT"), self._shown_unit(meta))(value)
+        except ValueError:
+            return value
+
+    def _open_settings(self):
+        if getattr(self, "settings_window", None) and self.settings_window.winfo_exists():
+            self.settings_window.lift()
+            return
+        win = self.settings_window = tk.Toplevel(self)
+        win.title("Settings")
+        win.resizable(False, False)
+        win.transient(self)
+        body = ttk.Frame(win, padding=14)
+        body.pack(fill="both", expand=True)
+
+        def group(title, row):
+            ttk.Label(body, text=title, font=("TkDefaultFont", 9, "bold")).grid(
+                row=row, column=0, sticky="nw", padx=(0, 18), pady=(0, 10))
+            frame = ttk.Frame(body)
+            frame.grid(row=row, column=1, sticky="w", pady=(0, 10))
+            return frame
+
+        f = group("Language", 0)
+        for name in core.LANGUAGES.values():
+            ttk.Radiobutton(f, text=name, value=name, variable=self.lang_var,
+                            command=self._set_language).pack(side="left", padx=(0, 10))
+        f = group("Units", 1)
+        self.units_var = tk.StringVar(value=self.units)
+        for value, text in (("metric", "Metric (\u00b0C, bar, km/h)"),
+                            ("imperial", "Imperial (\u00b0F, psi, mph)")):
+            ttk.Radiobutton(f, text=text, value=value, variable=self.units_var,
+                            command=lambda: self._set_units(self.units_var.get())).pack(
+                anchor="w")
+        ttk.Label(f, text="Logs keep the car's own units.", foreground=self.palette["muted"]
+                  ).pack(anchor="w")
+        f = group("Theme", 2)
+        self.theme_var = tk.StringVar(value=self.theme_name)
+        for value, text in (("light", "Light"), ("dark", "Dark"), ("system", "Like Windows")):
+            ttk.Radiobutton(f, text=text, value=value, variable=self.theme_var,
+                            command=lambda: self._set_theme(self.theme_var.get())).pack(
+                side="left", padx=(0, 10))
+        f = group("Updates", 3)
+        ttk.Checkbutton(f, text="Update automatically", variable=self.autoupdate_var,
+                        command=self._set_auto_update).pack(anchor="w")
+        f = group("Diagnostics", 4)
+        ttk.Checkbutton(f, text="Record connection diagnostics", variable=self.diag_var,
+                        command=self._set_diagnostics).pack(anchor="w")
+        ttk.Button(body, text="Close", command=win.destroy).grid(
+            row=5, column=1, sticky="e")
+        theme.apply(self, self.theme_name)
+
+    def _save_setting(self, key, value):
+        self.settings[key] = value
+        try:
+            core.save_settings(self.settings)
+        except OSError:
+            pass                        # it still applies this session
+
+    def _set_units(self, system):
+        if system not in ("metric", "imperial") or system == self.units:
+            return
+        self.units = system
+        self._save_setting("units", system)
+        for name, _did, meta in self.watch:
+            if self.tree.exists(name):
+                self.tree.set(name, "u", self._shown_unit(meta))
+                self.tree.set(name, "v", "")            # refilled in the new unit
+        for name, window in list(self.graphs.items()):
+            if window.winfo_exists():
+                window.set_unit(self._shown_unit(self.catalog.get(name, {})))
+        self._plot()
+
+    def _set_theme(self, name):
+        if name not in theme.THEMES:
+            return
+        self.theme_name = name
+        self._save_setting("theme", name)
+        self.palette = theme.apply(self, name)
+        for window in list(self.graphs.values()):
+            if window.winfo_exists():
+                window.set_colors(self.palette)
+        self._plot()
 
     def _index_catalog(self):
         """Per channel: module label, function group, record, label, search text.
@@ -1062,7 +1167,7 @@ class App(tk.Tk):
             self.series[name] = []
             self.history[name] = deque(maxlen=HISTORY_POINTS)
             self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
-                             values=("", meta["EINHEIT"], name, meta["ID"], ""))
+                             values=("", self._shown_unit(meta), name, meta["ID"], ""))
         self._push_channels()
 
     def _remove(self):
@@ -1103,7 +1208,9 @@ class App(tk.Tk):
                 continue
             meta = self.catalog.get(name, {})
             window = graph.GraphWindow(self, name, self._describe(meta), meta.get("EINHEIT"),
-                                       self.history[name], COLORS[i % len(COLORS)])
+                                       self.history[name], COLORS[i % len(COLORS)],
+                                       lang=self.lang, show_unit=self._shown_unit(meta),
+                                       colors=self.palette)
             self.graphs[name] = window
         return [self.graphs[n] for n in names]
 
@@ -1178,7 +1285,7 @@ class App(tk.Tk):
             self.series[name] = []
             self.history[name] = deque(maxlen=HISTORY_POINTS)
             self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
-                             values=("", meta["EINHEIT"], name, meta["ID"], ""))
+                             values=("", self._shown_unit(meta), name, meta["ID"], ""))
         self._push_channels()
 
     # -- demo and replay -------------------------------------------------
@@ -1677,10 +1784,15 @@ class App(tk.Tk):
             if not self.tree.exists(name):
                 continue
             meta = self.catalog.get(name, {})
-            shown = "" if value is None else (
-                "%.4g" % value if isinstance(value, float) else value)
-            if isinstance(value, float) and meta.get("EINHEIT") == "deg":
-                shown = "%.6f" % value          # %.4g would round a coordinate to ~10 km
+            # Shown in the chosen units; charted and logged as the car sent it.
+            display = value
+            if isinstance(value, float) or (isinstance(value, int) and
+                                            self._shown_unit(meta) != meta.get("EINHEIT")):
+                display = float(self._shown_value(value, meta))
+            shown = "" if display is None else (
+                "%.4g" % display if isinstance(display, float) else display)
+            if isinstance(display, float) and meta.get("EINHEIT") == "deg":
+                shown = "%.6f" % display        # %.4g would round a coordinate to ~10 km
             if not note:
                 # Enumerated values stay numbers (they log and plot); the
                 # words go in Status.
@@ -1707,8 +1819,10 @@ class App(tk.Tk):
         h = c.winfo_height() or 200
         pad = 28
 
+        p = self.palette
+        c.configure(bg=p["canvas"], highlightbackground=p["frame"])
         if self.feed:
-            c.create_text(w - pad, h - 8, anchor="e", fill="#c8c8c8",
+            c.create_text(w - pad, h - 8, anchor="e", fill=p["faint"],
                           font=("TkDefaultFont", 9, "bold"),
                           text="DEMO DATA" if self.feed.kind == "demo" else "REPLAY")
 
@@ -1721,12 +1835,19 @@ class App(tk.Tk):
             chosen = [n for n, v in self.series.items() if len(v) > 1]
         active = [(n, self.series[n]) for n in chosen[:CHART_LINES]]
         if not active:
-            c.create_text(w // 2, h // 2, text="no numeric data yet", fill="#aaa")
+            c.create_text(w // 2, h // 2, text="no numeric data yet", fill=p["muted"])
             return
 
         for frac in (0.0, 0.5, 1.0):
             y = pad + (h - 2 * pad) * frac
-            c.create_line(pad, y, w - pad, y, fill="#e8e8e8")
+            c.create_line(pad, y, w - pad, y, fill=p["grid"])
+        step = (w - 2 * pad) / max(1, PLOT_POINTS - 1)
+        hover = None
+        if self.chart_hover is not None and pad <= self.chart_hover <= w - pad:
+            hover = int(round((self.chart_hover - pad) / step))
+            c.create_line(pad + hover * step, pad, pad + hover * step, h - pad,
+                          fill=p["muted"], dash=(2, 2))
+        readings = []
 
         col_w = max(150, (w - 2 * pad) // 3)
         for i, (name, vals) in enumerate(active):
@@ -1744,9 +1865,31 @@ class App(tk.Tk):
                 pts += [x, y]
             if len(pts) >= 4:
                 c.create_line(*pts, fill=color, width=2, smooth=False)
-            label = "%s  %.5g–%.5g" % (name.split(".")[-1][:18], lo, hi)
+            meta = self.catalog.get(name, {})
+            unit = self._shown_unit(meta)
+            label = "%s  %.5g\u2013%.5g %s" % (name.split(".")[-1][:18],
+                                               self._shown_value(lo, meta),
+                                               self._shown_value(hi, meta), unit)
             c.create_text(pad + (i % 3) * col_w, 8 + (i // 3) * 11, anchor="w",
                           fill=color, font=("TkDefaultFont", 7), text=label)
+            k = None if hover is None else hover - start
+            if k is not None and 0 <= k < len(vals):
+                y = pad + (h - 2 * pad) * (1 - (vals[k] - lo) / span)
+                c.create_oval(pad + hover * step - 3, y - 3, pad + hover * step + 3, y + 3,
+                              outline=color, width=2)
+                readings.append((color, "%s %.5g %s" % (
+                    name.split(".")[-1][:18], self._shown_value(vals[k], meta), unit)))
+        if readings:
+            x = pad + hover * step
+            right = x > w / 2
+            for j, (color, text) in enumerate(readings):
+                c.create_text(x - 6 if right else x + 6, h - pad - 4 - 12 * (len(readings) - 1 - j),
+                              anchor="se" if right else "sw", fill=color,
+                              font=("TkDefaultFont", 8, "bold"), text=text)
+
+    def _chart_hover(self, x):
+        self.chart_hover = x
+        self._plot()
 
     def _close(self):
         self._stop_check()

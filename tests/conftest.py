@@ -98,6 +98,12 @@ def reset_app(a):
     if a.lang != "en":
         a.lang_var.set(core.LANGUAGES["en"])
         a._set_language()
+    a._set_units("metric")
+    if a.theme_name != "light":
+        a._set_theme("light")
+    if getattr(a, "settings_window", None) and a.settings_window.winfo_exists():
+        a.settings_window.destroy()
+    a.chart_hover = None
     while True:
         try:
             a.q.get_nowait()
