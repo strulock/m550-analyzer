@@ -1,3 +1,4 @@
+import gc
 import queue
 import time
 
@@ -135,6 +136,10 @@ def app(shared_app, monkeypatch):
     reset_app(shared_app)
     yield shared_app
     reset_app(shared_app)
+    # Free this test's Tk variables now, on the main thread. Collected later
+    # on another thread (the fake car's), Tk stalls that thread for a
+    # second waiting for a main loop, and its replies come too late.
+    gc.collect()
 
 
 def pump(app, cond, timeout=5.0):
