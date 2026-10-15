@@ -120,67 +120,146 @@ def stats(values):
             "last": values[-1], "n": len(values)}
 
 
+# What each unit becomes when the app is set to imperial. Units with no
+# everyday imperial form (V, A, %, s...) stay as they are.
+IMPERIAL = {"°C": "°F", "hPa": "psi", "mbar": "psi", "bar": "psi", "kPa": "psi",
+            "MPa": "psi", "km/h": "mph", "km": "mi", "m": "ft", "cm": "in", "mm": "in",
+            "kg/h": "lb/min", "Nm": "lb-ft"}
+
+
+def display_unit(unit, system="metric"):
+    """The unit a value in `unit` is shown in, for "metric" or "imperial"."""
+    unit = canonical(unit)
+    return IMPERIAL.get(unit, unit) if system == "imperial" else unit
+
+
+# The window's own words, in the app's two languages.
+TEXT = {
+    "en": {"time": "Time", "unit": "Unit", "scale": "Scale", "auto": "Auto", "to": "to",
+           "pause": "Pause", "resume": "Resume", "all": "All", "waiting": "waiting for data",
+           "axis_t": "time (%s)", "axis_v": "value", "at": "%s %s at %s %s",
+           "stats": "shown: min %s   mean %s   max %s   last %s %s   (%d points)",
+           "paused": "PAUSED"},
+    "de": {"time": "Zeit", "unit": "Einheit", "scale": "Skala", "auto": "Auto", "to": "bis",
+           "pause": "Anhalten", "resume": "Weiter", "all": "Alle", "waiting": "warte auf Daten",
+           "axis_t": "Zeit (%s)", "axis_v": "Wert", "at": "%s %s bei %s %s",
+           "stats": "angezeigt: Min %s   Mittel %s   Max %s   zuletzt %s %s   (%d Punkte)",
+           "paused": "ANGEHALTEN"},
+}
+
+
+def fmt(value, lang="en"):
+    """A number for display: German uses a decimal comma."""
+    text = "%.6g" % value
+    return text.replace(".", ",") if lang == "de" else text
+
+
 class GraphWindow(tk.Toplevel):
     """One channel, live, with its own axes."""
 
     REFRESH_MS = 250
     PAD_L, PAD_R, PAD_T, PAD_B = 64, 16, 12, 34
 
-    def __init__(self, master, name, title, unit, history, color="#2d7dd2"):
+    def __init__(self, master, name, title, unit, history, color="#2d7dd2", *,
+                 lang="en", show_unit=None, colors=None):
         super().__init__(master)
         self.name, self.unit, self.history, self.color = name, canonical(unit), history, color
-        self.title("%s  -  %s" % (title, name) if title and title != name else name)
+        self.lang = lang if lang in TEXT else "en"
+        self.colors = colors or {}
         self.geometry("820x460")
         self.minsize(520, 320)
         self.paused = None                  # the points frozen by Pause
         self.hover = None
+        self.last_range = (0.0, 1.0)
 
         bar = ttk.Frame(self, padding=(8, 6))
         bar.pack(fill="x")
-        ttk.Label(bar, text="Time").pack(side="left")
-        self.window_var = tk.StringVar(value="2 min")
-        ttk.Combobox(bar, textvariable=self.window_var, width=7, state="readonly",
-                     values=[w for w, _ in TIME_WINDOWS]).pack(side="left", padx=(4, 2))
+        self.time_label = ttk.Label(bar)
+        self.time_label.pack(side="left")
+        self.window_var = tk.StringVar()
+        self.window_box = ttk.Combobox(bar, textvariable=self.window_var, width=7,
+                                       state="readonly")
+        self.window_box.pack(side="left", padx=(4, 2))
         self.tunit_var = tk.StringVar(value="s")
         ttk.Combobox(bar, textvariable=self.tunit_var, width=4, state="readonly",
                      values=list(TIME_UNITS)).pack(side="left", padx=(0, 12))
 
-        ttk.Label(bar, text="Unit").pack(side="left")
-        self.unit_var = tk.StringVar(value=self.unit)
+        self.unit_label = ttk.Label(bar)
+        self.unit_label.pack(side="left")
         choices = units_for(self.unit)
+        self.unit_var = tk.StringVar(value=show_unit if show_unit in choices else self.unit)
         ttk.Combobox(bar, textvariable=self.unit_var, width=7, state="readonly"
                      if len(choices) > 1 else "disabled",
                      values=choices).pack(side="left", padx=(4, 12))
 
-        ttk.Label(bar, text="Scale").pack(side="left")
+        self.scale_label = ttk.Label(bar)
+        self.scale_label.pack(side="left")
         self.auto_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(bar, text="Auto", variable=self.auto_var,
-                        command=self._auto_changed).pack(side="left", padx=(4, 2))
+        self.auto_check = ttk.Checkbutton(bar, variable=self.auto_var,
+                                          command=self._auto_changed)
+        self.auto_check.pack(side="left", padx=(4, 2))
         self.min_var, self.max_var = tk.StringVar(), tk.StringVar()
         self.min_entry = ttk.Entry(bar, textvariable=self.min_var, width=8, state="disabled")
         self.min_entry.pack(side="left")
-        ttk.Label(bar, text="to").pack(side="left", padx=2)
+        self.to_label = ttk.Label(bar)
+        self.to_label.pack(side="left", padx=2)
         self.max_entry = ttk.Entry(bar, textvariable=self.max_var, width=8, state="disabled")
         self.max_entry.pack(side="left", padx=(0, 12))
 
-        self.pause_btn = ttk.Button(bar, text="Pause", command=self._toggle_pause)
+        self.pause_btn = ttk.Button(bar, command=self._toggle_pause)
         self.pause_btn.pack(side="right")
 
-        self.canvas = tk.Canvas(self, bg="#fbfbfb", highlightthickness=0)
+        self.canvas = tk.Canvas(self, highlightthickness=0,
+                                bg=self.colors.get("canvas", "#fbfbfb"))
         self.canvas.pack(fill="both", expand=True, padx=8)
-        self.stats_label = ttk.Label(self, padding=(8, 4), foreground="#555")
+        self.stats_label = ttk.Label(self, padding=(8, 4))
         self.stats_label.pack(fill="x")
         self.canvas.bind("<Motion>", self._motion)
         self.canvas.bind("<Leave>", lambda e: self._set_hover(None))
+        self.set_language(self.lang, title)
         self._job = self.after(10, self._tick)
         self.protocol("WM_DELETE_WINDOW", self.close)
+
+    def _t(self, key):
+        return TEXT[self.lang][key]
+
+    # -- what the app changes
+
+    def set_language(self, lang, title=None):
+        """Relabel everything in `lang`; `title` is the channel's description."""
+        self.lang = lang if lang in TEXT else "en"
+        if title is not None:
+            self.title("%s  -  %s" % (title, self.name) if title and title != self.name
+                       else self.name)
+        index = self.window_box.current() if self.window_var.get() else 2   # 2 min
+        labels = [self._t("all") if seconds is None else label
+                  for label, seconds in TIME_WINDOWS]
+        self.window_box.configure(values=labels)
+        self.window_box.current(index if index >= 0 else 2)
+        self.time_label.config(text=self._t("time"))
+        self.unit_label.config(text=self._t("unit"))
+        self.scale_label.config(text=self._t("scale"))
+        self.auto_check.config(text=self._t("auto"))
+        self.to_label.config(text=self._t("to"))
+        self.pause_btn.config(text=self._t("resume" if self.paused is not None else "pause"))
+        self.draw()
+
+    def set_colors(self, colors):
+        self.colors = colors or {}
+        self.canvas.configure(bg=self.colors.get("canvas", "#fbfbfb"))
+        self.draw()
+
+    def set_unit(self, unit):
+        if unit in units_for(self.unit):
+            self.unit_var.set(unit)
+            self.draw()
 
     # -- controls
 
     def _auto_changed(self):
         state = "disabled" if self.auto_var.get() else "normal"
         if not self.auto_var.get() and not self.min_var.get():
-            lo, hi = self.last_range if hasattr(self, "last_range") else (0.0, 1.0)
+            lo, hi = self.last_range
             self.min_var.set("%.4g" % lo)
             self.max_var.set("%.4g" % hi)
         self.min_entry.config(state=state)
@@ -189,10 +268,9 @@ class GraphWindow(tk.Toplevel):
     def _toggle_pause(self):
         if self.paused is None:
             self.paused = list(self.history)
-            self.pause_btn.config(text="Resume")
         else:
             self.paused = None
-            self.pause_btn.config(text="Pause")
+        self.pause_btn.config(text=self._t("resume" if self.paused is not None else "pause"))
 
     def _set_hover(self, x):
         self.hover = x
@@ -215,11 +293,13 @@ class GraphWindow(tk.Toplevel):
 
     def settings(self):
         """(window s, time unit factor, value unit, fixed range or None)."""
-        window = dict(TIME_WINDOWS).get(self.window_var.get(), 120)
+        index = self.window_box.current()
+        window = TIME_WINDOWS[index][1] if index >= 0 else 120
         fixed = None
         if not self.auto_var.get():
             try:
-                fixed = (float(self.min_var.get()), float(self.max_var.get()))
+                fixed = (float(self.min_var.get().replace(",", ".")),
+                         float(self.max_var.get().replace(",", ".")))
             except ValueError:
                 fixed = None
         return window, TIME_UNITS.get(self.tunit_var.get(), 1.0), self.unit_var.get(), fixed
@@ -227,6 +307,7 @@ class GraphWindow(tk.Toplevel):
     def draw(self):
         c = self.canvas
         c.delete("all")
+        col = self.colors.get
         w, h = max(c.winfo_width(), 200), max(c.winfo_height(), 120)
         L, R, T, B = self.PAD_L, w - self.PAD_R, self.PAD_T, h - self.PAD_B
         window, tfactor, unit, fixed = self.settings()
@@ -235,8 +316,9 @@ class GraphWindow(tk.Toplevel):
         except ValueError:
             conv, unit = (lambda v: v), self.unit
         points = [(t, conv(v)) for t, v in visible(self.paused or list(self.history), window)]
+        self.stats_label.config(foreground=col("muted", "#555"))
         if len(points) < 2:
-            c.create_text(w // 2, h // 2, text="waiting for data", fill="#aaa")
+            c.create_text(w // 2, h // 2, text=self._t("waiting"), fill=col("muted", "#aaa"))
             self.stats_label.config(text="")
             return
         t0, t1 = points[0][0], points[-1][0]
@@ -253,19 +335,22 @@ class GraphWindow(tk.Toplevel):
             return B - (B - T) * (v - lo) / (hi - lo)
 
         font = ("TkDefaultFont", 8)
+        axis = col("axis", "#666")
         for v in nice_ticks(lo, hi):
             if lo <= v <= hi:
-                c.create_line(L, py(v), R, py(v), fill="#e6e6e6")
-                c.create_text(L - 6, py(v), anchor="e", text="%.6g" % v, font=font, fill="#666")
+                c.create_line(L, py(v), R, py(v), fill=col("grid", "#e6e6e6"))
+                c.create_text(L - 6, py(v), anchor="e", text=fmt(v, self.lang), font=font,
+                              fill=axis)
         for t in nice_ticks(t0 / tfactor, t1 / tfactor, 6):
             x = px(t * tfactor)
             if L <= x <= R:
-                c.create_line(x, T, x, B, fill="#efefef")
-                c.create_text(x, B + 4, anchor="n", text="%.6g" % t, font=font, fill="#666")
-        c.create_rectangle(L, T, R, B, outline="#cfcfcf")
-        c.create_text((L + R) // 2, h - 4, anchor="s", font=font, fill="#666",
-                      text="time (%s)" % self.tunit_var.get())
-        c.create_text(8, T, anchor="nw", font=font, fill="#666", text=unit or "value")
+                c.create_line(x, T, x, B, fill=col("grid2", "#efefef"))
+                c.create_text(x, B + 4, anchor="n", text=fmt(t, self.lang), font=font,
+                              fill=axis)
+        c.create_rectangle(L, T, R, B, outline=col("frame", "#cfcfcf"))
+        c.create_text((L + R) // 2, h - 4, anchor="s", font=font, fill=axis,
+                      text=self._t("axis_t") % self.tunit_var.get())
+        c.create_text(8, T, anchor="nw", font=font, fill=axis, text=unit or self._t("axis_v"))
 
         coords = []
         for t, v in points:
@@ -275,13 +360,17 @@ class GraphWindow(tk.Toplevel):
         if self.hover is not None and L <= self.hover <= R:
             t, v = min(points, key=lambda p: abs(px(p[0]) - self.hover))
             x, y = px(t), py(v)
-            c.create_line(x, T, x, B, fill="#999", dash=(2, 2))
+            c.create_line(x, T, x, B, fill=col("muted", "#999"), dash=(2, 2))
             c.create_oval(x - 3, y - 3, x + 3, y + 3, outline=self.color, width=2)
-            c.create_text(min(x + 8, R - 4), T + 4, anchor="ne" if x + 8 > R - 120 else "nw",
-                          font=font, text="%.6g %s at %.4g %s" % (
-                              v, unit, t / tfactor, self.tunit_var.get()))
+            c.create_text(min(x + 8, R - 4), T + 4, anchor="ne" if x + 8 > R - 160 else "nw",
+                          font=font, fill=col("fg", "#1e1e1e"),
+                          text=self._t("at") % (fmt(v, self.lang), unit,
+                                                fmt(t / tfactor, self.lang),
+                                                self.tunit_var.get()))
         s = stats([v for _, v in points])
-        self.stats_label.config(text="shown: min %.6g   mean %.6g   max %.6g   last %.6g %s"
-                                "   (%d points)%s" % (s["min"], s["mean"], s["max"], s["last"],
-                                                     unit, s["n"],
-                                                     "   PAUSED" if self.paused else ""))
+        text = self._t("stats") % (fmt(s["min"], self.lang), fmt(s["mean"], self.lang),
+                                   fmt(s["max"], self.lang), fmt(s["last"], self.lang),
+                                   unit, s["n"])
+        if self.paused is not None:
+            text += "   " + self._t("paused")
+        self.stats_label.config(text=text)

@@ -125,15 +125,28 @@ in `Documents\BMW Analyzer Logs`.
   hPa/mbar/bar/kPa/psi, km/h/mph, V/mV, A/mA, kg/h/g/s, Nm/lb-ft...).
   Hover to read a point off; **Pause** holds the view while data keeps
   coming; the line under the graph gives min, mean, max and last of what's
-  shown. They keep the last 20,000 points per channel.
+  shown. Graphs follow the language, units and theme settings. They keep the last 20,000 points per channel.
 
 - **Add all shown** adds every channel the filter shows, except private head
   unit values (Wi-Fi password and PIN, SIM identity, previous destinations,
   paired devices), which can still be added one at a time.
 
-**Language** (top right) switches channel descriptions, value texts in the
-Status column and fault descriptions between English and Deutsch (BMW's
-original German). The filter searches both, whichever is shown, and the
+**Settings** (top right) has, in one place:
+
+- **Language**: English or Deutsch, as below.
+- **Units**: metric or imperial. Imperial shows °F, psi, mph, miles, lb-ft,
+  lb/min and inches in the watch table, the chart and the graphs. Logs keep
+  the car's own (metric) units, so they compare between runs.
+- **Theme**: light, dark, or like Windows.
+- **Update automatically** and **Record connection diagnostics**, also in
+  the version and Diagnostics menus.
+
+Hover over the chart to read off every line's value, in the displayed
+units, at that moment.
+
+**Language** (top right, and in Settings) switches channel descriptions,
+value texts in the Status column, fault descriptions and the pop-out graphs
+between English and Deutsch (BMW's original German). The filter searches both, whichever is shown, and the
 choice is remembered (`%APPDATA%\n63read\settings.json`). Code names
 (`ILAG2`, `EGS_ISTGANG.ISTGANG`) stay as they are in both: they're the
 column names in logs.
