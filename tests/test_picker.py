@@ -85,6 +85,26 @@ def test_groups_fill_lazily_and_keep_records_together(app):
     assert app.picker.exists(record)
     assert set(app._members[record]) == {"HU_STATUS_GPS_POSITION." + f for f in
                                           ("VALIDITY", "LATITUDE", "LONGITUDE", "HEIGHT")}
+    # The folder says what the record is, in English, then its job name.
+    assert app.picker.item(record, "text") == (
+        "Current GPS position: validity, latitude, longitude, altitude  -  "
+        "HU_STATUS_GPS_POSITION  (4)")
+
+
+def test_record_folders_follow_the_language_and_stay_short(app):
+    gps = {"JOB_INFO": "Aktuelle GPS-Position", "JOB_INFO_EN": "Current GPS position"}
+    assert app._record_label("HU_X", gps) == "Current GPS position  -  HU_X"
+    app.lang = "de"
+    try:
+        assert app._record_label("HU_X", gps) == "Aktuelle GPS-Position  -  HU_X"
+    finally:
+        app.lang = "en"
+    long = {"JOB_INFO_EN": "This DID is used to read out the history " * 4}
+    label = app._record_label("BDC_X", long)
+    assert label.endswith("…  -  BDC_X") and len(label) < 90
+    # No description, or only the job name again: just the name.
+    assert app._record_label("EGS_Y", {"JOB_INFO_EN": "CAN_LERNFUNKTION"}) == "EGS_Y"
+    assert app._record_label("EGS_Y", {}) == "EGS_Y"
 
 
 def test_filter_expands_small_results(app):

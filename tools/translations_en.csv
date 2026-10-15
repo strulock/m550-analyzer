@@ -281,6 +281,7 @@
 A,A
 A4A,A4A
 AD-Wert Schaltpaddles,Shift paddle ADC value
+ADAPTIONSWERTE_GLSHSCTRKF3,ADAPTIONSWERTE_GLSHSCTRKF3
 ADAPTION_AKTIV,Adaptation active
 ADAPTION_INAKTIV,Adaptation inactive
 ADC-Wert Ablassventil LS,"ADC value, discharge valve LS"
@@ -325,6 +326,8 @@ Abbruchgrund RSU,RSU abort reason
 Abbruchzaehler Diagnosefunktion EGSDCMN lesen,Read abort counter of diagnostic function EGSDCMN
 Abbruchzaehler der parallelisierten Diagnose Lambdasonden und Katalysator,Abort counter of parallelised lambda sensor and catalytic converter diagnosis
 Abbruchzaehler der parallelisierten Diagnose Lambdasonden und Katalysator Bank2,Abort counter of the parallelised lambda sensor and catalytic converter diagnosis bank 2
+Abfrage der Temperaturen des Steuergerätes.,Query of the control unit temperatures.
+"Abfrage des Status aller freischaltbaren Applikationen, z.B. Navigation.","Query of the status of all unlockable applications, e.g. navigation."
 Abgastemperatur hinter Hauptkat aus Modell,Exhaust gas temperature downstream of main catalyst from model
 Abgastemperatur hinter Hauptkat aus Modell Bank 2,Exhaust gas temperature downstream of main catalyst from model bank 2
 Abgastemperatur nach Katalysator aus Modell,Exhaust gas temperature downstream of catalyst from model
@@ -358,6 +361,8 @@ Absolutdruckrohwert Wasserdrucksensor SENT,Water pressure sensor SENT absolute p
 "Absolutwert Radbeschleunigung Hinten Rechts (nach oben positiv, im Stand ca. -9,81m/ss))","Absolute value of wheel acceleration, rear right (upwards positive, approx. -9.81 m/s² at standstill)"
 "Absolutwert der Radbeschleunigung Vorne Links (nach oben positiv, im Stand ca. -9,81m/ss)","Absolute value of wheel acceleration, front left (upwards positive, approx. -9.81 m/s² at standstill)"
 "Absolutwert der Radbeschleunigung Vorne Rechts (nach oben positiv, im Stand ca. -9,81m/ss)","Absolute value of wheel acceleration, front right (upwards positive, approx. -9.81 m/s² at standstill)"
+Absperrventil für Kühlmittelskreis,Shut-off valve for coolant circuit
+Abstand bzw. Berührungsfläche zwischen Hand und Lenkrad (gemessener Wert am A/D-Wandler),Distance or contact area between hand and steering wheel (value measured at the A/D converter)
 Abstand des detektierten Objekts mit dem kürzesten Abstand links (65533 = kein Objekt; 65534 = nicht verbaut; 65535 = Ungültig),"Distance to the nearest detected object, left (65533 = no object; 65534 = not fitted; 65535 = invalid)"
 Abstand des detektierten Objekts mit dem kürzesten Abstand rechts (65533 = kein Objekt; 65534 = nicht verbaut; 65535 = Ungültig),"Distance to the nearest detected object, right (65533 = no object; 65534 = not fitted; 65535 = invalid)"
 Abstand zur Startfaehigkeit,Margin to starting capability
@@ -436,10 +441,13 @@ Adaptionswert fuer MisfDet_dn Zylinder 6,Adaptation value for MisfDet_dn cylinde
 Adaptionswert fuer MisfDet_dn Zylinder 7,Adaptation value for MisfDet_dn cylinder 7
 Adaptionswert fuer MisfDet_dn Zylinder 8,Adaptation value for MisfDet_dn cylinder 8
 Adaptionswert fuer MisfDet_dn Zylinder 9,Adaptation value for MisfDet_dn cylinder 9
+Adaptionswerte Gang einlegen,Adaptation values for gear engagement
+Adaptionswerte KPF Kupplung,Adaptation values KPF clutch
 Adaptionswerte fuer Kupplungsverschleiss ueber Schlupf lesen.,Read adaptation values for clutch wear via slip
 Adaptiv,Adaptive
 Adaptive,Adaptive
 Address format,Address format
+AddressInformation,AddressInformation
 Adjusts the reaction on  strong signal changes depending on the time the input value is stable. 0 = no adjustment (old filter algorithm) 1-65535 = number of dim cycles the input value has to be stable Range: [0x0000¿0xFFFF],"Adjusts the reaction to strong signal changes depending on how long the input value is stable. 0 = no adjustment (old filter algorithm), 1-65535 = number of dim cycles the input value has to be stable. Range: [0x0000–0xFFFF]"
 Ailinger-Steuergerät,Ailinger control unit
 AirMon_nrFltIdObdRdrCrkcsLeakDiag_C  Diagnose Kurbelgehäuseentlueftung (PCV) Leckage,AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Crankcase ventilation (PCV) leak diagnosis
@@ -471,6 +479,8 @@ Aktiviert durch Codierung und Deaktiviert durch SWT,Activated by coding and deac
 Aktiviert durch Codierung und SWT Freischaltcode eingespielt,Activated by coding and SWT enabling code imported
 Aktiviert durch Codierung und Teilweise Aktiviert durch SWT,Activated by coding and partially activated by SWT
 Aktiviert durch SWT,Activated by SWT
+Aktiviert/Deaktiviert DAB Following- UND TP Funktionen.,Activates/deactivates DAB following and TP functions.
+Aktiviert/Deaktiviert TP und RDS Funktionen des analogen Teils des Tuners.,Activates/deactivates TP and RDS functions of the analog tuner section.
 "Aktivierung Abbiegelicht Funktion,  0 inaktiv, 1 aktiv","Cornering light function activation, 0 inactive, 1 active"
 "Aktivierung DLS Funktion, 0 inaktiv, 1 aktiv","DLS function activation, 0 inactive, 1 active"
 Aktivierung der AFS-Funktion 0...inaktiv 1...aktiv,AFS function activation 0...inactive 1...active
@@ -480,6 +490,7 @@ Aktivierung der LWR-Funktion: 0...inaktiv 1...aktiv,Headlight range adjustment f
 Aktivierung erfolgreich,Activation successful
 Aktivierung fehlgeschlagen,Activation failed
 Aktivierung läuft,Activation in progress
+Aktivierung/Deaktivierung der Aussenlichtfunktionen für die Montageprozesse.,Activation/deactivation of the exterior light functions for assembly processes.
 Aktivierungswert,Activation value
 Aktivierungszustand SBR (Klemmen oder PWF),SBR activation state (terminals or vehicle power state)
 Aktivstatus der Komponente,Component active status
@@ -495,6 +506,7 @@ Aktor degradiert zur Nullpositionregelung,Actuator degraded to zero position con
 Aktor eingeschränkter Regler  - Vorsteuersignale fehlen,Actuator restricted controller - pilot control signals missing
 Aktor temporäre Volldegradation - Motor nicht ansteuerbar,Actuator temporary full degradation - motor cannot be activated
 Aktualitaet Minimumwarnung,Minimum warning up to date
+Aktuell eingelegter Gang,Currently engaged gear
 Aktuell verbaut,Currently fitted
 "Aktuell verbaut - ja, nein","Currently fitted - yes, no"
 Aktuell vom WW-Aktuator berechneter Offsetwert in mA.  0xFFFFFFFF = ungültig.,Offset value in mA currently calculated by the WW actuator. 0xFFFFFFFF = invalid.
@@ -503,10 +515,12 @@ Aktuelle Fahrlichtsituation links auslesen,Read current left driving light situa
 Aktuelle Fahrlichtsituation rechts auslesen,Read current right driving light situation
 Aktuelle Fensterheber-Position in Hall-Pulsen (0 bedeutet komplett geschlossen),Current window lifter position in Hall pulses (0 means fully closed)
 Aktuelle Fensterheber-Position in Millimeter (0 bedeutet komplett geschlossen),Current window lifter position in millimetres (0 means fully closed)
+"Aktuelle GPS-Position: Gültigkeit, Breite, Länge, Höhe","Current GPS position: validity, latitude, longitude, altitude"
 Aktuelle Momentenverteilung bezogen auf die Fahrzeugebene und VA,Current torque distribution relative to vehicle level and front axle
 Aktuelle PAL Status,Current PAL status
 Aktuelle Polspannung des Speichers,Current terminal voltage of storage unit
 Aktuelle Position des Fensterhebers,Current window lifter position
+Aktuelle Position und Bewegung der ELSV,Current position and movement of the ELSV
 Aktuelle RE Position,Current wheel electronics position
 Aktuelle RE Status,Current wheel electronics status
 Aktuelle Regelabweichung WMM Steller,Current control deviation WMM actuator
@@ -539,6 +553,7 @@ Aktueller Schlüssel nicht gültig,Current key not valid
 Aktueller SoC Qualitaetswert des Speichers,Current storage unit SoC quality value
 Aktueller SoC des Speichers,Current storage unit SoC
 Aktueller Status Trennelement,Current isolating element status
+Aktueller Status der ILE 3. Sitzreihe Statusrückmeldungen auf dem LIN,"Current status of the ILE, 3rd seat row (status feedback on the LIN)"
 Aktueller Strom Leistungszusatzspeicher,Present current of auxiliary power storage
 Aktueller Strom des Speichers,Current storage unit current
 "Aktueller Stromwert in mA, wie er vom Wischer HW Treiber gemeldet und vom SafeIO zum WW-Aktuator weitergeleitet wird. 0xFFFFFFFF = ungültig.",Current wiper current in mA as reported by the wiper hardware driver and forwarded by SafeIO to the WW actuator. 0xFFFFFFFF = invalid.
@@ -600,6 +615,7 @@ An Blinken Stufe 3,"On, flashing level 3"
 An Kein Blinken,"On, no flashing"
 An Verbrennung teilnehmender Luftmassenstrom,Air mass flow taking part in combustion
 Analogwert Fototransistor im CID,Analog value of the phototransistor in the CID
+Analogwertewerte von Kältemittelverdichter Gen. 2.0,Analog values of refrigerant compressor Gen. 2.0
 Andere,Other
 Anforderung CSB Momentenverschiebung (HA zu VA) vom ZFM (FR: RQ_CHNG_REPAT_MX),CSB torque shift request (rear axle to front axle) from ZFM (FR: RQ_CHNG_REPAT_MX)
 Anforderung Detailmessung Oelniveau Ausgangsgroesse,"Request for detailed oil level measurement, output value"
@@ -653,6 +669,7 @@ Ansteuerroutine laeuft,Activation routine running
 Ansteuertastverhaeltnis der Kraftstoffpumpe,Fuel pump activation duty cycle
 "Ansteuerung der CC-Meldung ID12 -10, Fahrwerk gestört","Activation of CC message ID12 -10, chassis malfunction"
 "Ansteuerung der CC-Meldung ID204, Fahrwerk temporär gestört","Activation of CC message ID204, chassis temporarily malfunctioning"
+Ansteuerung der DSC-Pumpe in 2 Stufen für EMV-Versuche,Activation of the DSC pump in 2 stages for EMC tests
 Ansteuerung des Schleudersymbols ID707,Activation of skid symbol ID707
 Ansteuerungsmodus fuer den VVT Motor,Activation mode for the VVT motor
 Ansteuerwert DKG Absperr-Ventil,Control value for DKG shut-off valve
@@ -766,12 +783,14 @@ Anzahl der Audio-CDs die von der Gracenote DB erkannt wurden,Number of audio CDs
 Anzahl der Dateien die in der Musik DB gespeichert sind,Number of files stored in the music DB
 "Anzahl der Dateien, die Probleme bei der Wiedergabe verursachten",Number of files that caused playback problems
 Anzahl der Fahrzyklen > 10 min,Number of drive cycles > 10 min
+Anzahl der IKF-Aktivierungen der IKF-Funktionen,Number of IKF activations of the IKF functions
 Anzahl der Klenme 15 Zyklen in denen der RestartsInCurrentCl15Cycle Zähler zurückgesetzt wurde,Number of terminal 15 cycles in which the RestartsInCurrentCl15Cycle counter was reset
 Anzahl der Ports,Number of ports
 Anzahl der Restarts wegen Kurzschluss innerhalb des aktuellen Klemme 15 Zyklus,Number of restarts due to short circuit within the current terminal 15 cycle
 Anzahl der SARAH Konfigurationen,Number of SARAH configurations
 Anzahl der SARAH Konfigurationen über Einstellungsmenu (letzte Tastenbedienung mehr als 5 min zurückliegend),Number of SARAH configurations via the settings menu (last button press more than 5 min ago)
 Anzahl der Schritte für eine ganze Umdrehung der Kulissenscheibe.,Number of steps for one full revolution of the cam disc
+Anzahl der Schritte von Zentralantrieb,Number of steps of the central drive
 Anzahl der Schritte zur ersten Flanke der kurzen Nocke.,Number of steps to the first edge of the short cam
 Anzahl der Schritte zur ersten Flanke der langen Nocke.,Number of steps to the first edge of the long cam
 Anzahl der Schritte zur zweiten Flanke der kurzen Nocke.,Number of steps to the second edge of the short cam
@@ -831,6 +850,7 @@ Aufwachgrund ECU (SBC),ECU wake-up reason (SBC)
 August,August
 Auktueller Zählerstand,Current counter reading
 Aus,Off
+AusLesen Nullpunkt Hoehenstandssensoren,Read zero point of ride height sensors
 AusNachlauf,Off run-on
 Ausbrennen,Burn-out
 Ausbrennen TRS,Burn-out TRS
@@ -840,6 +860,7 @@ Ausgabe Höhenstand  hinten links (mm),Rear left ride height output (mm)
 Ausgabe Höhenstand  vorne links (mm),Front left ride height output (mm)
 "Ausgabe Kältemitteldruck in bar : 0 - 125, 126 = Kurzschluss nach Masse, 127 = Kurzschluss nach Plus bzw. Leitungsunterbrechnung oder Signal ungültig","Refrigerant pressure output in bar: 0 - 125, 126 = short circuit to ground, 127 = short circuit to positive or open circuit, or signal invalid"
 Ausgabe Magnetzone (aus Slave)  Auflistung siehe Tabelle TAB_MAGNETZONE,"Magnetic zone output (from slave), see table TAB_MAGNETZONE for list"
+Ausgabe Rohwert Höhenstandssensoren,Raw value output of ride height sensors
 "Ausgabe Status EJECT-Taste: 0 = Taste nicht gedrückt, 1 = Taste gedrückt","EJECT button status output: 0 = button not pressed, 1 = button pressed"
 Ausgabe Status Einlaufschutz: 0 = Einlauf nicht aktiv 1 = Einlauf aktiv,"Run-in protection status: 0 = run-in not active, 1 = run-in active"
 Ausgabe Status Einlaufschutz: 0 = Einlaufschutz abgeschlossen 1 = Einlaufschutz noch gesetzt,"Run-in protection status: 0 = run-in protection completed, 1 = run-in protection still set"
@@ -858,6 +879,7 @@ Ausgabe der Fasta Daten,FASTA data
 "Ausgabe der Grundstrom des Radbeschleunigung, Sensor vorn rechts","Wheel acceleration sensor base current output, front right"
 Ausgabe der Hochspannung in Volt. Ungültigkeitswert = 510 Volt,High voltage in volts. Invalid value = 510 volts
 Ausgabe der Ist-Drehzahl,Actual speed
+Ausgabe der Konfiguration des Standheizgerätes.,Output of the auxiliary heater configuration.
 Ausgabe der Kraftstoffart des Standheizgerätes: 0x01 Benzin  0x02 Diesel  0x04 RME  0xFF ungültig,Fuel type of the auxiliary heater: 0x01 petrol 0x02 diesel 0x04 RME 0xFF invalid
 Ausgabe der Ladezähler für den Dualspeicher Klammerung mit: HAS_FEPM==1 && BMW_DUASTO_SC==1,Output of charge counters for the dual storage system. Bracketing with: HAS_FEPM==1 && BMW_DUASTO_SC==1
 Ausgabe der Leistung in KW auf 2 Nachkommastellen genau. Vom SG wird der Wert mit Faktor 25 geliefert und in der SGBD durch 25 dividiert.,"Power in kW to 2 decimal places. The control unit supplies the value with factor 25, and the SGBD divides it by 25."
@@ -874,11 +896,16 @@ Ausgabe der Versorgungsspannung des Sensor Höhenstand hinten links in mV.,"Ride
 Ausgabe der Versorgungsspannung des Sensor Höhenstand hinten rechts in mV.,"Ride height sensor supply voltage output, rear right, in mV"
 Ausgabe der Versorgungsspannung des Sensor Höhenstand vorn links in mV.,"Ride height sensor supply voltage output, front left, in mV"
 Ausgabe der Versorgungsspannung des Sensor Höhenstand vorn rechts in mV.,"Ride height sensor supply voltage output, front right, in mV"
+Ausgabe der Widerstandswerte der Sitzmatten im Fond,Output of the resistance values of the rear seat mats
 Ausgabe der Wählhebelstellung,Selector lever position
+Ausgabe der Zuordnung Pin zu Funktion,Output of the pin-to-function assignment
+Ausgabe der aktuellen Eingangswerte des CID.,Output of the current CID input values.
+Ausgabe der aktuellen Gang-Position,Output of the current gear position
 Ausgabe der langsam gefilterten Höhenstandswerte. Die Filterwerte aus dem SLOWFILTER des linken hinteren Sensors werden angezeigt. Wenn das Fahrzeug fährt arbeitet die EHC Regelung mit den SLOWFILTER Werten. Der Slowfilter sorgt dafür das Fahrdynamische Prozesse (Strassenschäden etc.) nicht das EHC Regelverhalten beeinflussen,"Slow-filtered ride height values output. Shows the filter values from the SLOWFILTER of the left rear sensor. When the vehicle is moving, EHC control works with the SLOWFILTER values. The slow filter ensures that driving dynamics events (road damage etc.) do not affect EHC control behaviour."
 Ausgabe der langsam gefilterten Höhenstandswerte. Die Filterwerte aus dem SLOWFILTER des linken vorderen Sensors werden angezeigt. Wenn das Fahrzeug fährt arbeitet die EHC Regelung mit den SLOWFILTER Werten. Der Slowfilter sorgt dafür das Fahrdynamische Prozesse (Strassenschäden etc.) nicht das EHC Regelverhalten beeinflussen,"Slow-filtered ride height values output. Shows the filter values from the SLOWFILTER of the left front sensor. When the vehicle is moving, EHC control works with the SLOWFILTER values. The slow filter ensures that driving dynamics events (road damage etc.) do not affect EHC control behaviour."
 Ausgabe der langsam gefilterten Höhenstandswerte. Die Filterwerte aus dem SLOWFILTER des rechten hinteren Sensors werden angezeigt. Wenn das Fahrzeug fährt arbeitet die EHC Regelung mit den SLOWFILTER Werten. Der Slowfilter sorgt dafür das Fahrdynamische Prozesse (Strassenschäden etc.) nicht das EHC Regelverhalten beeinflussen,"Slow-filtered ride height values output. Shows the filter values from the SLOWFILTER of the right rear sensor. When the vehicle is moving, EHC control works with the SLOWFILTER values. The slow filter ensures that driving dynamics events (road damage etc.) do not affect EHC control behaviour."
 Ausgabe der langsam gefilterten Höhenstandswerte. Die Filterwerte aus dem SLOWFILTER des rechten vorderen Sensors werden angezeigt. Wenn das Fahrzeug fährt arbeitet die EHC Regelung mit den SLOWFILTER Werten. Der Slowfilter sorgt dafür das Fahrdynamische Prozesse (Strassenschäden etc.) nicht das EHC Regelverhalten beeinflussen,"Slow-filtered ride height values output. Shows the filter values from the SLOWFILTER of the right front sensor. When the vehicle is moving, EHC control works with the SLOWFILTER values. The slow filter ensures that driving dynamics events (road damage etc.) do not affect EHC control behaviour."
+Ausgabe der relevanten Stromwerte des diskreten Frontwischers.,Output of the relevant current values of the discrete front wiper.
 "Ausgabe der schnell gefilterten Höhenstandswerte. Die Filterwerte aus dem FASTFILTER des linken hinteren Sensors werden angezeigt. Wenn das Fahrzeug steht oder langsam fährt, arbeitet die EHC Regelung mit den FASTFILTER Werten.","Fast-filtered ride height values output. Shows the filter values from the FASTFILTER of the left rear sensor. When the vehicle is stationary or moving slowly, EHC control works with the FASTFILTER values."
 "Ausgabe der schnell gefilterten Höhenstandswerte. Die Filterwerte aus dem FASTFILTER des linken vorderen Sensors werden angezeigt. Wenn das Fahrzeug steht oder langsam fährt, arbeitet die EHC Regelung mit den FASTFILTER Werten.","Fast-filtered ride height values output. Shows the filter values from the FASTFILTER of the left front sensor. When the vehicle is stationary or moving slowly, EHC control works with the FASTFILTER values."
 "Ausgabe der schnell gefilterten Höhenstandswerte. Die Filterwerte aus dem FASTFILTER des rechten hinteren Sensors werden angezeigt. Wenn das Fahrzeug steht oder langsam fährt, arbeitet die EHC Regelung mit den FASTFILTER Werten.","Fast-filtered ride height values output. Shows the filter values from the FASTFILTER of the right rear sensor. When the vehicle is stationary or moving slowly, EHC control works with the FASTFILTER values."
@@ -892,6 +919,7 @@ Ausgabe des Höhenstandes hinten rechts in mm.,"Ride height output, rear right, 
 Ausgabe des Höhenstandes vorn links in mm.,"Ride height output, front left, in mm"
 Ausgabe des Höhenstandes vorn rechts in mm.,"Ride height output, front right, in mm"
 Ausgabe des Index der Hardware,Hardware index
+Ausgabe des Status des Einlaufschutzes für den Klimakompressor oder Schreiben des neuen Status. Erst nach vollständigem Einlauf wird dieser Status zurückgesetzt.,"Output of the break-in protection status for the A/C compressor, or writing of the new status. This status is only reset after the break-in has been fully completed."
 Ausgabe des Status des Sensortests:  Siehe Tabelle TAB_PDC_SENSORTEST,Sensor test status: see table TAB_PDC_SENSORTEST
 Ausgabe des Stroms der Hochspannung.,High-voltage current
 Ausgabe des Stroms.,Current
@@ -969,6 +997,7 @@ Auslastung Core 1,Core 1 load
 Auslastung Core 2,Core 2 load
 Auslastung DCDC-Wandler,DCDC converter load
 Auslastung der Maschine,Machine load
+Auslesen  Radbeschleunigungssensoren,Read wheel acceleration sensors
 Auslesen Adaptionswert Fülldruck KALT  Kupplung A,"Adaptation value filling pressure COLD, clutch A"
 Auslesen Adaptionswert Fülldruck KALT Kupplung B,"Adaptation value filling pressure COLD, clutch B"
 Auslesen Adaptionswert Fülldruck KALT Kupplung C,"Adaptation value filling pressure COLD, clutch C"
@@ -977,7 +1006,12 @@ Auslesen Adaptionswert Fülldruck KALT Kupplung E,"Adaptation value filling pres
 Auslesen Adaptionswerte Verbrennungsaussetzeradaption,Read combustion misfire adaptation values
 Auslesen Awp2Ecu - EWP23 - EME Kühlung,Read Awp2Ecu - EWP23 - EME cooling
 Auslesen AwpEcu - EWP22 - Ladeluft Kühlung,Read AwpEcu - EWP22 - charge air cooling
+Auslesen Basissignale Funktionsbaustein VdmEarsAb,Read base signals of function block VdmEarsAb
+Auslesen Basissignale Funktionsbaustein VdmEarsAs,Read base signals of function block VdmEarsAs
+Auslesen Basissignale Funktionsbaustein VdmEarsFf,Read base signals of function block VdmEarsFf
+Auslesen Batteriestatistik Unterspannungsituationen ARS,Read battery statistics for undervoltage situations ARS
 Auslesen Batterietauschdaten Klammerung mit: HAS_FEPM==1 && BMW_DUASTO_SC==1,Read battery replacement data. Bracketing with: HAS_FEPM==1 && BMW_DUASTO_SC==1
+Auslesen Beeinflussungsadaption KF1 KALT,Read influence adaptation KF1 COLD
 Auslesen Beeinflussungsadaption KF1 KALT GANG 1-2,Influence adaptation KF1 COLD gear 1-2
 Auslesen Beeinflussungsadaption KF1 KALT GANG 2-3,Influence adaptation KF1 COLD gear 2-3
 Auslesen Beeinflussungsadaption KF1 KALT GANG 3-4,Influence adaptation KF1 COLD gear 3-4
@@ -985,6 +1019,7 @@ Auslesen Beeinflussungsadaption KF1 KALT GANG 4-5,Influence adaptation KF1 COLD 
 Auslesen Beeinflussungsadaption KF1 KALT GANG 5-6,Influence adaptation KF1 COLD gear 5-6
 Auslesen Beeinflussungsadaption KF1 KALT GANG 6-7,Influence adaptation KF1 COLD gear 6-7
 Auslesen Beeinflussungsadaption KF1 KALT GANG 7-8,Influence adaptation KF1 COLD gear 7-8
+Auslesen Beeinflussungsadaption KF2 KALT,Read influence adaptation KF2 COLD
 Auslesen Beeinflussungsadaption KF2 KALT GANG 1-2,Influence adaptation KF2 COLD gear 1-2
 Auslesen Beeinflussungsadaption KF2 KALT GANG 2-3,Influence adaptation KF2 COLD gear 2-3
 Auslesen Beeinflussungsadaption KF2 KALT GANG 3-4,Influence adaptation KF2 COLD gear 3-4
@@ -992,6 +1027,8 @@ Auslesen Beeinflussungsadaption KF2 KALT GANG 4-5,Influence adaptation KF2 COLD 
 Auslesen Beeinflussungsadaption KF2 KALT GANG 5-6,Influence adaptation KF2 COLD gear 5-6
 Auslesen Beeinflussungsadaption KF2 KALT GANG 6-7,Influence adaptation KF2 COLD gear 6-7
 Auslesen Beeinflussungsadaption KF2 KALT GANG 7-8,Influence adaptation KF2 COLD gear 7-8
+Auslesen Bremsbelagssensor,Read brake pad sensor
+Auslesen Bremspedalwegsensor,Read brake pedal travel sensor
 Auslesen CVO-Adaptionen Teil 1 (Continuous Valve Operation). !!Hier werden Logische Zylinderreihenfolgen verwendet!!,Read CVO adaptations part 1 (continuous valve operation). Logical cylinder order is used here!
 Auslesen CVO3 Ansteuerzeitkorrektur Ballistik Grundadaption,"Read CVO3 activation time correction ballistic range, basic adaptation"
 Auslesen CVO3 Ansteuerzeitkorrektur Ende Ballistik Grundadaption,"Read CVO3 activation time correction end of ballistic range, basic adaptation"
@@ -999,11 +1036,21 @@ Auslesen CVO3 Ansteuerzeitkorrektur Uebergangsbereich,Read CVO3 activation time 
 "Auslesen CVO3 Ansteuerzeitkorrektur Vollhub, Oeffnungszeitverzug Grundadaption, Oeffnungszeit Uebergangsbereich","Read CVO3 activation time correction full lift, opening time delay basic adaptation, opening time transition range"
 Auslesen CVO3 Oeffnungszeitverzug im Uebergangsbereich Grundadaption,"Read CVO3 opening time delay in the transition range, basic adaptation"
 "Auslesen CVO3 Zaehler, gesperrte Zylinder, Statusmasken","Read CVO3 counters, disabled cylinders, status masks"
+Auslesen Daten Aktuator,Read actuator data
+Auslesen Daten EPS Endanschlaege winkelbezogen,Read EPS end stop data (angle-based)
+Auslesen Daten EPS Ritzelwinkel,Read EPS pinion angle data
+Auslesen Daten EPS Zahnstangenhub,Read EPS rack travel data
+Auslesen Daten Sensor (links + rechts),Read sensor data (left + right)
+Auslesen Daten Sensor Lenkmoment,Read steering torque sensor data
 Auslesen Drehzahlgefuehrte Lambdaadaption,Read speed-based lambda adaptation
+Auslesen Drucksensoren,Read pressure sensors
+"Auslesen Fahrgestellnummer, Hardware Lieferung ID, Software Lieferung ID und Steuergeräte Softwareupdate Version ID.","Read vehicle identification number, hardware delivery ID, software delivery ID and control unit software update version ID."
+Auslesen Feststellkraft,Read parking brake clamping force
 Auslesen Grunddaten Steuerkettenlaengung,Read timing chain elongation basic data
 Auslesen Histogramme zu den Regelwerk Ausgaengen,Read histograms for the rule set outputs
 Auslesen Histogramme zu den Regelwerk Eingaengen,Read histograms for the rule set inputs
 Auslesen Historienspeicher zum Tausch der 48V-Batterie Klammerung:,Read history memory for 48V battery replacement. Bracketing:
+Auslesen Höhenstandssensoren,Read ride height sensors
 Auslesen Identifikationsdaten Generator,Read alternator identification data
 Auslesen Individualdatenrettung Geberradadaption für die HO,Read individual data backup of trigger wheel adaptation for HO
 Auslesen Kupplungsbefüllprüfzähler Fülldruck KALT Kupplung A,"Clutch fill check counter, filling pressure COLD, clutch A"
@@ -1011,20 +1058,42 @@ Auslesen Kupplungsbefüllprüfzähler Fülldruck KALT Kupplung B,"Clutch fill ch
 Auslesen Kupplungsbefüllprüfzähler Fülldruck KALT Kupplung C,"Clutch fill check counter, filling pressure COLD, clutch C"
 Auslesen Kupplungsbefüllprüfzähler Fülldruck KALT Kupplung D,"Clutch fill check counter, filling pressure COLD, clutch D"
 Auslesen Kupplungsbefüllprüfzähler Fülldruck KALT Kupplung E,"Clutch fill check counter, filling pressure COLD, clutch E"
+Auslesen Kupplungsbefüllprüfzähler Startadaption Fülldruck,"Read clutch fill test counter, start adaptation fill pressure"
 Auslesen Kupplungsbefüllprüfzähler Startadaption Fülldruck Kupplung A,"Clutch fill check counter, start adaptation filling pressure, clutch A"
 Auslesen Kupplungsbefüllprüfzähler Startadaption Fülldruck Kupplung B,"Clutch fill check counter, start adaptation filling pressure, clutch B"
 Auslesen Kupplungsbefüllprüfzähler Startadaption Fülldruck Kupplung C,"Clutch fill check counter, start adaptation filling pressure, clutch C"
 Auslesen Kupplungsbefüllprüfzähler Startadaption Fülldruck Kupplung D,"Clutch fill check counter, start adaptation filling pressure, clutch D"
 Auslesen Kupplungsbefüllprüfzähler Startadaption Fülldruck Kupplung E,"Clutch fill check counter, start adaptation filling pressure, clutch E"
+Auslesen Kupplungsschaltungszähler Fülldruck KALT,"Read clutch shift counter, fill pressure COLD"
 Auslesen Kupplungsschaltungszähler Fülldruck KALT  Kupplung A,"Clutch shift counter, filling pressure COLD, clutch A"
 Auslesen Kupplungsschaltungszähler Fülldruck KALT  Kupplung B,"Clutch shift counter, filling pressure COLD, clutch B"
 Auslesen Kupplungsschaltungszähler Fülldruck KALT  Kupplung C,"Clutch shift counter, filling pressure COLD, clutch C"
 Auslesen Kupplungsschaltungszähler Fülldruck KALT Kupplung D,"Clutch shift counter, filling pressure COLD, clutch D"
 Auslesen Kupplungsschaltungszähler Fülldruck KALT Kupplung E,"Clutch shift counter, filling pressure COLD, clutch E"
+Auslesen Lerndaten Aktuator,Read actuator learned data
+Auslesen Lerndaten Standardisierung,Read standardization learned data
+Auslesen Lerndaten Statisik,Read statistics learned data
+Auslesen Lerndaten Statistik,Read statistics learned data
+Auslesen Lerndaten Taster,Read button learned data
+Auslesen LowLevel Software Version,Read low-level software version
 Auslesen Niveau Bremsflüssigkeit 1 = Bremsflüssigkeit vorhanden;  0 = Bremsflüssigkeit leer oder Unterbrechung,Brake fluid level: 1 = brake fluid present; 0 = brake fluid empty or open circuit
+Auslesen Nullpunkt Hoehenstandssensoren,Read zero point of ride height sensors
 Auslesen Parallelisierung Lambdasondendiagnose,Read lambda sensor diagnosis parallelisation
+Auslesen Raddrehzahlfühler,Read wheel speed sensors
+Auslesen Radmoment Bremsrekuperation,Read brake recuperation wheel torque
+Auslesen Spannung Steuergerät,Read control unit voltage
 Auslesen Statistikwerte zur Wassereinspritzung Klammerung:,Read water injection statistics. Bracketing:
+Auslesen Status Funktion Antiblockiersystem (ABS),Read status of anti-lock braking system (ABS) function
+Auslesen Status Funktion Antriebsschlupfregelung (ASC),Read status of traction control (ASC) function
+Auslesen Status Funktion Bergabfahrassistent (HDC),Read status of hill descent control (HDC) function
+Auslesen Status Funktion Fahrzeugstabilisierung (FDR),Read status of vehicle stability control (FDR) function
 "Auslesen Status der PDC-Taste über Bus : 0 = AUS, 1 = EIN","PDC button status via bus: 0 = off, 1 = on"
+Auslesen Taster der Bemiko,Read buttons of the Bemiko
+Auslesen Temperaturbereich,Read temperature range
+Auslesen Vakuumsensor,Read vacuum sensor
+Auslesen Ventil Status allgemein Druckventil,"Read general valve status, pressure valve"
+Auslesen Ventil Werte allgemein,Read general valve values
+Auslesen Versorgungsspannung Höhenstandssensoren,Read supply voltage of ride height sensors
 "Auslesen Werte Schaltung 1-2,Turbinendrehzahl, Moment","Values for shift 1-2, turbine speed, torque"
 "Auslesen Werte Schaltung 2-3,Turbinendrehzahl, Moment","Values for shift 2-3, turbine speed, torque"
 "Auslesen Werte Schaltung 3-4,Turbinendrehzahl, Moment","Values for shift 3-4, turbine speed, torque"
@@ -1032,13 +1101,19 @@ Auslesen Statistikwerte zur Wassereinspritzung Klammerung:,Read water injection 
 "Auslesen Werte Schaltung 5-6,Turbinendrehzahl, Moment","Values for shift 5-6, turbine speed, torque"
 "Auslesen Werte Schaltung 6-7,Turbinendrehzahl, Moment","Values for shift 6-7, turbine speed, torque"
 "Auslesen Werte Schaltung 7-8,Turbinendrehzahl, Moment","Values for shift 7-8, turbine speed, torque"
+Auslesen Zeiten Task,Read task times
 Auslesen Zustand AutoHold Taster 1= Taster gedrückt;  0= Taster nicht betätigt 2- Taster defekt 3-  = Signalmuster ungültig,AutoHold button state: 1 = button pressed; 0 = button not pressed; 2 = button defective; 3 = signal pattern invalid
+Auslesen Zustand Nullpunkt Hoehenstandssensor,Read zero point status of ride height sensor
+Auslesen analoger Spannungs- und Strom-Werte an den ZSG Ausgängen und Eingängen. Hinweise:  - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument SPANNUNG_KLEMMEN.,Read analog voltage and current values at the ZSG outputs and inputs. Notes: - The job is called via standard job STATUS_LESEN with argument SPANNUNG_KLEMMEN.
 Auslesen der Adaptionswerte Gang einlegen D1,Gear engagement adaptation values D1
 Auslesen der Adaptionswerte Gang einlegen D2,Gear engagement adaptation values D2
 Auslesen der Adaptionswerte Gang einlegen R,Gear engagement adaptation values R
 Auslesen der Anzahl von kodierten Fensterheber.,Reads the number of coded window lifters.
 Auslesen der Aussertzererkennungsfunktion.,Read the misfire detection function
+Auslesen der Basissignale des Funktionsbausteins VdmEarsSbs,Read the base signals of function block VdmEarsSbs
 Auslesen der Betriebszustaende des Zweimassenschwungrades die in DMD zu Ausblendzeiten fuehren.,Read dual-mass flywheel operating states that lead to blanking periods in DMD
+Auslesen der Charakteristik aller sichtbaren Satelliten.,Read the characteristics of all visible satellites.
+Auslesen der Detailinformationen,Read the detailed information
 Auslesen der GLS-Adaption der Doppelrückschaltung 3-1,GLS adaptation of double downshift 3-1
 Auslesen der GLS-Adaption der Doppelrückschaltung 4-2,GLS adaptation of double downshift 4-2
 Auslesen der GLS-Adaption der Doppelrückschaltung 5-3,GLS adaptation of double downshift 5-3
@@ -1064,14 +1139,44 @@ Auslesen der GLS-Adaption der Rückschaltung 5-4,GLS adaptation of downshift 5-4
 Auslesen der GLS-Adaption der Rückschaltung 6-5,GLS adaptation of downshift 6-5
 Auslesen der GLS-Adaption der Rückschaltung 7-6,GLS adaptation of downshift 7-6
 Auslesen der GLS-Adaption der Rückschaltung 8-7,GLS adaptation of downshift 8-7
+Auslesen der Kalibrierdaten/-stati,Read the calibration data/statuses
 Auslesen der LCC-Fußpunktsadaption,LCC base point adaptation
 Auslesen der Logistik-Nummer. ACHTUNG: RESULT wird von _WERT auf _TEXT gewandelt!,Reads the logistics number. NOTE: RESULT is changed from _WERT to _TEXT!
+Auslesen der Parameter für Aktuatortest Wankstabilisierung,Read the parameters for the roll stabilization actuator test
+Auslesen der Postcrash-IBrake Daten,Read the post-crash iBrake data
 Auslesen der Software Versionsnummer des GPS Receivers.,Reads the software version number of the GPS receiver
+Auslesen der Spannungen gemessen am ATIC IPSense Pin während HFM.,Read the voltages measured at the ATIC IPSense pin during HFM.
+Auslesen der Spannungsbedingungen vor und nach dem Senden  des letzten LF-Telegramms.,Read the voltage conditions before and after sending the last LF telegram.
+Auslesen der Version der Applikationsdaten,Read the application data version
+Auslesen der Werte des Fahrlichtsensors,Read the values of the driving light sensor
 Auslesen der Werte fuer die Diagnose Abgasdruck (Pak).,Read the values for the exhaust gas pressure diagnosis (Pak)
+Auslesen der Werte für die Antennenverstärkung.,Read the antenna gain values.
+Auslesen der Zähler für Gang-Einlege-Adaption,Read the counters for gear engagement adaptation
+Auslesen der aktuellen Temperatur an den Temperatursensoren,Read the current temperature at the temperature sensors
+"Auslesen der internen Verhinderungsgründe der Klemmensteuerungs-Statemachine für Klemmenwechsel:  Einschalten der KL15, Ausschalten der KL15, Anforderung Hersellung Fahrbereitschaft (RQ_FN_DRV) Hinweise: - Es wird jeweils nur ein Hinderungsgrund ausgegeben, auch wenn mehrere Hinderungsgründe vorliegen. - Abhängig vom betrachteten Klemmen-Wechsel sind jeweils nicht alle Werte aus der Tabelle TAB_ZSG_KLEMMEN_VERHINDERER möglich. Die Priorisierung bei mehreren Verhinderern ist in [] jeweils angegebn. (Prio-1 = höchste Priorität.).","Read the internal inhibit reasons of the terminal control state machine for terminal changes: switching on KL15, switching off KL15, request to establish ready-to-drive state (RQ_FN_DRV). Notes: - Only one inhibit reason is output at a time, even if several inhibit reasons are present. - Depending on the terminal change considered, not all values from table TAB_ZSG_KLEMMEN_VERHINDERER are possible. The prioritization for multiple inhibitors is given in [] in each case. (Prio-1 = highest priority.)"
+"Auslesen der jeweiligen Statuswerte der analogen Entriegeln-Leitungen von den Tür-Aussengriff-Elektroniken (TAGE) in den Türen FT, BFT, FTH, BFTH. Hinweise:  - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument CA_TAGE_ER_LEITUNG","Read the respective status values of the analog unlock lines from the outer door handle electronics (TAGE) in doors FT, BFT, FTH, BFTH. Notes: - The job is called via standard job STATUS_LESEN with argument CA_TAGE_ER_LEITUNG"
+"Auslesen der letzten Software Update Installationen. Für jeden Eintrag werden Zeit, Operationtype, SWIP ID, ECU SW VID und Operationcode gespeichert.","Read the most recent software update installations. For each entry, time, operation type, SWIP ID, ECU SW VID and operation code are stored."
+Auslesen der verwendeten HMI-Version,Read the HMI version in use
+Auslesen der verwendeten KFL-Version,Read the KFL version in use
+Auslesen des Temperatursensors,Read the temperature sensor
+"Auslesen des jeweiligen Sensorstatus der Tür-Aussengriff-Elektroniken (TAGE) in den Türen FT, BFT, FTH, BFTH. Hinweise:  - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument CA_TAGE_STATUS","Read the respective sensor status of the outer door handle electronics (TAGE) in doors FT, BFT, FTH, BFTH. Notes: - The job is called via standard job STATUS_LESEN with argument CA_TAGE_STATUS"
+Auslesen letzte Parklücke,Read last parking space
+Auslesen ob SitzExt-SB vorhanden,Read whether SitzExt-SB is present
+Auslesen status sitzmemory Fahrerseite Taster,Read status of driver-side seat memory button
+Auslesen und Setzen der folgenden im CAS gespeicherten Daten für die Handelsorganisation: - Händlernummer - Erstzulassungsdatum Hinweise:  - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN/STEUERN mit Argument HO_INFO. - Die Händlernummer wird vom Werk mit '00000' und das Erstzulasungsdatum mit dem Datum der Schlüssel-Initialisierung belegt. Diese Informationen sind Teil der CBS-Daten und werden auch in den Schlüssel übertragen.,Read and set the following data stored in the CAS for the sales organization: - dealer number - first registration date. Notes: - The job is called via standard job STATUS_LESEN/STEUERN with argument HO_INFO. - The dealer number is set by the factory to '00000' and the first registration date to the date of key initialization. This information is part of the CBS data and is also transferred to the key.
+Auslesen und Vorgeben Aktivierung Funktion Längsantriebsmomentenverteilung (Ansteuerung Verteilergetriebe) aktueller Klemme15 Zyklus,"Read and specify activation of the longitudinal drive torque distribution function (transfer case control), current terminal 15 cycle"
+Auslesen und Vorgeben Aktivierung Funktion Rekuperation (Bremsenergierückgewinnung) aktueller Klemme15 Zyklus,"Read and specify activation of the recuperation function (brake energy recovery), current terminal 15 cycle"
+Auslesen und Vorgeben Ansteuerung Pumpe,Read and specify pump activation
+Auslesen und Vorgeben Ansteuerung Ventile,Read and specify valve activation
+Auslesen und Vorgeben AutoHold LED,Read and specify AutoHold LED
+Auslesen und Vorgeben Lenkwinkel Offset,Read and specify steering angle offset
+Auslesen und Vorgeben Montagemodus (Sperrung Bedienung),Read and specify assembly mode (operation locked)
+Auslesen und Vorgeben Stromwerte Dämpfer Ventile,Read and specify damper valve current values
 Auslesen von EwpEcu - EWP20 - ATL Kühlung,Read EwpEcu - EWP20 - turbocharger cooling
 Auslesen von Groessen aus Secure Flash des HSM-Moduls,Read values from Secure Flash of the HSM module
 Auslesen von Wasserpumpeninformationen zu- EWP25 - LLK Bank 2 Kuehlung,Read water pump information for EWP25 - charge air cooler bank 2 cooling
 Auslesen von Wasserpumpeninformationen zu- EWP26 - 48V System Kuehlung,Read water pump information for EWP26 - 48V system cooling
+Auslesen weitere Informationen der Frontwischer.,Read further front wiper information.
 Auslesend der DMCS Debugwerte.,Reads the DMCS debug values
 Auslesung des grossen und kleinen Segelverhinderers. Dieser Job dient jetzt nur fuer Entwicklungszwecke. Wir fuer Kundenzwecke noch erweitert.,Read the large and small coasting inhibitor. This job is now only for development purposes; it will be extended for customer purposes
 Ausschwingzeit Membran links,"Membrane ring-down time, left"
@@ -1100,6 +1205,7 @@ Aussentemperatur beim Warnung Rücknahme.,Outside temperature at the warning wit
 Aussentemperatur beim Warnung.,Outside temperature at the warning
 AusstattungsVariante auslesen,Read equipment variant
 Ausstelllage,Tilted position
+Auswertung / Zustandserkennung der Höhenstandssensoren.,Evaluation / condition detection of the ride height sensors.
 Auszustand,Off state
 "AuthenticationTime, die maximale Zeit, die das Steuergerät zur Prüfung der Authentisierung (sendKey) benötigt mit Ablaufkontrolle im Steuergerät.","AuthenticationTime: maximum time the control unit needs to check authentication (sendKey), with sequence monitoring in the control unit"
 Authentisierungs-Device 0,Authentication device 0
@@ -1386,7 +1492,15 @@ Betriebsstundenzaehler,Operating hours counter
 Betriebsstundenzaehler fuer Zustartdegradation (HYB GEN20).,Operating hours counter for start-assist degradation (HYB GEN20)
 Betriebssystem Task Fehler,Operating system task fault
 Betriebstunden in s FF FF FF FF Ungültigkeitsbez,Operating hours in s; FF FF FF FF = invalid
+Betriebszustand Armauflagenheizung Beifahrer,"Operating state, passenger armrest heating"
+Betriebszustand Armauflagenheizung Beifahrer hinten,"Operating state, rear passenger-side armrest heating"
+Betriebszustand Armauflagenheizung Fahrer,"Operating state, driver armrest heating"
+Betriebszustand Armauflagenheizung Fahrer hinten,"Operating state, rear driver-side armrest heating"
 Betriebszustand PCU48,PCU48 operating state
+Betriebszustand Sitzheizung Beifahrer,"Operating state, passenger seat heating"
+Betriebszustand Sitzheizung Beifahrer hinten,"Operating state, rear passenger-side seat heating"
+Betriebszustand Sitzheizung Fahrer,"Operating state, driver seat heating"
+Betriebszustand Sitzheizung Fahrer hinten,"Operating state, rear driver-side seat heating"
 Betriebszustände Standheizgerät: siehe Tabelle TAB_SH_BETRIEBSZUSTAND,Auxiliary heater operating states: see table TAB_SH_BETRIEBSZUSTAND
 Betroffene SWE nicht gefunden,Affected SWE not found
 Betätigt,Pressed
@@ -1454,6 +1568,7 @@ Brennstörung Zuheizen,Combustion fault supplementary heating
 Brose,Brose
 Busnachricht Beladungssensor hinten in mm,Bus message rear load sensor in mm
 Busnachricht Beladungssensor vorne in mm,Bus message front load sensor in mm
+Busnachricht für die Beladungssensoren in mm,Bus message for the load sensors in mm
 Busshunt,Bus shunt
 Byte 0,Byte 0
 Byte 1,Byte 1
@@ -1493,6 +1608,8 @@ CAN-Signal Status Fensterheber Beifahrertür hinten. Hinweise: - Inhalt aus dem 
 CAN-Signal Status Fensterheber Beifahrertür. Hinweise:  - Inhalt aus dem CAN-Signal ST_PO_WRG_PSD. - Zuordnung erfolgt gemäß Tabelle TAB_CAS_FH_STATUS.,CAN signal: front passenger door window lifter status. Notes: content from CAN signal ST_PO_WRG_PSD. Assignment according to table TAB_CAS_FH_STATUS.
 CAN-Signal Status Fensterheber Fahrertür hinten. Hinweise:  - Inhalt aus dem CAN-Signal ST_PO_WRG_DVDR. - Zuordnung erfolgt gemäß Tabelle TAB_CAS_FH_STATUS.,CAN signal: rear driver's side door window lifter status. Notes: content from CAN signal ST_PO_WRG_DVDR. Assignment according to table TAB_CAS_FH_STATUS.
 CAN-Signal Status Fensterheber Fahrertür. Hinweise:  - Inhalt stammt aus CAN-Signal ST_PO_WRG_DRD. - Zuordnung erfolgt gemäß Tabelle TAB_CAS_FH_STATUS.,CAN signal: driver's door window lifter status. Notes: content comes from CAN signal ST_PO_WRG_DRD. Assignment according to table TAB_CAS_FH_STATUS.
+CAN_LERNFUNKTION_AKTIV,CAN_LERNFUNKTION_AKTIV
+CAN_LERNFUNKTION_GELERNT,CAN_LERNFUNKTION_GELERNT
 "CARB FREEZE FRAME Byte, Bank 1, fuer LR","CARB freeze frame byte, bank 1, for lambda control"
 CBR; CBS Service nicht anzeigen,CBR; do not display CBS service
 CBR; CBx Service anzeigen,CBR; display CBx service
@@ -1502,6 +1619,7 @@ CBS Daten manipuliert und Baukasten Client,CBS data manipulated and modular-syst
 CBS Daten manipuliert und Messung basiert auf Ersatzwerten,CBS data manipulated and measurement based on substitute values
 "CBS Daten manipuliert, Messung basiert auf Ersatzwerten und Baukasten Client","CBS data manipulated, measurement based on substitute values and modular-system client"
 CBS Motoroel Historien-Fkt lesen (FASTA),Read CBS engine oil history function (FASTA)
+CBS-Daten der Bremsen,CBS data for the brakes
 CBS; CBS Service nicht anzeigen,CBS; do not display CBS service
 CBS; CBx Service anzeigen,CBS; display CBx service
 CD,CD
@@ -1619,11 +1737,14 @@ Checksumme IO,Checksum OK
 Checksumme NIO,Checksum not OK
 Chiptemperatur der Maschine,Machine chip temperature
 Clutch differential speed in rad per 10 ms,Clutch differential speed in rad per 10 ms
+Codier-Bytes,Coding bytes
+Codierbyte Mode,Coding byte mode
 Codierparameter aus dem Master 0: Rechtslenker  1: Linkslenker,Coding parameter from master 0: Right-hand drive 1: Left-hand drive
 Codierparameter aus dem Master Spracheinstellung Auflistung siehe Tabelle TAB_KOMPASS_SPRACHE,"Coding parameter from master: language setting, see table TAB_KOMPASS_SPRACHE for list"
 Codierparameter codierte Wertreihe,Coding parameter coded value series
 Codierstatus Armauflagenheizung hinten (siehe TAB_ARMAUFLAGEHEIZUNG_VORH),Rear armrest heating coding status (see TAB_ARMAUFLAGEHEIZUNG_VORH)
 Codierstatus Armauflagenheizung vorne:  0 = nicht vorhanden  1 = vorhanden,Front armrest heating coding status: 0 = not present 1 = present
+Codierung,Coding
 Codierung 0x3000,Coding 0x3000
 Codierung 0x3001,Coding 0x3001
 Codierung Antriebsvariante,Drive variant coding
@@ -1687,6 +1808,10 @@ DAB FM Following ein,DAB-FM following on
 DAB FM Following keine Änderung,DAB-FM following no change
 DAB Signal,DAB signal
 DC-Spannungsregelung,DC voltage control
+DID for Corona LED,DID for Corona LED
+DID für Heckspoilertaster,DID for rear spoiler button
+DID zum Lesen des aktuellen Comfort Kurzschlusscounters.,DID for reading the current comfort short-circuit counter.
+DID zum lesen des absoluten Kurzschlusscounters.,DID for reading the absolute short-circuit counter.
 DK-Winkel der Notluftposition,Throttle valve angle of limp-home position
 DKG aktiv,DKG active
 DLLR_nrCatHeatgMaxSpdErr_C Leerlauf-Drehzahlfehler Max während Katheizen,DLLR_nrCatHeatgMaxSpdErr_C Idle speed error max during catalyst heating
@@ -1978,6 +2103,7 @@ Daten Rohwert des Ansauglufttemperatursensors 3 ueber SENT Schnittstelle,Raw dat
 Daten ausgelesen,Data read out
 Daten in Ordnung,Data OK
 Daten nicht in Ordnung,Data not OK
+Daten von Zentralantrieb,Central drive data
 Datum und Zeit YYYY-MM-DD_HH:MM 1. Historyeintrag,"Date and time YYYY-MM-DD_HH:MM, 1st history entry"
 Datum und Zeit YYYY-MM-DD_HH:MM 2. Historyeintrag,"Date and time YYYY-MM-DD_HH:MM, 2nd history entry"
 Datum und Zeit YYYY-MM-DD_HH:MM 3. Historyeintrag,"Date and time YYYY-MM-DD_HH:MM, 3rd history entry"
@@ -2051,11 +2177,23 @@ Demo Fett,Demo rich
 Demo Mager,Demo lean
 Denso,Denso
 Denso/Delphi,Denso/Delphi
+Der DID dient zum Auslesen des Zählers für die Standnutzungs-Nachlaufzeitenanforderungen-Histogramm.,This DID is used to read the counter for the stationary-use run-on time request histogram.
+Der Job dient zum Auslesen der CA HW Konfiguration.,This job is used to read the CA HW configuration.
+Der Job dient zum Auslesen der Faktoren zur Anpassung des LF-Antennenstroms,This job is used to read the factors for adjusting the LF antenna current
+Der Job dient zum Auslesen der kodierten Fahrzeugklappen.,This job is used to read the coded vehicle flaps.
+"Der Job dient zum Auslesen der über CAN empfangenen Werte für den Status der einzelnen Fensterheber (je Tür FT,BFT,FTH,BFTH). Hinweise:  Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument BUS_IN_FH. - Wird eine Botschaft innerhalb der erwarteten Zeit nicht empfangen (timeout), so wird der Status ungültig/kein Signal zurückgegeben. - Die Daten stammen aus CAN-Nachricht POSITION_FH_BFT, POSITION_FH_BFTH, POSITION_FH_FAT und POSITION_FH_FATH","This job is used to read the values received via CAN for the status of each window lifter (FH) (per door FT, BFT, FTH, BFTH). Notes: The job is called via standard job STATUS_LESEN with argument BUS_IN_FH. - If a message is not received within the expected time (timeout), the status invalid/no signal is returned. - The data comes from CAN messages POSITION_FH_BFT, POSITION_FH_BFTH, POSITION_FH_FAT and POSITION_FH_FATH"
+"Der Job dient zum Auslesen der über CAN empfangenen Werte von der Digitalen Stabilitätskontrolle (DSC). Hinweise:  Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument BUS_IN_DSC. Wird eine Botschaft innerhalb der erwarteten Zeit nicht empfangen (timeout), so wird der Status ungültig/kein Signal zurückgegeben. Die Daten stammen aus CAN-Nachrichten Status Stabilisierung DSC (ST_STAB_DSC) und Geschwindigkeit Fahrzeug (V_VEH)","This job is used to read the values received via CAN from the Dynamic Stability Control (DSC). Notes: The job is called via standard job STATUS_LESEN with argument BUS_IN_DSC. If a message is not received within the expected time (timeout), the status invalid/no signal is returned. The data comes from CAN messages DSC stabilization status (ST_STAB_DSC) and vehicle speed (V_VEH)"
+"Der Job dient zum Auslesen der über CAN empfangenen Werte von der Motorsteuerung (DME). Hinweise:  Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument BUS_IN_DME1. Wird eine Botschaft innerhalb der erwarteten Zeit nicht empfangen (timeout), so wird der Status ungültig/kein Signal zurückgegeben. Die Daten stammen aus den CAN-Nachrichten Daten Antriebsstrang 2 (DT_PT_2) und Drehmoment Kurbelwelle 1 (TORQ_CRSH_1)","This job is used to read the values received via CAN from the engine control unit (DME). Notes: The job is called via standard job STATUS_LESEN with argument BUS_IN_DME1. If a message is not received within the expected time (timeout), the status invalid/no signal is returned. The data comes from CAN messages powertrain data 2 (DT_PT_2) and crankshaft torque 1 (TORQ_CRSH_1)"
+"Der Job dient zum Auslesen des (Sperr-)Status der TAGE, der angibt, ob die TAGE gesperrt (z.B. aufgrund Dauerbetätigung oder sporadischer unmotivierter Aktivierung) oder freigegeben sind.","This job is used to read the (lock) status of the TAGE, indicating whether the TAGE are locked (e.g. due to continuous actuation or sporadic unintended activation) or enabled."
+"Der Job dient zum Auslesen des aktuellen vom Kombi empfangenen Zeitstempels (Datum und Zeit). Hinweise:  Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument BUS_IN_DATUM_ZEIT - Wird eine Botschaft innerhalb der erwarteten Zeit nicht empfangen (timeout), so wird der Status ungültig/kein Signal in den entsprechenden Results zurückgegeben. - Die Daten stammen aus CAN-Nachricht UHRZEIT_DATUM und RELATIVZEIT","This job is used to read the current timestamp (date and time) received from the instrument cluster. Notes: The job is called via standard job STATUS_LESEN with argument BUS_IN_DATUM_ZEIT - If a message is not received within the expected time (timeout), the status invalid/no signal is returned in the corresponding results. - The data comes from CAN messages UHRZEIT_DATUM and RELATIVZEIT"
 Der Motor laeuft nicht,Engine is not running
 Der Partikelfilter ist zu heiß,Particulate filter is too hot
 "Der Status der Klemme 15 auf Pin 9, 0 = Klemme_15 AUS / Zündung AUS (Klemme15 = 0 V = 0), 1 = Klemme_15 EIN / Zündung EIN (Klemme15 = 12 V = 1)","Terminal 15 status on pin 9: 0 = terminal 15 OFF / ignition OFF (terminal 15 = 0 V = 0), 1 = terminal 15 ON / ignition ON (terminal 15 = 12 V = 1)"
 Der angepasste Spannungsrohwert des Differenzdrucks am Partikelfilter Bank 2,Adjusted raw voltage value of the differential pressure at particulate filter bank 2
+"Der ermittelte Betriebspunkt der Kupplung (gestelltes Moment und auftretende Differenzdrehzahl) wird in 25 Sektoren eingeteilt und solange das LMV NIA SG im aktuellen Fahrzyklus aktiv ist, alle 10ms ein dem jeweiligen Sektor zugeordneter Intervallzählerstand inkrementiert.","The determined operating point of the clutch (applied torque and resulting differential speed) is divided into 25 sectors, and as long as the LMV NIA control unit is active in the current driving cycle, an interval counter assigned to the respective sector is incremented every 10 ms."
 Der gefilterte Wert des Differenzdrucks am Partikelfilter Bank 2,Filtered differential pressure value at particulate filter bank 2
+Detailinformation zum Energiebedarf für Licht,Detailed information on lighting energy demand
+Detaillierter SARAH Zustand,Detailed SARAH state
 Development Data Format Version,Development data format version
 Development Data Message 1 Part 1,Development Data Message 1 Part 1
 Development Data Message 1 Part 2,Development Data Message 1 Part 2
@@ -2089,13 +2227,27 @@ Diagnose Zuendung: Brenndauer des Zuendfunkens aus dem HW-nahen SW-RAM Zylinder 
 "Diagnose Zuendung: Brenndauer des Zuendfunkens aus dem HW-nahen SW-RAM, Zylinder 5","Ignition diagnosis: spark burn duration from hardware-level SW RAM, cylinder 5"
 "Diagnose Zuendung: Brenndauer des Zuendfunkens aus dem HW-nahen SW-RAM, Zylinder 6","Ignition diagnosis: spark burn duration from hardware-level SW RAM, cylinder 6"
 Diagnose beendet,Diagnosis ended
+Diagnosejob Status-EcuMA-intern,Diagnostic job status EcuMA internal
 Diagnosezustand,Diagnostic state
 Die Bremse ist betaetigt,Brake is applied
 Die Motorhaube ist nicht offen,Bonnet is not open
 Die Service Regeneration ist nicht freigegeben durch die Applikation,Service regeneration not enabled by the application
 Die derzeit eingestellte Frequenz im Bereich 150 - 108000 [kHz],Currently set frequency in the range 150 - 108000 [kHz]
+Die maximal vom HV-PM für den EDH bereitgestellte Leistung.,Maximum power provided by the HV-PM for the EDH.
+Die maximal vom HV-PM für die Klima bereitgestellten Leistungen.,Maximum power provided by the HV-PM for the air conditioning.
 Die über CAN von der Motorsteuerung empfangenen Motordrehzahl (Ist_Drehzahl_Motor_Kurbelwelle). Bereich von 0 [U/min] bis 12000 [U/min],"Engine speed received via CAN from the engine control unit (Ist_Drehzahl_Motor_Kurbelwelle), range 0 [rpm] to 12000 [rpm]"
+"Diese DID dient zum Auslesen der PWF Historiendaten. Der Historienspeicher gibt den eingenommenen Fahrzeugzustand, das Transitionsereignise (d.h. anforderer bzw. Ursache für einen Zustandswechsel) sowie den Zeitpunkt des Zustandswechsels wieder.","This DID is used to read the PWF history data. The history memory shows the vehicle state assumed, the transition event (i.e. requester or cause of a state change) and the time of the state change."
 Diesel,Diesel
+Dieser Job dient dazu per Diagnose detailierte Leuchten Diagnose Werte eines diskreten Leuchtenausganges zu bekommen,This job is used to obtain detailed lamp diagnostic values of a discrete lamp output via diagnosis
+"Dieser Job dient zum Auslesen des Status der Funktion automatische KL15-Abschaltung (Tür auf/zu, ZV sichern, OSFG).","This job is used to read the status of the automatic KL15 switch-off function (door open/closed, central locking secure, OSFG)."
+"Dieser Job dient zum Auslesen des Zustands der ZSG-Ausgänge zum Ansteuern der KL30F Hinten. Hinweise: 1. Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN mit Argument ANSTEUERUNG_KL30F_HINTEN 2. Der Job gibt nur sinnvolle Werte zurück, falls kein LIN-Stromverteiler verbaut ist (BDC-Codierung TCI_LIN_SV_ACTIVE = 0x00 = Inaktiv). Ist der LIN-Stromverteiler verbaut, so enthalten beide Results immer den Wert 0xFF. 3. HW-Ausgang zum Einschalten KL30F: 30F_EIN  im Connector  3 -Pin 4  - (PwrTerm30fRelayRearOn) 4. HW-Ausgang zum Ausschalten KL30F: 30F_AUS  im Connector  3 -Pin 5  - (PwrTerm30fRelayRearOff)","This job is used to read the state of the ZSG outputs for controlling KL30F rear. Notes: 1. The job is called via standard job STATUS_LESEN with argument ANSTEUERUNG_KL30F_HINTEN 2. The job only returns meaningful values if no LIN power distributor is installed (BDC coding TCI_LIN_SV_ACTIVE = 0x00 = inactive). If the LIN power distributor is installed, both results always contain the value 0xFF. 3. HW output for switching on KL30F: 30F_EIN in connector 3 - pin 4 - (PwrTerm30fRelayRearOn) 4. HW output for switching off KL30F: 30F_AUS in connector 3 - pin 5 - (PwrTerm30fRelayRearOff)"
+Dieser Job dient zum Auslesen des Zustands des ZSG-Eingangs für den Taster der Motor-Start-Automatik (MSA) oder Electric Vehicle (EV).,This job is used to read the state of the ZSG input for the auto start-stop (MSA) or Electric Vehicle (EV) button.
+Dieser Job dient zum Auslesen und Setzen der Zustände der beiden Sensoren des Start-Stopp-Tasters.  Hinweise: Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN/STEUERN_IO mit Argument START_STOP_TASTER_SENSOREN - Signalnamen der digitalen CAS Eingänge sind SSTA und SSTB - STEUERN: Aufruf des Jobs erfolgt über Standardjob STEUERN_IO mit Argument START_STOP_TASTER_SENSOREN und durchzuführender Aktion: RCTECU: Rückgabe der Kontrolle ans Steuergerät (returnControlToECU) RTD: Reset auf Defaultwert (resetToDefault) FCS: Aktuellen Zustand einfrieren (freezeCurrentState) STA: Setzen auf übergebenenen Vorgabewert (shortTermAdjustment),This job is used to read and set the states of the two sensors of the start/stop button. Notes: The job is called via standard job STATUS_LESEN/STEUERN_IO with argument START_STOP_TASTER_SENSOREN - Signal names of the digital CAS inputs are SSTA and SSTB - STEUERN: The job is called via standard job STEUERN_IO with argument START_STOP_TASTER_SENSOREN and the action to perform: RCTECU: return control to the control unit (returnControlToECU) RTD: reset to default value (resetToDefault) FCS: freeze current state (freezeCurrentState) STA: set to the passed specified value (shortTermAdjustment)
+Dieser Job dient zum Auslesen und Setzen des Zustands des CAS-Eingangs Taster zum Entriegeln der Heckklappe Innen (TOEHKI). Hinweise: - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN/STEUERN_IO mit Argument TASTER_HECKKL_INNEN - Signalname des digitalen CAS Eingang ist TOEHKI - STEUERN: Aufruf des Jobs erfolgt über Standardjob STEUERN_IO mit Argument TASTER_HECKKL_INNEN und durchzuführender Aktion: RCTECU: Rückgabe der Kontrolle ans Steuergerät (returnControlToECU)  RTD: Reset auf Defaultwert (resetToDefault)  FCS: Aktuelle Zustand einfrieren (freezeCurrentState)  STA: Setzen auf übergebenenen Vorgabewert (shortTermAdjustment),This job is used to read and set the state of the CAS input for the interior tailgate release button (TOEHKI). Notes: - The job is called via standard job STATUS_LESEN/STEUERN_IO with argument TASTER_HECKKL_INNEN - Signal name of the digital CAS input is TOEHKI - STEUERN: The job is called via standard job STEUERN_IO with argument TASTER_HECKKL_INNEN and the action to perform: RCTECU: return control to the control unit (returnControlToECU) RTD: reset to default value (resetToDefault) FCS: freeze current state (freezeCurrentState) STA: set to the passed specified value (shortTermAdjustment)
+Dieser Job dient zum Auslesen und Setzen des Zustands des CAS-Eingangs für den Centerlock-Taster. Hinweise: - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN/STEUERN_IO mit Argument TASTER_CENTERLOCK - Signalname des digitalen CAS Eingang ist CLT - STEUERN: Aufruf des Jobs erfolgt über Standardjob STEUERN_IO mit Argument TASTER_CENTERLOCK und durchzuführender Aktion: RCTECU: Rückgabe der Kontrolle ans Steuergerät (returnControlToECU) RTD: Reset auf Defaultwert (resetToDefault) FCS: Aktuelle Zustand einfrieren (freezeCurrentState) STA: Setzen auf übergebenenen Vorgabewert (shortTermAdjustment),This job is used to read and set the state of the CAS input for the center lock button. Notes: - The job is called via standard job STATUS_LESEN/STEUERN_IO with argument TASTER_CENTERLOCK - Signal name of the digital CAS input is CLT - STEUERN: The job is called via standard job STEUERN_IO with argument TASTER_CENTERLOCK and the action to perform: RCTECU: return control to the control unit (returnControlToECU) RTD: reset to default value (resetToDefault) FCS: freeze current state (freezeCurrentState) STA: set to the passed specified value (shortTermAdjustment)
+Dieser Job dient zum Auslesen und Setzen des Zustands des CAS-Eingangs für den Taster zum Zentralsichern der Heckklappe. Hinweise: - Aufruf des Jobs erfolgt über Standardjob STATUS_LESEN/STEUERN_IO mit Argument TASTER_SICHERN_HECKKL - Signalname des digitalen CAS Eingang ist TZSHK. - STEUERN: Aufruf des Jobs erfolgt über Standardjob STEUERN_IO mit Argument TASTER_SICHERN_HECKKL und durchzuführender Aktion: RCTECU: Rückgabe der Kontrolle ans Steuergerät (returnControlToECU) RTD: Reset auf Defaultwert (resetToDefault) FCS: Aktuelle Zustand einfrieren (freezeCurrentState) STA: Setzen auf übergebenenen Vorgabewert (shortTermAdjustment),This job is used to read and set the state of the CAS input for the tailgate central locking button. Notes: - The job is called via standard job STATUS_LESEN/STEUERN_IO with argument TASTER_SICHERN_HECKKL - Signal name of the digital CAS input is TZSHK. - STEUERN: The job is called via standard job STEUERN_IO with argument TASTER_SICHERN_HECKKL and the action to perform: RCTECU: return control to the control unit (returnControlToECU) RTD: reset to default value (resetToDefault) FCS: freeze current state (freezeCurrentState) STA: set to the passed specified value (shortTermAdjustment)
+Dieser Job liefert der aktuellen Zustand der bistabilen Relais: - Relaiszustände: ST_RLY_XXXX_LIN = 0x0 -> STAT_JBR_XXXX_RELAY = 0: Relais abgeschaltet ST_RLY_XXXX_LIN = 0x1 -> STAT_JBR_XXXX_RELAY = 1: Relais abgeschaltet ST_RLY_XXXX_LIN = 0x2 -> STAT_JBR_XXXX_RELAY = 2: Relais abgeschaltet ST_RLY_XXXX_LIN = 0x3 -> STAT_JBR_XXXX_RELAY = 3: ungültig,This job returns the current state of the bistable relays: - Relay states: ST_RLY_XXXX_LIN = 0x0 -> STAT_JBR_XXXX_RELAY = 0: relay switched off ST_RLY_XXXX_LIN = 0x1 -> STAT_JBR_XXXX_RELAY = 1: relay switched off ST_RLY_XXXX_LIN = 0x2 -> STAT_JBR_XXXX_RELAY = 2: relay switched off ST_RLY_XXXX_LIN = 0x3 -> STAT_JBR_XXXX_RELAY = 3: invalid
+"Dieser Service kommt nur zum Einsatz, wenn es eine geringfügige Hardwareänderung an dem Steuergerät gegeben hat, die nicht zu einer Änderung der Sachnummer bzw. der Hardware SGBM-IDs geführt hat. Eine solche Änderung ist von außen nicht diagnostizierbar, daher wurde dieser Dienst dafür eingeführt.","This service is only used if there has been a minor hardware change to the control unit that did not result in a change of the part number or the hardware SGBM IDs. Such a change cannot be diagnosed from outside, which is why this service was introduced."
 Dieses Result ist nur als Vorhalt vorhanden und wird immer mit 0 befüllt.,This result is only a placeholder and is always set to 0.
 Differenz des CAN-Uhr-Wertes seit letztem Clusterbeginn,Difference of CAN clock value since last cluster start
 Differenz des Referenzzaehlers seit letztem Clusterbeginn,Difference of reference counter since last cluster start
@@ -2125,6 +2277,7 @@ Drehzahl Brennluftgebläse: 0xFE = Fehler 0xFF = Signal ungültig,Combustion air
 Drehzahl E-Luefter LIN,Electric fan LIN speed
 Drehzahl Elektromotor,Electric motor speed
 Drehzahl Getriebeeingang,Transmission input speed
+Drehzahl Kältemitteldichter,Refrigerant compressor speed
 Drehzahl Motor Amplitude Hinterachse,"Motor speed amplitude, rear axle"
 Drehzahl Motor Amplitude Vorderachse,"Motor speed amplitude, front axle"
 Drehzahl Motor Periodendauer Hinterachse,"Motor speed period, rear axle"
@@ -2352,10 +2505,13 @@ ECU_SW_VID siehe Software Version ID Version 2.2. Beispiel: SD-B71200;TE-0A12B7-
 EDID Config List Version,EDID config list version
 EDID List Version OEM,EDID list version OEM
 EDID List Version public,EDID list version public
+EDRIdentification,EDRIdentification
 EDRVersion,EDR version
+EDR_OEM_IDENTIFICATION,EDR_OEM_IDENTIFICATION
 EEPROM Fehler beim Initialisierung,EEPROM fault during initialisation
 EEPROM Fehler beim Laufzeit,EEPROM fault during runtime
 EE_cntMisUseDetLow,EE_cntMisUseDetLow
+EGS Temperaturkollektiv,EGS temperature collective
 EGS aktiv,EGS active
 "EGSDO2_nrFltIdS1B1RdrDly_C LSF Dynamic diagnosis, Delay Time,Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrDly_C LSF dynamic diagnosis, delay time, sensor 1 bank 1"
 "EGSDO2_nrFltIdS1B1RdrDly_C LSU Dynamic diagnosis, Delay Time,Sensor1 Bank1","EGSDO2_nrFltIdS1B1RdrDly_C LSU dynamic diagnosis, delay time, sensor 1 bank 1"
@@ -2413,6 +2569,7 @@ Ein,On
 Ein Gang ist eingelegt,A gear is engaged
 Ein Systemfehler wurde erkannt,A system fault was detected
 Ein kompletter Zyklus,One complete cycle
+Ein- oder Ausschalten bzw. Abfragen des Radon-Signals.,"Switching on or off, or querying, the Radon signal."
 Ein_und_Auslassnockenwelle CSERS Offset,Intake and exhaust camshaft CSERS offset
 Ein_und_Auslassnockenwelle Offset,Intake and exhaust camshaft offset
 Ein_und_Auslassnockenwelle Offset nach KH,Intake and exhaust camshaft offset after KH
@@ -2428,6 +2585,7 @@ Eingangssignal ungültig,Input signal invalid
 Eingangstemperatur Poel_reg,Input temperature Poel_reg
 Eingefrorener Wert der VVT Versorgungsspannung beim Lern oder Stellgliedfehler,Frozen value of VVT supply voltage at learning or actuator fault
 Eingefüllte Drücke bestanden ja oder nein,"Filled pressures passed, yes or no"
+Eingehende Signale über Systembus,Incoming signals via system bus
 "Eingelegte Fahrstufe: P, R, N, D, M","Engaged drive position: P, R, N, D, M"
 "Eingelegter Gang im Getriebe: P, R, N, 0-8","Gear engaged in transmission: P, R, N, 0-8"
 Eingelernter Wert der Hinterachse,Learned value of the rear axle
@@ -2460,6 +2618,8 @@ Elektrische Motorwasserpumpe,Electric engine water pump
 Elektrischer Fehler vorhanden,Electrical fault present
 Elektrolüfter Statistikfunktion auslesen.,Read electric fan statistics function
 Elektroniktemperatur elektr. Wasserpumpe,Electric water pump electronics temperature
+Elektronischer Reifenfülldruckschild aktuell verbaute Reifen ECO lesen,"Read electronic tire pressure placard, currently fitted tires ECO"
+Elektronischer Reifenfülldruckschild aktuell verbaute Reifen lesen,"Read electronic tire pressure placard, currently fitted tires"
 Element in Bewegung,Element moving
 Element komplett geschlossen,Element fully closed
 Element komplett offen,Element fully open
@@ -2498,6 +2658,7 @@ Engine Speed in rpm,Engine speed in rpm
 Entfernen aller Benutzerupdates per Diagnose,Removal of all user updates via diagnostics
 Entfernen des letzten Update,Removal of the last update
 Entfernung aller Updates durch den Kunden,Removal of all updates by the customer
+Enthaelt die einzelnen Fehlerzahler fuer die externen Sensoren,Contains the individual error counters for the external sensors
 Entladung waehrend Ruhestromverletzung,Discharge during quiescent current violation
 Entprellen,Debouncing
 Entprellzaehler fuer sporadische Signalstoerungen,Debounce counter for sporadic signal faults
@@ -2533,6 +2694,7 @@ Erkennung eines Fehlers waehrend der Diagnose,Fault detected during diagnosis
 Erkennungssystem_nicht_vorhanden,Detection system not present
 Ermittelte Leckagegröße,Determined leakage size
 Ermittelter Ratiowert,Determined ratio value
+Ermittlung der verbleibenden Restzeit beim Einlaufschutz.,Remaining run-in protection time
 Erreichen der Startfähigkeitsgrenze 1,Starting capability limit 1 reached
 Erreichen der Startfähigkeitsgrenze 2,Starting capability limit 2 reached
 Error status output pins of the backlight LED. Range: [0x00¿0x03] 0xFF invalid,"Error status output pins of the backlight LED. Range: [0x00–0x03], 0xFF invalid"
@@ -2564,6 +2726,7 @@ Erweiterter Qualifier Funktion Bergabfahrassistent (HDC),Hill descent control (H
 Erweiterter Qualifier Funktion Fahrzeugstabilisierung (FDR),Vehicle stabilisation (FDR) function extended qualifier
 Erweiterungsbordnetz FEV-Signal,Extended vehicle electrical system FEV signal
 Erweiterungsbordnetz FLV-Signal,Extended vehicle electrical system FLV signal
+Es wird der Status der LIN Slaves im Layering System abgefragt und ausgegeben.,Queries and outputs the status of the LIN slaves in the layering system.
 "Es wird festgehalten, wie viele Werte für das Lernen gemessen werden.",Records how many values are measured for learning
 Ethanolgehalt - Rohwert vom Sensor,Ethanol content - raw value from sensor
 Ethanolmonitor Lesen Klammerung mit:,Read ethanol monitor. Bracketing with:
@@ -2602,6 +2765,8 @@ FAILURE_PRELOAD,FAILURE_PRELOAD
 FAILURE_TN,FAILURE_TN
 FALSE,FALSE
 FASTA-Messwertblock 10 lesen,Read FASTA measured value block 10
+FBM-Sensorik,FBM sensors
+FBM-Tasten,FBM buttons
 FES COORDINT SW Fehler,FES COORDINT SW fault
 FES Master SW Fehler,FES master SW fault
 FG18,FG18
@@ -2904,11 +3069,13 @@ Freigabe Panikmodus ungültig,Panic mode enable invalid
 Freigabe Ruhestrommessung,Quiescent current measurement enable
 Freigabe der EKP-Versorgung,Enable of electric fuel pump supply
 Freigabe für Einlaufschutz: 0 = Keine Freigabe (gesperrt) = Einlaufroutine kann nicht automatisch gestartet werden. 1 = Freigabe nach Einschaltbedingungen,"Run-in protection enable: 0 = not enabled (blocked) = run-in routine cannot start automatically, 1 = enabled according to switch-on conditions"
+Freigabe für Kompressoreinlauf,Compressor run-in enable
 Freigabe_Motorstopp,Engine stop enabled
 Freigabe_Motorstopp_mit_Teilentkopplung,Engine stop enabled with partial decoupling
 Freigabe_Motorstopp_und_Start_Kraftschlussfrei,Engine stop and start enabled without power transmission
 Freigegeben,Enabled
 Freilauf,Freewheeling
+Freilauf eKMV,eKMV freewheel
 Fremdladeerkennung 48V,External charging detection 48V
 Fremdladung aktiv,External charging active
 Fremdladung waehrend Schlafphase erkannt,External charging detected during sleep phase
@@ -2969,6 +3136,7 @@ Funktionsschnittstelle nicht vorhanden,Function interface not present
 Funktionsstatus LLRNS bei Anforderung Systemcheck,LLRNS function status on system check request
 Funktionsstatus T1L,Function status T1L
 Funktionsstatus T1R,Function status T1R
+Funktionsstatus der Klimaanlage,Air conditioning function status
 Funktionstest laeuft,Function test running
 Funktionszustands des Standheizgerätes: siehe Tabelle TAB_SH_FUNKTIONSZUSTAND,Auxiliary heater function state: see table TAB_SH_FUNKTIONSZUSTAND
 Fussraumtemperatursensor hinten (3-zonig),Footwell temperature sensor rear (3-zone)
@@ -2983,6 +3151,7 @@ Fußbremse nicht betätigt,Foot brake not applied
 "Fußgängerschutz vorne rechts; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden","Pedestrian protection front right; 0x10 = locked, 0x01 = enabled, 0x00 = not present"
 Fußraumleuchte Fond,Rear footwell light
 Fußraumleuchte Front,Front footwell light
+Führt eine Impedanzmessung der FM Antennen von der Phasen diversity aus.,Performs an impedance measurement of the FM antennas of the phase diversity.
 Füllstand Wasser Verfügbar Wassersteuergeraet,"Available water quantity, water control unit"
 Füllstand Wasser Wassersteuergeraet,"Water level, water control unit"
 "G11, G12","G11, G12"
@@ -3046,6 +3215,10 @@ GEVlv_nrFltIdObdRdrOutl_C Ausgabe der Ergebnisse der Nockenwellenstellerdiagnose
 "GK (gedrosselt kleiner Hub), ZWAD , HOM (Homogen)","GK (throttled, small lift), ZWAD, HOM (homogeneous)"
 GLOW PLUG RAMP,GLOW PLUG RAMP
 GLOW PLUG RAMP Partial Load Start,GLOW PLUG RAMP partial load start
+GLS Adaption Bewertungszähler Eilnzel-Hoch-Schaltungen Kennfeld 2 Kalt,"GLS adaptation evaluation counter, single upshifts, map 2 cold"
+GLS Adaption Bewertungszähler Einzel-Hoch-Schaltungen Kennfeld 1 Kalt,"GLS adaptation evaluation counter, single upshifts, map 1 cold"
+GLS Adaption Einzel-Hoch-Schaltungen Kennfeld 1 Kalt,"GLS adaptation single upshifts, map 1 cold"
+GLS Adaption Einzel-Hoch-Schaltungen Kennfeld 2 Kalt,"GLS adaptation single upshifts, map 2 cold"
 GPS Breitengrad (Nord positiv),GPS latitude (north positive)
 GPS Hoehe,GPS altitude
 GPS Laengengrad (Ost positiv),GPS longitude (east positive)
@@ -3069,6 +3242,8 @@ Gang 6 Synchronisiert,Gear 6 synchronised
 Gang 7,Gear 7
 Gang 8,Gear 8
 Gang der Schaltpunktanzeige,Gear of shift point indicator
+Gangauslege-Adaptions-Speicher,Gear disengagement adaptation memory
+Gangauslege-Adaptions-Speicher Prüfzähler,Gear disengagement adaptation memory check counter
 Gangsensor Fehlernachricht,Gear sensor fault message
 Gangsensorposition in X (Alpha) Richtung nach Offsetkorrektur,Gear sensor position in X (alpha) direction after offset correction
 Gangsensorposition in X (Beta) Richtung,Gear sensor position in X (beta) direction
@@ -3103,6 +3278,7 @@ Gemeldeter Kurzschlussfehler,Reported short-circuit fault
 Gemeldeter Open Load Fehler,Reported open load fault
 Gemeldeter interer Fehler,Reported internal fault
 Gemeldeter Übertemperaturfehler,Reported overtemperature fault
+"Gemessene Steuergerätetemperatur in 21 Intervallen von -40°C bis 150°C eingeteilt. Alle 2sec wird ein der Temperatur zugeordneter Intervallzähler inkrementiert, solange das LMV NIA SG im aktuellen Fahrzyklus aktiv ist.","Measured control unit temperature divided into 21 intervals from -40°C to 150°C. Every 2 s, an interval counter assigned to the temperature is incremented as long as the LMV NIA control unit is active in the current driving cycle."
 Gemessene Temperatur in °C -40 ... 85 °C,Measured temperature in °C -40 ... 85 °C
 Gemessener Stromwert,Measured current
 Gemessenes Stabilisatormoment an der HA,Measured stabiliser torque at the rear axle
@@ -3124,6 +3300,8 @@ Geräteadresse von Gerät 1,Device address of device 1
 Geräteadresse von Gerät 2,Device address of device 2
 Geräteadresse von Gerät 3,Device address of device 3
 Geräteadresse von Gerät 4,Device address of device 4
+Geräteliste im Wifi Direct Modus,Device list in Wi-Fi Direct mode
+Geräteliste in WLAN-AP-Modus,Device list in WLAN AP mode
 Gesammelte Fehlerinformation vom SENT-Raildrucksensor NV,"Collected fault information from SENT rail pressure sensor, non-volatile"
 Gesammelte Fehlerinformation vom SENT-Raildrucksensor im Fahrzyklus,Collected fault information from SENT rail pressure sensor in driving cycle
 Gesamt,Total
@@ -3170,6 +3348,7 @@ Gestoert,Faulty
 Gesundheitszustand in,State of health
 Getaktet,Pulsed
 Getriebe,Transmission
+Getriebe Eingangs- und Ausgangsdrehzahl,Transmission input and output speed
 Getriebe-Steuergeraet,Transmission control unit
 Getriebeausgangsdrehzahl Bereich von 0 [1/min] bis 10000 [1/min],"Transmission output speed, range 0 [1/min] to 10000 [1/min]"
 Getriebeeingangsdrehzahl der ersten Welle Bereich von 0 [1/min] bis 10000 [1/min],"Transmission input speed of the first shaft, range 0 [1/min] to 10000 [1/min]"
@@ -3185,6 +3364,7 @@ Getriebeöltemperatur zu groß,Transmission oil temperature too high
 Getriebeöltemperatur zu klein,Transmission oil temperature too low
 Geändert,Changed
 Geöffnet,Opened
+Gibt Informationen zur Nutzung der Diensteschnittelle der EPB wieder.,Returns information on the use of the EPB service interface.
 "Gibt an, an welchem Ausgang die Frontwaschpumpe angeschlossen ist",Indicates which output the front washer pump is connected to
 "Gibt an, an welchem Ausgang die Heckwaschpumpe angeschlossen ist",Indicates which output the rear washer pump is connected to
 "Gibt an, an welchem Ausgang die Scheinwerferreinigungs-/NIVI-Pumpe angeschlossen ist",Indicates which output the headlight washer/NIVI pump is connected to
@@ -3208,21 +3388,28 @@ Gibt den Status der RDS Funktion als Integer wieder.,Status of the RDS function 
 Gibt den Status der TP Funktion als Integer wieder.,Status of the TP function as integer
 Gibt den Status des Zentralinstruments zurück Werte aus der Tabelle TAB_ZIN_DIAGNOSTIC_FLAG,"Returns the central instrument status, values from table TAB_ZIN_DIAGNOSTIC_FLAG"
 Gibt den Steuergeräte Typ an.,Indicates the control unit type
+Gibt den aktuellen Link-Status aller physikalisch vorhandenen Ports zurück.,Returns the current link status of all physically present ports.
 Gibt die Anzahl der verbundenen Touch Command Geräten zurück,Returns the number of connected Touch Command devices
 Gibt die BT Firmware zurück,Returns the BT firmware
 Gibt die Firmware-Version des Laufwerks aus. ACHTUNG: Result wird dynamisch zu ..._TEXT statt _WERT.,Outputs the firmware version of the drive. NOTE: result becomes dynamically ..._TEXT instead of _WERT.
 Gibt die PRODUCTID des Laufwerks aus. ACHTUNG: Result wird dynamisch zu ..._TEXT statt _WERT.,Outputs the PRODUCTID of the drive. NOTE: result becomes dynamically ..._TEXT instead of _WERT.
 Gibt die Seriennummer der IFE zurück. [0.. 0xFFFFFFFE]: Seriennummer,Returns the serial number of the IFE. [0.. 0xFFFFFFFE]: serial number
+Gibt die Signalwege der Ultraschallsensoren der PDC aus.,Outputs the signal paths of the PDC ultrasonic sensors.
+Gibt die Statusinformationen des Zentralinstruments zurück.,Returns the status information of the central instrument.
 Gibt die VENDORID des Laufwerks aus. ACHTUNG: Result wird dynamisch zu ..._TEXT statt _WERT.,Outputs the VENDORID of the drive. NOTE: result becomes dynamically ..._TEXT instead of _WERT.
 Gibt die Variante des hinteren Bedienteils aus.,Rear control panel variant
 Gibt die Variante des vorderen Bedienteils aus.,Front control panel variant
+"Gibt die Zeiten an, die nach verschiedenen System-Aufstart-punkten vergangen sind",Returns the times elapsed since various system start-up points
 Gibt die eingestellte Temperatureinheit für die Temperaturschwellwerte aus. Siehe Tabelle TAB_IFK_TEMP_EINHEIT,Temperature unit set for the temperature thresholds. See table TAB_IFK_TEMP_EINHEIT
+Gibt die gefilterten Werte der angeschlossenen Sensorik(EHC Höhensensor) aus. Diese Werte werden der Regelung zur Verfügung gestellt werden. Der Filter dient der Signalaufbereitung für die Regelung Fahrdynamische Prozesse.,Outputs the filtered values of the connected sensors (EHC ride height sensor). These values are made available to the control system. The filter serves to condition the signals for driving dynamics control.
+"Gibt die gelernte Port-Konfiguration des SGs zurück.  Für ECUs mit mehr als 1 Port verpflichtend umzusetzen. Für ECUs mit 1 Port: Verpflichtend umzusetzen für SP2018 Steuergeräte, optional für SP2015 Steuergeräte.","Returns the learned port configuration of the control unit. Mandatory for ECUs with more than 1 port. For ECUs with 1 port: mandatory for SP2018 control units, optional for SP2015 control units."
 Gibt die im Steuergerät codierte Fahrzeugart aus. Siehe Tabelle TAB_FAHRZEUGART_KLIMA,Vehicle type coded in the control unit. See table TAB_FAHRZEUGART_KLIMA
 Gibt die im Steuergerät codierte Klimavariante aus. Siehe Tabelle TAB_KLIMA_VARIANTEN,Climate variant coded in the control unit. See table TAB_KLIMA_VARIANTEN
 Gibt die im Steuergerät codierte Produktlinie aus. Siehe Tabelle TAB_PRODUKTLINIE_KLIMA,Product line coded in the control unit. See table TAB_PRODUKTLINIE_KLIMA
 Gibt die in der IFE verbaute Codierdaten-Version aus. Byte 0: [0.. 0x3E]: Major-Version               [0x3F]: ungültig Byte 1 : [0..0x3F]: Minor-Version Byte 2: [0..0xFF]: Patch-Level,Returns the coding data version installed in the IFE. Byte 0: [0.. 0x3E]: major version [0x3F]: invalid Byte 1: [0..0x3F]: minor version Byte 2: [0..0xFF]: patch level
 Gibt die in der IFE verbaute Hardware-Version aus. Byte 0: [0.. 0x3E]: Major-Version               [0x3F]: ungültig Byte 1 : [0..0x3F]: Minor-Version Byte 2: [0..0xFF]: Patch-Level,Returns the hardware version installed in the IFE. Byte 0: [0.. 0x3E]: major version [0x3F]: invalid Byte 1: [0..0x3F]: minor version Byte 2: [0..0xFF]: patch level
 Gibt die in der IFE verbaute SW-Version aus. Byte 0: [0.. 0x3E]: Major-Version               [0x3F]: ungültig Byte 1 : [0..0x3F]: Minor-Version Byte 2: [0..0xFF]: Patch-Level,Returns the SW version installed in the IFE. Byte 0: [0.. 0x3E]: major version [0x3F]: invalid Byte 1: [0..0x3F]: minor version Byte 2: [0..0xFF]: patch level
+"Gibt die letzten 16 Ziele zurück, für die im Navigationssystem die Zielführung aktiviert wurden.",Returns the last 16 destinations for which route guidance was activated in the navigation system.
 Gibt die verschiedenen Firmware-Versionen des HD-Moduls zurück,Returns the various firmware versions of the HD module
 "Gibt für die ersten 32 CAN-Botschaften des ersten CAN-Bus an, ob Sie gelernt wurden",Indicates for the first 32 CAN messages of the first CAN bus whether they have been learned
 "Gibt für die ersten 32 CAN-Botschaften des zweiten CAN-Bus an, ob Sie gelernt wurden",Indicates for the first 32 CAN messages of the second CAN bus whether they have been learned
@@ -3302,6 +3489,7 @@ HKA,HKA
 HL-SW Version,HL-SW version
 HLI: Hardware Lieferung ID,HLI: hardware delivery ID
 HLZ,HLZ
+HMI Software Version,HMI software version
 HSM-Status,HSM status
 HSS über CAN oder diskret,HSS via CAN or discrete
 HUB angeschlossen,Hub connected
@@ -3339,6 +3527,7 @@ Head-Unit aus,Head unit off
 Head-Unit ein,Head unit on
 Healthy,Healthy
 Heben / Ausstellen,Raise / tilt
+Heckklappen Wippe,Tailgate rocker switch
 Heckrollo nicht vorhanden,Rear window blind not present
 Heckrollo über BDC,Rear window blind via BDC
 Heckrollo über HKFM,Rear window blind via HKFM
@@ -3365,6 +3554,7 @@ Hersteller unbekannt,Manufacturer unknown
 High Side Strom,High-side current
 High-Pegel,High level
 HighTemperatureReclampCounter,HighTemperatureReclampCounter
+Histogramdaten des 2WD-Modus,Histogram data of 2WD mode
 Histogramm Entladung MSA,Histogram of MSA discharge
 Histogramm Entladungen waehrend der Fahrt Startvoraussetzung: Klammerung: BMW_IBS35UP_UP_SC = 1,Histogram of discharges while driving. Start requirement: bracketing: BMW_IBS35UP_UP_SC = 1
 Histogramm Erzeuger,Generator histogram
@@ -3377,6 +3567,7 @@ Histogramm fuer die Speichertemperatur bei aktivem Erzeuger,Histogram for the st
 Histogramm fuer die globale Prioritaet im IAM,Histogram for the global priority in IAM
 Histogramm für das fEPM-Ausgangssignal 'Faktor Energieverfügbarkeit',Histogram for the fEPM output signal 'energy availability factor'
 Histogramm für die MSA-Stoppdauern (Erzeuger aus),Histogram for MSA stop durations (generator off)
+Histogrammdaten Anzahl Umdrehungen des Vorderachstrieblings über Momentenbereiche (Lastkollektiv),Histogram data: number of front axle drive pinion revolutions over torque ranges (load spectrum)
 Historie für die Verschiebung der Kennlinie für den Abschaltverhinderer (AV Batterieladezustand),History of the curve shift for the shutdown inhibitor (battery state of charge)
 Historie zur Batteriebelastung bei aktiver Erzeugerentlastung,History of battery load with active generator load relief
 Historienspeicher Abkühlung Basisbatterie Klammerung mit: BMW_FEPM_GEN_SC >= 156,Base battery cooling history memory. Bracketing with: BMW_FEPM_GEN_SC >= 156
@@ -3457,6 +3648,7 @@ Identifier Radelektronik RE7,Identifier of wheel electronics RE7
 Identifikation OPF lesen Klammerung mit: BMW_GAPAFI_SC == 1,Read OPF identification. Bracketing with: BMW_GAPAFI_SC == 1
 Identifikation als HA -> Wert = 0x06,Identification as rear axle -> value = 0x06
 Identifikation als VA -> Wert = 0x02,Identification as front axle -> value = 0x02
+Identifikation des REMA-Aktuators  Rechts und Links,"Identification of REMA actuator, right and left"
 Im EEPROM abgelegter Kilometerstand.,Mileage stored in the EEPROM.
 Imaginärteil des aktuell gemessenen komplexen Leitwerts,Imaginary part of the currently measured complex conductance
 Immer false,Always false
@@ -3484,6 +3676,7 @@ Informationen Standzeit LISB Startvorraussetzung: BMW_SY_LION >0,LISB standing t
 Informationen Trennelement,Isolating element information
 Informationen des bei Erststart vorliegenden Startverhinderers Ruecksetzen ueber Job RESET_ERSTST_ANL_SPERR,Information on the start inhibitor present at first start. Reset via job RESET_ERSTST_ANL_SPERR
 "Informationen von Daten bei Grenzwertverletzung: Strom, Temperatur, Spannung, min. Zellspannung, max. Zellspannung","Information on data at limit violation: current, temperature, voltage, min. cell voltage, max. cell voltage"
+Informationen zum SARAH Benutzerverhalten,Information on SARAH user behavior
 "Informationenn zur der Haeufung der Russmodellkorrekturen OPF Bank 2 Klammerung mit: BMW_GAPAFI_SC == 1, Bankkonfiguration ==2","Information on the accumulation of OPF soot model corrections bank 2. Bracketing with: BMW_GAPAFI_SC == 1, bank configuration == 2"
 Informationenn zur der Haeufung der Russmodellkorrekturen OPF Klammerung mit: BMW_GAPAFI_SC == 1,Information on the accumulation of OPF soot model corrections. Bracketing with: BMW_GAPAFI_SC == 1
 Infospeicher Superklopfer auslesen,Read super-knock info memory
@@ -3548,13 +3741,17 @@ Innenwiderstand der Nernstzelle der LSU,Internal resistance of LSU Nernst cell
 Innenwiderstand der Nernstzelle der LSU Bank 2,Internal resistance of LSU Nernst cell bank 2
 Innenwiderstand des Speichers,Internal resistance of storage unit
 Innenwiderstandswerte fuer Dualspeichersystem Klammerung mit: HAS_FEPM==1 && BMW_DUASTO_SC==1,Internal resistance values for dual storage system. Bracketing with: HAS_FEPM==1 && BMW_DUASTO_SC==1
+Insassenerkennung ACSM,Occupant detection ACSM
 Integrierter Offset Hubadaption,Integrated offset of lift adaptation
 Integritaet DME und Codierzaehler Leistungsklasse und maximale V_VEH,DME integrity and coding counter for power class and maximum V_VEH
 Internal Error PSI5-Sensor hinten links,"Internal error, PSI5 sensor rear left"
 Internal Error PSI5-Sensor hinten rechts,"Internal error, PSI5 sensor rear right"
 Internal Error PSI5-Sensor vorn links,"Internal error, PSI5 sensor front left"
 Internal Error PSI5-Sensor vorn rechts,"Internal error, PSI5 sensor front right"
+Interne SG-Daten des CC ausgeben,Output internal CC control unit data
 Interne Widerstandsmessung Ablassventil,"Internal resistance measurement, discharge valve"
+"Interne Zustandsvariablen der Seatbeltreminderfunktion, 2. Generation","Internal state variables of the seat belt reminder function, 2nd generation"
+"Interne Zustandsvariablen der Seatbeltreminderfunktion, 3. Generation","Internal state variables of the seat belt reminder function, 3rd generation"
 Interner Funktionsstatus vom ARS-System,Internal function status of the ARS system
 Interpolierter Kennlinienwert Faktor Saugstrahlpumpe,"Interpolated characteristic curve value, suction jet pump factor"
 Intervall,Interval
@@ -3581,6 +3778,7 @@ Intervallzähler Temperaturbereich 7,"Interval counter, temperature range 7"
 Intervallzähler Temperaturbereich 8,"Interval counter, temperature range 8"
 Intervallzähler Temperaturbereich 9,"Interval counter, temperature range 9"
 Invalid,Invalid
+Isolationsprüfung eKMV,eKMV insulation test
 Issuer of the Certificate,Issuer of the certificate
 Ist Betriebsart Wärmemanagementkoordinator,Actual operating mode of heat management coordinator
 Ist Laengsneigung Fahrbahn,Actual road longitudinal gradient
@@ -3774,6 +3972,8 @@ Kommunikation ein,Communication on
 Kommunikationsfehler bei Aktor-Signalen,Communication fault in actuator signals
 Komponententest,Component test
 Konfiguration Vibrationsstärke des Lenkrades (siehe Tabelle TAB_VIBRATIONSSTAERKE),Steering wheel vibration intensity configuration (see table TAB_VIBRATIONSSTAERKE)
+Konfiguration vom Klimasteuergerät,Climate control unit configuration
+Konfiguriert den Freigabestatus,Configures the enable status
 Kontakt nicht verbaut,Contact not fitted
 Koordiniertes Sollmoment am Rad,Coordinated target torque at wheel
 "Kopie des Status Flash-Programmierablauf, wenn die Kommunikation mit dem Tester-Dienst deaktiviert.",Copy of flash programming sequence status when communication with the tester service is deactivated
@@ -3803,6 +4003,7 @@ Kraftstoffpumpe Spannung Phase C,Fuel pump voltage phase C
 Kraftstoffpumpe Strom Phase A,Fuel pump current phase A
 Kraftstoffpumpe Strom Phase B,Fuel pump current phase B
 Kraftstoffpumpe Strom Phase C,Fuel pump current phase C
+"Kraftstoffpumpe: Spannungen, Ströme, Temperaturen, Tankgeber","Fuel pump: voltages, currents, temperatures, tank sender"
 Kraftstofftemperatur,Fuel temperature
 "Kraftstofftemperatur (Sensor-, Modell o. fester Ersatzwert)","Fuel temperature (sensor, model or fixed substitute value)"
 Kraftstoffverbrauch seit letztem Oelwechsel,Fuel consumption since last oil change
@@ -3825,6 +4026,7 @@ Kupplungssensorsignal unplausibel,Clutch sensor signal implausible
 Kupplungstemperatur,Clutch temperature
 Kurbelgehause Leckagefehler Faktor basierend auf gemessenem und modeliertem Kurbelgehaeusedruckverhaeltnis,Crankcase leak fault factor based on measured and modelled crankcase pressure ratio
 Kurbelwellenposition beim Startbefehl,Crankshaft position at start command
+Kurzhub rahmenlose Scheibe aktiv,Frameless window short stroke active
 Kurzschluss,Short circuit
 Kurzschluss nach Masse,Short circuit to ground
 Kurzschluss nach Masse (Verbindung HU - Antennenverstärker),Short circuit to ground (HU - antenna amplifier connection)
@@ -3837,6 +4039,7 @@ Kühlung,Cooling
 Küster,Küster
 L,L
 L-Band Antenne,L-band antenna
+LCC Fußpunktadaption,LCC base point adaptation
 LF Trigger,LF trigger
 LG_G,LG_G
 LG_X,LG_X
@@ -3863,8 +4066,10 @@ LK_M,LK_M
 LK_S,LK_S
 LK_X,LK_X
 LLA Staus letzter PAL Zyklus,LLA status of last PAL cycle
+LMV Drehmomenten Istwert und Qualifier auslesen,Read LMV actual torque value and qualifier
 LMV Klemmenspannung,LMV terminal voltage
 LMV Schutzfunktion,LMV protection function
+LMV Spannungen auslesen,Read LMV voltages
 LR,LR
 LTS Parkdauer > 30 Tage,LTS parking time > 30 days
 LTS Parkdauer > 7 Tage,LTS parking duration > 7 days
@@ -3985,6 +4190,7 @@ Leerlaufsolldrehzahl,Idle target speed
 Lehne nicht verriegelt (codiert + verbaut),Backrest not locked (coded + fitted)
 Lehne verriegelt (codiert + verbaut),Backrest locked (coded + fitted)
 Leitungsbruch / Kurzschluss nach Batteriespannung,Open circuit / short circuit to battery voltage
+Lenkleistungsbedarf (jeweils Mittelwert über 100ms),Steering power demand (each averaged over 100 ms)
 Lenkradheizung LED aus,Steering wheel heating LED off
 Lenkradheizung LED ein,Steering wheel heating LED on
 Lenkradheizung LED nicht verbaut,Steering wheel heating LED not fitted
@@ -4024,12 +4230,21 @@ Lernstatus Momentenkompensation Momentenbereich 5 (100 % = vollständig eingeler
 Lernstatus Momentenkompensation Momentenbereich 6 (100 % = vollständig eingelernt),Learning status torque compensation torque range 6 (100 % = fully learned)
 Lernstatus Momentenkompensation Momentenbereich 7 (100 % = vollständig eingelernt),Learning status torque compensation torque range 7 (100 % = fully learned)
 Lesen  Histogramm Ladezustand und Temperatur über die DME-Wach Phase,Read histogram of state of charge and temperature over the DME awake phase
+Lesen - und Schreiben des Licht 12h-Timers,Read and write the light 12h timer
+Lesen ADC-Werte VDC-Anteil,"Read ADC values, VDC portion"
 Lesen Histogramm Ladezustand und Temperatur ueber die Standphase (Modell),Read histogram of state of charge and temperature over the standing phase (model)
 Lesen Ladestrom Bereiche,Read charge current ranges
+Lesen PreCrashRecorder,Read PreCrashRecorder
 Lesen SDC Statistik Daten,Read SDC statistics data
 Lesen Version BZEDIAG,Read BZEDIAG version
+Lesen der ADC-Werte allgemein,"Read ADC values, general"
+Lesen der ADC-Werte für EHC,Read ADC values for EHC
+Lesen der EHC Sensoren,Read EHC sensors
 Lesen der IBS Fehler,Read IBS faults
+Lesen der VDC-Sensorwerte,Read VDC sensor values
+Lesen des EHC dutycycle,Read EHC duty cycle
 Lesen des Status der erweiteren Triprecorderconfiguration,Read status of the extended trip recorder configuration
+Lesen und Schreiben der Seriennummer des Verteilergetriebes,Read and write the transfer case serial number
 Letzer gültiger Reifendruckwert der vom ausgewählten Rad zurückgeliefert wird,Last valid tire pressure value returned by the selected wheel
 Letzte RE Position,Last wheel electronics position
 Letzte gültige Reifentemperatur des ausgewählten Rads,Last valid tire temperature of the selected wheel
@@ -4069,14 +4284,23 @@ Liefert den Status des HOD Sensors,Returns the HOD sensor status
 Liefert den Zustand der Ansteuerung der vorderen Wascherpumpe:  0= Ansteuerung hintere Wascherpumpe nicht aktiv;  1= Ansteuerung hintere Wascherpumpe aktiv,Returns the washer pump activation state: 0= Rear washer pump activation not active; 1= Rear washer pump activation active
 Liefert den Zustand der Ansteuerung des Frontscheibenwischers:  0= Ansteuerung Frontscheibenwischer nicht aktiv; 1= Ansteuerung Frontscheibenwischer aktiv,Returns the front wiper activation state: 0= Front wiper activation not active; 1= Front wiper activation active
 Liefert den Zustand der Ansteuerung des Heckscheibenwischers:  0= Ansteuerung Heckscheibenwischer nicht aktiv; 1= Ansteuerung Heckscheibenwischer aktiv,Returns the rear wiper activation state: 0= Rear wiper activation not active; 1= Rear wiper activation active
+Liefert den Zustand der einzelnen Wischerschalter am Lenkstock,Returns the state of the individual wiper switches on the steering column stalk
 Liefert den Zustand des Relais der Scheinwerferreinigungsanlage:  0= Relais Scheinwerferreinigungsanlage nicht aktiv;  1= Relais Scheinwerferreinigungsanlage aktiv,Returns the state of the headlight washer system relay: 0= Headlight washer relay not active; 1= Headlight washer relay active
 Liefert den aktuellen Wert der verwendeten Autoadressierung.  Entspricht dem BDC Kodierparameter  METHODE_AUTOADRESSIERUNG,Returns the current auto-addressing value in use. Corresponds to BDC coding parameter METHODE_AUTOADRESSIERUNG
+Liefert die (zuvor) codierte Konfiguration des Systems,Returns the (previously) coded system configuration
 Liefert die Adresse des Bluetooth Gerätes,Returns the address of the Bluetooth device
 Liefert die Anzahl der Fehlerverriegelungen zurück,Returns the number of fault lockouts
+"Liefert folgende Informationen: Seriennummer, BMW Teilenummer, Produktionsdatum, Software Release Nummer, Hardware Release Nummer","Returns the following information: serial number, BMW part number, production date, software release number, hardware release number"
 Liefert ob den Cargo-Funktion aktiv kodiert ist,Returns whether the cargo function is coded as active
+"Liefert oder simuliert die Signale der Aktivierung  von PDC, TV, RV und PMA, wie sie über BUS empfangen wird.","Returns or simulates the activation signals of PDC, TV, RV and PMA as received via the bus."
 "Liefert zurück die aktuelle Winkelposition des beifahrerseiten Frontwischers.  Dieser Wert gilt für den zweiten Wischermotor, z.B. Schmetterlingswischer.   255=Ungültig","Returns the current angular position of the passenger side front wiper. This value applies to the second wiper motor, e.g. butterfly wipers. 255=Invalid"
 Liefert zurück die aktuelle Winkelposition des fahrerseiten Frontwischers. 255=Ungültig,Returns the current angular position of the driver's side front wiper. 255=Invalid
 Liefert zurück ob die Außenspiegel abblendbar sind und welche. Siehe Table TAB_AUSSENSPIEGEL_ABBLENDEN,"Returns whether the exterior mirrors can be dimmed, and which ones. See table TAB_AUSSENSPIEGEL_ABBLENDEN"
+Liest Entwicklungs spezifische Daten aus dem RDCi Software.,Reads development-specific data from the RDCi software.
+Liest Entwicklungsdaten der DmgDet aus,Reads DmgDet development data
+Liest Stati des HDD-Laufwerks aus.,Reads HDD drive status.
+Liest Status der Event Zähler DmgDet aus.,Reads DmgDet event counter status.
+Liest Status des Schreibens der Provisionierungsdatei.,Reads the status of writing the provisioning file.
 Liest aktuellen Status der Fensterheberfreigabe Freigabe nicht aktiv 0x00 Freigabe aktiv 0x01,"Current window lifter enable status: enable not active 0x00, enable active 0x01"
 Liest aktuellen Status der Panikfreigabe Panik-Freigabe nicht aktiv 0x00 Panik-Freigabe aktiv 0x01,"Current panic enable status: panic enable not active 0x00, panic enable active 0x01"
 Liest aktuellen Status des Thermomonitors,Current status of the thermal monitor
@@ -4084,7 +4308,15 @@ Liest aktuellen Status des Thermomonitors,Current status of the thermal monitor
 Liest das 16 Bytelange JTAG Passwort aus.,Reads the 16-byte JTAG password
 Liest den Bluetooth Gerätenamen,Reads the Bluetooth device name
 Liest den GPS Status. Siehe Tabelle TGpsStatus.,Reads the GPS status. See table TGpsStatus.
+Liest den Identifier des Mediums und das Qualitätslevel der digitalen Aufnahme aus.,Reads the medium identifier and the quality level of the digital recording.
 Liest den momentanen Korrekturfaktor,Current correction factor
+Liest die GPS Auflösung/Genauigkeit aus,Reads the GPS resolution/accuracy
+Liest die Geräte-Adresse der letzten vier gekoppelten Bluetooth Geräte,Reads the device addresses of the last four paired Bluetooth devices
+Liest die Logistikdaten der IFE aus,Reads the IFE logistics data
+Liest die Logostikdaten der IFE aus.,Reads the IFE logistics data.
+Liest die Parameter der Provisionierung aus,Reads the provisioning parameters
+Liest die die Geschwindigkeitssignale vom Bus und vom GPS Empänger.,Reads the speed signals from the bus and from the GPS receiver.
+Liest die letzten 3 Schadensmeldungen aus,Reads the last 3 damage reports
 Ließt die Seriennummer mit 14 Zeichen (DIN ISO 10 486),Reads the 14-character serial number (DIN ISO 10 486)
 LifeCylce Counter 1 fuer AKKS 1,Life cycle counter 1 for AKKS 1
 LifeCylce Counter 1 fuer AKKS 2,Life cycle counter 1 for AKKS 2
@@ -4162,6 +4394,7 @@ Lithiumionen-Starterbatterie - Status Warnung des Trennelements der Lithiumionen
 LocalHealingOpenLoad,"Local healing, open load"
 Lock bit Failure,Lock bit failure
 Log & Trace,Log & Trace
+Logistikinformationen CID,CID logistics information
 Lokalisierung Fehler,Localisation fault
 Lokalisierung mit Bewegung,Localisation with movement
 Lokalisierung ohne Bewegung,Localisation without movement
@@ -4325,6 +4558,7 @@ Melco,Melco
 Message,Message
 Message L2 zur L1: Antriebsbeschleunigung in der Beschleunigungsueberwachung,Message L2 to L1: drive acceleration in acceleration monitoring
 Message Momentenuebersetzung Gesamt in der Beschleunigungsueberwachung,Message total torque ratio in acceleration monitoring
+"Messen der Feldstärke, die aktuell am Tuner anliegt.",Measures the field strength currently present at the tuner.
 Messung basiert auf Ersatzwerten,Measurement based on substitute values
 "Messwert Temperatur Armauflage Mittelarmlehne: -40..85, 87 = ungültig","Centre armrest temperature reading: -40..85, 87 = invalid"
 "Messwert Temperatur Armauflage Tür: -40..85, 87 = ungültig","Door armrest temperature reading: -40..85, 87 = invalid"
@@ -4372,6 +4606,7 @@ MisfDet_nrFltIdCat_C Katalysatorschaedigende Aussetzer,MisfDet_nrFltIdCat_C Cata
 MisfDet_nrFltIdEmiStrt_C Emissionsrelevante Aussetzer nach Start,MisfDet_nrFltIdEmiStrt_C Emissions-relevant misfires after start
 MisfDet_nrFltIdEmi_C   Emissionsrelevante Aussetzer,MisfDet_nrFltIdEmi_C Emissions-relevant misfires
 MisfDet_nrFltIdEmi_C Emissionsrelevante Aussetzer,MisfDet_nrFltIdEmi_C Emissions-relevant misfires
+Mit diesem Diagnosebefehl wird die MAC Adresse geschrieben oder ausgelesen,This diagnostic command writes or reads the MAC address
 Mittelwert Qstat-Adaption Zylinder Bank 1,"Qstat adaptation mean value, bank 1 cylinders"
 Mittelwert Qstat-Adaption Zylinder Bank 2,"Qstat adaptation mean value, bank 2 cylinders"
 Mittelwert Qstat-Adaption alle Zylinder,"Qstat adaptation mean value, all cylinders"
@@ -4648,6 +4883,7 @@ Ortung Satellit 5,Tracking satellite 5
 Ortung Satellit 6,Tracking satellite 6
 Otto Partikelfilter Verbaudiagnosestatus auslesen Klammerung: BMW_GAPAFI_SC == 1,Read gasoline particulate filter installation diagnosis status. Bracketing: BMW_GAPAFI_SC == 1
 OutputPermanentlyDisabled,Output permanently disabled
+Overwrites / Reads CID coding data in RAM temporarily,Overwrites / Reads CID coding data in RAM temporarily
 P,P
 P - Parkposition,P - park position
 P - parken,P - park
@@ -4677,6 +4913,7 @@ PROM P00-P02 CRC Bits Error,PROM P00-P02 CRC bits error
 PROM Parity Bit P1 Error,PROM parity bit P1 error
 PROM Parity Bit P2 Error,PROM parity bit P2 error
 PROM Parity Bit P3 Error,PROM parity bit P3 error
+PSI5 Statuswort,PSI5 status word
 PWF-Zustand des Fahrzeugs.,Vehicle power state (PWF)
 PWM Glühstift: 0xFE = Fehler 0xFF = Signal ungültig,Glow plug PWM: 0xFE = fault 0xFF = signal invalid
 PWM-Frequenz Soll Ventil hinten links,"Valve target PWM frequency, rear left"
@@ -4693,6 +4930,7 @@ PWM-Wert Wasserventil Fahrer in Prozent. Wasserventile werden ab 17-07 nicht meh
 PWM-Wert: 0 = 0% 1 = 25% 2 = 50% 3 = 75% 4 = 100%,PWM value: 0 = 0% 1 = 25% 2 = 50% 3 = 75% 4 = 100%
 PadWearAdjustmentCounter,PadWearAdjustmentCounter
 Padding for further use,Padding for further use
+Pairing Modus für WLAN AP oder Wifi Direkt,Pairing mode for WLAN AP or Wi-Fi Direct
 Panikmodus freigeschalten,Panic mode enabled
 Panikmodus nicht freigeschalten,Panic mode not enabled
 Pannen Warnung vom angewählten Rad,Flat tire warning from the selected wheel
@@ -4805,6 +5043,7 @@ Pruefen_Analyse_Diagnose,Testing/analysis/diagnosis
 Pruefen_Analyse_Diagnose_durch_Analyse_starten_PWF_MASTER_134,Test/analysis/diagnosis: analysis started (PWF_MASTER_134)
 Pruefen_Analyse_Diagnose_durch_Diagnose_PWF_MASTER_403,Test/analysis/diagnosis: by diagnosis (PWF_MASTER_403)
 Präsentations-Modus,Presentation mode
+Präsenz der verschiedenen WLAN-Modi,Presence of the various WLAN modes
 Pumpe EMV-Betrieb (Teilansteuerung),Pump EMC mode (partial activation)
 Pumpe Vollansteuerung,Pump full activation
 Pumpe an Ausgang Frontwaschen (Wi_Pu1) angeschlossen,Pump connected to front washing output (Wi_Pu1)
@@ -4951,6 +5190,7 @@ Raildruck korrigiert um gelernten Raildrucksensoroffset,Rail pressure corrected 
 Rampe Vollast,Ramp full load
 Rate Based Monitoring Mode 9 auslesen (Ausgabe der Werte wie im Scantool Mode 9),Read rate based monitoring mode 9 (values output as in scan tool mode 9)
 Read Data Acces,Read data access
+Reads out from the navigation system how many Resyncs from which client the navigation system has received and how many messages the navigation system has sent since the beginning of the current lifecycle,Reads out from the navigation system how many Resyncs from which client the navigation system has received and how many messages the navigation system has sent since the beginning of the current lifecycle
 Reads the ATIC164 configuration register.,ATIC164 configuration register
 Reads the antenna configuration for the extended paramter sets.,Antenna configuration for the extended parameter sets
 Reads the configuration for sequential LF sending on up to 4 LF antennas.,Configuration for sequential LF transmission on up to 4 LF antennas
@@ -4995,6 +5235,15 @@ Reifen Saison,Tire season
 Reifen Technologie,Tire technology
 Reifen Tragfähigkeit,Tire load capacity
 Reifen ab Werksauslieferung: Ja/Nein,Tire fitted at factory delivery: yes/no
+Reifendruckcodierung für RDC-Sensoren (HO),Tire pressure coding for RDC sensors (HO)
+Reifendruckkontrolle Radzuordnung interner System Status.,Tire pressure monitoring wheel assignment internal system status.
+Reifendruckkontrolle Status Abfragen bezüglich Eigenradabfragen,Tire pressure monitoring status query regarding own-wheel queries
+Reifendruckkontrolle System Informationen vom am Fahrzeug erkannten Radelektroniken.,Tire pressure monitoring system information from the wheel electronics detected on the vehicle.
+Reifendruckkontrolle Systemzustand beim Befüll Hinweis Ereignis.,Tire pressure monitoring system state at inflation notice event.
+Reifendruckkontrolle Systemzustand beim Systemausfall und Ausfallursache.,Tire pressure monitoring system state at system failure and failure cause.
+Reifendruckkontrolle Systemzustand beim Warnereignis Rücknahme.,Tire pressure monitoring system state at warning event withdrawal.
+Reifendruckkontrolle Systemzustand beim Warnereignis.,Tire pressure monitoring system state at warning event.
+Reifendruckkontrolle Systemzustand nach Radzuordung (Kalibrierung).,Tire pressure monitoring system state after wheel assignment (calibration).
 Reifendruckwert Radelektronik RE0 (65.535 bar => ungueltig),Tire pressure of wheel electronics RE0 (65.535 bar => invalid)
 Reifendruckwert Radelektronik RE1 (65.535 bar => ungueltig),Tire pressure of wheel electronics RE1 (65.535 bar => invalid)
 Reifendruckwert Radelektronik RE2 (65.535 bar => ungueltig),Tire pressure of wheel electronics RE2 (65.535 bar => invalid)
@@ -5003,6 +5252,7 @@ Reifendruckwert Radelektronik RE4 (65.535 bar => ungueltig),Tire pressure of whe
 Reifendruckwert Radelektronik RE5 (65.535 bar => ungueltig),Tire pressure of wheel electronics RE5 (65.535 bar => invalid)
 Reifendruckwert Radelektronik RE6 (65.535 bar => ungueltig),Tire pressure of wheel electronics RE6 (65.535 bar => invalid)
 Reifendruckwert Radelektronik RE7 (65.535 bar => ungueltig),Tire pressure of wheel electronics RE7 (65.535 bar => invalid)
+Reifenpannenanzeige,Flat tire indicator
 Reifentemperatur beim Batterie Uterspannung Warnung,Tire temperature at battery undervoltage warning
 Reinitialisation,Reinitialisation
 Relais ausgeschaltet,Relay switched off
@@ -5017,6 +5267,7 @@ Relaiszustand 30B7-Relais,30B7 relay state
 Relaiszustand 30F1-Relais,30F1 relay state
 Relaiszustand 30F2-Relais,30F2 relay state
 Relaiszustand Hintere Heckscheibenheizung-Relais,Rear window heating relay state
+Relative Feuchte und Temperatur,Relative humidity and temperature
 Relative Kraftstoffmasse,Relative fuel mass
 "Relative Zeit der Hubadaption, Mradhubakt_time bezogen auf K_MRADHUBAKT_TIME_MN","Relative time of lift adaptation, Mradhubakt_time relative to K_MRADHUBAKT_TIME_MN"
 Relativer Exzenterwinkel ohnd Bezug auf einen Anschlag,Relative eccentric angle without reference to a stop
@@ -5072,10 +5323,17 @@ Restliche Zeit in der der Spiegel noch abgeblendet ist,Remaining time for which 
 Restweg aus Kraftstoffverbrauch abgeleitet,Remaining distance derived from fuel consumption
 Restwärmenutzung,Residual heat utilisation
 Restzeit des Einlaufschutzes in Sekunden,Remaining time of the run-in protection in seconds
+Returns all filtered internal sensor values,Returns all filtered internal sensor values
+Returns important internal state variables of the CID software bus,Returns important internal state variables of the CID software bus
 Returns the 12 digits Radio ID of the SDARS tuner (SXM),Returns the 12-digit radio ID of the SDARS tuner (SXM)
+Returns the CD/ DVD media statistic,Returns the CD/ DVD media statistic
 Returns the ISO 3166 country code of the car position as three characters; e.g. Deutschland DEU,"Returns the ISO 3166 country code of the car position as three characters, e.g. Germany DEU"
+Returns the current CID-SW version.,Returns the current CID-SW version.
+Returns the extended logistic information of the currently connected CID,Returns the extended logistic information of the currently connected CID
 "Returns the latitude  LL     east/ west with 0x00 east, 0x01 west GG    degree [0-180] MM   minute(s) [0-59]  SS    second [0-59] HH   100stel second [0-99]","Returns the latitude: LL east/west with 0x00 east, 0x01 west; GG degrees [0-180]; MM minutes [0-59]; SS seconds [0-59]; HH hundredths of a second [0-99]"
 "Returns the longitude  bb    north/ south with 0x00 north, 0x01 south gg    degree [0-90]   mm  minute(s) [0-59]  ss     second [0-59]  hh    100stel second [0-99]","Returns the longitude: bb north/south with 0x00 north, 0x01 south; gg degrees [0-90]; mm minutes [0-59]; ss seconds [0-59]; hh hundredths of a second [0-99]"
+Returns the quality of the SDARS signal,Returns the quality of the SDARS signal
+Returns the various versions from HW and SW of the SDARS module,Returns the various versions from HW and SW of the SDARS module
 Reverse current detected,Reverse current detected
 Reversieren Emergency-Mode,"Reversing, emergency mode"
 Reversieren Mautlauf,"Reversing, toll mode"
@@ -5136,12 +5394,14 @@ Rändel in Stufe 2,Thumbwheel at level 2
 Rändel in Stufe 3,Thumbwheel at level 3
 Rändel in Stufe 4,Thumbwheel at level 4
 Rückgabe Kilometerstand,Mileage
+Rückgabe Regenintensität,Returns rain intensity
 Rückgabe der Messwerte. Die Anzahl der Messwerte ist festgelegt durch ANZAHL_HA_LERN_WERTE,Measured values. The number of measured values is set by ANZAHL_HA_LERN_WERTE
 Rückgabe der aktuellen Systemlast Core 0 in Prozent,"Current system load, core 0, in percent"
 Rückgabe der aktuellen Systemlast Core 3 in Prozent,"Current system load, core 3, in percent"
 Rückgabe der maximalen Systemlast Core 0 in Prozent,"Maximum system load, core 0, in percent"
 Rückgabe der maximalen Systemlast Core 3 in Prozent,"Maximum system load, core 3, in percent"
 Rückgabe der maximalen Systemlast in Prozent,Maximum system load in percent
+Rückgabe des Fahrzeugszustandes,Returns the vehicle state
 Rückgabe des Füllstands des rechten Tanksensors. Arbeitsbereich und IO-Bereich muss vom Entwickler befüllt werden.,Fill level returned by the right tank sensor. Working range and OK range must be filled in by the developer.
 Rückgabe des Füllstandwerts des linken Tanksensor. Arbeitsbereich und IO-Bereich muss vom Entwickler befüllt werden.,Fill level value returned by the left tank sensor. Working range and OK range must be filled in by the developer.
 "Rückgabewert, ob die Lichtsperre aktiv ist",Returns whether the light lock is active
@@ -5157,6 +5417,7 @@ S,S
 SC5,SC5
 SDARS,SDARS
 SDARS Telefonnummer,SDARS telephone number
+SDARS Telefonnummer auslesen bzw. schreiben,Read or write SDARS phone number
 SDC-DIAG Batteriestrom t3,SDC-DIAG battery current t3
 SDC-DIAG Bordnetzspannung t1,SDC-DIAG vehicle electrical system voltage t1
 SDC-DIAG Bordnetzspannung t2,SDC-DIAG vehicle electrical system voltage t2
@@ -5193,7 +5454,9 @@ START5 Partial Load Start,START5 partial load start
 START6,START6
 START6 Partial Load Start,START6 partial load start
 STATUS Freischaltung SWO 2,STATUS enabling SWO 2
+STATUS_FES_STATISTIK,STATUS_FES_STATISTIK
 STATUS_UPSHIFT_COUNTER_QS3,STATUS_UPSHIFT_COUNTER_QS3
+STATUS_WASCHPUMPEN_AUSSTATTUNG,STATUS_WASCHPUMPEN_AUSSTATTUNG
 STAT_2WD_DISTANCE_TOTAL_WERT,STAT_2WD_DISTANCE_TOTAL_WERT
 STAT_BLDC_ENERGY_CONST_IGN,STAT_BLDC_ENERGY_CONST_IGN
 STAT_BLDC_ENERGY_CONS_LIFETIME,STAT_BLDC_ENERGY_CONS_LIFETIME
@@ -5292,6 +5555,45 @@ Schalter Kupplung,Clutch switch
 Schalter S_POELFUNC_ON,Switch S_POELFUNC_ON
 Schalterstellung Beifahrer Airbag aus Schalter Siehe TAB_POS_ZUSTAND,Front passenger airbag off switch position; see TAB_POS_ZUSTAND
 Schaltpaddles nicht betätigt,Shift paddles not operated
+Schaltungsapplikation  1 1 2,Shift calibration 1 1 2
+Schaltungsapplikation  1 2 1,Shift calibration 1 2 1
+Schaltungsapplikation  1 2 3,Shift calibration 1 2 3
+Schaltungsapplikation  1 3 1,Shift calibration 1 3 1
+Schaltungsapplikation  1 3 2,Shift calibration 1 3 2
+Schaltungsapplikation  1 3 4,Shift calibration 1 3 4
+Schaltungsapplikation  1 4 2,Shift calibration 1 4 2
+Schaltungsapplikation  1 4 3,Shift calibration 1 4 3
+Schaltungsapplikation  1 4 5,Shift calibration 1 4 5
+Schaltungsapplikation  1 5 1,Shift calibration 1 5 1
+Schaltungsapplikation  1 5 3,Shift calibration 1 5 3
+Schaltungsapplikation  1 5 4,Shift calibration 1 5 4
+Schaltungsapplikation  1 5 6,Shift calibration 1 5 6
+Schaltungsapplikation  1 6 3,Shift calibration 1 6 3
+Schaltungsapplikation  1 6 4,Shift calibration 1 6 4
+Schaltungsapplikation  1 6 5,Shift calibration 1 6 5
+Schaltungsapplikation  1 6 7,Shift calibration 1 6 7
+Schaltungsapplikation  1 7 1,Shift calibration 1 7 1
+Schaltungsapplikation  1 7 5,Shift calibration 1 7 5
+Schaltungsapplikation  1 7 6,Shift calibration 1 7 6
+Schaltungsapplikation  1 7 8,Shift calibration 1 7 8
+Schaltungsapplikation  1 8 2,Shift calibration 1 8 2
+Schaltungsapplikation  1 8 4,Shift calibration 1 8 4
+Schaltungsapplikation  1 8 6,Shift calibration 1 8 6
+Schaltungsapplikation  1 8 7,Shift calibration 1 8 7
+Schaltungsapplikation 2 1 2,Shift calibration 2 1 2
+Schaltungsapplikation 2 2 1,Shift calibration 2 2 1
+Schaltungsapplikation 2 2 3,Shift calibration 2 2 3
+Schaltungsapplikation 2 3 2,Shift calibration 2 3 2
+Schaltungsapplikation 2 3 4,Shift calibration 2 3 4
+Schaltungsapplikation 2 4 3,Shift calibration 2 4 3
+Schaltungsapplikation 2 4 5,Shift calibration 2 4 5
+Schaltungsapplikation 2 5 4,Shift calibration 2 5 4
+Schaltungsapplikation 2 5 6,Shift calibration 2 5 6
+Schaltungsapplikation 2 6 5,Shift calibration 2 6 5
+Schaltungsapplikation 2 6 7,Shift calibration 2 6 7
+Schaltungsapplikation 2 7 6,Shift calibration 2 7 6
+Schaltungsapplikation 2 7 8,Shift calibration 2 7 8
+Schaltungsapplikation 2 8 7,Shift calibration 2 8 7
 Schaltwippe Tip minus betätigt und entprellt,Shift paddle tip minus operated and debounced
 Schaltwippe Tip plus betätigt und entprellt,Shift paddle tip plus operated and debounced
 Schaltwippe betätigt,Shift paddle pressed
@@ -5304,6 +5606,7 @@ Schicht,Stratified
 "Schichtungspotentiometer links: 0 = Kalt, 100 = Warm, 255 = Poti nicht codiert","Stratification potentiometer left: 0 = cold, 100 = warm, 255 = potentiometer not coded"
 "Schichtungspotentiometer rechts: 0 = Kalt, 100 = Warm, 255 = Poti nicht codiert","Stratification potentiometer right: 0 = cold, 100 = warm, 255 = potentiometer not coded"
 "Schichtungspotentiometer vorn: 0 = Kalt, 100 = Warm, 255 = Poti nicht codiert","Stratification potentiometer front: 0 = cold, 100 = warm, 255 = potentiometer not coded"
+Schichtungspotentiometern Klima,Climate blend potentiometers
 Schiebelage,Sliding position
 Schlechtwetter C1,Bad weather C1
 Schlechtwetter C2,Bad weather C2
@@ -5314,6 +5617,7 @@ Schloss nicht verriegelt / nicht aktiv,Lock not locked / not active
 Schloss verriegelt / aktiv,Lock locked / active
 Schluesselstart oder MSA-Start,Key start or MSA start
 Schlüssel des AP Netzwerk,Key of the AP network
+Schnellfüllzeit Adaption,Rapid fill time adaptation
 Schnellfüllzeit Adaption Kupplung A,Rapid-fill time adaptation of clutch A
 Schnellfüllzeit Adaption Kupplung B,Rapid-fill time adaptation of clutch B
 Schnellfüllzeit Adaption Kupplung C,Rapid-fill time adaptation of clutch C
@@ -5326,6 +5630,9 @@ Schreiben  fehlgeschlagen,Write failed
 Schreiben erfolgreich,Write successful
 Schreiben läuft,Write in progress
 Schreiben noch nicht angestoßen (Routine nicht gestartet),Write not yet triggered (routine not started)
+Schreiben und Lesen der Klassierinformation im EEPROM,Write and read the classification information in EEPROM
+Schreiben und Lesen der Kontaktdaten des Service Partners in/aus  dem Telefonbuch des Steuergeräts.,Write and read the service partner contact details to/from the control unit's phone book.
+Schreibt/Liest den Bluetooth Gerätenamen,Writes/reads the Bluetooth device name
 Schrittzaehler DK-Rueckstellfeder-Pruefung,Step counter throttle valve return spring check
 Schwankung von Referenzstrom zu gross,Reference current fluctuation too large
 Seal,Seal
@@ -5335,6 +5642,7 @@ Segel Status der ATSYS Seite,Coasting status on the ATSYS side
 "Segel-Lernfunktion aktiviert, aber nicht gelernt","Coasting learning function activated, but not learned"
 "Segel-Lernfunktion aktiviert, aber nicht gelernt und per Diagnosetester deaktivert","Coasting learning function activated, but not learned and deactivated by diagnostic tester"
 Segelanforderung AGS (die AGS sieht Segeln als sinnvoll an und es liegt kein Verhinderer vor),Coasting request from AGS (AGS considers coasting appropriate and no inhibitor is present)
+Segelfunktion,Coasting function
 Segelfunktion fest deaktiviert,Coasting function permanently deactivated
 Segelfunktion fest deaktiviert und per Diagnosetester deaktivert,Coasting function permanently deactivated and deactivated by diagnostic tester
 Segelfunktion fest eingeschaltet aber per Diagnosetester deaktivert,Coasting function permanently on but deactivated by diagnostic tester
@@ -5375,6 +5683,7 @@ Selbsterkennungs-Status fuer Plausi,Self-detection status for plausibility check
 Self Test Failure: Neg. Test,Self-test failure: neg. test
 Self Test Failure: Pos. Test,Self-test failure: pos. test
 Sendemode der Radelektronik,Wheel electronics transmission mode
+Senden das Zertifikat das als nächstes abläuft und das Datum an dem es abläuft,Sends the certificate that expires next and the date on which it expires
 SenderID des 3. letzten Anforderers,Sender ID of the 3rd-to-last requester
 SenderID des 4. letzten Anforderers,Sender ID of the 4th-to-last requester
 SenderID des 5. letzten Anforderers,Sender ID of the 5th-to-last requester
@@ -5427,6 +5736,7 @@ Seriennummer des REMA-Aktuators T1R byte 7,REMA actuator T1R serial number byte 
 Seriennummer des Steuergeräts,Control unit serial number
 Seriennummer des Zentralinstruments,Central instrument serial number
 Seriensteuergeraet,Series production control unit
+Service - Qualifier des LMV,LMV service qualifier
 Service Basis - Qualifier des LMV,Service base - LMV qualifier
 Service Regeneration kann gestartet werden,Service regeneration can be started
 Serviceregeneration laeuft,Service regeneration running
@@ -5434,6 +5744,7 @@ Serviceregeneration wurde abgebrochen,Service regeneration was aborted
 Serviceregeneration wurde komplett durchgefuehrt,Service regeneration fully completed
 Serviceregeneration wurde komplett durchgefuehrt und reduzierte Russbeladung bestaetigt,Service regeneration fully completed and reduced soot load confirmed
 Servicezähler,Service counter
+Sets a definite SDARS channel,Sets a definite SDARS channel
 ShortCircuit,Short circuit
 ShortcutOvertemperature,Short circuit overtemperature
 Sicherheitszeit,Safety time
@@ -5481,6 +5792,7 @@ Signalwert der Taste Schlafposition an der Beifahrertür Fond,Signal value of sl
 Signalwert für Fernbedienungstaste-Taste an der Fahrertür,Signal value for remote control button on the driver's door
 Signalwert für Reset-Taste an BFT,Signal value for reset button on front passenger door
 Signaturpruefung schlug fehl,Signature check failed
+Simulierte Stahllamellentemperatur in 12 Intervallen,Simulated steel plate temperature in 12 intervals
 Simulierte mittlere Temperatur OPF Bank1,Simulated mean OPF temperature bank 1
 Simulierter Druck nach OPF Bank1,Simulated pressure downstream of OPF bank 1
 Sitz hinten links: Person erkannt / nicht erkannt,Rear left seat: person detected / not detected
@@ -5495,8 +5807,10 @@ Sitzlehne Beifahrer (Cabrio): verriegelt / nicht verriegelt,Front passenger seat
 Sitzlehne Fahrer (Cabrio): verriegelt / nicht verriegelt,Driver seat backrest (convertible): locked / not locked
 Sitzposition Beifahrer aus Sitzmodul (Bus-Nachricht) Siehe TAB_SITZPOS_SM_ZUSTAND,Front passenger seat position from seat module (bus message); see TAB_SITZPOS_SM_ZUSTAND
 Sitzposition Fahrer aus Sitzmodul (Bus-Nachricht) Siehe TAB_SITZPOS_SM_ZUSTAND,Driver seat position from seat module (bus message); see TAB_SITZPOS_SM_ZUSTAND
+Sitzposition aus Sitzmodul (Bus-Nachricht),Seat position from seat module (bus message)
 Sitzposition hinten (codiert + verbaut),Seat position rearward (coded + fitted)
 Sitzposition vorne (codiert + verbaut),Seat position forward (coded + fitted)
+Sitzpositionssensor,Seat position sensor
 Slave DME,Slave DME
 Sleep_Mode,Sleep mode
 Slow Offset Compensation Error,Slow offset compensation error
@@ -5643,6 +5957,7 @@ Spiegelauswahl Fahrer / Beifahrer  0: Beifahrerspiegel  1: Fahrerspiegel,Mirror 
 Spiegelposition Spiegel links horizontal Bereich: 0-255 Inkremente,Left mirror horizontal position. Range: 0-255 increments
 Spiegelposition Spiegel links vertikal. Bereich: 0-255 Inkremente,Left mirror vertical position. Range: 0-255 increments
 Spiegelposition Spiegel rechts vertikal Bereich: 0-255 Inkremente,Right mirror vertical position. Range: 0-255 increments
+Spiegelt Zähler (Statistikdaten) der EPB wider.,Reflects EPB counters (statistics data).
 SpltCooltVlv_rAct,SpltCooltVlv_rAct
 Sport Dynamic,Sport Dynamic
 Sport Expert,Sport Expert
@@ -5752,11 +6067,61 @@ Statistik zur Bauteilschutzfunktion Startvorraussetzung: Klammerung:,Component p
 Statistik zur Medienqualitaet Wassersystem Startvorraussetzung: Klammerung:,Water system fluid quality statistics. Start requirement: bracketing:
 Statistik-Datenblock EHC,EHC statistics data block
 Statistiken fuer MDrive lesen. Klammerung: SY_MDRIVE == 1,Read MDrive statistics. Bracketing: SY_MDRIVE == 1
+Statistiken über WLAN Verbindungen im AP Modus,Statistics on WLAN connections in AP mode
+Statistiken über WLAN Verbindungen im Wifi Direct Modus,Statistics on WLAN connections in Wi-Fi Direct mode
+"Statistikwerte der Steuergeräte Temperatur (Endstufe/Leistungsteil) (Abschaltschwelle EPS: 105, HSR: 95°, ASA: 85°)","Control unit temperature statistics (output stage/power section) (shutdown threshold EPS: 105, HSR: 95°, ASA: 85°)"
+Statistikzähler Spannung Eingangsgröße: gefiltete Spannung (100 ms Filterzeit um Kurzzeitpeaks herauszufiltern) außerhalb Motorstart (Kalt- und Warmstart),"Voltage statistics counter, input: filtered voltage (100 ms filter time to filter out short-term peaks) outside engine start (cold and warm start)"
+Statistikzähler Strom,Current statistics counter
 Statistisch berechnete Werte aus der Anzahl der Anlernwerte,Statistically calculated values from the number of learned values
+Status / Simualtion Heckscheibenkontakt 0: Heckscheine offen 1: Heckscheibe geschlossen,Status / simulation rear window contact 0: rear window open 1: rear window closed
+Status / Simualtion Taster Kindersicherung  1: Taster gedrückt,Status / simulation child lock button 1: button pressed
+Status / Simulation  HW-Eingang Vorrastkontakt (VRK) der Soft-Close-Automatik (SCA),Status / simulation HW input pre-latch contact (VRK) of soft-close automatic (SCA)
+Status / Simulation Hardwareeingang Türkontakt Beifahrer,"Status / simulation hardware input door contact, passenger"
+Status / Simulation Hardwareeingang Türkontakt Beifahrer hinten,"Status / simulation hardware input door contact, passenger rear"
+Status / Simulation Hardwareeingang Türkontakt Fahrer  Dieser Job wird im Rahmen der FUSI in speziellen Prüfschritten in Werk und HO verwendet. Der Job darf daher nie entfallen und muss im Rahmen der Absicherung als kritischer/hochpriorer Test betrachtet werden.,"Status / simulation hardware input door contact, driver. This job is used in special test steps in the plant and in the dealer network as part of functional safety (FUSI). The job must therefore never be removed and must be treated as a critical/high-priority test during validation."
+Status / Simulation Hardwareeingang Türkontakt Fahrer hinten,"Status / simulation hardware input door contact, driver rear"
+Status / Simulation Heckklappenkontakt 0: Heckklappe geschlossen 1: Heckklappe offen,Status / simulation tailgate contact 0: tailgate closed 1: tailgate open
+Status / Simulation LED SARAH  1: LED ein,Status / simulation LED SARAH 1: LED on
+Status / Simulation Taster SARAH  1: Taster gedrückt,Status / simulation button SARAH 1: button pressed
+Status / Simulation Taster Sonnenrollo Heckscheibe  0: Taster nicht gedrückt 1: Taster gedrückt,Status / simulation rear window sun blind button 0: button not pressed 1: button pressed
+Status / Simulation für Taster Heckklappe aussen,Status / simulation for tailgate exterior button
+Status / Simulation für Taster Heckscheibe,Status / simulation for rear window button
+Status / Steuern Abblenden Aussenspiegel,Status / control exterior mirror dimming
+Status / Steuern Aussenspiegel beiklappen / abklappen,Status / control exterior mirror fold in / fold out
+Status / Steuern Bewegung Spiegel links (Richtung),Status / control left mirror movement (direction)
+Status / Steuern Bewegung Spiegel rechts (Richtung),Status / control right mirror movement (direction)
+Status / Steuern HC2-Anzeige,Status / control HC2 display
+Status / Steuern Heckrollo,Status / control rear blind
+Status / Steuern Heizung Aussenspiegel,Status / control exterior mirror heating
+Status / Steuern Hupe,Status / control horn
+Status / Steuern Innenspiegel (EC-Spiegel),Status / control interior mirror (EC mirror)
+"Status / Steuern Lenkradheizung (Aktiv, LED und analoger Wert)","Status / control steering wheel heating (active, LED and analog value)"
+Status / Steuern Montage-Position Frontscheibenwischer,Status / control front wiper assembly position
+Status / Steuern Park-Position Frontscheibenwischer,Status / control front wiper park position
+Status / Steuern Park-Position Heckscheibenwischer,Status / control rear wiper park position
+Status / Steuern Position links Spiegel,Status / control left mirror position
+Status / Steuern Position rechts Spiegel,Status / control right mirror position
+Status / Steuern Seitenrollo Beifahrer hinten,"Status / control side blind, passenger rear"
+Status / Steuern Seitenrollo Fahrer hinten,"Status / control side blind, driver rear"
+Status / Steuern Service-Position Frontscheibenwischer,Status / control front wiper service position
+Status / Steuern Service-Position Heckscheibenwischer,Status / control rear wiper service position
+Status / Steuern Stufe Sitzheizung Beifahrerseite,"Status / control seat heating level, passenger side"
+Status / Steuern Stufe Sitzheizung Beifahrerseite hinten,"Status / control seat heating level, passenger side rear"
+Status / Steuern Stufe Sitzheizung Fahrer,"Status / control seat heating level, driver"
+Status / Steuern Stufe Sitzheizung Fahrer hinten,"Status / control seat heating level, driver rear"
+Status / Steuern Temperatur Sitzheizung Beifahrer,"Status / control seat heating temperature, passenger"
+Status / Steuern Temperatur Sitzheizung Beifahrer hinten,"Status / control seat heating temperature, passenger rear"
+Status / Steuern Temperatur Sitzheizung Fahrer,"Status / control seat heating temperature, driver"
+Status / Steuern Temperatur Sitzheizung Fahrer hinten,"Status / control seat heating temperature, driver rear"
+Status / Steuern Waschwasserpumpe hinten,Status / control rear washer pump
+Status / Steuern Waschwasserpumpe vorne,Status / control front washer pump
+Status / Steuern Zusatzwasserpumpe,Status / control auxiliary water pump
+Status / Steuern aktuelle Fahrlichtsituation,Status / control current driving light situation
 Status Abschaltung T1L,Shutdown status T1L
 Status Abschaltung T1R,Shutdown status T1R
 Status Aktivierung EKS,EKS activation status
 Status Aktivierung Temperaturüberwachung,Temperature monitoring activation status
+Status Ambiente-Beleuchtung,Status ambient lighting
 Status Ansteuerung Relais KL30B_EA_lang (A_S_MR),KL30B_EA_lang relay activation status (A_S_MR)
 Status Ansteuerung Relais VVT,Status VVT relay activation
 Status Antrieb Fahrzeug,Vehicle drive status
@@ -5769,6 +6134,7 @@ Status Betriebsbereichsgrenzen (LISB) Startvorraussetzung: BMW_SY_LION >0,Operat
 Status Betriebsmodus-Tester E-Luefter LIN,Electric fan LIN operating mode tester status
 Status Bit ob IGR high aktiv,Status bit IGR high active
 Status Bit ob IGR medium aktiv,Status bit IGR medium active
+Status Bremslichschalter,Status brake light switch
 Status CDD Events (MPT Qualifier),CDD events status (MPT qualifier)
 Status DCDC-Wandler,DCDC converter status
 Status DTC Fehler mit Warnlampe im Fehlerspeicher.,Status of DTC fault with warning lamp in fault memory
@@ -5787,6 +6153,8 @@ Status Endanschlaege und Offset,Status of end stops and offset
 Status Endlagenschalter: 0x00 = nicht betätigt 0x01 = betätigt,Limit switch status: 0x00 = not pressed 0x01 = pressed
 Status Endstufen Diagnose,Status output stage diagnosis
 Status Energie Powermanagement,Energy power management status
+Status FES Daten,Status FES data
+Status FH-Taster Fahrer,"Status window lifter (FH) button, driver"
 Status FM 1 Phasendiversity Antenne. Ergebnis siehe Tabelle TAB_stateFMPhasAntenna,FM 1 phase diversity antenna status. Result see table TAB_stateFMPhasAntenna
 Status FM 2 Phasendiversity Antenne. Ergebnis siehe Tabelle TAB_stateFMPhasAntenna,FM 2 phase diversity antenna status. Result see table TAB_stateFMPhasAntenna
 Status Fahren Bereitschaft Antrieb,Drive ready-to-drive status
@@ -5841,8 +6209,12 @@ Status Heizungs Stufe auf der Fahrerseite hinten,"Heating level status, rear dri
 Status Heizungs Stufe der Sitzheizung auf der Beifahrerseite,"Seat heating level status, front passenger side"
 Status IIGN_CYC_CNT als Integerwert,IIGN_CYC_CNT status as integer value
 Status IUMPR_GEN_DEN als Integerwert,IUMPR_GEN_DEN status as integer value
+Status Innenlicht hinten,Status rear interior light
+Status Innenlicht vorne / Steuern Innenlicht Daueraus,Status front interior light / control interior light permanently off
 Status Kalibrieranforderung.,Calibration request status
 Status Klemme 15,Status terminal 15
+Status Klemme VA (Verbraucherabschaltung),Status terminal VA (load shedding)
+Status Klimakompressor (EIN / AUS und PWM),Status A/C compressor (ON / OFF and PWM)
 Status Komponententreiber Absperr-Ventil,Shut-off valve component driver status
 Status Komponententreiber Belueftungs-Ventil,Vent valve component driver status
 Status Komponententreiber Dosier-Ventil,Metering valve component driver status
@@ -5858,6 +6230,10 @@ Status LS-Kurzschluss-Flag VL Zugstufe,LS short-circuit flag status FL rebound
 Status LS-Kurzschluss-Flag VR Druckstufe,LS short-circuit flag status FR compression
 Status LS-Kurzschluss-Flag VR Zugstufe,LS short-circuit flag status FR rebound
 Status Lernverfahren Aussetzererkennung,Status misfire detection learning procedure
+Status Leselicht hinten,Status rear reading light
+Status Leselicht vorne,Status front reading light
+Status Lichthupe / Fernlicht. Resultbeschreibung in der Sub-Tabelle,Status headlight flasher / high beam. Result description in the sub-table
+Status Lichtschaltereinheit,Status light switch unit
 Status Lifecycle,Lifecycle status
 Status MSA Einschaltaufforderer,Status MSA switch-on requester
 Status MSA Einschaltverhinderer,Status MSA switch-on preventer
@@ -5870,17 +6246,22 @@ Status Meldung der Radelektronik des angewählten Rads.,Status message of the wh
 Status Modus Hauptuntersuchung,Vehicle inspection mode status
 Status Momentenbegrenzung,Torque limitation status
 Status Motortemperatur,Motor temperature status
+Status NIA,Status NIA
+Status NIA energy,Status NIA energy
 Status Notlauf Gesamtmotor,Overall engine limp-home status
 Status Notstartschalter: Geschlossen,Emergency start switch status: closed
 Status Notstartschalter: Offen,Emergency start switch status: open
 Status Notstartschalter: Signal ungueltig,Emergency start switch status: signal invalid
 Status Nullgangerkennung,Status neutral detection
 Status Oelniveaumessung ONII Abbruchbedingungen,Oil level measurement ONII abort conditions status
+Status PIA (FollowMeHome),Status PIA (follow me home)
+Status PIA-Einstellung Tippblinken,Status PIA setting tap turn signal
 Status PTC von 3. Sitzreihe: 0x00 = PTC aus 0x01 = PTC ein,3rd seat row PTC status: 0x00 = PTC off 0x01 = PTC on
 Status Pulsbreitenausgabe Teil 1,Pulse width output status part 1
 Status Pulsbreitenausgabe Teil 2,Pulse width output status part 2
 Status Querbeschleunigung vom Ackermannmodell,Status lateral acceleration from the Ackermann model
 "Status Quote der Energieverfügbarkeit von ELMA, 1=100% (FR: ENERG_AVAI_ARS)","Status energy availability ratio from ELMA, 1=100% (FR: ENERG_AVAI_ARS)"
+Status REMA-Aktuator,Status REMA actuator
 Status Radposition der Eigenräder,Wheel position status of own wheels
 Status Radzuordnung Timeout,Wheel assignment timeout status
 Status Relais-Tester E-Luefter LIN,Electric fan LIN relay tester status
@@ -5893,6 +6274,7 @@ Status STG Anforderung Radmoment Antriebsstrang Summe Stabilisierung,"Status STG
 Status STG Ist Bremsmoment Summe,Status STG actual brake torque total
 Status STG Ist Lenkwinkel Vorderachse,Status STG actual steering angle front axle
 Status STG Status Stabilisierung DSC,Status STG DSC stabilisation status
+Status Schalter / Taster Spiegelverstellung,Status mirror adjustment switch / button
 Status Schaltpaddles,Shift paddle status
 "Status Schaltwippe Minus: 0 = nicht betätigt, 1 = betätigt","Shift paddle minus status: 0 = not pressed, 1 = pressed"
 "Status Schaltwippe Plus: 0 = nicht betätigt, 1 = betätigt","Shift paddle plus status: 0 = not pressed, 1 = pressed"
@@ -5902,17 +6284,23 @@ Status Sichere Energieversorgung Klasse (QU_FN_ENSU_SFY),Status safe power suppl
 Status Sichere Energieversorgung Zustand (QU_FN_ENSU_SFY),Status safe power supply state (QU_FN_ENSU_SFY)
 Status Sitzbelegung Befahrer entprellt,"Front passenger seat occupancy status, debounced"
 Status Sitzbelegung Beifahrer (SBR-Info),Front passenger seat occupancy status (SBR info)
+Status Solarsensor Links und Rechts,Status solar sensor left and right
+Status Standheizgerät,Status auxiliary heater
 Status Standverbraucher registriert Teil 1,"Status parked-vehicle consumers registered, part 1"
 Status Standverbraucher registriert Teil 2,"Status parked-vehicle consumers registered, part 2"
 Status TDA BMW Dienste,TDA BMW services status
+Status Taster Fahrrichtungsanzeiger. Resultbeschreibung in der Sub-Tabelle,Status turn signal button. Result description in the sub-table
 Status Taster Gebläse: 0x00 = nicht betätigt 0x01 = betätigt,Blower button status: 0x00 = not pressed 0x01 = pressed
 Status Taster Heckspoiler,Rear spoiler button status
+Status Taster Innenlicht / Innenlicht Daueraus,Status interior light button / interior light permanently off
+Status Taster elektrische Lenksäulenverstellung,Status electric steering column adjustment button
 Status Test-Eigenraderkennung in Fahrt.,Status of own-wheel detection test while driving
 Status Trennelement (LISB) Startvorraussetzung: BMW_SY_LION >0,Isolating element status (LISB). Start prerequisite: BMW_SY_LION >0
 Status Trennelement Leistungszusatzspeicher,Auxiliary power storage isolating element status
 Status Trennkupplung K0,Disconnect clutch K0 status
 Status Turboladerdiagnose,Turbocharger diagnosis status
 "Status Türkontakt, der den Motortreiber zur Verfügung steht.",Door contact status available to the motor driver.
+Status USB HUB eingebaut,Status USB hub installed
 Status VVT-Anschlaglernen (intern),VVT stop learning status (internal)
 Status Verknüpfung Freigabe Panikmodus,Panic mode enable logic status
 Status Versogungsspannung am Aktor HA (FR: AVL_U_ACT_FTAX_ARS),Status supply voltage at rear axle actuator (FR: AVL_U_ACT_FTAX_ARS)
@@ -5920,22 +6308,34 @@ Status Versogungsspannung am Aktor VA (FR: AVL_U_ACT_FTAX_ARS),Status supply vol
 Status Versorgungsspannung H-Bruecke (E_U_BRIDGE),H-bridge supply voltage status (E_U_BRIDGE)
 Status WMM Steller,Status WMM actuator
 Status Zellen (LISB) Startvorraussetzung: BMW_SY_LION >0,Cell status (LISB). Start prerequisite: BMW_SY_LION >0
+Status Zentralverriegelung Beifahrer,"Status central locking, passenger"
+Status Zentralverriegelung Fahrer,"Status central locking, driver"
+Status Zentralverriegelung Heckklappe,"Status central locking, tailgate"
+Status Zentralverriegelung Heckscheibe,"Status central locking, rear window"
+Status aller ZV-Antriebe,Status of all central locking (ZV) actuators
 Status der Abstellzeit,Engine-off time status
 Status der Aktorüberwachung Hinterachse,"Actuator monitoring status, rear axle"
 Status der Aktorüberwachung Vorderachse,"Actuator monitoring status, front axle"
 Status der Anzeige,Display status
 Status der Anzeige Uhrzeit/Datum,Time/date display status
+Status der Blinkerswippe am Lenkstock. Details in der Sub-Tabelle,Status of the turn signal stalk on the steering column. Details in the sub-table
 Status der CC-Meldungsvorgabe vom Fahrzeugregler,Status of the CC message request from the vehicle controller
 "Status der CID-Verbindung: 0 = CID-Verbindung in Ordnung, Bild wird angezeigt 1 = Keine Aktivierung der Bildausgabe 2 = Anzeigegerät nicht anzeigebereit 3 = Keine Kommunikation mit Anzeigegerät 4 = Bilddaten ungültig 255 = Ungültigkeitswert (Default nach RESET)","CID connection status: 0 = CID connection OK, image is displayed; 1 = image output not activated; 2 = display device not ready; 3 = no communication with display device; 4 = image data invalid; 255 = invalid value (default after RESET)"
 Status der Checkcontrolmeldungen und Fehlerspeichereinträge,Status of Check Control messages and fault memory entries
+Status der Ersatzmassnahmen,Status of the substitute measures
 "Status der Fahrzeugbewegung:  0 = Fahrzeug steht,  1 = Fahrzeug fährt vorwärts, 2 = Fahrzeug fährt rückwärts, 3 = Fahrzeug fährt,  255 ungültig","Vehicle movement status: 0 = stationary, 1 = moving forwards, 2 = moving backwards, 3 = moving, 255 = invalid"
+Status der Fensterheberbewegung,Status of window lifter movement
 Status der Funktionsanzeige:  0= AUS; 1= EIN,"Function indicator status: 0 = off, 1 = on"
 Status der Getriebevoradaption,Transmission pre-adaptation status
 Status der Heizleistung des Heizgeräts.  0 %: Heizung aus ... 100 %: Heizung ein (maximum) 140 %: Fehler 150 %: Signal ungültig,Heater heating output status. 0 %: heating off ... 100 %: heating on (maximum) 140 %: fault 150 %: signal invalid
+Status der M-spezifischen Lenkradtasten,Status of the M-specific steering wheel buttons
+Status der MFL-Tasten,Status of the MFL buttons
 Status der MSA Schnittstelle,MSA interface status
 Status der Massetaktungsdiagnose,Status of ground switching diagnosis
 Status der Nachfuellmenge fuer das Motoroel,Engine oil top-up quantity status
+Status der Radgeschwindigkeit,Status of wheel speed
 Status der Segelfunktion,Coasting function status
+Status der Sitzlehnen-Verriegelung (Cabrio-Fahrzeuge),Status of seat backrest locking (convertible vehicles)
 Status der WK-TSF-Adaptionswerte,Status of torque converter lock-up clutch TSF adaptation values
 Status der Wandlerkupplung  Siehe Tabelle TAB_WANDLERKUPPLUNG,"Torque converter lock-up clutch status, see table TAB_WANDLERKUPPLUNG"
 Status der fuel-off Adaption im aktuellen Betriebsbereich,Status of fuel-off adaptation in the current operating range
@@ -5953,6 +6353,7 @@ Status des Eco Pro Individual Modus,Eco Pro Individual mode status
 Status des Eco Pro Plus Modus,Eco Pro Plus mode status
 Status des Fahrerlebnisschalter,Driving experience switch status
 Status des Komponententreibers,Status of component driver
+Status des Mikroschalters der Zentralkulisse,Status of the central gate microswitch
 Status des OeNS-Komponententreibes,OeNS component driver status
 Status des OeNS-Sensors,OeNS sensor status
 Status des PID30 - Warm-Up Cycles,PID30 status - warm-up cycles
@@ -5973,9 +6374,12 @@ Status elektrische Pumpe EWP_25 LLK2,Status electric pump EWP_25 LLK2
 Status elektrische Pumpe EWP_26 48V Komponentenkuehlung,Status electric pump EWP_26 48V component cooling
 Status erkennung Radelektroniken,Wheel electronics detection status
 Status für Zustand System noch inaktiv wegen Kurvenfahrt,Status for state: system still inactive due to cornering
+Status lokaler Taster Beifahrertür für die seitlichen Sonnenrollos bzw. Heckscheibe,Status of local passenger door button for the side sun blinds or rear window
+Status lokaler Taster Fahrertür für die seitlichen Sonnenrollos bzw. Heckscheibe,Status of local driver door button for the side sun blinds or rear window
 Status nicht Definiert,Status not defined
 Status ob Diagnosebetrieb am Aktor Hinterachse aktiv,Status whether diagnostic mode is active on the rear axle actuator
 Status ob Diagnosebetrieb am Aktor Vorderachse aktiv,Status whether diagnostic mode is active on the front axle actuator
+Status of key authentication and position detection from the last PASE function carried out.,Status of key authentication and position detection from the last PASE function carried out.
 Status of the current SDARS channel as integer,Status of the current SDARS channel as integer
 Status ok,Status OK
 Status ok und Baukasten Client,Status OK and modular-system client
@@ -5986,10 +6390,19 @@ Status zum Lenkwinkelsignal (Sollwert Radebene aus ZFM) (FR: QU_TAR_STEA_FTAX_CT
 Status zur gefilterten Geschwindigkeit des Fahrzeugschwerpunktes,Status of the filtered speed of the vehicle centre of gravity
 "Status, ob ein USB-HUB zwischen HU und KDZ installiert ist; hängt von der Codierprüfung ab",Whether a USB hub is installed between HU and KDZ; depends on the coding check
 "Status, ob gerade eine Geradeuasfahrt erkannt wird",Status indicating whether straight-ahead driving is currently detected
+Status/Steuern LIN-Wischer,Status/control LIN wiper
 Status: Radentlastungsfunktion,Status: wheel unloading function
 Status_Antrieb_Ist,Status_Antrieb_Ist (actual drive status)
 Status_STG_Anforderung_Drehmoment_Kurbelwelle_Fahrdynamik,"Status_STG_Anforderung_Drehmoment_Kurbelwelle_Fahrdynamik (crankshaft torque request, driving dynamics)"
 Status_STG_Anforderung_Radmoment_Antriebsstrang_Summe_FAS [-],"Status_STG_Anforderung_Radmoment_Antriebsstrang_Summe_FAS (wheel torque request, powertrain total, FAS)"
+Statusabfrage Armauflagenheizung vorhanden,Status query armrest heating present
+Statusabfrage bzw. Ansteuerung der Heckscheibenheizung.,Status query or activation of the rear window heating.
+Statusabfrage bzw. Ansteuerung der Kompressorkupplung,Status query or activation of the compressor clutch
+Statusabfrage bzw. Ansteuerung der Wasserventil Fahrer- und Beifahrerseite. Wasserventile werden ab 17-07 nicht mehr verwendet. Die Rückgabewert ist daher REQUEST_OUT_OF_RANGE.,"Status query or activation of the water valve, driver and passenger side. Water valves are no longer used from 17-07. The return value is therefore REQUEST_OUT_OF_RANGE."
+Statusabfrage bzw. Ansteuerung des Umschaltventils.,Status query or activation of the changeover valve.
+Statusabfrage der Waehlhebenstellung,Status query of the selector lever position
+Statusabfrage des Starts und Rücksetzen der Lernfunktion.,Status query of the start and reset of the learning function.
+"Statusabfrage und Setzen des Montagemodus für ELV-Sperre, KL50-Sperre/Fahrbereitschafts-Sperre und Präsentations-Modus. Die ELV-Sperre (ELV-Montagemodus) ist ab SP2015 im BDC nicht mehr relevant, da die ELV eigensicher über das ELV-Steuergerät realisert ist.","Status query and setting of the assembly mode for ELV lock, KL50 lock/drive readiness lock and presentation mode. The ELV lock (ELV assembly mode) is no longer relevant in the BDC from SP2015, since the ELV is implemented as intrinsically safe via the ELV control unit."
 Statusabfrage über laufenden NVM Integritätscheck (Non-Volatile-Memory),Status of the running NVM (non-volatile memory) integrity check
 Statusbyte Strommessung plausibel,Status byte current measurement plausible
 Statusbyte Superklopfer (im Zusatzfenster),Status byte super knock (in additional window)
@@ -6006,6 +6419,8 @@ Statussignal vom Aktorregler Vorderachse (FR: ST_FN_FTAX_ARS),Status signal from
 Statussignal zum FR-Signal des Soll-Lenkwinkels der hinteren Räder (Hinterachslenkung),Status signal for the FlexRay signal of the rear wheel target steering angle (rear axle steering)
 Statussignal zur Codierkonsistenz,Coding consistency status signal
 Statuswert Helligkeit des LIN-Slaves,LIN slave brightness status value
+Statuswerte der Heizung 3. Sitzreihe,Status values of 3rd seat row heating
+Statuswerte elektrischer Durchlauferhitzer,Status values of electric flow heater
 Statuswoerter fuer MSA Antriebsstrategie auslesen.,Read status words for MSA drive strategy
 Statuswort Diagnoseergebnis der Bandende-Diagnose vom Aufladesystem,Status word end-of-line diagnosis result of boost system
 Statuswort Diagnosen 12V Generator FUSI,Status word 12V generator FUSI diagnostics
@@ -6017,6 +6432,7 @@ Statuswort temporaerer Momentenbegrenzungen Faktor,Status word temporary torque 
 Statuswort temporaerer Momentenbegrenzungen Status,Status word temporary torque limits: status
 Stellgliedposition,Actuator position
 Stellgliedposition E-Luefter-Relais,Electric fan relay actuator position
+Stellt die entsprechende Frequenz des Radios ein bzw. liest sie aus.,Sets or reads the corresponding radio frequency.
 Stellung Abblendlicht,Position low beam
 Stellung Airbag ON (codiert + verbaut),Airbag ON position (coded + fitted)
 Stellung Airbag Off  (codiert + verbaut),Airbag OFF position (coded + fitted)
@@ -6026,7 +6442,13 @@ Stellung Standlicht,Position parking lights
 Steuegerät noch nicht kalibriert,Control unit not yet calibrated
 Steuegerät noch nicht kalibriert - RE Positionen vermutet,Control unit not yet calibrated - wheel electronics positions assumed
 Steuergeraetetemperatur,Control unit temperature
+Steuergerät als Entwicklungssteuergerät deklarieren,Declare control unit as development control unit
 "Steuergeräte-Innen-Temperatur in 0,1°C 0xFFFF = Wert nicht vorhanden",Control unit internal temperature in 0.1 °C; 0xFFFF = value not available
+Steuern der Lampenfunktion  Mögliche Elemente siehe Tabelle TAB_LAMPEN_FUNKTION,Control the lamp function. For possible elements see table TAB_LAMPEN_FUNKTION
+Steuern/Status des TMC.,Control/status of the TMC.
+Steuern/Status: Radentlastungsfunktion,Control/status: wheel unloading function
+Steuert die Bluetooth Geräteadresse,Controls the Bluetooth device address
+Steuert und liest die Mute-Funktion aus,Controls and reads the mute function
 Steuerung Leistung Sonderverbraucher,Special consumer power control
 Steuerung Standverbraucher,Parked-vehicle consumer control
 Stillstandsadaption beendet,Standstill adaptation finished
@@ -6199,12 +6621,14 @@ Taste Telefon betätigt,Telephone button pressed
 Taste Volume Minus betätigt,Volume minus button pressed
 Taste Volume Plus betätigt,Volume plus button pressed
 Taste gedrückt,Button pressed
+Tasten Audiobedienfeld,Audio control panel buttons
 Taster 1,Button 1
 Taster 2,Button 2
 Taster 3,Button 3
 Taster M,Button M
 Taster betätigt,Button pressed
 Taster defekt,Button defective
+Taster für Frontklappe,Button for front hood
 Taster gedrückt,Button pressed
 Taster gezogen,Button pulled
 Taster links betätigt,Left button pressed
@@ -6328,6 +6752,7 @@ Temperature threshold 04 in 0¿100°C,Temperature threshold 04 in 0–100°C
 Temperatursensor hinter OPF Bank 1,Temperature sensor downstream of OPF bank 1
 Temperatursensor hinter OPF Bank 2,Temperature sensor downstream of OPF bank 2
 Temperatursensor vor OPF Bank 1,Temperature sensor upstream of OPF bank 1
+Temperatursensoren Klimaanlage,Air conditioning temperature sensors
 Temperaturstatus T1L,Temperature status T1L
 Temperaturstatus T1R,Temperature status T1R
 Test Ergebnis OK,Test result OK
@@ -6344,12 +6769,19 @@ Testerjob für E-Lüfter-Ansteuerung freigegeben,Tester job for electric fan act
 "Testfunktion 2 laeuft (konstante Drehzahl, Solldruck-Rampen)","Test function 2 running (constant engine speed, target pressure ramps)"
 "Testfunktion 3 laeuft (Drehzahl-Rampen, konstanter Solloeldruck)","Test function 3 running (engine speed ramps, constant target oil pressure)"
 TextToSpeech,Text-to-speech
+"The LF antenna parameters contain information relevant to the LF transmission, to inside/outside detection for a given function, etc.","The LF antenna parameters contain information relevant to the LF transmission, to inside/outside detection for a given function, etc."
+"The LF antenna parameters contain information relevant to the LF transmission, to inside/outside detection for a given function, etc. Local","The LF antenna parameters contain information relevant to the LF transmission, to inside/outside detection for a given function, etc. Local"
 "The LF antenna status is composed of 16 bit fields, one for each of up to 8 LF antennas. The ninth 16-bit field gives a global antenna status, including problems that cannot be attributed to a particular antenna. The global antenna status can also be configured as cumulation of the antenna status 0 to 7.","The LF antenna status consists of 16-bit fields, one for each of up to 8 LF antennas. The ninth 16-bit field gives a global antenna status, including problems that cannot be attributed to a particular antenna. The global antenna status can also be configured as the cumulation of antenna statuses 0 to 7."
+The temperature counter and the corresponding temperature thresholds,The temperature counter and the corresponding temperature thresholds
 Thermo 100 aktiv (übersteuert),Thermo 100 active (overridden)
 "Thermo 100 aktiv, nicht übersteuert","Thermo 100 active, not overridden"
 Thermo 90 aktiv (übersteuert),Thermo 90 active (overridden)
 "Thermo 90 aktiv, nicht übersteuert","Thermo 90 active, not overridden"
+Thermomonitor Beifahrer hinten,"Thermal monitor, passenger rear"
+Thermomonitor Fahrer hinten,"Thermal monitor, driver rear"
+Thermomonitor Fensterheber,"Thermal monitor, window lifter"
 Thermostat Hubsensor Diagnose ist durchgelaufen im Fahrzyklus,Thermostat lift sensor diagnosis completed in driving cycle
+This configuration is used to determine/read the PASE-LL behaviour when antenna defects are recognized.,This configuration is used to determine/read the PASE-LL behaviour when antenna defects are recognized.
 This result is used to read the PASE-LL behaviour when antenna defects are recognized.,PASE-LL behaviour when antenna defects are detected
 This result is used to read the index number of a ICM request.,Index number of an ICM request
 This result reads the PASE LL configuration.,PASE LL configuration
@@ -6358,6 +6790,7 @@ This result reads the status of key authentication and position detection from t
 "This result shows the overall status of the PASE-LL component, in order to capture and check the reliability of the PASE LF-HF communication.","Overall status of the PASE-LL component, used to capture and check the reliability of PASE LF-HF communication"
 This result shows the release version of the PASE LL package,PASE LL package release version
 This result shows the status of key authentication and position detection from the last PASE function carried out.,Status of key authentication and position detection from the last PASE function carried out
+This service Reads/Writes PASE LL Configuration.,This service Reads/Writes PASE LL Configuration.
 Threshold for luminous density deviation,Threshold for luminance deviation
 Tiefe Parklücke links,"Parking space depth, left"
 Tiefe Parklücke rechts,"Parking space depth, right"
@@ -6369,6 +6802,7 @@ Time to fade out (resolution 100ms). Range: [0x00¿0x3F],Time to fade out (resol
 Time to fade to current luminous density (resolution 100ms). Range: [0x00¿0x3F],Time to fade to current luminance (resolution 100ms). Range: [0x00–0x3F]
 Timeout,Timeout
 "Timer für Hubadaption aktiv (Summation seit letztem B_eisy_clrad=True, NV-RAM)","Timer for lift adaptation active (total since last B_eisy_clrad=True, NV-RAM)"
+Timo to line crossing,Time to line crossing
 Tipprändel BC gedrückt,On-board computer thumbwheel pressed
 Tipprändel BC nicht betätigt,On-board computer thumbwheel not operated
 Tipprändel nach oben,Thumbwheel up
@@ -6445,6 +6879,8 @@ USB Gerät nicht angeschlossen,USB device not connected
 USB HUB codiert,USB hub coded
 USB Installation,USB installation
 Uebergabeparameter nicht plausibel,Transfer parameters not plausible
+Uhrzeit Datum zum Zeitpunkt letzter Power-On,Time and date of last power-on
+Uhrzeit Datum zum Zeitpunkt letztes Löschen Fehlerspeicher,Time and date of last fault memory clearing
 Uhrzeit zum Inaktivereignis. 99.99.99 => ungültig,Time of the inactive event. 99.99.99 => invalid
 Uhrzeit zum Kalibrierereignis. 99.99.99 => ungültig,Time of the calibration event. 99.99.99 => invalid
 Uhrzeit zum Vorwarnung. 99.99.99 => ungültig,Time of the pre-warning. 99.99.99 => invalid
@@ -6553,6 +6989,7 @@ Unterspannung inaktiv,Undervoltage inactive
 "Unterspannung inaktiv, Entprellzeit >50%","Undervoltage inactive, debounce time >50%"
 "Unterspannung inaktiv, Entprellzeit >75%","Undervoltage inactive, debounce time >75%"
 "Unterspannung inaktiv, Entprellzeit >=100%","Undervoltage inactive, debounce time >=100%"
+"Unterspannung während MSA-Start MSA-Minimalspannung: Counter darf nur bei aktivem MSA-Start zählen; Es ist nur ein Zählvorgang für jeden MSA-Start zulässig, der niedrigste Wert wird gezählt","Undervoltage during MSA start. MSA minimum voltage: the counter may only count during an active MSA start; only one count is permitted per MSA start, the lowest value is counted"
 Unterversion,Sub-version
 Unterversion des SW-Moduls  DAC .,DAC SW module minor version
 Unterversion des SW-Moduls  PARKMASTER .,PARKMASTER SW module minor version
@@ -6641,6 +7078,7 @@ Ventil Status vorne links Druckventil,"Valve status, front left pressure valve"
 Ventil Status vorne rechts,"Valve status, front right"
 Ventil Status vorne rechts Druckventil,"Valve status, front right pressure valve"
 Ventil offene Leitung,Valve open circuit
+Ventile Kalibrierung Lerndaten lesen,Read valve calibration learned data
 Ventilstrom hinten links,"Valve current, rear left"
 Ventilstrom hinten links Druckventil,"Valve current, rear left pressure valve"
 Ventilstrom hinten rechts,"Valve current, rear right"
@@ -6650,6 +7088,7 @@ Ventilstrom vorne links Druckventil,"Valve current, front left pressure valve"
 Ventilstrom vorne recht Druckventil,"Valve current, front right pressure valve"
 Ventilstrom vorne rechts,"Valve current, front right"
 Ventilstrommessung nicht kalibriert,Valve current measurement not calibrated
+"Verbau- und Codierzustand Smart Opener: 0 = nicht codiert, nicht verbaut, 1 = codiert, verbaut","Installation and coding state of Smart Opener: 0 = not coded, not installed, 1 = coded, installed"
 "Verbau- und Codierzustand Smart Opener: 0x00 = nicht codiert, nicht verbaut 0x01 = codiert, verbaut","Smart Opener fitting and coding state: 0x00 = not coded, not fitted 0x01 = coded, fitted"
 Verbaufehler (nicht codiert+verbaut),Installation fault (not coded + fitted)
 Verbindung zu Gas- und Bremspedal verloren,Connection to accelerator and brake pedal lost
@@ -6667,7 +7106,9 @@ Verriegelt,Locked
 Verriegelung Codierbereich,Coding area lock
 Verriegelung Codierbereich per Testerjob Wert aus top_l uebernommen,"Coding area lock via tester job, value taken from top_l"
 Verriegelung Kodierbereich,Coding area lock
+Verriegelungszustandes Airbag-Steuergerät Sind Airbags scharfgeschaltet?,Lock state of airbag control unit. Are the airbags armed?
 Verriegelungszähler des elektrischen Durchlauferhitzers.,Lockout counter of the electric flow heater
+Version Unfall Schadens Management,Version of accident damage management
 Version des Steuergerätes und des Provisionierungsmanagers,Version of the control unit and the provisioning manager
 Versogungsspannung am Aktor HA (FR: AVL_U_ACT_BAX_ARS),Supply voltage at rear axle actuator (FR: AVL_U_ACT_BAX_ARS)
 Versogungsspannung am Aktor VA (FR: AVL_U_ACT_FTAX_ARS),Supply voltage at front axle actuator (FR: AVL_U_ACT_FTAX_ARS)
@@ -6681,7 +7122,9 @@ Versorgungsspannung Last Einspritzung,Injection load supply voltage
 Versorgungsspannung Last VVT,VVT load supply voltage
 Versorgungsspannung elektr. Wasserpumpe,Electric water pump supply voltage
 Verstellbereich des Exzenterwinkels,Eccentric angle adjustment range
+Verstellt und liest den aktuell eingestellten Lautsprecherkanal.,Adjusts and reads the currently set loudspeaker channel.
 Verstellzeitentest,Adjustment time test
+Verteilergetriebedaten auslesen,Read transfer case data
 Vertikale Scheinwerferpos. Links vom LaMaster,Left vertical headlight position from LaMaster
 Vertikale Scheinwerferpos. Rechts vom LaMaster,Right vertical headlight position from LaMaster
 Verwende Soll-PWM,Use target PWM
@@ -6769,9 +7212,12 @@ WAIT STATE,WAIT STATE
 WEP,WEP
 WI-Leitungsheizung wird aufgrund Testeranforderung angesteuert,WI line heater activated due to tester request
 WIFI_DIRECT_MODE,WIFI_DIRECT_MODE
+WISCHER_LIN_DATEN_LESEN,WISCHER_LIN_DATEN_LESEN
 WLAN AP,WLAN AP
+WLAN Modus,WLAN mode
 WLAN Station,WLAN station
 WLAN Wifi Direct,WLAN Wi-Fi Direct
+WLAN Zustand,WLAN state
 "WLAN codiert, wenn mindestens 1 der folgenden Wert STAT_WLAN_AP_SA, STAT_WLAN_WIFI_DIRECT_SA oder STAT_WLAN_STATION_SA aktiv ist","WLAN coded if at least one of the following values is active: STAT_WLAN_AP_SA, STAT_WLAN_WIFI_DIRECT_SA or STAT_WLAN_STATION_SA"
 WMM SENT - Treiberstatus,WMM SENT driver status
 WPA,WPA
@@ -6805,6 +7251,7 @@ Warten,Waiting
 Warten auf Ende Russabbrand,Waiting for end of soot burn-off
 Warteschleife,Wait loop
 WarteschleifeÜberspannung,Wait loop overvoltage
+Waschdüsenheizung,Washer jet heating
 Wasserdrucksensor SENT ASIC-Temperatur Datenrohwert fuer WI,Water pressure sensor SENT ASIC temperature raw data value for WI
 Wasserdrucksensor SENT ASIC-Temperaturrohwert,Water pressure sensor SENT ASIC temperature raw value
 Wasserdrucksensor SENT Datenrohwert fuer WI,Water pressure sensor SENT raw data value for WI
@@ -6828,6 +7275,7 @@ WassersystemStatus Leitfaehigkeit,Water system status: conductivity
 WassersystemStatus Medienqualitaet,Water system status: fluid quality
 WassersystemStatus Schallgeschwindigkeit,Water system status: speed of sound
 Wassertemperatur: 0xFE = Fehler 0xFF = Signal ungültig,Water temperature: 0xFE = fault 0xFF = signal invalid
+Wasserventil vorhanden,Water valve present
 Wasserverbrauch i.O.,Water consumption OK
 Wasserverbrauch nicht i.O.,Water consumption not OK
 Webasto,Webasto
@@ -6842,6 +7290,7 @@ Wegstrecke im Efficiency Mode,Distance in efficiency mode
 Wegstrecke_km auf 1km genau,"Distance in km, accurate to 1 km"
 Wegstreckenzaehler OENS Sensorsignal unplausibel (kumuliert),Distance counter OENS sensor signal implausible (cumulative)
 Weiche Warnung aktiv,Soft warning active
+Welche Leuchtweitenregulierung (LWR) ist aktiv,Which headlight range control (LWR) is active
 "Wenn der Betriebsstundenzähler kleiner gleich 10h ist und keine Verriegelung (DISCODBSR) aktiviert ist, dann werden die Daten aus dem BSR-Bereich in einen Shadowblock der gleichen Größe kopiert.","If the operating hours counter is 10 h or less and no lock (DISCODBSR) is activated, the data from the BSR area are copied into a shadow block of the same size."
 "Wenn die Service Regeneration zu lang dauert, wird sie unterbrochen und fuer die Dauer PFltSrv_tiIntrptRgnLockd_C gesperrt","If the service regeneration takes too long, it is interrupted and locked for the duration PFltSrv_tiIntrptRgnLockd_C"
 Werksjustage Abgleichwert VDP hinten links (mm),Factory adjustment VDP calibration value rear left (mm)
@@ -6937,6 +7386,8 @@ Wert_Initialisierung,Value initialisation
 "Werte von 0-127 [s], die angeben, wie viel Zeit vergangen ist, seit dem intern der Staus 'vollständig aufgestartet' erreicht wurde. -1 bedeutet 'noch nicht erreicht'",Values 0-127 [s] indicating how much time has passed since the internal state 'fully started up' was reached. -1 means 'not yet reached'
 "Werte von 0-127 [s], die angeben, wie viel Zeit vergangen ist, seit dem intern der Staus erreicht wurde, sofort einen Powerdown auszuführen. -1 bedeutet 'noch nicht erreicht'",Values 0-127 [s] indicating how much time has passed since the internal state 'power down immediately' was reached. -1 means 'not yet reached'
 "Werte von 0-255 [s], die angeben, wie viel Zeit seit dem Hochstarten (Aufwecken) vergangen ist",Values 0-255 [s] indicating how much time has passed since startup (wake-up)
+Werte von den IMU Sensoren,Values from the IMU sensors
+Werte von den redundanten IMU Sensoren,Values from the redundant IMU sensors
 Werte zwischen 0..15 Dies entspricht 0..60 dBµV in Schritten von 4dB.,Values 0..15. This corresponds to 0..60 dBµV in steps of 4 dB.
 "Werte zwischen 0..15 Dies ist der für AF-Tracking verwendete Wert, wobei 15 bester Qualität entspricht.","Values 0..15. This is the value used for AF tracking, where 15 is the best quality."
 "Werte zwischen 0..60 Dies entspricht 0..60 dBµV in Schritten von 1dB. Rückgabe von 255, wenn keine Messung möglich.",Values 0..60. This corresponds to 0..60 dBµV in steps of 1 dB. Returns 255 if no measurement is possible.
@@ -6946,6 +7397,7 @@ Widerstand Glühstift: 0xFFFF = Signal ungültig,Glow plug resistance: 0xFFFF = 
 "Widerstandswerte der SBR-Matte hinten mitte in 0,1 Ohm  0xFFFF ungültig",Rear centre SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid
 "Widerstandswerte der SBR-Matte hinten rechts in 0,1 Ohm  0xFFFF ungültig",Rear right SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid
 "Widerstandswerte der SBR-Matte in 0,1 Ohm  0xFFFF ungültig",SBR mat resistance values in 0.1 ohm; 0xFFFF = invalid
+Widerstandswerte für die einzelnen Zündkreise,Resistance values for the individual firing circuits
 Width of dimming module tolerance band (dynamic part),Width of dimming module tolerance band (dynamic part)
 Width of dimming module tolerance band (static part),Width of dimming module tolerance band (static part)
 "Windowbag Retractor1; 0x10 = gesperrt,  0x01 = freigegeben,  0x00 = nicht vorhanden","Window airbag retractor 1; 0x10 = locked, 0x01 = enabled, 0x00 = not present"
@@ -7069,6 +7521,7 @@ Zaehler fuer unplausible fsr_w Werte,Counter for implausible fsr_w values
 Zahnriehmenstarter,Toothed-belt starter
 Zahnstangengeschwindigkeit,Rack speed
 Zahnstangenhub,Rack travel
+Zahnstangenhub pro Zeit Zähltakt 60s,"Steering rack travel per time, counting interval 60 s"
 Zeigt den Status der ersten 32 Ersatzmaßnahmen (von 64),Shows the status of the first 32 substitute measures (of 64)
 Zeigt den Status der letzten 32 Ersatzmaßnahmen (von 64),Shows the status of the last 32 substitute measures (of 64)
 Zeit bis zum Reaktivieren eines wegen Kurzschluss abegeschalteten Leuchtenausgangs,Time until reactivation of a lamp output switched off due to a short circuit
@@ -7229,6 +7682,8 @@ Zellspannung Zelle 3,Cell voltage cell 3
 Zellspannung Zelle 4,Cell voltage cell 4
 Zellspannung Zelle 5,Cell voltage cell 5
 Zellspannung Zelle 6,Cell voltage cell 6
+Zentralverriegelung: Status Beifahrer hinten,Central locking: status passenger rear
+Zentralverriegelung: Status Fahrer,Central locking: status driver
 Ziehen defekt,Pull function defective
 Ziel Anhaltegeschwindigkeit erreicht,Target stopping speed reached
 Zone  11,Zone 11
@@ -7259,10 +7714,12 @@ Zuendwinkelaenderung aus Adaption Klopfregelung,Ignition angle change from knock
 Zuglühen,Post-ignition glow
 Zuhaltebetrieb,Hold-closed operation
 Zuordnung PIN zu Funktion,Pin-to-function assignment
+Zur Funktionsprüfung der Antirutschmatte,For the function check of the anti-slip mat
 "Zusammengefasster Degradationsstatus (Bit codiert, 1: CC-Meldung, 4: Nullpositionsregelung, 8: Abschaltung)","Combined degradation status (bit-coded, 1: CC message, 4: zero position control, 8: shutdown)"
 Zusatzwasserpumpe,Auxiliary water pump
 Zusatzwasserpumpe PWM,Auxiliary water pump PWM
 "Zusatzwasserpumpenstatus: 0 = AUS, 1 = EIN","Auxiliary water pump status: 0 = OFF, 1 = ON"
+Zustand  Radbeschleunigungssensoren,State of wheel acceleration sensors
 Zustand Aktuator Lenkradheizung,Steering wheel heating actuator state
 Zustand Anforderung ASR/MSR,ASR/MSR request state
 Zustand Anforderung Fahrerassisstenzsystem,Driver assistance system request state
@@ -7427,7 +7884,11 @@ Zähgebläseanlauf,Sluggish blower start-up
 Zähler Auto-P wegen EMF-Anforderung in N,Counter Auto-P due to EMF request in N
 Zähler Auto-P wegen EMF-Komfortebene,Counter Auto-P due to EMF comfort level
 Zähler Efficiency Mode,Efficiency mode counter
+Zähler Hochschaltung,Upshift counter
+Zähler Hochschaltung der GLS Adaption,Upshift counter of the GLS adaptation
+Zähler Lenkungs-Endanschläge,Counter of steering end stops
 Zähler NLR Mode,NLR mode counter
+Zähler Rückschaltung,Downshift counter
 "Zähler Spannungsbereich 1, (< 6V), Messtakt 1ms","Counter voltage range 1 (< 6 V), measuring interval 1 ms"
 "Zähler Spannungsbereich 2, (>=6 V UND < 6,8V), Messtakt 1ms","Counter voltage range 2 (>= 6 V AND < 6.8 V), measuring interval 1 ms"
 "Zähler Spannungsbereich 3, (>= 6,8V UND < 8V), Messtakt 1ms","Counter voltage range 3 (>= 6.8 V AND < 8 V), measuring interval 1 ms"
@@ -7503,6 +7964,7 @@ Zähler für Kalibrierereignisse,Counter for calibration events
 Zähler für R- Gang,Counter for reverse gear
 Zähler für Warnungsrücknahmen durch Luftnachfüllen oder Radtausch.,Counter for warning withdrawals due to topping up air or changing a wheel
 "Zähler gehobene Lenkleistung (901W - 1150W)   (P3,  t5)","Counter elevated steering power (901 W - 1150 W) (P3, t5)"
+Zähler kupplungsbezogene Schnellfüllungsadaption,Counter of clutch-related fast fill adaptation
 "Zähler max Lenkleistung (mehr als 1401W) (P5, t5)","Counter max. steering power (more than 1401 W) (P5, t5)"
 Zähler mittlere Lenkgeschwindigkeitsschwelle (301 - 600°/s),Counter medium steering speed threshold (301 - 600°/s)
 "Zähler mittlere Lenkleistung (601  -  900W) (P2, t5)","Counter medium steering power (601 - 900 W) (P2, t5)"
@@ -7525,6 +7987,9 @@ Zündung,Ignition
 [0] Einlass-NW: Winkelversatz Referenzadaption,"[0] Intake camshaft: angle offset, reference adaptation"
 [1] Auslass-NW: Winkelversatz Feinadaption,"[1] Exhaust camshaft: angle offset, fine adaptation"
 [1] Auslass-NW: Winkelversatz Referenzadaption,"[1] Exhaust camshaft: angle offset, reference adaptation"
+_EIN: 1 Kühlmittelbehälter ausreichend befüllt _WERT: Pegel in mV,_EIN: 1 coolant reservoir sufficiently filled _WERT: level in mV
+_EIN: 1 Waschwasserbehälter ausreichend befüllt _WERT: Pegel in mV,_EIN: 1 washer fluid reservoir sufficiently filled _WERT: level in mV
+_INNENBELEUCHTUNG_PWM,_INNENBELEUCHTUNG_PWM
 abgelehnt,Rejected
 acceleration lateral scaled value,"Lateral acceleration, scaled value"
 acceleration lateral scaled value  redundant,"Lateral acceleration, scaled value (redundant)"
@@ -7544,6 +8009,7 @@ aktiv / betätigt,Active / operated
 aktive Schutzfunktion in NIA SW,Active protection function in NIA SW
 aktiver Kurzschluss High-Side,Active short circuit high side
 aktiver Kurzschluss Low-Side,Active short circuit low side
+aktuelle AP Netzwerkparameter,Current AP network parameters
 aktuelle Batteriespannung,Current battery voltage
 aktuelle Batteriespannung 48V Batterie,48V battery present voltage
 aktuelle Betriebstunden in s FF FF FF FF Ungültigkeitsbez,Current operating hours in s; FF FF FF FF = invalid
@@ -7701,9 +8167,13 @@ gibt Wert von ZK 6  zurück  in Ohm 0xFF = ZK nicht vorhanden,Firing circuit 6 r
 gibt Wert von ZK 7  zurück  in Ohm 0xFF = ZK nicht vorhanden,Firing circuit 7 resistance in ohms; 0xFF = firing circuit not present
 gibt Wert von ZK 8 zurück  in Ohm 0xFF = ZK nicht vorhanden,Firing circuit 8 resistance in ohms; 0xFF = firing circuit not present
 gibt Wert von ZK 9 zurück  in Ohm 0xFF = ZK nicht vorhanden,Firing circuit 9 resistance in ohms; 0xFF = firing circuit not present
+gibt den Freigabestatus der Zündkreise aus,Returns the enable status of the firing circuits
 gibt den Status der Antennenstromversorgung wieder.,Status of the antenna power supply
 "gibt den Typ des Ziels zurück  Bit-0,Bit-1: 00 = no destination (remaining data can be skipped) 01 = user destination 10 = optional destination (not activated, for BMW Routes) 11 = activated optional destination (BMW Routes)  Bit-2: 0 = not current destination 1 = current destination  Bit-3: Future use  Bit-4: Future use  Bit-5: Future use  Bit-6 to Bit-7: Future use","Returns the destination type. Bit-0,Bit-1: 00 = no destination (remaining data can be skipped), 01 = user destination, 10 = optional destination (not activated, for BMW Routes), 11 = activated optional destination (BMW Routes). Bit-2: 0 = not current destination, 1 = current destination. Bit-3: future use. Bit-4: future use. Bit-5: future use. Bit-6 to Bit-7: future use"
 "gibt die Anzahl der ZK zurück, die ausgegeben werden",Number of firing circuits output
+gibt die Anzahl der pro Einschaltzyklus  uebergebenen Trigger des Sicherheitspfades (Safing) fuer den Frontairbag an,Returns the number of safing path triggers passed per power-on cycle for the front airbag
+gibt die ID und die entsprechende Version der integrierten SW-Module wieder,Returns the ID and corresponding version of the integrated SW modules
+gibt die Konfiguration der DTC DEBUG INFO Funktion wieder,Returns the configuration of the DTC DEBUG INFO function
 "gibt die Latitude zurück  LL    Ost/ West mit  0x00 Ost, 0x01 West GG   Grad [0-180] MM   Minute  [0-59]  SS    Sekunde [0-59] HH   100stel Sekunde [0-99]","Returns the latitude: LL east/west with 0x00 east, 0x01 west; GG degrees [0-180]; MM minutes [0-59]; SS seconds [0-59]; HH hundredths of a second [0-99]"
 "gibt die Latitude zurück  LL    Ost/ West mit 0x00 Ost, 0x01 West GG   Grad [0-180] MM   Minute  [0-59]  SS    Sekunde [0-59] HH   100stel Sekunde [0-99]","Returns the latitude: LL east/west with 0x00 east, 0x01 west; GG degrees [0-180]; MM minutes [0-59]; SS seconds [0-59]; HH hundredths of a second [0-99]"
 "gibt die Latitude zurück  LL    Ost/ West mit 0x00 Ost, 0x01 West GG   Grad [0-180] MM  Minute  [0-59]  SS    Sekunde [0-59] HH   100stel Sekunde [0-99]","Returns the latitude: LL east/west with 0x00 east, 0x01 west; GG degrees [0-180]; MM minutes [0-59]; SS seconds [0-59]; HH hundredths of a second [0-99]"
@@ -7713,6 +8183,12 @@ gibt den Status der Antennenstromversorgung wieder.,Status of the antenna power 
 "gibt die Longitude zurück  bb nord/süd mit 0x00 Nord, 0x01 Süd gg    Grad [0-90]   mm Minute  [0-59]  ss    Sekunde [0-59]  hh   100stel Sekunde [0-99]","Returns the longitude: bb north/south with 0x00 north, 0x01 south; gg degrees [0-90]; mm minutes [0-59]; ss seconds [0-59]; hh hundredths of a second [0-99]"
 "gibt die Longitude zurück  bb nord/süd mit 0x00 Nord, 0x01 Süd gg   Grad [0-90]   mm Minute  [0-59]  ss    Sekunde [0-59]  hh   100stel Sekunde [0-99]","Returns the longitude: bb north/south with 0x00 north, 0x01 south; gg degrees [0-90]; mm minutes [0-59]; ss seconds [0-59]; hh hundredths of a second [0-99]"
 gibt die Navigations DB zurück,Returns the navigation DB
+gibt die Stromwerte der fest vorgegebenen Hall-Eingänge zurück,Returns the current values of the fixed Hall inputs
+gibt die Uhrzeit/Datum vom Systembus zum Auslesezeitpunkt an,Returns the time/date from the system bus at the time of reading
+gibt die entsprechende Version des integrierten SW-Moduls   dacDiagAlgoIdent  wieder.,Returns the corresponding version of the integrated SW module dacDiagAlgoIdent.
+gibt die entsprechende Version des integrierten SW-Moduls  PARKMASTER  wieder,Returns the corresponding version of the integrated SW module PARKMASTER
+gibt die entsprechende Version des integrierten SW-Moduls  PRECRASH  wieder,Returns the corresponding version of the integrated SW module PRECRASH
+gibt die entsprechende Version des integrierten SW-Moduls  SBR  wieder,Returns the corresponding version of the integrated SW module SBR
 gibt die gesetzte Adresse  A des dritten Eintrages wieder,Set address A of the third entry
 gibt die gesetzte Adresse  A des ersten Eintrages wieder,Set address A of the first entry
 gibt die gesetzte Adresse  A des zweiten Eintrages wieder,Set address A of the second entry
@@ -7720,6 +8196,7 @@ gibt die gesetzte Adresse B des dritten Eintrages wieder,Set address B of the th
 gibt die gesetzte Adresse B des ersten Eintrages wieder,Set address B of the first entry
 gibt die gesetzte Adresse B des zweiten Eintrages wieder,Set address B of the second entry
 "gibt die longitude zurück  bb nord/süd mit 0x00 Nord, 0x01 Süd gg    Grad [0-90]   mm  Minute  [0-59]  ss    Sekunde [0-59]  hh   100stel Sekunde [0-99]","Returns the longitude: bb north/south with 0x00 north, 0x01 south; gg degrees [0-90]; mm minutes [0-59]; ss seconds [0-59]; hh hundredths of a second [0-99]"
+"gibt einige STAUTS wieder, wie Operation- und Energie-Status","Returns several statuses, such as operation and energy status"
 gibt für jede Applikation X deren Namen aus der Tabelle TApplication wieder.,Returns for each application X its name from table TApplication
 "gibt für jede Applikation X wieder, ob sie aktiviert ist.",Returns for each application X whether it is activated
 "gibt für jede Applikation X wieder, ob sie gerade läuft.",Returns for each application X whether it is currently running
@@ -7731,6 +8208,7 @@ hinten rechts,Rear right
 i.O.,OK
 iO,OK
 idle / update done,Idle / update done
+imported by DiagFuncImport,imported by DiagFuncImport
 "insync, ms ECU overall, not comparable","In sync, ms ECU overall, not comparable"
 intern gemessener Winkel an der Rotorwelle,Internally measured rotor shaft angle
 interne Fehlerzustände (Pointer Address to literal string),Internal fault states (pointer address to literal string)
@@ -7761,6 +8239,7 @@ kombinierter Status Brückentreiber,Combined bridge driver status
 kombinierter Status RPS,Combined RPS status
 kombinierter Status SBC,Combined SBC status
 koordiniertes Moment fuer Fuellung,Coordinated torque for cylinder charge
+label pin in der HU für WIFI Direct,Label pin in the HU for WIFI Direct
 lesen,Read
 letzte Feststellkraft hinten links,Last clamping force rear left
 letzte Feststellkraft hinten rechts,Last clamping force rear right
@@ -7858,6 +8337,7 @@ normierter Referenzpegel Klopfregelung Zylinder 5,Normalised knock control refer
 normierter Referenzpegel Klopfregelung Zylinder 6,Normalised knock control reference level cylinder 6
 not changed,Not changed
 not defined,Not defined
+not defined in diagnosis database,not defined in diagnosis database
 not ready,Not ready
 oben,Up
 oberen Anschlag lernen (WG offen),Learn upper stop (WG open)
@@ -7966,6 +8446,7 @@ unten,Down
 unteren Anschlag lernen (WG geschlossen),Learn lower stop (WG closed)
 unterhalb Limit,Below limit
 vehicleManufacturerSpecific_40,vehicleManufacturerSpecific_40
+verbundene USB Geräte an der HU,USB devices connected to the HU
 verfügbar,Available
 verfügbar Rückfallebene,"Available, fallback level"
 verfügbar Rückfallebene Schlupf aufgeweitet,"Available, fallback level, extended slip"
@@ -7989,6 +8470,7 @@ zeitlicher Störnachlauf bei Unterspannung,Timed fault run-on at undervoltage
 zweite Event ID,Second event ID
 Öffnen,Open
 Öl-Verschleißintegrator,Oil wear integrator
+Öltemperaturkollektiv,Oil temperature histogram
 Ölverschleiß,Oil wear
 Über LF angefordert,Requested via LF
 Übergang Regelbetrieb,Transition to control mode

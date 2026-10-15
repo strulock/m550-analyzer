@@ -68,7 +68,11 @@ MODULES = {
 }
 
 HEADER = ["ARG", "MODULE", "ID", "FIELD", "RESULTNAME", "INFO", "INFO_EN",
-          "EINHEIT", "L/H", "DATENTYP", "NAME", "MUL", "DIV", "ADD", "JOB", "POS"]
+          "EINHEIT", "L/H", "DATENTYP", "NAME", "MUL", "DIV", "ADD", "JOB", "POS",
+          "JOB_INFO", "JOB_INFO_EN"]
+# What the hand-decoded jobs below are, as the SGBD would have described them.
+GPS_JOB_INFO = "Aktuelle GPS-Position: Gültigkeit, Breite, Länge, Höhe"
+EKP_JOB_INFO = "Kraftstoffpumpe: Spannungen, Ströme, Temperaturen, Tankgeber"
 
 # Head unit 0xD039, STATUS_GPS_POSITION. Layout in core.py's GPS section.
 GPS_ROWS = [
@@ -153,12 +157,15 @@ def build(tabs, name, module, prefix):
         return "-" if n in ("", "-") else enum_prefix + n.upper()
 
     def add(arg, did, field, result, info, unit, lh, dtype, ename, mul, div, add_, job,
-            pos=""):
+            pos="", job_info=""):
+        # JOB_INFO: what the whole record is (the job's own description), the
+        # name its fields are grouped under; empty for single values.
         rows.append({"ARG": arg, "MODULE": module, "ID": did, "FIELD": field,
                      "RESULTNAME": result, "INFO": info, "INFO_EN": translate(info),
                      "EINHEIT": unit, "L/H": lh, "DATENTYP": dtype,
                      "NAME": enum_name(ename), "MUL": mul, "DIV": div, "ADD": add_,
-                     "JOB": job, "POS": pos})
+                     "JOB": job, "POS": pos, "JOB_INFO": job_info,
+                     "JOB_INFO_EN": translate(job_info)})
         if ename not in ("", "-"):
             used_enums.add(ename.upper())
 
@@ -180,7 +187,7 @@ def build(tabs, name, module, prefix):
                 add("%s%s.%s" % (prefix, job, short(label)), did, i,
                     r[rc["RESULTNAME"]], r[rc["INFO"]], r[rc["EINHEIT"]], r[rc["L/H"]],
                     r[rc["DATENTYP"]], r[rc["NAME"]], r[rc["MUL"]], r[rc["DIV"]],
-                    r[rc["ADD"]], job)
+                    r[rc["ADD"]], job, job_info=f[col["INFO"]] if "INFO" in col else "")
         elif f[col["RESULTNAME"]] not in ("", "-"):
             add(prefix + job, did, 0, f[col["RESULTNAME"]], f[col["INFO"]],
                 f[col["EINHEIT"]], f[col["L/H"]], f[col["DATENTYP"]], f[col["NAME"]],
@@ -189,13 +196,14 @@ def build(tabs, name, module, prefix):
     if name == "NBTEVO":
         for i, (suffix, result, info, unit, dtype, ename) in enumerate(GPS_ROWS):
             add("%sSTATUS_GPS_POSITION.%s" % (prefix, suffix), "0xD039", i, result, info,
-                unit, "high", dtype, ename, "1.0", "1.0", "0.0", "STATUS_GPS_POSITION")
+                unit, "high", dtype, ename, "1.0", "1.0", "0.0", "STATUS_GPS_POSITION",
+                job_info=GPS_JOB_INFO)
 
     if name == "EKP301":
         for i, (suffix, info, unit, pos, mul, add_) in enumerate(EKP_ROWS):
             add("%sSTATUS_ADC_BEWERTET.%s" % (prefix, suffix), "0x4010", i,
                 "STAT_" + suffix, info, unit, "high", "unsigned char", "-", mul, "1.0",
-                add_, "STATUS_ADC_BEWERTET", pos)
+                add_, "STATUS_ADC_BEWERTET", pos, job_info=EKP_JOB_INFO)
 
     names = [r["ARG"] for r in rows]
     dupes = sorted({n for n in names if names.count(n) > 1})
@@ -282,6 +290,10 @@ def write_csv(path, header, rows, dicts=True):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    # --catalogs-only: rewrite the measurement catalogs, leave the enum
+    # tables and the shared fault texts alone.
+    catalogs_only = "--catalogs-only" in argv
+    argv = [a for a in argv if a != "--catalogs-only"]
     if not argv:
         sys.exit(__doc__)
     for prg in argv:
@@ -289,6 +301,9 @@ def main(argv=None):
         tabs = tables(deobfuscate(prg))
         rows, enums = build(tabs, name, module, prefix)
         write_csv(os.path.join(DATA, "%s_measurements.csv" % name), HEADER, rows)
+        if catalogs_only:
+            print("%-9s %s  %4d channels" % (name, module, len(rows)))
+            continue
         write_csv(os.path.join(DATA, "%s_enum_tables.csv" % name),
                   ["table_name", "value", "text_de", "text_en"], enums, dicts=False)
         added, tagged, clashes, kept = merge_faults(tabs, tag)

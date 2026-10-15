@@ -28,7 +28,7 @@ which were rejected, is in [Modules](modules.md#decisions-made-and-why).
 ## Module catalog columns
 
 `ARG, MODULE, ID, FIELD, RESULTNAME, INFO, INFO_EN, EINHEIT, L/H, DATENTYP,
-NAME, MUL, DIV, ADD, JOB, POS`
+NAME, MUL, DIV, ADD, JOB, POS, JOB_INFO, JOB_INFO_EN`
 
 - `ARG`: channel name, `<PREFIX><JOB>` for a single value or
   `<PREFIX><JOB>.<RESULT>` for a record field (`STAT_` and `_WERT` stripped)
@@ -36,6 +36,10 @@ NAME, MUL, DIV, ADD, JOB, POS`
 - `FIELD`: place in the record; `POS`: explicit byte offset, rarely set
 - `NAME`: value table, prefixed with the catalog name (`NBTEVO.TGPSSTATUS`)
 - `JOB`: the SGBD job (`STATUS_GPS_POSITION`)
+- `JOB_INFO` / `JOB_INFO_EN`: what a record is, from the job's own `INFO` in
+  `SG_FUNKTIONEN` (written by hand for the two hand-decoded jobs); the GUI
+  names a record's folder with it. Empty for single values. The English is
+  curated in `tools/translations_en.csv` like the rest.
 
 The DME catalog has the SGBD's own column set (`ARG, ID, RESULTNAME, INFO,
 INFO_EN, EINHEIT, LABEL, L/H, DATENTYP, NAME, MUL, DIV, ADD, SG_ADR, SERVICE,

@@ -238,7 +238,8 @@ def tool_search_channels(a):
     cat.update(core.load_module_catalogs())
     hits = []
     for name, meta in cat.items():
-        text = " ".join([name, meta.get("INFO_EN") or "", meta.get("INFO") or ""]).lower()
+        text = " ".join([name, meta.get("INFO_EN") or "", meta.get("INFO") or "",
+                         meta.get("JOB_INFO_EN") or "", meta.get("JOB_INFO") or ""]).lower()
         if all(w in text for w in words):
             hits.append((name, meta))
     lines = ["%d channel(s) match; module, unit, description:" % len(hits)]
