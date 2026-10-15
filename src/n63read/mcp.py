@@ -535,4 +535,7 @@ def main(args):
             print("Restart Claude Desktop to pick it up. In Claude Code, run `claude` and "
                   "ask, e.g., \"use n63read to check the connection to my car\".")
         return
-    serve()
+    try:
+        serve()
+    except KeyboardInterrupt:
+        pass                            # closed (an update, Ctrl+C): just stop

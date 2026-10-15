@@ -93,6 +93,9 @@ jobs:
           $psi.RedirectStandardInput = $true
           $psi.RedirectStandardOutput = $true
           $psi.UseShellExecute = $false
+          # Its own (hidden) console: the installer closes it with Ctrl+C, which
+          # would otherwise reach this script too.
+          $psi.CreateNoWindow = $true
           $mcp = [System.Diagnostics.Process]::Start($psi)
           Start-Sleep 3
           Start-Process dist\BMW-Analyzer-Setup.exe -Wait -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/NORESTART", "/CLOSEAPPLICATIONS"
