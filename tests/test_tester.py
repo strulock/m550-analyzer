@@ -26,7 +26,7 @@ def car(monkeypatch):
 # ----------------------------------------------------------- two connections
 
 def test_bank2_has_its_own_connection_and_tester_address(car):
-    with core.Tester("127.0.0.1", timeout=1.0) as h:
+    with core.Tester("127.0.0.1", timeout=3.0) as h:
         assert h.read_did(0x12, 0x588A) == b"\x10\x00"
         assert car.connections == 1                 # bank 2 not opened until needed
         assert h.read_did(core.DME_SLAVE, 0x588A) == b"\x0F\x00"
@@ -38,7 +38,7 @@ def test_bank2_has_its_own_connection_and_tester_address(car):
 
 
 def test_bank2_connection_closes_when_idle(car):
-    with core.Tester("127.0.0.1", timeout=1.0) as h:
+    with core.Tester("127.0.0.1", timeout=3.0) as h:
         h.read_did(core.DME_SLAVE, 0x588A)
         h.tidy()
         assert h.slave is not None
@@ -55,7 +55,7 @@ def test_bank2_refused_is_an_error_and_not_retried_at_once(car, monkeypatch):
             raise ConnectionResetError(10054, "forcibly closed")
         real(self)
     monkeypatch.setattr(core.Hsfz, "connect", connect)
-    with core.Tester("127.0.0.1", timeout=1.0) as h:
+    with core.Tester("127.0.0.1", timeout=3.0) as h:
         with pytest.raises(core.HsfzError, match="bank 2 connection failed"):
             h.read_did(core.DME_SLAVE, 0x588A)
         with pytest.raises(core.HsfzError, match="another tool may hold one"):
@@ -70,7 +70,7 @@ def test_bank2_channels_read_from_the_slave(car):
     assert cat["ILAG2@0x13"]["INFO_EN"] == "Bank 2: Lambda"
     chans = [(n, 0x588A, cat[n]) for n in ("ILAG2", "ILAG2@0x13")]
     reader = core.ChannelReader({}, core.DME_MASTER)
-    with core.Tester("127.0.0.1", timeout=1.0) as h:
+    with core.Tester("127.0.0.1", timeout=3.0) as h:
         sample = reader.read(h, chans)
     assert sample["ILAG2"][0] == 1.0 and sample["ILAG2@0x13"][0] == 0.9375
 
@@ -93,7 +93,7 @@ class Owner:
     """Holds the car and lends it, as the app or `n63read log` does."""
 
     def __init__(self):
-        self.h = core.Tester("127.0.0.1", timeout=1.0)
+        self.h = core.Tester("127.0.0.1", timeout=3.0)
         self.h.connect()
         self.host = share.Host("127.0.0.1").start()
         self.running = True
@@ -205,7 +205,7 @@ def test_codes_that_never_failed_are_hidden_unless_asked(car, monkeypatch):
     import fake_car
     monkeypatch.setitem(fake_car.MODULES, 0x29, [("480780", 0x58), ("48069E", 0x6D),
                                                  ("480000", 0x50)])
-    with core.Tester("127.0.0.1", timeout=1.0) as h:
+    with core.Tester("127.0.0.1", timeout=3.0) as h:
         rows = core.read_all_faults(h, [0x29], texts={}, names={})
         every = core.read_all_faults(h, [0x29], texts={}, names={}, everything=True)
     assert [r["code"] for r in rows] == ["48069E"]

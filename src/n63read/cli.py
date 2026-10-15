@@ -234,8 +234,17 @@ def op_read(args):
 
 def op_log(args):
     cat = _catalog(args.csv)
+    names = list(args.names)
+    if args.template:
+        saved = core.load_templates()
+        if args.template not in saved:
+            sys.exit("no template %r; saved: %s" % (
+                args.template, ", ".join(sorted(saved)) or "none"))
+        names = saved[args.template] + [n for n in names if n not in saved[args.template]]
+    if not names:
+        sys.exit("name some channels, or --template")
     chans = []
-    for name in args.names:
+    for name in names:
         meta = cat.get(name)
         if not meta:
             sys.exit("unknown channel: %s" % name)
@@ -282,6 +291,15 @@ def op_log(args):
             host.stop()
         out.close()
         print("wrote %d samples to %s" % (n, args.out))
+
+
+def op_templates(args):
+    saved = core.load_templates()
+    if not saved:
+        print("No templates yet: save one in the app (Templates > Save watch list).")
+        return
+    for name in sorted(saved, key=str.lower):
+        print("%s  (%d)\n    %s" % (name, len(saved[name]), " ".join(saved[name])))
 
 
 def op_update(args):
@@ -546,8 +564,13 @@ def build_parser():
     sp.add_argument("--interval", type=float, default=0.2)
     sp.add_argument("--out", help="CSV to write (default: a dated file in "
                                   "Documents\\%s)" % core.LOGS_FOLDER)
-    sp.add_argument("names", nargs="+")
+    sp.add_argument("--template", help="the channels of a template saved in the app "
+                                       "(see `templates`), plus any named")
+    sp.add_argument("names", nargs="*")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("templates", help="list the channel templates saved in the app")
+    sp.set_defaults(func=op_templates)
 
     sp = sub.add_parser("update", help="install the latest GitHub release")
     sp.add_argument("--check", action="store_true", help="only say whether one is available")
