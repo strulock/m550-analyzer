@@ -4,8 +4,9 @@ from n63read import core
 
 
 def test_parse_gps_position_north_west():
-    # 30 deg 08' 04.56" N, 97 deg 38' 09.24" W, 160 m (Circuit of the Americas)
-    payload = bytes([0x00, 0x00, 30, 8, 4, 56, 0x01, 97, 38, 9, 24, 0x00, 160])
+    # 30 deg 08' 04.56" N, 97 deg 38' 09.24" W, 160 m (Circuit of the Americas).
+    # 97 W comes as 01 9F: sign and degrees are nine-bit two's complement.
+    payload = bytes([0x00, 0x00, 30, 8, 4, 56, 0x01, 0x9F, 38, 9, 24, 0x00, 160])
     p = core.parse_gps_position(payload)
     assert p["valid"] is True
     assert p["lat"] == pytest.approx(30 + 8 / 60 + 4.56 / 3600)
@@ -14,10 +15,18 @@ def test_parse_gps_position_north_west():
 
 
 def test_parse_gps_position_invalid_and_south_east():
-    payload = bytes([0x01, 0x01, 33, 0, 0, 0, 0x00, 151, 0, 0, 0, 0x01, 0x2C])
+    # 33 S is 01 DF (0x1DF = -33); 151 E is 00 97.
+    payload = bytes([0x01, 0x01, 0xDF, 0, 0, 0, 0x00, 151, 0, 0, 0, 0x01, 0x2C])
     p = core.parse_gps_position(payload)
     assert p["valid"] is False
     assert p["lat"] == -33 and p["lon"] == 151 and p["height"] == 300
+
+
+def test_far_west_longitude_needs_the_ninth_bit():
+    # 157 deg 51' W (Honolulu): 0x200 - 157 = 0x163, i.e. 01 63. Read as a
+    # signed byte alone, 0x63 would be +99.
+    payload = bytes([0x00, 0x00, 21, 18, 0, 0, 0x01, 0x63, 51, 0, 0, 0x00, 5])
+    assert core.parse_gps_position(payload)["lon"] == pytest.approx(-(157 + 51 / 60))
 
 
 def test_parse_gps_position_rejects_short_payload():

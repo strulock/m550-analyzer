@@ -148,7 +148,8 @@ class Hsfz:
         self._t0 = time.time()
 
     def __enter__(self):
-        self.connect()
+        if self.sock is None:           # share.open_tester() hands it over open
+            self.connect()
         return self
 
     def __exit__(self, *exc):
@@ -171,6 +172,11 @@ class Hsfz:
                 self.sock.close()
             finally:
                 self.sock = None
+
+    def _set_timeout(self, seconds):
+        self.timeout = seconds
+        if self.sock:
+            self.sock.settimeout(seconds)
 
     # -- low level ---------------------------------------------------------
 
@@ -252,13 +258,11 @@ class Hsfz:
         """
         if timeout is not None:
             saved = self.timeout
-            self.timeout = timeout
-            self.sock.settimeout(timeout)
+            self._set_timeout(timeout)
             try:
                 return self.read_did(target, did)
             finally:
-                self.timeout = saved
-                self.sock.settimeout(saved)
+                self._set_timeout(saved)
         resp = self.request(target, bytes([0x22, (did >> 8) & 0xFF, did & 0xFF]))
         if len(resp) < 3:
             raise HsfzError("short response")
@@ -279,8 +283,7 @@ class Hsfz:
         """
         timeout = PROBE_TIMEOUT if timeout is None else timeout
         saved = self.timeout
-        self.timeout = timeout
-        self.sock.settimeout(timeout)
+        self._set_timeout(timeout)
         try:
             self.request(target, bytes([0x3E, 0x00]), retries=0)
             return True
@@ -289,8 +292,7 @@ class Hsfz:
         except HsfzError:
             return False
         finally:
-            self.timeout = saved
-            self.sock.settimeout(saved)
+            self._set_timeout(saved)
 
     def read_dtcs(self, target, status_mask=0xFF):
         """UDS 0x19 sub-function 0x02 (reportDTCByStatusMask).
@@ -304,6 +306,78 @@ class Hsfz:
         """
         resp = self.request(target, bytes([0x19, 0x02, status_mask & 0xFF]))
         return parse_dtc_records(resp)
+
+
+# The N63 has a DME per bank: 0x12 (master) runs bank 1, 0x13 (slave) bank 2,
+# and both use the same identifiers. Bank 2's are read from 0x13 under the
+# bank-1 names; the catalog's _BANK2 / _2 identifiers are refused on this car.
+DME_SLAVE = 0x13
+BANK2_SUFFIX = "@0x13"
+BANK2_IDLE = 10.0               # s without a bank-2 read before its connection closes
+BANK2_RETRY = 30.0              # s before trying again after it was refused
+
+
+class Tester(Hsfz):
+    """The car's diagnostic connections, as one Hsfz.
+
+    The gateway allows two connections, each with its own tester address.
+    The first (`source`) carries 0x12 and every other module; the slave DME
+    (0x13) gets the second (`source` + 1), opened on its first request and
+    closed by tidy() once it has been idle for BANK2_IDLE seconds.
+    """
+
+    def __init__(self, *a, **k):
+        super().__init__(*a, **k)
+        self.slave = None
+        self.slave_used = 0.0
+        self.slave_refused_until = 0.0
+
+    def request(self, target, payload, retries=4):
+        if target != DME_SLAVE:
+            return super().request(target, payload, retries)
+        return self._slave().request(target, payload, retries)
+
+    def _slave(self):
+        now = time.time()
+        if self.slave is None:
+            if now < self.slave_refused_until:
+                raise HsfzError("bank 2 connection unavailable (the car allows two "
+                                "connections; another tool may hold one)")
+            slave = Hsfz(self.ip, self.port, source=(self.source + 1) & 0xFF,
+                         timeout=self.timeout, trace=self.trace)
+            try:
+                slave.connect()
+            except OSError as e:
+                self.slave_refused_until = now + BANK2_RETRY
+                raise HsfzError("bank 2 connection failed: %s" % e) from None
+            self.slave = slave
+        self.slave._set_timeout(self.timeout)
+        self.slave_used = now
+        return self.slave
+
+    def tidy(self, now=None):
+        """Close the bank-2 connection once nothing has used it for a while."""
+        now = time.time() if now is None else now
+        if self.slave and now - self.slave_used > BANK2_IDLE:
+            self.close_slave()
+
+    def close_slave(self):
+        if self.slave:
+            self.slave.close()
+            self.slave = None
+
+    def close(self):
+        self.close_slave()
+        super().close()
+
+
+def connection_problem(e):
+    """Plain words for a connection the car dropped, or None."""
+    if isinstance(e, ConnectionResetError) or getattr(e, "winerror", None) == 10054:
+        return ("The car closed the connection. It allows two diagnostic connections "
+                "at a time, so another one is probably open: another n63read, a "
+                "Claude session not sharing this one, or another diagnostic tool.")
+    return None
 
 
 def parse_dtc_records(resp):
@@ -338,6 +412,16 @@ def dtc_status_flags(status):
     return [name for bit, name in enumerate(DTC_STATUS_BITS) if status & (1 << bit)]
 
 
+def dtc_failed(status):
+    """True if the code has actually failed: now, this or last cycle, or since
+    the memory was cleared. A "confirmed" bit on a code whose test has not
+    run since the last clear does not count: some modules (the DSC on this
+    car) report their whole list that way, test entries included."""
+    if status & 0x25:               # testFailed, pending, testFailedSinceLastClear
+        return True
+    return bool(status & 0x08) and not status & 0x10
+
+
 def dtc_status_summary(status):
     """One-line reading of a statusOfDTC byte: is the fault active, is it stored."""
     present = bool(status & 0x01)
@@ -352,6 +436,8 @@ def dtc_status_summary(status):
         text = "not present"
     if status & 0x80:
         text += ", warning lamp requested"
+    if not dtc_failed(status) and status & 0x08:
+        text += " (but not tested since cleared)"
     return text
 
 
@@ -455,11 +541,13 @@ def sweep_modules(h, lo=None, hi=None, progress=None, probe_timeout=None):
     return found
 
 
-def read_all_faults(h, modules, texts=None, names=None, progress=None):
+def read_all_faults(h, modules, texts=None, names=None, progress=None, everything=False):
     """Read fault memory (0x19) from each module. Returns rows for a fault CSV.
 
     Every module gets at least one row, so the file shows what was checked:
     one per fault, or a single row saying "no faults" or why it refused.
+    Modules list every code they can raise, mostly ones that never failed;
+    those are left out (see dtc_failed) unless `everything`.
     """
     texts = load_fault_texts() if texts is None else texts
     names = load_module_names() if names is None else names
@@ -468,11 +556,11 @@ def read_all_faults(h, modules, texts=None, names=None, progress=None):
     for addr in modules:
         if progress:
             progress(addr)
-        rows.extend(_module_fault_rows(h, addr, texts, names, read_at))
+        rows.extend(_module_fault_rows(h, addr, texts, names, read_at, everything))
     return rows
 
 
-def _module_fault_rows(h, addr, texts, names, read_at):
+def _module_fault_rows(h, addr, texts, names, read_at, everything=False):
     """Fault CSV rows for one module: one per fault, or one saying why none."""
     base = {"read_at": read_at, "module": "0x%02X" % addr,
             "module_name": names.get(addr, ""), "code": "", "status": "",
@@ -483,8 +571,13 @@ def _module_fault_rows(h, addr, texts, names, read_at):
         return [dict(base, state="refused (%s)" % NRC.get(e.code, "nrc 0x%02X" % e.code))]
     except HsfzError as e:
         return [dict(base, state="no reply (%s)" % e)]
+    hidden = 0
+    if not everything:
+        kept = [d for d in dtcs if dtc_failed(d[1])]
+        hidden, dtcs = len(dtcs) - len(kept), kept
     if not dtcs:
-        return [dict(base, state="no faults")]
+        return [dict(base, state="no faults" + (
+            " (%d listed codes never failed)" % hidden if hidden else ""))]
     rows = []
     for code, status in sorted(dtcs):
         entry = texts.get(code.upper(), {})
@@ -510,8 +603,9 @@ def write_fault_csv(path, rows):
 # hand-coded rather than table-driven, so the layout below comes from
 # disassembling that job: it sends 22 D0 39 and reads, after the echoed DID,
 #   [0]      validity, 0x00 = valid, 0x01 = not valid
-#   [1..5]   latitude:  0x00 N / 0x01 S, degrees, minutes, seconds, 1/100 s
-#   [6..10]  longitude: 0x00 E / 0x01 W, degrees, minutes, seconds, 1/100 s
+#   [1..5]   latitude:  sign, degrees, minutes, seconds, 1/100 s
+#   [6..10]  longitude: sign, degrees, minutes, seconds, 1/100 s
+#            (sign + degrees are a nine-bit two's-complement number: see _dms)
 #   [11..12] height, unsigned big-endian, unit not stated (presumably m)
 
 HEAD_UNIT = 0x63
@@ -530,9 +624,18 @@ GPS_FIX = {
 
 
 def _dms(b):
-    """5 bytes (hemisphere, deg, min, sec, 1/100 s) to signed decimal degrees."""
-    deg = b[1] + b[2] / 60 + (b[3] + b[4] / 100) / 3600
-    return -deg if b[0] == 0x01 else deg
+    """5 bytes (sign, deg, min, sec, 1/100 s) to signed decimal degrees.
+
+    The first byte is the ninth bit of a two's-complement degree count, not a
+    hemisphere flag over a plain one: 96 deg W comes as 01 A0 (0x1A0 = -96 in
+    nine bits), not 01 60. Seen on the car (October 2026); the minutes and
+    seconds are the magnitude's.
+    """
+    whole = ((b[0] & 0x01) << 8) | b[1]
+    if b[0] & 0x01:
+        whole -= 0x200
+    deg = abs(whole) + b[2] / 60 + (b[3] + b[4] / 100) / 3600
+    return -deg if whole < 0 else deg
 
 
 def parse_gps_position(payload):
@@ -957,6 +1060,28 @@ def decode_record(raw, fields):
     return out
 
 
+def add_bank2(cat):
+    """Add each DME channel again as NAME@0x13: the same identifier read from
+    the slave DME, i.e. bank 2. Returns the catalog."""
+    for name, meta in list(cat.items()):
+        if (meta.get("MODULE") or "").strip() or name.endswith(BANK2_SUFFIX):
+            continue
+        twin = dict(meta, ARG=name + BANK2_SUFFIX, TARGET="0x%02X" % DME_SLAVE)
+        for key in ("INFO", "INFO_EN"):
+            if twin.get(key):
+                twin[key] = "Bank 2: " + twin[key]
+        cat[name + BANK2_SUFFIX] = twin
+    return cat
+
+
+def channel_target(meta, default):
+    """The module a channel is read from."""
+    for key in ("MODULE", "TARGET"):
+        if (meta.get(key) or "").strip():
+            return int(meta[key], 16)
+    return default
+
+
 class ChannelReader:
     """Reads a watch list from the DME and other modules, one request per DID.
 
@@ -1012,7 +1137,7 @@ class ChannelReader:
 
     def _read_value(self, h, did, meta):
         try:
-            value, unit = decode(h.read_did(self.target, did), meta)
+            value, unit = decode(h.read_did(channel_target(meta, self.target), did), meta)
             return (value, unit, "")
         except NegativeResponse as e:
             return (None, "", NRC.get(e.code, "0x%02X" % e.code))

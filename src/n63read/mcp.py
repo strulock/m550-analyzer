@@ -29,6 +29,10 @@ from n63read import __version__, core, diag, update
 SERVER_NAME = "n63read"
 PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")    # newest first
 MAX_TEXT = 60000                # characters per tool result
+# The car tools borrow the app's (or a running log's) connection when one is
+# open. Otherwise they connect themselves, as tester 0xF6 (bank 2: 0xF7), so
+# the app connecting meanwhile as 0xF4 cannot knock either off.
+SOURCE = "0xF6"
 
 INSTRUCTIONS = """\
 n63read reads a 2018 BMW M550i (G30, N63TU2 V8) over the OBD Ethernet (ENET)
@@ -82,17 +86,20 @@ TOOLS = [
      "inputSchema": _ip({"probe_timeout": {"type": "number", "description":
                                            "Seconds to wait at each address (default 0.5)"}})},
     {"name": "read_channels", "car": True,
-     "description": "Read channels once and decode them, e.g. ILAG1, ILAG2 (DME) or "
-                    "HU_STATUS_GPS (head unit). Other modules' channels go to their own "
-                    "module whatever target says.",
+     "description": "Read channels once and decode them, e.g. ILAG1, ILAG2 (DME, bank 1) "
+                    "or HU_STATUS_GPS (head unit). Other modules' channels go to their own "
+                    "module whatever target says. Bank 2 (cylinders 5-8) is the second "
+                    "DME, 0x13: add @0x13 to a DME channel, e.g. ILAG1@0x13.",
      "inputSchema": _ip({"names": {"type": "array", "items": {"type": "string"},
                                    "description": "Channel names (see search_channels)"},
                          "target": _target()}, required=("ip", "names"))},
     {"name": "read_faults", "car": True,
      "description": "Read and decode fault memory: the DME's, another module's, or with "
-                    "all_modules every module that answers (a minute or more).",
+                    "all_modules every module that answers (a minute or more). Lists "
+                    "codes that have failed; every_code adds the many that never did.",
      "inputSchema": _ip({"target": _target(),
                          "all_modules": {"type": "boolean"},
+                         "every_code": {"type": "boolean"},
                          "save": {"type": "boolean", "description":
                                   "Also save the faults to a CSV in the logs folder"}})},
     {"name": "read_gps", "car": True,
@@ -192,20 +199,22 @@ def tool_discover(a):
 
 
 def tool_scan_modules(a):
-    return run_cli(_opt(["scan", "--ip", a["ip"]], "--probe-timeout", a.get("probe_timeout")))
+    return run_cli(_opt(["scan", "--ip", a["ip"], "--source", SOURCE], "--probe-timeout", a.get("probe_timeout")))
 
 
 def tool_read_channels(a):
     names = [str(n) for n in a.get("names") or []]
     if not names:
         raise ToolError("names: give at least one channel")
-    return run_cli(_opt(["read", "--ip", a["ip"]], "--target", a.get("target")) + names)
+    return run_cli(_opt(["read", "--ip", a["ip"], "--source", SOURCE], "--target", a.get("target")) + names)
 
 
 def tool_read_faults(a):
-    argv = _opt(["faults", "--ip", a["ip"], "-v"], "--target", a.get("target"))
+    argv = _opt(["faults", "--ip", a["ip"], "--source", SOURCE, "-v"], "--target", a.get("target"))
     if a.get("all_modules"):
         argv.append("--all")
+    if a.get("every_code"):
+        argv.append("--every-code")
     if a.get("save"):
         argv += ["--out", os.path.join(core.logs_dir(),
                                        time.strftime("faults_%Y-%m-%d_%H-%M-%S.csv"))]
@@ -213,11 +222,11 @@ def tool_read_faults(a):
 
 
 def tool_read_gps(a):
-    return run_cli(["gps", "--ip", a["ip"]])
+    return run_cli(["gps", "--ip", a["ip"], "--source", SOURCE])
 
 
 def tool_check_modules(a):
-    return run_cli(_opt(["check", "--ip", a["ip"]], "--module", a.get("module")))
+    return run_cli(_opt(["check", "--ip", a["ip"], "--source", SOURCE], "--module", a.get("module")))
 
 
 def tool_search_channels(a):

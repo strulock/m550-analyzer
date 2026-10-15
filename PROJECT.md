@@ -305,8 +305,16 @@ Frame: `[length:4 BE][control:2 BE][source:1][target:1][uds payload]`.
 Control words: `0x0001` diagnostic request/response, `0x0002` acknowledge
 (the gateway echoes the request — skip it), `0x0011` vehicle identification.
 
-Tester source address `0xF4`. Known targets: `0x12` master DME, `0x40` BDC,
-`0x10` central gateway, `0x60` instrument cluster.
+Tester source address `0xF4`. Known targets: `0x12` master DME, `0x13`
+slave DME (bank 2), `0x40` BDC, `0x10` central gateway, `0x60` instrument
+cluster.
+
+The gateway allows two diagnostic connections, each with its own tester
+address; n63read uses `0xF4` for `0x12` and everything else, `0xF5` for
+`0x13`, and lends them to its other processes. See
+[docs/protocol.md](docs/protocol.md#two-connections). Bank 2 values are read
+from `0x13` under the bank-1 identifiers; see
+[docs/modules.md](docs/modules.md#bank-2-and-the-slave-dme).
 
 A module's variant can be identified at runtime: `22 F1 50` returns its SGBD
 index, which looks up in `G30_module_sgbd_map.csv`. Confirmed for this car:

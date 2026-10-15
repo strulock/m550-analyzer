@@ -18,13 +18,14 @@ from tkinter import ttk, filedialog, messagebox
 
 import webbrowser
 
-from n63read import __version__, core, diag, playback, update
+from n63read import __version__, core, diag, playback, share, update
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
 UPDATE_FIRST_CHECK_MS = 10000       # first update check after start
 CHART_LINES = 6                     # lines drawn at once; select rows to choose
 DME_LABEL = "Engine (DME)"
+BANK2_LABEL = "Engine bank 2 (DME 0x13)"
 CHECK_BATCH = 10                    # identifiers checked per poll cycle while logging
 # Picker marks for what the car said about a channel's identifier.
 ANSWER_MARKS = {"ok": "\u2713  ", "size": "\u2260  ", "refused": "\u2717  ",
@@ -125,15 +126,23 @@ class Poller(threading.Thread):
         t0 = time.time()
         connected = False
         samples, reason = 0, "stopped"
+        host = None
         try:
-            with core.Hsfz(self.ip, source=self.source, timeout=self.timeout,
-                           trace=self.trace) as h:
+            # Borrow the car from another n63read that holds it (a running
+            # log), else hold it ourselves and lend it to the others.
+            with share.open_tester(self.ip, self.source, self.timeout,
+                                   trace=self.trace) as h:
                 connected = True
+                if not getattr(h, "shared", False):
+                    host = share.Host(self.ip).start()
                 diag.record_later("connect", ip=self.ip, result="ok",
                                   seconds=round(time.time() - t0, 3), bind=self.bind)
                 self.out_q.put(("status", "connected"))
                 while not self._stop_event.is_set():
                     self._run_jobs(h)
+                    if host:
+                        host.serve(h)
+                        h.tidy()
                     with self.lock:
                         chans = list(self.channels)
                     if not chans:
@@ -150,11 +159,14 @@ class Poller(threading.Thread):
         except Exception as e:                                      # noqa: BLE001
             reason = "%s: %s" % (type(e).__name__, e)
             if connected:
-                self.out_q.put(("error", str(e)))
+                why = core.connection_problem(e)
+                self.out_q.put(("error", "%s\n\n%s" % (e, why) if why else str(e)))
             else:
                 self.out_q.put(("error", no_answer_text(self.ip, e)))
                 diag.connect_failed(self.ip, e, self.bind)
         finally:
+            if host:
+                host.stop()
             self.stop_log()
             if connected:
                 r = self.reader
@@ -277,7 +289,7 @@ class App(tk.Tk):
         # Other modules (head unit, transmission, DSC...): optional, so a
         # missing file only hides that module's channels.
         cat.update(core.load_module_catalogs())
-        return cat
+        return core.add_bank2(cat)
 
     # -- layout ----------------------------------------------------------
 
@@ -713,7 +725,7 @@ class App(tk.Tk):
                 func = record_group[key]
                 record = prefix_job if "." in name else None
             else:
-                module_label = DME_LABEL
+                module_label = BANK2_LABEL if meta.get("TARGET") else DME_LABEL
                 func = core.function_group(name, meta.get("INFO"), english)
                 record = None
             # Search both languages and the code name, whichever is shown.
@@ -727,9 +739,7 @@ class App(tk.Tk):
 
     def _avail_key(self, name):
         meta = self.catalog[name]
-        if meta.get("MODULE"):
-            return int(meta["MODULE"], 16), int(meta["ID"], 16)
-        return self._dme_target(), int(meta["ID"], 16)
+        return core.channel_target(meta, self._dme_target()), int(meta["ID"], 16)
 
     def _dme_target(self):
         try:
@@ -804,7 +814,8 @@ class App(tk.Tk):
         `kind` matters: "Climate" is both a module and a function group.
         """
         if kind == "module":
-            return (0, "") if name == DME_LABEL else (1, name)
+            return ((0, "") if name == DME_LABEL else (0, "~") if name == BANK2_LABEL
+                    else (1, name))
         order = [g for g, _ in core.FUNCTION_GROUPS]
         return (len(order), "") if name not in order else (order.index(name), "")
 
@@ -976,7 +987,7 @@ class App(tk.Tk):
 
         def work():
             try:
-                with core.Hsfz(ip, source=0xF4, timeout=2.0) as h:
+                with share.open_tester(ip, 0xF4, 2.0) as h:
                     for _ in job(h):
                         pass
             except Exception as e:                                  # noqa: BLE001
@@ -1195,7 +1206,7 @@ class App(tk.Tk):
 
         def work():
             try:
-                with core.Hsfz(ip, source=0xF4, timeout=wait) as h:
+                with share.open_tester(ip, 0xF4, wait) as h:
                     for t in range(lo, hi + 1):
                         try:
                             h.tester_present(t)
@@ -1325,7 +1336,7 @@ class App(tk.Tk):
 
         def work():
             try:
-                with core.Hsfz(ip, source=0xF4, timeout=2.0) as h:
+                with share.open_tester(ip, 0xF4, 2.0) as h:
                     for _ in job(h):
                         pass
             except Exception as e:                                  # noqa: BLE001

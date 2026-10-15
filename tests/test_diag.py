@@ -195,14 +195,12 @@ def test_failed_connect_is_recorded_with_port_checks(app, quick_diagnostics, mon
 def test_session_is_recorded_with_its_wire_trace(quick_diagnostics):
     import queue
     car = FakeCar()
-    real = core.Hsfz
+    saved = core.Hsfz.__init__.__defaults__
     try:
         q = queue.Queue()
         p = gui.Poller("127.0.0.1", 0x12, 0xF4, 1.0, q)
         p.interval = 0.05
-        gui.core = type("C", (), dict(vars(core), Hsfz=staticmethod(
-            lambda ip, source, timeout, **kw: real(ip, port=car.port, source=source,
-                                                   timeout=timeout, **kw))))
+        core.Hsfz.__init__.__defaults__ = (car.port, core.TESTER_ADDR, 3.0)
         meta = {"DATENTYP": "unsigned int", "EINHEIT": "-"}
         p.set_channels([("ILAG2", 0x588A, meta)])
         p.start()
@@ -211,7 +209,7 @@ def test_session_is_recorded_with_its_wire_trace(quick_diagnostics):
         p.stop()
         p.join(5)
     finally:
-        gui.core = core
+        core.Hsfz.__init__.__defaults__ = saved
         car.close()
     assert wait_for(lambda: any(e["event"] == "session" for e in entries(quick_diagnostics)))
     s = next(e for e in entries(quick_diagnostics) if e["event"] == "session")

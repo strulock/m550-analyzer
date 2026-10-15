@@ -281,6 +281,21 @@ Its tools: `status`, `connection_check`, `discover`, `scan_modules`,
 file tools only read the logs folder and the journal. Each tool call is
 noted in the journal.
 
+### Bank 2 and the car's connections
+
+The N63 has an engine computer per bank: `0x12` for bank 1, `0x13` for bank 2
+(cylinders 5–8), with the same channel names. Every engine channel is listed
+again as `NAME@0x13` for bank 2; in the GUI they're under **Engine bank 2
+(DME 0x13)**.
+
+The car takes two diagnostic connections at a time. n63read uses one for
+bank 1 and every other module, and opens the second for bank 2 only while
+you're reading bank 2. While the app is connected (or `n63read log` is
+running), other n63read commands and Claude borrow its connections instead of
+opening their own, so they work alongside it. If the car drops a connection
+because something else holds one (another diagnostic tool, say), n63read
+says so.
+
 ### Connection diagnostics
 
 Every Discover, Connect, session and car check is recorded to a journal in
@@ -320,7 +335,9 @@ reply, which includes its VIN. It stays on this PC unless you send it.
 n63read discover --bind 169.254.x.x          find the car
 n63read scan --ip 169.254.x.x                which modules answer
 n63read read --ip 169.254.x.x ILAG1 ILAG2    read channels once
-n63read faults --ip 169.254.x.x -v           DME fault memory, decoded
+n63read read --ip 169.254.x.x IUKZ5@0x13     bank 2: the same channel from the second DME
+n63read faults --ip 169.254.x.x -v           DME fault memory, decoded (codes that
+                                             failed; --every-code for all)
 n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
 n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
