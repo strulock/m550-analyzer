@@ -190,6 +190,60 @@ def update(exe_path=None, progress=None):
     return info
 
 
+def _process_paths():
+    """{pid: exe path} of the processes this user can see (Windows only)."""
+    if sys.platform != "win32":
+        return {}
+    import ctypes
+    from ctypes import wintypes
+    psapi, kernel32 = ctypes.WinDLL("psapi"), ctypes.WinDLL("kernel32")
+    pids = (wintypes.DWORD * 4096)()
+    needed = wintypes.DWORD()
+    if not psapi.EnumProcesses(pids, ctypes.sizeof(pids), ctypes.byref(needed)):
+        return {}
+    out = {}
+    for pid in pids[:needed.value // ctypes.sizeof(wintypes.DWORD)]:
+        handle = kernel32.OpenProcess(0x1000, False, pid)   # QUERY_LIMITED_INFORMATION
+        if not handle:
+            continue
+        try:
+            buf = ctypes.create_unicode_buffer(1024)
+            size = wintypes.DWORD(len(buf))
+            if kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size)):
+                out[pid] = buf.value
+        finally:
+            kernel32.CloseHandle(handle)
+    return out
+
+
+def others_running(folder=None):
+    """[(pid, exe name)] of other n63read processes running from the app's
+    folder: Claude's connection (n63read-cli mcp), a CLI log, a second
+    window. While one runs, the installer can't replace the files it uses."""
+    folder = folder or install_location() or (
+        os.path.dirname(running_exe()) if running_exe() else None)
+    if not folder:
+        return []
+    norm = lambda p: os.path.normcase(os.path.normpath(p))    # noqa: E731
+    here = norm(folder)
+    return sorted((pid, os.path.basename(path)) for pid, path in _process_paths().items()
+                  if pid != os.getpid() and norm(os.path.dirname(path)) == here)
+
+
+def stop(pids):
+    """End these processes (ours, from the app's folder) so an update can run."""
+    for pid in pids:
+        try:
+            if sys.platform == "win32":
+                subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True,
+                               timeout=15, creationflags=getattr(subprocess,
+                                                                 "CREATE_NO_WINDOW", 0))
+            else:
+                os.kill(pid, 15)
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+
 def install(setup, relaunch=False):
     """Run the verified installer silently, detached. The caller then exits
     so its files can be replaced; with relaunch the installer starts the

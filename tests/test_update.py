@@ -234,3 +234,57 @@ def test_no_update_check_while_connected(app, monkeypatch):
         app.poller = None
         app.autoupdate_var.set(False)
     assert started == []
+
+
+# ------------------------------------------- other n63read processes running
+
+REAL_OTHERS_RUNNING = update.others_running     # before conftest stubs it per test
+
+
+def test_other_processes_in_the_app_folder_are_found(monkeypatch, tmp_path):
+    real = REAL_OTHERS_RUNNING
+    app_dir = str(tmp_path / "BMW Analyzer")
+    procs = {101: os.path.join(app_dir, "n63read-cli.exe"),
+             102: os.path.join(app_dir, "n63read.exe"),
+             103: os.path.join(str(tmp_path), "elsewhere", "n63read.exe"),
+             os.getpid(): os.path.join(app_dir, "n63read.exe")}       # ourselves
+    monkeypatch.setattr(update, "_process_paths", lambda: procs)
+    assert real(app_dir) == [(101, "n63read-cli.exe"), (102, "n63read.exe")]
+    assert real(str(tmp_path / "empty")) == []
+
+
+def test_restart_to_update_closes_the_others_first(app, monkeypatch, started):
+    app._update_setup, app._update_ready = "setup.exe", "9.9.9"
+    monkeypatch.setattr(update, "others_running", lambda folder=None: [(4242, "n63read-cli.exe")])
+    stopped, closed = [], []
+    monkeypatch.setattr(update, "stop", lambda pids: stopped.extend(pids))
+    monkeypatch.setattr(app, "_close", lambda: closed.append(1))
+    monkeypatch.setattr(gui.messagebox, "askyesno", lambda *a, **k: False)
+    app._restart_to_update()
+    assert not started and not stopped and not closed      # declined: nothing happens
+    monkeypatch.setattr(gui.messagebox, "askyesno", lambda *a, **k: True)
+    app._restart_to_update()
+    assert stopped == [4242] and started[-1][0] == "setup.exe" and closed
+    app._update_ready = None
+
+
+def test_closing_waits_while_others_run(app, monkeypatch, started):
+    app._update_setup = "setup.exe"
+    monkeypatch.setattr(update, "others_running", lambda folder=None: [(7, "n63read-cli.exe")])
+    assert app._install_on_exit() is False and not started
+    monkeypatch.setattr(update, "others_running", lambda folder=None: [])
+    assert app._install_on_exit() is True and started[-1][0] == "setup.exe"
+    app._update_setup = None
+
+
+def test_cli_update_waits_while_others_run(monkeypatch, capsys):
+    from n63read import cli
+    monkeypatch.setattr(update, "installed", lambda exe_path=None: True)
+    monkeypatch.setattr(update, "update", lambda progress=None: {
+        "setup": "setup.exe", "current": "0.3.7", "latest": "9.9.9", "newer": True})
+    monkeypatch.setattr(update, "others_running", lambda folder=None: [(9, "n63read-cli.exe")])
+    ran = []
+    monkeypatch.setattr(update, "install", lambda setup, relaunch=False: ran.append(setup))
+    with pytest.raises(SystemExit, match="close these first"):
+        cli.main(["update"])
+    assert not ran

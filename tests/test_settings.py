@@ -62,6 +62,7 @@ def test_graphs_follow_language_units_and_theme(app):
     assert win.time_label.cget("text") == "Zeit" and win.pause_btn.cget("text") == "Anhalten"
     assert "Alle" in win.window_box.cget("values")
     assert win.stats_label.cget("text").startswith("angezeigt:")
+    assert win.heading.cget("text") == app._describe(app.catalog["ITKUA"])  # German
     assert "Kühlmitteltemperatur" in win.title() or "ITKUA" in win.title()
     win._motion(type("E", (), {"x": 300})())
     texts = [win.canvas.itemcget(i, "text") for i in win.canvas.find_all()
@@ -99,17 +100,34 @@ def test_hovering_the_chart_reads_off_every_line(app):
         app._show_sample({"ITKUA": (90.0 + i, DEG_C, ""), "ILAG2": (1.0 + i / 100, "-", "")},
                          elapsed=float(i))
     app.update()
-    w = app.canvas.winfo_width()
-    app._chart_hover(w - 30)                                 # the newest samples
-    texts = [app.canvas.itemcget(i, "text") for i in app.canvas.find_all()
-             if app.canvas.type(i) == "text"]
-    # Readings are "NAME value unit"; the legend has two spaces after the name.
-    readings = [t for t in texts if t.split(" ")[0] in ("ITKUA", "ILAG2")
-                and not t.startswith(("ITKUA  ", "ILAG2  "))]
-    assert any(t.startswith("ITKUA 11") and t.endswith(DEG_C) for t in readings)
-    assert any(t.startswith("ILAG2 ") for t in readings)
+    coolant = app._chart_name("ITKUA", app.catalog["ITKUA"])
+    lambda2 = app._chart_name("ILAG2", app.catalog["ILAG2"])
+    assert coolant != "ITKUA" and lambda2 != "ILAG2"      # descriptions, not code names
+
+    def chart_texts():
+        return [app.canvas.itemcget(i, "text") for i in app.canvas.find_all()
+                if app.canvas.type(i) == "text"]
+    # Legend: "name  lo-hi unit" (two spaces); reading: "name value unit".
+    assert any(t.startswith(coolant + "  ") for t in chart_texts())
+    app._chart_hover(app.canvas.winfo_width() - 30)          # the newest samples
+    readings = [t for t in chart_texts() if t.startswith((coolant + " ", lambda2 + " "))
+                and not t.startswith((coolant + "  ", lambda2 + "  "))]
+    assert any(t.startswith(coolant + " 11") and t.endswith(DEG_C) for t in readings)
+    assert any(t.startswith(lambda2 + " ") for t in readings)
     app._chart_hover(None)
-    texts = [app.canvas.itemcget(i, "text") for i in app.canvas.find_all()
-             if app.canvas.type(i) == "text"]
-    assert all(t.startswith(("ITKUA  ", "ILAG2  ")) for t in texts
-               if t.split(" ")[0] in ("ITKUA", "ILAG2"))
+    assert not [t for t in chart_texts() if t.startswith(coolant + " ")
+                and not t.startswith(coolant + "  ")]
+
+
+def test_chart_names_follow_the_language_and_stay_short(app):
+    meta = {"INFO": "Mittlere Motordrehzahl über ein Zylindersegment",
+            "INFO_EN": "Mean engine speed over one cylinder segment"}
+    name = app._chart_name("MITTL_MOTORDREHZAHL_PRO_ZYLSEGM", meta)
+    assert name.startswith("Mean engine speed") and name.endswith("\u2026")
+    assert len(name) <= 31
+    app.lang = "de"
+    try:
+        assert app._chart_name("X", meta).startswith("Mittlere Motordrehzahl")
+    finally:
+        app.lang = "en"
+    assert app._chart_name("EGS_Y.FIELD", {}) == "FIELD"
