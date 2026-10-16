@@ -141,7 +141,7 @@ class Poller(threading.Thread):
                     host = share.Host(self.ip).start()
                 diag.record_later("connect", ip=self.ip, result="ok",
                                   seconds=round(time.time() - t0, 3), bind=self.bind)
-                self.out_q.put(("status", "connected"))
+                self.out_q.put(("status", "connected", self))
                 while not self._stop_event.is_set():
                     self._run_jobs(h)
                     if host:
@@ -164,9 +164,9 @@ class Poller(threading.Thread):
             reason = "%s: %s" % (type(e).__name__, e)
             if connected:
                 why = core.connection_problem(e)
-                self.out_q.put(("error", "%s\n\n%s" % (e, why) if why else str(e)))
+                self.out_q.put(("error", "%s\n\n%s" % (e, why) if why else str(e), self))
             else:
-                self.out_q.put(("error", no_answer_text(self.ip, e)))
+                self.out_q.put(("error", no_answer_text(self.ip, e), self))
                 diag.connect_failed(self.ip, e, self.bind)
         finally:
             if host:
@@ -179,7 +179,7 @@ class Poller(threading.Thread):
                             refused={"0x%02X:0x%04X" % k: v for k, v in r.refused.items()},
                             silent_modules=["0x%02X" % m for m in r.quiet_until],
                             log=self.log_path, trace=self.trace)
-            self.out_q.put(("status", "disconnected"))
+            self.out_q.put(("status", "disconnected", self))
 
     def _write_log(self, elapsed, chans, sample):
         with self.lock:
@@ -1452,7 +1452,10 @@ class App(tk.Tk):
                                 t, core.NRC.get(e.code, "0x%02X" % e.code))
                         except core.HsfzError:
                             continue
-                        except Exception:                           # noqa: BLE001
+                        except Exception as e:                      # noqa: BLE001
+                            # Not "nothing here": say what went wrong, then
+                            # carry on with the next address.
+                            emit("0x%02X  error: %s: %s\n" % (t, type(e).__name__, e))
                             continue
                         else:
                             line = "0x%02X  responds\n" % t
@@ -1486,6 +1489,7 @@ class App(tk.Tk):
             self.poller.stop()
             self.poller = None
             self.connect_btn.config(text="Connect")
+            self._log_ended()
             return
 
         ip = self.ip_var.get().strip()
@@ -1620,14 +1624,23 @@ class App(tk.Tk):
 
     # -- logging ---------------------------------------------------------
 
+    def _log_ended(self):
+        """The log is closed (the poller closes it on its way out); say so."""
+        self.logging_to = None
+        self.log_btn.config(text="Start logging")
+
     def _toggle_log(self):
         if not self.poller:
             messagebox.showinfo("Logging", "Connect first.")
             return
         if self.logging_to:
             self.poller.stop_log()
-            self.logging_to = None
-            self.log_btn.config(text="Start logging")
+            self._log_ended()
+            return
+        if not self.watch:
+            # The header is written with the first sample, and with nothing
+            # watched there is none: the file would stay empty.
+            messagebox.showinfo("Logging", "Add channels to watch first.")
             return
         path = filedialog.asksaveasfilename(
             defaultextension=".csv", filetypes=[("CSV", "*.csv")],
@@ -1642,154 +1655,173 @@ class App(tk.Tk):
     # -- event pump ------------------------------------------------------
 
     def _drain(self):
+        # Reschedule whatever happens: if this loop stops, the window stops
+        # showing samples, errors and status, and nothing says so.
         try:
             while True:
-                msg = self.q.get_nowait()
-                kind = msg[0]
+                try:
+                    msg = self.q.get_nowait()
+                except queue.Empty:
+                    break
+                try:
+                    self._handle(msg)
+                except Exception as e:                      # noqa: BLE001
+                    diag.record("gui_error", message=msg[0],
+                                error="%s: %s" % (type(e).__name__, e))
+                    self.status.config(text="● display error: %s" % e,
+                                       foreground="#c0392b")
+        finally:
+            self.after(60, self._drain)
 
-                if kind == "sample":
-                    self._learn(msg[2])
-                    self._show_sample(msg[2], msg[1])
+    def _handle(self, msg):
+        kind = msg[0]
 
-                elif kind == "checkres":
-                    _, key, status, i, total = msg
-                    if status in core.ANSWERS or status == "refused" \
-                            or key not in self.avail:
-                        self.avail[key] = status
-                    if i % 50 == 0 or i == total:
-                        self.status.config(text="\u25cf checking %d / %d" % (i, total),
-                                           foreground="#b8860b")
+        if kind == "sample":
+            self._learn(msg[2])
+            self._show_sample(msg[2], msg[1])
 
-                elif kind == "checkdone":
-                    self._checking = None
-                    by_module = {}
-                    for (module, _did), status in self.avail.items():
-                        counts = by_module.setdefault("0x%02X" % module, {})
-                        counts[status] = counts.get(status, 0) + 1
-                    diag.record("check", stopped=msg[1], modules=by_module)
-                    answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
-                    self._answers_changed("check %s: %d identifiers answer"
-                                          % ("stopped" if msg[1] else "done", answered))
+        elif kind == "checkres":
+            _, key, status, i, total = msg
+            if status in core.ANSWERS or status == "refused" \
+                    or key not in self.avail:
+                self.avail[key] = status
+            if i % 50 == 0 or i == total:
+                self.status.config(text="\u25cf checking %d / %d" % (i, total),
+                                   foreground="#b8860b")
 
-                elif kind == "feedsample":
-                    _, feed, elapsed, sample = msg
-                    if feed is not self.feed:
-                        continue                # left over from a stopped feed
-                    self._show_sample(sample, elapsed)
-                    if feed.kind == "replay":
-                        self.status.config(
-                            text="● replaying %s  %s / %s" % (
-                                feed.name_shown, _clock(elapsed - feed.rows[0][0]),
-                                _clock(feed.duration)),
-                            foreground="#2d7dd2")
+        elif kind == "checkdone":
+            self._checking = None
+            by_module = {}
+            for (module, _did), status in self.avail.items():
+                counts = by_module.setdefault("0x%02X" % module, {})
+                counts[status] = counts.get(status, 0) + 1
+            diag.record("check", stopped=msg[1], modules=by_module)
+            answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
+            self._answers_changed("check %s: %d identifiers answer"
+                                  % ("stopped" if msg[1] else "done", answered))
 
-                elif kind == "feeddone":
-                    if msg[1] is self.feed:
-                        self.feed = None
-                        self.replay_btn.config(text="Open log...")
-                        self.status.config(text="● replay finished", foreground="#999")
+        elif kind == "feedsample":
+            _, feed, elapsed, sample = msg
+            if feed is not self.feed:
+                return                      # left over from a stopped feed
+            self._show_sample(sample, elapsed)
+            if feed.kind == "replay":
+                self.status.config(
+                    text="● replaying %s  %s / %s" % (
+                        feed.name_shown, _clock(elapsed - feed.rows[0][0]),
+                        _clock(feed.duration)),
+                    foreground="#2d7dd2")
 
-                elif kind == "status":
-                    ok = msg[1] == "connected"
-                    self.status.config(
-                        text="\u25cf " + msg[1],
-                        foreground="#2a9d3f" if ok else "#999")
-                    if not ok:
-                        self.connect_btn.config(text="Connect")
-                        self.poller = None
+        elif kind == "feeddone":
+            if msg[1] is self.feed:
+                self.feed = None
+                self.replay_btn.config(text="Open log...")
+                self.status.config(text="● replay finished", foreground="#999")
 
-                elif kind == "discovered":
-                    hits = msg[1]
-                    near = msg[2] if len(msg) > 2 else []
-                    hsfz = [h for h in hits if core.reply_protocol(h[1]) == "HSFZ"]
-                    if hits and not hsfz:
-                        self.ip_var.set(hits[0][0])
-                        self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
-                        messagebox.showinfo(
-                            "Discover",
-                            "The car at %s answered with DoIP (port 13400), not "
-                            "HSFZ, which is what this tool speaks. Please report "
-                            "this: DoIP support can be added." % hits[0][0])
-                    elif not hits and near:
-                        self.ip_var.set(near[0])
-                        self.status.config(text="\u25cf no reply; %s is on the link"
-                                           % near[0], foreground="#b8860b")
-                        messagebox.showinfo(
-                            "Discover",
-                            "The car didn't answer Discover, but %s is on the car's "
-                            "link, so it's probably the car. It's in the IP box: "
-                            "press Connect.%s" % (near[0], "\n\nAlso seen: " +
-                                                  ", ".join(near[1:]) if near[1:] else ""))
-                    elif not hits:
-                        messagebox.showinfo(
-                            "Discover",
-                            "No reply.\n\n"
-                            + ("This PC has no 169.254.x.x (ENET) address yet: "
-                               "the adapter isn't connected or Windows hasn't "
-                               "set it up (it takes 30-60 s after plugging in).\n\n"
-                               if self._no_enet_address else "")
-                            + "1. Ignition on (position 2)\n"
-                            "2. USB ENET adapter plugged into car and PC\n"
-                            "3. Pick the 169.254.x.x address in 'via' - an "
-                            "auto broadcast leaves over WiFi instead\n"
-                            "4. Allow Python through Windows Firewall, and set "
-                            "that network to Private")
-                        self.status.config(text="\u25cf not connected", foreground="#999")
-                    else:
-                        self.ip_var.set(hits[0][0])
-                        self.status.config(
-                            text="\u25cf found %d" % len(hits), foreground="#2a9d3f")
+        elif kind in ("status", "error") and self.poller is not None \
+                and msg[2] is not self.poller:
+            return      # from a poller already replaced by a new connection
 
-                elif kind == "module":
-                    if msg[1] not in self.modules:
-                        self.modules.append(msg[1])
+        elif kind == "status":
+            ok = msg[1] == "connected"
+            self.status.config(
+                text="\u25cf " + msg[1],
+                foreground="#2a9d3f" if ok else "#999")
+            if not ok:
+                self.connect_btn.config(text="Connect")
+                self.poller = None
+                self._log_ended()
 
-                elif kind == "faultmsg":
-                    _, win, text = msg
-                    if win.winfo_exists():
-                        win.parts["msg"].config(text=text)
+        elif kind == "discovered":
+            hits = msg[1]
+            near = msg[2] if len(msg) > 2 else []
+            hsfz = [h for h in hits if core.reply_protocol(h[1]) == "HSFZ"]
+            if hits and not hsfz:
+                self.ip_var.set(hits[0][0])
+                self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
+                messagebox.showinfo(
+                    "Discover",
+                    "The car at %s answered with DoIP (port 13400), not "
+                    "HSFZ, which is what this tool speaks. Please report "
+                    "this: DoIP support can be added." % hits[0][0])
+            elif not hits and near:
+                self.ip_var.set(near[0])
+                self.status.config(text="\u25cf no reply; %s is on the link"
+                                   % near[0], foreground="#b8860b")
+                messagebox.showinfo(
+                    "Discover",
+                    "The car didn't answer Discover, but %s is on the car's "
+                    "link, so it's probably the car. It's in the IP box: "
+                    "press Connect.%s" % (near[0], "\n\nAlso seen: " +
+                                          ", ".join(near[1:]) if near[1:] else ""))
+            elif not hits:
+                messagebox.showinfo(
+                    "Discover",
+                    "No reply.\n\n"
+                    + ("This PC has no 169.254.x.x (ENET) address yet: "
+                       "the adapter isn't connected or Windows hasn't "
+                       "set it up (it takes 30-60 s after plugging in).\n\n"
+                       if self._no_enet_address else "")
+                    + "1. Ignition on (position 2)\n"
+                    "2. USB ENET adapter plugged into car and PC\n"
+                    "3. Pick the 169.254.x.x address in 'via' - an "
+                    "auto broadcast leaves over WiFi instead\n"
+                    "4. Allow Python through Windows Firewall, and set "
+                    "that network to Private")
+                self.status.config(text="\u25cf not connected", foreground="#999")
+            else:
+                self.ip_var.set(hits[0][0])
+                self.status.config(
+                    text="\u25cf found %d" % len(hits), foreground="#2a9d3f")
 
-                elif kind == "faults_done":
-                    _, win, rows = msg
-                    if win.winfo_exists():
-                        self._show_faults(win, rows)
+        elif kind == "module":
+            if msg[1] not in self.modules:
+                self.modules.append(msg[1])
 
-                elif kind == "logfile":
-                    self.logging_to = msg[1]
-                    self.status.config(text="● channels changed - logging to %s"
-                                       % os.path.basename(msg[1]), foreground="#2a9d3f")
+        elif kind == "faultmsg":
+            _, win, text = msg
+            if win.winfo_exists():
+                win.parts["msg"].config(text=text)
 
-                elif kind == "scanline":
-                    _, box, text = msg
-                    if box.winfo_exists():
-                        box.insert("end", text)
-                        box.see("end")
+        elif kind == "faults_done":
+            _, win, rows = msg
+            if win.winfo_exists():
+                self._show_faults(win, rows)
 
-                elif kind == "update":
-                    self._show_update(*msg[1:])
+        elif kind == "logfile":
+            self.logging_to = msg[1]
+            self.status.config(text="● channels changed - logging to %s"
+                               % os.path.basename(msg[1]), foreground="#2a9d3f")
 
-                elif kind == "claude":
-                    self._show_claude(msg[1])
+        elif kind == "scanline":
+            _, box, text = msg
+            if box.winfo_exists():
+                box.insert("end", text)
+                box.see("end")
 
-                elif kind == "note":
-                    # Information for the status line only; not a state change.
-                    self.status.config(text="● " + msg[1], foreground="#2d7dd2")
+        elif kind == "update":
+            self._show_update(*msg[1:])
 
-                elif kind == "joberror":
-                    # A failed fault read, check or discovery: say so, but
-                    # it is not a lost connection, so leave the poller be.
-                    if not self.poller:
-                        self.status.config(text="● error", foreground="#c0392b")
-                    messagebox.showerror("Error", msg[1])
+        elif kind == "claude":
+            self._show_claude(msg[1])
 
-                elif kind == "error":
-                    self.status.config(text="\u25cf error", foreground="#c0392b")
-                    messagebox.showerror("Connection", msg[1])
-                    self.connect_btn.config(text="Connect")
-                    self.poller = None
-        except queue.Empty:
-            pass
-        self.after(60, self._drain)
+        elif kind == "note":
+            # Information for the status line only; not a state change.
+            self.status.config(text="● " + msg[1], foreground="#2d7dd2")
+
+        elif kind == "joberror":
+            # A failed fault read, check or discovery: say so, but
+            # it is not a lost connection, so leave the poller be.
+            if not self.poller:
+                self.status.config(text="● error", foreground="#c0392b")
+            messagebox.showerror("Error", msg[1])
+
+        elif kind == "error":
+            self.status.config(text="\u25cf error", foreground="#c0392b")
+            messagebox.showerror("Connection", msg[1])
+            self.connect_btn.config(text="Connect")
+            self.poller = None
+            self._log_ended()
 
     def _show_sample(self, sample, elapsed=None):
         for name, (value, unit, note) in sample.items():
@@ -1920,6 +1952,9 @@ class App(tk.Tk):
                 pass
         if self.poller:
             self.poller.stop()
+            # The poller is a daemon thread: without the wait the process can
+            # exit before it closes the log, losing the last second of it.
+            self.poller.join(timeout=3)
         self._stop_feed()
         self._install_on_exit()
         self.destroy()
