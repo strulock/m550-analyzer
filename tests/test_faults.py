@@ -262,3 +262,10 @@ def test_parse_probe_timeout_and_sweep_estimate():
     assert core.parse_probe_timeout("1.5") == 1.5
     lo, hi = core.SWEEP_RANGE
     assert core.sweep_seconds(1.0) == hi - lo + 1
+
+
+@pytest.mark.parametrize("code, module", [("025600", 0x56), ("025D00", 0x5D), ("026100", 0x61)])
+def test_roof_camera_and_telematics_faults_have_texts(code, module):
+    entry = core.load_fault_texts()[code]
+    assert entry["text_en"] == "Energy-saving mode active"
+    assert core.load_module_names()[module]

@@ -350,8 +350,41 @@ def dme_enums(tabs):
     return names, len(rows)
 
 
+# Modules whose fault texts are wanted but not (yet) their live values:
+# file key -> fault-file tag. For a module with several candidate files
+# (the telematics module, 0x61), list the likeliest first: a code the
+# files word differently keeps the first file's text.
+FAULTS_ONLY = {
+    "fzd_g11": "FZD-G11",       # 0x56 roof function centre
+    "kafasg11": "KAFAS-G11",    # 0x5D camera-based driver assistance
+    "atm02": "ATM02",           # 0x61 telematics: ATM2, then ATM, then TCB 4G
+    "atm": "ATM",
+    "tcb4g": "TCB4G",
+}
+
+
+def faults_only(paths):
+    """Merge the fault texts of FAULTS_ONLY files, in FAULTS_ONLY order."""
+    def key(path):
+        base = os.path.basename(path).lower()
+        for k in sorted(FAULTS_ONLY, key=len, reverse=True):
+            if re.search(r"(^|[^a-z0-9])%s\.prg$" % re.escape(k), base):
+                return k
+        sys.exit("not a faults-only module: %s (see FAULTS_ONLY)" % path)
+    order = list(FAULTS_ONLY)
+    for path in sorted(paths, key=lambda p: order.index(key(p))):
+        added, tagged, clashes, kept = merge_faults(tables(deobfuscate(path)),
+                                                    FAULTS_ONLY[key(path)])
+        print("%-9s faults: %d added, %d tagged, %d reworded, %d kept (other module's)"
+              % (key(path), added, tagged, clashes, kept))
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    # --faults-only FILE...: only add these modules' fault texts.
+    if argv[:1] == ["--faults-only"] and len(argv) > 1:
+        faults_only(argv[1:])
+        return
     # --dme dme8ff_r.prg: rewrite the DME's value tables and snapshot fields.
     if argv[:1] == ["--dme"] and len(argv) == 2:
         dme(argv[1])

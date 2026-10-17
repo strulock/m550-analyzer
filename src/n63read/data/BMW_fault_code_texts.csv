@@ -1,121 +1,154 @@
 ﻿code,text_de,text_en,source_module
-020100,Energiesparmode aktiv,Energiesparmode active,ACSM5
+020100,Energiesparmode aktiv,Energy-saving mode active,ACSM5
 020108,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,ACSM5
-020109,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,ACSM5
-02010A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,ACSM5
-02010B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,ACSM5
-02010C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,ACSM5
-02010D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,ACSM5
-021000,Energiesparmode aktiv,Energiesparmode active,ZGW; ZGW-SP18
-021200,Energiesparmode aktiv,Energiesparmode active,DME; DME-slave
-021203,Externe SWT-Prüfbedingung nicht erfüllt,Externe SWT-Prüfbedingung not met,DME; DME-slave
-021204,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check fehlgeschlagen,DME; DME-slave
+020109,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,ACSM5
+02010A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,ACSM5
+02010B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,ACSM5
+02010C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,ACSM5
+02010D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,ACSM5
+021000,Energiesparmode aktiv,Energy-saving mode active,ZGW; ZGW-SP18
+021200,Energiesparmode aktiv,Energy-saving mode active,DME; DME-slave
+021203,Externe SWT-Prüfbedingung nicht erfüllt,External SWT-test condition not met,DME; DME-slave
+021204,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check failed,DME; DME-slave
 021208,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,DME; DME-slave
-021209,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,DME; DME-slave
-02120A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,DME; DME-slave
-02120B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,DME; DME-slave
-02120C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,DME; DME-slave
-02120D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,DME; DME-slave
+021209,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,DME; DME-slave
+02120A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,DME; DME-slave
+02120B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,DME; DME-slave
+02120C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,DME; DME-slave
+02120D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,DME; DME-slave
 02120E,Datenstand-Variante nicht passend; Leistungsreduktion Antrieb,Datenstand-variant not passend; Leistungsreduktion drive,DME; DME-slave
 021220,CAN-Fehler (Sammelfehler),CAN-fault (group fault),DME
 021221,EEPROM-Fehler (Sammelfehler),EEPROM-fault (group fault),DME
 021223,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),DME
-021224,"Flexray, externe Ursache (Sammelfehler)","Flexray, externe cause (group fault)",DME
+021224,"Flexray, externe Ursache (Sammelfehler)","Flexray, external cause (group fault)",DME
 021225,"Flexray, interne Ursache (Sammelfehler)","Flexray, internal cause (group fault)",DME
 021226,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),DME
 021228,"LIN, interne Ursache (Sammelfehler)","LIN, internal cause (group fault)",DME
 021229,Softwarefehler (Sammelfehler),Softwarefehler (group fault),DME
 021300,Energiesparmodus: aktiv,Energiesparmodus: active,DME; DME-slave
-021303,"Funktionsfreischaltung 2, externe Prüfung: Randbedingungen nicht erfüllt","Funktionsfreischaltung 2, externe check: Randbedingungen not met",DME; DME-slave
+021303,"Funktionsfreischaltung 2, externe Prüfung: Randbedingungen nicht erfüllt","Funktionsfreischaltung 2, external check: Randbedingungen not met",DME; DME-slave
 021304,"Funktionsfreischaltung 2, interne Prüfung: Randbedingungen nicht erfüllt","Funktionsfreischaltung 2, internal check: Randbedingungen not met",DME; DME-slave
 021308,"DME Slave, Kodierung: fehlt","DME slave, coding: missing",DME; DME-slave
 021309,"DME Slave, Kodierung: Schreibfehler","DME slave, coding: Schreibfehler",DME; DME-slave
-02130A,"DME Slave, Kodierung: Signaturprüfung fehlerhaft","DME slave, coding: Signaturprüfung faulty",DME; DME-slave
+02130A,"DME Slave, Kodierung: Signaturprüfung fehlerhaft","DME slave, coding: signature check faulty",DME; DME-slave
 02130B,"DME Slave, Kodierung: Fahrgestellnummer falsch","DME slave, coding: Fahrgestellnummer incorrect",DME; DME-slave
 02130C,"DME Slave, Kodierung: Daten unplausibel","DME slave, coding: data implausible",DME; DME-slave
-02130D,"DME Slave, Kodierung: Daten nicht qualifiziert","DME slave, coding: data not qualifiziert",DME; DME-slave
+02130D,"DME Slave, Kodierung: Daten nicht qualifiziert","DME slave, coding: data not qualified",DME; DME-slave
 021320,CAN-Fehler (Sammelfehler),CAN-fault (group fault),DME-slave
 021321,EEPROM-Fehler (Sammelfehler),EEPROM-fault (group fault),DME-slave
 021323,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),DME-slave
-021324,"Flexray, externe Ursache (Sammelfehler)","Flexray, externe cause (group fault)",DME-slave
+021324,"Flexray, externe Ursache (Sammelfehler)","Flexray, external cause (group fault)",DME-slave
 021325,"Flexray, interne Ursache (Sammelfehler)","Flexray, internal cause (group fault)",DME-slave
 021326,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),DME-slave
 021328,"LIN, interne Ursache (Sammelfehler)","LIN, internal cause (group fault)",DME-slave
 021329,Softwarefehler (Sammelfehler),Softwarefehler (group fault),DME-slave
-021700,Energiesparmode aktiv,Energiesparmode active,EKP301
-021800,Energiesparmode aktiv,Energiesparmode active,GSZFB1
+021700,Energiesparmode aktiv,Energy-saving mode active,EKP301
+021800,Energiesparmode aktiv,Energy-saving mode active,GSZFB1
 021808,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,GSZFB1
-021809,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,GSZFB1
-02180A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,GSZFB1
-02180B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,GSZFB1
-02180C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,GSZFB1
-02180D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,GSZFB1
-021900,Energiesparmode aktiv,Energiesparmode active,LMV-G11
+021809,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,GSZFB1
+02180A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,GSZFB1
+02180B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,GSZFB1
+02180C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,GSZFB1
+02180D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,GSZFB1
+021900,Energiesparmode aktiv,Energy-saving mode active,LMV-G11
 021908,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,LMV-G11
-021909,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,LMV-G11
-02190A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,LMV-G11
-02190B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,LMV-G11
-02190C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,LMV-G11
-02190D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,LMV-G11
+021909,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,LMV-G11
+02190A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,LMV-G11
+02190B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,LMV-G11
+02190C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,LMV-G11
+02190D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,LMV-G11
 021923,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),LMV-G11
-021924,"Flexray, externe Ursache (Sammelfehler)","Flexray, externe cause (group fault)",LMV-G11
+021924,"Flexray, externe Ursache (Sammelfehler)","Flexray, external cause (group fault)",LMV-G11
 021925,"Flexray, interne Ursache (Sammelfehler)","Flexray, internal cause (group fault)",LMV-G11
 021926,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),LMV-G11
 021929,Softwarefehler (Sammelfehler),Softwarefehler (group fault),LMV-G11
-022900,Energiesparmode aktiv,Energiesparmode active,DSC-G30N
-022903,Externe SWT-Prüfbedingung nicht erfüllt,Externe SWT-Prüfbedingung not met,DSC-G30N
-022904,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check fehlgeschlagen,DSC-G30N
+022900,Energiesparmode aktiv,Energy-saving mode active,DSC-G30N
+022903,Externe SWT-Prüfbedingung nicht erfüllt,External SWT-test condition not met,DSC-G30N
+022904,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check failed,DSC-G30N
 022908,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,DSC-G30N
-022909,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,DSC-G30N
-02290A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,DSC-G30N
-02290B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,DSC-G30N
-02290C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,DSC-G30N
-02290D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,DSC-G30N
+022909,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,DSC-G30N
+02290A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,DSC-G30N
+02290B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,DSC-G30N
+02290C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,DSC-G30N
+02290D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,DSC-G30N
 022923,"LIN Fehler (SW, HW)","LIN fault (SW, HW)",DSC-G30N
 022924,NVM_E_HARDWARE,NVM_E_HARDWARE,DSC-G30N
 022940,Spannungsversorgung - Lokale Überspannung,Power supply - Lokale overvoltage,DSC-G30N
 022941,Spannungsversorgung - Lokale Unterspannung,Power supply - Lokale undervoltage,DSC-G30N
 022943,Spannungsversorgung - Globale Überspannung extern,Power supply - global overvoltage extern,DSC-G30N
 022945,Spannungsversorgung - Globale Unterspannung extern,Power supply - global undervoltage extern,DSC-G30N
-022C00,Energiesparmode aktiv,Energiesparmode active,PMA-20
-023000,Energiesparmode aktiv,Energiesparmode active,EPS-G11
+022C00,Energiesparmode aktiv,Energy-saving mode active,PMA-20
+023000,Energiesparmode aktiv,Energy-saving mode active,EPS-G11
 023008,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,EPS-G11
-023009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,EPS-G11
-02300A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,EPS-G11
-02300B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,EPS-G11
-02300C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,EPS-G11
-024000,Energiesparmode aktiv,Energiesparmode active,BDC; BDC-G05; BDC-G11
+023009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,EPS-G11
+02300A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,EPS-G11
+02300B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,EPS-G11
+02300C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,EPS-G11
+024000,Energiesparmode aktiv,Energy-saving mode active,BDC; BDC-G05; BDC-G11
 024008,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,BDC-G11
-024009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,BDC; BDC-G05; BDC-G11
-02400A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,BDC-G11
-02400B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,BDC; BDC-G05; BDC-G11
-02400C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,BDC-G11
-02400D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,BDC-G05
-026000,Energiesparmode aktiv,Energiesparmode active,KOMBI-G11; KOMBI-01; KOMBI-25
-026009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,KOMBI-G11; KOMBI-25
-02600B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,KOMBI-G11; KOMBI-25
-02600D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,KOMBI-25
+024009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,BDC; BDC-G05; BDC-G11
+02400A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,BDC-G11
+02400B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,BDC; BDC-G05; BDC-G11
+02400C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,BDC-G11
+02400D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,BDC-G05
+025600,Energiesparmode aktiv,Energy-saving mode active,FZD-G11
+025608,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,FZD-G11
+025609,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,FZD-G11
+02560A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,FZD-G11
+02560B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,FZD-G11
+02560C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,FZD-G11
+02560D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,FZD-G11
+025D00,Energiesparmode aktiv,Energy-saving mode active,KAFAS-G11
+025D03,Externe SWT-Prüfbedingung nicht erfüllt,External SWT-test condition not met,KAFAS-G11
+025D04,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check failed,KAFAS-G11
+025D08,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,KAFAS-G11
+025D09,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,KAFAS-G11
+025D0A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,KAFAS-G11
+025D0B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,KAFAS-G11
+025D0C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,KAFAS-G11
+025D0D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,KAFAS-G11
+025D23,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),KAFAS-G11
+025D26,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),KAFAS-G11
+025D29,Softwarefehler (Sammelfehler),Softwarefehler (group fault),KAFAS-G11
+026000,Energiesparmode aktiv,Energy-saving mode active,KOMBI-G11; KOMBI-01; KOMBI-25
+026009,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,KOMBI-G11; KOMBI-25
+02600B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,KOMBI-G11; KOMBI-25
+02600D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,KOMBI-25
 026021,EEPROM-Fehler (Sammelfehler),EEPROM-fault (group fault),KOMBI-25
 026026,Hardwarefehler (Sammelfehler),Hardwarefehler (group fault),KOMBI-25
-026300,Energiesparmode aktiv,Energiesparmode active,NBTEVO
+026100,Energiesparmode aktiv,Energy-saving mode active,ATM02; ATM; TCB4G
+026103,Externe SWT-Prüfbedingung nicht erfüllt,External SWT-test condition not met,ATM02
+026104,Interne SWT-Prüfung fehlgeschlagen,Internal SWT-check failed,ATM02
+026108,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,ATM02; ATM; TCB4G
+026109,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,ATM02; ATM; TCB4G
+02610A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,ATM02; ATM; TCB4G
+02610B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,ATM02; ATM; TCB4G
+02610C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,ATM02; ATM; TCB4G
+026123,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),ATM02; ATM
+026160,RSU_CLIENT_HW_FEHLER,RSU_CLIENT_HW_FEHLER,ATM02
+026170,IPSEC_NICHT_INITIALISIERT,IPSEC_NICHT_INITIALISIERT,ATM02
+026171,IPSEC_NICHT_VERRIEGELT,IPSEC_NICHT_VERRIEGELT,ATM02
+026172,IPSEC_FEHLER_AUFGETRETEN,IPSEC_FEHLER_AUFGETRETEN,ATM02
+026180,ZERTIFIKATE_UND_BINDINGS_TYP1_WERK_NICHT_BEREIT,ZERTIFIKATE_UND_BINDINGS_TYP1_WERK_NICHT_BEREIT,ATM02
+026300,Energiesparmode aktiv,Energy-saving mode active,NBTEVO
 026308,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,NBTEVO
-026309,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,NBTEVO
-02630A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,NBTEVO
-02630B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,NBTEVO
-02630C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,NBTEVO
-027600,Energiesparmode aktiv,Energiesparmode active,VDP-G11
+026309,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,NBTEVO
+02630A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,NBTEVO
+02630B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,NBTEVO
+02630C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,NBTEVO
+027600,Energiesparmode aktiv,Energy-saving mode active,VDP-G11
 027608,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,VDP-G11
-027609,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,VDP-G11
-02760A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,VDP-G11
-02760B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,VDP-G11
-02760D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,VDP-G11
-027800,Energiesparmode aktiv,Energiesparmode active,IHKA-G11
+027609,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,VDP-G11
+02760A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,VDP-G11
+02760B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,VDP-G11
+02760D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,VDP-G11
+027800,Energiesparmode aktiv,Energy-saving mode active,IHKA-G11
 027808,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,IHKA-G11
-027809,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at Codierdatentransaktion occurred,IHKA-G11
-02780A,Codierung: Signatur der Codierdaten ungültig,Coding: Signatur the Codierdaten invalid,IHKA-G11
-02780B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: Codierdaten passen not to vehicle,IHKA-G11
-02780C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: Unplausible data during Codierdatentransaktion,IHKA-G11
-02780D,Codierung: Codierdaten nicht qualifiziert,Coding: Codierdaten not qualifiziert,IHKA-G11
+027809,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,IHKA-G11
+02780A,Codierung: Signatur der Codierdaten ungültig,Coding: signature the coding data invalid,IHKA-G11
+02780B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,IHKA-G11
+02780C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,IHKA-G11
+02780D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,IHKA-G11
 02FF01,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,ACSM5
 02FF12,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
 02FF13,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
@@ -126,7 +159,10 @@
 02FF2C,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,PMA-20
 02FF30,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,EPS-G11
 02FF40,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,BDC; BDC-G11
+02FF56,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,FZD-G11
+02FF5D,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,KAFAS-G11
 02FF60,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,KOMBI-G11; KOMBI-25
+02FF61,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,ATM02; ATM; TCB4G
 02FF63,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,NBTEVO
 02FF76,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,VDP-G11
 02FF78,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,IHKA-G11
@@ -218,6 +254,64 @@
 0301B3,FH BFH interner Fehler,FH BFH internal error,BDC-G11
 0301B4,IFE BFTH unerwarteter LIN-Slave,IFE BFTH unexpected LIN-slave,BDC-G11
 0301B5,IFE BFTH fehlender LIN-Slave,IFE BFTH missing LIN slave,BDC-G11
+030200,"SHD, Relais Öffnen, fehlende Aussgangsspannung: Relaiskleber oder Sicherung defekt oder Kurzschluss nach Masse","SHD, relay Öffnen, missing Aussgangsspannung: relay welded shut or fuse defective or short circuit to ground",FZD-G11
+030201,"SHD, Relais Schliessen, keine Aussgangsspannung: Relaiskleber oder Sicherung defekt oder Kurzschluss nach Masse","SHD, relay Schliessen, no Aussgangsspannung: relay welded shut or fuse defective or short circuit to ground",FZD-G11
+030202,"SHD, Relais Öffnen: Kurzschluss nach Ubatt oder Relaiskleber","SHD, relay Öffnen: short circuit to Ubatt or relay welded shut",FZD-G11
+030203,"SHD, Relais Schliessen: Kurzschluss nach Ubatt oder Relaiskleber","SHD, relay Schliessen: short circuit to Ubatt or relay welded shut",FZD-G11
+030204,SHD_ESH: Schreiben der Daten im NVRAM nicht möglich (Position ungültig),SHD_ESH: Schreiben the data in the NVRAM not possible (position invalid),FZD-G11
+030205,"SHD, Hallelement A: Hallelement defekt oder Leitungsunterbrechung","SHD, Hall element A: Hall element defective or open circuit",FZD-G11
+030206,"SHD, Hallelement B: Hallelement defekt oder Leitungsunterbrechung","SHD, Hall element B: Hall element defective or open circuit",FZD-G11
+030207,"SHD, Hallelemente A und B: Motoreinheit defekt oder Leitungsunterbrechung","SHD, Hall element A and B: engine unit defective or open circuit",FZD-G11
+030208,SHD: Hallelemente A und B: Kurzschluss Motorzuleitung nach Ubatt oder Relaiskleber oder Einheit mechanisch bewegt,SHD: Hall element A and B: short circuit Motorzuleitung to Ubatt or relay welded shut or unit mechanical bewegt,FZD-G11
+030209,"SHD, Hallelemente A und B: Kurzschluss zwischen Zuleitung oder Motoreinheit defekt","SHD, Hall element A and B: short circuit between Zuleitung or engine unit defective",FZD-G11
+03020A,"SHD, Hallelement A: Kurzschluss nach Masse","SHD, Hall element A: short circuit to ground",FZD-G11
+03020B,"SHD, Hallelement B: Kurzschluss nach Masse","SHD, Hall element B: short circuit to ground",FZD-G11
+03020C,"SHD, Hallelement A: Kurzschluss nach Ubatt","SHD, Hall element A: short circuit to Ubatt",FZD-G11
+03020D,"SHD, Hallelement B: Kurzschluss nach Ubatt","SHD, Hall element B: short circuit to Ubatt",FZD-G11
+03020E,"SHD, Hallelement A: Leitungsunterbrechung","SHD, Hall element A: open circuit",FZD-G11
+03020F,"SHD, Hallelement B: Leitungsunterbrechung","SHD, Hall element B: open circuit",FZD-G11
+030210,SHD: Hallelemente zeigen falsche Drehrichtung: Verpolung Stecker oder Kabelbaum,SHD: Hall element zeigen incorrect Drehrichtung: Verpolung connector or Kabelbaum,FZD-G11
+030212,"SHD: Timeout Ansteuerung, keine Blockerkennung","SHD: timeout actuation, no block detection",FZD-G11
+030214,"SHD: Nullposition überfahren, Normierungsverlust","SHD: Nullposition überfahren, Normierungsverlust",FZD-G11
+030215,"SHD: ungültige Kennlinie, keine Normierung vorhanden","SHD: invalid Kennlinie, no Normierung present",FZD-G11
+030216,SHD: Motortemperatur 90% Schwelle überschritten,SHD: engine temperature 90% threshold exceeded,FZD-G11
+030217,SHD: Motorlauf wegen Übertemperatur unterbrochen,SHD: Motorlauf due to overtemperature interrupted,FZD-G11
+030218,SHD: Kein Motorstart wegen Überspannung oder Unterspannung,SHD: no engine start due to overvoltage or undervoltage,FZD-G11
+030219,SHD: Checksumme Codierung fehlerhaft,SHD: check sum coding faulty,FZD-G11
+03021C,SHD: Keine Initialisierung aufgrund ungültiger Randbedingungen (Motortreiber),SHD: no Initialisierung due to invalid Randbedingungen (engine driver),FZD-G11
+03021D,SHD: Abschaltung Hallvorsorgung wegen Überspannung,SHD: shutdown Hallvorsorgung due to overvoltage,FZD-G11
+03021E,"SHD: Motoransteuerung nicht möglich,  keine Spannung am Relaiseingang","SHD: engine actuation not possible,  no voltage am relay input",FZD-G11
+030220,SHD: System nicht normiert,SHD: system not normiert,FZD-G11
+03027E,SHD; Funktionseinschränkung Geschwindigkeit zu hoch,SHD; Funktionseinschränkung speed too high,FZD-G11
+03027F,SHD: keine Bewegung,SHD: no Bewegung,FZD-G11
+030280,"ESH, Relais Öffnen, fehlende Aussgangsspannung: Relaiskleber oder Sicherung defekt oder Kurzschluss nach Masse","ESH, relay Öffnen, missing Aussgangsspannung: relay welded shut or fuse defective or short circuit to ground",FZD-G11
+030281,"ESH, Relais Schliessen, keine Aussgangsspannung: Relaiskleber oder Sicherung defekt oder Kurzschluss nach Masse","ESH, relay Schliessen, no Aussgangsspannung: relay welded shut or fuse defective or short circuit to ground",FZD-G11
+030282,"ESH, Relais Öffnen: Kurzschluss nach Ubatt oder Relaiskleber","ESH, relay Öffnen: short circuit to Ubatt or relay welded shut",FZD-G11
+030283,"ESH, Relais Schliessen: Kurzschluss nach Ubatt oder Relaiskleber","ESH, relay Schliessen: short circuit to Ubatt or relay welded shut",FZD-G11
+030285,"ESH, Hallelement A: Hallelement defekt oder Leitungsunterbrechung","ESH, Hall element A: Hall element defective or open circuit",FZD-G11
+030286,"ESH, Hallelement B: Hallelement defekt oder Leitungsunterbrechung","ESH, Hall element B: Hall element defective or open circuit",FZD-G11
+030287,"ESH, Hallelemente A und B: Motoreinheit defekt oder Leitungsunterbrechung","ESH, Hall element A and B: engine unit defective or open circuit",FZD-G11
+030288,ESH: Hallelemente A und B: Kurzschluss Motorzuleitung nach Ubatt oder Relaiskleber oder Einheit mechanisch bewegt,ESH: Hall element A and B: short circuit Motorzuleitung to Ubatt or relay welded shut or unit mechanical bewegt,FZD-G11
+030289,"ESH, Hallelemente A und B: Kurzschluss zwischen Zuleitung oder Motoreinheit defekt","ESH, Hall element A and B: short circuit between Zuleitung or engine unit defective",FZD-G11
+03028A,"ESH, Hallelement A: Kurzschluss nach Masse","ESH, Hall element A: short circuit to ground",FZD-G11
+03028B,"ESH, Hallelement B: Kurzschluss nach Masse","ESH, Hall element B: short circuit to ground",FZD-G11
+03028C,"ESH, Hallelement A: Kurzschluss nach Ubatt","ESH, Hall element A: short circuit to Ubatt",FZD-G11
+03028D,"ESH, Hallelement B: Kurzschluss nach Ubatt","ESH, Hall element B: short circuit to Ubatt",FZD-G11
+03028E,"ESH, Hallelement A: Leitungsunterbrechung","ESH, Hall element A: open circuit",FZD-G11
+03028F,"ESH, Hallelement B: Leitungsunterbrechung","ESH, Hall element B: open circuit",FZD-G11
+030290,ESH: Hallelemente zeigen falsche Drehrichtung: Verpolung Stecker oder Kabelbaum,ESH: Hall element zeigen incorrect Drehrichtung: Verpolung connector or Kabelbaum,FZD-G11
+030292,"ESH: Timeout Ansteuerung, keine Blockerkennung","ESH: timeout actuation, no block detection",FZD-G11
+030294,"ESH: Nullposition überfahren, Normierungsverlust","ESH: Nullposition überfahren, Normierungsverlust",FZD-G11
+030295,"ESH: ungültige Kennlinie, keine Normierung vorhanden","ESH: invalid Kennlinie, no Normierung present",FZD-G11
+030296,ESH: Motortemperatur 90% Schwelle überschritten,ESH: engine temperature 90% threshold exceeded,FZD-G11
+030297,ESH: Motorlauf wegen Übertemperatur unterbrochen,ESH: Motorlauf due to overtemperature interrupted,FZD-G11
+030298,ESH: Kein Motorstart wegen Überspannung oder Unterspannung,ESH: no engine start due to overvoltage or undervoltage,FZD-G11
+030299,ESH: Checksumme Codierung fehlerhaft,ESH: check sum coding faulty,FZD-G11
+03029C,ESH: Keine Initialisierung aufgrund ungültiger Randbedingungen (Motortreiber),ESH: no Initialisierung due to invalid Randbedingungen (engine driver),FZD-G11
+03029D,ESH: Abschaltung Hallvorsorgung wegen Überspannung,ESH: shutdown Hallvorsorgung due to overvoltage,FZD-G11
+03029E,"ESH: Motoransteuerung nicht möglich,  keine Spannung am Relaiseingang","ESH: engine actuation not possible,  no voltage am relay input",FZD-G11
+0302A0,ESH: System nicht normiert,ESH: system not normiert,FZD-G11
+0302FF,ESH: keine Bewegung,ESH: no Bewegung,FZD-G11
 030340,Schaltzentrum Lenksaeule (SZL) (LIN): Interner Hardware-Fehler,Steering column switch cluster (SZL) (LIN): internal Hardware-fault,BDC-G11
 030341,Schaltzentrum Lenksaeule (SZL) Lenkstock Blinker: Funktionsfehler,Steering column switch cluster (SZL) Lenkstock Blinker: function fault,BDC-G11
 030343,Schaltzentrum Lenksaeule (SZL) Lenkstock Blinker: Taster haengt (FAS/ BC/FLA),Steering column switch cluster (SZL) Lenkstock Blinker: button stuck (FAS/ BC/FLA),BDC
@@ -429,6 +523,38 @@
 031782,SIF: Online,SIF: Online,NBTEVO
 031783,SIF: Telematic Online Logbook,SIF: Telematic Online Logbook,NBTEVO
 031784,SIF: Map Update,SIF: Map Update,NBTEVO
+031785,SIF: Breakdown Call,SIF: Breakdown Call,ATM
+031786,SIF: Last State Call,SIF: load State Call,ATM02; ATM; TCB4G
+031787,SIF: Automatic Service Call,SIF: Automatic service Call,ATM
+031788,SIF: Teleservice Battery Gard,SIF: Teleservice Battery Gard,ATM
+031789,SIF: Remote Service,SIF: Remote service,ATM02; ATM; TCB4G
+03178A,SIF: General Mobile Network Errors,SIF: General Mobile Network Errors,ATM02; ATM; TCB4G
+03178B,SIF: Remote 360,SIF: Remote 360,ATM02; ATM
+03178C,SIF: E-Call,SIF: E-Call,ATM02; ATM; TCB4G
+038200,AED defekt,AED defective,FZD-G11
+038201,"AED: Timeout Ansteuerung, keine Blockerkennung","AED: timeout actuation, no block detection",FZD-G11
+038202,"AED: Nullposition überfahren, Normierungsverlust","AED: Nullposition überfahren, Normierungsverlust",FZD-G11
+038203,AED: ungültige Kennlinie,AED: invalid Kennlinie,FZD-G11
+038204,AED: Motortemperatur 90% Schwelle überschritten,AED: engine temperature 90% threshold exceeded,FZD-G11
+038205,AED: Motorlauf wegen Übertemperatur unterbrochen,AED: Motorlauf due to overtemperature interrupted,FZD-G11
+038206,AED: Kein Motorstart wegen Überspannung oder Unterspannung,AED: no engine start due to overvoltage or undervoltage,FZD-G11
+038207,AED: Keine Initialisierung aufgrund ungültiger Randbedingungen (Motortreiber),AED: no Initialisierung due to invalid Randbedingungen (engine driver),FZD-G11
+038208,AED: System nicht normiert,AED: system not normiert,FZD-G11
+038209,AED: Codierdaten Schreibfehler,AED: coding data Schreibfehler,FZD-G11
+03820A,AED: Codierdaten Lesefehler,AED: coding data Lesefehler,FZD-G11
+03820B,AED: Inkompatible Hardware- oder Softwareversion,AED: Inkompatible Hardware- or Softwareversion,FZD-G11
+03820C,AED: EEPROM Lesefehler,AED: EEPROM Lesefehler,FZD-G11
+038309,Interner Steuergerätefehler: GEK Kamerafehler,Internal Steuergerätefehler: GEK camera fault,FZD-G11
+038310,Gestik: Camera Software Fehler,Gestik: Camera Software fault,FZD-G11
+038311,Gestik: Keine IR Beleuchtung wegen Kurzschluss,Gestik: no IR lighting due to short circuit,FZD-G11
+038312,Gestik: Temperatur Bildgeber zu hoch.,Gestik: temperature Bildgeber too high.,FZD-G11
+038313,Gestik: SW Reset,Gestik: SW reset,FZD-G11
+038314,Gestik: Interner Kommunikationsfehler ARM-FPGA,Gestik: internal communication error ARM-FPGA,FZD-G11
+038315,Gestik: Kommunikationsfehler ARM-MAIN Board,Gestik: communication error ARM-MAIN Board,FZD-G11
+038316,Gestik: Bild Qualitäts Problem,Gestik: Bild quality Problem,FZD-G11
+038317,Gestik: Bild zu dunkel (CMOS oder IR Problem),Gestik: Bild to dunkel (CMOS or IR Problem),FZD-G11
+038318,Gestik: Ungültige Kalibrierdaten,Gestik: invalid Kalibrierdaten,FZD-G11
+03831A,Gestik: Falscher Bildabstand,Gestik: incorrect Bildabstand,FZD-G11
 100000,VcmSoftwareError,VcmSoftwareError,ZGW; ZGW-SP18
 1000FF,VCM Logger Fehlerspeichereintrag,VCM Logger fault memory entry,ZGW
 100101,Einschlafbestaetigungen nicht vollstaendig,Einschlafbestaetigungen not vollstaendig,ZGW; ZGW-SP18
@@ -491,7 +617,7 @@
 100316,"Kleinstmengenadaption, Injektor Zylinder 2: negative Korrektur","Small quantity adaptation, injector cylinder 2: negative correction",DME; DME-slave
 100317,"Kleinstmengenadaption, Injektor Zylinder, Similar Condtions: Fehlfunktion","Small quantity adaptation, injector cylinder, Similar Condtions: malfunction",DME; DME-slave
 100318,"DME, interner Fehler [Kleinstmengenadaption, Injektor Zylinder, Similar Conditions: Signal unplausibel]","DME, internal error [small quantity adaptation, injector cylinder, Similar Conditions: signal implausible]",DME; DME-slave
-100319,DME: interner Fehler [Sensorabschaltung fehlgeschlagen],DME: internal error [sensor shutdown fehlgeschlagen],DME; DME-slave
+100319,DME: interner Fehler [Sensorabschaltung fehlgeschlagen],DME: internal error [sensor shutdown failed],DME; DME-slave
 10031A,"DME: interner Fehler [Kleinstmengenadaption, Injektor Zylinder 5: Signal unplausibel]","DME: internal error [small quantity adaptation, injector cylinder 5: signal implausible]",DME; DME-slave
 10031B,"DME: interner Fehler [Kleinstmengenadaption, Injektor Zylinder 6: Signal unplausibel]","DME: internal error [small quantity adaptation, injector cylinder 6: signal implausible]",DME; DME-slave
 10031C,"DME: interner Fehler [Kleinstmengenadaption, Injektor Zylinder 7: Signal unplausibel]","DME: internal error [small quantity adaptation, injector cylinder 7: signal implausible]",DME; DME-slave
@@ -2041,7 +2167,7 @@
 1BC115,"Gangsensor, elektrisch: Kurzschluss nach Plus","Gear sensor, electric: short circuit to positive",DME; DME-slave
 1BC116,"Gangsensor, elektrisch: Kurzschluss nach Masse","Gear sensor, electric: short circuit to ground",DME; DME-slave
 1BC117,"Gangsensor, Plausibilität, Position unplausibel","Gear sensor, plausibility, position implausible",DME; DME-slave
-1BC118,"Gangsensor, Lernwerte: unplausibel oder Speichern fehlgeschlagen","Gear sensor, learned value: implausible or memory fehlgeschlagen",DME; DME-slave
+1BC118,"Gangsensor, Lernwerte: unplausibel oder Speichern fehlgeschlagen","Gear sensor, learned value: implausible or memory failed",DME; DME-slave
 1BC119,Gangsensor: Schalthebelpositon ungültig,Gear sensor: Schalthebelpositon invalid,DME; DME-slave
 1BC11A,"Gangsensor, Kommunikation: Statusinformation fehlerhaft","Gear sensor, communication: status information faulty",DME; DME-slave
 1BC11B,"Gangsensor, Plausibilität: Temparatur zu hoch","Gear sensor, plausibility: Temparatur too high",DME; DME-slave
@@ -2135,7 +2261,7 @@
 1F0202,"DME: interner Fehler [LIN-Controller, Fehlerhaft]","DME: internal error [LIN-Controller, faulty]",DME; DME-slave
 1F0203,DME: interner Fehler [CAN-Controller: Hardwarefehler],DME: internal error [CAN-Controller: Hardwarefehler],DME; DME-slave
 1F0205,DME: interner Fehler [Neustart LIN-Scheduler],DME: internal error [Neustart LIN-Scheduler],DME; DME-slave
-1F0206,DME: interner Fehler [Neustart LIN-Scheduler fehlgeschlagen],DME: internal error [Neustart LIN-Scheduler fehlgeschlagen],DME; DME-slave
+1F0206,DME: interner Fehler [Neustart LIN-Scheduler fehlgeschlagen],DME: internal error [Neustart LIN-Scheduler failed],DME; DME-slave
 1F050E,"Valvetronic 2, Versorgungsspannung: Kurzschluss nach Masse","Valvetronic 2, supply voltage: short circuit to ground",DME; DME-slave
 1F050F,"Valvetronic 2, Versorgungsspannung: Leitungsunterbrechung","Valvetronic 2, supply voltage: open circuit",DME; DME-slave
 1F0511,"DME-Hauptrelais, Ansteuerung: Kurzschluss nach Masse","DME-Hauptrelais, actuation: short circuit to ground",DME; DME-slave
@@ -2386,7 +2512,7 @@
 20A706,Motor-Kühlsystem: Status Entlüftungsprozedur erfolgt,Engine-cooling system: status Entlüftungsprozedur takes place,DME; DME-slave
 20A707,Motor-Kühlsystem: Status Entlüftungsprozedur gestartet,Engine-cooling system: status Entlüftungsprozedur gestartet,DME; DME-slave
 20AD13,Hauptwasserpumpe: Klappenstellung Fehlerhaft,Hauptwasserpumpe: flap position faulty,DME; DME-slave
-20BA20,"Kupplungsschalter, Signal: unplausible Gangwechsel erkannt","Clutch switch, signal: unplausible Gangwechsel detected",DME; DME-slave
+20BA20,"Kupplungsschalter, Signal: unplausible Gangwechsel erkannt","Clutch switch, signal: implausible Gangwechsel detected",DME; DME-slave
 20E102,"Kurbelgehäuseentlüftung, Entlüftungsschlauch: nicht angeschlossen/defekt","Kurbelgehäuseentlüftung, Entlüftungsschlauch: not angeschlossen/defective",DME; DME-slave
 20E120,"Kurbelgehäuseentlüftung, Entlüftungsschlauch: nicht angeschlossen/defekt","Kurbelgehäuseentlüftung, Entlüftungsschlauch: not angeschlossen/defective",DME; DME-slave
 20E121,"Kurbelgehäuseentlüftung 2, Entlüftungsschlauch: nicht angeschlossen/defekt","Kurbelgehäuseentlüftung 2, Entlüftungsschlauch: not angeschlossen/defective",DME; DME-slave
@@ -2440,7 +2566,7 @@
 20F22A,Wärme Management Modul: Steller außerhalb gültigen Bereich,Heat management module: actuator outside valid range,DME; DME-slave
 20F22B,"Wärme Management Modul, Temperatursensor [Plausibilität]: Temperatur unplausibel","Heat management module, temperature sensor [plausibility]: temperature implausible",DME; DME-slave
 20F22C,Split Cooling Ventil:  Anschlag Lernen fehlerhaft,Split Cooling valve:  end stop learning faulty,DME; DME-slave
-20F22D,Split Cooling Ventil: Eigenprüfung fehlgeschlagen,Split Cooling valve: Eigenprüfung fehlgeschlagen,DME; DME-slave
+20F22D,Split Cooling Ventil: Eigenprüfung fehlgeschlagen,Split Cooling valve: Eigenprüfung failed,DME; DME-slave
 20F22E,Split Cooling Ventil: Abschaltung aufgrund Überlastschutz aktiv,Split Cooling valve: shutdown due to Überlastschutz active,DME; DME-slave
 20F22F,Split Cooling Ventil: klemmt,Split Cooling valve: klemmt,DME; DME-slave
 20F230,"DME: interner Fehler [Endstufe, Split Cooling Ventil: Übertemperatur erkannt]","DME: internal error [output stage, Split Cooling valve: overtemperature detected]",DME; DME-slave
@@ -2502,7 +2628,7 @@
 213A26,"Zweimassenschwungrad, Schutz: Abwürgen erkannt","Zweimassenschwungrad, Schutz: Abwürgen detected",DME; DME-slave
 213A27,"Antrieb, Sicherheitsfunktion: Sicherheitsabschaltung Antrieb, Anlernphase Beschleunigungssensor","Drive, safety function: safety shutdown drive, Anlernphase acceleration sensor",DME; DME-slave
 213A28,"Antrieb, Sicherheitsfunktion: Antrieb leistungsreduziert, DSC-Signale unplausibel","Drive, safety function: drive leistungsreduziert, DSC-signal implausible",DME; DME-slave
-213A29,"Antrieb, Sicherheitsfunktion: externe Sicherheitsabschaltung durch Subsystem E-Antrieb","Drive, safety function: externe safety shutdown by Subsystem E-drive",DME; DME-slave
+213A29,"Antrieb, Sicherheitsfunktion: externe Sicherheitsabschaltung durch Subsystem E-Antrieb","Drive, safety function: external safety shutdown by Subsystem E-drive",DME; DME-slave
 213A2A,"H-Brücke, Versorgung geschaltet durch Hauptrelais: Kurzschluss nach Plus","H-Brücke, supply geschaltet by Hauptrelais: short circuit to positive",DME; DME-slave
 213A2B,"Geberradsensor, Adaption: Resetfehler","Sender wheel sensor, adaptation: reset fault",DME; DME-slave
 213A2C,"Geberradsensor 2,Adaption: Resetfehler","Sender wheel sensor 2,adaptation: reset fault",DME; DME-slave
@@ -2623,7 +2749,7 @@
 218223,"DOBD-BCU150P-Batterieladeeinheit für Zustart, Temperatursensor [Arbeitsbereich]: Temperatur zu niedrig","DOBD-BCU150P-battery charging unit for Zustart, temperature sensor [working range]: temperature too low",DME; DME-slave
 218224,"DOBD-BCU150P-Batterieladeeinheit für Zustart, Temperatursensor 2: Kurzschluss nach Masse","DOBD-BCU150P-battery charging unit for Zustart, temperature sensor 2: short circuit to ground",DME; DME-slave
 218225,"DOBD-BCU150P-Batterieladeeinheit für Zustart, Temperatursensor 2 [Arbeitsbereich]: Temperatur zu niedrig","DOBD-BCU150P-battery charging unit for Zustart, temperature sensor 2 [working range]: temperature too low",DME; DME-slave
-218226,D-OBD-Botschaftsfehler von BCU150P: inhaltliche Prüfung fehlgeschlagen,D-OBD-message fault of BCU150P: inhaltliche check fehlgeschlagen,DME; DME-slave
+218226,D-OBD-Botschaftsfehler von BCU150P: inhaltliche Prüfung fehlgeschlagen,D-OBD-message fault of BCU150P: inhaltliche check failed,DME; DME-slave
 218301,Batterieladeeinheit: Fehler im Trennelement/Kabelbaum,Battery charging unit: fault in the Trennelement/Kabelbaum,DME; DME-slave
 218302,"DOBD-BCU150P-Batterieladeeinheit für Zustart, Stromsensor, Plausibilität: Strom unplausibel","DOBD-BCU150P-battery charging unit for Zustart, current sensor, plausibility: current implausible",DME; DME-slave
 218303,"DOBD-BCU150P-Batterieladeeinheit für Zustart, Spannungssensor: Kurzschluss nach Plus","DOBD-BCU150P-battery charging unit for Zustart, voltage sensor: short circuit to positive",DME; DME-slave
@@ -3280,7 +3406,7 @@
 23140E,"Body Domain Controller, Füllstandsensor, rechts, Arbeitsbereich: Füllstand zu hoch","Body Domain Controller, level sensor, right, working range: level too high",DME; DME-slave
 23140F,"Body Domain Controller, Füllstandsensor, rechts, elektrisch: Kurzschluss nach Masse","Body Domain Controller, level sensor, right, electric: short circuit to ground",DME; DME-slave
 231501,Fehlerspeichereintrag: Sendepuffer voll,Fault memory entry: Sendepuffer voll,DME; DME-slave
-231502,Fehlerspeichereintrag: Senden fehlgeschlagen,Fault memory entry: Senden fehlgeschlagen,DME; DME-slave
+231502,Fehlerspeichereintrag: Senden fehlgeschlagen,Fault memory entry: Senden failed,DME; DME-slave
 231503,Bandendefunktion: aktiv,Bandendefunktion: active,DME; DME-slave
 231506,BDC Sensorversorgungsspannung: Plausibilitätsfehler,BDC sensor supply voltage: plausibility fault,DME; DME-slave
 231507,BDC Reset durch Watchdog,BDC reset by Watchdog,DME; DME-slave
@@ -3459,7 +3585,7 @@
 420907,Hardwareüberwachungseinheit: Programmablaufsteuerung hat eine Abweichung festgestellt,Hardwareüberwachungseinheit: Programmablaufsteuerung has a deviation festgestellt,GSZFB1
 420911,"EPROM: Prüfsummenüberwachung hat im Daten-, Programm-, Boot-, Abgleichdaten- oder Fertigungsdatenblock eine Abweichung festgestellt","EPROM: checksum monitoring has in the data-, Programm-, Boot-, Abgleichdaten- or Fertigungsdatenblock a deviation festgestellt",GSZFB1
 420921,EEPROM: Daten können nicht gelesen werden (bei Initialisierung der EGS) oder es ist in Summe nur noch 1 Block beschreibbar,EEPROM: data können not gelesen be (at Initialisierung the EGS) or es is in sum nur yet 1 block beschreibbar,GSZFB1
-420922,Sicherheitszugang: Authentisierung ist dreimal fehlgeschlagen,Sicherheitszugang: authentication is dreimal fehlgeschlagen,GSZFB1
+420922,Sicherheitszugang: Authentisierung ist dreimal fehlgeschlagen,Sicherheitszugang: authentication is dreimal failed,GSZFB1
 420941,Reset: Unterspannung während Fahrt,Reset: undervoltage during Fahrt,GSZFB1
 420971,E-Schaltung: PMA fehlerhaft aktiviert,E-Schaltung: PMA faulty activated,GSZFB1
 420972,E-Schaltung: Falsche Weitergabe der Positionsvorgabe an den Schaltablauf,E-Schaltung: incorrect Weitergabe the Positionsvorgabe an the Schaltablauf,GSZFB1
@@ -3716,8 +3842,8 @@
 480885,Bremspedalwegsensor - Rauschüberwachung - Versorgungsspannung,Bremspedalwegsensor - Rauschüberwachung - supply voltage,DSC-G30N
 480887,Bremspedalwegsensor - Rauschüberwachung - Signalleitung 2,Bremspedalwegsensor - Rauschüberwachung - signal line 2,DSC-G30N
 480888,Bremspedalwegsensor - Rauschüberwachung - Signalleitung 1,Bremspedalwegsensor - Rauschüberwachung - signal line 1,DSC-G30N
-480890,Steuergerät intern - Software Laufzeitfehler - Versenden von Daten fehlgeschlagen,Control unit internal - Software Laufzeitfehler - Versenden of data fehlgeschlagen,DSC-G30N
-480891,Steuergerät intern - Software Laufzeitfehler - Versenden von Daten wiederholt fehlgeschlagen,Control unit internal - Software Laufzeitfehler - Versenden of data wiederholt fehlgeschlagen,DSC-G30N
+480890,Steuergerät intern - Software Laufzeitfehler - Versenden von Daten fehlgeschlagen,Control unit internal - Software Laufzeitfehler - Versenden of data failed,DSC-G30N
+480891,Steuergerät intern - Software Laufzeitfehler - Versenden von Daten wiederholt fehlgeschlagen,Control unit internal - Software Laufzeitfehler - Versenden of data wiederholt failed,DSC-G30N
 480898,Ventile Spule Übertemperatur (Traktionskontrolle),Valve Spule overtemperature (Traktionskontrolle),DSC-G30N
 480899,Ventile Spule Übertemperatur (Auto Hold),Valve Spule overtemperature (Auto Hold),DSC-G30N
 48089B,Ventile Spule offen / Kurzschluss (Traktionskontrolle SUPPLY),Valve Spule open / short circuit (Traktionskontrolle SUPPLY),DSC-G30N
@@ -3726,7 +3852,7 @@
 4808D9,Ventilgruppe - elektrischer Fehler,Ventilgruppe - electrical fault,DSC-G30N
 4808E4,Steuergerät intern - Temperatursensor - ASIC - Wert außerhalb Toleranz,Control unit internal - temperature sensor - ASIC - value outside tolerance,DSC-G30N
 4808E5,Steuergerät intern - Temperatursensor - PCB Diode - Wert außerhalb Toleranz,Control unit internal - temperature sensor - PCB Diode - value outside tolerance,DSC-G30N
-4808E6,Steuergerät intern - Temperatursensor - ASIC / PCB Diode - Plausibilisierung fehlgeschlagen,Control unit internal - temperature sensor - ASIC / PCB Diode - plausibility check fehlgeschlagen,DSC-G30N
+4808E6,Steuergerät intern - Temperatursensor - ASIC / PCB Diode - Plausibilisierung fehlgeschlagen,Control unit internal - temperature sensor - ASIC / PCB Diode - plausibility check failed,DSC-G30N
 4808E7,Steuergerät intern - Temperatursensor - ASIC - Kalibrierung fehlerhaft,Control unit internal - temperature sensor - ASIC - Kalibrierung faulty,DSC-G30N
 4808E8,Steuergerät intern - Temperatursensor - PCB Diode - Kalibrierung fehlerhaft,Control unit internal - temperature sensor - PCB Diode - Kalibrierung faulty,DSC-G30N
 4808EB,Vakuumsensor - Offset-Plausibilisierung,Vakuumsensor - offset-plausibility check,DSC-G30N
@@ -3765,7 +3891,7 @@
 4809EB,RDCi Radelektronik (Position unbekannt) kein Empfang,RDCi Radelektronik (position unknown) no Empfang,DSC-G30N
 4809ED,Digitaler Drucksensor  2 - Kommunikationsfehler,Digitaler pressure sensor  2 - communication error,DSC-G30N
 4809EE,Digitaler Drucksensor  3 - Kommunikationsfehler,Digitaler pressure sensor  3 - communication error,DSC-G30N
-4809EF,"Flexray, externe Ursache","Flexray, externe cause",DSC-G30N
+4809EF,"Flexray, externe Ursache","Flexray, external cause",DSC-G30N
 4809F0,Raddrehzahlsensor - Hinten Links - Sensormasse - Strom zu hoch,Wheel speed sensor - rear left - sensor ground - current too high,DSC-G30N
 4809F1,Raddrehzahlsensor - Hinten Rechts - Sensormasse - Strom zu hoch,Wheel speed sensor - rear right - sensor ground - current too high,DSC-G30N
 4809F2,Raddrehzahlsensor - Vorn Links - Sensormasse - Strom zu hoch,Wheel speed sensor - Vorn left - sensor ground - current too high,DSC-G30N
@@ -3790,7 +3916,7 @@
 480AC1,Codierung - Falsche Antriebsvariante Hybrid,Coding - incorrect drive variant hybrid,DSC-G30N
 480AC8,Entwicklungsphase Allgemeiner Fehler,Entwicklungsphase Allgemeiner fault,DSC-G30N
 480ACA,EPBi Initialisierung nach Montagemodus nicht durchgeführt,EPBi Initialisierung to Montagemodus not carried out,DSC-G30N
-480ACE,eRFS Codierdaten inkonsistent,eRFS Codierdaten inkonsistent,DSC-G30N
+480ACE,eRFS Codierdaten inkonsistent,eRFS coding data inkonsistent,DSC-G30N
 480AD7,Funktion Rekuperation über Codierung deaktiviert,Function Rekuperation via coding deactivated,DSC-G30N
 480AD8,Funktion LMV über Codierung deaktiviert,Function LMV via coding deactivated,DSC-G30N
 480ADA,Bremspedalwegsensor - Plausibilisierung - Versorgungsleitung - Kurzschluss nach Plus,Bremspedalwegsensor - plausibility check - supply line - short circuit to positive,DSC-G30N
@@ -3817,13 +3943,13 @@
 480B26,Steuergerät intern - Betriebssystem - RTOS-Fehler,Control unit internal - operation system - RTOS-fault,DSC-G30N
 480B27,Steuergerät intern - Betriebssystem - Sequenzfehler,Control unit internal - operation system - Sequenzfehler,DSC-G30N
 480B2C,FUSI - Funktions-Kontrollalgorithmus ausgelöst,FUSI - function-Kontrollalgorithmus ausgelöst,DSC-G30N
-480B2E,Codierung - Unplausible PBC-Daten,Coding - Unplausible PBC-data,DSC-G30N
+480B2E,Codierung - Unplausible PBC-Daten,Coding - implausible PBC-data,DSC-G30N
 480B38,EPBi Aktuator Links  - Überstrom,EPBi actuator left  - overcurrent,DSC-G30N
 480B57,EPBi - Unterdrückung einer Löseanforderung durch RSU,EPBi - Unterdrückung a Löseanforderung by RSU,DSC-G30N
 480B58,Steuergerät intern - System ASIC - Ventilspulen Fehler,Control unit internal - system ASIC - Ventilspulen fault,DSC-G30N
 480B59,Steuergerät intern - System ASIC - Raddrehzahlsensor Spannungsfehler vorn links,Control unit internal - system ASIC - wheel speed sensor voltage fault vorn left,DSC-G30N
 480B5A,Digitaler Drucksensor  1 - Kommunikationsfehler,Digitaler pressure sensor  1 - communication error,DSC-G30N
-480B6C,Steuergerät intern - E2E Protection - Initialisierung fehlgeschlagen,Control unit internal - E2E Protection - Initialisierung fehlgeschlagen,DSC-G30N
+480B6C,Steuergerät intern - E2E Protection - Initialisierung fehlgeschlagen,Control unit internal - E2E Protection - Initialisierung failed,DSC-G30N
 480B7B,Steuergerät intern - MCU-Temperatur außerhalb Arbeitsbereich,Control unit internal - MCU-temperature outside working range,DSC-G30N
 481700,Interner Steuergerätefehler REMA links,Internal Steuergerätefehler REMA left,ACSM5
 481702,Temporäre Funktionsstörung REMA links,Temporäre Funktionsstörung REMA left,ACSM5
@@ -3871,7 +3997,7 @@
 481E15,Spannungsversorgung Lokale Unterspannung,Power supply Lokale undervoltage,PMA-20
 481E16,Spannungsversorgung Lokale Überspannung,Power supply Lokale overvoltage,PMA-20
 481E31,PMA Codierung Transaktion gescheitert,PMA coding Transaktion gescheitert,PMA-20
-481E32,PMA Codierung Signatur fehlerhaft,PMA coding Signatur faulty,PMA-20
+481E32,PMA Codierung Signatur fehlerhaft,PMA coding signature faulty,PMA-20
 481E33,PMA Codierung falsches Fahrzeug,PMA coding incorrect vehicle,PMA-20
 481E45,PMA Funktion max. Einparkgeschwindigkeit überschritten,PMA function max. Einparkgeschwindigkeit exceeded,PMA-20
 481E4D,PMA Steuergerät inter Interner ASIC Fehler,PMA control unit inter internal ASIC fault,PMA-20
@@ -3890,9 +4016,9 @@
 481E61,NVM - Nichtflüchtiger Speicher - Integrität gescheitert,NVM - Nichtflüchtiger memory - Integrität gescheitert,PMA-20
 481E62,NVM - Nichtflüchtiger Speicher - Anfrage gescheitert,NVM - Nichtflüchtiger memory - Anfrage gescheitert,PMA-20
 481E63,Flashprozess Vergleich gescheitert,Flashprozess comparison gescheitert,PMA-20
-481E64,PMA Steuergerät Intern - Initialisierung fehlgeschlagen Parameter,PMA control unit internal - Initialisierung fehlgeschlagen Parameter,PMA-20
+481E64,PMA Steuergerät Intern - Initialisierung fehlgeschlagen Parameter,PMA control unit internal - Initialisierung failed Parameter,PMA-20
 481E65,PMA Steuergerät Intern - Flash Parameter-Sektion inkompatibel zu Software,PMA control unit internal - Flash Parameter-Sektion inkompatibel to Software,PMA-20
-481E66,PMA Steuergerät Intern - Initialisierung fehlgeschlagen Hardware Ursache,PMA control unit internal - Initialisierung fehlgeschlagen Hardware cause,PMA-20
+481E66,PMA Steuergerät Intern - Initialisierung fehlgeschlagen Hardware Ursache,PMA control unit internal - Initialisierung failed Hardware cause,PMA-20
 481E67,PMA Steuergerät Intern - NVM Parameter-Sektion inkompatibel zu Software,PMA control unit internal - NVM Parameter-Sektion inkompatibel to Software,PMA-20
 481E68,PMA Steuergerät Intern - RAM Fehler,PMA control unit internal - RAM fault,PMA-20
 481E69,PMA Steuergerät Intern - ROM Flash Checksummenfehler,PMA control unit internal - ROM Flash check sum fault,PMA-20
@@ -4059,12 +4185,12 @@
 48295F,Kompressorrelais Kurzschluss nach Plus,Kompressorrelais short circuit to positive,VDP-G11
 482962,Kompressorrelais Kurzschluss nach Masse,Kompressorrelais short circuit to ground,VDP-G11
 482963,Niveauregelung - Kompressorrelais Maximale Einschaltdauer überschritten,Niveauregelung - Kompressorrelais maximum Einschaltdauer exceeded,VDP-G11
-482966,Niveauregelung - Kompressortemperatur Unplausibles Signal,Niveauregelung - Kompressortemperatur Unplausibles signal,VDP-G11
+482966,Niveauregelung - Kompressortemperatur Unplausibles Signal,Niveauregelung - Kompressortemperatur implausible signal,VDP-G11
 482967,Kompressor - Temperatursensor - Kurzschluss nach Masse,Kompressor - temperature sensor - short circuit to ground,VDP-G11
 48296A,Kompressor - Temperatursensor - Kurzschluss nach Plus,Kompressor - temperature sensor - short circuit to positive,VDP-G11
 48296B,Kompressor - Temperatursensor - Unterbrechung,Kompressor - temperature sensor - interruption,VDP-G11
 48296E,Kompressor - Druckgeber - Versorgungsspannung,Kompressor - pressure sender - supply voltage,VDP-G11
-48296F,Niveauregelung Druckgeber Unplausibles Signal,Niveauregelung pressure sender Unplausibles signal,VDP-G11
+48296F,Niveauregelung Druckgeber Unplausibles Signal,Niveauregelung pressure sender implausible signal,VDP-G11
 482972,Kompressor - Druckgeber - Signalspannung,Kompressor - pressure sender - signal voltage,VDP-G11
 482974,Niveauregelung - Fahrzeug-Niveau - nicht - einstellbar,Niveauregelung - vehicle-Niveau - not - einstellbar,VDP-G11
 482975,Niveauregelung - Fahrzeug-Niveau - nicht - plausibel,Niveauregelung - vehicle-Niveau - not - plausibel,VDP-G11
@@ -4116,6 +4242,24 @@
 483126,Höhenstandssensor - vorn links - Abgleich unplausibel,Höhenstandssensor - vorn left - Abgleich implausible,VDP-G11
 483127,Höhenstandssensor - vorn rechts - Abgleich unplausibel,Höhenstandssensor - vorn right - Abgleich implausible,VDP-G11
 483129,Höhenstandssensor - Allgemein - Abgleich nicht durchgeführt,Höhenstandssensor - Allgemein - Abgleich not carried out,VDP-G11
+800A00,Interne Kommunikation gestört,Internal communication disturbed,KAFAS-G11
+800A01,Kamera Sichtfeld gestört durch Wetterbedingungen,Camera Sichtfeld disturbed by Wetterbedingungen,KAFAS-G11
+800A02,Interner Steuergerätefehler: Spannungsmessung ausserhalb Bereich,Internal Steuergerätefehler: voltage measurement outside range,KAFAS-G11
+800A03,Static Input Data error,Static Input Data error,KAFAS-G11
+800A04,Fertigungsmodus aktiv! Alle KaFAS-Funktionen deaktiviert!,Fertigungsmodus active! Alle KaFAS-function deactivated!,KAFAS-G11
+800A20,Sensitivität verstellt,Sensitivität verstellt,KAFAS-G11
+800A22,Interner Steuergerätefehler,Internal Steuergerätefehler,KAFAS-G11
+800AB8,Überspannung erkannt,Overvoltage detected,KAFAS-G11
+800AB9,Unterspannung erkannt,Undervoltage detected,KAFAS-G11
+800ABC,Fehler im Bildverarbeitungspfad,Fault in the Bildverarbeitungspfad,KAFAS-G11
+800ABD,Bildverarbeitungsfehler,Bildverarbeitungsfehler,KAFAS-G11
+800ABE,KAFAS-Kamera: Blindheit,KAFAS-camera: Blindheit,KAFAS-G11
+800AC0,KAFAS-Kamera: Abschaltung wegen Übertemperatur,KAFAS-camera: shutdown due to overtemperature,KAFAS-G11
+800AC1,KAFAS-Kamera: Abschaltung Golddust wegen Übertemperatur,KAFAS-camera: shutdown Golddust due to overtemperature,KAFAS-G11
+800AC4,Kamerakalibrierung fehlgeschlagen,Kamerakalibrierung failed,KAFAS-G11
+800AC5,Scheibenheizung KAFAS: Kurzschluss nach Plus oder Unterbrechung,Scheibenheizung KAFAS: short circuit to positive or interruption,KAFAS-G11
+800AC6,Scheibenheizung KAFAS: Interner Fehler,Scheibenheizung KAFAS: internal error,KAFAS-G11
+800AC7,Scheibenheizung KAFAS: Kurzschluss nach Minus,Scheibenheizung KAFAS: short circuit to Minus,KAFAS-G11
 801100,Motor Frischluft oder Frischluft-Umluft: Blockierung,Engine Frischluft or Frischluft-Umluft: Blockierung,IHKA-G11
 801101,Motor Frischluft oder Frischluft-Umluft: interner Motorfehler,Engine Frischluft or Frischluft-Umluft: internal engine fault,IHKA-G11
 801102,Motor Frischluft oder Frischluft-Umluft: Initialisierungsfehler,Engine Frischluft or Frischluft-Umluft: Initialisierungsfehler,IHKA-G11
@@ -4176,7 +4320,7 @@
 80113F,Motor Zentralantrieb: Blockierung,Engine Zentralantrieb: Blockierung,IHKA-G11
 801140,Motor Zentralantrieb: interner Motorfehler,Engine Zentralantrieb: internal engine fault,IHKA-G11
 801141,Motor Zentralantrieb: Initialisierungsfehler,Engine Zentralantrieb: Initialisierungsfehler,IHKA-G11
-80115E,Autoadressierung (LIN): Autoadressierung fehlgeschlagen,Autoadressierung (LIN): Autoadressierung fehlgeschlagen,IHKA-G11
+80115E,Autoadressierung (LIN): Autoadressierung fehlgeschlagen,Autoadressierung (LIN): Autoadressierung failed,IHKA-G11
 80115F,Mischverbau: Klappenmotoren von verschiedenen Hersteller erkannt,Mischverbau: flap engine of verschiedenen manufacturer detected,IHKA-G11
 801160,Verdampfertemperatursensor: Kurzschluss nach Minus,Verdampfertemperatursensor: short circuit to Minus,IHKA-G11
 801161,Verdampfertemperatursensor: Kurzschluss nach Plus oder Unterbrechung,Verdampfertemperatursensor: short circuit to positive or interruption,IHKA-G11
@@ -4272,7 +4416,7 @@
 80124C,eDH: HV-Spannungssensor unter Betriebsbereich,eDH: HV-voltage sensor under operation range,IHKA-G11
 80124D,eDH: Degradation,eDH: Degradation,IHKA-G11
 80124E,eDH: Verriegelung wg. Systemfehler Kühlmittelfluss,eDH: locking wg. system fault Kühlmittelfluss,IHKA-G11
-80124F,eDH: Niederspannungsfehler/unplausible Prozessorkommunikation,eDH: low voltage fault/unplausible processor communication,IHKA-G11
+80124F,eDH: Niederspannungsfehler/unplausible Prozessorkommunikation,eDH: low voltage fault/implausible processor communication,IHKA-G11
 801250,eDH: Temperaturfühler Kühlmittel Kurzschluss/Leitungsunterbrechung,eDH: Temperaturfühler coolant short circuit/open circuit,IHKA-G11
 801252,eDH: Temperaturfühler Platine Kurzschluss/Leitungsunterbrechung,eDH: Temperaturfühler Platine short circuit/open circuit,IHKA-G11
 801253,eDH: Temperaturfühler Platine ausserhalb Betriebsbereich,eDH: Temperaturfühler Platine outside operation range,IHKA-G11
@@ -4392,10 +4536,71 @@
 8013FD,EEPROM Speicher Fehler (IHKA),EEPROM memory fault (IHKA),IHKA-G11
 8013FE,Software Laufzeitfehler (IHKA),Software Laufzeitfehler (IHKA),IHKA-G11
 8013FF,Software Watchdogfehler (IHKA),Software Watchdogfehler (IHKA),IHKA-G11
+801A00,"Diebstahlwarnanlage, Ultraschall-Senorik: ein oder zwei Kanäle defekt","Diebstahlwarnanlage, Ultraschall-Senorik: a or zwei Kanäle defective",FZD-G11
+801A01,Diebstahlwarnanlage: LED oder Leitung LED Kurzschluss nach Plus,Diebstahlwarnanlage: LED or line LED short circuit to positive,FZD-G11
+801A02,"Bedieneinheit Dach, Boulevardlicht: Interner Fehler oder Leuchtmittel defekt","Operating unit roof, Boulevardlicht: internal error or Leuchtmittel defective",FZD-G11
+801A03,"Schiebedach, Bedienschalter: unzulässige Kombination der Schaltereingänge","Sunroof, Bedienschalter: impermissible Kombination the Schaltereingänge",FZD-G11
+801A04,"Bedieneinheit Dach, Boulevardlicht extern links: Interner Fehler Leitungsunterbrechung oder Leuchtmittel defekt","Operating unit roof, Boulevardlicht extern left: internal error open circuit or Leuchtmittel defective",FZD-G11
+801A05,"Bedieneinheit Dach, Boulevardlicht extern rechts: Interner Fehler, Leitungsunterbrechung oder Leuchtmittel defekt","Operating unit roof, Boulevardlicht extern right: internal error, open circuit or Leuchtmittel defective",FZD-G11
+801A07,"Bedieneinheit Dach, Leselicht extern links: Kurzschluss nach Masse","Operating unit roof, Leselicht extern left: short circuit to ground",FZD-G11
+801A08,"Bedieneinheit Dach, Leselicht extern links: Leitungsunterbrechung","Operating unit roof, Leselicht extern left: open circuit",FZD-G11
+801A09,"Bedieneinheit Dach, Leselicht extern rechts: Kurzschluss nach Masse","Operating unit roof, Leselicht extern right: short circuit to ground",FZD-G11
+801A0A,"Bedieneinheit Dach, Leselicht extern rechts: Leitungsunterbrechung","Operating unit roof, Leselicht extern right: open circuit",FZD-G11
+801A0D,"FZD, Boulevardlicht: Interner Fehler oder Leuchtmittel defekt","FZD, Boulevardlicht: internal error or Leuchtmittel defective",FZD-G11
+801A11,Interner LIN: Bedieneinheit Dach antwortet nicht,Internal LIN: operating unit roof antwortet not,FZD-G11
+801A32,"Schiebedach, Bedienschalter: Taster hängt","Sunroof, Bedienschalter: button stuck",FZD-G11
+801A37,Interner Steuergerätefehler,Internal Steuergerätefehler,FZD-G11
+801A38,Unterspannung erkannt,Undervoltage detected,FZD-G11
+801A39,Überspannung erkannt,Overvoltage detected,FZD-G11
+801A4A,Diebstahlwarnanlage:  Neigungsgeber und Innenraumschutz deaktiviert,Diebstahlwarnanlage:  inclination sender and Innenraumschutz deactivated,FZD-G11
+801A4B,SINE: Externe Versorgung Unterspannung,SINE: external supply undervoltage,FZD-G11
+801A4C,SINE: Interne Versorgung Unterspannung,SINE: internal supply undervoltage,FZD-G11
+801A4D,SINE: EEPROM fehlerhaft,SINE: EEPROM faulty,FZD-G11
+801A4E,SINE: Aktiver Schutz fehlerhaft,SINE: active Schutz faulty,FZD-G11
+801A4F,SINE: Aufweckzeit fehlerhaft,SINE: Aufweckzeit faulty,FZD-G11
+801A50,SINE: Sirenenschaltkreis defekt,SINE: Sirenenschaltkreis defective,FZD-G11
+801A51,SINE: Neigungsgeber defekt,SINE: inclination sender defective,FZD-G11
+801A52,SINE: Kodierdaten Schreibfehler,SINE: Kodierdaten Schreibfehler,FZD-G11
+801A53,SINE: Selbsttest timeout,SINE: self test timeout,FZD-G11
+801A54,Diebstahlwarnanlage: DWA-LED: Kurzschluß nach Masse,Diebstahlwarnanlage: DWA-LED: short circuit to ground,FZD-G11
+801A55,Diebstahlwarnanlage: Alarm - Details im Alarmspeicher,Diebstahlwarnanlage: Alarm - Details in the Alarmspeicher,FZD-G11
+801A56,Diebstahlwarnanlage: Panikalarm - Details im Panikspeicher,Diebstahlwarnanlage: Panikalarm - Details in the Panikspeicher,FZD-G11
+801A58,LIN-Bus Kurzschluss nach Masse,LIN-bus short circuit to ground,FZD-G11
+801A59,Sternenhimmel: interner Steuergeräte Fehler,Sternenhimmel: internal control unit fault,FZD-G11
+801A5A,Sternenhimmel LED Modul_00: Funktionsfehler,Sternenhimmel LED Modul_00: function fault,FZD-G11
+801A5B,Sternenhimmel LED Modul_01: Funktionsfehler,Sternenhimmel LED Modul_01: function fault,FZD-G11
+801A5C,Sternenhimmel LED Modul_02: Funktionsfehler,Sternenhimmel LED Modul_02: function fault,FZD-G11
+801A5D,Sternenhimmel LED Modul_03: Funktionsfehler,Sternenhimmel LED Modul_03: function fault,FZD-G11
+801A5E,Sternenhimmel LED Modul_04: Funktionsfehler,Sternenhimmel LED Modul_04: function fault,FZD-G11
+801A5F,Sternenhimmel LED Modul_05: Funktionsfehler,Sternenhimmel LED Modul_05: function fault,FZD-G11
+801A60,Sternenhimmel LED Modul_06: Funktionsfehler,Sternenhimmel LED Modul_06: function fault,FZD-G11
+801A61,Sternenhimmel LED Modul_07: Funktionsfehler,Sternenhimmel LED Modul_07: function fault,FZD-G11
+801A62,Sternenhimmel LED Modul_08: Funktionsfehler,Sternenhimmel LED Modul_08: function fault,FZD-G11
+801A63,Sternenhimmel LED Modul_09: Funktionsfehler,Sternenhimmel LED Modul_09: function fault,FZD-G11
+801A64,Sternenhimmel LED Modul_10: Funktionsfehler,Sternenhimmel LED Modul_10: function fault,FZD-G11
+801A65,Sternenhimmel LED Modul_11: Funktionsfehler,Sternenhimmel LED Modul_11: function fault,FZD-G11
+801A66,Sternenhimmel LED Modul_12: Funktionsfehler,Sternenhimmel LED Modul_12: function fault,FZD-G11
+801A67,Sternenhimmel LED Modul_13: Funktionsfehler,Sternenhimmel LED Modul_13: function fault,FZD-G11
+801A68,Sternenhimmel LED Modul_14: Funktionsfehler,Sternenhimmel LED Modul_14: function fault,FZD-G11
+801A69,Sternenhimmel LED Modul_15: Funktionsfehler,Sternenhimmel LED Modul_15: function fault,FZD-G11
+801A6A,Fahrzeuginnenraum-Trennwand:  Kurzschluß oder Überlast,Fahrzeuginnenraum-Trennwand:  short circuit or Überlast,FZD-G11
+801A6B,Fahrzeuginnenraum-Trennwand: Leitungsunterbrechung,Fahrzeuginnenraum-Trennwand: open circuit,FZD-G11
+801A6E,Gegensprechanlage Mute Pin: Leitungsfehler,Gegensprechanlage Mute Pin: line fault,FZD-G11
+801A70,Gegensprechanlage Lautsprecher vorne: Kurzschluß / Überlast,Gegensprechanlage Lautsprecher front: short circuit / Überlast,FZD-G11
+801A71,Gegensprechanlage Leuchtdiode  Fond: Kurzschluß,Gegensprechanlage Leuchtdiode  rear compartment: short circuit,FZD-G11
+801A72,Gegensprechanlage Leuchtdiode Fond: Leitungsunterbrechung,Gegensprechanlage Leuchtdiode rear compartment: open circuit,FZD-G11
+801A73,Gegensprechanlage Leuchtdiode vorn: Kurzschluß,Gegensprechanlage Leuchtdiode vorn: short circuit,FZD-G11
+801A74,Gegensprechanlage Leuchtdiode vorn: Leitungsunterbrechung,Gegensprechanlage Leuchtdiode vorn: open circuit,FZD-G11
+801A75,Gegensprechanlage Mikrofon Fond links: Kurzschluß,Gegensprechanlage Mikrofon rear compartment left: short circuit,FZD-G11
+801A76,Gegensprechanlage Mikrofon Fond links: Leitungsunterbrechung,Gegensprechanlage Mikrofon rear compartment left: open circuit,FZD-G11
+801A77,Gegensprechanlage Mikrofon Fond rechts: Kurzschluß,Gegensprechanlage Mikrofon rear compartment right: short circuit,FZD-G11
+801A78,Gegensprechanlage Mikrofon Fond rechts: Leitungsunterbrechung,Gegensprechanlage Mikrofon rear compartment right: open circuit,FZD-G11
+801A79,Gegensprechanlage Mikrofon vorn: Kurzschluß,Gegensprechanlage Mikrofon vorn: short circuit,FZD-G11
+801A7A,Gegensprechanlage Mikrofon vorn: Leitungsunterbrechung,Gegensprechanlage Mikrofon vorn: open circuit,FZD-G11
 801C00,VcmErrorWriteVcmData - Schreibfehler: Schreibzugriff auf VCM-Daten,VcmErrorWriteVcmData - Schreibfehler: Schreibzugriff on VCM-data,ZGW; ZGW-SP18
 801C02,VcmErrorNoTasResponse - Testerassistent ist beschäftigt oder antwortet nicht,VcmErrorNoTasResponse - Testerassistent is busy or antwortet not,ZGW
-801C03,Signaturprüfung: Fehlerhafte Signatur beim Schreiben eines Datums,Signaturprüfung: faulty Signatur during Schreiben of a Datums,ZGW-SP18
-801C04,VcmErrorSignatureCreation - Signaturerzeugung: Es konnte keine Signatur für ein zu lesendes Datum erzeugt werden,VcmErrorSignatureCreation - Signaturerzeugung: Es konnte no Signatur for a to lesendes Datum erzeugt be,ZGW
+801C03,Signaturprüfung: Fehlerhafte Signatur beim Schreiben eines Datums,Signature check: faulty signature during Schreiben of a Datums,ZGW-SP18
+801C04,VcmErrorSignatureCreation - Signaturerzeugung: Es konnte keine Signatur für ein zu lesendes Datum erzeugt werden,VcmErrorSignatureCreation - Signaturerzeugung: Es konnte no signature for a to lesendes Datum erzeugt be,ZGW
 801C06,VcmErrorSvtGeneration - SVT-Ist Generierung: SVT-ist konnte nicht erzeugt werden,VcmErrorSvtGeneration - SVT-is Generierung: SVT-is konnte not erzeugt be,ZGW
 801C07,Steuergerätetauscherkennung: Liste getauschter Steuergeräte konnte nicht erstellt werden.,Steuergerätetauscherkennung: Liste getauschter control unit konnte not erstellt be.,ZGW-SP18
 801C10,Anforderung Reset Klemme 30F Wecker,Request reset terminal 30F Wecker,ZGW
@@ -4675,7 +4880,7 @@
 8040AC,Ansteuerung Ausschalten KL30F-Hinten: Kurzschluss Batteriespannung oder Leitungsunterbrechung,Actuation Ausschalten KL30F-rear: short circuit battery voltage or open circuit,BDC-G11
 8040AD,LED Suchbeleuchtung Start-Stopp-Taster: Kurzschluss nach Masse,LED Suchbeleuchtung start-Stopp-button: short circuit to ground,BDC-G05; BDC-G11
 8040AE,LED Suchbeleuchtung Start-Stopp-Taster: Kurzschluss Batteriespannung,LED Suchbeleuchtung start-Stopp-button: short circuit battery voltage,BDC-G11
-8040AF,Kodierung: Lampenmapping Innenlicht fehlgeschlagen,Coding: Lampenmapping inside light fehlgeschlagen,BDC-G05
+8040AF,Kodierung: Lampenmapping Innenlicht fehlgeschlagen,Coding: Lampenmapping inside light failed,BDC-G05
 8040B0,IBS Wakeup: Kurzschluss nach Masse,IBS Wakeup: short circuit to ground,BDC-G11
 8040B1,IBS Wakeup: Leitungsunterbrechung oder Kurzschluss nach Batteriespannung,IBS Wakeup: open circuit or short circuit to battery voltage,BDC; BDC-G05; BDC-G11
 8040B2,LED Funktionsbeleuchtung MSA: Kurzschluss Masse,LED function lighting MSA: short circuit ground,BDC-G11
@@ -4818,8 +5023,8 @@
 80417E,ZV-Relais Sichern (ZV_MVS) oder Verriegeln Fahrertür (ZV_MVR_FA): Sicherung defekt,ZV-relay Sichern (ZV_MVS) or Verriegeln driver door (ZV_MVR_FA): fuse defective,BDC-G05
 804180,Ausgang POL_L defekt,Output POL_L defective,BDC; BDC-G05; BDC-G11
 804181,Ausgang POL_R defekt,Output POL_R defective,BDC-G11
-804182,Ausgang AL_L defekt oder Wiederzündung für Bi-Xenon fehlgeschlagen,Output AL_L defective or Wiederzündung for Bi-Xenon fehlgeschlagen,BDC; BDC-G05; BDC-G11
-804183,Ausgang AL_R defekt oder Wiederzündung für Bi-Xenon fehlgeschlagen,Output AL_R defective or Wiederzündung for Bi-Xenon fehlgeschlagen,BDC-G11
+804182,Ausgang AL_L defekt oder Wiederzündung für Bi-Xenon fehlgeschlagen,Output AL_L defective or Wiederzündung for Bi-Xenon failed,BDC; BDC-G05; BDC-G11
+804183,Ausgang AL_R defekt oder Wiederzündung für Bi-Xenon fehlgeschlagen,Output AL_R defective or Wiederzündung for Bi-Xenon failed,BDC-G11
 804184,Ausgang TFL_L defekt,Output TFL_L defective,BDC; BDC-G05; BDC-G11
 804185,Ausgang TFL_R defekt,Output TFL_R defective,BDC-G11
 804186,Ausgang FL_L defekt,Output FL_L defective,BDC; BDC-G05; BDC-G11
@@ -4871,7 +5076,7 @@
 8041B9,Leuchtweitenregulierung (LWR): Treiberfehler,Leuchtweitenregulierung (LWR): driver fault,BDC
 8041BA,Adaptive Headlight (AHL): System defekt,Adaptive Headlight (AHL): system defective,BDC-G11
 8041BF,Signal vom Regenlichtsensor unplausibel,Signal vom rain light sensor implausible,BDC; BDC-G05; BDC-G11
-8041C3,Kodierung: Lampenmapping fehlgeschlagen,Coding: Lampenmapping fehlgeschlagen,BDC; BDC-G11
+8041C3,Kodierung: Lampenmapping fehlgeschlagen,Coding: Lampenmapping failed,BDC; BDC-G11
 8041C5,Kodierung: Lampenmapping unplausibel,Coding: Lampenmapping implausible,BDC-G05; BDC-G11
 8041C6,Kodierung: Parameter Überspannungsschutz unplausibel,Coding: Parameter Überspannungsschutz implausible,BDC
 8041C7,Lampenmapping Innenlicht unplausibel,Lampenmapping inside light implausible,BDC-G05
@@ -4956,7 +5161,7 @@
 8042A8,Frontwischer (LIN): Überlast Wischermotor Fahrerseite,Front wiper (LIN): Überlast wiper engine driver side,BDC; BDC-G11
 8042A9,Frontwischer (LIN): Blockierung Beifahrerseite,Front wiper (LIN): Blockierung passenger side,BDC-G11
 8042AA,Frontwischer (LIN): Überspannung,Front wiper (LIN): overvoltage,BDC; BDC-G11
-8042AB,Frontwischer (LIN): Noch nicht initialisiert oder Initialisierung fehlgeschlagen,Front wiper (LIN): yet not initialisiert or Initialisierung fehlgeschlagen,BDC-G11
+8042AB,Frontwischer (LIN): Noch nicht initialisiert oder Initialisierung fehlgeschlagen,Front wiper (LIN): yet not initialisiert or Initialisierung failed,BDC-G11
 8042AC,Frontwischer (LIN): Kommunikationsfehler zwischen den Motoren Fahrerseite und Beifahrerseite,Front wiper (LIN): communication error between the engine driver side and passenger side,BDC; BDC-G05; BDC-G11
 8042C0,Ausgang Innenbeleuchtung 1 hat Kurzschluss,Output interior lighting 1 has short circuit,BDC-G11
 8042C1,Ausgang Innenbeleuchtung 2 hat Kurzschluss,Output interior lighting 2 has short circuit,BDC; BDC-G05; BDC-G11
@@ -5145,7 +5350,7 @@
 8044EB,"Innenlicht Layering FI-LIN-2, LIN-Slave 11: Fehlerhaft","Inside light Layering FI-LIN-2, LIN-slave 11: faulty",BDC-G05
 8044ED,"Innenlicht Layering FI-LIN-2, LIN-Slave 13: Fehlerhaft","Inside light Layering FI-LIN-2, LIN-slave 13: faulty",BDC-G05
 8044EF,"Innenlicht Layering FI-LIN-2, LIN-Slave 15: Fehlerhaft","Inside light Layering FI-LIN-2, LIN-slave 15: faulty",BDC-G05
-8044F0,"Drahtloser Fahrzeugzugang DFZ: Authentisierung fehlgeschlagen, Secret Key ungültig","Drahtloser Fahrzeugzugang DFZ: authentication fehlgeschlagen, Secret Key invalid",BDC
+8044F0,"Drahtloser Fahrzeugzugang DFZ: Authentisierung fehlgeschlagen, Secret Key ungültig","Drahtloser Fahrzeugzugang DFZ: authentication failed, Secret Key invalid",BDC
 8044F1,"Innenlicht Layering FI-LIN-2, LIN-Slave 17: Fehlerhaft","Inside light Layering FI-LIN-2, LIN-slave 17: faulty",BDC-G05
 8044F3,"Innenlicht Layering FI-LIN-2, LIN-Slave 19: Fehlerhaft","Inside light Layering FI-LIN-2, LIN-slave 19: faulty",BDC-G05
 8044F5,"Innenlicht Layering FI-LIN-2, LIN-Slave 21: Fehlerhaft","Inside light Layering FI-LIN-2, LIN-slave 21: faulty",BDC-G05
@@ -5199,7 +5404,7 @@
 80484B,"Taster Heckscheibe (TOEHS), Frontklappe (TOEFKI) oder Untere Heckklappe (TOEHKU): Dauerbetätigung","Button Heckscheibe (TOEHS), front flap (TOEFKI) or under tailgate (TOEHKU): duration actuation",BDC-G11
 80484C,Vorrastkontakt (VRK) der Soft-Close-Automatik(SCA): Kurzschluss oder Leitungsunterbrechung oder Soft-Close-Automatik klemmt oder Heckklappenkontakt defekt,Vorrastkontakt (VRK) the Soft-Close-Automatik(SCA): short circuit or open circuit or Soft-Close-Automatik klemmt or tailgate contact defective,BDC-G11
 80484D,"Öffnen Heckklappe blockiert, wegen fehlendem Status des Anhänger-Anschluss-Geräts (AAG)","Öffnen tailgate blocked, due to fehlendem status of the Anhänger-Anschluss-device (AAG)",BDC-G11
-804850,FBD-Empfänger: Initialisierung fehlgeschlagen (Auto-Init),FBD-receiver: Initialisierung fehlgeschlagen (Auto-Init),BDC-G05; BDC-G11
+804850,FBD-Empfänger: Initialisierung fehlgeschlagen (Auto-Init),FBD-receiver: Initialisierung failed (Auto-Init),BDC-G05; BDC-G11
 804851,NFC-Reader innen vorne: Antenne defekt oder falsche Variante verbaut,NFC-Reader inside front: antenna defective or incorrect variant verbaut,BDC-G11
 804852,NFC-Reader innen vorne: Antenne nicht gesteckt,NFC-Reader inside front: antenna not gesteckt,BDC-G11
 804853,NFC-Reader innen vorne: Falschverbau,NFC-Reader inside front: Falschverbau,BDC-G11
@@ -5262,9 +5467,9 @@
 8048E4,"Sitzheizung BF hinten (LIN), Leiterplatte Temperatur: Temperatur zu hoch","Seat heating BF rear (LIN), Leiterplatte temperature: temperature too high",BDC; BDC-G05; BDC-G11
 8048E5,"Sitzheizung BFH (LIN), Temperatursensor Kissen: Leitungsunterbrechung oder Kurzschluss","Seat heating BFH (LIN), temperature sensor Kissen: open circuit or short circuit",BDC-G11
 8048E6,"Sitzheizung BF hinten (LIN), Temperatursensor Kissen Leitungsbruch","Seat heating BF rear (LIN), temperature sensor Kissen Leitungsbruch",BDC
-8048E7,"Sitzheizung BFH (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating BFH (LIN), temperature sensor Kissen: Unplausibles signal",BDC-G05; BDC-G11
+8048E7,"Sitzheizung BFH (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating BFH (LIN), temperature sensor Kissen: implausible signal",BDC-G05; BDC-G11
 8048E8,"Sitzheizung BFH (LIN), Temperatursensor Lehne: Leitungsunterbrechung oder Kurzschluss","Seat heating BFH (LIN), temperature sensor Lehne: open circuit or short circuit",BDC-G11
-8048EA,"Sitzheizung BF hinten (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating BF rear (LIN), temperature sensor Lehne unplausibles signal",BDC; BDC-G05; BDC-G11
+8048EA,"Sitzheizung BF hinten (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating BF rear (LIN), temperature sensor Lehne implausible signal",BDC; BDC-G05; BDC-G11
 8048EB,Sitzheizung BFH (LIN): Versorgungsspannung außerhalb des gültigen Bereiches,Seat heating BFH (LIN): supply voltage outside of the valid range,BDC-G11
 8048EC,Sitzheizung BF hinten (LIN): Unterspannung erkannt,Seat heating BF rear (LIN): undervoltage detected,BDC
 8048ED,Sitzheizung BFH  (LIN): Interner Steuergerätefehler,Seat heating BFH  (LIN): internal Steuergerätefehler,BDC-G05; BDC-G11
@@ -5274,9 +5479,9 @@
 8048F4,"Sitzheizung FA hinten (LIN), Leiterplatte Temperatur: Temperatur zu hoch","Seat heating FA rear (LIN), Leiterplatte temperature: temperature too high",BDC; BDC-G05; BDC-G11
 8048F5,"Sitzheizung FAH (LIN), Temperatursensor Kissen: Leitungsunterbrechung oder Kurzschluss","Seat heating FAH (LIN), temperature sensor Kissen: open circuit or short circuit",BDC-G11
 8048F6,"Sitzheizung FA hinten (LIN), Temperatursensor Kissen Leitungsbruch","Seat heating FA rear (LIN), temperature sensor Kissen Leitungsbruch",BDC
-8048F7,"Sitzheizung FAH (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating FAH (LIN), temperature sensor Kissen: Unplausibles signal",BDC-G05; BDC-G11
+8048F7,"Sitzheizung FAH (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating FAH (LIN), temperature sensor Kissen: implausible signal",BDC-G05; BDC-G11
 8048F8,"Sitzheizung FAH (LIN), Temperatursensor Lehne: Leitungsunterbrechung oder Kurzschluss","Seat heating FAH (LIN), temperature sensor Lehne: open circuit or short circuit",BDC-G11
-8048FA,"Sitzheizung FA hinten (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating FA rear (LIN), temperature sensor Lehne unplausibles signal",BDC; BDC-G05; BDC-G11
+8048FA,"Sitzheizung FA hinten (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating FA rear (LIN), temperature sensor Lehne implausible signal",BDC; BDC-G05; BDC-G11
 8048FB,Sitzheizung FAH (LIN): Versorgungsspannung außerhalb des gültigen Bereiches,Seat heating FAH (LIN): supply voltage outside of the valid range,BDC-G11
 8048FC,Sitzheizung FA hinten (LIN): Unterspannung erkannt,Seat heating FA rear (LIN): undervoltage detected,BDC
 8048FD,Sitzheizung FAH  (LIN): Interner Steuergerätefehler,Seat heating FAH  (LIN): internal Steuergerätefehler,BDC-G05; BDC-G11
@@ -5286,9 +5491,9 @@
 804904,"Sitzheizung BF (LIN), Leiterplatte Temperatur: Temperatur zu hoch","Seat heating BF (LIN), Leiterplatte temperature: temperature too high",BDC; BDC-G05; BDC-G11
 804905,"Sitzheizung BF (LIN), Temperatursensor Kissen: Leitungsunterbrechung oder Kurzschluss","Seat heating BF (LIN), temperature sensor Kissen: open circuit or short circuit",BDC-G11
 804906,"Sitzheizung BF (LIN), Temperatursensor Kissen Leitungsbruch","Seat heating BF (LIN), temperature sensor Kissen Leitungsbruch",BDC
-804907,"Sitzheizung BF (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating BF (LIN), temperature sensor Kissen: Unplausibles signal",BDC-G05; BDC-G11
+804907,"Sitzheizung BF (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating BF (LIN), temperature sensor Kissen: implausible signal",BDC-G05; BDC-G11
 804908,"Sitzheizung BF (LIN), Temperatursensor Lehne: Leitungsunterbrechung oder Kurzschluss","Seat heating BF (LIN), temperature sensor Lehne: open circuit or short circuit",BDC-G11
-80490A,"Sitzheizung BF (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating BF (LIN), temperature sensor Lehne unplausibles signal",BDC; BDC-G05; BDC-G11
+80490A,"Sitzheizung BF (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating BF (LIN), temperature sensor Lehne implausible signal",BDC; BDC-G05; BDC-G11
 80490B,Sitzheizung BF (LIN): Versorgungsspannung außerhalb des gültigen Bereiches,Seat heating BF (LIN): supply voltage outside of the valid range,BDC-G11
 80490C,Sitzheizung BF (LIN): Unterspannung erkannt,Seat heating BF (LIN): undervoltage detected,BDC
 80490D,Sitzheizung BF  (LIN): Interner Steuergerätefehler,Seat heating BF  (LIN): internal Steuergerätefehler,BDC-G05; BDC-G11
@@ -5298,9 +5503,9 @@
 804914,"Sitzheizung FA (LIN), Leiterplatte Temperatur: Temperatur zu hoch","Seat heating FA (LIN), Leiterplatte temperature: temperature too high",BDC; BDC-G05; BDC-G11
 804915,"Sitzheizung FA (LIN), Temperatursensor Kissen: Leitungsunterbrechung oder Kurzschluss","Seat heating FA (LIN), temperature sensor Kissen: open circuit or short circuit",BDC-G11
 804916,"Sitzheizung FA (LIN), Temperatursensor Kissen Leitungsbruch","Seat heating FA (LIN), temperature sensor Kissen Leitungsbruch",BDC
-804917,"Sitzheizung FA (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating FA (LIN), temperature sensor Kissen: Unplausibles signal",BDC-G05; BDC-G11
+804917,"Sitzheizung FA (LIN), Temperatursensor Kissen: Unplausibles Signal","Seat heating FA (LIN), temperature sensor Kissen: implausible signal",BDC-G05; BDC-G11
 804918,"Sitzheizung FA (LIN), Temperatursensor Lehne: Leitungsunterbrechung oder Kurzschluss","Seat heating FA (LIN), temperature sensor Lehne: open circuit or short circuit",BDC-G11
-80491A,"Sitzheizung FA (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating FA (LIN), temperature sensor Lehne unplausibles signal",BDC; BDC-G05; BDC-G11
+80491A,"Sitzheizung FA (LIN), Temperatursensor Lehne unplausibles Signal","Seat heating FA (LIN), temperature sensor Lehne implausible signal",BDC; BDC-G05; BDC-G11
 80491B,Sitzheizung FA (LIN): Versorgungsspannung außerhalb des gültigen Bereiches,Seat heating FA (LIN): supply voltage outside of the valid range,BDC-G11
 80491C,Sitzheizung FA (LIN): Unterspannung erkannt,Seat heating FA (LIN): undervoltage detected,BDC
 80491D,Sitzheizung FA  (LIN): Interner Steuergerätefehler,Seat heating FA  (LIN): internal Steuergerätefehler,BDC-G05; BDC-G11
@@ -5361,9 +5566,9 @@
 804A00,"Armauflagenheizung BF (LIN), Heizfeld Beifahrertür: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), Heizfeld passenger door: open circuit or short circuit",BDC-G05; BDC-G11
 804A01,"Armauflagenheizung BF (LIN), Heizfeld Mittelarmlehne: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), Heizfeld Mittelarmlehne: open circuit or short circuit",BDC-G11
 804A02,"Armauflagenheizung BF (LIN), Temperatursensor Beifahrertür: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), temperature sensor passenger door: open circuit or short circuit",BDC-G05; BDC-G11
-804A03,"Armauflagenheizung BF (LIN), Temperatursensor Beifahrertür: Unplausibles Signal","Armrest heating BF (LIN), temperature sensor passenger door: Unplausibles signal",BDC-G11
+804A03,"Armauflagenheizung BF (LIN), Temperatursensor Beifahrertür: Unplausibles Signal","Armrest heating BF (LIN), temperature sensor passenger door: implausible signal",BDC-G11
 804A04,"Armauflagenheizung BF (LIN), Temperatursensor Mittelarmlehne: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), temperature sensor Mittelarmlehne: open circuit or short circuit",BDC-G05; BDC-G11
-804A05,"Armauflagenheizung BF (LIN), Temperatursensor Mittelarmlehne: Unplausibles Signal","Armrest heating BF (LIN), temperature sensor Mittelarmlehne: Unplausibles signal",BDC-G11
+804A05,"Armauflagenheizung BF (LIN), Temperatursensor Mittelarmlehne: Unplausibles Signal","Armrest heating BF (LIN), temperature sensor Mittelarmlehne: implausible signal",BDC-G11
 804A06,Armauflagenheizung BF (LIN): Interner Steuergerätefehler,Armrest heating BF (LIN): internal Steuergerätefehler,BDC-G05; BDC-G11
 804A07,Armauflagenheizung BF (LIN): Kurzschluss nach Plus oder Relais klebt,Armrest heating BF (LIN): short circuit to positive or relay klebt,BDC-G11
 804A08,Armauflagenheizung BF (LIN): Temperatur der Leiterplatte zu hoch,Armrest heating BF (LIN): temperature the Leiterplatte too high,BDC-G11
@@ -5371,17 +5576,17 @@
 804A0A,"Armauflagenheizung BFH (LIN), Heizfeld Mittelarmlehne Fond: Leitungsunterbrechung oder Kurzschluss","Armrest heating BFH (LIN), Heizfeld Mittelarmlehne rear compartment: open circuit or short circuit",BDC-G05; BDC-G11
 804A0B,"Armauflagenheizung BFH (LIN), Heizfeld Tür Beifahrerseite hinten: Leitungsunterbrechung oder Kurzschluss","Armrest heating BFH (LIN), Heizfeld door passenger side rear: open circuit or short circuit",BDC-G11
 804A0C,"Armauflagenheizung BFH (LIN), Temperatursensor Mittelarmlehne Fond: Leitungsunterbrechung oder Kurzschluss","Armrest heating BFH (LIN), temperature sensor Mittelarmlehne rear compartment: open circuit or short circuit",BDC-G05; BDC-G11
-804A0D,"Armauflagenheizung BFH (LIN), Temperatursensor Mittelarmlehne Fond: Unplausibles Signal","Armrest heating BFH (LIN), temperature sensor Mittelarmlehne rear compartment: Unplausibles signal",BDC-G11
+804A0D,"Armauflagenheizung BFH (LIN), Temperatursensor Mittelarmlehne Fond: Unplausibles Signal","Armrest heating BFH (LIN), temperature sensor Mittelarmlehne rear compartment: implausible signal",BDC-G11
 804A0E,"Armauflagenheizung BFH (LIN), Temperatursensor Tür Beifahrerseite hinten: Leitungsunterbrechung oder Kurzschluss","Armrest heating BFH (LIN), temperature sensor door passenger side rear: open circuit or short circuit",BDC-G05; BDC-G11
-804A0F,"Armauflagenheizung BFH (LIN), Temperatursensor Tür Beifahrerseite hinten: Unplausibles Signal","Armrest heating BFH (LIN), temperature sensor door passenger side rear: Unplausibles signal",BDC-G11
+804A0F,"Armauflagenheizung BFH (LIN), Temperatursensor Tür Beifahrerseite hinten: Unplausibles Signal","Armrest heating BFH (LIN), temperature sensor door passenger side rear: implausible signal",BDC-G11
 804A10,Armauflagenheizung BFH (LIN): Kurzschluss nach Plus oder Relais klebt,Armrest heating BFH (LIN): short circuit to positive or relay klebt,BDC-G05; BDC-G11
 804A11,Armauflagenheizung BFH (LIN): Versorgungsspannung außerhalb des gültigen Bereiches,Armrest heating BFH (LIN): supply voltage outside of the valid range,BDC-G11
 804A12,"Armauflagenheizung FA (LIN), Heizfeld Fahrertür: Leitungsunterbrechung oder Kurzschluss","Armrest heating FA (LIN), Heizfeld driver door: open circuit or short circuit",BDC-G05; BDC-G11
 804A13,"Armauflagenheizung FA (LIN), Heizfeld Mittelarmlehne: Leitungsunterbrechung oder Kurzschluss","Armrest heating FA (LIN), Heizfeld Mittelarmlehne: open circuit or short circuit",BDC-G11
 804A14,"Armauflagenheizung FA (LIN), Temperatursensor Fahrertür: Leitungsunterbrechung oder Kurzschluss","Armrest heating FA (LIN), temperature sensor driver door: open circuit or short circuit",BDC-G05; BDC-G11
-804A15,"Armauflagenheizung FA (LIN), Temperatursensor Fahrertür: Unplausibles Signal","Armrest heating FA (LIN), temperature sensor driver door: Unplausibles signal",BDC-G11
+804A15,"Armauflagenheizung FA (LIN), Temperatursensor Fahrertür: Unplausibles Signal","Armrest heating FA (LIN), temperature sensor driver door: implausible signal",BDC-G11
 804A16,"Armauflagenheizung FA (LIN), Temperatursensor Mittelarmlehne: Leitungsunterbrechung oder Kurzschluss","Armrest heating FA (LIN), temperature sensor Mittelarmlehne: open circuit or short circuit",BDC-G05; BDC-G11
-804A17,"Armauflagenheizung FA (LIN), Temperatursensor Mittelarmlehne: Unplausibles Signal","Armrest heating FA (LIN), temperature sensor Mittelarmlehne: Unplausibles signal",BDC-G11
+804A17,"Armauflagenheizung FA (LIN), Temperatursensor Mittelarmlehne: Unplausibles Signal","Armrest heating FA (LIN), temperature sensor Mittelarmlehne: implausible signal",BDC-G11
 804A18,Armauflagenheizung FA (LIN): Kurzschluss nach Plus oder Relais klebt,Armrest heating FA (LIN): short circuit to positive or relay klebt,BDC-G05; BDC-G11
 804A19,Armauflagenheizung BFH (LIN): Temperatur der Leiterplatte zu hoch,Armrest heating BFH (LIN): temperature the Leiterplatte too high,BDC-G11
 804A1A,Armauflagenheizung FA (LIN): Temperatur der Leiterplatte zu hoch,Armrest heating FA (LIN): temperature the Leiterplatte too high,BDC-G05; BDC-G11
@@ -5389,9 +5594,9 @@
 804A1C,"Armauflagenheizung FAH (LIN), Heizfeld Mittelarmlehne Fond: Leitungsunterbrechung oder Kurzschluss","Armrest heating FAH (LIN), Heizfeld Mittelarmlehne rear compartment: open circuit or short circuit",BDC-G05; BDC-G11
 804A1D,"Armauflagenheizung FAH (LIN), Heizfeld Tür Fahrerseite hinten: Leitungsunterbrechung oder Kurzschluss","Armrest heating FAH (LIN), Heizfeld door driver side rear: open circuit or short circuit",BDC-G11
 804A1E,"Armauflagenheizung FAH (LIN), Temperatursensor Mittelarmlehne Fond: Leitungsunterbrechung oder Kurzschluss","Armrest heating FAH (LIN), temperature sensor Mittelarmlehne rear compartment: open circuit or short circuit",BDC-G05; BDC-G11
-804A1F,"Armauflagenheizung FAH (LIN), Temperatursensor Mittelarmlehne Fond: Unplausibles Signal","Armrest heating FAH (LIN), temperature sensor Mittelarmlehne rear compartment: Unplausibles signal",BDC-G11
+804A1F,"Armauflagenheizung FAH (LIN), Temperatursensor Mittelarmlehne Fond: Unplausibles Signal","Armrest heating FAH (LIN), temperature sensor Mittelarmlehne rear compartment: implausible signal",BDC-G11
 804A20,"Armauflagenheizung FAH (LIN), Temperatursensor Tür Fahrerseite hinten: Leitungsunterbrechung oder Kurzschluss","Armrest heating FAH (LIN), temperature sensor door driver side rear: open circuit or short circuit",BDC-G05; BDC-G11
-804A21,"Armauflagenheizung FAH (LIN), Temperatursensor Tür Fahrerseite hinten: Unplausibles Signal","Armrest heating FAH (LIN), temperature sensor door driver side rear: Unplausibles signal",BDC-G11
+804A21,"Armauflagenheizung FAH (LIN), Temperatursensor Tür Fahrerseite hinten: Unplausibles Signal","Armrest heating FAH (LIN), temperature sensor door driver side rear: implausible signal",BDC-G11
 804A22,Armauflagenheizung FAH (LIN): Kurzschluss nach Plus oder Relais klebt,Armrest heating FAH (LIN): short circuit to positive or relay klebt,BDC-G05; BDC-G11
 804A23,Armauflagenheizung FAH (LIN): Versorgungsspannung außerhalb des gültigen Bereiches,Armrest heating FAH (LIN): supply voltage outside of the valid range,BDC-G11
 804A24,Armauflagenheizung FAH (LIN): Temperatur der Leiterplatte zu hoch,Armrest heating FAH (LIN): temperature the Leiterplatte too high,BDC-G05; BDC-G11
@@ -5625,7 +5830,7 @@
 930A06,ODS-System: Sitzbelegungsmatte Beifahrer: Kodierdaten stimmen nicht mit Ausstattung ueberein,ODS-system: Sitzbelegungsmatte passenger: Kodierdaten stimmen not with Ausstattung ueberein,ACSM5
 930A07,ODS-System: Sitzbelegungsmatte Beifahrer: Signal ungueltig,ODS-system: Sitzbelegungsmatte passenger: signal invalid,ACSM5
 930A08,ODS-System: Sitzbelegungsmatte Beifahrer: sendet Fehler Sensor Kurzschluss,ODS-system: Sitzbelegungsmatte passenger: sendet fault sensor short circuit,ACSM5
-930A09,ODS-System: Sitzbelegungsmatte Beifahrer: Zugriff fehlgeschlagen,ODS-system: Sitzbelegungsmatte passenger: Zugriff fehlgeschlagen,ACSM5
+930A09,ODS-System: Sitzbelegungsmatte Beifahrer: Zugriff fehlgeschlagen,ODS-system: Sitzbelegungsmatte passenger: Zugriff failed,ACSM5
 930A0A,Airbagsensor B-Saeule rechts (x-y-Richtung): Kurzschluss nach Plus oder Unterbrechung,Airbagsensor B-pillar right (x-y-Richtung): short circuit to positive or interruption,ACSM5
 930A0B,Airbagsensor Tür vorn links: Kurzschluss nach Plus oder Unterbrechung,Airbagsensor door vorn left: short circuit to positive or interruption,ACSM5
 930A11,PTS Plausibilisierungssensor: Kurzschluss nach Plus oder Unterbrechung,PTS plausibility check sensor: short circuit to positive or interruption,ACSM5
@@ -5635,11 +5840,11 @@
 930A16,ODS-System: Sitzbelegungsmatte Beifahrer: Ersatzteil: Codierung notwendig,ODS-system: Sitzbelegungsmatte passenger: Ersatzteil: coding notwendig,ACSM5
 930A1B,ODS-System: Sitzbelegungsmatte Beifahrer: sendet Fehler Sensor Unterbrechung,ODS-system: Sitzbelegungsmatte passenger: sendet fault sensor interruption,ACSM5
 930A1C,ODS-System: Sitzbelegung Beifahrer: sendet Messwerte ausserhalb Bereich,ODS-system: Sitzbelegung passenger: sendet measured value outside range,ACSM5
-930A1D,ODS-System: Sitzbelegungsmatte Beifahrer: sendet unplausible Messwerte,ODS-system: Sitzbelegungsmatte passenger: sendet unplausible measured value,ACSM5
+930A1D,ODS-System: Sitzbelegungsmatte Beifahrer: sendet unplausible Messwerte,ODS-system: Sitzbelegungsmatte passenger: sendet implausible measured value,ACSM5
 930A1E,Airbagsensor B-Saeule links (x-y-Richtung): Kurzschluss nach Plus oder Unterbrechung,Airbagsensor B-pillar left (x-y-Richtung): short circuit to positive or interruption,ACSM5
 930A21,ODS-System: Sitzbelegungsmatte Beifahrer: sendet Fehler Masse Sitzpfanne,ODS-system: Sitzbelegungsmatte passenger: sendet fault ground Sitzpfanne,ACSM5
-930A22,ODS-System: Sitzbelegungsmatte Beifahrer: sendet unplausible Messwerte Heizdraht,ODS-system: Sitzbelegungsmatte passenger: sendet unplausible measured value Heizdraht,ACSM5
-930A23,ODS-System: Sitzbelegungsmatte Beifahrer: sendet Fehler Freigabe fehlgeschlagen,ODS-system: Sitzbelegungsmatte passenger: sendet fault enable fehlgeschlagen,ACSM5
+930A22,ODS-System: Sitzbelegungsmatte Beifahrer: sendet unplausible Messwerte Heizdraht,ODS-system: Sitzbelegungsmatte passenger: sendet implausible measured value Heizdraht,ACSM5
+930A23,ODS-System: Sitzbelegungsmatte Beifahrer: sendet Fehler Freigabe fehlgeschlagen,ODS-system: Sitzbelegungsmatte passenger: sendet fault enable failed,ACSM5
 930A24,UpFront: Airbagfrontsensor links: Sensortyp falsch,UpFront: Airbagfrontsensor left: Sensortyp incorrect,ACSM5
 930A26,UpFront: Airbagfrontsensor links: Kodierdaten stimmen nicht mit Ausstattung ueberein,UpFront: Airbagfrontsensor left: Kodierdaten stimmen not with Ausstattung ueberein,ACSM5
 930A27,UpFront: Airbagfrontsensor links: sendet Fehler,UpFront: Airbagfrontsensor left: sendet fault,ACSM5
@@ -5805,7 +6010,7 @@
 930BB1,UpFront: Airbagfrontsensor rechts: Leitung verkoppelt,UpFront: Airbagfrontsensor right: line verkoppelt,ACSM5
 930BB3,Airbagsensor C-Saeule links (y-Richtung): Leitung verkoppelt,Airbagsensor C-pillar left (y-Richtung): line verkoppelt,ACSM5
 930BB4,Airbagsensor C-Saeule rechts (y-Richtung): Leitung verkoppelt,Airbagsensor C-pillar right (y-Richtung): line verkoppelt,ACSM5
-930BB6,Datenkonsistenzfehler: Codierdaten (Datenfehler),Datenkonsistenzfehler: Codierdaten (data fault),ACSM5
+930BB6,Datenkonsistenzfehler: Codierdaten (Datenfehler),Datenkonsistenzfehler: coding data (data fault),ACSM5
 930BBA,Die Sequenz zum Ausloesen der Rollover-Buegel ist aktiv,The Sequenz to Ausloesen the Rollover-Buegel is active,ACSM5
 930BBC,SBR-Sensor: Sitzbelegungsmatte Beifahrer: Leitung verkoppelt,SBR-sensor: Sitzbelegungsmatte passenger: line verkoppelt,ACSM5
 930BC7,Sensor PTS links: Sensortyp falsch,Sensor PTS left: Sensortyp incorrect,ACSM5
@@ -5841,7 +6046,7 @@
 930C1E,Interner Steuergerätefehler allgemeiner Sensorclusterfehler OBD relevant,Internal Steuergerätefehler allgemeiner Sensorclusterfehler OBD relevant,ACSM5
 930C1F,Mindestens ein oder mehrere unerwartete Zündkreise erkannt,Mindestens a or mehrere unexpected Zündkreise detected,ACSM5
 930C20,Interner Steuergerätefehler allgemeiner Sensorclusterfehler,Internal Steuergerätefehler allgemeiner Sensorclusterfehler,ACSM5
-930C22,Codierung: unplausible Ausstattung,Coding: unplausible Ausstattung,ACSM5
+930C22,Codierung: unplausible Ausstattung,Coding: implausible Ausstattung,ACSM5
 930C28,Interner Steuergerätefehler Sensorclusterfehler Kommunikation,Internal Steuergerätefehler Sensorclusterfehler communication,ACSM5
 930C29,Interner Steuergerätefehler Sensorclusterfehler Spannungsversorgung,Internal Steuergerätefehler Sensorclusterfehler power supply,ACSM5
 930C2D,Interner Steuergerätefehler Sensorclusterfehler Temporärer Ausfall Rollratensensor,Internal Steuergerätefehler Sensorclusterfehler Temporärer failure Rollratensensor,ACSM5
@@ -5951,6 +6156,66 @@
 930D55,UpFront: Airbagfrontsensor Mitte: Kurzschluss nach Minus,UpFront: Airbagfrontsensor center: short circuit to Minus,ACSM5
 930D56,UpFront: Airbagfrontsensor Mitte: Sensorwerte liegen dauerhaft ueber Offset-Wert,UpFront: Airbagfrontsensor center: sensor values liegen permanent via offset-value,ACSM5
 930D57,UpFront: Airbagfrontsensor Mitte: Leitung verkoppelt,UpFront: Airbagfrontsensor center: line verkoppelt,ACSM5
+B7F30D,Keine Kommunikation mit GPS-Empfänger,No communication with GPS-receiver,ATM; TCB4G
+B7F30E,Download des SIM Profils fehlgeschlagen,Download of the SIM Profils failed,ATM02; ATM
+B7F310,ERA Glonass Profil nicht vorhanden,ERA Glonass Profil not present,ATM02; ATM
+B7F311,Kein Zugriff auf interne SIM-Karte,No Zugriff on internal SIM-Karte,ATM02; ATM; TCB4G
+B7F312,Registrierung mit neuem SIM Profil fehlgeschlagen,Registrierung with neuem SIM Profil failed,ATM02; ATM
+B7F313,SIM-Karte gesperrt,SIM-Karte blocked,ATM02; ATM; TCB4G
+B7F315,GPS-Antenne: Kurzschluss nach Plus,GPS-antenna: short circuit to positive,ATM02; ATM; TCB4G
+B7F316,GPS-Antenne: Unterbrechung,GPS-antenna: interruption,ATM02; ATM; TCB4G
+B7F317,GPS-Antenne: Kurzschluss nach Masse,GPS-antenna: short circuit to ground,ATM02; ATM; TCB4G
+B7F318,Notruf-LED Fehler,Emergency call-LED fault,ATM02; ATM; TCB4G
+B7F319,Notruf-Taster: Kurzschluss,Emergency call-button: short circuit,ATM02; ATM; TCB4G
+B7F31A,Notruf-Taster: Unterbrechung,Emergency call-button: interruption,ATM02; ATM; TCB4G
+B7F31B,Mikrofon 1: Kurzschluss nach Plus,Mikrofon 1: short circuit to positive,ATM02; ATM; TCB4G
+B7F31D,Telematik-Antenne2: Kurzschluss nach Plus,Telematik-Antenne2: short circuit to positive,ATM02; ATM; TCB4G
+B7F31E,Telematik-Antenne1: Kurzschluss nach Plus,Telematik-Antenne1: short circuit to positive,ATM02; ATM; TCB4G
+B7F31F,Telematik-Antenne1: Kurzschluss nach Masse,Telematik-Antenne1: short circuit to ground,ATM02; ATM; TCB4G
+B7F320,Hardware Reset,Hardware reset,ATM02; ATM; TCB4G
+B7F321,Software Reset,Software reset,ATM02; ATM; TCB4G
+B7F323,Alive Signal Airbag fehlerhaft,Alive signal Airbag faulty,ATM02; ATM; TCB4G
+B7F324,Notruf-Lautsprecher: Kurzschluss nach Plus,Emergency call-Lautsprecher: short circuit to positive,ATM02; ATM; TCB4G
+B7F325,Notruf-Lautsprecher: Unterbrechung,Emergency call-Lautsprecher: interruption,ATM02; ATM; TCB4G
+B7F326,Notruf-Lautsprecher: Kurzschluss nach Masse,Emergency call-Lautsprecher: short circuit to ground,ATM02; ATM; TCB4G
+B7F327,Mikrofon 1: Kurzschluss nach Masse,Mikrofon 1: short circuit to ground,ATM02; ATM; TCB4G
+B7F328,Mikrofon 1: Unterbrechung,Mikrofon 1: interruption,ATM02; ATM; TCB4G
+B7F32B,Telematik-Antenne1: Unterbrechung,Telematik-Antenne1: interruption,ATM02; ATM; TCB4G
+B7F32C,Telematik-Antenne2: Kurzschluss nach Masse,Telematik-Antenne2: short circuit to ground,ATM02; ATM; TCB4G
+B7F32D,Telematik-Antenne2: Unterbrechung,Telematik-Antenne2: interruption,ATM02; ATM; TCB4G
+B7F32E,Mikrofon 1: Leitungen kurzgeschlossen,Mikrofon 1: line kurzgeschlossen,ATM02; ATM; TCB4G
+B7F335,Interner Steuergerätefehler Hardware,Internal Steuergerätefehler Hardware,ATM02; ATM; TCB4G
+B7F336,Interner Steuergerätefehler Software,Internal Steuergerätefehler Software,ATM02; ATM; TCB4G
+B7F338,Alive Signal Airbag fehlt,Alive signal Airbag missing,ATM02; ATM; TCB4G
+B7F339,Unterspannung erkannt,Undervoltage detected,ATM02; ATM; TCB4G
+B7F33A,Überspannung erkannt,Overvoltage detected,ATM02; ATM; TCB4G
+B7F33C,Interner Steuergerätefehler,Internal Steuergerätefehler,ATM02; ATM; TCB4G
+B7F33E,Automatischer Notruf häufig ausgelöst,Automatischer emergency call häufig ausgelöst,ATM02; ATM; TCB4G
+B7F33F,Notruf durch Diagnose deaktiviert,Emergency call by diagnosis deactivated,ATM02; ATM; TCB4G
+B7F341,Backup-Batterie: Hardware defekt,Backup-battery: Hardware defective,ATM02; ATM; TCB4G
+B7F342,Notruf-Lautsprecher: Leitungen kurzgeschlossen,Emergency call-Lautsprecher: line kurzgeschlossen,ATM02; ATM; TCB4G
+B7F343,Backup-Batterie:  Before end of life,Backup-battery:  Before end of life,ATM02; ATM; TCB4G
+B7F344,WLAN durch Diagnose deaktiviert,WLAN by diagnosis deactivated,ATM
+B7F345,Abschaltung wegen Übertemperatur,Shutdown due to overtemperature,ATM02; ATM; TCB4G
+B7F347,Provisionierung Signaturprüfung fehlgeschlagen Diagnose,Provisionierung signature check failed diagnosis,ATM02
+B7F348,Provisionierung Signaturprüfung fehlgeschlagen OTA,Provisionierung signature check failed OTA,ATM02
+B7F349,Zertifikatsprüfung fehlgeschlagen,Certificate check failed,ATM02
+B7F34A,ECall Testmode activ,ECall Testmode activ,ATM02; ATM
+B7F34B,Notfall-Antenne: Kurzschluss nach Plus,Notfall-antenna: short circuit to positive,ATM02
+B7F34C,Notfall-Antenne: Kurzschluss nach Masse,Notfall-antenna: short circuit to ground,ATM02
+B7F34D,Notfall-Antenne: Unterbrechung,Notfall-antenna: interruption,ATM02
+B7F34E,Kommunikation mit SIM Karte nicht verfügbar,Communication with SIM Karte not available,ATM02; ATM
+B7F34F,Registrierung mit vorherigem SIM Profil fehlgeschlagen,Registrierung with vorherigem SIM Profil failed,ATM02; ATM
+B7F351,Modus: Tracing aktiv,Mode: Tracing active,ATM02
+B7F352,SIM Profil Fallback registriert,SIM Profil Fallback registriert,ATM02; ATM
+B7F353,SIM SUA Statuswechsel registriert,SIM SUA Statuswechsel registriert,ATM02; ATM
+B7F354,OtD Last State Call: LSC aktiviert durch Diagnose,OtD load State Call: LSC activated by diagnosis,ATM02; ATM
+B7F355,OtD Last State Call: LSC Aktivierung durch Diagnose fehlgeschlagen,OtD load State Call: LSC activation by diagnosis failed,ATM02; ATM
+B7F35D,Zertifikatsmanager: ungültige Zertifikatssperrliste,Certificate manager: invalid Zertifikatssperrliste,ATM02
+B7F35F,Notruf-Komponenten Fehler,Emergency call-component fault,ATM02
+B7F360,Provisionierung Syntax Fehler OTA,Provisionierung Syntax fault OTA,ATM02
+B7F361,Provisionierung Syntax Fehler Diagnose,Provisionierung Syntax fault diagnosis,ATM02
+B7F362,Debug Mode aktiv,Debug Mode active,ATM02
 B7F600,Kombi: Fehler beim Schreiben der EEPROM-Daten,Instrument cluster: error while writing the EEPROM-data,KOMBI-01
 B7F601,Kombi: Fehler beim Lesen der EEPROM-Daten,Instrument cluster: error while reading the EEPROM-data,KOMBI-25
 B7F602,Kombi: Fehler in der Steuerung der EEPROM-Daten,Instrument cluster: error in the control the EEPROM-data,KOMBI-01
@@ -6038,7 +6303,7 @@ B7F6A8,KOMBI: Speicherfehler beim Aufstarttest,KOMBI: memory fault during Aufsta
 B7F6A9,KOMBI: Anzeigeabschaltfehler beim Aufstarten,KOMBI: Anzeigeabschaltfehler during Aufstarten,KOMBI-01
 B7F6AA,KOMBI: Displayabschaltfehler beim Aufstarten,KOMBI: Displayabschaltfehler during Aufstarten,KOMBI-25
 B7F6AB,KOMBI: Fehlerhafter Vergleich in der Anzeige beim Aufstarten,KOMBI: faulty comparison in the display during Aufstarten,KOMBI-01
-B7F6AC,KOMBI: Fehlerhafte Signatur im Aufstarttest,KOMBI: faulty Signatur in the Aufstarttest,KOMBI-25
+B7F6AC,KOMBI: Fehlerhafte Signatur im Aufstarttest,KOMBI: faulty signature in the Aufstarttest,KOMBI-25
 B7F6AD,KOMBI: Fehlerbedingter Reset beim Aufstarttest der Spannungsversorgung,KOMBI: Fehlerbedingter reset during Aufstarttest the power supply,KOMBI-01
 B7F6AE,KOMBI: Fehlerbedingter Reset beim Aufstarttest des Speichers,KOMBI: Fehlerbedingter reset during Aufstarttest of the memory,KOMBI-25
 B7F6AF,KOMBI: Fehlerbedingter Reset beim Aufstarttest des Alivezählers,KOMBI: Fehlerbedingter reset during Aufstarttest of the alive counter,KOMBI-01; KOMBI-25
@@ -6231,17 +6496,17 @@ B7F85F,KISU Kunden Anwendungsfehler,KISU customer Anwendungsfehler,NBTEVO
 B7F865,Lüfter Fehler,Fan fault,NBTEVO
 B7F867,Interner Temperaturfehler,Internal temperature fault,NBTEVO
 B7F868,ATC Test negativ: DVD Laufwerk defekt,ATC test negativ: DVD Laufwerk defective,NBTEVO
-B7F869,Provisionierung ohne Signatur OTA,Provisionierung without Signatur OTA,NBTEVO
-B7F86A,Zertifikat ohne Signatur,Certificate without Signatur,NBTEVO
-B7F86B,Externe Unterspannung,Externe undervoltage,NBTEVO
-B7F86C,Externe Überspannung,Externe overvoltage,NBTEVO
-B7F86D,Provisionierung ohne Signatur Diagnose,Provisionierung without Signatur diagnosis,NBTEVO
-B7F86E,Signatur der zu importierenden Portierungsdatei korrupt,Signatur the to importierenden Portierungsdatei korrupt,NBTEVO
+B7F869,Provisionierung ohne Signatur OTA,Provisionierung without signature OTA,NBTEVO
+B7F86A,Zertifikat ohne Signatur,Certificate without signature,NBTEVO
+B7F86B,Externe Unterspannung,External undervoltage,NBTEVO
+B7F86C,Externe Überspannung,External overvoltage,NBTEVO
+B7F86D,Provisionierung ohne Signatur Diagnose,Provisionierung without signature diagnosis,NBTEVO
+B7F86E,Signatur der zu importierenden Portierungsdatei korrupt,Signature the to importierenden Portierungsdatei korrupt,NBTEVO
 B7F86F,Dateistruktur der zu importierenden Portierungsdatei korrupt,Dateistruktur the to importierenden Portierungsdatei korrupt,NBTEVO
 B7F870,Version der zu importierenden Portierungsdatei unbekannt,Version the to importierenden Portierungsdatei unknown,NBTEVO
 B7F872,PIA Software Fehler,PIA Software fault,NBTEVO
-B7F874,Fehler beim Schreiben auf externes Speichermedium,Error while writing on externes Speichermedium,NBTEVO
-B7F875,Fehler beim Lesen vom externen Speichermedium,Error while reading vom externen Speichermedium,NBTEVO
+B7F874,Fehler beim Schreiben auf externes Speichermedium,Error while writing on external Speichermedium,NBTEVO
+B7F875,Fehler beim Lesen vom externen Speichermedium,Error while reading vom external Speichermedium,NBTEVO
 B7F87A,Komponentenschutz aktiv,Component protection active,NBTEVO
 B7F87D,Komponenteninitialiserung nicht gestartet,Komponenteninitialiserung not gestartet,NBTEVO
 B7F87E,Die von einer PIA-Funktion gelieferte aktuelle Profilnummer unterscheidet sich von der in der Head Unit vermerkten,The of a PIA-function gelieferte current Profilnummer unterscheidet sich of the in the Head Unit vermerkten,NBTEVO
@@ -6255,7 +6520,7 @@ B7F89C,Kein GPS Empfang in den letzten 40 Kilometern,No GPS Empfang in the letzt
 B7F8A1,Error memory content corrupted,Error memory content corrupted,NBTEVO
 B7F8AD,Ethernet Verbindung Head-Unit zum ZGW_FEM: Link Status von dem Ethernet Treiber nicht ok,Ethernet Verbindung Head-Unit to ZGW_FEM: Link status of the Ethernet driver not ok,NBTEVO
 B7F8AF,USB-VBUS Verbindung Head-Unit zur USB Benutzer Schnittstelle: Kurzschluss nach Masse,USB-VBUS Verbindung Head-Unit to USB Benutzer interface: short circuit to ground,NBTEVO
-B7F8B2,Video Verbindung: keine oder ungültige Codierdaten-Informationen für die angeforderte Verbindung Quelle %s zu Senke %s. Verbindung nicht hergestellt,Video Verbindung: no or invalid Codierdaten-information for the angeforderte Verbindung Quelle %s to Senke %s. Verbindung not hergestellt,NBTEVO
+B7F8B2,Video Verbindung: keine oder ungültige Codierdaten-Informationen für die angeforderte Verbindung Quelle %s zu Senke %s. Verbindung nicht hergestellt,Video Verbindung: no or invalid coding data-information for the angeforderte Verbindung Quelle %s to Senke %s. Verbindung not hergestellt,NBTEVO
 B7F8B3,Video Verbindung: Fehler vom Video Switch %i beim Verbindungsversuch Quelle %s zu Senke %s. Verbindung nicht hergestellt,Video Verbindung: fault vom Video Switch %i during Verbindungsversuch Quelle %s to Senke %s. Verbindung not hergestellt,NBTEVO
 B7F8B4,Verbindung Head-Unit zum SDARS Antennenfuß: Leitungsunterbrechung,Verbindung Head-Unit to SDARS Antennenfuß: open circuit,NBTEVO
 B7F8B5,Verbindung Head-Unit zum SDARS Antennenfuß: Kurzschluss,Verbindung Head-Unit to SDARS Antennenfuß: short circuit,NBTEVO
@@ -6295,7 +6560,7 @@ B7F8EF,Touch Command: App Reset,Touch Command: App reset,NBTEVO
 B7F8F0,Touch Command: Fahrzeug Kompatibilitätsproblem,Touch Command: vehicle Kompatibilitätsproblem,NBTEVO
 B7F8F1,Touch Command: Nicht genug Speicher,Touch Command: not genug memory,NBTEVO
 B7F8F2,Touch Command: Batterie Problem,Touch Command: battery Problem,NBTEVO
-B7F8F6,HDCP: Authentifizierung fehlgeschlagen,HDCP: Authentifizierung fehlgeschlagen,NBTEVO
+B7F8F6,HDCP: Authentifizierung fehlgeschlagen,HDCP: Authentifizierung failed,NBTEVO
 B7F8F7,System: Softwaremanipulationsfehler erkannt,System: Softwaremanipulationsfehler detected,NBTEVO
 B7F8F8,Digital Video Eingang: kein Video Signal vorhanden,Digital Video input: no Video signal present,NBTEVO
 B7F8FF,UWB Dummy HU,UWB Dummy HU,NBTEVO
@@ -6432,7 +6697,7 @@ CD0440,Überwachungsschaltung hat Reset ausgelöst,Überwachungsschaltung has re
 CD0442,TempShutdown-Sender/Empfängerbaustein(FOT):Temperatur übersteigt kritische Schwelle,TempShutdown-sender/Empfängerbaustein(FOT):temperature übersteigt kritische threshold,ZGW
 CD0445,INIC Reset-Host hat bei fatalem Fehler vom INIC einen Reset ausgelöst,INIC reset-Host has at fatalem fault vom INIC a reset ausgelöst,ZGW
 CD0468,BODY-CAN Control Module Bus OFF,BODY-CAN control module bus OFF,ZGW-SP18
-CD0487,"Synchronisationsvorgang fehlgeschlagen, CC war zum Zeitpunkt der Aufhebung der Fehlerspeichersperre noch nicht synchron","Synchronisationsvorgang fehlgeschlagen, CC war to point in time the Aufhebung the Fehlerspeichersperre yet not synchron",ZGW
+CD0487,"Synchronisationsvorgang fehlgeschlagen, CC war zum Zeitpunkt der Aufhebung der Fehlerspeichersperre noch nicht synchron","Synchronisationsvorgang failed, CC war to point in time the Aufhebung the Fehlerspeichersperre yet not synchron",ZGW
 CD050A,ZSG-CAN Control Module Bus OFF,ZSG-CAN control module bus OFF,ZGW-SP18
 CD0518,FAS-CAN Control Module Bus OFF,FAS-CAN control module bus OFF,ZGW-SP18
 CD0600,Ethernet Unexpected Link Down,Ethernet Unexpected Link Down,ZGW
@@ -8114,6 +8379,55 @@ D94014,"CAN-Botschaft, Steuerung Vibration Lenkrad (CTR_VIB_STW): CRC-Fehler ode
 D94015,"CAN-Botschaft, Geschwindigkeit Fahrzeug (V_VEH): CRC-Fehler oder Alive","CAN-message, speed vehicle (V_VEH): CRC-fault or alive",BDC-G05; BDC-G11
 D94016,"CAN-Botschaft, Höhenstand Fahrzeug gefiltert (HGLV_VEH_1): Alive","CAN-message, Höhenstand vehicle gefiltert (HGLV_VEH_1): alive",BDC-G11
 D94300,Elektrische Lenksäulenverriegelung (ELV): ELV-Master - Ungültige Bussignale erkannt,Electric steering column locking (ELV): ELV-master - invalid bus signal detected,BDC
+DE8468,BODY- oder IuK-CAN Control Module Bus OFF,BODY- or IuK-CAN control module bus OFF,FZD-G11
+DE8BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,FZD-G11
+DE8C00,LIN: AED antwortet nicht,LIN: AED antwortet not,FZD-G11
+DE8C02,Sternenhimmel: LCAN Error,Sternenhimmel: LCAN Error,FZD-G11
+DE8C03,Fahrzeuginnenraum-Trennwand: unplausible LIN-Bus Kommunikation,Fahrzeuginnenraum-Trennwand: implausible LIN-bus communication,FZD-G11
+DE8C04,Gegensprechanlage: unplausible LIN-Bus Kommunikation,Gegensprechanlage: implausible LIN-bus communication,FZD-G11
+DE8C05,LIN: PWCU antwortet nicht,LIN: PWCU antwortet not,FZD-G11
+DE8C5E,LIN: Sine antwortet nicht,LIN: Sine antwortet not,FZD-G11
+E04602,Ethernet: Link-Qualität niedrig,Ethernet: Link-quality low,KAFAS-G11
+E04603,Ethernet: Kommunikationsfehler (Link-Abbruch) durch Steuergeräte-Reset,Ethernet: communication error (Link-abort) by control unit-reset,KAFAS-G11
+E04606,KAFAS-Ethernet: physikalischer Fehler (link off),KAFAS-Ethernet: physical fault (link off),KAFAS-G11
+E04BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,KAFAS-G11
+E05400,Botschaftsfehler - 0x7533 - 0x0001 - BMW_CHASSIS_SpeedAcceleration - Timeout,Message fault - 0x7533 - 0x0001 - BMW_CHASSIS_SpeedAcceleration - timeout,KAFAS-G11
+E05401,Kafas VDY kritischer Fehler,Kafas VDY kritischer fault,KAFAS-G11
+E05402,Signalfehler - 0x7533 - 0x0001 - BMW_CHASSIS_SpeedAcceleration - Signal ungültig,Signal fault - 0x7533 - 0x0001 - BMW_CHASSIS_SpeedAcceleration - signal invalid,KAFAS-G11
+E05404,Signalfehler - 0x5531 - 0x0001 - BMW_BODY_Wiper - E2E Absicherungsfehler,Signal fault - 0x5531 - 0x0001 - BMW_BODY_Wiper - E2E Absicherungsfehler,KAFAS-G11
+E05409,Botschaftsfehler - 0x5532 - 0x0001 - BMW_BODY_Light - Timeout,Message fault - 0x5532 - 0x0001 - BMW_BODY_Light - timeout,KAFAS-G11
+E0540B,Signalfehler - 0x5532 - 0x0001 - BMW_BODY_Light - Signal ungültig,Signal fault - 0x5532 - 0x0001 - BMW_BODY_Light - signal invalid,KAFAS-G11
+E0540C,Botschaftsfehler - 0x5531 - 0x0001 - BMW_BODY_Wiper - Timeout,Message fault - 0x5531 - 0x0001 - BMW_BODY_Wiper - timeout,KAFAS-G11
+E0540D,Signalfehler - 0x7533 - 0x0001 - BMW_CHASSIS_SpeedAcceleration - E2E-Absicherungsfehler,Signal fault - 0x7533 - 0x0001 - BMW_CHASSIS_SpeedAcceleration - E2E-Absicherungsfehler,KAFAS-G11
+E0540E,Signalfehler - 0x5531 - 0x0001 - BMW_BODY_Wiper - Signal Ungültig,Signal fault - 0x5531 - 0x0001 - BMW_BODY_Wiper - signal invalid,KAFAS-G11
+E0540F,Signalfehler - 0x7530 - 0x0001 - BMW_CHASSIS_VehicleModel - E2E Absicherungsfehler,Signal fault - 0x7530 - 0x0001 - BMW_CHASSIS_VehicleModel - E2E Absicherungsfehler,KAFAS-G11
+E05410,Botschaftsfehler - 0x7530 - 0x0001 - BMW_CHASSIS_VehicleModel - Timeout,Message fault - 0x7530 - 0x0001 - BMW_CHASSIS_VehicleModel - timeout,KAFAS-G11
+E05411,Signalfehler - 0x7530 - 0x0001 - BMW_CHASSIS_VehicleModel - Signal Ungültig,Signal fault - 0x7530 - 0x0001 - BMW_CHASSIS_VehicleModel - signal invalid,KAFAS-G11
+E05418,Botschaftsfehler - 0x7536 - 0x0001 - BMW_CHASSIS_WheelTorqueECBA - Timeout,Message fault - 0x7536 - 0x0001 - BMW_CHASSIS_WheelTorqueECBA - timeout,KAFAS-G11
+E0541A,Signalfehler - 0x7536 - 0x0001 - BMW_CHASSIS_WheelTorqueECBA - Signal Ungültig,Signal fault - 0x7536 - 0x0001 - BMW_CHASSIS_WheelTorqueECBA - signal invalid,KAFAS-G11
+E0541B,Botschaftsfehler - 0x7534 - 0x0001 - BMW_CHASSIS_VehicleStabilizationManagement - Timeout,Message fault - 0x7534 - 0x0001 - BMW_CHASSIS_VehicleStabilizationManagement - timeout,KAFAS-G11
+E0541D,Signalfehler - 0x7534 - 0x0001 - BMW_CHASSIS_VehicleStabilizationManagement - Signal ungültig,Signal fault - 0x7534 - 0x0001 - BMW_CHASSIS_VehicleStabilizationManagement - signal invalid,KAFAS-G11
+E0541E,Botschaftsfehler - 0x7532 - 0x0001 - BMW_CHASSIS_SteeringAngle - Timeout,Message fault - 0x7532 - 0x0001 - BMW_CHASSIS_SteeringAngle - timeout,KAFAS-G11
+E0541F,Signalfehler - 0x7532 - 0x0001 - BMW_CHASSIS_SteeringAngle - E2E-Absicherungsfehler,Signal fault - 0x7532 - 0x0001 - BMW_CHASSIS_SteeringAngle - E2E-Absicherungsfehler,KAFAS-G11
+E05420,Signalfehler - 0x7532 - 0x0001 - BMW_CHASSIS_SteeringAngle - Signal ungültig,Signal fault - 0x7532 - 0x0001 - BMW_CHASSIS_SteeringAngle - signal invalid,KAFAS-G11
+E05421,Botschaftsfehler - 0x353b - 0x0001 - BMW_DASS_MainBeam - Timeout,Message fault - 0x353b - 0x0001 - BMW_DASS_MainBeam - timeout,KAFAS-G11
+E05422,Signalfehler - 0x353b - 0x0001 - BMW_DASS_MainBeam - Signal Ungültig,Signal fault - 0x353b - 0x0001 - BMW_DASS_MainBeam - signal invalid,KAFAS-G11
+E05424,Botschaftsfehler - 0x3531 - 0x0001 - BMW_DASS_ControlAndStatus - Timeout,Message fault - 0x3531 - 0x0001 - BMW_DASS_ControlAndStatus - timeout,KAFAS-G11
+E05426,Signalfehler - 0x3531 - 0x0001 - BMW_DASS_ControlAndStatus - Signal Ungültig,Signal fault - 0x3531 - 0x0001 - BMW_DASS_ControlAndStatus - signal invalid,KAFAS-G11
+E05427,Botschaftsfehler - 0x3538 - 0x0001 - BMW_DASS_DriverAssistanceComfortAndSecurity - Timeout,Message fault - 0x3538 - 0x0001 - BMW_DASS_DriverAssistanceComfortAndSecurity - timeout,KAFAS-G11
+E05428,Signalfehler - 0x3538 - 0x0001 - BMW_DASS_DriverAssistanceComfortAndSecurity - E2E Absicherungsfehler,Signal fault - 0x3538 - 0x0001 - BMW_DASS_DriverAssistanceComfortAndSecurity - E2E Absicherungsfehler,KAFAS-G11
+E05429,Signalfehler - 0x3538 - 0x0001 - BMW_DASS_DriverAssistanceComfortAndSecurity - Signal Ungültig,Signal fault - 0x3538 - 0x0001 - BMW_DASS_DriverAssistanceComfortAndSecurity - signal invalid,KAFAS-G11
+E05435,Signalfehler - 0xb534 - 0x0001 - BMW_INFOTAINMENT_DisplayStatus - Signalfehler,Signal fault - 0xb534 - 0x0001 - BMW_INFOTAINMENT_DisplayStatus - signal fault,KAFAS-G11
+E05439,Botschaftsfehler - 0x1531 - 0x0001 - BMW_INFRASTRUCTURE_VehicleCondition - Timeout,Message fault - 0x1531 - 0x0001 - BMW_INFRASTRUCTURE_VehicleCondition - timeout,KAFAS-G11
+E0543A,Signalfehler - 0x1531 - 0x0001 - BMW_INFRASTRUCTURE_ VehicleCondition - E2E Absicherungsfehler,Signal fault - 0x1531 - 0x0001 - BMW_INFRASTRUCTURE_ VehicleCondition - E2E Absicherungsfehler,KAFAS-G11
+E0543B,Signalfehler - 0x1531 - 0x0001 - BMW_INFRASTRUCTURE_ VehicleCondition - Signal Ungültig,Signal fault - 0x1531 - 0x0001 - BMW_INFRASTRUCTURE_ VehicleCondition - signal invalid,KAFAS-G11
+E0543D,Signalfehler - 0x1535 - 0x0001 - BMW_INFRASTRUCTURE_Environmentalinformation - Signal Ungültig,Signal fault - 0x1535 - 0x0001 - BMW_INFRASTRUCTURE_Environmentalinformation - signal invalid,KAFAS-G11
+E0543F,Botschaftsfehler - 0x1535 - 0x0001 - BMW_INFRASTRUCTURE_Environmentalinformation - Timeout,Message fault - 0x1535 - 0x0001 - BMW_INFRASTRUCTURE_Environmentalinformation - timeout,KAFAS-G11
+E05445,Botschaftsfehler - 0x1536 - 0x0001 - BMW_INFRASTRUCTURE_VehicleInformation - Timeout,Message fault - 0x1536 - 0x0001 - BMW_INFRASTRUCTURE_VehicleInformation - timeout,KAFAS-G11
+E05447,Signalfehler - 0x1536 - 0x0001 - BMW_INFRASTRUCTURE_VehicleInformation - Signal Ungültig,Signal fault - 0x1536 - 0x0001 - BMW_INFRASTRUCTURE_VehicleInformation - signal invalid,KAFAS-G11
+E0544B,Botschaftsfehler - 0x9531 - 0x0001 - BMW_POWERTRAIN_AcceleratorPedal - Timeout,Message fault - 0x9531 - 0x0001 - BMW_POWERTRAIN_AcceleratorPedal - timeout,KAFAS-G11
+E0544C,Signalfehler - 0x9531 - 0x0001 - BMW_POWERTRAIN_AcceleratorPedal - E2E-Absicherungsfehler,Signal fault - 0x9531 - 0x0001 - BMW_POWERTRAIN_AcceleratorPedal - E2E-Absicherungsfehler,KAFAS-G11
+E0544D,Signalfehler - 0x9531 - 0x0001 - BMW_POWERTRAIN_AcceleratorPedal - Signal ungültig,Signal fault - 0x9531 - 0x0001 - BMW_POWERTRAIN_AcceleratorPedal - signal invalid,KAFAS-G11
 E10401,FA-CAN Physikalischer Busfehler,FA-CAN physical bus fault,KOMBI-25
 E10409,FA-CAN Bus (-) shorted to Bus (+),FA-CAN bus (-) shorted to bus (+),KOMBI-01
 E1040A,FA-CAN Control Module Bus OFF,FA-CAN control module bus OFF,KOMBI-G11; KOMBI-25
@@ -8415,6 +8729,14 @@ E12CA6,"Schnittstelle BIS, RAM (Status Gong, 0x16f): Signal ungültig","Interfac
 E12CA8,"Schnittstelle BDC_Body (Status Bedienung Licht Außen, 0x1AE): Signal ungültig","Interface BDC_Body (status Bedienung light outside, 0x1AE): signal invalid",KOMBI-G11
 E12CAF,"Schnittstelle BDC_Body (Steuerung Kontrolleuchten, 0x224): Signal ungültig","Interface BDC_Body (control Kontrolleuchten, 0x224): signal invalid",KOMBI-G11
 E12CB7,"Schnittstelle BDC_Body (Steuerung Komfiguration FAS 5, 0x385): Signal ungültig","Interface BDC_Body (control Komfiguration FAS 5, 0x385): signal invalid",KOMBI-G11
+E1441E,IuK-CAN Control Module Bus OFF,IuK-CAN control module bus OFF,ATM02
+E1445F,BODY- oder IuK-CAN Physikalischer Busfehler,BODY- or IuK-CAN physical bus fault,ATM; TCB4G
+E14468,BODY- oder IuK-CAN Control Module Bus OFF,BODY- or IuK-CAN control module bus OFF,ATM; TCB4G
+E14600,Ethernet: physikalischer Fehler (link off),Ethernet: physical fault (link off),ATM02; ATM
+E14602,Ethernet: Link-Qualität niedrig,Ethernet: Link-quality low,ATM02; ATM
+E14603,Ethernet: Kommunikationsfehler (Link-Abbruch) durch Steuergeräte-Reset,Ethernet: communication error (Link-abort) by control unit-reset,ATM02; ATM
+E14604,Ethernet: Unerwarteter Link aufgebaut,Ethernet: unexpected Link aufgebaut,ATM02; ATM
+E14BFF,Dummy-Fehlerspeichereintrag im Netzwerkfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the network fault range nur for Testzwecke,ATM02; ATM; TCB4G
 E1C41E,IuK-CAN Control Module Bus OFF,IuK-CAN control module bus OFF,NBTEVO
 E1C43F,MOST: Empfänger hat Nachricht nicht abgenommen,MOST: receiver has message not abgenommen,NBTEVO
 E1C440,Reset,Reset,NBTEVO
