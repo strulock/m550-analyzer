@@ -1,6 +1,7 @@
 """The GUI's event handler, and its flows against the fake car."""
 
 import csv
+import os
 import tkinter as tk
 
 import pytest
@@ -31,6 +32,15 @@ def drain(app, *msgs):
     for m in msgs:
         app.q.put(m)
     app._drain()
+
+
+def read_journal(folder):
+    out = []
+    for root, _, files in os.walk(folder):
+        for f in files:
+            with open(os.path.join(root, f), encoding="utf-8") as fh:
+                out.append(fh.read())
+    return out
 
 
 def cell(app, name, col):
@@ -91,19 +101,92 @@ def test_check_messages(app):
 
 
 def test_status_messages(app):
-    app.poller = object()                                     # only its presence matters
-    drain(app, ("status", "connected"))
+    poller = app.poller = object()                            # only its identity matters
+    drain(app, ("status", "connected", poller))
     assert "connected" in app.status.cget("text") and app.poller is not None
     app.connect_btn.config(text="Disconnect")
-    drain(app, ("status", "disconnected"))
+    drain(app, ("status", "disconnected", poller))
     assert app.poller is None and app.connect_btn.cget("text") == "Connect"
 
 
 def test_connection_error_drops_the_poller(app, dialogs):
-    app.poller = object()
-    drain(app, ("error", "connection reset"))
+    poller = app.poller = object()
+    drain(app, ("error", "connection reset", poller))
     assert app.poller is None and "error" in app.status.cget("text")
     assert dialogs == [("showerror", "Connection", "connection reset")]
+
+
+def logging(app, poller):
+    app.poller = poller
+    app.logging_to = "C:/logs/run.csv"
+    app.log_btn.config(text="Stop logging")
+
+
+@pytest.mark.parametrize("msg", [("status", "disconnected"), ("error", "connection reset")])
+def test_a_lost_connection_ends_the_log(app, dialogs, msg):
+    poller = object()
+    logging(app, poller)
+    drain(app, msg + (poller,))
+    assert app.logging_to is None and app.log_btn.cget("text") == "Start logging"
+
+
+def test_disconnect_ends_the_log(app):
+    class Stub:
+        def stop(self):
+            pass
+    logging(app, Stub())
+    app._toggle()
+    assert app.poller is None
+    assert app.logging_to is None and app.log_btn.cget("text") == "Start logging"
+
+
+def test_a_late_message_from_a_replaced_poller_is_ignored(app, dialogs):
+    old, new = object(), object()
+    logging(app, new)
+    drain(app, ("status", "disconnected", old), ("error", "reset", old))
+    assert app.poller is new and app.logging_to == "C:/logs/run.csv"
+    assert dialogs == []
+    app.poller = None
+
+
+def test_a_failing_message_does_not_stop_the_event_pump(app, monkeypatch, quick_diagnostics):
+    def broken(*a, **k):
+        raise ValueError("bad sample")
+    monkeypatch.setattr(app, "_show_sample", broken)
+    monkeypatch.setattr(app, "_learn", lambda sample: None)
+    scheduled = []
+    monkeypatch.setattr(app, "after", lambda ms, fn: scheduled.append(fn))
+    drain(app, ("sample", 1.0, {}), ("module", 0x18))
+    assert app.modules == [0x18]                              # the next message still ran
+    assert "display error: bad sample" in app.status.cget("text")
+    assert scheduled == [app._drain]                          # and the pump goes on
+    assert "gui_error" in "".join(read_journal(quick_diagnostics))
+
+
+def test_logging_needs_channels(app, dialogs, monkeypatch):
+    asked = []
+    monkeypatch.setattr(gui.filedialog, "asksaveasfilename", lambda **k: asked.append(k))
+    app.poller = object()
+    app._toggle_log()
+    assert dialogs[-1][2] == "Add channels to watch first."
+    assert asked == [] and app.logging_to is None
+    app.poller = None
+
+
+def test_close_waits_for_the_poller(app, monkeypatch):
+    calls = []
+
+    class Stub:
+        def stop(self):
+            calls.append("stop")
+
+        def join(self, timeout=None):
+            calls.append(("join", timeout))
+    app.poller = Stub()
+    monkeypatch.setattr(app, "destroy", lambda: calls.append("destroy"))
+    app._close()
+    assert calls == ["stop", ("join", 3), "destroy"]
+    app.poller = None
 
 
 def test_a_failed_background_job_keeps_the_connection(app, dialogs):
@@ -319,3 +402,23 @@ def test_an_unstubbed_dialog_fails_instead_of_hanging(app):
         gui.filedialog.asksaveasfilename()
     with pytest.raises(AssertionError, match="unstubbed dialog"):
         gui.messagebox.showinfo("x", "y")
+
+
+def test_scan_shows_an_unexpected_error_and_carries_on(app, car, monkeypatch):
+    monkeypatch.setattr(core, "SWEEP_RANGE", (0x0E, 0x14))
+    real = core.Hsfz.tester_present
+
+    def flaky(self, target):
+        if target == 0x11:
+            raise RuntimeError("adapter fell over")
+        return real(self, target)
+    monkeypatch.setattr(core.Hsfz, "tester_present", flaky)
+    app.ip_var.set("127.0.0.1")
+    app.probe_var.set("0.1")
+    before = set(app.winfo_children())
+    app._scan()
+    box = next(w for w in app.winfo_children() if w not in before).winfo_children()[0]
+    assert pump(app, lambda: "Done." in box.get("1.0", "end"), timeout=4)
+    text = box.get("1.0", "end")
+    assert "0x11  error: RuntimeError: adapter fell over" in text
+    assert app.modules == [0x10, 0x12]                        # the scan went on past it
