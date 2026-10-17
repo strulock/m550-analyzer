@@ -52,3 +52,12 @@ def test_enum_unmatched_value_falls_back_to_number():
 def test_every_data_file_is_locatable():
     for name in core.DATA_FILES:
         assert os.path.exists(core.resource_path(name)), name
+
+
+@pytest.mark.parametrize("value, cell", [
+    (None, ""), (1.5, 1.5), (-3, -3), ("3D position", "3D position"),
+    ("=HYPERLINK(\"x\")", "'=HYPERLINK(\"x\")"), ("+1", "'+1"), ("-x", "'-x"),
+    ("@SUM(A1)", "'@SUM(A1)"),
+])
+def test_log_cells_never_run_as_spreadsheet_formulas(value, cell):
+    assert core.log_cell(value) == cell

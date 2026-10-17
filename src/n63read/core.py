@@ -134,6 +134,10 @@ class Hsfz:
     """
 
     TRACE_LIMIT = 400               # frames kept when tracing
+    # Largest frame accepted. Real ones are a few hundred bytes; without a
+    # cap a bad length field from whatever answers at the IP has us try to
+    # allocate up to 4 GB.
+    MAX_FRAME = 0x10000
 
     def __init__(self, ip, port=HSFZ_DIAG_PORT, source=TESTER_ADDR, timeout=3.0, *,
                  trace=None):
@@ -186,7 +190,7 @@ class Hsfz:
         self._note("tx", CTRL_DIAG, self.source, target, payload)
 
     def _recv_exact(self, n):
-        buf = b""
+        buf = bytearray()
         while len(buf) < n:
             try:
                 chunk = self.sock.recv(n - len(buf))
@@ -197,11 +201,14 @@ class Hsfz:
             if not chunk:
                 raise HsfzError("connection closed by ECU")
             buf += chunk
-        return buf
+        return bytes(buf)
 
     def _recv_frame(self):
         head = self._recv_exact(6)
         length, control = struct.unpack(">IH", head)
+        if length > self.MAX_FRAME:
+            raise HsfzError("bad frame from %s: length %d (control 0x%04X)"
+                            % (self.ip, length, control))
         body = self._recv_exact(length)
         if length >= 2:
             self._note("rx", control, body[0], body[1], body[2:])
@@ -627,8 +634,8 @@ def _dms(b):
     """5 bytes (sign, deg, min, sec, 1/100 s) to signed decimal degrees.
 
     The first byte is the ninth bit of a two's-complement degree count, not a
-    hemisphere flag over a plain one: 96 deg W comes as 01 A0 (0x1A0 = -96 in
-    nine bits), not 01 60. Seen on the car (October 2026); the minutes and
+    hemisphere flag over a plain one: 100 deg W comes as 01 9C (0x19C = -100
+    in nine bits), not 01 64. Seen on the car (October 2026); the minutes and
     seconds are the magnitude's.
     """
     whole = ((b[0] & 0x01) << 8) | b[1]
@@ -679,8 +686,22 @@ DOIP_IDENT_PROBE = bytes([0x02, 0xFD, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00])
 
 
 def reply_protocol(payload):
-    """"DoIP" or "HSFZ", from a discovery reply's first bytes."""
-    return "DoIP" if payload[:2] == b"\x02\xfd" else "HSFZ"
+    """"DoIP", "HSFZ" or "unknown", from a discovery reply's first bytes.
+
+    HSFZ needs the vehicle identification control word, so a stray datagram
+    on the port can't pass for the car.
+    """
+    if payload[:2] == b"\x02\xfd":
+        return "DoIP"
+    if len(payload) >= 6 and payload[4:6] == b"\x00\x11":
+        return "HSFZ"
+    return "unknown"
+
+
+def reply_vin(payload):
+    """The VIN in an HSFZ identification reply ("...BMWVIN<17 chars>"), or ""."""
+    m = re.search(rb"BMWVIN([A-HJ-NPR-Z0-9]{17})", payload)
+    return m.group(1).decode("ascii") if m else ""
 
 
 def link_neighbours(local_ip):
@@ -772,12 +793,31 @@ def discover(timeout=3.0, bind_ip=None, details=None):
         if details is not None:
             details.append({"ms": round((time.time() - sent) * 1000), "from": addr[0],
                             "port": addr[1], "bytes": data.hex()})
+        if data in HSFZ_IDENT_PROBES or data == DOIP_IDENT_PROBE:
+            continue                    # our own broadcast, heard back
         if (addr[0], data) not in found:
             found.append((addr[0], data))
     s.close()
-    # HSFZ replies first: that is the protocol this tool speaks.
-    found.sort(key=lambda h: reply_protocol(h[1]) != "HSFZ")
+    # HSFZ replies first: that is the protocol this tool speaks. Then the
+    # ENET link's 169.254.x.x, where the car is, ahead of anything on WiFi.
+    rank = {"HSFZ": 0, "DoIP": 1, "unknown": 2}
+    found.sort(key=lambda h: (rank[reply_protocol(h[1])],
+                              not h[0].startswith("169.254.")))
     return found
+
+
+# Text a spreadsheet would run as a formula when a log is opened in it.
+FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
+
+
+def log_cell(value):
+    """A value as written to a CSV log: blank for no reading, and text that
+    a spreadsheet would run as a formula made literal with a leading '."""
+    if value is None:
+        return ""
+    if isinstance(value, str) and value.startswith(FORMULA_START):
+        return "'" + value
+    return value
 
 
 # ------------------------------------------------------------ measurements

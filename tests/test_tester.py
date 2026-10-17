@@ -157,6 +157,17 @@ def test_a_wrong_token_is_dropped(owner):
         assert s.recv(100) == b""
 
 
+def test_an_endless_line_is_dropped_before_the_token_check(owner):
+    with open(share.state_path(), encoding="utf-8") as f:
+        port = json.load(f)["port"]
+    with socket.create_connection(("127.0.0.1", port), timeout=5) as s:
+        try:
+            s.sendall(b"x" * (share.MAX_LINE + 10))
+        except OSError:
+            pass                                      # already dropped: also fine
+        assert s.recv(100) == b""
+
+
 def test_stopping_the_owner_withdraws_the_offer(car):
     o = Owner()
     assert os.path.exists(share.state_path())

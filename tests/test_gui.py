@@ -15,6 +15,7 @@ gui = pytest.importorskip("n63read.gui")
 
 LAT = "HU_STATUS_GPS_POSITION.LATITUDE"
 FIX = "HU_STATUS_GPS"
+IDENT = bytes.fromhex("000000320011") + b"DIAGADR10BMWMAC001A37AABBCCBMWVINWBA00000000000000"
 
 
 @pytest.fixture
@@ -214,8 +215,30 @@ def test_logfile_module_and_scanline_messages(app):
 def test_discovered_messages(app, dialogs):
     drain(app, ("discovered", []))
     assert dialogs and dialogs[0][1] == "Discover"
-    drain(app, ("discovered", [("169.254.10.20", "WBA...")]))
-    assert app.ip_var.get() == "169.254.10.20" and "found 1" in app.status.cget("text")
+    drain(app, ("discovered", [("169.254.10.20", IDENT)]))
+    assert app.ip_var.get() == "169.254.10.20"
+    assert "found WBA00000000000000 at 169.254.10.20" in app.status.cget("text")
+
+
+def test_a_stray_reply_is_not_taken_for_the_car(app, dialogs):
+    app.ip_var.set("")
+    drain(app, ("discovered", [("192.168.1.50", b"junk")]))
+    assert app.ip_var.get() == "" and dialogs[-1][2].startswith("No reply.")
+
+
+@pytest.mark.parametrize("hits", [
+    [("192.168.1.60", IDENT)],                                # not on the ENET link
+    [("169.254.10.20", IDENT), ("169.254.10.21", IDENT)],     # two cars
+])
+def test_an_unusual_car_is_confirmed_by_vin_first(app, monkeypatch, hits):
+    asked = []
+    monkeypatch.setattr(gui.messagebox, "askyesno", lambda t, m: asked.append(m) or False)
+    app.ip_var.set("")
+    drain(app, ("discovered", hits))
+    assert "WBA00000000000000" in asked[0] and app.ip_var.get() == ""
+    monkeypatch.setattr(gui.messagebox, "askyesno", lambda t, m: True)
+    drain(app, ("discovered", hits))
+    assert app.ip_var.get() == hits[0][0]
 
 
 # ------------------------------------------------------- against the fake car

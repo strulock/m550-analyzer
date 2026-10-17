@@ -10,6 +10,9 @@ from conftest import pump
 # An address that is never on a PC: TEST-NET-3 (RFC 5737).
 GONE = "203.0.113.77"
 
+# An HSFZ identification reply, as the car sends it (placeholder VIN).
+IDENT = bytes.fromhex("000000320011") + b"DIAGADR10BMWMAC001A37AABBCCBMWVINWBA00000000000000"
+
 
 def test_link_local():
     assert core.link_local(["10.0.0.5", "169.254.10.2", "169.254.1.1"]) == \
@@ -73,7 +76,7 @@ def test_refresh_falls_back_to_auto_without_an_adapter(app, addrs):
 def test_discover_uses_the_current_address_not_the_stale_one(app, addrs, monkeypatch):
     used = []
     monkeypatch.setattr(core, "discover", lambda t, bind: used.append(bind) or
-                        [("169.254.10.10", b"")])
+                        [("169.254.10.10", IDENT)])
     app.bind_var.set("169.254.1.1")                 # remembered from before a link reset
     app._discover()
     assert "169.254.1.1 is gone" in app.status.cget("text")
@@ -141,6 +144,55 @@ def test_probes_include_the_zero_length_hsfz_request_and_doip():
     assert core.DOIP_IDENT_PROBE == bytes.fromhex("02fd000100000000")
     assert core.reply_protocol(bytes.fromhex("02fd0004")) == "DoIP"
     assert core.reply_protocol(bytes.fromhex("000000320011")) == "HSFZ"
+
+
+def test_a_stray_datagram_is_not_the_car():
+    assert core.reply_protocol(b"") == "unknown"
+    assert core.reply_protocol(b"hello world") == "unknown"
+    assert core.reply_protocol(bytes.fromhex("000000020012")) == "unknown"
+
+
+def test_vin_from_the_identification_reply():
+    assert core.reply_vin(IDENT) == "WBA00000000000000"
+    assert core.reply_vin(bytes.fromhex("000000000011")) == ""
+
+
+class FakeSocket:
+    """Plays back datagrams to discover(); records what it sent."""
+    def __init__(self, replies):
+        self.replies = list(replies)
+
+    def setsockopt(self, *a):
+        pass
+
+    def settimeout(self, t):
+        pass
+
+    def bind(self, addr):
+        pass
+
+    def sendto(self, data, addr):
+        pass
+
+    def recvfrom(self, n):
+        if not self.replies:
+            raise core.socket.timeout()
+        return self.replies.pop(0)
+
+    def close(self):
+        pass
+
+
+def test_discover_ranks_the_car_on_the_link_first_and_drops_echoes(monkeypatch):
+    replies = [
+        (core.HSFZ_IDENT_PROBES[0], ("169.254.35.7", 6811)),   # our own broadcast
+        (b"junk", ("192.168.1.50", 6811)),
+        (IDENT, ("192.168.1.60", 6811)),
+        (IDENT, ("169.254.12.34", 6811)),
+    ]
+    monkeypatch.setattr(core.socket, "socket", lambda *a: FakeSocket(replies))
+    got = core.discover(timeout=0.2)
+    assert [ip for ip, _ in got] == ["169.254.12.34", "192.168.1.60", "192.168.1.50"]
 
 
 ARP_OUTPUT = """

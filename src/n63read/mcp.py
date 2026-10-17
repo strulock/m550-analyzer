@@ -171,9 +171,18 @@ def run_cli(argv):
     return text or "(no output)"
 
 
+def _value(value):
+    """A tool argument as one CLI argument. One starting with "-" would be
+    read as an option (say --source, overriding the tester address)."""
+    value = str(value)
+    if value.startswith("-"):
+        raise ToolError("not a valid value: %r" % value)
+    return value
+
+
 def _opt(argv, flag, value):
     if value not in (None, ""):
-        argv += [flag, str(value)]
+        argv += [flag, _value(value)]
     return argv
 
 
@@ -199,18 +208,19 @@ def tool_discover(a):
 
 
 def tool_scan_modules(a):
-    return run_cli(_opt(["scan", "--ip", a["ip"], "--source", SOURCE], "--probe-timeout", a.get("probe_timeout")))
+    return run_cli(_opt(["scan", "--ip", _value(a["ip"]), "--source", SOURCE], "--probe-timeout", a.get("probe_timeout")))
 
 
 def tool_read_channels(a):
-    names = [str(n) for n in a.get("names") or []]
+    names = [_value(n) for n in a.get("names") or []]
     if not names:
         raise ToolError("names: give at least one channel")
-    return run_cli(_opt(["read", "--ip", a["ip"], "--source", SOURCE], "--target", a.get("target")) + names)
+    return run_cli(_opt(["read", "--ip", _value(a["ip"]), "--source", SOURCE], "--target", a.get("target"))
+                   + ["--"] + names)
 
 
 def tool_read_faults(a):
-    argv = _opt(["faults", "--ip", a["ip"], "--source", SOURCE, "-v"], "--target", a.get("target"))
+    argv = _opt(["faults", "--ip", _value(a["ip"]), "--source", SOURCE, "-v"], "--target", a.get("target"))
     if a.get("all_modules"):
         argv.append("--all")
     if a.get("every_code"):
@@ -222,11 +232,11 @@ def tool_read_faults(a):
 
 
 def tool_read_gps(a):
-    return run_cli(["gps", "--ip", a["ip"], "--source", SOURCE])
+    return run_cli(["gps", "--ip", _value(a["ip"]), "--source", SOURCE])
 
 
 def tool_check_modules(a):
-    return run_cli(_opt(["check", "--ip", a["ip"], "--source", SOURCE], "--module", a.get("module")))
+    return run_cli(_opt(["check", "--ip", _value(a["ip"]), "--source", SOURCE], "--module", a.get("module")))
 
 
 def tool_search_channels(a):

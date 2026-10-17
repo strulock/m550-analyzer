@@ -69,6 +69,12 @@ def test_silent_address_raises_hsfz_error_not_socket_timeout():
         hsfz([]).tester_present(0x55)
 
 
+def test_an_absurd_frame_length_is_refused_not_allocated():
+    bad = struct.pack(">IH", 0xFFFFFFFF, core.CTRL_DIAG) + bytes([0x12, 0xF4])
+    with pytest.raises(core.HsfzError, match="bad frame"):
+        hsfz([bad]).tester_present(0x12)
+
+
 def test_request_out_of_range_is_a_negative_response():
     h = hsfz([frame(0x12, 0xF4, b"\x7F\x22\x31")])
     with pytest.raises(core.NegativeResponse) as e:
