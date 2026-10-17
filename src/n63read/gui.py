@@ -376,7 +376,7 @@ class App(tk.Tk):
     # -- layout ----------------------------------------------------------
 
     def _build(self):
-        bar = ttk.Frame(self, padding=8)
+        bar = self._top_bar = ttk.Frame(self, padding=8)
         bar.pack(fill="x")
 
         ttk.Label(bar, text="IP").pack(side="left")
@@ -557,6 +557,7 @@ class App(tk.Tk):
         self.canvas.pack(fill="x", pady=(6, 0))
         self.canvas.bind("<Motion>", lambda e: self._chart_hover(e.x))
         self.canvas.bind("<Leave>", lambda e: self._chart_hover(None))
+        self._build_replay_bar()
 
         self._refilter()
 
@@ -1147,7 +1148,8 @@ class App(tk.Tk):
     def _learn(self, sample):
         """Record, from live reads, which identifiers this car answers."""
         for name, (value, _unit, note) in sample.items():
-            if name not in self.catalog or core.is_derived(self.catalog[name]):
+            meta = self.catalog.get(name)
+            if meta is None or core.is_derived(meta) or meta.get("LOGONLY"):
                 continue                        # worked out, not asked of the car
             status = "ok" if value is not None else "refused" if note in REFUSALS else None
             key = self._avail_key(name)
@@ -1607,6 +1609,7 @@ class App(tk.Tk):
             return
         if self.feed.kind == "replay":
             self.replay_btn.config(text="Open log...")
+            self.replay_bar.pack_forget()
         self.feed.stop()
         self.feed = None
         for s in self.series.values():
@@ -1652,20 +1655,113 @@ class App(tk.Tk):
         if self.poller:
             return                          # connected while it was reading
         names, rows = result
-        known = [n for n in names if n in self.catalog]
-        if not known:
-            messagebox.showerror("Replay", "None of the log's columns are known channels.")
-            return
-        if len(known) < len(names):
-            messagebox.showwarning(
-                "Replay", "Skipping columns not in the channel catalog:\n\n"
-                + ", ".join(n for n in names if n not in self.catalog))
+        # Another tool's columns (a BimmerLink export: "Engine speed (rpm)")
+        # aren't catalog channels; they replay and graph all the same.
+        for name in names:
+            if name not in self.catalog:
+                label, unit = playback.label_and_unit(name)
+                self.catalog[name] = {"ARG": name, "ID": "0x0000", "INFO": label,
+                                      "INFO_EN": label, "EINHEIT": unit, "LOGONLY": "1"}
         self._stop_feed()
-        self._set_watch(known)
+        self._set_watch(names)
         feed = playback.ReplayFeed(self.q, rows)
         feed.name_shown = os.path.basename(path)
         self._start_feed(feed)
         self.replay_btn.config(text="Stop replay")
+        self._show_replay_bar(feed)
+
+    # -- replay controls ---------------------------------------------------
+
+    def _build_replay_bar(self):
+        """Pause, speed, a slider through the log, and the whole log at once.
+        Shown only while a log replays."""
+        bar = self.replay_bar = ttk.Frame(self, padding=(8, 0, 8, 6))
+        self.replay_pause_btn = ttk.Button(bar, text="Pause", width=7,
+                                           command=self._replay_pause)
+        self.replay_pause_btn.pack(side="left")
+        ttk.Label(bar, text="Speed").pack(side="left", padx=(10, 2))
+        self.replay_speed_var = tk.StringVar(value="1x")
+        speed = ttk.Combobox(bar, textvariable=self.replay_speed_var, width=4,
+                             state="readonly",
+                             values=["%dx" % s for s in playback.ReplayFeed.SPEEDS])
+        speed.pack(side="left")
+        speed.bind("<<ComboboxSelected>>", lambda e: self._replay_speed())
+        self.scrub_var = tk.DoubleVar(value=0.0)
+        self.scrub = ttk.Scale(bar, orient="horizontal", variable=self.scrub_var,
+                               from_=0.0, to=1.0, command=self._scrub)
+        self.scrub.pack(side="left", fill="x", expand=True, padx=10)
+        self.scrub_label = ttk.Label(bar, text="0:00 / 0:00", width=13)
+        self.scrub_label.pack(side="left")
+        ttk.Button(bar, text="Whole log into graphs",
+                   command=self._whole_log).pack(side="left", padx=(8, 0))
+        self._scrub_setting = False
+
+    def _show_replay_bar(self, feed):
+        self.scrub.configure(to=max(feed.duration, 0.001))
+        self.replay_speed_var.set("1x")
+        self.replay_pause_btn.config(text="Pause")
+        self._scrub_shown(0.0)
+        self.replay_bar.pack(after=self._top_bar, fill="x")
+
+    def _scrub_shown(self, seconds):
+        """Move the slider with the replay, without that counting as a seek."""
+        feed = self.feed
+        self._scrub_setting = True
+        try:
+            self.scrub_var.set(seconds)
+        finally:
+            self._scrub_setting = False
+        self.scrub_label.config(text="%s / %s" % (
+            _clock(seconds), _clock(feed.duration if feed else 0)))
+
+    def _scrub(self, value):
+        feed = self.feed
+        if self._scrub_setting or not feed or feed.kind != "replay":
+            return
+        feed.seek(float(value))
+
+    def _replay_speed(self):
+        if self.feed and self.feed.kind == "replay":
+            self.feed.set_speed(int(self.replay_speed_var.get().rstrip("x")))
+
+    def _replay_pause(self):
+        feed = self.feed
+        if not feed or feed.kind != "replay":
+            return
+        feed.pause(not feed.paused)
+        self.replay_pause_btn.config(text="Resume" if feed.paused else "Pause")
+
+    def _whole_log(self):
+        """Every row of the log into the graphs at once, rather than replayed
+        at its own pace. The table shows the last row."""
+        feed = self.feed
+        if not feed or feed.kind != "replay":
+            return
+        feed.whole = True               # its thread's leftover samples are ignored
+        feed.stop()
+        names = [n for n, _, _ in self.watch]
+        last = {}
+        for h in (self.history.get(n) for n in names):
+            if h is not None:
+                h.clear()
+        for t, values in feed.rows:
+            for name in names:
+                v = values.get(name)
+                if v is not None:
+                    last[name] = v
+                    h = self.history.get(name)
+                    if h is not None and isinstance(v, (int, float)):
+                        h.append((float(t), float(v)))
+        self._show_sample({n: (last.get(n), "", "" if n in last else "not in log")
+                           for n in names}, plot=False)
+        for name in names:
+            h = self.history.get(name)
+            self.series[name] = [v for _, v in list(h)[-PLOT_POINTS:]] if h else []
+        self.replay_bar.pack_forget()
+        self._plot()
+        self.status.config(text="● %s: whole log (%s, %d rows) - select rows and press "
+                           "Graph" % (feed.name_shown, _clock(feed.duration), len(feed.rows)),
+                           foreground="#2d7dd2")
 
     # -- connection ------------------------------------------------------
 
@@ -2078,10 +2174,11 @@ class App(tk.Tk):
 
         elif kind == "feedsample":
             _, feed, elapsed, sample = msg
-            if feed is not self.feed:
+            if feed is not self.feed or getattr(feed, "whole", False):
                 return                      # left over from a stopped feed
             self._show_sample(sample, elapsed, plot=False)
             if feed.kind == "replay":
+                self._scrub_shown(elapsed - feed.rows[0][0])
                 self.status.config(
                     text="● replaying %s  %s / %s" % (
                         feed.name_shown, _clock(elapsed - feed.rows[0][0]),
@@ -2094,6 +2191,7 @@ class App(tk.Tk):
         elif kind == "feeddone":
             if msg[1] is self.feed:
                 self.feed = None
+                self.replay_bar.pack_forget()
                 self.replay_btn.config(text="Open log...")
                 self.status.config(text="● replay finished", foreground="#999")
 
