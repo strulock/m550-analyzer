@@ -114,15 +114,20 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 5 — Diagnostics depth
 
-- [ ] Freeze frames: read `0x19 04/06` (still service 0x19, read-only) and
-      decode them with the bundled `BMW_freeze_frame_fields.csv`, which is
-      loaded but unused (`core.py:70`).
-- [ ] Multi-identifier `0x22` reads, if the DME accepts them. Measure the gain
-      against the single-identifier rate. Needs the car first.
-- [ ] Fault texts for modules 0x56, 0x5D, 0x61 and 0x6D
-      (`docs/modules.md:125-131`).
-- [ ] A clearer DoIP path than the "Please report this" message box
-      (`gui.py:1708-1712`).
+- [x] Freeze frames: read `0x19 04/06` (still service 0x19, read-only) and
+      decode them. `BMW_freeze_frame_fields.csv` turned out to be mostly
+      neighbouring tables picked up by the first extraction, without the
+      odometer (`0x1700`); it was rebuilt from `DTCSNAPSHOTIDENTIFIER`, which
+      every module file supplied agrees on. Shown under Details in the fault
+      window, by `faults --details`, and by the MCP `read_faults` tool.
+- [x] Multi-identifier `0x22` reads: built, off by default, and
+      self-checking (a reply is used only if every echo lines up; any doubt
+      turns batching off for that DME). `n63read speed` measures both ways
+      and `n63read log --batch` uses it. Measuring at the car is in Phase 10.
+- [ ] Decode modules' own snapshot values: each module file's `FUMWELTTEXTE`
+      gives them, but the texts need English first (`tools/translate.py`).
+- [x] A clearer DoIP path: what a DoIP-only answer usually means, offered
+      with a diagnostics report, in the app, `discover` and `diag`.
 
 ## Phase 6 — Replay and MCP
 
@@ -195,3 +200,23 @@ the file and line it starts from, as of 0.3.8.
 - [ ] Look into the bank-2 gaps: `SOLL_POS_EWG` is unreadable and
       `I_EWG_POS@0x13` replies with the wrong identifier
       (`docs/modules.md:118-120`).
+- [ ] Run `n63read speed` at the car. If the DME takes several identifiers
+      per request, consider making batching the default in the app too.
+- [ ] Check the freeze-frame details against a real fault: odometer, time and
+      counters should match the car.
+
+## Phase 11 — Needs more BMW files
+
+> **Blocked:** needs `dme8ff_r.prg` (and the `.prg` files for the modules below).
+
+- [ ] Re-extract the DME's value tables. `BMW_enum_tables.csv` was made by
+      the first extractor, which read each table's position from the
+      directory entry before its name, so each table's texts sit under the
+      next table's name: "Status terminal 15" and "Condition for detected
+      knocks" show gear texts, "COMM status FA CAN" shows engine-stall
+      reasons. It can't be shifted back reliably: tables that weren't kept
+      sit between the ones that were. The module catalogs use the newer
+      extractor and aren't affected.
+- [ ] Fault texts for modules 0x56, 0x5D, 0x61 and 0x6D
+      (`docs/modules.md:125-131`).
+- [ ] The DME's own snapshot values (its `FUMWELTTEXTE`).

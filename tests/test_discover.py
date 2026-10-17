@@ -2,7 +2,7 @@
 
 import pytest
 
-from n63read import core
+from n63read import cli, core
 
 from conftest import pump
 
@@ -227,9 +227,21 @@ def test_no_reply_but_a_neighbour_fills_the_ip(app, addrs, monkeypatch, dialogs)
 def test_a_doip_car_is_reported(app, addrs, monkeypatch, dialogs):
     monkeypatch.setattr(core, "discover",
                         lambda t, bind: [("169.254.12.34", bytes.fromhex("02fd0004"))])
+    asked, reports = [], []
+    monkeypatch.setattr(gui.messagebox, "askyesno", lambda t, m, **k: asked.append(m) or True)
+    monkeypatch.setattr(app, "_save_diag_report", lambda: reports.append(1))
     app._discover()
-    assert pump(app, lambda: dialogs.info)
-    assert "DoIP" in dialogs.info[-1] and app.ip_var.get() == "169.254.12.34"
+    assert pump(app, lambda: asked)
+    assert "answered Discover with DoIP" in asked[-1] and app.ip_var.get() == "169.254.12.34"
+    assert reports == [1]                               # offered, and taken
+
+
+def test_cli_explains_a_doip_answer(monkeypatch, capsys):
+    monkeypatch.setattr(core, "discover",
+                        lambda t, bind: [("169.254.12.34", bytes.fromhex("02fd0004"))])
+    cli.main(["discover"])
+    out = capsys.readouterr().out
+    assert "answered Discover with DoIP" in out and "n63read diag --report" in out
 
 
 def test_cli_discover_lists_neighbours_when_nothing_answers(monkeypatch, capsys):

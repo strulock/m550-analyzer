@@ -288,6 +288,19 @@ class Hsfz:
             raise HsfzError("identifier mismatch: asked 0x%04X got 0x%04X" % (did, echoed))
         return resp[3:]
 
+    def read_dids(self, target, dids, timeout=None):
+        """UDS 0x22 with several identifiers in one request. Returns the reply
+        after 0x62: each identifier echoed, then its data (split_reply())."""
+        if timeout is not None:
+            saved = self.timeout
+            self._set_timeout(timeout)
+            try:
+                return self.read_dids(target, dids)
+            finally:
+                self._set_timeout(saved)
+        resp = self.request(target, b"\x22" + b"".join(d.to_bytes(2, "big") for d in dids))
+        return resp[1:]
+
     def tester_present(self, target):
         return self.request(target, bytes([0x3E, 0x00]))
 
@@ -323,6 +336,16 @@ class Hsfz:
         """
         resp = self.request(target, bytes([0x19, 0x02, status_mask & 0xFF]))
         return parse_dtc_records(resp)
+
+    def read_snapshots(self, target, code):
+        """UDS 0x19 sub-function 0x04: the conditions stored when fault `code`
+        (6 hex digits) set - odometer, time and the like. Raw 59 04 reply."""
+        return self.request(target, bytes([0x19, 0x04]) + bytes.fromhex(code) + b"\xff")
+
+    def read_extended(self, target, code):
+        """UDS 0x19 sub-function 0x06: the fault's counters (how often it
+        occurred, healing). Raw 59 06 reply."""
+        return self.request(target, bytes([0x19, 0x06]) + bytes.fromhex(code) + b"\xff")
 
 
 # The N63 has a DME per bank: 0x12 (master) runs bank 1, 0x13 (slave) bank 2,
@@ -613,6 +636,181 @@ def _module_fault_rows(h, addr, texts, names, read_at, everything=False):
     return rows
 
 
+# ------------------------------------------------------------- fault details
+#
+# What a module stored with a fault. A snapshot (0x19 04) holds identifiers
+# with values; BMW's standard ones (0x17xx: odometer, time, SAE code, fault
+# class, power state) are the same in every UDS module on this car, and are
+# in FREEZE_CSV. A module's own environment values may follow; without their
+# sizes they can't be split, so the rest is shown raw. The extended data
+# (0x19 06) holds counters, from DTCEXTENDEDDATARECORDNUMBER.
+
+FREEZE_LABELS = {
+    0x1700: "Odometer", 0x1701: "Vehicle time", 0x1702: "SAE code",
+    0x1731: "Fault class", 0x1750: "Power state (base network)",
+    0x1751: "Power state (sub-networks)", 0x1768: "Odometer (extended)",
+    0x1769: "Vehicle time (extended)", 0xFFFF: "Unknown identifier",
+}
+FREEZE_UNITS = {0x1700: "km", 0x1768: "km", 0x1701: "s", 0x1769: "s"}
+
+# BMW's own tables for these, the same in every module file that has them.
+FAULT_CLASSES = {
+    0x00: ("Keine Fehlerklasse verfuegbar", "no fault class"),
+    0x01: ("Ueberpruefung bei naechstem Werkstattbesuch", "check at the next service"),
+    0x02: ("Ueberpruefung bei naechstem Halt", "check at the next stop"),
+    0x04: ("Ueberpruefung sofort erforderlich !", "check immediately"),
+    0xFF: ("unbekannte Fehlerklasse", "unknown fault class"),
+}
+POWER_STATES = {
+    0x00: ("Reserviert", "reserved"), 0x01: ("Parken BN niO", "parked, power not OK"),
+    0x02: ("Parken BN iO", "parked, power OK"),
+    0x03: ("Standfunktionen Kunde nicht in Fahrzeug",
+           "standby functions, driver not in the car"),
+    0x05: ("Wohnen", "residing"), 0x07: ("Pruefen Analyse Diagnose", "test, analysis, diagnosis"),
+    0x08: ("Fahrbereitschaft herstellen", "getting ready to drive"), 0x0A: ("Fahren", "driving"),
+    0x0C: ("Fahrbereitschaft beenden", "ending readiness to drive"),
+    0x0E: ("nicht verfügbar", "not available"), 0xFF: ("ungültig", "invalid"),
+}
+ENUM_FIELDS = {0x1731: FAULT_CLASSES, 0x1750: POWER_STATES}
+
+EXTENDED_RECORDS = {        # record number -> (name, English, bytes)
+    0x01: ("CONDITION_BYTE", "condition byte", 1),
+    0x02: ("HFK", "times it occurred", 1),
+    0x03: ("HLZ", "healing counter", 1),
+}
+
+
+def field_bytes(datatype):
+    """Bytes a freeze field takes, from its SGBD type: a mask (0xFFFFFF is 3),
+    a C type, or a number (text of that length). None if unknown."""
+    t = (datatype or "").strip().lower()
+    if re.fullmatch(r"0x(ff)+", t):
+        return (len(t) - 2) // 2
+    if t.isdigit():
+        return int(t)
+    return {"u char": 1, "unsigned char": 1, "signed char": 1, "char": 1,
+            "unsigned int": 2, "signed int": 2, "int": 2,
+            "unsigned long": 4, "signed long": 4, "long": 4, "float": 4}.get(t)
+
+
+def load_freeze_fields():
+    """(module or None, identifier) -> field row, from FREEZE_CSV."""
+    fields = {}
+    path = resource_path(FREEZE_CSV)
+    if not os.path.exists(path):
+        return fields
+    with open(path, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            try:
+                uw = int(row["uw_id"], 16)
+            except (KeyError, ValueError):
+                continue
+            module = (row.get("module") or "").strip()
+            fields[(int(module, 16) if module else None, uw)] = row
+    return fields
+
+
+def _freeze_value(uw, raw, row, lang):
+    """(value, text) for one snapshot field."""
+    if uw == 0x1702:
+        return raw.hex().upper(), ""
+    n = int.from_bytes(raw, "big")
+    try:
+        value = n * float(row.get("mul") or 1) / float(row.get("div") or 1) + \
+            float(row.get("add") or 0)
+    except ValueError:
+        value = n
+    if value == int(value):
+        value = int(value)
+    table = ENUM_FIELDS.get(uw)
+    text = ""
+    if table and n in table:
+        text = table[n][0 if lang == "text_de" else 1]
+    return value, text
+
+
+def parse_snapshots(resp, module, fields=None, lang="text_en"):
+    """Split a 59 04 reply into records: [{"record", "fields": [{id, name,
+    label, value, unit, text}], "rest": hex of what couldn't be split}]."""
+    fields = load_freeze_fields() if fields is None else fields
+    body, i, records = resp[6:], 0, []
+    while i + 2 <= len(body):
+        number, count = body[i], body[i + 1]
+        i += 2
+        record = {"record": number, "fields": [], "rest": ""}
+        records.append(record)
+        for _ in range(count):
+            if i + 2 > len(body):
+                break
+            uw = int.from_bytes(body[i:i + 2], "big")
+            row = fields.get((module, uw)) or fields.get((None, uw))
+            size = field_bytes(row.get("datatype")) if row else None
+            if size is None or i + 2 + size > len(body):
+                # A module's own value of unknown size: nothing after it
+                # can be split reliably.
+                record["rest"] = body[i:].hex()
+                return records
+            raw = body[i + 2:i + 2 + size]
+            value, text = _freeze_value(uw, raw, row, lang)
+            record["fields"].append({
+                "id": uw, "name": row.get("name_de") or "", "label": FREEZE_LABELS.get(uw, ""),
+                "value": value, "unit": FREEZE_UNITS.get(uw, ""), "text": text})
+            i += 2 + size
+    return records
+
+
+def parse_extended(resp):
+    """Split a 59 06 reply into [{"record", "name", "label", "value"}]; a
+    record of unknown size ends the list, its bytes given raw."""
+    body, i, out = resp[6:], 0, []
+    while i < len(body):
+        number = body[i]
+        name, label, size = EXTENDED_RECORDS.get(number, ("", "", None))
+        if size is None or i + 1 + size > len(body):
+            out.append({"record": number, "name": "", "label": "",
+                        "value": body[i + 1:].hex()})
+            break
+        out.append({"record": number, "name": name, "label": label,
+                    "value": int.from_bytes(body[i + 1:i + 1 + size], "big")})
+        i += 1 + size
+    return out
+
+
+def fault_details(h, module, code, fields=None, lang="text_en"):
+    """{"snapshots", "extended", "errors"} for one fault: each read is tried
+    on its own, so a module that keeps no snapshots still gives counters."""
+    out = {"snapshots": [], "extended": [], "errors": []}
+    for key, read, parse in (
+            ("snapshots", h.read_snapshots,
+             lambda r: parse_snapshots(r, module, fields, lang)),
+            ("extended", h.read_extended, parse_extended)):
+        try:
+            out[key] = parse(read(module, code))
+        except NegativeResponse as e:
+            out["errors"].append("%s: %s" % (key, NRC.get(e.code, "0x%02X" % e.code)))
+        except HsfzTimeout as e:
+            out["errors"].append("%s: %s" % (key, e))
+    return out
+
+
+def format_details(details):
+    """Fault details as lines of text, for the CLI, the app and Claude."""
+    lines = []
+    for rec in details["snapshots"]:
+        lines.append("snapshot %d:" % rec["record"])
+        for f in rec["fields"]:
+            text = " (%s)" % f["text"] if f["text"] else ""
+            lines.append("  %-28s %s%s%s" % (f["label"] or f["name"] or "0x%04X" % f["id"],
+                                              f["value"], " " + f["unit"] if f["unit"] else "",
+                                              text))
+        if rec["rest"]:
+            lines.append("  module's own values (not decoded): %s" % rec["rest"])
+    for ext in details["extended"]:
+        lines.append("%-30s %s" % (ext["label"] or "record 0x%02X" % ext["record"], ext["value"]))
+    lines += ["(%s)" % e for e in details["errors"]]
+    return lines or ["(no details stored)"]
+
+
 def write_fault_csv(path, rows):
     """Write read_all_faults() rows. utf-8-sig so Excel shows umlauts."""
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
@@ -713,6 +911,18 @@ def reply_protocol(payload):
     if len(payload) >= 6 and payload[4:6] == b"\x00\x11":
         return "HSFZ"
     return "unknown"
+
+
+def doip_help(ip):
+    """What a DoIP-only answer to Discover means, and what to do about it."""
+    return ("The car at %s answered Discover with DoIP (UDP %d), not HSFZ. This tool "
+            "speaks HSFZ, the protocol the 2018 G30 uses on its OBD Ethernet pins.\n\n"
+            "That usually means one of:\n"
+            "- a newer car, or a gateway updated to a software level that uses DoIP;\n"
+            "- something else on this network answered (check the address is the car's);\n"
+            "- the ENET adapter or cable is meant for a different car.\n\n"
+            "n63read can't read a DoIP car yet. A diagnostics report shows exactly what "
+            "answered; send it on to get DoIP support added." % (ip, DOIP_PORT))
 
 
 def reply_vin(payload):
@@ -1304,6 +1514,36 @@ def channel_target(meta, default):
     return default
 
 
+MULTI_MAX = 8                   # identifiers per request when batching
+
+
+def split_reply(body, sizes):
+    """{identifier: data} from a multi-identifier 0x22 reply, given each
+    asked identifier's size. A module leaves out ones it doesn't support;
+    anything else that doesn't line up exactly - an echo that wasn't asked
+    for, data running short, bytes left over - raises ValueError, so a
+    wrong size can never shift one value into the next."""
+    out, i = {}, 0
+    while i < len(body):
+        if i + 2 > len(body):
+            raise ValueError("stray byte at the end of a multi-identifier reply")
+        did = int.from_bytes(body[i:i + 2], "big")
+        if did not in sizes or did in out:
+            raise ValueError("reply has 0x%04X where an asked identifier should be" % did)
+        end = i + 2 + sizes[did]
+        if end > len(body):
+            raise ValueError("reply too short for 0x%04X" % did)
+        out[did] = body[i + 2:end]
+        i = end
+    return out
+
+
+def value_bytes(meta):
+    """Bytes a DME value's reply takes, if the catalog says exactly; else None."""
+    size, exact = expected_size([meta])
+    return size if exact and size else None
+
+
 def rest(interval, started, now=None):
     """Seconds to wait so cycles start `interval` apart: the time the cycle
     took counts towards it, so the rate is the one asked for."""
@@ -1321,8 +1561,13 @@ class ChannelReader:
     reused in between, so every sample and log row is complete.
     """
 
-    def __init__(self, layouts, target):
+    def __init__(self, layouts, target, batch=False):
         self.layouts, self.target = layouts, target
+        # Batching: DME values read up to MULTI_MAX to a request. Off unless
+        # asked for; any sign a DME won't do it turns it off for that DME.
+        self.batch = batch
+        self.batch_off = {}     # DME address -> why batching stopped there
+        self.batched = 0        # values that came in batches
         self.cache = {}         # (module, did) -> {ARG: (value, unit, note)}
         self.last = {}          # (module, did) -> time of last read
         self.refused = {}       # (module, did) -> reason; not asked again
@@ -1338,6 +1583,7 @@ class ChannelReader:
         sample, records = {}, {}
         answered, silent = set(), set()     # DME addresses, this cycle
         derived = []
+        got = self._prefetch(h, chans, now) if self.batch else {}
         for name, did, meta in chans:
             module = (meta.get("MODULE") or "").strip()
             if is_derived(meta):
@@ -1345,7 +1591,7 @@ class ChannelReader:
             elif module:
                 records.setdefault((int(module, 16), did), []).append(name)
             else:
-                sample[name] = self._read_value(h, did, meta, now, answered, silent)
+                sample[name] = self._read_value(h, did, meta, now, answered, silent, got)
 
         due = [k for k in records
                if k not in self.refused and k in self.layouts
@@ -1371,11 +1617,56 @@ class ChannelReader:
             sample[name] = derive(name, sample)
         return sample
 
-    def _read_value(self, h, did, meta, now, answered, silent):
+    def _prefetch(self, h, chans, now):
+        """Read the DME values several to a request. {(target, did): data}
+        for those that came; the rest are read one at a time as usual."""
+        sizes = {}
+        for _name, did, meta in chans:
+            if (meta.get("MODULE") or "").strip() or is_derived(meta):
+                continue
+            target = channel_target(meta, self.target)
+            key = (target, did)
+            if (target in self.batch_off or key in self.refused
+                    or now < self.value_quiet.get(target, 0)
+                    or now < self.value_quiet.get(key, 0)):
+                continue
+            size = value_bytes(meta)
+            known = sizes.setdefault(target, {})
+            # Two channels on one identifier with different sizes: can't
+            # tell where it ends, so that one is read on its own.
+            known[did] = size if known.get(did, size) == size else None
+        got = {}
+        for target, by_did in sizes.items():
+            dids = [d for d, s in by_did.items() if s]
+            for k in range(0, len(dids), MULTI_MAX):
+                chunk = dids[k:k + MULTI_MAX]
+                if len(chunk) < 2:
+                    continue
+                try:
+                    parts = split_reply(h.read_dids(target, chunk, timeout=VALUE_TIMEOUT),
+                                        {d: by_did[d] for d in chunk})
+                except (ConnectionLost, ConnectionError):
+                    raise
+                except (HsfzError, ValueError) as e:
+                    self.batch_off[target] = str(e)[:80]
+                    break
+                for did, raw in parts.items():
+                    got[(target, did)] = raw
+                self.batched += len(parts)
+        return got
+
+    def _read_value(self, h, did, meta, now, answered, silent, got=None):
         target = channel_target(meta, self.target)
         key = (target, did)
         if key in self.refused:
             return (None, "", self.refused[key])
+        if got and key in got:
+            answered.add(target)
+            try:
+                value, unit = decode(got[key], meta)
+            except Exception as e:                                  # noqa: BLE001
+                return (None, "", str(e)[:28])
+            return (value, unit, "")
         if (target in silent or now < self.value_quiet.get(target, 0)
                 or now < self.value_quiet.get(key, 0)):
             return (None, "", "not answering")
