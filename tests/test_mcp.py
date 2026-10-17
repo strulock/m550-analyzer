@@ -75,23 +75,24 @@ def test_a_failing_tool_is_a_tool_error_not_a_crash():
 
 
 @pytest.mark.parametrize("args", [
-    {"ip": "127.0.0.1", "names": ["--source", "0xF4"]},
-    {"ip": "127.0.0.1", "names": ["ILAG2", "--csv"]},
-    {"ip": "--timeout", "names": ["ILAG2"]},
-    {"ip": "127.0.0.1", "names": ["ILAG2"], "target": "-1"},
+    {"ip": "--timeout"},
+    {"ip": "127.0.0.1", "target": "-1"},
 ])
 def test_arguments_cannot_become_cli_options(args, monkeypatch):
     ran = []
     monkeypatch.setattr(mcp, "run_cli", lambda argv: ran.append(argv) or "")
-    text, error = call("read_channels", **args)
+    text, error = call("read_faults", **args)
     assert error and "not a valid value" in text and ran == []
 
 
-def test_channel_names_follow_a_double_dash(monkeypatch):
-    ran = []
-    monkeypatch.setattr(mcp, "run_cli", lambda argv: ran.append(argv) or "")
-    call("read_channels", ip="127.0.0.1", names=["ILAG2"])
-    assert ran[0][-2:] == ["--", "ILAG2"]
+@pytest.mark.parametrize("args, says", [
+    ({"ip": "127.0.0.1", "names": ["--source", "0xF4"]}, "unknown channel"),
+    ({"ip": "127.0.0.1", "names": ["ILAG2"], "target": "-1"}, "not an address"),
+    ({"ip": "--timeout", "names": ["ILAG2"]}, "not a valid value"),
+])
+def test_read_channels_checks_its_arguments(args, says):
+    text, error = call("read_channels", **args)
+    assert error and says in text
 
 
 # --------------------------------------------------------------- the car

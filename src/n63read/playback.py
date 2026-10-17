@@ -7,9 +7,11 @@ draws from, so the table and chart work exactly as they do on the car.
 No Tk here, so it can be tested without a display.
 """
 
+import bisect
 import csv
 import math
 import random
+import re
 import threading
 import time
 from collections.abc import Mapping
@@ -122,17 +124,6 @@ def demo_sample(t, rng=random):
     }
 
 
-def _cell(text):
-    """A logged cell back to a value: number if it parses, None if blank."""
-    text = text.strip()
-    if text == "":
-        return None
-    try:
-        return float(text)
-    except ValueError:
-        return text                                 # enum text, hex, etc.
-
-
 class Row(Mapping):
     """One log row as {name: value}: a list of values and a column index
     shared by every row, about half the memory of a dict per row."""
@@ -155,30 +146,89 @@ class Row(Mapping):
         return min(len(self.values), len(self.index))
 
 
-def read_log(path):
-    """Read a GUI log. Returns (channel names, [(time, {name: value})]),
-    each row a read-only mapping.
+NUMBER_COMMA = re.compile(r"^[-+]?\d+,\d+$")
+CLOCK = re.compile(r"^(\d{1,2}):(\d{2}):(\d{2}(?:[.,]\d+)?)$")
 
-    Raises ValueError if it is not one of our logs (first column "Time").
+
+def _cell(text, comma=False):
+    """A logged cell back to a value: number if it parses, None if blank.
+    `comma`: the file writes decimals with a comma (a semicolon-separated
+    export from a German or French Windows)."""
+    text = text.strip()
+    if text == "":
+        return None
+    if comma and NUMBER_COMMA.match(text):
+        text = text.replace(",", ".")
+    try:
+        return float(text)
+    except ValueError:
+        return text                                 # enum text, hex, etc.
+
+
+def _seconds(text, comma=False):
+    """A time cell as seconds: a number, or a clock time hh:mm:ss(.fff)."""
+    text = text.strip()
+    m = CLOCK.match(text)
+    if m:
+        return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + \
+            float(m.group(3).replace(",", "."))
+    if comma:
+        text = text.replace(",", ".")
+    return float(text)
+
+
+def _is_time(name):
+    n = name.strip().lower()
+    return n.startswith(("time", "zeit", "timestamp")) or n in ("t", "s", "sec", "seconds")
+
+
+def label_and_unit(name):
+    """'Engine speed (rpm)' or 'Boost [psi]' -> ('Engine speed', 'rpm')."""
+    m = re.match(r"^(.*?)\s*[(\[]([^)\]]{1,12})[)\]]\s*$", name)
+    return (m.group(1).strip() or name, m.group(2).strip()) if m else (name.strip(), "")
+
+
+def read_log(path):
+    """Read a log. Returns (channel names, [(time, {name: value})]), each
+    row a read-only mapping.
+
+    Ours (Time first, Clock and Event left out) or another tool's, such as
+    BimmerLink's: any CSV whose first column is the time, in seconds or as
+    hh:mm:ss, comma- or semicolon-separated. Clock times count from the
+    first row. Raises ValueError if the first column isn't a time.
     """
     with open(path, newline="", encoding="utf-8-sig") as f:
-        reader = csv.reader(f)
+        sample = f.read(8192)
+        f.seek(0)
+        try:
+            delimiter = csv.Sniffer().sniff(sample, delimiters=",;\t").delimiter
+        except csv.Error:
+            delimiter = ","
+        comma = delimiter != ","
+        reader = csv.reader(f, delimiter=delimiter)
         header = next(reader, None)
-        if not header or header[0] != "Time" or len(header) < 2:
-            raise ValueError("not an n63read log: the first column must be 'Time'")
-        # Clock and Event (logs from 0.4 on) aren't channels: leave them out.
-        cols = [i for i, n in enumerate(header) if i and n not in core.LOG_META]
-        names = [header[i] for i in cols]
+        if not header or len(header) < 2 or not _is_time(header[0]):
+            raise ValueError("not a log: the first column must be the time "
+                             "(named Time, Zeit or the like)")
+        cols = [i for i, n in enumerate(header) if i and n not in core.LOG_META and n.strip()]
+        names = [header[i].strip() for i in cols]
         index = {n: i for i, n in enumerate(names)}
-        rows = []
+        rows, first, clock = [], None, None
         for line in reader:
             if not line:
                 continue
             try:
-                t = float(line[0])
+                t = _seconds(line[0], comma)
             except ValueError:
                 continue                            # stray header or junk row
-            rows.append((t, Row(index, [_cell(line[i]) for i in cols if i < len(line)])))
+            if clock is None:
+                clock = bool(CLOCK.match(line[0].strip()))
+                first = t
+            if clock:
+                t -= first
+                if t < 0:
+                    t += 24 * 3600                  # past midnight
+            rows.append((t, Row(index, [_cell(line[i], comma) for i in cols if i < len(line)])))
     if not rows:
         raise ValueError("the log has a header but no samples")
     return names, rows
@@ -231,18 +281,56 @@ class DemoFeed(_Feed):
 class ReplayFeed(_Feed):
     kind = "replay"
 
+    SPEEDS = (1, 2, 4, 8, 16)
+
     def __init__(self, out_q, rows, speed=1.0):
         super().__init__(out_q)
         self.rows = rows
         self.speed = speed
         self.duration = rows[-1][0] - rows[0][0]
+        self.times = [t for t, _ in rows]
+        self.paused = False
+        self._seek_to = None            # row index to jump to
+        self._wake = threading.Event()  # a seek, pause or speed change
+
+    def set_speed(self, speed):
+        self.speed = max(0.1, float(speed))
+        self._wake.set()
+
+    def seek(self, seconds):
+        """Carry on from `seconds` into the log."""
+        self._seek_to = min(bisect.bisect_left(self.times, self.times[0] + seconds),
+                            len(self.rows) - 1)
+        self._wake.set()
+
+    def pause(self, paused):
+        self.paused = paused
+        self._wake.set()
+
+    def _rest(self, seconds):
+        """Wait between rows; a stop, seek, pause or speed change cuts it short."""
+        end = time.time() + seconds
+        self._wake.clear()
+        while not self._stop_event.is_set():
+            left = end - time.time()
+            if left <= 0 or self._wake.wait(min(left, 0.1)):
+                return
 
     def run(self):
-        prev = self.rows[0][0]
-        for t, values in self.rows:
-            gap = min(MAX_REPLAY_GAP, max(0.0, t - prev)) / self.speed
-            if self._stop_event.wait(gap):
-                return
-            prev = t
+        i = 0
+        while i < len(self.rows) and not self._stop_event.is_set():
+            if self._seek_to is not None:
+                i, self._seek_to = self._seek_to, None
+            if self.paused:
+                self._rest(0.1)
+                continue
+            t, values = self.rows[i]
             self._emit(t, values, "not in log")
-        self.out_q.put(("feeddone", self))
+            if i + 1 < len(self.rows):
+                gap = min(MAX_REPLAY_GAP, max(0.0, self.rows[i + 1][0] - t)) / self.speed
+                self._rest(gap)
+                if self._seek_to is not None or self.paused:
+                    continue                # the jump or pause wins over the next row
+            i += 1
+        if not self._stop_event.is_set():
+            self.out_q.put(("feeddone", self))

@@ -131,17 +131,22 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 6 — Replay and MCP
 
-- [ ] Replay speed control from 1x to 16x and a scrub bar. `speed` exists in
+- [x] Replay speed control from 1x to 16x and a scrub bar. `speed` exists in
       `playback.py:196-219` but isn't exposed.
-- [ ] Load a log straight into graphs without real-time replay.
-- [ ] Open BimmerLink CSVs in replay.
-- [ ] MCP `read_log` with `start`, `end`, `columns` and `resample`.
-- [ ] MCP `compare_banks(log)` and `find_events` (threshold crossings, misfire
+- [x] Load a log straight into graphs without real-time replay.
+- [x] Open BimmerLink CSVs in replay: any CSV with the time first (seconds
+      or hh:mm:ss, comma or semicolon, decimal commas). Not yet tried on a
+      real BimmerLink export.
+- [x] MCP `read_log` with `start`, `end`, `columns` and `resample`.
+- [x] MCP `compare_banks(log)` and `find_events` (threshold crossings, misfire
       counter increments).
-- [ ] MCP `start_log`, `stop_log` and `sample(names, seconds)` through the
+- [x] MCP `start_log`, `stop_log` and `sample(names, seconds)` through the
       share host.
-- [ ] Have MCP tools call core functions that return data instead of scraping
-      CLI output (`mcp.py:147-170`).
+- [x] Have MCP tools call core functions that return data instead of scraping
+      CLI output (`mcp.py:147-170`): `read_channels` and the new tools do.
+      The report tools (`connection_check`, `discover`, `scan_modules`,
+      `read_faults`, `read_gps`, `check_modules`) keep the CLI's report on
+      purpose: the report is what they return.
 
 ## Phase 7 — Code structure and tests
 

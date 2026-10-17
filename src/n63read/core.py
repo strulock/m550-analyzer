@@ -1626,6 +1626,8 @@ class ChannelReader:
             module = (meta.get("MODULE") or "").strip()
             if is_derived(meta):
                 derived.append(name)        # worked out below, not read
+            elif meta.get("LOGONLY"):
+                sample[name] = (None, "", "only in a log")   # another tool's column
             elif module:
                 records.setdefault((int(module, 16), did), []).append(name)
             else:

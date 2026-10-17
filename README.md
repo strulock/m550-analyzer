@@ -116,8 +116,14 @@ in `Documents\BMW Analyzer Logs`.
   times 128 seconds. If a module you expect is missing from a scan, raise it
   to 1 or 2 and scan again. The CLI equivalent is `--probe-timeout` on
   `scan` and `faults --all`.
-- **Open log...** replays a CSV the GUI logged earlier through the table and
-  chart at the speed it was recorded (pauses over 2 s are shortened).
+- **Open log...** replays a CSV through the table and chart at the speed it
+  was recorded (pauses over 2 s are shortened). A bar under the toolbar
+  pauses it, runs it at up to 16x, and jumps anywhere with its slider;
+  **Whole log into graphs** puts every row in the graphs at once instead.
+  Other tools' logs open too, BimmerLink's among them: any CSV whose first
+  column is the time (seconds or hh:mm:ss), comma- or semicolon-separated.
+  Their columns show under their own names, with the unit from the header
+  ("Engine speed (rpm)").
 
 - **Templates ▾** saves the watch list under a name and brings it back for
   the next run (it replaces the watch list). **Delete** removes one. They're
@@ -344,9 +350,13 @@ the server is `n63read-cli.exe mcp`, an MCP server on stdin/stdout:
 Uninstalling removes it from Claude again.
 
 Its tools: `status`, `connection_check`, `discover`, `scan_modules`,
-`read_channels`, `read_faults`, `read_gps`, `check_modules`,
-`search_channels`, `list_files`, `read_log` and `diagnostics_journal`. The
-file tools only read the logs folder and the journal. Each tool call is
+`read_channels`, `sample` (a few seconds of channels, summarised),
+`start_log` / `stop_log` (a drive log, named channels or a template),
+`read_faults`, `read_gps`, `check_modules`, `search_channels`,
+`list_files`, `read_log` (also a time window, chosen columns, averaged
+rows), `compare_banks` (bank 1 against bank 2 in a log), `find_events`
+(alerts, limits crossed, misfire counters rising) and `diagnostics_journal`.
+The file tools only read the logs folder and the journal. Each tool call is
 noted in the journal.
 
 ### Bank 2 and the car's connections
