@@ -115,9 +115,19 @@ in `Documents\BMW Analyzer Logs`.
 
 - **Templates ▾** saves the watch list under a name and brings it back for
   the next run (it replaces the watch list). **Delete** removes one. They're
-  kept in `%APPDATA%
-63read	emplates.json`, and `n63read log --template
-  NAME` logs one from the command line.
+  kept in `%APPDATA%\n63read\templates.json`, and `n63read log --template
+  NAME` logs one from the command line. **Ready-made sets** has five to start
+  from: *Misfire hunt* (engine speed, uneven running and misfire counters for
+  all eight cylinders, and each cylinder's difference from the rest),
+  *Boost and wastegates, both banks*, *Lambda and trims, both banks*,
+  *Temperatures*, and *Drive log with GPS*.
+- **Compare banks** folds each engine channel's bank-2 twin into its bank-1
+  row, with **Bank 2** and **Δ 1−2** columns, and adds the twin of every
+  engine channel you watch. The chart draws bank 2 dashed on bank 1's scale,
+  and a pop-out graph draws both. Unticked, bank 2 is a row of its own again.
+- **Alert...** sets a low and a high limit for the selected channel, in the
+  units shown. Outside them, the row turns red, the PC beeps once, and the
+  log's Event column says so. Limits are remembered.
 - **Graph** (or double-click a row) opens the selected channels in windows of
   their own, live. Each has a time window (30 s to 1 h, or everything) in
   seconds, minutes or hours; a value scale that fits what's shown or a
@@ -186,11 +196,25 @@ transmission oil temperature, a tire pressure and lateral acceleration),
 marked "DEMO DATA" on the chart. It stops the moment you press **Connect** or
 open a log, and its points are dropped so they never mix with real ones.
 
+**Calculated** channels (a group of their own in the picker) are worked out
+from others every cycle: lambda and lambda control factor, bank 1 minus bank
+2; boost pressure minus its target; GPS speed minus vehicle speed; and each
+cylinder's uneven running minus the mean of all eight. Adding one adds what it
+needs; they show, chart, log and alert like any channel.
+
+A log has `Time` first (seconds from the start of the log, as in a BimmerLink
+export), then `Clock` (the time of day, to line it up with video or other
+logs), one column per channel, and `Event` last: alerts, and the connection
+dropping and coming back. If the connection drops while logging (a cable
+bump, the car going to sleep), the log stays open, the gap is marked, and the
+app keeps trying to reconnect and carries on in the same file. Replay skips
+`Clock` and `Event`.
+
 The log is written to disk about once a second, so a crash or flat battery
 loses at most a second. Changing the watched channels while logging starts a
 new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in
-one file. A fault read while connected shares the connection: logging slows
-down during it but doesn't stop.
+one file; `Time` carries on counting. A fault read while connected shares the
+connection: logging slows down during it but doesn't stop.
 
 ### Other modules: head unit, transmission, chassis, body, climate
 
@@ -379,7 +403,8 @@ n63read faults --ip 169.254.x.x -v           DME fault memory, decoded (codes th
 n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
 n63read log --ip 169.254.x.x --template "Idle check"
-                                             log a template saved in the app
+                                             log a template saved in the app, or
+                                             a ready-made set ("Misfire hunt")
 n63read templates                            list the saved templates
 n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
                                              log to Documents\BMW Analyzer Logs
@@ -404,7 +429,9 @@ faults, refused, or didn't reply, so the file shows everything that was
 checked.
 
 `--target` selects a module (default `0x12`, master DME). The log CSV is
-`Time` plus one column per channel, the same shape as a BimmerLink export.
+`Time`, `Clock`, one column per channel, then `Event`, as in the app; `Time`
+first keeps the shape of a BimmerLink export. A connection that drops while
+logging is retried every 2 seconds and the log carries on (Ctrl-C stops it).
 
 Channel blocks are **not contiguous**. Cylinders 7–8 of the V8 sit in a
 separate range, so don't assume sequential identifiers:

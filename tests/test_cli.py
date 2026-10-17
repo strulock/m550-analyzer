@@ -55,7 +55,7 @@ def test_log_writes_dme_and_head_unit_columns(car, tmp_path, monkeypatch, capsys
     assert "wrote 3 samples" in capsys.readouterr().out
     with open(out, encoding="utf-8") as f:
         rows = list(csv.reader(f))
-    assert rows[0] == ["Time"] + names
+    assert rows[0] == ["Time", "Clock"] + names + ["Event"]
     assert len(rows) == 4
     for row in rows[1:]:
         values = dict(zip(rows[0], row))

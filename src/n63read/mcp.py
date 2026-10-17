@@ -247,7 +247,7 @@ def _search_catalog():
     """Every channel, loaded once for the life of the server (read only)."""
     cat = core.load_catalog()
     cat.update(core.load_module_catalogs())
-    return cat
+    return core.add_derived(core.add_bank2(cat))
 
 
 def tool_search_channels(a):

@@ -47,7 +47,7 @@ def _catalog(path):
     except FileNotFoundError as e:
         sys.exit(str(e))
     cat.update(core.load_module_catalogs())
-    return core.add_bank2(cat)
+    return core.add_derived(core.add_bank2(cat))
 
 
 def _tester(args, timeout=None):
@@ -236,60 +236,81 @@ def op_log(args):
     cat = _catalog(args.csv)
     names = list(args.names)
     if args.template:
-        saved = core.load_templates()
+        saved = dict(core.BUILTIN_TEMPLATES, **core.load_templates())
         if args.template not in saved:
-            sys.exit("no template %r; saved: %s" % (
-                args.template, ", ".join(sorted(saved)) or "none"))
+            sys.exit("no template %r; available: %s" % (
+                args.template, ", ".join(sorted(saved, key=str.lower))))
         names = saved[args.template] + [n for n in names if n not in saved[args.template]]
     if not names:
         sys.exit("name some channels, or --template")
     chans = []
-    for name in names:
+    for name in core.with_inputs(names):     # a calculated channel needs its inputs
         meta = cat.get(name)
         if not meta:
             sys.exit("unknown channel: %s" % name)
         chans.append((name, int(meta["ID"], 16), meta))
+    names = [n for n, _, _ in chans]
+    blank = {n: (None, "", "") for n in names}
 
     if not args.out:
         args.out = os.path.join(core.logs_dir(), time.strftime("n63_%Y-%m-%d_%H-%M-%S.csv"))
     out = open(args.out, "w", newline="", encoding="utf-8")
     w = csv.writer(out)
-    w.writerow(["Time"] + [n for n, _, _ in chans])
+    w.writerow(core.log_header(names))
     print("Logging %d channel(s) to %s - Ctrl-C to stop" % (len(chans), args.out))
 
     t0 = last_flush = time.time()
     n = 0
-    host = None
+    lost_at = None              # when the connection dropped, while it's down
+    event = ""
+    reader = core.ChannelReader(core.record_layouts(cat), args.target)
     try:
-        reader = core.ChannelReader(core.record_layouts(cat), args.target)
-        with _tester(args) as h:
-            if not getattr(h, "shared", False):
-                # We hold the car: lend it to other n63read processes.
-                host = share.Host(args.ip).start()
-            while True:
-                cycle = time.time()
-                if host:
-                    host.serve(h)
-                    h.tidy()
-                row = [round(time.time() - t0, 3)]
-                sample = reader.read(h, chans)
-                for name, _, _ in chans:
-                    value = sample[name][0]
-                    row.append(core.log_cell(value))
-                w.writerow(row)
-                n += 1
-                # Push to disk about once a second; a crash loses at most that.
-                if time.time() - last_flush >= 1.0:
+        while True:
+            host = None
+            try:
+                with _tester(args) as h:
+                    if lost_at is not None:
+                        event = "reconnected after %d s" % round(time.time() - lost_at)
+                        print("\n" + event)
+                        lost_at = None
+                    if not getattr(h, "shared", False):
+                        # We hold the car: lend it to other n63read processes.
+                        host = share.Host(args.ip).start()
+                    while True:
+                        cycle = time.time()
+                        if host:
+                            host.serve(h)
+                            h.tidy()
+                        sample = reader.read(h, chans)
+                        now = time.time()
+                        w.writerow(core.log_row(now - t0, now, names, sample, event))
+                        event = ""
+                        n += 1
+                        # Push to disk about once a second; a crash loses at most that.
+                        if now - last_flush >= 1.0:
+                            out.flush()
+                            os.fsync(out.fileno())
+                            last_flush = now
+                            print("\r%d samples, %.1f s" % (n, now - t0), end="")
+                        time.sleep(core.rest(args.interval, cycle, time.time()))
+            except (HsfzError, OSError) as e:
+                if n == 0 and lost_at is None:
+                    raise                   # never got going: report it as before
+                if lost_at is None:
+                    # A cable bump or the car going to sleep: keep the log
+                    # going, mark the gap, and keep trying.
+                    lost_at = time.time()
+                    print("\nconnection lost (%s); reconnecting - Ctrl-C to stop" % e)
+                    w.writerow(core.log_row(lost_at - t0, lost_at, names, blank,
+                                            "connection lost: %s" % e))
                     out.flush()
-                    os.fsync(out.fileno())
-                    last_flush = time.time()
-                    print("\r%d samples, %.1f s" % (n, time.time() - t0), end="")
-                time.sleep(core.rest(args.interval, cycle, time.time()))
+                time.sleep(core.RECONNECT_WAIT)
+            finally:
+                if host:
+                    host.stop()
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
-        if host:
-            host.stop()
         out.close()
         print("wrote %d samples to %s" % (n, args.out))
 

@@ -292,8 +292,9 @@ def test_logging_from_the_gui(app, car, tmp_path, monkeypatch, dialogs):
     app._toggle_log()
     assert app.logging_to is None and app.log_btn.cget("text") == "Start logging"
     got = rows()
-    assert got[0] == ["Time", "ILAG2", LAT]
-    assert float(got[-1][1]) == 1.0 and float(got[-1][2]) == pytest.approx(30.1346, abs=1e-4)
+    assert got[0] == ["Time", "Clock", "ILAG2", LAT, "Event"]
+    assert float(got[-1][2]) == 1.0 and float(got[-1][3]) == pytest.approx(30.1346, abs=1e-4)
+    assert float(got[1][0]) < 1.0                       # Time counts from the log's start
 
 
 @pytest.fixture

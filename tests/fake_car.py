@@ -48,7 +48,17 @@ class FakeCar:
         self.connections = 0        # connections accepted
         self.sources = []           # (tester address, target) of each request
         self._stop = False
+        self.live = []              # open connections, for drop()
         threading.Thread(target=self._accept, daemon=True).start()
+
+    def drop(self):
+        """Cut every open connection, as a cable bump does; new ones still work."""
+        for conn in list(self.live):
+            try:
+                conn.shutdown(socket.SHUT_RDWR)
+                conn.close()
+            except OSError:
+                pass
 
     def close(self):
         self._stop = True
@@ -61,6 +71,7 @@ class FakeCar:
             except OSError:
                 return
             self.connections += 1
+            self.live.append(conn)
             threading.Thread(target=self._serve, args=(conn,), daemon=True).start()
 
     def _serve(self, conn):
@@ -82,10 +93,14 @@ class FakeCar:
                     src, dst, uds = body[0], body[1], body[2:]
                     self.services.append(uds[0])
                     self.sources.append((src, dst))
-                    conn.sendall(_frame(CTRL_ACK, src, dst, uds))
                     reply = self._answer(dst, uds)
-                    if reply is not None:
-                        conn.sendall(_frame(CTRL_DIAG, dst, src, reply))
+                    try:
+                        conn.sendall(_frame(CTRL_ACK, src, dst, uds))
+                        if reply is not None:
+                            conn.sendall(_frame(CTRL_DIAG, dst, src, reply))
+                    except OSError:
+                        return              # cut by drop() or the test
+
 
     def _answer(self, addr, uds):
         if addr not in MODULES:

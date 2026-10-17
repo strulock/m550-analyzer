@@ -16,11 +16,13 @@ PALETTES = {
     "light": {"bg": "#f0f0f0", "fg": "#1e1e1e", "field": "#ffffff", "border": "#c8c8c8",
               "select": "#cce4f7", "select_fg": "#1e1e1e", "muted": "#888888",
               "canvas": "#fbfbfb", "grid": "#e6e6e6", "grid2": "#efefef",
-              "axis": "#666666", "frame": "#cfcfcf", "faint": "#c8c8c8"},
+              "axis": "#666666", "frame": "#cfcfcf", "faint": "#c8c8c8",
+              "alert": "#f8d7da"},
     "dark": {"bg": "#202124", "fg": "#e8eaed", "field": "#2b2c30", "border": "#3c4043",
              "select": "#264f78", "select_fg": "#ffffff", "muted": "#9aa0a6",
              "canvas": "#18191b", "grid": "#2f3134", "grid2": "#26282b",
-             "axis": "#9aa0a6", "frame": "#3c4043", "faint": "#4a4d51"},
+             "axis": "#9aa0a6", "frame": "#3c4043", "faint": "#4a4d51",
+             "alert": "#5c2328"},
 }
 
 

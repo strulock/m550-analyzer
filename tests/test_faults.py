@@ -142,8 +142,8 @@ def test_log_reaches_disk_while_still_logging(tmp_path, car, restore_gui_core):
     try:
         # No stop_log(): the data must already be on disk, as after a crash.
         assert wait_for(lambda: len(lines(path)) >= 3, timeout=3.0)
-        assert lines(path)[0] == "Time,ILAG2"
-        assert lines(path)[1].endswith(",1.0")
+        assert lines(path)[0] == "Time,Clock,ILAG2,Event"
+        assert lines(path)[1].endswith(",1.0,")
     finally:
         p.stop()
 
@@ -164,9 +164,9 @@ def test_channel_change_starts_a_new_file(tmp_path, car, restore_gui_core):
         p.stop()
         p.join(3)
     first = lines(path)
-    assert first[0] == "Time,ILAG2"
+    assert first[0] == "Time,Clock,ILAG2,Event"
     assert all(not l.startswith("Time") for l in first[1:])   # one header only
-    assert lines(second)[0] == "Time,ILAG1,ILAG2"
+    assert lines(second)[0] == "Time,Clock,ILAG1,ILAG2,Event"
     msgs = []
     while not q.empty():
         msgs.append(q.get())
