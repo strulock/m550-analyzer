@@ -288,8 +288,74 @@ def write_csv(path, header, rows, dicts=True):
         w.writerows(rows)
 
 
+DME_CATALOG = "N63TU2_DME_readable_measurements.csv"
+DME_ENUMS = "BMW_enum_tables.csv"
+FREEZE = "BMW_freeze_frame_fields.csv"
+FREEZE_HEADER = ["uw_id", "module", "name_de", "name_en", "unit", "byte_order", "datatype",
+                 "name", "mul", "div", "add"]
+DME_ADDRESSES = "0x12 0x13"     # master and slave carry the same environment table
+
+
+def dme(prg):
+    """From the DME's own file: its value tables and its snapshot fields."""
+    tabs = tables(deobfuscate(prg))
+    tables_n, enum_rows = dme_enums(tabs)
+    fields = dme_freeze(tabs)
+    print("%s: %d value tables, %d rows\n%s: %d DME snapshot fields"
+          % (DME_ENUMS, tables_n, enum_rows, FREEZE, fields))
+
+
+def dme_freeze(tabs):
+    """Rewrite BMW_freeze_frame_fields.csv: BMW's standard fields as they
+    are, then the DME's own (FUMWELTTEXTE) for both DME addresses."""
+    path = os.path.join(DATA, FREEZE)
+    with open(path, encoding="utf-8-sig") as f:
+        standard = [r for r in csv.DictReader(f)
+                    if (r.get("module") or "").strip() != DME_ADDRESSES]
+    taken = {r["uw_id"].upper() for r in standard}
+    head, rows = tabs["FUMWELTTEXTE"]
+    c = {h: i for i, h in enumerate(head)}
+    own = [{"uw_id": r[c["UWNR"]], "module": DME_ADDRESSES, "name_de": r[c["UWTEXT"]],
+            "name_en": translate(r[c["UWTEXT"]]), "unit": r[c["UW_EINH"]],
+            "byte_order": r[c["L/H"]], "datatype": r[c["UWTYP"]],
+            "name": r[c["NAME"]].upper() if r[c["NAME"]] not in ("", "-") else "-",
+            "mul": r[c["MUL"]], "div": r[c["DIV"]], "add": r[c["ADD"]]}
+           for r in rows if r[c["UWNR"]].upper() not in taken]
+    write_csv(path, FREEZE_HEADER, standard + own)
+    return len(own)
+
+
+def dme_enums(tabs):
+    """Rewrite BMW_enum_tables.csv: every value table (WERT, TEXT) the DME
+    catalog's NAME column or its snapshot fields refer to, unprefixed as
+    the catalog names them. Returns (tables, rows)."""
+    with open(os.path.join(DATA, DME_CATALOG), encoding="utf-8-sig") as f:
+        used = {(r.get("NAME") or "").strip().upper() for r in csv.DictReader(f)}
+    head, rows = tabs.get("FUMWELTTEXTE", ([], []))
+    if "NAME" in head:
+        used |= {r[head.index("NAME")].strip().upper() for r in rows}
+    used = sorted(used - {"", "-"})
+    rows, names = [], 0
+    for ename in used:
+        if ename not in tabs:
+            continue
+        ehead, erows = tabs[ename]
+        if "WERT" not in ehead or "TEXT" not in ehead:
+            continue                    # bit fields and the like, not value tables
+        w, t = ehead.index("WERT"), ehead.index("TEXT")
+        names += 1
+        rows += [[ename, e[w], e[t], translate(e[t])] for e in erows]
+    write_csv(os.path.join(DATA, DME_ENUMS), ["table_name", "value", "text_de", "text_en"],
+              rows, dicts=False)
+    return names, len(rows)
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    # --dme dme8ff_r.prg: rewrite the DME's value tables and snapshot fields.
+    if argv[:1] == ["--dme"] and len(argv) == 2:
+        dme(argv[1])
+        return
     # --catalogs-only: rewrite the measurement catalogs, leave the enum
     # tables and the shared fault texts alone.
     catalogs_only = "--catalogs-only" in argv

@@ -207,16 +207,18 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 11 — Needs more BMW files
 
-> **Blocked:** needs `dme8ff_r.prg` (and the `.prg` files for the modules below).
+> **Blocked:** needs the `.prg` files for modules 0x56, 0x5D, 0x61 and 0x6D.
 
-- [ ] Re-extract the DME's value tables. `BMW_enum_tables.csv` was made by
+- [x] Re-extract the DME's value tables. `BMW_enum_tables.csv` was made by
       the first extractor, which read each table's position from the
       directory entry before its name, so each table's texts sit under the
       next table's name: "Status terminal 15" and "Condition for detected
       knocks" show gear texts, "COMM status FA CAN" shows engine-stall
       reasons. It can't be shifted back reliably: tables that weren't kept
       sit between the ones that were. The module catalogs use the newer
-      extractor and aren't affected.
+      extractor and aren't affected. Done from `dme8ff_r.prg` with
+      `tools/module_catalog.py --dme`: the 22 value tables the catalog uses.
 - [ ] Fault texts for modules 0x56, 0x5D, 0x61 and 0x6D
       (`docs/modules.md:125-131`).
-- [ ] The DME's own snapshot values (its `FUMWELTTEXTE`).
+- [x] The DME's own snapshot values: 1,538 fields from its `FUMWELTTEXTE`,
+      for both DMEs (`dme8ff_l` has the same table).

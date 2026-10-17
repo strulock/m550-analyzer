@@ -136,7 +136,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `ASG_EWG` | 0x6478 |  | signed int | % | × 100 ÷ 32768 |  | Read output control variable for eWG electric wastegate | Ausgangsstellgroesse zur Ansteuerung eWG elektr. Wastegate auslesen |
 | `ASG_WMM_MODUL` | 0x647A |  | signed int | % | ÷ 100 |  | Read output control variable for WMM module | Ausgangsstellgroesse zur Ansteuerung WMM Modul auslesen |
 | `ASG_KGEH` | 0x64AD |  | unsigned char |  |  |  | Read output control variable for crankcase ventilation heater | Ausgangsstellgroesse zur Ansteuerung Kurbelgehaeuseentlueftungsheizung auslesen |
-| `ASG_MLS` | 0x64B2 |  | unsigned char | 0-n |  | 0 = FALSE; 1 = TRUE | Read output control variable for engine mount control active | Ausgangsstellgroesse zur Ansteuerung Motorlagersteuerung aktiv auslesen |
+| `ASG_MLS` | 0x64B2 |  | unsigned char | 0-n |  | [`T_B_MOLAET_DOP`](DME-values.md#t_b_molaet_dop) (256 values) | Read output control variable for engine mount control active | Ausgangsstellgroesse zur Ansteuerung Motorlagersteuerung aktiv auslesen |
 | `ASG_ULV` | 0x64B5 |  | signed int | % | × 0.01 |  | Diverter valve output control variable | Ausgangsstellgroesse Umluftventil |
 | `ASG_LDS1` | 0x64B6 |  | unsigned int | % | × 0.00152588 |  | Output control variable for boost pressure actuator | Ausgangsstellgroesse zur Ansteuerung des Ladedruckstellers |
 | `ASG_MSV` | 0x64BD |  | unsigned int | % | × 100 ÷ 65535 |  | Read output control variable for volume control valve | Ausgangsstellgroesse zur Ansteuerung Mengensteuerventil auslesen |
@@ -155,7 +155,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `ASG_HEI_ASP_V` | 0x6507 |  | signed int | % | ÷ 100 |  | Read output control variable for heater shut-off valve for modular engines | Ausgangsstellgroesse zur Ansteuerung Heizungsabsperventil fuer Baukastenmotoren auslesen |
 | `ASG_KASK` | 0x6508 |  | unsigned int |  | ÷ 100 |  | Read output control variable for KASK | Ausgangsstellgroesse zur Ansteuerung KASK auslesen |
 | `ASG_ELUE_LIN` | 0x6509 |  | unsigned char | 1/min | × 20 |  | Read output control variable for electric fan LIN | Ausgangsstellgroesse zur Ansteuerung Elektr. Luefter LIN auslesen |
-| `ASG_ELUE_LIN_RLY` | 0x650A |  | unsigned char | 0-n |  | 0 = Battery OK; 1 = Check battery; 2 = Battery not OK; 3 = Invalid | Read output control variable for electric fan relay LIN | Ausgangsstellgroesse zur Ansteuerung Elektr. Luefter Relay LIN auslesen |
+| `ASG_ELUE_LIN_RLY` | 0x650A |  | unsigned char | 0-n |  | 0 = 0; 1 = 1 | Read output control variable for electric fan relay LIN | Ausgangsstellgroesse zur Ansteuerung Elektr. Luefter Relay LIN auslesen |
 | `ASG_VARIABLE_AKKS` | 0x650C |  | unsigned int |  |  |  | Read output control variable for variably controlled air ducting | Ausgangsstellgroesse zur Ansteuerung variabel gesteuerten Luftfuehrung auslesen |
 | `ASG_UMSCH_VENT_MEWAP` | 0x650E |  | signed int | % | ÷ 100 |  | Read output control variable for mechanical water pump switching valve | Ausgangsstellgroesse zur Ansteuerung des Schaltventil der Mechanischen Wasserpumpe auslesen |
 | `ASG_NVLD3_PVENTIL` | 0x650F |  | unsigned int |  |  |  | Read output control variable for NVLD3 poppet valve | Ausgangsstellgroesse zur Ansteuerung des NVLD3-Poppetventil auslesen |
@@ -327,7 +327,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `OPF_WEG_BIS_VOLL` | 0x48D0 |  | unsigned int | km | × 10 |  | Estimated distance until OPF will be fully loaded with ash | Abschätzung Wegstrecke bis OPF mit Asche voll beladen sein wird |
 | `OPF_GRADIENT_ASCHE` | 0x48D1 |  | unsigned int |  | × 1e-05 |  | Ash build-up gradient | Gradient Aschezuwachs |
 | `HEIZUNGSSPANNUNG_VORKAT2` | 0x4A12 |  | unsigned int | V | × 0.00488281 |  | Heater voltage of a wideband lambda sensor upstream of catalyst (ADC value) bank 2 | Heizungsspannung vor Kat einer Breitbandlambdasonde (ADC-Wert) Bank 2 |
-| `ISKLO` | 0x4A36 |  | unsigned char | 0-n |  | [`T_IKCTL_FLGKNKDETN_SIGDOP`](DME-values.md#t_ikctl_flgknkdetn_sigdop) (19 values) | Condition for detected knocks | Bedingung fuer erkannte Klopfer |
+| `ISKLO` | 0x4A36 |  | unsigned char | 0-n |  | 0 = ----; 1 = TRUE | Condition for detected knocks | Bedingung fuer erkannte Klopfer |
 | `IUKZ1` | 0x4A37 |  | unsigned long | V*ms | × 0.05 ÷ 65536 |  | Normalised knock control reference level cylinder 1 | normierter Referenzpegel Klopfregelung Zylinder 1 |
 | `IUKZ2` | 0x4A38 |  | unsigned long | V*ms | × 0.05 ÷ 65536 |  | Normalised knock control reference level cylinder 2 | normierter Referenzpegel Klopfregelung Zylinder 2 |
 | `IUKZ3` | 0x4A39 |  | unsigned long | V*ms | × 0.05 ÷ 65536 |  | Normalised knock control reference level cylinder 3 | normierter Referenzpegel Klopfregelung Zylinder 3 |
@@ -1115,7 +1115,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `UBATT_ZSEBATTERIE` | 0x5736 |  | unsigned int | V | × 0.001 |  | Voltage at ZSE battery measured by ZSE IBS | Spannung an der ZSE-Batterie von ZSE-IBS gemessen |
 | `ILMKG` | 0x5812 |  | unsigned int | kg/h | × 0.1 |  | Mass flow HFM 16-bit value, duplicate of 0x57AD | Massenstrom HFM 16-Bit Groesse, doppelt zu 0x57AD |
 | `IUK87` | 0x5815 |  | signed int | mV | × 20 |  | ECU supply voltage (1 byte) | Versorgungsspannung ECU (1 Byte) |
-| `STATUS_KL15` | 0x5820 |  | unsigned char | 0-n |  | [`T_IKCTL_FLGKNKDETN_SIGDOP`](DME-values.md#t_ikctl_flgknkdetn_sigdop) (19 values) | Status terminal 15 | Status Klemme 15 |
+| `STATUS_KL15` | 0x5820 |  | unsigned char | 0-n |  | 0 = ----; 1 = TRUE | Status terminal 15 | Status Klemme 15 |
 | `FEHLERSTATUS_E_MASCHINE_AKT` | 0x5824 |  | unsigned int |  |  |  | Current electric machine fault status | aktueller Fehlerstatus E-Maschine |
 | `SPANNUNG` | 0x5825 |  | signed int | V | ÷ 100 |  | Voltage | Spannung |
 | `IUPW1` | 0x5846 |  | signed int | mV | × 0.2 |  | Voltage accelerator pedal sensor potentiometer 1 (word) | Spannung PWG-Poti 1 (Word) |
@@ -1230,7 +1230,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `MISF_ADAP_ZYL_12` | 0x4B63 |  | signed int | rad/s² | × 0.0625 |  | Adaptation value for MisfDet_dn cylinder 12 | Adaptionswert fuer MisfDet_dn Zylinder 12 |
 | `FEPM_FREMDSTART_ANSCHL` | 0x541F |  | unsigned char | 0/1 |  |  | External start detected from vehicle being tow-started (engine start drag detected) | Fremdstarterkennung durch Anschleppen des Fahrzeug (Engine Start Drag Detected) |
 | `FEPM_FREMDSTART_FRESTR` | 0x5420 |  | unsigned char | 0/1 |  |  | External start detected from external power supply / external charging (engine start external charge detected) | Fremdstarterkennung durch Fremdbestromung Fremdladen (Engine Start Extern Chargen Detected) |
-| `INFO_MOTORAUSGEHER` | 0x5443 |  | unsigned char | 0-n |  | 0 = ----; 1 = TRUE | Information on engine stalls | Information ueber Motorausgeher |
+| `INFO_MOTORAUSGEHER` | 0x5443 |  | unsigned char | 0-n |  | 0 = No stall; 1 = Shutdown MSA or SST stop; 2 = Start aborted (brake/clutch released); 3 = Failed start on SST start; 4 = Failed start on MSA start; 5 = Stall during operation (after SST start); 6 = Stall during operation (after MSA start); 7 = Stall after CoM | Information on engine stalls | Information ueber Motorausgeher |
 | `MW_QSTAT_ADAP_ZYL_ALL` | 0x546E |  | unsigned int |  | × 3.052e-05 |  | Qstat adaptation mean value, all cylinders | Mittelwert Qstat-Adaption alle Zylinder |
 | `MW_QSTAT_ADAP_ZYL_B1` | 0x546F |  | unsigned int |  | × 3.052e-05 |  | Qstat adaptation mean value, bank 1 cylinders | Mittelwert Qstat-Adaption Zylinder Bank 1 |
 | `MW_QSTAT_ADAP_ZYL_B2` | 0x5470 |  | unsigned int |  | × 3.052e-05 |  | Qstat adaptation mean value, bank 2 cylinders | Mittelwert Qstat-Adaption Zylinder Bank 2 |
@@ -1355,7 +1355,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `ZEIT_NACH_MOTORSTART` | 0x5800 |  | unsigned int | s | × 0.1 |  | Time counter from end of start (16-bit) | Zeitzaehler ab Startende (16bit) |
 | `ITMOT` | 0x5805 |  | signed int | °C | × 0.1 − 273.14 |  | Engine temperature, linearised and converted | Motortemperatur, linearisiert und umgerechnet |
 | `IZMOS` | 0x5823 |  | unsigned int | s |  |  | Engine-off time | Abstellzeit |
-| `IMOST` | 0x5832 |  | unsigned char | 0-n |  | [`T_STATE_ENG_SIGDOP`](DME-values.md#t_state_eng_sigdop) (21 values) | Engine state | Motorzustand |
+| `IMOST` | 0x5832 |  | unsigned char | 0-n |  | 0 = COENG_STANDBY - initialisation state; 1 = COENG_READY - waiting for engine speed; 2 = COENG_CRANKING - waiting for end of cranking; 3 = COENG_RUNNING - engine running; 4 = COENG_STOPPING - run-on, engine still turning or direct shutdown from stationary engine; 5 = COENG_FINISH - run-on, engine stopped | Engine state | Motorzustand |
 | `S_MOTORMOMENT_MSR_SCHN_EINGR` | 0x5875 |  | signed int | Nm |  |  | Target engine torque MSR for fast intervention | Soll-Motormoment MSR fuer schnellen Eingriff |
 | `VVT_ROTORWINKEL` | 0x5877 |  | unsigned int | ° |  |  | VVT motor rotor angle | Rotorwinkel des VVT Motors |
 | `TEMP_MOTOR_REFERENZ_MODELL` | 0x587E |  | signed int | °C | × 0.1 − 273.14 |  | Engine temperature reference value from model | Motortemperatur-Referenzwert aus Modell |
@@ -1522,7 +1522,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `F_UW_BN` | 0x1750 |  | unsigned char |  |  |  | BASISNETZ. Basic vehicle state from the control unit's point of view | BASISNETZ. Basiszustand des Fzg aus Sicht des SG. |
 | `F_UW_TN` | 0x1751 |  | data[3] | DATA |  |  | TEILNETZ. Stored sub-network for the control unit | TEILNETZ. Ablage Teilnetz für das SG. |
 | `MESSWERTE` | 0x4000 |  |  |  |  |  | Read measured values | Messwerte auslesen |
-| `DIGITAL_1` | 0x4002 |  | BITFIELD | Bit |  | 123 = Vmax slave; 149 = Vmax master; 151 = Pmax slave; 152 = Pmax master; 65535 = Unknown | Decoding of the status byte for switch states | Decodierung des Statusbytes fuer Schalterzustaende |
+| `DIGITAL_1` | 0x4002 |  | BITFIELD | Bit |  | `BF_0x4002_0` | Decoding of the status byte for switch states | Decodierung des Statusbytes fuer Schalterzustaende |
 | `DIGITAL_0` | 0x4007 |  |  |  |  |  | Switch states status 0 | Status Schaltzustaende 0 |
 | `MESSWERTE_VVT` | 0x400B |  |  |  |  |  | Read VVT measured values | VVT Messwerte auslesen |
 | `FASTA10` | 0x4015 |  |  |  |  |  | Read FASTA measured value block 10 | FASTA-Messwertblock 10 lesen |
@@ -1684,12 +1684,12 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `UMDR_KW_WR_BER_4` | 0x54CB |  | unsigned long |  | × 0.00390625 |  | Crankshaft revolutions by water rate, range 4 | Umdrehungen Kurbelwelle bezogen auf verschiedene Wasserraten Bereich 4 |
 | `ST_LIN_KOMM_STATEMACHINE` | 0x5500 |  | unsigned char |  |  |  | LIN communication state machine status | Status LIN-Kommunikations-StateMachine |
 | `ST_LIN_KOORD_STATEMACHINE` | 0x5501 |  | unsigned char |  |  |  | LIN coordinator state machine | LIN-Koordinator-State Machine |
-| `COMM_STATUS_FA_CAN` | 0x5502 |  | unsigned char | 0-n |  | 0 = No stall; 1 = Shutdown MSA or SST stop; 2 = Start aborted (brake/clutch released); 3 = Failed start on SST start; 4 = Failed start on MSA start; 5 = Stall during operation (after SST start); 6 = Stall during operation (after MSA start); 7 = Stall after CoM | ComM status FA CAN | ComM Status FA CAN |
+| `COMM_STATUS_FA_CAN` | 0x5502 |  | unsigned char | 0-n |  | 0 = COMM_NO_COMMUNICATION; 1 = COMM_SILENT_COMMUNICATION; 2 = COMM_FULL_COMMUNICATION | ComM status FA CAN | ComM Status FA CAN |
 | `LIN_AKTIV_IN_NACHLVERL` | 0x5503 |  | unsigned char |  |  |  | LIN active during extended after-run | LIN waehrend Nachlaufverlaengerung aktiv |
 | `LIN_CHANNEL_STATUS` | 0x5504 |  | unsigned char |  |  |  | LIN channel status | LIN Channel Status |
 | `COMM_STATUS_LIN_CHANNEL` | 0x5506 |  | unsigned char | 0-n |  | 0 = COMM_NO_COMMUNICATION; 1 = COMM_SILENT_COMMUNICATION; 2 = COMM_FULL_COMMUNICATION | ComM state LIN channel | ComM State LIN Channel |
-| `ECU_IN_PREDRIVE2` | 0x5507 |  | unsigned char | 0-n |  | [`T_INMRST_SYCSTPREDRV_DOP`](DME-values.md#t_inmrst_sycstpredrv_dop) (9 values) | ECU in pre-drive | ECU in PreDrive |
-| `ECU_IN_POSTDRIVE2` | 0x5508 |  | unsigned char | 0-n |  | 0 = COMM_NO_COMMUNICATION; 1 = COMM_SILENT_COMMUNICATION; 2 = COMM_FULL_COMMUNICATION | ECU in post-drive message | ECU in PostDrive Message |
+| `ECU_IN_PREDRIVE2` | 0x5507 |  | unsigned char | 0-n |  | [`T_INMRST_SYCSTPREDRV_DOP`](DME-values.md#t_inmrst_sycstpredrv_dop) (10 values) | ECU in pre-drive | ECU in PreDrive |
+| `ECU_IN_POSTDRIVE2` | 0x5508 |  | unsigned char | 0-n |  | [`T_INMRST_SYCSTPOSTDRV_DOP`](DME-values.md#t_inmrst_sycstpostdrv_dop) (9 values) | ECU in post-drive message | ECU in PostDrive Message |
 | `ZEIT_IN_SYC_PREDRIVE` | 0x5509 |  | unsigned long | ms | × 10 |  | Time since reaching state SYC_PREDRIVE | Zeit seit Erreichen des Zustands SYC_PREDRIVE |
 | `ZEIT_IN_SYC_POSTDRIVE` | 0x550A |  | unsigned long | ms | × 10 |  | Time since reaching state SYC_POSTDRIVE | Zeit seit Erreichen des Zustands SYC_POSTDRIVE |
 | `STACKAUSLASTUNG_KONTEXT_CORE_0` | 0x551B |  | unsigned int | % | ÷ 100 |  | Stack usage, context stack core 0 | Stackauslastung Kontext Stack Core 0 |
@@ -1745,8 +1745,8 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `NSOLL_EWP23` | 0x5610 |  | unsigned char |  |  |  | Message for transmit signal Tarvl_Rpm_Ewp23_Lin | Nachricht fuer Sendesignal Tarvl_Rpm_Ewp23_Lin |
 | `NIST_EWP23` | 0x5611 |  | unsigned char |  |  |  | Message for signal AVL_VL_RPM_EWP23_LIN | Nachricht fuer Signal AVL_VL_RPM_EWP23_LIN |
 | `TRQPTD_ST_ERRREAS` | 0x561A |  | unsigned char |  |  |  | Status word for cause of fault from function monitoring level 1 | Statuswort fuer Ursache von Fehler aus der Funktionsueberwachung an der Ebene 1 |
-| `BA_IST_BANK1` | 0x5622 |  | unsigned int | 0-n |  | 0 = 0; 8192 = 1 | Operating mode and sub-operating mode, actual | Betriebsart und Subbetriebsart IST |
-| `BA_IST_BANK2` | 0x5623 |  | unsigned int | 0-n |  | 0 = 0; 8192 = 1 | Operating mode and sub-operating mode, actual, from coupling | Betriebsart und Subbetriebsart IST von Kopplung |
+| `BA_IST_BANK1` | 0x5622 |  | unsigned int | 0-n |  | [`T_BAWIST_W_MSG_TEXT_DOP`](DME-values.md#t_bawist_w_msg_text_dop) (73 values) | Operating mode and sub-operating mode, actual | Betriebsart und Subbetriebsart IST |
+| `BA_IST_BANK2` | 0x5623 |  | unsigned int | 0-n |  | [`T_BAWIST_W_MSG_TEXT_DOP`](DME-values.md#t_bawist_w_msg_text_dop) (73 values) | Operating mode and sub-operating mode, actual, from coupling | Betriebsart und Subbetriebsart IST von Kopplung |
 | `BASIS_BORDNETZ_FEV_SIGNAL` | 0x5630 |  | unsigned char | % | × 0.5 |  | Base vehicle electrical system FEV signal | Basisbordnetz FEV-Signal |
 | `BASIS_BORDNETZ_FLV_SIGNAL` | 0x5631 |  | unsigned char | % | × 0.5 |  | Base vehicle electrical system FLV signal | Basisbordnetz FLV-Signal |
 | `ERWEITERUNGS_BORDNETZ_FEV_SIGNAL` | 0x5632 |  | unsigned char | % | × 0.5 |  | Extended vehicle electrical system FEV signal | Erweiterungsbordnetz FEV-Signal |
@@ -1776,15 +1776,15 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `MASS_STROM_QUOT_DIAG_HFM_COAST_DOWN` | 0x56BE |  | unsigned int |  | × 3.052e-05 |  | Mass flow ratio for HFM diagnosis in coast-down, last NV-RAM value | Massenstromquotient für Diagnose HFM im Coast Down, letzter NV-RAM Wert |
 | `STATUS_LIN_KOMM_STATEMACH` | 0x56C3 |  | unsigned char |  |  |  | LIN communication state machine status | Status LIN-Kommunikations-StateMachine |
 | `STATUS_LIN_KOORD_STATEMACH` | 0x56C4 |  | unsigned char |  |  |  | Status LIN coordinator state machine | Status LIN-Koordinator-StateMachine |
-| `KOMM_M_STATUS_FA_CAN` | 0x56C5 |  | unsigned char | 0-n |  | 0 = Adaptation running; 1 = Adaptation blocked, engine outside speed/load range; 2 = Adaptation blocked, engine temperature outside permitted range; 3 = Adaptation blocked, catalyst temperature outside permitted range; 4 = Adaptation blocked due to fault memory entry; 5 = Adaptation blocked because lambda not 1, fuel supply system not OK, catalyst heating active or component protection active; 6 = Adaptation blocked because tank venting or mixture adaptation active; 255 = Adaptation is blocked (other enable condition not met) | ComM state FA CAN | ComM Staat FA CAN |
-| `VORHER_SYS_ECU_UNTERZUST` | 0x56C6 |  | unsigned char | 0-n |  | [`T_SYC_STSUBOLD_DOP`](DME-values.md#t_syc_stsubold_dop) (10 values) | Previous system/ECU sub-state | Vorhergehender System/ECU-Unterzustand |
+| `KOMM_M_STATUS_FA_CAN` | 0x56C5 |  | unsigned char | 0-n |  | 0 = COMM_NO_COMMUNICATION; 1 = COMM_SILENT_COMMUNICATION; 2 = COMM_FULL_COMMUNICATION | ComM state FA CAN | ComM Staat FA CAN |
+| `VORHER_SYS_ECU_UNTERZUST` | 0x56C6 |  | unsigned char | 0-n |  | 0 = SYC_INI; 1 = SYC_INISYN; 2 = SYC_INIEND; 3 = SYC_PREDRIVE; 4 = SYC_DRIVE; 5 = SYC_POSTDRIVE; 6 = SYC_POST_OS_EXIT | Previous system/ECU sub-state | Vorhergehender System/ECU-Unterzustand |
 | `KURZSCHLUSSERKENN_LIN_STARTUP` | 0x56C7 |  | unsigned char | 0/1 |  |  | LIN bus short-circuit detection during start-up | Kurzschlußerkennung LIN-Bus während StartUp |
 | `PLAUSI_DIAG_FREIGABE_LIN_KNOTEN` | 0x56C8 |  | unsigned long |  |  |  | Plausibility-checked bitwise diagnosis enable of the LIN nodes | Plausibilisierte Bitweise Diagnose-Freigabe der LIN-Knoten |
 | `LIN_NACHLAUFVERLAENG_AKTIV` | 0x56C9 |  | unsigned char |  |  |  | PostDrive LIN extension status | PostDrive LIN Verlängerungsstatus |
 | `INM_LIN_CH_STATUS` | 0x56CC |  | unsigned char |  |  |  | LIN channel status | LIN Kanal Status |
 | `KOMM_M_STATUS_LIN` | 0x56CE |  | unsigned char | 0-n |  | 0 = COMM_NO_COMMUNICATION; 1 = COMM_SILENT_COMMUNICATION; 2 = COMM_FULL_COMMUNICATION | ComM status of LIN channel | ComM Status vom LIN Kanal |
-| `ECU_IN_PREDRIVE` | 0x56D0 |  | unsigned char | 0-n |  | [`T_SYC_STPREDRV_DOP`](DME-values.md#t_syc_stpredrv_dop) (9 values) | PreDrive control state | Zustand der PreDrive-Steuerung |
-| `ECU_IN_POSTDRIVE` | 0x56D1 |  | unsigned char | 0-n |  | [`T_SYC_STPOSTDRV_DOP`](DME-values.md#t_syc_stpostdrv_dop) (12 values) | PostDrive control state | Zustand der PostDrive-Steuerung |
+| `ECU_IN_PREDRIVE` | 0x56D0 |  | unsigned char | 0-n |  | [`T_SYC_STPREDRV_DOP`](DME-values.md#t_syc_stpredrv_dop) (10 values) | PreDrive control state | Zustand der PreDrive-Steuerung |
+| `ECU_IN_POSTDRIVE` | 0x56D1 |  | unsigned char | 0-n |  | [`T_SYC_STPOSTDRV_DOP`](DME-values.md#t_syc_stpostdrv_dop) (9 values) | PostDrive control state | Zustand der PostDrive-Steuerung |
 | `ZEIT_SEIT_ZUSTAND_SYC_PREDRIVE` | 0x56D2 |  | unsigned long | ms | × 10 |  | Time since reaching state SYC_PREDRIVE | Zeit seit Erreichen des Zustands SYC_PREDRIVE |
 | `ZEIT_SEIT_ZUSTAND_SYC_POSTDRIVE` | 0x56D3 |  | unsigned long | ms | × 10 |  | Time since reaching state SYC_POSTDRIVE | Zeit seit Erreichen des Zustands SYC_POSTDRIVE |
 | `ZEIT_SEIT_ZUSTAND_SYC_DRIVE` | 0x56D4 |  | unsigned long | ms | × 10 |  | Time since reaching state SYC_DRIVE | Zeit seit Erreichen des Zustands SYC_DRIVE |
@@ -1860,17 +1860,17 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `I_EWG_POS_2` | 0x5928 |  | unsigned char | % | × 100 ÷ 256 |  | Actual position electric wastegate 2 (0: WG closed, 100: WG open) | Ist Position Elektrische Wastegate 2 (0: WG geschlossen, 100 WG offen) |
 | `DGI_SENSOR_PULSB_MIN` | 0x592B |  | unsigned long |  |  |  | Pulse width output status part 1 | Status Pulsbreitenausgabe Teil 1 |
 | `DGI_SENSOR_PULSB_MAX` | 0x592C |  | unsigned long |  |  |  | Pulse width output status part 2 | Status Pulsbreitenausgabe Teil 2 |
-| `STATUS_SYNCHROMOD` | 0x592F |  | unsigned char | 0-n |  | [`T_Epm_stSync_SIGDOP`](DME-values.md#t_epm_stsync_sigdop) (10 values) | Synchronisation state | Zustand Synchronisation |
+| `STATUS_SYNCHROMOD` | 0x592F |  | unsigned char | 0-n |  | 0 = EPM_NO_SYNC; 10 = EPM_ALE_SYNC; 20 = EPM_CAS_SYNC; 21 = EPM_DIRSTALE_SYNC; 30 = EPM_FULL_SYNC | Synchronisation state | Zustand Synchronisation |
 | `STAT_0X5931_WERT` | 0x5931 |  | unsigned int | Ohm | × 2 |  |  |  |
 | `ROH_ETHANOLGEH_SENSOR` | 0x5938 |  | unsigned int |  | × 3.052e-05 |  | Ethanol content - raw value from sensor | Ethanolgehalt - Rohwert vom Sensor |
 | `ETHANOLGEH_EV` | 0x5939 |  | unsigned int |  | × 3.052e-05 |  |  |  |
-| `FPC_MASSETAST_DATA` | 0x594D |  | unsigned char | 0-n |  | 0 = Unknown; 1 = BSD generator; 2 = VDA LIN generator; 3 = Starter-generator SGR; 255 = Not defined | FPC: information transmitted via FPC ground switching (suspend) | FPC: Durch die FPC-Massetastung (Suspend) uebertragenen Information |
+| `FPC_MASSETAST_DATA` | 0x594D |  | unsigned char | 0-n |  | [`T_PSPDia_stFPCEnfGnd_SIGDOP`](DME-values.md#t_pspdia_stfpcenfgnd_sigdop) (12 values) | FPC: information transmitted via FPC ground switching (suspend) | FPC: Durch die FPC-Massetastung (Suspend) uebertragenen Information |
 | `DRUCKDIFF_SAUGSTRAHLP_ZU_UMG` | 0x5956 |  | signed int | hPa | × 10 ÷ 256 |  | Differential pressure suction jet pump - ambient | Differenzdruck Saugstrahlpumpe - Umgebung |
 | `I_WMM_POS` | 0x595A |  | signed int | % | ÷ 81.92 |  | Actual position WMM actuator | Ist-Position WMM Steller |
 | `I_POS_WMM_ROH` | 0x595B |  | signed int | mV | × 0.2 |  | Actual position WMM actuator raw value | Ist-Position WMM Steller Rohwert |
 | `WMM_STATUS` | 0x595D |  | unsigned long |  |  |  | Status WMM actuator | Status WMM Steller |
 | `ISTWERT_HUBVER` | 0x5960 |  | unsigned int | mm | × 0.001 |  | Actual value valve lift adjustment | Istwert Hubverstellung |
-| `KNDSPEZ_SYSZUST` | 0x5963 |  | unsigned int | 0-n |  | 4 = Clear power management histogram | Customer-specific system state | Kundenspezifischer System-Zustand |
+| `KNDSPEZ_SYSZUST` | 0x5963 |  | unsigned int | 0-n |  | [`T_SYC_STMNCOORD_DOP`](DME-values.md#t_syc_stmncoord_dop) (12 values) | Customer-specific system state | Kundenspezifischer System-Zustand |
 | `AEP_STEUERUNG_STANDVERBRAUCHER` | 0x5982 |  | unsigned char |  |  |  | Parked-vehicle consumer control | Steuerung Standverbraucher |
 | `S_PRIO_ENTLASTANFORDERUNG` | 0x5983 |  | unsigned char |  |  |  | Target priority of load-shedding request | Soll Prioritaet Entlastanforderung |
 | `VOLLZYKLEN` | 0x5988 |  | unsigned int |  | × 0.1 |  | Read full cycles | Vollzyklen lesen |
@@ -1889,7 +1889,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `STATUS_FEHLER_KW_SIGNAL` | 0x59C1 |  | unsigned int |  |  |  | Crankshaft signal fault status | Fehlerstatus KW-Signal |
 | `PERIPH_MONI_ERR_DRIVE` | 0x59C5 |  | unsigned long | HEX |  |  | Peripheral monitoring fault in drive | Peripheral Monitoring Fehler im Drive |
 | `PERIPH_MONI_ERR_HOCHLAUF` | 0x59C6 |  | unsigned long | HEX |  |  | Peripheral monitoring fault during start-up | Peripheral Monitoring Fehler im Hochlauf |
-| `FEHLWERT_PERIOD_PRUEF` | 0x59C7 |  | unsigned char | 0-n |  | 0 = Vehicle electrical system configuration: high-voltage system not coded; 4 = Vehicle electrical system configuration: high-voltage system coded | Fault value in periodic check | Fehlerwert bei der Periodischen Pruefung |
+| `FEHLWERT_PERIOD_PRUEF` | 0x59C7 |  | unsigned char | 0-n |  | [`T_1BYTE_0X59C7_TEXTTAB_SIGDOP`](DME-values.md#t_1byte_0x59c7_texttab_sigdop) (24 values) | Fault value in periodic check | Fehlerwert bei der Periodischen Pruefung |
 | `VON_DER_SWT_PRUEF` | 0x59C8 |  | string[7] | TEXT |  |  | VIN from SWT check | VIN der SWT Pruefung |
 | `SWID_DEAKT_SWAPPL` | 0x59C9 |  | unsigned long | HEX |  |  | SWID of deactivated SW application | SWID der Deaktivierten SW-Appl |
 | `FEHLERSTAT_MUX_TFM` | 0x59CC |  | unsigned char |  |  |  | Fault status of monitored Mux_Imme and Mux_Max values of the TFM | Fehlerstatus der ueberwachten Mux_Imme- und Mux_Max-Werte des TFM |
@@ -1898,7 +1898,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `TV_EWG` | 0x59E1 |  | signed int | % | × 0.00305176 |  | Duty cycle for activating the electric wastegate | Tastverhaeltnis fuer Ansteuerung des elektrischen Wastegate |
 | `OBDRADAR_NORMWERT_KATDIAGNOSE` | 0x59E2 |  | signed int |  | × 0.00015259 |  | Normalised value catalyst diagnosis for OBD radar | Normwert Katdiagnose fuer OBD-Radar |
 | `VVT_ZUST_SYSKOORD` | 0x59F0 |  | unsigned char |  |  |  | VVT status system coordination state | VVT Status Zustand Systemkoordination |
-| `VVT_STAT_KOMPONENTE` | 0x59F2 |  | unsigned char | 0-n |  | 0 = SYC_INI; 1 = SYC_INISYN; 2 = SYC_INIEND; 3 = SYC_PREDRIVE; 4 = SYC_DRIVE; 5 = SYC_POSTDRIVE; 6 = SYC_POST_OS_EXIT | VVT component status | VVT Status Komponente |
+| `VVT_STAT_KOMPONENTE` | 0x59F2 |  | unsigned char | 0-n |  | 0 = INIT; 1 = STANDBY; 2 = RUNNING; 3 = ERROR_STOP; 4 = ERROR_PROCEED; 5 = ERROR_OFF | VVT component status | VVT Status Komponente |
 | `CODVAR_AKTIVSTAT_KOMP_0` | 0x5A00 |  | unsigned char |  |  |  | Component active status | Aktivstatus der Komponente |
 | `CODVAR_AKTIVSTAT_KOMP_1` | 0x5A01 |  | unsigned char |  |  |  | Component active status | Aktivstatus der Komponente |
 | `CODVAR_AKTIVSTAT_KOMP_2` | 0x5A02 |  | unsigned char |  |  |  | Component active status | Aktivstatus der Komponente |
@@ -1946,4 +1946,4 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (2
 | `WASSER_ABSPERRVENTIL_STAT_KOMPTR` | 0xE827 |  | unsigned long |  |  |  | Shut-off valve component driver status | Status Komponententreiber Absperr-Ventil |
 | `WASSER_BELUEFTUNGSVENTIL_STAT_KOMPTR` | 0xE828 |  | unsigned long |  |  |  | Vent valve component driver status | Status Komponententreiber Belueftungs-Ventil |
 | `TRIPREC_ERWEITERTE_KONFIGURATION` | 0xE829 |  |  |  |  |  | Read status of the extended trip recorder configuration | Lesen des Status der erweiteren Triprecorderconfiguration |
-| `ACTIVE_DIAGNOSTIC_SESSION` | 0xF186 |  | unsigned char | 0-n |  | [`RDBI_ADS_DOP`](DME-values.md#rdbi_ads_dop) (28 values) | Active diagnostic session | activeDiagnosticSession |
+| `ACTIVE_DIAGNOSTIC_SESSION` | 0xF186 |  | unsigned char | 0-n |  | [`RDBI_ADS_DOP`](DME-values.md#rdbi_ads_dop) (10 values) | Active diagnostic session | activeDiagnosticSession |

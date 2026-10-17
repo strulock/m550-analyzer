@@ -19,8 +19,8 @@ MODULES = {
     0x63: [],                                   # head unit (NBT Evo)
 }
 # What the DME stored with its first fault: one snapshot (odometer 54,321 km,
-# vehicle time, fault class 1, power state "driving", then a value of its own
-# the catalog can't size) and the counters (occurred 3 times, healing 40).
+# vehicle time, fault class 1, power state "driving", then one of its own:
+# filtered air mass, 466 kg/h) and the counters (occurred 3 times, healing 40).
 SNAPSHOT = bytes.fromhex("0105" "1700" "00d431" "1701" "0001e240" "1731" "01"
                          "1750" "0a" "4abc" "1234")
 EXTENDED = bytes.fromhex("0100" "0203" "0328")

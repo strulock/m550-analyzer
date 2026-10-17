@@ -705,34 +705,59 @@ def load_freeze_fields():
                 uw = int(row["uw_id"], 16)
             except (KeyError, ValueError):
                 continue
-            module = (row.get("module") or "").strip()
-            fields[(int(module, 16) if module else None, uw)] = row
+            # One row can serve several modules ("0x12 0x13": both DMEs).
+            modules = (row.get("module") or "").split()
+            for module in modules or [None]:
+                fields[(int(module, 16) if module else None, uw)] = row
     return fields
 
 
-def _freeze_value(uw, raw, row, lang):
-    """(value, text) for one snapshot field."""
-    if uw == 0x1702:
-        return raw.hex().upper(), ""
-    n = int.from_bytes(raw, "big")
+def _number(text, default):
     try:
-        value = n * float(row.get("mul") or 1) / float(row.get("div") or 1) + \
-            float(row.get("add") or 0)
-    except ValueError:
-        value = n
-    if value == int(value):
-        value = int(value)
-    table = ENUM_FIELDS.get(uw)
+        return float(text)
+    except (TypeError, ValueError):
+        return default                  # "-": no scaling
+
+
+def _freeze_value(uw, raw, row, lang, enums=None):
+    """(value, text) for one snapshot field."""
+    if uw == 0x1702 or (row.get("unit") or "").upper() in ("HEX", "TEXT"):
+        return raw.hex().upper(), ""
+    dtype = (row.get("datatype") or "").strip().lower()
+    n = int.from_bytes(raw, "big", signed=dtype.startswith("signed"))
+    value = n * _number(row.get("mul"), 1.0) / (_number(row.get("div"), 1.0) or 1.0) + \
+        _number(row.get("add"), 0.0)
+    value = int(value) if value == int(value) else round(value, 6)
     text = ""
+    table = ENUM_FIELDS.get(uw)
     if table and n in table:
         text = table[n][0 if lang == "text_de" else 1]
+    elif enums and (row.get("name") or "-") != "-":
+        entry = enums.get(row["name"].upper(), {}).get(n)
+        if entry:
+            text = entry.get(lang) or entry.get("text_de") or ""
     return value, text
 
 
-def parse_snapshots(resp, module, fields=None, lang="text_en"):
+def _freeze_label(uw, row, lang):
+    if uw in FREEZE_LABELS:
+        return FREEZE_LABELS[uw]
+    return (row.get("name_de") if lang == "text_de" else row.get("name_en")) or \
+        row.get("name_de") or ""
+
+
+def _freeze_unit(uw, row):
+    if uw in FREEZE_UNITS:
+        return FREEZE_UNITS[uw]
+    unit = (row.get("unit") or "").strip()
+    return "" if unit in ("", "-", "0-n", "TEXT", "HEX") else unit
+
+
+def parse_snapshots(resp, module, fields=None, lang="text_en", enums=None):
     """Split a 59 04 reply into records: [{"record", "fields": [{id, name,
     label, value, unit, text}], "rest": hex of what couldn't be split}]."""
     fields = load_freeze_fields() if fields is None else fields
+    enums = load_enum_tables() if enums is None else enums
     body, i, records = resp[6:], 0, []
     while i + 2 <= len(body):
         number, count = body[i], body[i + 1]
@@ -751,10 +776,10 @@ def parse_snapshots(resp, module, fields=None, lang="text_en"):
                 record["rest"] = body[i:].hex()
                 return records
             raw = body[i + 2:i + 2 + size]
-            value, text = _freeze_value(uw, raw, row, lang)
+            value, text = _freeze_value(uw, raw, row, lang, enums)
             record["fields"].append({
-                "id": uw, "name": row.get("name_de") or "", "label": FREEZE_LABELS.get(uw, ""),
-                "value": value, "unit": FREEZE_UNITS.get(uw, ""), "text": text})
+                "id": uw, "name": row.get("name_de") or "", "label": _freeze_label(uw, row, lang),
+                "value": value, "unit": _freeze_unit(uw, row), "text": text})
             i += 2 + size
     return records
 

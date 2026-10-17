@@ -38,7 +38,7 @@ N63TU2_DME_readable_measurements.csv  1,845 live measurements (service 0x22)
 BMW_fault_code_texts.csv              5,680 fault codes, DME/BDC/ZGW/cluster
 BMW_dtc_status_byte.csv               92 statusOfDTC byte values
 BMW_freeze_frame_fields.csv           204 environmental-condition fields
-BMW_enum_tables.csv                   162 named value→text tables, 1,448 entries
+BMW_enum_tables.csv                   22 named value→text tables, 480 entries
 G30_module_sgbd_map.csv               13 confirmed G30 module→SGBD rows
 ```
 
@@ -75,7 +75,7 @@ fault against a drive.
 ### Enumeration tables
 
 Status and mode channels return bare integers; these tables carry the text.
-162 tables, 1,448 entries, each with its real SGBD name.
+22 tables (the ones the DME catalog refers to), 480 entries, each with its real SGBD name.
 
 A scalar measurement's `NAME` column names its value→text table, so the
 decoder can resolve a raw value to text with a dictionary lookup. 27
@@ -162,7 +162,7 @@ N63TU2_DME_readable_measurements.csv    measurement catalog (1,845 rows)
 BMW_fault_code_texts.csv                fault code catalog (5,680 rows)
 BMW_dtc_status_byte.csv                 statusOfDTC decoder (92 rows)
 BMW_freeze_frame_fields.csv             FS_LESEN_DETAIL field catalog (204)
-BMW_enum_tables.csv                     value→text enumerations (1,448)
+BMW_enum_tables.csv                     value→text enumerations (480)
 G30_module_sgbd_map.csv                 module address → SGBD file (13)
 ```
 

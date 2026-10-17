@@ -152,8 +152,10 @@ vehicle time (4, s), `0x1702` SAE code (3), `0x1731` fault class (1, BMW's
 `FEHLERKLASSE` table), `0x1750`/`0x1751` power state (1 and 3; `0x1750` read
 with the `UWB_TAB_PWF` table), `0x1768`/`0x1769` extended odometer and time
 (4 and 6; the DSC stores `0x1769` in 4). A module's own environment values
-may follow; without their sizes nothing after the first can be split, so
-the rest is shown raw.
+may follow. The DME's are in the same file (its `FUMWELTTEXTE`: engine
+temperature, pressures, air mass... with their scaling and value tables);
+for other modules, nothing after the first own value can be split without
+its size, so the rest is shown raw.
 
 `19 06 <DTC> FF` returns the extended data: `59 06 DTC[3] status[1]`, then
 `number[1] data[n]` per record. `DTCEXTENDEDDATARECORDNUMBER` gives `0x01`

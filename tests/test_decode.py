@@ -61,3 +61,21 @@ def test_every_data_file_is_locatable():
 ])
 def test_log_cells_never_run_as_spreadsheet_formulas(value, cell):
     assert core.log_cell(value) == cell
+
+
+@pytest.mark.parametrize("name, value, text", [
+    ("INFO_MOTORAUSGEHER", 0, "No stall"),          # each table's own texts, not the
+    ("STATUS_KL15", 1, "TRUE"),                     # neighbouring table's
+    ("ISKLO", 0, "----"),
+    ("COMM_STATUS_LIN_CHANNEL", 2, "COMM_FULL_COMMUNICATION"),
+])
+def test_dme_value_texts_are_their_own(name, value, text):
+    meta = core.load_catalog()[name]
+    assert core.enum_text(value, meta, core.load_enum_tables(), "text_en") == text
+
+
+def test_every_dme_value_table_is_there():
+    tables = core.load_enum_tables()
+    named = {(m.get("NAME") or "").upper() for m in core.load_catalog().values()} - {"", "-"}
+    missing = {n for n in named if n not in tables and not n.startswith("BF_")}
+    assert not missing
