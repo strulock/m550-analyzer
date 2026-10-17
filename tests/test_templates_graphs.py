@@ -80,10 +80,10 @@ def test_cli_logs_a_template(monkeypatch, tmp_path, capsys):
                   "--template", "Lambda", "--out", str(out), "ILAG2", "ITKUA"])
     finally:
         c.close()
-    assert out.read_text(encoding="utf-8").splitlines()[0] == "Time,ILAG1,ILAG2,ITKUA"
+    assert out.read_text(encoding="utf-8").splitlines()[0] == "Time,Clock,ILAG1,ILAG2,ITKUA,Event"
     cli.main(["templates"])
     assert "Lambda  (2)" in capsys.readouterr().out
-    with pytest.raises(SystemExit, match="no template 'Nope'; saved: Lambda"):
+    with pytest.raises(SystemExit, match="no template 'Nope'; available: .*Lambda"):
         cli.main(["log", "--ip", "127.0.0.1", "--template", "Nope"])
 
 

@@ -14,6 +14,8 @@ import threading
 import time
 from collections.abc import Mapping
 
+from n63read import core
+
 # Real catalog channels, so the demo shows what a watch list really looks
 # like, and they stay valid if the user connects with them still watched.
 DEMO_CHANNELS = [
@@ -164,7 +166,9 @@ def read_log(path):
         header = next(reader, None)
         if not header or header[0] != "Time" or len(header) < 2:
             raise ValueError("not an n63read log: the first column must be 'Time'")
-        names = header[1:]
+        # Clock and Event (logs from 0.4 on) aren't channels: leave them out.
+        cols = [i for i, n in enumerate(header) if i and n not in core.LOG_META]
+        names = [header[i] for i in cols]
         index = {n: i for i, n in enumerate(names)}
         rows = []
         for line in reader:
@@ -174,7 +178,7 @@ def read_log(path):
                 t = float(line[0])
             except ValueError:
                 continue                            # stray header or junk row
-            rows.append((t, Row(index, [_cell(v) for v in line[1:len(names) + 1]])))
+            rows.append((t, Row(index, [_cell(line[i]) for i in cols if i < len(line)])))
     if not rows:
         raise ValueError("the log has a header but no samples")
     return names, rows

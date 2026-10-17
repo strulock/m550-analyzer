@@ -115,6 +115,11 @@ class HsfzTimeout(HsfzError):
     """Nothing answered in time: an empty address, or a module asleep."""
 
 
+class ConnectionLost(HsfzError):
+    """The connection itself is gone (closed or reset), not just one read:
+    the reader passes this on, so a log can reconnect."""
+
+
 class NegativeResponse(HsfzError):
     def __init__(self, service, code):
         self.service = service
@@ -186,7 +191,10 @@ class Hsfz:
 
     def _send(self, target, payload):
         header = struct.pack(">IH", len(payload) + 2, CTRL_DIAG)
-        self.sock.sendall(header + bytes([self.source, target]) + payload)
+        try:
+            self.sock.sendall(header + bytes([self.source, target]) + payload)
+        except OSError as e:
+            raise ConnectionLost("connection lost: %s" % e) from e
         self._note("tx", CTRL_DIAG, self.source, target, payload)
 
     def _recv_exact(self, n):
@@ -198,8 +206,10 @@ class Hsfz:
                 # Surface as HsfzError so callers (scan especially) can treat
                 # a silent address as "nothing there" rather than a crash.
                 raise HsfzTimeout("timed out waiting for response") from None
+            except OSError as e:
+                raise ConnectionLost("connection lost: %s" % e) from e
             if not chunk:
-                raise HsfzError("connection closed by ECU")
+                raise ConnectionLost("connection closed by ECU")
             buf += chunk
         return bytes(buf)
 
@@ -342,7 +352,14 @@ class Tester(Hsfz):
     def request(self, target, payload, retries=4):
         if target != DME_SLAVE:
             return super().request(target, payload, retries)
-        return self._slave().request(target, payload, retries)
+        slave = self._slave()
+        try:
+            return slave.request(target, payload, retries)
+        except (ConnectionLost, ConnectionError) as e:
+            # Only bank 2's connection went: drop it (the next read opens a
+            # new one) without taking the main connection, and the log, down.
+            self.close_slave()
+            raise HsfzError("bank 2 connection lost: %s" % e) from None
 
     def _slave(self):
         now = time.time()
@@ -1016,6 +1033,7 @@ VALUE_TIMEOUT = 1.0
 VALUE_TARGET_BACKOFF = 5.0
 VALUE_KEY_BACKOFF = 30.0
 REFUSED_FOR_GOOD = (0x11, 0x12, 0x31)   # not supported / out of range: stop asking
+RECONNECT_WAIT = 2.0           # s between tries after the connection dropped mid-log
 
 # Values a log should not carry by default: credentials, SIM identity,
 # where the car has been, and paired devices. Still in the catalog, so
@@ -1124,6 +1142,160 @@ def add_bank2(cat):
     return cat
 
 
+def bank_twin(name):
+    """NAME@0x13 for a bank-1 DME channel name; None for one already bank 2."""
+    return None if name.endswith(BANK2_SUFFIX) else name + BANK2_SUFFIX
+
+
+def bank_pairs(names):
+    """[(bank 1, bank 2)] for each channel in `names` whose twin is there too."""
+    present = set(names)
+    return [(n, n + BANK2_SUFFIX) for n in names
+            if not n.endswith(BANK2_SUFFIX) and n + BANK2_SUFFIX in present]
+
+
+# --------------------------------------------------------- calculated channels
+
+# Values worked out from others each cycle, not read from the car: the
+# difference between the banks, how far each cylinder runs from the rest.
+# name -> (English, German, unit, inputs, function of the input values).
+CALC_LABEL = "Calculated"
+CYLINDERS = 8
+
+
+def _difference(a, b):
+    return a - b
+
+
+def _from_mean(i):
+    def f(*values):
+        return values[i] - sum(values) / len(values)
+    return f
+
+
+DERIVED = {
+    "CALC_LAMBDA_BANK1_MINUS_BANK2": (
+        "Lambda, bank 1 minus bank 2", "Lambda, Bank 1 minus Bank 2", "-",
+        ("LAMBDA_SONDE_IST", "LAMBDA_SONDE_IST" + BANK2_SUFFIX), _difference),
+    "CALC_LAMBDA_TRIM_BANK1_MINUS_BANK2": (
+        "Lambda control factor, bank 1 minus bank 2",
+        "Lambdaregelfaktor, Bank 1 minus Bank 2", "-",
+        ("LAMBD_REGELFAKTOR_MITTEL_SCHNELL", "LAMBD_REGELFAKTOR_MITTEL_SCHNELL" + BANK2_SUFFIX),
+        _difference),
+    "CALC_BOOST_MINUS_TARGET": (
+        "Boost pressure minus its target", "Ladedruck minus Sollwert", "hPa",
+        ("IPLAD", "S_LADEDRUCK"), _difference),
+    "CALC_GPS_SPEED_MINUS_VEHICLE_SPEED": (
+        "GPS speed minus vehicle speed", "GPS-Geschwindigkeit minus Fahrzeuggeschwindigkeit",
+        "km/h", ("HU_STATUS_SPEED.GPS_SPEED", "FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP"),
+        _difference),
+}
+for _i in range(CYLINDERS):
+    DERIVED["CALC_ILUZ%d_FROM_MEAN" % (_i + 1)] = (
+        "Uneven running cylinder %d minus the mean of all %d" % (_i + 1, CYLINDERS),
+        "Laufunruhe Zylinder %d minus Mittelwert aller %d" % (_i + 1, CYLINDERS), "rad/s²",
+        tuple("ILUZ%d" % (k + 1) for k in range(CYLINDERS)), _from_mean(_i))
+
+
+def add_derived(cat):
+    """Add the calculated channels whose inputs are all in the catalog."""
+    for name, (en, de, unit, inputs, _f) in DERIVED.items():
+        if all(n in cat for n in inputs):
+            cat[name] = {"ARG": name, "ID": "0x0000", "INFO": de, "INFO_EN": en,
+                         "EINHEIT": unit, "DATENTYP": "", "MUL": "1", "DIV": "1",
+                         "ADD": "0", "DERIVED": "1"}
+    return cat
+
+
+def is_derived(meta):
+    return bool(meta.get("DERIVED"))
+
+
+def with_inputs(names):
+    """`names` with each calculated channel's inputs put before it, once."""
+    out, seen = [], set()
+    for name in names:
+        for n in tuple(DERIVED[name][3] if name in DERIVED else ()) + (name,):
+            if n not in seen:
+                seen.add(n)
+                out.append(n)
+    return out
+
+
+def derive(name, sample):
+    """(value, unit, note) of a calculated channel from this cycle's sample."""
+    _en, _de, unit, inputs, f = DERIVED[name]
+    values = [sample.get(n, (None,))[0] for n in inputs]
+    missing = [n for n, v in zip(inputs, values) if not isinstance(v, (int, float))]
+    if missing:
+        return (None, "", "needs %s" % missing[0])
+    return (round(f(*values), 9), unit, "")   # without float noise like ...0000004
+
+
+# ---------------------------------------------------------- built-in channel sets
+
+BUILTIN_TEMPLATES = {
+    "Misfire hunt": ["INMOT", "ZAEHLER_AUSSETZ_ABGASREL_SUM_ALLEZYL"]
+    + ["ILUZ%d" % (i + 1) for i in range(CYLINDERS)]
+    + ["ZAEHLER_AUSSETZERK_ZYL%d" % (i + 1) for i in range(CYLINDERS)]
+    + ["CALC_ILUZ%d_FROM_MEAN" % (i + 1) for i in range(CYLINDERS)],
+    "Boost and wastegates, both banks": [
+        "INMOT", "IPLAD", "S_LADEDRUCK", "CALC_BOOST_MINUS_TARGET"]
+    + [n + s for n in ("LADEDRUCK_REGELDIFFERENZ_BANKSPEZ", "I_EWG_POS", "TV_EWG")
+       for s in ("", BANK2_SUFFIX)] + ["SOLL_POS_EWG"],
+    "Lambda and trims, both banks": [
+        n + s for n in ("LAMBDA_SONDE_IST", "LAMBDA_SONDE_SOLL",
+                        "LAMBD_REGELFAKTOR_MITTEL_SCHNELL") for s in ("", BANK2_SUFFIX)]
+    + ["CALC_LAMBDA_BANK1_MINUS_BANK2", "CALC_LAMBDA_TRIM_BANK1_MINUS_BANK2"],
+    "Temperatures": ["ITKUA", "ITOEL", "TEMP_OEL_SUMPF", "TEMP_ANSLUFT1_FILT",
+                     "TEMP_KRAFTSTOFF", "TEMP_GETRIEBE", "EGS_GETRIEBEOELTMEPERATUR"],
+    "Drive log with GPS": [
+        "INMOT", "BUS_FAHRPEDALWERT", "FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "EGS_ISTGANG.ISTGANG",
+        "IPLAD", "S_LADEDRUCK", "ITOEL", "ITKUA", "HU_STATUS_GPS",
+        "HU_STATUS_GPS_POSITION.LATITUDE", "HU_STATUS_GPS_POSITION.LONGITUDE",
+        "HU_STATUS_GPS_POSITION.HEIGHT", "HU_STATUS_SPEED.GPS_SPEED",
+        "CALC_GPS_SPEED_MINUS_VEHICLE_SPEED"],
+}
+
+
+# ------------------------------------------------------------------- alerts
+
+def alert_state(value, limits):
+    """"low", "high" or None for a value against (low, high) limits, either
+    of which may be None."""
+    if not isinstance(value, (int, float)) or not limits:
+        return None
+    lo, hi = limits
+    if lo is not None and value < lo:
+        return "low"
+    if hi is not None and value > hi:
+        return "high"
+    return None
+
+
+# ---------------------------------------------------------------- log layout
+
+# Columns a log has besides the channels: Time first (as BimmerLink has it,
+# seconds from the log's start), the wall clock next, and events last.
+LOG_TIME, LOG_CLOCK, LOG_EVENT = "Time", "Clock", "Event"
+LOG_META = (LOG_TIME, LOG_CLOCK, LOG_EVENT)
+
+
+def log_header(names):
+    return [LOG_TIME, LOG_CLOCK] + list(names) + [LOG_EVENT]
+
+
+def log_clock(now=None):
+    now = time.time() if now is None else now
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(now)) + ".%03d" % (
+        int(now * 1000) % 1000)
+
+
+def log_row(seconds, now, names, sample, event=""):
+    return ([round(seconds, 3), log_clock(now)]
+            + [log_cell(sample[n][0]) for n in names] + [log_cell(event)])
+
+
 def channel_target(meta, default):
     """The module a channel is read from."""
     for key in ("MODULE", "TARGET"):
@@ -1165,9 +1337,12 @@ class ChannelReader:
         now = time.time() if now is None else now
         sample, records = {}, {}
         answered, silent = set(), set()     # DME addresses, this cycle
+        derived = []
         for name, did, meta in chans:
             module = (meta.get("MODULE") or "").strip()
-            if module:
+            if is_derived(meta):
+                derived.append(name)        # worked out below, not read
+            elif module:
                 records.setdefault((int(module, 16), did), []).append(name)
             else:
                 sample[name] = self._read_value(h, did, meta, now, answered, silent)
@@ -1192,6 +1367,8 @@ class ChannelReader:
                 note = "waiting"
             for name in names:
                 sample[name] = got.get(name) or (None, "", note)
+        for name in derived:
+            sample[name] = derive(name, sample)
         return sample
 
     def _read_value(self, h, did, meta, now, answered, silent):
@@ -1216,6 +1393,8 @@ class ChannelReader:
             if target not in answered:      # nothing from it at all: rest it too
                 self.value_quiet[target] = now + VALUE_TARGET_BACKOFF
             return (None, "", "not answering")
+        except (ConnectionLost, ConnectionError):
+            raise                           # the connection, not this value: reconnect
         except Exception as e:                                      # noqa: BLE001
             return (None, "", str(e)[:28])
         answered.add(target)
@@ -1270,7 +1449,7 @@ def check_layouts(catalog, target=DME_MASTER):
     """
     out = record_layouts(catalog)
     for row in catalog.values():
-        if not (row.get("MODULE") or "").strip():
+        if not (row.get("MODULE") or "").strip() and not is_derived(row):
             key = (target, int(row["ID"], 16))
             if key not in out or expected_size([row])[0] > expected_size(out[key])[0]:
                 out[key] = [row]

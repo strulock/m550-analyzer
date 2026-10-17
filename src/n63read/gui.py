@@ -67,6 +67,8 @@ class Poller(threading.Thread):
         self.log_path = None        # file the user picked
         self.log_part = 1           # >1 once a channel change has split the log
         self.last_flush = 0.0
+        self.log_t0 = None          # when logging started: the log's Time is from here
+        self.events = []            # text for the next row's Event cell
 
     def set_channels(self, chans):
         with self.lock:
@@ -85,7 +87,35 @@ class Poller(threading.Thread):
     def start_log(self, path):
         with self.lock:
             self.log_path, self.log_part = path, 1
+            self.log_t0 = time.time()
+            self.events = []
             self._open_log(path)
+
+    def mark(self, text):
+        """Note something (an alert, a reconnect) in the log's Event column."""
+        with self.lock:
+            if self.logwriter:
+                self.events.append(text)
+
+    def _logging(self):
+        with self.lock:
+            return self.logwriter is not None
+
+    def _log_event_now(self, text):
+        """A row of its own for an event when no samples are coming (the
+        connection just dropped), pushed to disk at once."""
+        with self.lock:
+            if not self.logwriter:
+                return
+            if self.log_header is None:
+                self.events.append(text)        # no header yet: the first row carries it
+                return
+            now = time.time()
+            blank = {n: (None, "", "") for n in self.log_header}
+            self.logwriter.writerow(core.log_row(now - self.log_t0, now, self.log_header,
+                                                 blank, text))
+            self.logfile.flush()
+            os.fsync(self.logfile.fileno())
 
     def _open_log(self, path):
         self.logfile = open(path, "w", newline="", encoding="utf-8")
@@ -127,39 +157,66 @@ class Poller(threading.Thread):
 
     def run(self):
         t0 = time.time()
-        connected = False
+        connected = False               # at some point this session
         samples, reason = 0, "stopped"
-        host = None
+        lost_at = None                  # when the connection dropped, while it's down
         try:
-            # Borrow the car from another n63read that holds it (a running
-            # log), else hold it ourselves and lend it to the others.
-            with share.open_tester(self.ip, self.source, self.timeout,
-                                   trace=self.trace) as h:
-                connected = True
-                if not getattr(h, "shared", False):
-                    host = share.Host(self.ip).start()
-                diag.record_later("connect", ip=self.ip, result="ok",
-                                  seconds=round(time.time() - t0, 3), bind=self.bind)
-                self.out_q.put(("status", "connected", self))
-                while not self._stop_event.is_set():
-                    cycle = time.time()
-                    self._run_jobs(h)
+            while not self._stop_event.is_set():
+                host = None
+                try:
+                    # Borrow the car from another n63read that holds it (a
+                    # running log), else hold it ourselves and lend it.
+                    with share.open_tester(self.ip, self.source, self.timeout,
+                                           trace=self.trace) as h:
+                        if not connected:
+                            diag.record_later("connect", ip=self.ip, result="ok",
+                                              seconds=round(time.time() - t0, 3),
+                                              bind=self.bind)
+                        connected = True
+                        if not getattr(h, "shared", False):
+                            host = share.Host(self.ip).start()
+                        if lost_at is not None:
+                            gap = round(time.time() - lost_at)
+                            diag.record("reconnect", ip=self.ip, seconds=gap)
+                            self.mark("reconnected after %d s" % gap)
+                            lost_at = None
+                        self.out_q.put(("status", "connected", self))
+                        while not self._stop_event.is_set():
+                            cycle = time.time()
+                            self._run_jobs(h)
+                            if host:
+                                host.serve(h)
+                                h.tidy()
+                            with self.lock:
+                                chans = list(self.channels)
+                            if not chans:
+                                time.sleep(0.15)
+                                continue
+
+                            elapsed = round(time.time() - t0, 3)
+                            sample = self.reader.read(h, chans)
+
+                            self.out_q.put(("sample", elapsed, sample))
+                            samples += 1
+                            self._write_log(chans, sample)
+                            self._stop_event.wait(core.rest(self.interval, cycle))
+                    break                       # stopped
+                except Exception as e:                              # noqa: BLE001
+                    # While logging, a cable bump or the car dozing off
+                    # shouldn't end the drive's log: mark the gap, keep the
+                    # file open, and keep trying. Otherwise it's an error.
+                    if not (connected and self._logging()) or self._stop_event.is_set():
+                        raise
+                    if lost_at is None:
+                        lost_at = time.time()
+                        diag.record("connection_lost", ip=self.ip,
+                                    error="%s: %s" % (type(e).__name__, e))
+                        self._log_event_now("connection lost: %s" % e)
+                        self.out_q.put(("status", "reconnecting", self))
+                    self._stop_event.wait(core.RECONNECT_WAIT)
+                finally:
                     if host:
-                        host.serve(h)
-                        h.tidy()
-                    with self.lock:
-                        chans = list(self.channels)
-                    if not chans:
-                        time.sleep(0.15)
-                        continue
-
-                    elapsed = round(time.time() - t0, 3)
-                    sample = self.reader.read(h, chans)
-
-                    self.out_q.put(("sample", elapsed, sample))
-                    samples += 1
-                    self._write_log(elapsed, chans, sample)
-                    self._stop_event.wait(core.rest(self.interval, cycle))
+                        host.stop()
         except Exception as e:                                      # noqa: BLE001
             reason = "%s: %s" % (type(e).__name__, e)
             if connected:
@@ -169,8 +226,6 @@ class Poller(threading.Thread):
                 self.out_q.put(("error", no_answer_text(self.ip, e), self))
                 diag.connect_failed(self.ip, e, self.bind)
         finally:
-            if host:
-                host.stop()
             self.stop_log()
             if connected:
                 r = self.reader
@@ -181,10 +236,11 @@ class Poller(threading.Thread):
                             log=self.log_path, trace=self.trace)
             self.out_q.put(("status", "disconnected", self))
 
-    def _write_log(self, elapsed, chans, sample):
+    def _write_log(self, chans, sample):
         with self.lock:
             if not self.logwriter:
                 return
+            now = time.time()
             names = [c[0] for c in chans]
             if self.log_header is not None and self.log_header != names:
                 # The channel list changed mid-log. A second header row in
@@ -196,14 +252,16 @@ class Poller(threading.Thread):
                 self._open_log(path)
                 self.out_q.put(("logfile", path))
             if self.log_header is None:
-                self.logwriter.writerow(["Time"] + names)
+                self.logwriter.writerow(core.log_header(names))
                 self.log_header = names
-            self.logwriter.writerow(
-                [elapsed] + [core.log_cell(sample[n][0]) for n in names]
-            )
+            # Time from the start of the log (a split file carries on the
+            # count), the wall clock beside it, and any events since the
+            # last row.
+            self.logwriter.writerow(core.log_row(now - self.log_t0, now, names, sample,
+                                                 "; ".join(self.events)))
+            self.events = []
             # Push to disk about once a second, so a crash, sleep or flat
             # battery loses at most that much of the drive.
-            now = time.time()
             if now - self.last_flush >= LOG_FLUSH_SECONDS:
                 self.logfile.flush()
                 os.fsync(self.logfile.fileno())
@@ -275,6 +333,12 @@ class App(tk.Tk):
         self._keys = {}                      # (name, DME address) -> availability key
         self._dme = core.DME_MASTER          # the DME address box, as a number
         self._marks_for = None               # answered keys the picker was last built for
+        self._pairs = []                     # [(bank 1, bank 2)] both watched
+        self._hidden = set()                 # bank-2 rows folded into bank 1
+        self._numbers = {}                   # name -> value as shown, for the bank delta
+        self.alerts = {k: tuple(v) for k, v in (self.settings.get("alerts") or {}).items()}
+        self._alerting = {}                  # name -> "low"/"high" while out of range
+        self.compare_var = tk.BooleanVar(value=self.settings.get("compare_banks", False))
         self.q = queue.Queue()
         self.poller = None
         self.modules = []                    # addresses found by the last scan
@@ -283,6 +347,7 @@ class App(tk.Tk):
 
         self._build()
         self.palette = theme.apply(self, self.theme_name)
+        self._style_tags()
         self._start_demo()
         self.after(60, self._drain)
         self.after(10000, self._save_answers)
@@ -306,7 +371,7 @@ class App(tk.Tk):
         # Other modules (head unit, transmission, DSC...): optional, so a
         # missing file only hides that module's channels.
         cat.update(core.load_module_catalogs())
-        return core.add_bank2(cat)
+        return core.add_derived(core.add_bank2(cat))
 
     # -- layout ----------------------------------------------------------
 
@@ -452,15 +517,19 @@ class App(tk.Tk):
         right = ttk.Frame(body)
         body.add(right, weight=2)
 
-        self.tree = ttk.Treeview(right, columns=("v", "u", "arg", "id", "note"),
+        # "b2" and "d" (bank 2 and the difference) only show while comparing
+        # banks; they come last so the rows' positional values stay put.
+        self.tree = ttk.Treeview(right, columns=("v", "u", "arg", "id", "note", "b2", "d"),
                                  show="tree headings", height=10)
         self.tree.heading("#0", text="Channel")
         for c, t, w in (("v", "Value", 100), ("u", "Unit", 60),
                         ("arg", "Name", 150), ("id", "DID", 70),
-                        ("note", "Status", 140)):
+                        ("note", "Status", 140), ("b2", "Bank 2", 90),
+                        ("d", "Δ 1−2", 80)):
             self.tree.heading(c, text=t)
             self.tree.column(c, width=w, anchor="w")
         self.tree.column("#0", width=260)
+        self._show_columns()
         self.tree.pack(fill="both", expand=True)
         self.tree.bind("<Double-Button-1>", lambda e: self._pop_out(
             [self.tree.identify_row(e.y)] if self.tree.identify_row(e.y) else None))
@@ -470,6 +539,9 @@ class App(tk.Tk):
         ttk.Button(row, text="Remove", command=self._remove).pack(side="left")
         ttk.Button(row, text="Clear", command=self._clear).pack(side="left", padx=4)
         ttk.Button(row, text="Graph", command=self._pop_out).pack(side="left")
+        ttk.Button(row, text="Alert...", command=self._edit_alert).pack(side="left", padx=(4, 0))
+        ttk.Checkbutton(row, text="Compare banks", variable=self.compare_var,
+                        command=self._compare_changed).pack(side="left", padx=(8, 0))
         self.templates_btn = ttk.Menubutton(row, text="Templates \u25be")
         self.templates_menu = tk.Menu(self.templates_btn, tearoff=False,
                                       postcommand=self._fill_templates_menu)
@@ -840,6 +912,7 @@ class App(tk.Tk):
         self.theme_name = name
         self._save_setting("theme", name)
         self.palette = theme.apply(self, name)
+        self._style_tags()
         for window in list(self.graphs.values()):
             if window.winfo_exists():
                 window.set_colors(self.palette)
@@ -874,7 +947,8 @@ class App(tk.Tk):
                 func = record_group[key]
                 record = prefix_job if "." in name else None
             else:
-                module_label = BANK2_LABEL if meta.get("TARGET") else DME_LABEL
+                module_label = (core.CALC_LABEL if core.is_derived(meta) else
+                                BANK2_LABEL if meta.get("TARGET") else DME_LABEL)
                 func = core.function_group(name, meta.get("INFO"), english)
                 record = None
             # Search both languages and the code name, whichever is shown.
@@ -916,6 +990,12 @@ class App(tk.Tk):
             self.after_cancel(self._refilter_job)
         self._refilter_job = self.after(250, self._refilter)
 
+    def _answers(self, name):
+        """Whether the car answers this channel; a calculated one, all its inputs."""
+        if name in core.DERIVED:
+            return all(self._answers(n) for n in core.DERIVED[name][3] if n in self.catalog)
+        return self.avail.get(self._avail_key(name)) in core.ANSWERS
+
     def _answered(self):
         return frozenset(k for k, v in self.avail.items() if v in core.ANSWERS)
 
@@ -935,7 +1015,7 @@ class App(tk.Tk):
             module, func, record, _, hay = self._info[name]
             if term and term not in hay:
                 continue
-            if only and self.avail.get(self._avail_key(name)) not in core.ANSWERS:
+            if only and not self._answers(name):
                 continue
             top, sub = (module, func) if by_module else (func, module)
             groups.setdefault(top, {}).setdefault(sub, {}).setdefault(record, []).append(name)
@@ -979,7 +1059,7 @@ class App(tk.Tk):
         """
         if kind == "module":
             return ((0, "") if name == DME_LABEL else (0, "~") if name == BANK2_LABEL
-                    else (1, name))
+                    else (0, "~~") if name == core.CALC_LABEL else (1, name))
         order = [g for g, _ in core.FUNCTION_GROUPS]
         return (len(order), "") if name not in order else (order.index(name), "")
 
@@ -1067,8 +1147,8 @@ class App(tk.Tk):
     def _learn(self, sample):
         """Record, from live reads, which identifiers this car answers."""
         for name, (value, _unit, note) in sample.items():
-            if name not in self.catalog:
-                continue
+            if name not in self.catalog or core.is_derived(self.catalog[name]):
+                continue                        # worked out, not asked of the car
             status = "ok" if value is not None else "refused" if note in REFUSALS else None
             key = self._avail_key(name)
             if status and self.avail.get(key) != status:
@@ -1193,34 +1273,65 @@ class App(tk.Tk):
             self.avail.clear()
             self._answers_changed("recorded answers forgotten")
 
+    def _with_extras(self, names):
+        """What to watch for `names`: a calculated channel brings its inputs,
+        and while comparing banks an engine channel brings its bank-2 twin."""
+        out = []
+        for name in core.with_inputs(names):
+            out.append(name)
+            twin = self._twin_to_add(name)
+            if twin:
+                out.append(twin)
+        return out
+
+    def _twin_to_add(self, name):
+        if not self.compare_var.get():
+            return None
+        meta = self.catalog.get(name, {})
+        if meta.get("MODULE") or meta.get("TARGET") or core.is_derived(meta):
+            return None
+        twin = core.bank_twin(name)
+        return twin if twin in self.catalog else None
+
     def _add_names(self, names):
         watched = {n for n, _, _ in self.watch}     # "Add all" passes thousands
-        for name in names:
-            if name in watched:
+        for name in self._with_extras(names):
+            if name in watched or name not in self.catalog:
                 continue
             watched.add(name)
-            self._forget_cells(name)
-            meta = self.catalog[name]
-            self.watch.append((name, int(meta["ID"], 16), meta))
-            self.series[name] = []
-            self.history[name] = graph.History(HISTORY_POINTS)
-            self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
-                             values=("", self._shown_unit(meta), name, meta["ID"], ""))
+            self._add_row(name)
         self._push_channels()
 
+    def _add_row(self, name):
+        self._forget_cells(name)
+        meta = self.catalog[name]
+        self.watch.append((name, int(meta["ID"], 16), meta))
+        self.series[name] = []
+        self.history[name] = graph.History(HISTORY_POINTS)
+        self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
+                         values=("", self._shown_unit(meta), name, meta["ID"], ""))
+
     def _remove(self):
-        for name in self.tree.selection():
-            self.watch = [c for c in self.watch if c[0] != name]
+        gone = set(self.tree.selection())
+        if self.compare_var.get():
+            # A bank-2 twin is folded into its bank-1 row: it goes with it.
+            gone |= {b2 for b1, b2 in self._pairs if b1 in gone}
+        for name in gone:
             self.series.pop(name, None)
             self._forget_history(name)
-            self.tree.delete(name)
+            if self.tree.exists(name):
+                self.tree.delete(name)
+        self.watch = [c for c in self.watch if c[0] not in gone]
         self._push_channels()
 
     def _clear(self):
         for name in list(self.history):
             self._forget_history(name)
+        names = [n for n, _, _ in self.watch]
         self.watch.clear()
         self.series.clear()
+        # Folded-in bank-2 rows are detached: get_children() doesn't list them.
+        self.tree.delete(*[n for n in names if self.tree.exists(n)])
         self.tree.delete(*self.tree.get_children())
         self._push_channels()
 
@@ -1246,10 +1357,12 @@ class App(tk.Tk):
                 window.lift()
                 continue
             meta = self.catalog.get(name, {})
+            # Comparing banks: bank 2 drawn over bank 1 in the same window.
+            twin = dict(self._pairs).get(name) if self.compare_var.get() else None
             window = graph.GraphWindow(self, name, self._describe(meta), meta.get("EINHEIT"),
                                        self.history[name], COLORS[i % len(COLORS)],
                                        lang=self.lang, show_unit=self._shown_unit(meta),
-                                       colors=self.palette)
+                                       colors=self.palette, overlay=self.history.get(twin))
             self.graphs[name] = window
         return [self.graphs[n] for n in names]
 
@@ -1260,6 +1373,11 @@ class App(tk.Tk):
         m.delete(0, "end")
         m.add_command(label="Save watch list as template...", command=self._save_template,
                       state="normal" if self.watch else "disabled")
+        builtin = tk.Menu(m, tearoff=False)
+        for name, names in core.BUILTIN_TEMPLATES.items():
+            builtin.add_command(label="%s  (%d)" % (name, len(names)),
+                                command=lambda n=name: self._load_builtin(n))
+        m.add_cascade(label="Ready-made sets", menu=builtin)
         templates = core.load_templates()
         if not templates:
             m.add_command(label="(no templates saved yet)", state="disabled")
@@ -1305,11 +1423,22 @@ class App(tk.Tk):
             name, len(known), ", %d no longer in the catalog" % missing if missing else ""),
             foreground="#2d7dd2")
 
+    def _load_builtin(self, name):
+        """A ready-made set: misfire hunt, both banks' boost or lambda..."""
+        known = [n for n in core.BUILTIN_TEMPLATES.get(name, []) if n in self.catalog]
+        self._set_watch(known)
+        self.template_name = ""
+        self.status.config(text="● %s: %d channels" % (name, len(self.watch)),
+                           foreground="#2d7dd2")
+
     def _delete_template(self, name):
         if messagebox.askyesno("Delete template", "Delete the template \"%s\"?" % name):
             core.delete_template(name)
 
     def _push_channels(self):
+        names = [n for n, _, _ in self.watch]
+        self._pairs = core.bank_pairs(names)
+        self._arrange_rows()
         if self.poller:
             self.poller.set_channels(self.watch)
         if self.feed:
@@ -1318,15 +1447,145 @@ class App(tk.Tk):
     def _set_watch(self, names):
         """Replace the watch list with these catalog channels."""
         self._clear()
-        for name in names:
-            meta = self.catalog[name]
-            self._forget_cells(name)
-            self.watch.append((name, int(meta["ID"], 16), meta))
-            self.series[name] = []
-            self.history[name] = graph.History(HISTORY_POINTS)
-            self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
-                             values=("", self._shown_unit(meta), name, meta["ID"], ""))
+        watched = set()
+        for name in self._with_extras(names):
+            if name in watched or name not in self.catalog:
+                continue
+            watched.add(name)
+            self._add_row(name)
         self._push_channels()
+
+    # -- comparing banks ---------------------------------------------------
+
+    def _compare_changed(self):
+        self._save_setting("compare_banks", self.compare_var.get())
+        if self.compare_var.get():
+            self._add_names([n for n, _, _ in self.watch])    # brings the twins
+        else:
+            self._push_channels()
+
+    def _arrange_rows(self):
+        """While comparing, each bank-2 twin is folded into its bank-1 row
+        (Bank 2 and difference columns); otherwise it's a row of its own,
+        just below bank 1."""
+        hide = {b2 for _, b2 in self._pairs} if self.compare_var.get() else set()
+        for name in self._hidden - hide:
+            if self.tree.exists(name):
+                b1 = name[:-len(core.BANK2_SUFFIX)]
+                at = self.tree.index(b1) + 1 if self.tree.exists(b1) else "end"
+                self.tree.move(name, "", at)
+        for name in hide - self._hidden:
+            self.tree.detach(name)
+        self._hidden = hide
+        self._show_columns()
+
+    def _show_columns(self):
+        compare = self.compare_var.get()
+        self.tree.configure(displaycolumns=("v", "b2", "d", "u", "arg", "id", "note")
+                            if compare else ("v", "u", "arg", "id", "note"))
+
+    def _show_banks(self, sample):
+        """Fill each compared bank-1 row's Bank 2 and difference cells."""
+        for b1, b2 in self._pairs:
+            if b1 not in sample and b2 not in sample:
+                continue
+            self._set_cell(b1, "b2", self._cells.get((b2, "v"), ""))
+            n1, n2 = self._numbers.get(b1), self._numbers.get(b2)
+            self._set_cell(b1, "d", "" if n1 is None or n2 is None else "%+.4g" % (n1 - n2))
+
+    # -- alerts ------------------------------------------------------------
+
+    def _edit_alert(self):
+        """Set a low and high limit for the selected channel, in shown units."""
+        name = next(iter(self.tree.selection()), None)
+        if not name:
+            messagebox.showinfo("Alert", "Select a watched channel first.")
+            return
+        meta = self.catalog.get(name, {})
+        unit = self._shown_unit(meta)
+        to_shown = self._converter(meta.get("EINHEIT"), unit)
+        lo, hi = self.alerts.get(name, (None, None))
+        win = tk.Toplevel(self)
+        win.title("Alert")
+        win.transient(self)
+        win.resizable(False, False)
+        ttk.Label(win, padding=(10, 10, 10, 4), wraplength=360,
+                  text="Highlight the row, beep and mark the log when\n%s\ngoes outside "
+                  "these limits. Leave a box empty for no limit." % (
+                      self._describe(meta) or name)).grid(row=0, column=0, columnspan=3)
+        boxes = {}
+        for r, (label, value) in enumerate((("Below", lo), ("Above", hi)), start=1):
+            ttk.Label(win, text=label).grid(row=r, column=0, sticky="e", padx=(10, 4))
+            var = tk.StringVar(value="" if value is None else "%g" % to_shown(value))
+            ttk.Entry(win, textvariable=var, width=12).grid(row=r, column=1, pady=2)
+            ttk.Label(win, text=unit).grid(row=r, column=2, sticky="w", padx=(4, 10))
+            boxes[label] = var
+
+        def save():
+            try:
+                limits = self._limits_from(boxes["Below"].get(), boxes["Above"].get(), meta)
+            except ValueError:
+                messagebox.showerror("Alert", "Enter numbers, or leave a box empty.",
+                                     parent=win)
+                return
+            self._set_alert(name, limits)
+            win.destroy()
+
+        row = ttk.Frame(win, padding=10)
+        row.grid(row=3, column=0, columnspan=3, sticky="e")
+        ttk.Button(row, text="Save", command=save).pack(side="right")
+        ttk.Button(row, text="Cancel", command=win.destroy).pack(side="right", padx=4)
+        return win
+
+    def _converter(self, src, dst):
+        try:
+            return graph.converter(src, dst)
+        except ValueError:
+            return lambda v: v
+
+    def _limits_from(self, below, above, meta):
+        """(low, high) in the car's units from what was typed in shown units."""
+        back = self._converter(self._shown_unit(meta), meta.get("EINHEIT"))
+
+        def value(text):
+            text = text.strip().replace(",", ".")
+            return None if not text else back(float(text))
+        return value(below), value(above)
+
+    def _set_alert(self, name, limits):
+        if limits == (None, None):
+            self.alerts.pop(name, None)
+        else:
+            self.alerts[name] = limits
+        self._alerting.pop(name, None)
+        if self.tree.exists(name):
+            self.tree.item(name, tags=())
+        self._save_setting("alerts", {k: list(v) for k, v in self.alerts.items()})
+
+    def _check_alerts(self, sample):
+        for name, limits in self.alerts.items():
+            if name not in sample or not self.tree.exists(name):
+                continue
+            value = sample[name][0]
+            state = core.alert_state(value, limits)
+            if state == self._alerting.get(name):
+                continue
+            self._alerting[name] = state
+            self.tree.item(name, tags=("alert",) if state else ())
+            if state:
+                meta = self.catalog.get(name, {})
+                unit = self._shown_unit(meta)
+                text = "%s %s %g %s (%g)" % (
+                    name, "below" if state == "low" else "above",
+                    self._shown_value(limits[0] if state == "low" else limits[1], meta),
+                    unit, self._shown_value(value, meta))
+                self.bell()
+                self.status.config(text="● alert: " + text, foreground="#c0392b")
+                if self.poller:
+                    self.poller.mark(text)
+
+    def _style_tags(self):
+        self.tree.tag_configure("alert", background=self.palette.get("alert", "#f8d7da"))
 
     # -- demo and replay -------------------------------------------------
 
@@ -1795,6 +2054,11 @@ class App(tk.Tk):
                 and msg[2] is not self.poller:
             return      # from a poller already replaced by a new connection
 
+        elif kind == "status" and msg[1] == "reconnecting":
+            # Lost mid-log: the poller keeps the log open and keeps trying.
+            self.status.config(text="● connection lost - reconnecting, log kept open",
+                               foreground="#b8860b")
+
         elif kind == "status":
             ok = msg[1] == "connected"
             self.status.config(
@@ -1917,6 +2181,7 @@ class App(tk.Tk):
                 note = core.enum_text(value, meta, self.enums, self._enum_lang()) or ""
             self._set_cell(name, "v", shown)
             self._set_cell(name, "note", note)
+            self._numbers[name] = display if isinstance(display, (int, float)) else None
             if isinstance(value, (int, float)):
                 s = self.series.setdefault(name, [])
                 s.append(float(value))
@@ -1926,6 +2191,10 @@ class App(tk.Tk):
                     if h and elapsed < h[-1][0]:
                         h.clear()               # a new session: its clock restarted
                     h.append((float(elapsed), float(value)))
+        if self._pairs and self.compare_var.get():
+            self._show_banks(sample)
+        if self.alerts:
+            self._check_alerts(sample)
         if plot:
             self._plot()
         else:
@@ -1964,7 +2233,7 @@ class App(tk.Tk):
         # each line's range.
         chosen = [n for n in self.tree.selection() if len(self.series.get(n, [])) > 1]
         if not chosen:
-            chosen = [n for n, v in self.series.items() if len(v) > 1]
+            chosen = [n for n, v in self.series.items() if len(v) > 1 and n not in self._hidden]
         active = [(n, self.series[n]) for n in chosen[:CHART_LINES]]
         if not active:
             c.create_text(w // 2, h // 2, text="no numeric data yet", fill=p["muted"])
@@ -1982,35 +2251,46 @@ class App(tk.Tk):
         readings = []
 
         col_w = max(150, (w - 2 * pad) // 3)
+        # Comparing banks: bank 2 rides along with bank 1, dashed, on the
+        # same scale, so the two lines can be read against each other.
+        twins = dict(self._pairs) if self.compare_var.get() else {}
         for i, (name, vals) in enumerate(active):
             color = COLORS[i % len(COLORS)]
-            lo, hi = min(vals), max(vals)
+            tvals = self.series.get(twins.get(name)) or []
+            lo, hi = min(vals + tvals), max(vals + tvals)
             if hi - lo < 1e-9:
                 lo, hi = lo - 1, hi + 1
             span = hi - lo
             step = (w - 2 * pad) / max(1, PLOT_POINTS - 1)
-            pts = []
-            start = PLOT_POINTS - len(vals)
-            for k, v in enumerate(vals):
-                x = pad + (start + k) * step
-                y = pad + (h - 2 * pad) * (1 - (v - lo) / span)
-                pts += [x, y]
-            if len(pts) >= 4:
-                c.create_line(*pts, fill=color, width=2, smooth=False)
+
+            def line(values, **style):
+                pts = []
+                first = PLOT_POINTS - len(values)
+                for k, v in enumerate(values):
+                    pts += [pad + (first + k) * step, pad + (h - 2 * pad) * (1 - (v - lo) / span)]
+                if len(pts) >= 4:
+                    c.create_line(*pts, fill=color, width=2, smooth=False, **style)
+            line(vals)
+            if tvals:
+                line(tvals, dash=(5, 3))
             meta = self.catalog.get(name, {})
             unit = self._shown_unit(meta)
-            label = "%s  %.5g\u2013%.5g %s" % (self._chart_name(name, meta),
-                                               self._shown_value(lo, meta),
-                                               self._shown_value(hi, meta), unit)
+            label = "%s%s  %.5g\u2013%.5g %s" % (self._chart_name(name, meta),
+                                                 "  (bank 2 dashed)" if tvals else "",
+                                                 self._shown_value(lo, meta),
+                                                 self._shown_value(hi, meta), unit)
             c.create_text(pad + (i % 3) * col_w, 8 + (i // 3) * 11, anchor="w",
                           fill=color, font=("TkDefaultFont", 7), text=label)
-            k = None if hover is None else hover - start
-            if k is not None and 0 <= k < len(vals):
-                y = pad + (h - 2 * pad) * (1 - (vals[k] - lo) / span)
-                c.create_oval(pad + hover * step - 3, y - 3, pad + hover * step + 3, y + 3,
-                              outline=color, width=2)
-                readings.append((color, "%s %.5g %s" % (
-                    self._chart_name(name, meta), self._shown_value(vals[k], meta), unit)))
+            for values, which in ((vals, ""), (tvals, " bank 2")):
+                start = PLOT_POINTS - len(values)
+                k = None if hover is None else hover - start
+                if k is not None and 0 <= k < len(values):
+                    y = pad + (h - 2 * pad) * (1 - (values[k] - lo) / span)
+                    c.create_oval(pad + hover * step - 3, y - 3, pad + hover * step + 3,
+                                  y + 3, outline=color, width=2)
+                    readings.append((color, "%s%s %.5g %s" % (
+                        self._chart_name(name, meta), which,
+                        self._shown_value(values[k], meta), unit)))
         if readings:
             x = pad + hover * step
             right = x > w / 2

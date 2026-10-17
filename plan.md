@@ -94,19 +94,21 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 4 — Bank 1 vs Bank 2 and robust logging
 
-- [ ] Bank comparison view: pair each `NAME` with `NAME@0x13` automatically,
+- [x] Bank comparison view: pair each `NAME` with `NAME@0x13` automatically,
       show them side by side with a delta column, and overlay them on one
       graph (lambda, wastegate, knock, fuel trims).
-- [ ] Built-in channel sets: misfire hunt, boost/wastegate both banks,
+- [x] Built-in channel sets: misfire hunt, boost/wastegate both banks,
       lambda/trims both banks, thermal, drive log with GPS.
-- [ ] Auto-reconnect while logging, continuing into a `_partN` file. The CLI
-      `log` only catches `KeyboardInterrupt` (`cli.py:286`).
-- [ ] Add a wall-clock column to logs, keeping `Time` first for BimmerLink.
+- [x] Auto-reconnect while logging. Done in the same file rather than a
+      `_partN` one: the gap is marked in the Event column. A dropped socket
+      is now `ConnectionLost`, which the reader passes on instead of turning
+      it into blank values.
+- [x] Add a wall-clock column to logs, keeping `Time` first for BimmerLink.
       Measure `Time` from log start in the GUI, as the CLI does
       (`gui.py:130`, `156` vs `cli.py:260`).
-- [ ] Alerts: per-channel min/max with a row highlight, a beep and a log
+- [x] Alerts: per-channel min/max with a row highlight, a beep and a log
       marker.
-- [ ] Derived channels: bank lambda delta, per-cylinder uneven-running
+- [x] Derived channels: bank lambda delta, per-cylinder uneven-running
       deviation from the mean, boost actual minus setpoint, GPS speed vs wheel
       speed.
 

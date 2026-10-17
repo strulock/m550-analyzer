@@ -225,12 +225,14 @@ TEXT = {
            "pause": "Pause", "resume": "Resume", "all": "All", "waiting": "waiting for data",
            "axis_t": "time (%s)", "axis_v": "value", "at": "%s %s at %s %s",
            "stats": "shown: min %s   mean %s   max %s   last %s %s   (%d points)",
-           "paused": "PAUSED"},
+           "paused": "PAUSED", "banks": "solid: bank 1   dashed: bank 2",
+           "bank2": "bank 2"},
     "de": {"time": "Zeit", "unit": "Einheit", "scale": "Skala", "auto": "Auto", "to": "bis",
            "pause": "Anhalten", "resume": "Weiter", "all": "Alle", "waiting": "warte auf Daten",
            "axis_t": "Zeit (%s)", "axis_v": "Wert", "at": "%s %s bei %s %s",
            "stats": "angezeigt: Min %s   Mittel %s   Max %s   zuletzt %s %s   (%d Punkte)",
-           "paused": "ANGEHALTEN"},
+           "paused": "ANGEHALTEN", "banks": "durchgezogen: Bank 1   gestrichelt: Bank 2",
+           "bank2": "Bank 2"},
 }
 
 
@@ -247,9 +249,10 @@ class GraphWindow(tk.Toplevel):
     PAD_L, PAD_R, PAD_T, PAD_B = 64, 16, 12, 34
 
     def __init__(self, master, name, title, unit, history, color="#2d7dd2", *,
-                 lang="en", show_unit=None, colors=None):
+                 lang="en", show_unit=None, colors=None, overlay=None):
         super().__init__(master)
         self.name, self.unit, self.history, self.color = name, canonical(unit), history, color
+        self.overlay = overlay              # bank 2's History, drawn dashed over bank 1
         self.lang = lang if lang in TEXT else "en"
         self.colors = colors or {}
         self.geometry("820x460")
@@ -393,7 +396,8 @@ class GraphWindow(tk.Toplevel):
     def _signature(self):
         last = self.history.last() if hasattr(self.history, "last") else \
             (self.history[-1] if len(self.history) else None)
-        return (last, len(self.history), self.paused is not None, self.settings(),
+        over = self.overlay.last() if self.overlay is not None else None
+        return (last, over, len(self.history), self.paused is not None, self.settings(),
                 self.canvas.winfo_width(), self.canvas.winfo_height(), self.hover)
 
     def _points(self, window):
@@ -431,6 +435,9 @@ class GraphWindow(tk.Toplevel):
         except ValueError:
             conv, unit = (lambda v: v), self.unit
         points = [(t, conv(v)) for t, v in self._points(window)]
+        # Bank 2, while comparing banks: the same window, drawn dashed.
+        second = ([(t, conv(v)) for t, v in self.overlay.window(window)]
+                  if self.overlay is not None and self.paused is None else [])
         self.stats_label.config(foreground=col("muted", "#555"))
         if len(points) < 2:
             c.create_text(w // 2, h // 2, text=self._t("waiting"), fill=col("muted", "#aaa"))
@@ -440,7 +447,8 @@ class GraphWindow(tk.Toplevel):
         if window is not None:
             t0 = max(t0, t1 - window)       # until the data fills the window
         t1 = max(t1, t0 + 1e-6)
-        lo, hi = value_range([v for _, v in points], fixed)
+        second = [p for p in second if p[0] >= t0]
+        lo, hi = value_range([v for _, v in points + second], fixed)
         self.last_range = (lo, hi)
 
         def px(t):
@@ -472,17 +480,30 @@ class GraphWindow(tk.Toplevel):
             coords += [px(t), min(max(py(v), T - 2), B + 2)]
         if len(coords) >= 4:
             c.create_line(*coords, fill=self.color, width=2)
+        coords = []
+        for t, v in thin(second, px, max(1, int(R - L))):
+            coords += [px(t), min(max(py(v), T - 2), B + 2)]
+        if len(coords) >= 4:
+            c.create_line(*coords, fill=self.color, width=2, dash=(5, 3))
+            c.create_text(R - 4, T + 4, anchor="ne", font=font, fill=axis,
+                          text=self._t("banks"))
 
         if self.hover is not None and L <= self.hover <= R:
-            t, v = nearest(points, t0 + (self.hover - L) / (R - L) * (t1 - t0))
+            at = t0 + (self.hover - L) / (R - L) * (t1 - t0)
+            t, v = nearest(points, at)
             x, y = px(t), py(v)
             c.create_line(x, T, x, B, fill=col("muted", "#999"), dash=(2, 2))
             c.create_oval(x - 3, y - 3, x + 3, y + 3, outline=self.color, width=2)
-            c.create_text(min(x + 8, R - 4), T + 4, anchor="ne" if x + 8 > R - 160 else "nw",
-                          font=font, fill=col("fg", "#1e1e1e"),
-                          text=self._t("at") % (fmt(v, self.lang), unit,
-                                                fmt(t / tfactor, self.lang),
-                                                self.tunit_var.get()))
+            text = self._t("at") % (fmt(v, self.lang), unit, fmt(t / tfactor, self.lang),
+                                    self.tunit_var.get())
+            if second:
+                t2, v2 = nearest(second, at)
+                c.create_oval(px(t2) - 3, py(v2) - 3, px(t2) + 3, py(v2) + 3,
+                              outline=self.color, width=2, dash=(2, 1))
+                text += "   %s %s %s" % (self._t("bank2"), fmt(v2, self.lang), unit)
+            c.create_text(min(x + 8, R - 4), T + 18 if second else T + 4,
+                          anchor="ne" if x + 8 > R - 160 else "nw",
+                          font=font, fill=col("fg", "#1e1e1e"), text=text)
         s = stats([v for _, v in points])
         text = self._t("stats") % (fmt(s["min"], self.lang), fmt(s["mean"], self.lang),
                                    fmt(s["max"], self.lang), fmt(s["last"], self.lang),
