@@ -87,7 +87,9 @@ def test_interface_of_finds_the_enet_adapter():
 @pytest.mark.parametrize("snap, hits, near, expect", [
     ({"enet": []}, [], [], "adapter is not up"),
     ({"enet": ["169.254.35.7"]}, [("169.254.1.2", HSFZ_REPLY)], [], "answered (HSFZ)"),
-    ({"enet": ["169.254.35.7"]}, [("169.254.1.2", bytes.fromhex("02fd0004"))], [], "DoIP only"),
+    ({"enet": ["169.254.35.7"]}, [("169.254.1.2", bytes.fromhex("02fd0004"))], [],
+     "answered Discover with DoIP"),
+    ({"enet": ["169.254.35.7"]}, [("169.254.1.2", b"junk")], [], "not as a BMW gateway"),
     ({"enet": ["169.254.35.7"]}, [], ["169.254.1.2"], "is on the car's link"),
     (dict(SNAP, enet_interface={"alias": "Ethernet 4", "category": "Public"}), [], [],
      "Public network"),

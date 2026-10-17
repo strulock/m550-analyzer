@@ -90,8 +90,8 @@ else before it reaches the wire.
 
 | Service | Used for |
 |---|---|
-| `0x22` ReadDataByIdentifier | every live value: `22 <DID hi> <DID lo>`, reply `62 <DID> <data>` |
-| `0x19` ReadDTCInformation | fault memory: sub-function `0x02` (reportDTCByStatusMask), mask `0xFF` |
+| `0x22` ReadDataByIdentifier | every live value: `22 <DID hi> <DID lo>`, reply `62 <DID> <data>`; with batching (`log --batch`), up to 8 identifiers in one request |
+| `0x19` ReadDTCInformation | fault memory: sub-function `0x02` (reportDTCByStatusMask), mask `0xFF`; per fault, `0x04` (snapshots) and `0x06` (extended data) |
 | `0x3E` TesterPresent | the module scan (`3E 00`): does anything answer at this address? |
 
 Never sent: `0x2E` (write), `0x2F` (I/O control), `0x31` (routines),
@@ -140,6 +140,38 @@ only if it failed: now, this or last cycle, or since the memory was cleared
 of its list as `0x58`: *confirmed* together with *not tested since the
 clear*, test entries ("Dummy-Fehlerspeichereintrag") included. That
 combination doesn't count as failed.
+
+### What was stored with a fault (0x19 04, 0x19 06)
+
+`19 04 <DTC> FF` returns the fault's snapshots: `59 04 DTC[3] status[1]`,
+then per snapshot `number[1] count[1]` and `count` × `identifier[2] data[n]`.
+BMW's standard identifiers are the same in every UDS module on this car
+(`DTCSNAPSHOTIDENTIFIER` in each module file) and are in
+`BMW_freeze_frame_fields.csv`: `0x1700` odometer (3 bytes, km), `0x1701`
+vehicle time (4, s), `0x1702` SAE code (3), `0x1731` fault class (1, BMW's
+`FEHLERKLASSE` table), `0x1750`/`0x1751` power state (1 and 3; `0x1750` read
+with the `UWB_TAB_PWF` table), `0x1768`/`0x1769` extended odometer and time
+(4 and 6; the DSC stores `0x1769` in 4). A module's own environment values
+may follow; without their sizes nothing after the first can be split, so
+the rest is shown raw.
+
+`19 06 <DTC> FF` returns the extended data: `59 06 DTC[3] status[1]`, then
+`number[1] data[n]` per record. `DTCEXTENDEDDATARECORDNUMBER` gives `0x01`
+condition byte, `0x02` HFK (times it occurred) and `0x03` HLZ (healing
+counter), one byte each. A module that keeps no snapshots or counters for a
+code says `requestOutOfRange`.
+
+### Several identifiers per request (0x22)
+
+ISO 14229 allows `22 <DID> <DID> ...`; the reply is each identifier echoed
+with its data. To split it the sizes must be known, so a batch only holds
+DME values whose catalog size is exact, and the reply is accepted only if
+every echo is an identifier that was asked for, at exactly the place the
+sizes put it, with nothing left over. Identifiers the DME doesn't support
+are left out of the reply and read singly. A refusal, a timeout or anything
+that doesn't line up turns batching off for that DME for the session.
+`n63read speed` measures both ways; `n63read log --batch` uses it. Whether
+this DME takes it is still to be checked at the car.
 
 Many fault codes embed the module address: the generic *Energiesparmode
 aktiv* (energy-saving mode active) code is `02AA00`, where `AA` is the

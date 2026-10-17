@@ -1846,13 +1846,24 @@ class App(tk.Tk):
             tree.heading(c, text=t)
             tree.column(c, width=w, anchor="w")
         tree.pack(fill="both", expand=True, padx=6)
+        # What the module stored with the selected fault: odometer, time,
+        # fault class, power state, how often it occurred.
+        detail = tk.Text(win, height=9, wrap="none", font=("Consolas", 9))
+        detail.pack(fill="x", padx=6, pady=(6, 0))
+        detail.insert("1.0", "Select a fault and press Details (or double-click it) to read "
+                      "what the module stored with it.")
+        detail.config(state="disabled")
         row = ttk.Frame(win, padding=6)
         row.pack(fill="x")
         save_btn = ttk.Button(row, text="Save CSV...", state="disabled")
         save_btn.pack(side="right")
+        ttk.Button(row, text="Details", command=lambda: self._fault_details(win)).pack(
+            side="left")
+        tree.bind("<Double-Button-1>", lambda e: self._fault_details(win))
         win.fault_rows = []
+        win.ip = ip
         save_btn.config(command=lambda: self._save_faults(win, ask=True))
-        win.parts = {"msg": msg, "tree": tree, "save": save_btn}
+        win.parts = {"msg": msg, "tree": tree, "save": save_btn, "detail": detail}
 
         modules = list(self.modules)
         if modules:
@@ -1894,8 +1905,8 @@ class App(tk.Tk):
         parts = win.parts
         win.fault_rows = rows
         tree = parts["tree"]
-        for r in rows:
-            tree.insert("", "end", values=(r["module"], r["module_name"], r["code"],
+        for i, r in enumerate(rows):
+            tree.insert("", "end", iid=str(i), values=(r["module"], r["module_name"], r["code"],
                                            r["state"], (r["text_de"] or r["text_en"])
                                            if self.lang == "de" else
                                            (r["text_en"] or r["text_de"])))
@@ -1904,6 +1915,42 @@ class App(tk.Tk):
         parts["msg"].config(text="%d fault(s) across %d module(s)." % (n_faults, n_mods))
         parts["save"].config(state="normal")
         self._save_faults(win, ask=not self.logging_to)
+
+    def _fault_details(self, win):
+        """Read the selected fault's snapshot and counters (0x19 04 / 06)."""
+        sel = win.parts["tree"].selection()
+        if not sel or not sel[0].isdigit() or int(sel[0]) >= len(win.fault_rows):
+            return
+        r = win.fault_rows[int(sel[0])]
+        if not r["code"]:
+            return
+        module, code = int(r["module"], 16), r["code"]
+        lang = self._enum_lang()
+        self._set_detail(win, "Reading what %s stored with %s..." % (r["module"], code))
+
+        def job(h):
+            self.q.put(("faultdetail", win, r["module"], code,
+                        core.fault_details(h, module, code, lang=lang)))
+
+        if self.poller:
+            self.poller.submit(job)             # between samples, on the live connection
+            return
+
+        def work():
+            try:
+                with share.open_tester(win.ip, 0xF4, 2.0) as h:
+                    job(h)
+            except Exception as e:                                  # noqa: BLE001
+                self.q.put(("faultmsg", win, "Error: %s" % e))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _set_detail(self, win, text):
+        detail = win.parts["detail"]
+        detail.config(state="normal")
+        detail.delete("1.0", "end")
+        detail.insert("1.0", text)
+        detail.config(state="disabled")
 
     def _save_faults(self, win, ask):
         """Save next to the drive log when logging; otherwise ask where."""
@@ -2079,11 +2126,10 @@ class App(tk.Tk):
             if doip and not hsfz:
                 self.ip_var.set(doip[0][0])
                 self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
-                messagebox.showinfo(
-                    "Discover",
-                    "The car at %s answered with DoIP (port 13400), not "
-                    "HSFZ, which is what this tool speaks. Please report "
-                    "this: DoIP support can be added." % doip[0][0])
+                if messagebox.askyesno(
+                        "Discover", core.doip_help(doip[0][0]) +
+                        "\n\nSave a diagnostics report now?"):
+                    self._save_diag_report()
             elif not hsfz and near:
                 self.ip_var.set(near[0])
                 self.status.config(text="\u25cf no reply; %s is on the link"
@@ -2120,6 +2166,12 @@ class App(tk.Tk):
             _, win, text = msg
             if win.winfo_exists():
                 win.parts["msg"].config(text=text)
+
+        elif kind == "faultdetail":
+            _, win, module, code, details = msg
+            if win.winfo_exists():
+                self._set_detail(win, "%s  %s\n%s" % (module, code,
+                                                      "\n".join(core.format_details(details))))
 
         elif kind == "faults_done":
             _, win, rows = msg

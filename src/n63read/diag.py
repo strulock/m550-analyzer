@@ -305,8 +305,12 @@ def verdict(snap, hits, near, error=None):
         return "Discover failed: %s" % error
     if any(core.reply_protocol(p) == "HSFZ" for _, p in hits):
         return "The car answered (HSFZ) at %s." % hits[0][0]
+    doip = [ip for ip, p in hits if core.reply_protocol(p) == "DoIP"]
+    if doip:
+        return core.doip_help(doip[0]).split("\n\n")[0]
     if hits:
-        return "The car answered with DoIP only, at %s: this tool speaks HSFZ." % hits[0][0]
+        return ("Something at %s answered on the discovery port, but not as a BMW "
+                "gateway: check that address is the car's." % hits[0][0])
     if not enet:
         return ("No 169.254.x.x address on this PC: the ENET adapter is not up "
                 "(unplugged, no driver, or Windows still configuring it).")

@@ -99,10 +99,13 @@ TOOLS = [
     {"name": "read_faults", "car": True,
      "description": "Read and decode fault memory: the DME's, another module's, or with "
                     "all_modules every module that answers (a minute or more). Lists "
-                    "codes that have failed; every_code adds the many that never did.",
+                    "codes that have failed; every_code adds the many that never did. "
+                    "details adds what was stored with each fault: odometer, vehicle "
+                    "time, fault class, power state, and how often it occurred.",
      "inputSchema": _ip({"target": _target(),
                          "all_modules": {"type": "boolean"},
                          "every_code": {"type": "boolean"},
+                         "details": {"type": "boolean"},
                          "save": {"type": "boolean", "description":
                                   "Also save the faults to a CSV in the logs folder"}})},
     {"name": "read_gps", "car": True,
@@ -228,6 +231,8 @@ def tool_read_faults(a):
         argv.append("--all")
     if a.get("every_code"):
         argv.append("--every-code")
+    if a.get("details"):
+        argv.append("--details")
     if a.get("save"):
         argv += ["--out", os.path.join(core.logs_dir(),
                                        time.strftime("faults_%Y-%m-%d_%H-%M-%S.csv"))]

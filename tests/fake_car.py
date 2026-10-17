@@ -18,6 +18,12 @@ MODULES = {
     0x40: 0x11,                                 # BDC: refuses 0x19
     0x63: [],                                   # head unit (NBT Evo)
 }
+# What the DME stored with its first fault: one snapshot (odometer 54,321 km,
+# vehicle time, fault class 1, power state "driving", then a value of its own
+# the catalog can't size) and the counters (occurred 3 times, healing 40).
+SNAPSHOT = bytes.fromhex("0105" "1700" "00d431" "1701" "0001e240" "1731" "01"
+                         "1750" "0a" "4abc" "1234")
+EXTENDED = bytes.fromhex("0100" "0203" "0328")
 # Head unit GPS position (0xD039): valid, 30 08' 04.56" N, 97 38' 09.24" W, 160 m.
 # Sign and degrees are nine-bit two's complement, as the car sends them:
 # 97 W is 0x19F (-97), i.e. 01 9F.
@@ -49,6 +55,7 @@ class FakeCar:
         self.sources = []           # (tester address, target) of each request
         self._stop = False
         self.live = []              # open connections, for drop()
+        self.multi = True           # answers several identifiers in one 0x22
         threading.Thread(target=self._accept, daemon=True).start()
 
     def drop(self):
@@ -114,16 +121,28 @@ class FakeCar:
             faults = MODULES[addr]
             if isinstance(faults, int):
                 return bytes([0x7F, 0x19, faults])
+            if uds[1] in (0x04, 0x06):
+                # One fault's snapshot or counters: the DME's first fault has
+                # both, the others none (requestOutOfRange, as a module says).
+                code = uds[2:5].hex().upper()
+                status = dict(faults).get(code)
+                if addr != 0x12 or status is None or code != faults[0][0]:
+                    return b"\x7F\x19\x31"
+                head = bytes([0x59, uds[1]]) + uds[2:5] + bytes([status])
+                return head + (SNAPSHOT if uds[1] == 0x04 else EXTENDED)
             body = b"".join(bytes.fromhex(c) + bytes([s]) for c, s in faults)
             return b"\x59\x02\xFF" + body
         if service == 0x22:
             return self._read(addr, uds)
         return bytes([0x7F, service, 0x11])
 
-    @staticmethod
-    def _read(addr, uds):
-        did = (uds[1] << 8) | uds[2]
-        raw = DIDS.get((addr, did))
-        if raw is None:
-            return bytes([0x7F, 0x22, 0x31])
-        return b"\x62" + uds[1:3] + raw
+    def _read(self, addr, uds):
+        dids = [(uds[i] << 8) | uds[i + 1] for i in range(1, len(uds) - 1, 2)]
+        if len(dids) > 1 and not self.multi:
+            return bytes([0x7F, 0x22, 0x13])        # one identifier per request only
+        out = b""
+        for did in dids:
+            raw = DIDS.get((addr, did))
+            if raw is not None:                     # unsupported ones are left out
+                out += did.to_bytes(2, "big") + raw
+        return b"\x62" + out if out else bytes([0x7F, 0x22, 0x31])

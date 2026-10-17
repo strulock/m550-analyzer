@@ -81,10 +81,16 @@ def op_discover(args):
                   "Try: n63read read --ip %s ILAG1" % (", ".join(near), near[0]))
         return
     for ip, payload in hits:
-        print("%-16s %-5s %s" % (ip, core.reply_protocol(payload), payload.hex()))
+        protocol = core.reply_protocol(payload)
+        vin = core.reply_vin(payload)
+        print("%-16s %-7s %s%s" % (ip, protocol, payload.hex(), "  VIN " + vin if vin else ""))
         tail = payload[6:]
         printable = bytes(c if 32 <= c < 127 else 0x2E for c in tail)
         print(" " * 17 + printable.decode("ascii", "replace"))
+    protocols = {core.reply_protocol(p) for _, p in hits}
+    if "HSFZ" not in protocols and "DoIP" in protocols:
+        ip = next(ip for ip, p in hits if core.reply_protocol(p) == "DoIP")
+        print("\n" + core.doip_help(ip) + "\nSave one with: n63read diag --report report.jsonl")
 
 
 def op_faults(args):
@@ -95,17 +101,21 @@ def op_faults(args):
     texts = core.load_fault_texts()
     lang = "text_de" if args.german else "text_en"
 
+    details = {}
     with _tester(args) as h:
         try:
             dtcs = h.read_dtcs(args.target, args.mask)
         except NegativeResponse as e:
             sys.exit("module 0x%02X refused 0x19: %s"
                      % (args.target, NRC.get(e.code, "nrc 0x%02X" % e.code)))
-
-    hidden = 0
-    if not args.every_code:
-        kept = [d for d in dtcs if core.dtc_failed(d[1])]
-        hidden, dtcs = len(dtcs) - len(kept), kept
+        hidden = 0
+        if not args.every_code:
+            kept = [d for d in dtcs if core.dtc_failed(d[1])]
+            hidden, dtcs = len(dtcs) - len(kept), kept
+        if args.details:
+            fields = core.load_freeze_fields()
+            details = {code: core.fault_details(h, args.target, code, fields, lang)
+                       for code, _ in dtcs}
     if not dtcs:
         print("No fault codes reported by module 0x%02X%s." % (
             args.target, " (%d listed codes never failed; --every-code shows them)"
@@ -128,6 +138,8 @@ def op_faults(args):
         print("  %-8s status 0x%02X - %s" % ("", status, core.dtc_status_summary(status)))
         if args.verbose:
             print("  %-8s %s" % ("", ", ".join(core.dtc_status_flags(status)) or "no bits set"))
+        for line in (core.format_details(details[code]) if code in details else []):
+            print("  %-8s %s" % ("", line))
     if hidden:
         print("\n%d listed code(s) never failed; --every-code shows them." % hidden)
     if unknown:
@@ -152,6 +164,13 @@ def _faults_report(args):
         rows = core.read_all_faults(
             h, modules, progress=lambda a: print("Reading 0x%02X..." % a, end="\r", flush=True),
             everything=args.every_code)
+        details = {}
+        if args.details:
+            fields = core.load_freeze_fields()
+            for r in rows:
+                if r["code"]:
+                    details[(r["module"], r["code"])] = core.fault_details(
+                        h, int(r["module"], 16), r["code"], fields, lang)
 
     current = None
     for r in rows:
@@ -161,6 +180,9 @@ def _faults_report(args):
         if r["code"]:
             print("  %-8s %s" % (r["code"], r[lang] or r["text_de"]))
             print("  %-8s status %s - %s" % ("", r["status"], r["state"]))
+            if (r["module"], r["code"]) in details:
+                for line in core.format_details(details[(r["module"], r["code"])]):
+                    print("  %-8s %s" % ("", line))
         else:
             print("  %s" % r["state"])
 
@@ -263,7 +285,7 @@ def op_log(args):
     n = 0
     lost_at = None              # when the connection dropped, while it's down
     event = ""
-    reader = core.ChannelReader(core.record_layouts(cat), args.target)
+    reader = core.ChannelReader(core.record_layouts(cat), args.target, batch=args.batch)
     try:
         while True:
             host = None
@@ -313,6 +335,42 @@ def op_log(args):
     finally:
         out.close()
         print("wrote %d samples to %s" % (n, args.out))
+
+
+def op_speed(args):
+    """Read the same engine channels one per request, then several per
+    request, and say how many cycles a second each managed."""
+    cat = _catalog(args.csv)
+    names = args.names or [n for n in core.BUILTIN_TEMPLATES["Misfire hunt"]
+                           if n in cat and not core.is_derived(cat[n])]
+    chans = []
+    for name in names:
+        meta = cat.get(name)
+        if not meta or meta.get("MODULE") or core.is_derived(meta):
+            sys.exit("not an engine channel: %s" % name)
+        chans.append((name, int(meta["ID"], 16), meta))
+    results = []
+    with _tester(args) as h:
+        for batch in (False, True):
+            reader = core.ChannelReader({}, args.target, batch=batch)
+            cycles, end = 0, time.time() + args.seconds
+            while time.time() < end:
+                sample = reader.read(h, chans)
+                cycles += 1
+            answered = sum(1 for v in sample.values() if v[0] is not None)
+            results.append((batch, cycles / args.seconds, answered, reader))
+    print("%d engine channel(s), %g s each way:\n" % (len(chans), args.seconds))
+    for batch, rate, answered, reader in results:
+        print("  %-24s %6.1f cycles/s   %d of %d answered" % (
+            "several per request" if batch else "one per request", rate, answered, len(chans)))
+    batched = results[1][3]
+    if batched.batch_off:
+        for target, why in sorted(batched.batch_off.items()):
+            print("\nDME 0x%02X won't take several identifiers per request (%s);"
+                  " the log reads it one at a time." % (target, why))
+    elif batched.batched and results[0][1]:
+        print("\n%.1fx faster several per request: `n63read log --batch` uses it."
+              % (results[1][1] / results[0][1]))
 
 
 def op_templates(args):
@@ -577,6 +635,9 @@ def build_parser():
                     help="also list the individual statusOfDTC bits")
     sp.add_argument("--all", action="store_true",
                     help="find every module that answers and read them all")
+    sp.add_argument("--details", action="store_true",
+                    help="also read what was stored with each fault: odometer, "
+                         "time, fault class, power state, how often it occurred")
     sp.add_argument("--every-code", action="store_true",
                     help="also list codes that never failed (modules list every "
                          "code they can raise)")
@@ -593,8 +654,20 @@ def build_parser():
                                   "Documents\\%s)" % core.LOGS_FOLDER)
     sp.add_argument("--template", help="the channels of a template saved in the app "
                                        "(see `templates`), plus any named")
+    sp.add_argument("--batch", action="store_true",
+                    help="read engine values several to a request (falls back to one at "
+                         "a time if the DME won't; try `speed` first)")
     sp.add_argument("names", nargs="*")
     sp.set_defaults(func=op_log)
+
+    sp = sub.add_parser("speed", help="how fast engine values read, one per request "
+                                      "and several per request")
+    common(sp)
+    sp.add_argument("--target", type=hexint, default=DME_MASTER)
+    sp.add_argument("--seconds", type=float, default=10.0, help="per method (default 10)")
+    sp.add_argument("names", nargs="*", help="channels (default: the misfire hunt set's "
+                                             "engine channels)")
+    sp.set_defaults(func=op_speed)
 
     sp = sub.add_parser("templates", help="list the channel templates saved in the app")
     sp.set_defaults(func=op_templates)

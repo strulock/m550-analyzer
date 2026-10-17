@@ -1,0 +1,219 @@
+"""What a module stored with a fault, and reading several values per request."""
+
+import types
+
+import pytest
+
+from n63read import cli, core, mcp
+
+from conftest import pump
+from fake_car import FakeCar
+
+
+@pytest.fixture
+def car(monkeypatch):
+    c = FakeCar()
+    monkeypatch.setattr(core.Hsfz.__init__, "__defaults__", (c.port, core.TESTER_ADDR, 3.0))
+    yield c
+    c.close()
+
+
+# ------------------------------------------------------------ the catalog
+
+@pytest.mark.parametrize("datatype, size", [
+    ("0xFF", 1), ("0xFFFFFF", 3), ("0xFFFFFFFFFFFF", 6), ("u char", 1),
+    ("unsigned int", 2), ("signed long", 4), ("6", 6), ("float", 4), ("weird", None), ("", None),
+])
+def test_field_sizes(datatype, size):
+    assert core.field_bytes(datatype) == size
+
+
+def test_the_freeze_catalog_has_the_odometer_and_the_dsc_exception():
+    fields = core.load_freeze_fields()
+    assert fields[(None, 0x1700)]["name_de"] == "KM_STAND"
+    assert core.field_bytes(fields[(None, 0x1769)]["datatype"]) == 6
+    assert core.field_bytes(fields[(0x29, 0x1769)]["datatype"]) == 4
+    assert all(k[1] in core.FREEZE_LABELS for k in fields)
+
+
+# ------------------------------------------------------------ the parsers
+
+HEAD4 = bytes.fromhex("5904123456" "2f")
+HEAD6 = bytes.fromhex("5906123456" "2f")
+
+
+def test_a_snapshot_is_decoded_field_by_field():
+    body = bytes.fromhex("0106" "1700" "0186a0" "1701" "00001234" "1702" "030010"
+                         "1731" "04" "1750" "0a" "1751" "000001")
+    rec, = core.parse_snapshots(HEAD4 + body, 0x12)
+    got = {f["id"]: f for f in rec["fields"]}
+    assert got[0x1700]["value"] == 100000 and got[0x1700]["unit"] == "km"
+    assert got[0x1701]["value"] == 0x1234 and got[0x1701]["unit"] == "s"
+    assert got[0x1702]["value"] == "030010"                      # a code, kept as hex
+    assert got[0x1731]["text"] == "check immediately"
+    assert got[0x1750]["text"] == "driving"
+    assert rec["rest"] == ""
+    de, = core.parse_snapshots(HEAD4 + body, 0x12, lang="text_de")
+    assert {f["id"]: f for f in de["fields"]}[0x1750]["text"] == "Fahren"
+
+
+def test_a_modules_own_value_stops_the_split_and_is_kept_raw():
+    body = bytes.fromhex("0103" "1700" "000010" "4abc" "1234" "1731" "01")
+    rec, = core.parse_snapshots(HEAD4 + body, 0x12)
+    assert [f["id"] for f in rec["fields"]] == [0x1700]
+    assert rec["rest"] == "4abc12341731" "01"
+
+
+def test_the_dsc_stores_a_shorter_time():
+    body = bytes.fromhex("0101" "1769" "00000064")
+    rec, = core.parse_snapshots(HEAD4 + body, 0x29)
+    assert rec["fields"][0]["value"] == 100 and rec["rest"] == ""
+    rec, = core.parse_snapshots(HEAD4 + body, 0x12)            # elsewhere it's 6 bytes
+    assert rec["fields"] == [] and rec["rest"] == "176900000064"
+
+
+def test_several_snapshots():
+    body = bytes.fromhex("0101" "1700" "000001" "0201" "1700" "000002")
+    recs = core.parse_snapshots(HEAD4 + body, 0x12)
+    assert [(r["record"], r["fields"][0]["value"]) for r in recs] == [(1, 1), (2, 2)]
+
+
+def test_the_counters():
+    got = core.parse_extended(HEAD6 + bytes.fromhex("0100" "0207" "0329"))
+    assert [(e["name"], e["value"]) for e in got] == [
+        ("CONDITION_BYTE", 0), ("HFK", 7), ("HLZ", 41)]
+    got = core.parse_extended(HEAD6 + bytes.fromhex("0203" "09aabb"))
+    assert got[-1] == {"record": 9, "name": "", "label": "", "value": "aabb"}
+
+
+def test_details_read_off_the_car_with_read_only_requests(car):
+    with core.Tester("127.0.0.1", timeout=1.0) as t:
+        got = core.fault_details(t, 0x12, "021200")
+        none = core.fault_details(t, 0x12, "ABCDEF")
+    fields = {f["id"]: f["value"] for f in got["snapshots"][0]["fields"]}
+    assert fields[0x1700] == 54321 and fields[0x1750] == 10
+    assert got["snapshots"][0]["rest"] == "4abc1234"
+    assert {e["name"]: e["value"] for e in got["extended"]} == {
+        "CONDITION_BYTE": 0, "HFK": 3, "HLZ": 40}
+    assert none["snapshots"] == [] and len(none["errors"]) == 2
+    assert set(car.services) == {0x19}
+    text = "\n".join(core.format_details(got))
+    assert "Odometer" in text and "54321 km" in text and "times it occurred" in text
+    assert core.format_details(none)[-1].startswith("(extended: requestOutOfRange")
+
+
+def test_cli_faults_with_details(car, capsys):
+    cli.main(["faults", "--ip", "127.0.0.1", "--timeout", "1", "--details"])
+    out = capsys.readouterr().out
+    assert "54321 km" in out and "times it occurred" in out and "check at the next service" in out
+
+
+def test_cli_faults_all_with_details(car, monkeypatch, capsys):
+    monkeypatch.setattr(core, "SWEEP_RANGE", (0x10, 0x13))
+    cli.main(["faults", "--ip", "127.0.0.1", "--timeout", "1", "--all",
+              "--probe-timeout", "0.1", "--details"])
+    assert "54321 km" in capsys.readouterr().out
+
+
+def test_claude_can_ask_for_details(monkeypatch):
+    ran = []
+    monkeypatch.setattr(mcp, "run_cli", lambda argv: ran.append(argv) or "")
+    mcp.tool_read_faults({"ip": "127.0.0.1", "details": True})
+    assert "--details" in ran[0]
+
+
+def test_the_fault_window_shows_details(app, car, monkeypatch):
+    gui = pytest.importorskip("n63read.gui")
+    monkeypatch.setattr(gui.filedialog, "asksaveasfilename", lambda **k: "")
+    app.ip_var.set("127.0.0.1")
+    app.modules = [0x12]
+    before = set(app.winfo_children())
+    app._faults()
+    win = next(w for w in app.winfo_children() if w not in before)
+    try:
+        assert pump(app, lambda: win.fault_rows)
+        tree = win.parts["tree"]
+        first = next(i for i in tree.get_children() if win.fault_rows[int(i)]["code"] == "021200")
+        tree.selection_set(first)
+        app._fault_details(win)
+        detail = win.parts["detail"]
+        assert pump(app, lambda: "54321 km" in detail.get("1.0", "end"))
+    finally:
+        win.destroy()
+        app.modules = []
+
+
+# --------------------------------------------- several values per request
+
+def test_split_reply():
+    sizes = {0x1000: 2, 0x2000: 1}
+    assert core.split_reply(bytes.fromhex("1000abcd" "200001"), sizes) == {
+        0x1000: b"\xab\xcd", 0x2000: b"\x01"}
+    assert core.split_reply(bytes.fromhex("200001"), sizes) == {0x2000: b"\x01"}  # one left out
+    for bad in ("3000abcd", "1000ab", "1000abcd20", "1000abcd1000abcd"):
+        with pytest.raises(ValueError):
+            core.split_reply(bytes.fromhex(bad), sizes)
+
+
+DME = core.load_catalog()
+
+
+def chans(*names):
+    return [(n, int(DME[n]["ID"], 16), DME[n]) for n in names]
+
+
+def test_batched_reads_match_single_reads(car):
+    names = chans("ILAG1", "ILAG2", "ITOEL")            # ITOEL isn't answered by the fake car
+    with core.Tester("127.0.0.1", timeout=1.0) as t:
+        single = core.ChannelReader({}, 0x12).read(t, names)
+        r = core.ChannelReader({}, 0x12, batch=True)
+        batched = r.read(t, names)
+    assert batched == single and batched["ILAG2"][0] == 1.0
+    assert r.batched == 2 and r.batch_off == {}
+
+
+def test_a_dme_that_wont_batch_is_read_one_at_a_time(car):
+    car.multi = False
+    names = chans("ILAG1", "ILAG2")
+    with core.Tester("127.0.0.1", timeout=1.0) as t:
+        r = core.ChannelReader({}, 0x12, batch=True)
+        first = r.read(t, names)
+        car.sources.clear()
+        second = r.read(t, names)
+    assert first["ILAG2"][0] == 1.0 == second["ILAG2"][0]
+    assert 0x12 in r.batch_off and r.batched == 0
+    assert len(car.sources) == 2                         # no batch tried again
+
+
+def test_cli_speed_compares_both_ways(car, capsys):
+    cli.main(["speed", "--ip", "127.0.0.1", "--timeout", "1", "--seconds", "0.3",
+              "ILAG1", "ILAG2"])
+    out = capsys.readouterr().out
+    assert "one per request" in out and "several per request" in out
+    assert "log --batch" in out
+
+
+def test_cli_speed_says_when_the_dme_wont(car, capsys):
+    car.multi = False
+    cli.main(["speed", "--ip", "127.0.0.1", "--timeout", "1", "--seconds", "0.3",
+              "ILAG1", "ILAG2"])
+    assert "won't take several identifiers per request" in capsys.readouterr().out
+
+
+def test_cli_log_can_batch(car, tmp_path, monkeypatch):
+    out = tmp_path / "run.csv"
+    calls = {"n": 0}
+
+    def sleep(s):
+        calls["n"] += 1
+        if calls["n"] > 3:
+            raise KeyboardInterrupt
+    import time
+    monkeypatch.setattr(cli, "time", types.SimpleNamespace(
+        time=time.time, sleep=sleep, strftime=time.strftime))
+    cli.main(["log", "--ip", "127.0.0.1", "--timeout", "1", "--interval", "0", "--batch",
+              "--out", str(out), "ILAG1", "ILAG2"])
+    rows = out.read_text(encoding="utf-8").splitlines()
+    assert rows[0] == "Time,Clock,ILAG1,ILAG2,Event" and rows[-1].split(",")[3] == "1.0"
+    assert set(car.services) == {0x22}                  # still only reads
+    assert len(car.services) == len(rows) - 1           # one request a row, not two

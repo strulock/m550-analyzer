@@ -105,6 +105,12 @@ in `Documents\BMW Analyzer Logs`.
   modules from the last scan, or sweeps first if there wasn't one (about a
   minute). While logging, the fault list is saved next to the log as
   `<log>_faults_<time>.csv`; otherwise you're asked where to save it.
+  Select a fault and press **Details** (or double-click it) to read what the
+  module stored with it: the odometer and vehicle time when it set, the fault
+  class, the car's power state, and how often it has occurred. Values of the
+  module's own it can't decode yet are shown raw.
+- **Discover** that finds a car answering only DoIP (the newer protocol) says
+  what that usually means and offers to save a diagnostics report to send.
 - **Probe wait s** (default 0.5) is how long Scan modules and Faults wait at
   each address before deciding nothing is there. A sweep costs about this
   times 128 seconds. If a module you expect is missing from a scan, raise it
@@ -402,13 +408,18 @@ n63read faults --ip 169.254.x.x -v           DME fault memory, decoded (codes th
                                              failed; --every-code for all)
 n63read faults --ip 169.254.x.x --all --out faults.csv
                                              every module, saved to CSV
+n63read faults --ip 169.254.x.x --details    ...with odometer, time, fault class and
+                                             counts stored with each fault
 n63read log --ip 169.254.x.x --template "Idle check"
                                              log a template saved in the app, or
                                              a ready-made set ("Misfire hunt")
 n63read templates                            list the saved templates
 n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
                                              log to Documents\BMW Analyzer Logs
-                                             (or --out run.csv)
+                                             (or --out run.csv; --batch reads
+                                             several engine values per request)
+n63read speed --ip 169.254.x.x               engine values a second: one per request
+                                             vs several (is --batch worth it?)
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?
