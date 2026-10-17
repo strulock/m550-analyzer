@@ -126,7 +126,17 @@ before concluding it can't be read.
 
 ARS active roll stabilisation as its own module (`0x04`/`0x25`; the
 suspension module reports some roll signals), the instrument
-cluster's live values (only its fault texts are in), and the gateway. The
-car's fault memory also has codes from `0x56`, `0x5D`, `0x61` and `0x6D`,
-which have no texts yet. Send the `.prg` for any of these and it can be added the same way
-(add it to `MODULES` in `tools/module_catalog.py`).
+cluster's live values (only its fault texts are in), and the gateway.
+
+Fault texts only (no live values yet), added with
+`tools/module_catalog.py --faults-only`:
+
+| Address | Module | File | Notes |
+|---|---|---|---|
+| `0x56` | Roof function centre (FZD) | `fzd_g11` | address confirmed by its `025600` code |
+| `0x5D` | Camera-based driver assistance (KAFAS) | `kafasg11` | `025D00` |
+| `0x61` | Telematics | `atm02`, then `atm`, then `tcb4g` | all three are `0x61` variants and the car's isn't known yet; their texts agree on all but 3 codes, where `atm02`'s wording is kept |
+
+Still without texts: `0x6D`, the driver's seat module (SM_FA); its file
+(`sm_fa*` or `smfa*`) hasn't been supplied. Send the `.prg` for any module
+here and it can be added the same way.

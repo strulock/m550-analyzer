@@ -207,7 +207,7 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 11 — Needs more BMW files
 
-> **Blocked:** needs the `.prg` files for modules 0x56, 0x5D, 0x61 and 0x6D.
+> **Blocked:** needs the driver's seat module file (`sm_fa*`/`smfa*`, 0x6D).
 
 - [x] Re-extract the DME's value tables. `BMW_enum_tables.csv` was made by
       the first extractor, which read each table's position from the
@@ -218,7 +218,10 @@ the file and line it starts from, as of 0.3.8.
       sit between the ones that were. The module catalogs use the newer
       extractor and aren't affected. Done from `dme8ff_r.prg` with
       `tools/module_catalog.py --dme`: the 22 value tables the catalog uses.
-- [ ] Fault texts for modules 0x56, 0x5D, 0x61 and 0x6D
-      (`docs/modules.md:125-131`).
+- [x] Fault texts for 0x56 (FZD, `fzd_g11`), 0x5D (KAFAS, `kafasg11`) and
+      0x61 (telematics: `atm02`, `atm`, `tcb4g` merged, ATM2's wording first).
+- [ ] Fault texts for 0x6D, the driver's seat module (SM_FA).
+- [ ] Find out which telematics variant the car has (its 0x61 codes in a
+      fault read will say), and drop the other two files' texts if they clash.
 - [x] The DME's own snapshot values: 1,538 fields from its `FUMWELTTEXTE`,
       for both DMEs (`dme8ff_l` has the same table).
