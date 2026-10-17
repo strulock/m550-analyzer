@@ -52,6 +52,13 @@ watch list `[(name, did, meta)]` and returns `{name: (value, unit, note)}`:
 | `SLOW_READS_PER_CYCLE` | 6 | most module requests per DME cycle, stalest first |
 | `MODULE_TIMEOUT` | 0.5 s | per module request |
 | `NO_ANSWER_BACKOFF` | 30 s | a module that timed out is left alone |
+| `VALUE_TIMEOUT` | 1 s | per live DME read (0x12, and 0x13 for bank 2) |
+| `VALUE_KEY_BACKOFF` | 30 s | a DME identifier that timed out is left alone |
+| `VALUE_TARGET_BACKOFF` | 5 s | a DME address that answered nothing that cycle is left alone |
+
+The read interval runs from the start of one cycle to the start of the
+next, so the time the reads take counts towards it and the rate is the one
+asked for (as long as the reads fit in the interval).
 
 Between refreshes the last values are reused, so every sample and every log
 row is complete. An identifier refused with `0x11`/`0x12`/`0x31` is never

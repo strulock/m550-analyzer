@@ -65,6 +65,7 @@ def test_graphs_follow_language_units_and_theme(app):
     assert win.heading.cget("text") == app._describe(app.catalog["ITKUA"])  # German
     assert "Kühlmitteltemperatur" in win.title() or "ITKUA" in win.title()
     win._motion(type("E", (), {"x": 300})())
+    win.update_idletasks()                                    # hover redraws when idle
     texts = [win.canvas.itemcget(i, "text") for i in win.canvas.find_all()
              if win.canvas.type(i) == "text"]
     assert any(" bei " in t for t in texts)                   # the hover read-off
@@ -110,11 +111,13 @@ def test_hovering_the_chart_reads_off_every_line(app):
     # Legend: "name  lo-hi unit" (two spaces); reading: "name value unit".
     assert any(t.startswith(coolant + "  ") for t in chart_texts())
     app._chart_hover(app.canvas.winfo_width() - 30)          # the newest samples
+    app.update_idletasks()                                  # hover redraws when idle
     readings = [t for t in chart_texts() if t.startswith((coolant + " ", lambda2 + " "))
                 and not t.startswith((coolant + "  ", lambda2 + "  "))]
     assert any(t.startswith(coolant + " 11") and t.endswith(DEG_C) for t in readings)
     assert any(t.startswith(lambda2 + " ") for t in readings)
     app._chart_hover(None)
+    app.update_idletasks()
     assert not [t for t in chart_texts() if t.startswith(coolant + " ")
                 and not t.startswith(coolant + "  ")]
 

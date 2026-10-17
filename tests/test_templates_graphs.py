@@ -153,6 +153,7 @@ def test_pop_out_graph_follows_the_channel(app):
         assert "(21 points)" in win.stats_label.cget("text")
 
         win._motion(types.SimpleNamespace(x=300))             # hover read-off
+        win.update_idletasks()
     finally:
         app.tree.selection_set("ITKUA")
         app._remove()

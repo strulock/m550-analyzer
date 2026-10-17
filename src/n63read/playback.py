@@ -12,6 +12,7 @@ import math
 import random
 import threading
 import time
+from collections.abc import Mapping
 
 # Real catalog channels, so the demo shows what a watch list really looks
 # like, and they stay valid if the user connects with them still watched.
@@ -130,8 +131,31 @@ def _cell(text):
         return text                                 # enum text, hex, etc.
 
 
+class Row(Mapping):
+    """One log row as {name: value}: a list of values and a column index
+    shared by every row, about half the memory of a dict per row."""
+
+    __slots__ = ("index", "values")
+
+    def __init__(self, index, values):
+        self.index, self.values = index, values
+
+    def __getitem__(self, name):
+        i = self.index[name]
+        if i >= len(self.values):
+            raise KeyError(name)            # a short row: the cell isn't there
+        return self.values[i]
+
+    def __iter__(self):
+        return (n for n, i in self.index.items() if i < len(self.values))
+
+    def __len__(self):
+        return min(len(self.values), len(self.index))
+
+
 def read_log(path):
-    """Read a GUI log. Returns (channel names, [(time, {name: value})]).
+    """Read a GUI log. Returns (channel names, [(time, {name: value})]),
+    each row a read-only mapping.
 
     Raises ValueError if it is not one of our logs (first column "Time").
     """
@@ -141,6 +165,7 @@ def read_log(path):
         if not header or header[0] != "Time" or len(header) < 2:
             raise ValueError("not an n63read log: the first column must be 'Time'")
         names = header[1:]
+        index = {n: i for i, n in enumerate(names)}
         rows = []
         for line in reader:
             if not line:
@@ -149,7 +174,7 @@ def read_log(path):
                 t = float(line[0])
             except ValueError:
                 continue                            # stray header or junk row
-            rows.append((t, {n: _cell(v) for n, v in zip(names, line[1:])}))
+            rows.append((t, Row(index, [_cell(v) for v in line[1:len(names) + 1]])))
     if not rows:
         raise ValueError("the log has a header but no samples")
     return names, rows

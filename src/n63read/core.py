@@ -1006,6 +1006,16 @@ SLOW_READS_PER_CYCLE = 6       # module reads allowed per DME cycle
 NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
 MODULE_TIMEOUT = 0.5           # a present module answers in milliseconds; a
                                # missing or sleeping one must not stall the DME
+# DME channels (0x12, and 0x13 for bank 2) are read every cycle, so one that
+# never answers would cost the full timeout every time and drag the whole
+# log down. Instead a timeout skips that address for the rest of the cycle,
+# rests it briefly, and rests the identifier itself for longer: a sleeping
+# slave DME comes back within seconds, while one silent identifier on a
+# working DME doesn't hold up the others.
+VALUE_TIMEOUT = 1.0
+VALUE_TARGET_BACKOFF = 5.0
+VALUE_KEY_BACKOFF = 30.0
+REFUSED_FOR_GOOD = (0x11, 0x12, 0x31)   # not supported / out of range: stop asking
 
 # Values a log should not carry by default: credentials, SIM identity,
 # where the car has been, and paired devices. Still in the catalog, so
@@ -1122,6 +1132,13 @@ def channel_target(meta, default):
     return default
 
 
+def rest(interval, started, now=None):
+    """Seconds to wait so cycles start `interval` apart: the time the cycle
+    took counts towards it, so the rate is the one asked for."""
+    now = time.time() if now is None else now
+    return max(0.0, interval - (now - started))
+
+
 class ChannelReader:
     """Reads a watch list from the DME and other modules, one request per DID.
 
@@ -1138,6 +1155,7 @@ class ChannelReader:
         self.last = {}          # (module, did) -> time of last read
         self.refused = {}       # (module, did) -> reason; not asked again
         self.quiet_until = {}   # module -> time; it did not answer
+        self.value_quiet = {}   # DME (target, did) or target -> time; no answer
 
     @staticmethod
     def period(key):
@@ -1146,12 +1164,13 @@ class ChannelReader:
     def read(self, h, chans, now=None):
         now = time.time() if now is None else now
         sample, records = {}, {}
+        answered, silent = set(), set()     # DME addresses, this cycle
         for name, did, meta in chans:
             module = (meta.get("MODULE") or "").strip()
             if module:
                 records.setdefault((int(module, 16), did), []).append(name)
             else:
-                sample[name] = self._read_value(h, did, meta)
+                sample[name] = self._read_value(h, did, meta, now, answered, silent)
 
         due = [k for k in records
                if k not in self.refused and k in self.layouts
@@ -1175,14 +1194,32 @@ class ChannelReader:
                 sample[name] = got.get(name) or (None, "", note)
         return sample
 
-    def _read_value(self, h, did, meta):
+    def _read_value(self, h, did, meta, now, answered, silent):
+        target = channel_target(meta, self.target)
+        key = (target, did)
+        if key in self.refused:
+            return (None, "", self.refused[key])
+        if (target in silent or now < self.value_quiet.get(target, 0)
+                or now < self.value_quiet.get(key, 0)):
+            return (None, "", "not answering")
         try:
-            value, unit = decode(h.read_did(channel_target(meta, self.target), did), meta)
-            return (value, unit, "")
+            value, unit = decode(h.read_did(target, did, timeout=VALUE_TIMEOUT), meta)
         except NegativeResponse as e:
-            return (None, "", NRC.get(e.code, "0x%02X" % e.code))
+            answered.add(target)
+            reason = NRC.get(e.code, "0x%02X" % e.code)
+            if e.code in REFUSED_FOR_GOOD:
+                self.refused[key] = reason
+            return (None, "", reason)
+        except HsfzTimeout:
+            silent.add(target)
+            self.value_quiet[key] = now + VALUE_KEY_BACKOFF
+            if target not in answered:      # nothing from it at all: rest it too
+                self.value_quiet[target] = now + VALUE_TARGET_BACKOFF
+            return (None, "", "not answering")
         except Exception as e:                                      # noqa: BLE001
             return (None, "", str(e)[:28])
+        answered.add(target)
+        return (value, unit, "")
 
     def _read_record(self, h, key, now):
         module, did = key

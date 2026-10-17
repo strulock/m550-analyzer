@@ -66,30 +66,30 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 3 — Logging speed and long-run performance
 
-- [ ] Back off a DME or bank-2 channel that never answers. Today each one
+- [x] Back off a DME or bank-2 channel that never answers. Today each one
       costs the full 2 s timeout on every cycle (`core.py:1109-1145`), so one
       silent `@0x13` channel drops the whole log under 0.5 Hz. Add a
       per-target `quiet_until`, a `refused` set and a 0.5 s per-read timeout,
       as `_read_record` already does.
-- [ ] Hold the requested rate: the interval sleep is added after the read
+- [x] Hold the requested rate: the interval sleep is added after the read
       (`gui.py:162`, `cli.py:286`). Sleep `max(0, interval - elapsed)`.
-- [ ] Redraw the chart once per `_drain`, not once per queued sample, and
+- [x] Redraw the chart once per `_drain`, not once per queued sample, and
       throttle hover redraws (`gui.py:1650-1652`, `1823-1912`).
-- [ ] Keep point history only for channels that have a pop-out graph, or use
+- [x] Keep point history only for channels that have a pop-out graph, or use
       `array('d')` ring buffers. Today each watched channel can grow to about
       2.4 MB (`gui.py:26`, `1180`, `1298`, `1822`).
-- [ ] Skip a pop-out graph redraw when nothing changed, and thin the points to
+- [x] Skip a pop-out graph redraw when nothing changed, and thin the points to
       about 2 per pixel column (`graph.py:291-364`).
-- [ ] Work out each watch entry's availability key once, and call `tree.set`
+- [x] Work out each watch entry's availability key once, and call `tree.set`
       only when the shown text changed (`gui.py:883-891`, `1046-1055`,
       `1795-1813`). Also stops the 10 s picker rebuild hitch
       (`gui.py:917`, `1074-1075`).
-- [ ] Use a set for the duplicate check in "Add all", which is O(n²) over
+- [x] Use a set for the duplicate check in "Add all", which is O(n²) over
       ~11.8k channels (`gui.py:1175`).
-- [ ] Load replay logs in a worker thread, or stream the rows; store each row
+- [x] Load replay logs in a worker thread, or stream the rows; store each row
       as a list. A 1 h, 100-channel log takes about 2 s and 84 MB on the Tk
       thread (`gui.py:1345`, `playback.py:133-155`).
-- [ ] Cache catalog loads in the MCP server, and stream `read_log` with
+- [x] Cache catalog loads in the MCP server, and stream `read_log` with
       running min/max/mean (`mcp.py:237-238`, `296-325`).
 
 ## Phase 4 — Bank 1 vs Bank 2 and robust logging
