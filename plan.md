@@ -28,21 +28,23 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 1 — Bugs that lose data or freeze the app
 
-- [ ] `_drain` stops for good if any message handler raises: only
+- [x] `_drain` stops for good if any message handler raises: only
       `queue.Empty` is caught, so `self.after(60, self._drain)` is skipped
       (`gui.py:1644-1792`). Reschedule in `finally` and wrap each message in
       its own `try`.
-- [ ] A disconnect or error while logging leaves `logging_to` and the
+- [x] A disconnect or error while logging leaves `logging_to` and the
       "Stop logging" button stale (`gui.py:1692-1699`, `1785-1789`, and manual
       Disconnect at `1484-1489`). Later fault reads are saved next to the dead
       log. Reset the log state in every disconnect path.
-- [ ] Closing the window while logging can lose the last second: `_close`
+- [x] Closing the window while logging can lose the last second: `_close`
       stops the daemon poller but never joins it (`gui.py:1914-1926`). Join
       with a timeout before `destroy()`.
-- [ ] Starting a log with an empty watch list writes a 0-byte CSV that replay
+- [x] Starting a log with an empty watch list writes a 0-byte CSV that replay
       then rejects (`gui.py:152-154`). Refuse to start, or write the header.
-- [ ] A scan swallows every exception per address (`gui.py:1455`). Catch only
+- [x] A scan swallows every exception per address (`gui.py:1455`). Catch only
       `HsfzError` and show anything else.
+- [x] A late status or error message from a replaced connection dropped the
+      new one. Messages now carry the poller that sent them.
 
 ## Phase 2 — Hardening
 
