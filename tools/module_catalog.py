@@ -357,6 +357,19 @@ def dme_enums(tabs):
 FAULTS_ONLY = {
     "fzd_g11": "FZD-G11",       # 0x56 roof function centre
     "kafasg11": "KAFAS-G11",    # 0x5D camera-based driver assistance
+    "fas_g11": "FAS-G11",       # 0x6D driver's seat module
+    "bfs_g11": "BFS-G11",       # 0x6E passenger seat module
+    "komb_g11": "KOMB-G11",     # 0x60 instrument cluster
+    "frr_g11": "FRR-G11",       # 0x21 full-range radar (active cruise)
+    "sas_g11": "SAS-G11",       # 0x22 optional-equipment module
+    "hsr_g11": "HSR-G11",       # 0x2B rear-axle steering
+    "uss_g11": "USS-G11",       # 0x2C ultrasonic park sensors (after PMA_20's texts)
+    "pcu_g11": "PCU-G11",       # 0x2E power control unit
+    "hc2_g11": "HC2-G11",       # 0x08 lane-change warning
+    "hkfm_g11": "HKFM-G11",     # 0x0D rear function module (tailgate)
+    "lem_g11": "LEM-G11",       # 0x4F light effect manager
+    "gws_g11": "GWS-G11",       # 0x5E gear selector, then its variant
+    "gws_g11b": "GWS-G11B",
     "atm02": "ATM02",           # 0x61 telematics: ATM2, then ATM, then TCB 4G
     "atm": "ATM",
     "tcb4g": "TCB4G",

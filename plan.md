@@ -205,9 +205,7 @@ the file and line it starts from, as of 0.3.8.
 - [ ] Check the freeze-frame details against a real fault: odometer, time and
       counters should match the car.
 
-## Phase 11 — Needs more BMW files
-
-> **Blocked:** needs the driver's seat module file (`sm_fa*`/`smfa*`, 0x6D).
+## Phase 11 — More BMW files
 
 - [x] Re-extract the DME's value tables. `BMW_enum_tables.csv` was made by
       the first extractor, which read each table's position from the
@@ -220,7 +218,9 @@ the file and line it starts from, as of 0.3.8.
       `tools/module_catalog.py --dme`: the 22 value tables the catalog uses.
 - [x] Fault texts for 0x56 (FZD, `fzd_g11`), 0x5D (KAFAS, `kafasg11`) and
       0x61 (telematics: `atm02`, `atm`, `tcb4g` merged, ATM2's wording first).
-- [ ] Fault texts for 0x6D, the driver's seat module (SM_FA).
+- [x] Fault texts for 0x6D, the driver's seat module (`fas_g11`), and for
+      the other G11-family modules a G30 can have (passenger seat, cluster,
+      radar, rear steering, park sensors, gear selector...): 10,662 texts.
 - [ ] Find out which telematics variant the car has (its 0x61 codes in a
       fault read will say), and drop the other two files' texts if they clash.
 - [x] The DME's own snapshot values: 1,538 fields from its `FUMWELTTEXTE`,
