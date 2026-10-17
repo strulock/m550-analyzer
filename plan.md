@@ -48,21 +48,21 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 2 — Hardening
 
-- [ ] Limit the HSFZ reply length: the 4-byte length is trusted as-is
+- [x] Limit the HSFZ reply length: the 4-byte length is trusted as-is
       (`core.py:202-205`), so a device on the LAN can make `recv` try to
       allocate up to 4 GB. Refuse `length > 0x10000` with `HsfzError`, and
       read into a `bytearray` instead of `buf += chunk`.
-- [ ] MCP `read_channels` appends `names` straight to the CLI arguments
+- [x] MCP `read_channels` appends `names` straight to the CLI arguments
       (`mcp.py:205-209`), so a name like `--source` overrides the tester
       address. Put `--` before the names and reject names starting with `-`.
-- [ ] Guard drive-log CSVs against formula injection: prefix `'` to text cells
+- [x] Guard drive-log CSVs against formula injection: prefix `'` to text cells
       starting with `= + - @`, tab or CR (`gui.py:201-203`, `cli.py:278`).
-- [ ] Make discovery stricter: require a well-formed `CTRL_IDENT` reply
+- [x] Make discovery stricter: require a well-formed `CTRL_IDENT` reply
       (`core.py:681-683`), prefer 169.254.x.x sources, and show the VIN for
       the user to confirm before filling the IP box (`gui.py:1704-1722`).
-- [ ] Cap the line length `share.Host._client` reads before it checks the
+- [x] Cap the line length `share.Host._client` reads before it checks the
       token (`share.py:95`).
-- [ ] Remove the longitude hint in the comment at `core.py:630`.
+- [x] Remove the longitude hint in the comment at `core.py:630`.
 
 ## Phase 3 — Logging speed and long-run performance
 

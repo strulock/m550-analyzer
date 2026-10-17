@@ -199,7 +199,7 @@ class Poller(threading.Thread):
                 self.logwriter.writerow(["Time"] + names)
                 self.log_header = names
             self.logwriter.writerow(
-                [elapsed] + [("" if sample[n][0] is None else sample[n][0]) for n in names]
+                [elapsed] + [core.log_cell(sample[n][0]) for n in names]
             )
             # Push to disk about once a second, so a crash, sleep or flat
             # battery loses at most that much of the drive.
@@ -1622,6 +1622,26 @@ class App(tk.Tk):
         msg = win.parts["msg"]
         msg.config(text=msg.cget("text").split("  Saved")[0] + "  Saved to %s" % path)
 
+    def _found_car(self, hsfz):
+        """Put the car Discover found in the IP box. One car on the ENET
+        link (169.254.x.x) goes straight in; anything else - an answer from
+        another network, or several - is shown with its VIN to confirm."""
+        ip, payload = hsfz[0]
+        vin = core.reply_vin(payload) or "no VIN"
+        on_link = ip.startswith("169.254.")
+        if len(hsfz) > 1 or not on_link:
+            others = "".join("\n  %s  %s" % (h[0], core.reply_vin(h[1]) or "no VIN")
+                             for h in hsfz[1:])
+            why = ("More than one car answered." if on_link else
+                   "It isn't on the ENET link (169.254.x.x): check this is your car.")
+            if not messagebox.askyesno(
+                    "Discover", "Use the car at %s (%s)?%s\n\n%s" % (
+                        ip, vin, "\n\nAlso answered:" + others if others else "", why)):
+                self.status.config(text="● not connected", foreground="#999")
+                return
+        self.ip_var.set(ip)
+        self.status.config(text="● found %s at %s" % (vin, ip), foreground="#2a9d3f")
+
     # -- logging ---------------------------------------------------------
 
     def _log_ended(self):
@@ -1735,16 +1755,19 @@ class App(tk.Tk):
         elif kind == "discovered":
             hits = msg[1]
             near = msg[2] if len(msg) > 2 else []
+            # Only a well-formed HSFZ identification counts as the car; a
+            # stray datagram ("unknown") never fills the IP box.
             hsfz = [h for h in hits if core.reply_protocol(h[1]) == "HSFZ"]
-            if hits and not hsfz:
-                self.ip_var.set(hits[0][0])
+            doip = [h for h in hits if core.reply_protocol(h[1]) == "DoIP"]
+            if doip and not hsfz:
+                self.ip_var.set(doip[0][0])
                 self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
                 messagebox.showinfo(
                     "Discover",
                     "The car at %s answered with DoIP (port 13400), not "
                     "HSFZ, which is what this tool speaks. Please report "
-                    "this: DoIP support can be added." % hits[0][0])
-            elif not hits and near:
+                    "this: DoIP support can be added." % doip[0][0])
+            elif not hsfz and near:
                 self.ip_var.set(near[0])
                 self.status.config(text="\u25cf no reply; %s is on the link"
                                    % near[0], foreground="#b8860b")
@@ -1754,7 +1777,7 @@ class App(tk.Tk):
                     "link, so it's probably the car. It's in the IP box: "
                     "press Connect.%s" % (near[0], "\n\nAlso seen: " +
                                           ", ".join(near[1:]) if near[1:] else ""))
-            elif not hits:
+            elif not hsfz:
                 messagebox.showinfo(
                     "Discover",
                     "No reply.\n\n"
@@ -1770,9 +1793,7 @@ class App(tk.Tk):
                     "that network to Private")
                 self.status.config(text="\u25cf not connected", foreground="#999")
             else:
-                self.ip_var.set(hits[0][0])
-                self.status.config(
-                    text="\u25cf found %d" % len(hits), foreground="#2a9d3f")
+                self._found_car(hsfz)
 
         elif kind == "module":
             if msg[1] not in self.modules:

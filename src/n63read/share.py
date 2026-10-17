@@ -28,6 +28,7 @@ from n63read import core
 WAIT = 120.0                    # s a client waits for its answer
 BUDGET = 2.0                    # s of shared requests per owner cycle, at most
 LINGER = 0.05                   # s to wait for a client's next request
+MAX_LINE = 0x10000              # bytes in one request line, at most
 
 
 def state_path():
@@ -92,7 +93,12 @@ class Host:
     def _client(self, conn):
         with conn:
             f = conn.makefile("rwb")
-            for line in f:
+            while True:
+                # Capped: an endless line would otherwise be buffered whole
+                # before the token is even checked.
+                line = f.readline(MAX_LINE + 1)
+                if not line or len(line) > MAX_LINE:
+                    return
                 try:
                     msg = json.loads(line)
                 except ValueError:

@@ -274,7 +274,7 @@ def op_log(args):
                 sample = reader.read(h, chans)
                 for name, _, _ in chans:
                     value = sample[name][0]
-                    row.append("" if value is None else value)
+                    row.append(core.log_cell(value))
                 w.writerow(row)
                 n += 1
                 # Push to disk about once a second; a crash loses at most that.

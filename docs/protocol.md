@@ -24,6 +24,12 @@ Implementation: `core.Hsfz`, `core.discover`.
   (length 2, control `0x0011`, payload `00 00`) to `255.255.255.255` and
   `169.254.255.255` on UDP 6811 and collects replies (the gateway answers
   with the car's IP and identification).
+- **Which reply is the car.** Only a reply with the identification control
+  word `0x0011` counts as HSFZ; anything else on the port is "unknown" and
+  never fills the IP box. Replies from `169.254.x.x` (the ENET link) sort
+  first. One car on the link is used straight away; a car on another network,
+  or more than one, is shown with its VIN (from `BMWVIN…` in the reply) for
+  you to confirm first.
 - **The broadcast gotcha.** With Wi-Fi up, an unbound broadcast leaves via
   the default route and never reaches the car. Bind to the adapter's
   `169.254.x.x` address (GUI *via*, CLI `--bind`). The reply is also dropped
