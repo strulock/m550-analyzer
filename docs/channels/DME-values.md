@@ -4,91 +4,403 @@
 
 What the numbers of enumerated channels mean. The app logs and charts the number and shows the text in the Status column.
 
-## BF_0X4002_0
-
-| Value | Meaning | German |
-|---|---|---|
-| 123 | Vmax slave | Vmax Slave |
-| 149 | Vmax master | Vmax Master |
-| 151 | Pmax slave | Pmax Slave |
-| 152 | Pmax master | Pmax Master |
-| 65535 | Unknown | unbekannt |
-
 ## RDBI_ADS_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 1 | HEGO_nrFltIdS2B1RiDHtgObdRdr_C Heater output diagnosis for binary lambda sensors | HEGO_nrFltIdS2B1RiDHtgObdRdr_C   Heizleistungsdiagnose für Zweipunktlambdasonden |
-| 2 | MisfDet_nrFltIdCat_C Catalyst-damaging misfires | MisfDet_nrFltIdCat_C   Katalysatorschädigende Aussetzer |
-| 3 | MisfDet_nrFltIdEmi_C Emissions-relevant misfires | MisfDet_nrFltIdEmi_C   Emissionsrelevante Aussetzer |
-| 4 | UEGO_nrFltIdDynArB1_C LSU dynamic response diagnosis, area check | UEGO_nrFltIdDynArB1_C   Diagnose Dynamikverhalten der LSU Flächenprüfung |
-| 5 | UEGO_nrFltIdDynSlopB1_C LSU dynamic response diagnosis, slope check | UEGO_nrFltIdDynSlopB1_C   Diagnose Dynamikverhalten der LSU Steigungsprüfung |
-| 6 | UEGO_nrFltIdHeatrB1_C LSU heater control diagnosis | UEGO_nrFltIdHeatrB1_C   Diagnose Heizungsregelung LSU |
-| 7 | UEGO_nrFltIdPlausB1_C LSU plausibility diagnosis | UEGO_nrFltIdPlausB1_C   Plausibilitätsdiagnose LSU |
-| 8 | CIb_nrFltId_C Cylinder-individual faults, lambda interface | CIb_nrFltId_C   Zylinderindividuelle Fehler Lambda Schnittstelle |
-| 9 | CIb_nrRawFltId_C Cylinder-individual lambda faults, raw lambda interface | CIb_nrRawFltId_C   Zylinderindividuelle Lambda-Fehler Roh-Lambda Schnittstelle |
-| 10 | FlMA_FRAId_C Mixture adaptation diagnosis | FlMA_FRAId_C   Gemischadaption Diagnose |
-| 11 | TWCD_nrFltldObdRdrB1 Catalytic converter diagnosis by determining oxygen storage capacity | TWCD_nrFltldObdRdrB1   Katalysatordiagnose durch Bestimmung der Sauerstoffspeicherfähigkeit |
-| 12 | FlSply_nrFltIdObdRdrId57_C Plausibility check diagnosis of BDE fuel supply system, HDR cold | FlSply_nrFltIdObdRdrId57_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR Kalt |
-| 13 | FlSply_nrFltIdObdRdrId58_C Plausibility check diagnosis of BDE fuel supply system, HDR | FlSply_nrFltIdObdRdrId58_C   Diagnose Plausibilitätsprüfung Kraftstoffversorgungssystem BDE HDR |
-| 14 | CtT_nrFltIdObdRdr_C Engine coolant thermostat diagnosis | CtT_nrFltIdObdRdr_C   Diagnose Thermostat Motor-Kühlmittel |
-| 15 | GEVlv_nrFltIdObdRdrIntk_C Intake camshaft actuator diagnosis for OBD radar | GEVlv_nrFltIdObdRdrIntk_C   Einlass Nockenwellenstellerdiagnose für OBD-Radar |
-| 16 | GEVlv_nrFltIdObdRdrOutl_C Exhaust camshaft actuator diagnosis for OBD radar | GEVlv_nrFltIdObdRdrOutl_C   Auslass Nockenwellenstellerdiagnose für OBD-Radar |
-| 17 | HEGOD_nrFltIdS2B1RdrRLTran_C Dynamic diagnosis of sensor downstream of catalyst, rich-to-lean switching time bank 1 | HEGOD_nrFltIdS2B1RdrRLTran_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Schaltzeit Bank1 |
-| 18 | HEGOD_nrFltIdS2B1RdrLRTran_C Dynamic diagnosis of sensor downstream of catalyst, lean-to-rich switching time bank 1 | HEGOD_nrFltIdS2B1RdrLRTran_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Schaltzeit Bank1 |
-| 19 | HEGOD_nrFltIdS2B1RdrRLDly_C Dynamic diagnosis of sensor downstream of catalyst, rich-to-lean delay bank 1 | HEGOD_nrFltIdS2B1RdrRLDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Bank1 |
-| 20 | HEGOD_nrFltIdS2B1RdrRLRawDly_C Dynamic diagnosis of sensor downstream of catalyst, rich-to-lean delay raw value bank 1 | HEGOD_nrFltIdS2B1RdrRLRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Fett-Mager-Verzögerung Rohwert Bank1 |
-| 21 | HEGOD_nrFltIdS2B1RdrLRDly_C Dynamic diagnosis of sensor downstream of catalyst, lean-to-rich delay bank 1 | HEGOD_nrFltIdS2B1RdrLRDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Bank1 |
-| 22 | HEGOD_nrFltIdS2B1RdrLRRawDly_C Dynamic diagnosis of sensor downstream of catalyst, lean-to-rich delay raw value bank 1 | HEGOD_nrFltIdS2B1RdrLRRawDly_C   Dynamik Diagnose Sonde hinter Katalysator Mager-Fett-Verzögerung Rohwert Bank1 |
-| 23 | CEngDsT_nrFltIdObdRdr_C Coolant temperature sensor | CEngDsT_nrFltIdObdRdr_C   Kühlmitteltemperatursensor |
-| 24 | GEVlv_nrFltIdObdRdrColdStrtIntk_C Intake camshaft actuator diagnosis, cold start | GEVlv_nrFltIdObdRdrColdStrtIntk_C   Einlass Nockenwellenstellerdiagnose Kaltstart |
-| 25 | GEVlv_nrFltIdObdRdrColdStrtOutl_C Exhaust camshaft actuator diagnosis, cold start | GEVlv_nrFltIdObdRdrColdStrtOutl_C   Auslass Nockenwellenstellerdiagnose Kaltstart |
-| 26 | ExhMgT_nrFltIdCSERSCatH_C Secondary air diagnosis for CSERS diagnosis | ExhMgT_nrFltIdCSERSCatH_C   Sekundärluftdiagnose für CSERS-Diagnose |
-| 27 | AirMon_nrFltIdObdRdrCrkcsLeakDiag_C Crankcase ventilation (PCV) leak diagnosis | AirMon_nrFltIdObdRdrCrkcsLeakDiag_C  Diagnose Kurbelgehäuseentlueftung (PCV) Leckage |
-| 65535 | Channel ID not defined | Kanal-ID nicht Definiert |
+| 0 | ISOSAEReserved_00 | ISOSAEReserved_00 |
+| 1 | defaultSession | defaultSession |
+| 2 | programmingSession | programmingSession |
+| 3 | extendedDiagnosticSession | extendedDiagnosticSession |
+| 4 | safetySystemDiagnosticSession | safetySystemDiagnosticSession |
+| 64 | vehicleManufacturerSpecific_40 | vehicleManufacturerSpecific_40 |
+| 65 | codingSession | codingSession |
+| 66 | SWTSession | SWTSession |
+| 67 | HDDUpdateSession | HDDUpdateSession |
+| 255 | Invalid | ungültig |
 
 ## T_1BYTE_0X59C7_TEXTTAB_SIGDOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Vehicle electrical system configuration: high-voltage system not coded | Bordnetzkonfiguration Hochvoltsystem nicht codiert |
-| 4 | Vehicle electrical system configuration: high-voltage system coded | Bordnetzkonfiguration Hochvoltsystem codiert |
+| 0 | Successful | Erfolgreich |
+| 209 | A structural error was detected while parsing the FSC | Beim Parsen des FSCs ist ein Strukturfehler erkannt worden |
+| 211 | No memory space left | Kein Speicherplatz mehr vorhanden |
+| 214 | Incorrect parameter(s) | Falsche(r) Parameter |
+| 216 | No data available for the control unit | Keine Daten zum SG vorhanden |
+| 217 | No authentication | Keine Authentisierung |
+| 220 | Validity check failed | Gueltigkeits-Pruefung schlug fehl |
+| 221 | Vehicle identification number incorrect | Fahrgestellnummer fehlerhaft |
+| 222 | VIN check failed | FGN-Pruefung schlug fehl |
+| 223 | Flash read error | Flash-Lesefehler |
+| 224 | Flash write error | Flash-Schreibfehler |
+| 243 | FSC check failed | FSC Prüfung schlug fehl |
+| 244 | FSC cancelled | FSC storniert |
+| 245 | FSC status rejected | FSC-Status  abgelehnt |
+| 246 | FSC not present | FSC nicht vorhanden |
+| 247 | Wrong FSCS ID in FSC | Falsche FSCS-ID im FSC |
+| 248 | Invalid FSC creation date | Ungültiges FSC-Erstellungsdatum |
+| 249 | Signature check failed | Signaturpruefung schlug fehl |
+| 250 | SW signature check failed | SW- Signaturprüfung schlug fehl |
+| 251 | SW signature status rejected | SW Signaturstatus  abgelehnt |
+| 252 | SW ID check failed | SW-ID Pruefung schlug fehl |
+| 253 | SW not activated | SW nicht aktiviert |
+| 254 | SW ID not present | SW-ID nicht vorhanden |
+| 255 | Unknown error | Unbekannter Fehler |
 
 ## T_BAWIST_W_MSG_TEXT_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | 0 | 0 |
-| 8192 | 1 | 1 |
+| 4098 | VT (unthrottled), -, HOM (homogeneous) | VT (ungedrosselt), - , HOM (Homogen) |
+| 4114 | VT (unthrottled), optimal, HOM (homogeneous) | VT (ungedrosselt), Optimal , HOM (Homogen) |
+| 4130 | VT (unthrottled), Lambda_1, HOM (homogeneous) | VT (ungedrosselt), Lambda_1 , HOM (Homogen) |
+| 4146 | VT (unthrottled), Test_O2, HOM (homogeneous) | VT (ungedrosselt), Test_O2 , HOM (Homogen) |
+| 4162 | VT (unthrottled), KHM_DOE_LR, HOM (homogeneous) | VT (ungedrosselt), KHM_DOE_LR , HOM (Homogen) |
+| 4178 | VT (unthrottled), KHM_DOE_EM, HOM (homogeneous) | VT (ungedrosselt), KHM_DOE_EM , HOM (Homogen) |
+| 4194 | VT (unthrottled), component protection, HOM (homogeneous) | VT (ungedrosselt), Bauteilschutz , HOM (Homogen) |
+| 4210 | VT (unthrottled), KHM_ZW, HOM (homogeneous) | VT (ungedrosselt), KHM_ZW , HOM (Homogen) |
+| 4226 | VT (unthrottled), DESU_PULS, HOM (homogeneous) | VT (ungedrosselt), DESU_PULS , HOM (Homogen) |
+| 4242 | VT (unthrottled), NOxKat_reg, HOM (homogeneous) | VT (ungedrosselt), NOxKat_reg , HOM (Homogen) |
+| 4258 | VT (unthrottled), KHM_LR, HOM (homogeneous) | VT (ungedrosselt), KHM_LR , HOM (Homogen) |
+| 4274 | VT (unthrottled), KHM_EM, HOM (homogeneous) | VT (ungedrosselt), KHM_EM , HOM (Homogen) |
+| 4290 | VT (unthrottled), KHM_ZW_DESU, HOM (homogeneous) | VT (ungedrosselt), KHM_ZW_DESU , HOM (Homogen) |
+| 4306 | VT (unthrottled), KHM_LR_DESU, HOM (homogeneous) | VT (ungedrosselt), KHM_LR_DESU , HOM (Homogen) |
+| 4322 | VT (unthrottled), KHM_DOE_LR_DESU, HOM (homogeneous) | VT (ungedrosselt), KHM_DOE_LR_DESU , HOM (Homogen) |
+| 4338 | VT (unthrottled), limp-home, HOM (homogeneous) | VT (ungedrosselt), NOTLAUF , HOM (Homogen) |
+| 4354 | VT (unthrottled), LAMTEST, HOM (homogeneous) | VT (ungedrosselt), LAMTEST , HOM (Homogen) |
+| 4370 | VT (unthrottled), GL_ZSK, HOM (homogeneous) | VT (ungedrosselt), GL_ZSK , HOM (Homogen) |
+| 4386 | VT (unthrottled), DESU_FETT, HOM (homogeneous) | VT (ungedrosselt), DESU_FETT , HOM (Homogen) |
+| 4402 | VT (unthrottled), ZWAD, HOM (homogeneous) | VT (ungedrosselt), ZWAD , HOM (Homogen) |
+| 4418 | VT (unthrottled), UESP, HOM (homogeneous) | VT (ungedrosselt), UESP , HOM (Homogen) |
+| 4434 | VT (unthrottled), VL, HOM (homogeneous) | VT (ungedrosselt), VL , HOM (Homogen) |
+| 4450 | VT (unthrottled), INJAD, HOM (homogeneous) | VT (ungedrosselt), INJAD , HOM (Homogen) |
+| 4530 | VT (unthrottled), OPFHEIZ, HOM (homogeneous) | VT (ungedrosselt), OPFHEIZ , HOM (Homogen) |
+| 8194 | GD (throttled), -, HOM (homogeneous) | GD (gedrosselt), - , HOM (Homogen) |
+| 8210 | GD (throttled), optimal, HOM (homogeneous) | GD (gedrosselt), Optimal , HOM (Homogen) |
+| 8226 | GD (throttled), Lambda_1, HOM (homogeneous) | GD (gedrosselt), Lambda_1 , HOM (Homogen) |
+| 8242 | GD (throttled), Test_O2, HOM (homogeneous) | GD (gedrosselt), Test_O2 , HOM (Homogen) |
+| 8258 | GD (throttled), KHM_DOE_LR, HOM (homogeneous) | GD (gedrosselt), KHM_DOE_LR , HOM (Homogen) |
+| 8274 | GD (throttled), KHM_DOE_EM, HOM (homogeneous) | GD (gedrosselt), KHM_DOE_EM , HOM (Homogen) |
+| 8290 | GD (throttled), component protection, HOM (homogeneous) | GD (gedrosselt), Bauteilschutz , HOM (Homogen) |
+| 8306 | GD (throttled), KHM_ZW, HOM (homogeneous) | GD (gedrosselt), KHM_ZW , HOM (Homogen) |
+| 8322 | GD (throttled), DESU_PULS, HOM (homogeneous) | GD (gedrosselt), DESU_PULS , HOM (Homogen) |
+| 8338 | GD (throttled), NOxKat_reg, HOM (homogeneous) | GD (gedrosselt), NOxKat_reg , HOM (Homogen) |
+| 8354 | GD (throttled), KHM_LR, HOM (homogeneous) | GD (gedrosselt), KHM_LR , HOM (Homogen) |
+| 8370 | GD (throttled), KHM_EM, HOM (homogeneous) | GD (gedrosselt), KHM_EM , HOM (Homogen) |
+| 8386 | GD (throttled), KHM_ZW_DESU, HOM (homogeneous) | GD (gedrosselt), KHM_ZW_DESU , HOM (Homogen) |
+| 8402 | GD (throttled), KHM_LR_DESU, HOM (homogeneous) | GD (gedrosselt), KHM_LR_DESU , HOM (Homogen) |
+| 8418 | GD (throttled), KHM_DOE_LR_DESU, HOM (homogeneous) | GD (gedrosselt), KHM_DOE_LR_DESU , HOM (Homogen) |
+| 8434 | GD (throttled), limp-home, HOM (homogeneous) | GD (gedrosselt), NOTLAUF , HOM (Homogen) |
+| 8450 | GD (throttled), LAMTEST, HOM (homogeneous) | GD (gedrosselt), LAMTEST , HOM (Homogen) |
+| 8466 | GD (throttled), GL_ZSK, HOM (homogeneous) | GD (gedrosselt), GL_ZSK , HOM (Homogen) |
+| 8482 | GD (throttled), DESU_FETT, HOM (homogeneous) | GD (gedrosselt), DESU_FETT , HOM (Homogen) |
+| 8498 | GD (throttled), ZWAD, HOM (homogeneous) | GD (gedrosselt), ZWAD , HOM (Homogen) |
+| 8514 | GD (throttled), UESP, HOM (homogeneous) | GD (gedrosselt), UESP , HOM (Homogen) |
+| 8530 | GD (throttled), VL, HOM (homogeneous) | GD (gedrosselt), VL , HOM (Homogen) |
+| 8546 | GD (throttled), INJAD, HOM (homogeneous) | GD (gedrosselt), INJAD , HOM (Homogen) |
+| 8626 | GD (throttled), OPFHEIZ, HOM (homogeneous) | GD (gedrosselt), OPFHEIZ , HOM (Homogen) |
+| 12290 | GK (throttled, small lift), -, HOM (homogeneous) | GK (gedrosselt kleiner Hub), - , HOM (Homogen) |
+| 12306 | GK (throttled, small lift), optimal, HOM (homogeneous) | GK (gedrosselt kleiner Hub), Optimal , HOM (Homogen) |
+| 12322 | GK (throttled, small lift), Lambda_1, HOM (homogeneous) | GK (gedrosselt kleiner Hub), Lambda_1 , HOM (Homogen) |
+| 12338 | GK (throttled, small lift), Test_O2, HOM (homogeneous) | GK (gedrosselt kleiner Hub), Test_O2 , HOM (Homogen) |
+| 12354 | GK (throttled, small lift), KHM_DOE_LR, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_DOE_LR , HOM (Homogen) |
+| 12370 | GK (throttled, small lift), KHM_DOE_EM, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_DOE_EM , HOM (Homogen) |
+| 12386 | GK (throttled, small lift), component protection, HOM (homogeneous) | GK (gedrosselt kleiner Hub), Bauteilschutz , HOM (Homogen) |
+| 12402 | GK (throttled, small lift), KHM_ZW, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_ZW , HOM (Homogen) |
+| 12418 | GK (throttled, small lift), DESU_PULS, HOM (homogeneous) | GK (gedrosselt kleiner Hub), DESU_PULS, HOM (Homogen) |
+| 12434 | GK (throttled, small lift), NOxKat_reg, HOM (homogeneous) | GK (gedrosselt kleiner Hub), NOxKat_reg , HOM (Homogen) |
+| 12450 | GK (throttled, small lift), KHM_LR, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_LR , HOM (Homogen) |
+| 12466 | GK (throttled, small lift), KHM_EM, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_EM , HOM (Homogen) |
+| 12482 | GK (throttled, small lift), KHM_ZW_DESU, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_ZW_DESU , HOM (Homogen) |
+| 12498 | GK (throttled, small lift), KHM_LR_DESU, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_LR_DESU , HOM (Homogen) |
+| 12514 | GK (throttled, small lift), KHM_DOE_LR_DESU, HOM (homogeneous) | GK (gedrosselt kleiner Hub), KHM_DOE_LR_DESU , HOM (Homogen) |
+| 12530 | GK (throttled, small lift), limp-home, HOM (homogeneous) | GK (gedrosselt kleiner Hub), NOTLAUF , HOM (Homogen) |
+| 12546 | GK (throttled, small lift), LAMTEST, HOM (homogeneous) | GK (gedrosselt kleiner Hub), LAMTEST , HOM (Homogen) |
+| 12562 | GK (throttled, small lift), GL_ZSK, HOM (homogeneous) | GK (gedrosselt kleiner Hub), GL_ZSK , HOM (Homogen) |
+| 12578 | GK (throttled, small lift), DESU_FETT, HOM (homogeneous) | GK (gedrosselt kleiner Hub), DESU_FETT, HOM (Homogen) |
+| 12594 | GK (throttled, small lift), ZWAD, HOM (homogeneous) | GK (gedrosselt kleiner Hub), ZWAD , HOM (Homogen) |
+| 12610 | GK (throttled, small lift), UESP, HOM (homogeneous) | GK (gedrosselt kleiner Hub), UESP, HOM (Homogen) |
+| 12626 | GK (throttled, small lift), VL, HOM (homogeneous) | GK (gedrosselt kleiner Hub), VL , HOM (Homogen) |
+| 12642 | GK (throttled, small lift), INJAD, HOM (homogeneous) | GK (gedrosselt kleiner Hub), INJAD , HOM (Homogen) |
+| 12722 | GK (throttled, small lift), OPFHEIZ, HOM (homogeneous) | GK (gedrosselt kleiner Hub), OPFHEIZ , HOM (Homogen) |
+| 65535 | Invalid | Ungueltig |
 
 ## T_B_1BYTE_LESEN_0_1
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Battery OK | Batterie i.O. |
-| 1 | Check battery | Batterie pruefen |
-| 2 | Battery not OK | Batterie nicht i.O. |
-| 3 | Invalid | ungueltig |
+| 0 | 0 | 0 |
+| 1 | 1 | 1 |
 
 ## T_B_MOLAET_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | FALSE | FALSE |
-| 1 | TRUE | TRUE |
+| 0 | 0 | 0 |
+| 1 | 1 | 1 |
+| 2 | 1 | 1 |
+| 3 | 1 | 1 |
+| 4 | 1 | 1 |
+| 5 | 1 | 1 |
+| 6 | 1 | 1 |
+| 7 | 1 | 1 |
+| 8 | 1 | 1 |
+| 9 | 1 | 1 |
+| 10 | 1 | 1 |
+| 11 | 1 | 1 |
+| 12 | 1 | 1 |
+| 13 | 1 | 1 |
+| 14 | 1 | 1 |
+| 15 | 1 | 1 |
+| 16 | 1 | 1 |
+| 17 | 1 | 1 |
+| 18 | 1 | 1 |
+| 19 | 1 | 1 |
+| 20 | 1 | 1 |
+| 21 | 1 | 1 |
+| 22 | 1 | 1 |
+| 23 | 1 | 1 |
+| 24 | 1 | 1 |
+| 25 | 1 | 1 |
+| 26 | 1 | 1 |
+| 27 | 1 | 1 |
+| 28 | 1 | 1 |
+| 29 | 1 | 1 |
+| 30 | 1 | 1 |
+| 31 | 1 | 1 |
+| 32 | 1 | 1 |
+| 33 | 1 | 1 |
+| 34 | 1 | 1 |
+| 35 | 1 | 1 |
+| 36 | 1 | 1 |
+| 37 | 1 | 1 |
+| 38 | 1 | 1 |
+| 39 | 1 | 1 |
+| 40 | 1 | 1 |
+| 41 | 1 | 1 |
+| 42 | 1 | 1 |
+| 43 | 1 | 1 |
+| 44 | 1 | 1 |
+| 45 | 1 | 1 |
+| 46 | 1 | 1 |
+| 47 | 1 | 1 |
+| 48 | 1 | 1 |
+| 49 | 1 | 1 |
+| 50 | 1 | 1 |
+| 51 | 1 | 1 |
+| 52 | 1 | 1 |
+| 53 | 1 | 1 |
+| 54 | 1 | 1 |
+| 55 | 1 | 1 |
+| 56 | 1 | 1 |
+| 57 | 1 | 1 |
+| 58 | 1 | 1 |
+| 59 | 1 | 1 |
+| 60 | 1 | 1 |
+| 61 | 1 | 1 |
+| 62 | 1 | 1 |
+| 63 | 1 | 1 |
+| 64 | 1 | 1 |
+| 65 | 1 | 1 |
+| 66 | 1 | 1 |
+| 67 | 1 | 1 |
+| 68 | 1 | 1 |
+| 69 | 1 | 1 |
+| 70 | 1 | 1 |
+| 71 | 1 | 1 |
+| 72 | 1 | 1 |
+| 73 | 1 | 1 |
+| 74 | 1 | 1 |
+| 75 | 1 | 1 |
+| 76 | 1 | 1 |
+| 77 | 1 | 1 |
+| 78 | 1 | 1 |
+| 79 | 1 | 1 |
+| 80 | 1 | 1 |
+| 81 | 1 | 1 |
+| 82 | 1 | 1 |
+| 83 | 1 | 1 |
+| 84 | 1 | 1 |
+| 85 | 1 | 1 |
+| 86 | 1 | 1 |
+| 87 | 1 | 1 |
+| 88 | 1 | 1 |
+| 89 | 1 | 1 |
+| 90 | 1 | 1 |
+| 91 | 1 | 1 |
+| 92 | 1 | 1 |
+| 93 | 1 | 1 |
+| 94 | 1 | 1 |
+| 95 | 1 | 1 |
+| 96 | 1 | 1 |
+| 97 | 1 | 1 |
+| 98 | 1 | 1 |
+| 99 | 1 | 1 |
+| 100 | 1 | 1 |
+| 101 | 1 | 1 |
+| 102 | 1 | 1 |
+| 103 | 1 | 1 |
+| 104 | 1 | 1 |
+| 105 | 1 | 1 |
+| 106 | 1 | 1 |
+| 107 | 1 | 1 |
+| 108 | 1 | 1 |
+| 109 | 1 | 1 |
+| 110 | 1 | 1 |
+| 111 | 1 | 1 |
+| 112 | 1 | 1 |
+| 113 | 1 | 1 |
+| 114 | 1 | 1 |
+| 115 | 1 | 1 |
+| 116 | 1 | 1 |
+| 117 | 1 | 1 |
+| 118 | 1 | 1 |
+| 119 | 1 | 1 |
+| 120 | 1 | 1 |
+| 121 | 1 | 1 |
+| 122 | 1 | 1 |
+| 123 | 1 | 1 |
+| 124 | 1 | 1 |
+| 125 | 1 | 1 |
+| 126 | 1 | 1 |
+| 127 | 1 | 1 |
+| 128 | 1 | 1 |
+| 129 | 1 | 1 |
+| 130 | 1 | 1 |
+| 131 | 1 | 1 |
+| 132 | 1 | 1 |
+| 133 | 1 | 1 |
+| 134 | 1 | 1 |
+| 135 | 1 | 1 |
+| 136 | 1 | 1 |
+| 137 | 1 | 1 |
+| 138 | 1 | 1 |
+| 139 | 1 | 1 |
+| 140 | 1 | 1 |
+| 141 | 1 | 1 |
+| 142 | 1 | 1 |
+| 143 | 1 | 1 |
+| 144 | 1 | 1 |
+| 145 | 1 | 1 |
+| 146 | 1 | 1 |
+| 147 | 1 | 1 |
+| 148 | 1 | 1 |
+| 149 | 1 | 1 |
+| 150 | 1 | 1 |
+| 151 | 1 | 1 |
+| 152 | 1 | 1 |
+| 153 | 1 | 1 |
+| 154 | 1 | 1 |
+| 155 | 1 | 1 |
+| 156 | 1 | 1 |
+| 157 | 1 | 1 |
+| 158 | 1 | 1 |
+| 159 | 1 | 1 |
+| 160 | 1 | 1 |
+| 161 | 1 | 1 |
+| 162 | 1 | 1 |
+| 163 | 1 | 1 |
+| 164 | 1 | 1 |
+| 165 | 1 | 1 |
+| 166 | 1 | 1 |
+| 167 | 1 | 1 |
+| 168 | 1 | 1 |
+| 169 | 1 | 1 |
+| 170 | 1 | 1 |
+| 171 | 1 | 1 |
+| 172 | 1 | 1 |
+| 173 | 1 | 1 |
+| 174 | 1 | 1 |
+| 175 | 1 | 1 |
+| 176 | 1 | 1 |
+| 177 | 1 | 1 |
+| 178 | 1 | 1 |
+| 179 | 1 | 1 |
+| 180 | 1 | 1 |
+| 181 | 1 | 1 |
+| 182 | 1 | 1 |
+| 183 | 1 | 1 |
+| 184 | 1 | 1 |
+| 185 | 1 | 1 |
+| 186 | 1 | 1 |
+| 187 | 1 | 1 |
+| 188 | 1 | 1 |
+| 189 | 1 | 1 |
+| 190 | 1 | 1 |
+| 191 | 1 | 1 |
+| 192 | 1 | 1 |
+| 193 | 1 | 1 |
+| 194 | 1 | 1 |
+| 195 | 1 | 1 |
+| 196 | 1 | 1 |
+| 197 | 1 | 1 |
+| 198 | 1 | 1 |
+| 199 | 1 | 1 |
+| 200 | 1 | 1 |
+| 201 | 1 | 1 |
+| 202 | 1 | 1 |
+| 203 | 1 | 1 |
+| 204 | 1 | 1 |
+| 205 | 1 | 1 |
+| 206 | 1 | 1 |
+| 207 | 1 | 1 |
+| 208 | 1 | 1 |
+| 209 | 1 | 1 |
+| 210 | 1 | 1 |
+| 211 | 1 | 1 |
+| 212 | 1 | 1 |
+| 213 | 1 | 1 |
+| 214 | 1 | 1 |
+| 215 | 1 | 1 |
+| 216 | 1 | 1 |
+| 217 | 1 | 1 |
+| 218 | 1 | 1 |
+| 219 | 1 | 1 |
+| 220 | 1 | 1 |
+| 221 | 1 | 1 |
+| 222 | 1 | 1 |
+| 223 | 1 | 1 |
+| 224 | 1 | 1 |
+| 225 | 1 | 1 |
+| 226 | 1 | 1 |
+| 227 | 1 | 1 |
+| 228 | 1 | 1 |
+| 229 | 1 | 1 |
+| 230 | 1 | 1 |
+| 231 | 1 | 1 |
+| 232 | 1 | 1 |
+| 233 | 1 | 1 |
+| 234 | 1 | 1 |
+| 235 | 1 | 1 |
+| 236 | 1 | 1 |
+| 237 | 1 | 1 |
+| 238 | 1 | 1 |
+| 239 | 1 | 1 |
+| 240 | 1 | 1 |
+| 241 | 1 | 1 |
+| 242 | 1 | 1 |
+| 243 | 1 | 1 |
+| 244 | 1 | 1 |
+| 245 | 1 | 1 |
+| 246 | 1 | 1 |
+| 247 | 1 | 1 |
+| 248 | 1 | 1 |
+| 249 | 1 | 1 |
+| 250 | 1 | 1 |
+| 251 | 1 | 1 |
+| 252 | 1 | 1 |
+| 253 | 1 | 1 |
+| 254 | 1 | 1 |
+| 255 | 1 | 1 |
 
 ## T_COM_STCOMMSTATE_FA_DOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Adaptation running | Adaption laeuft |
-| 1 | Adaptation blocked, engine outside speed/load range | Adaption blockiert, Motor ausserhalb Drehzahl-/Lastbereich |
-| 2 | Adaptation blocked, engine temperature outside permitted range | Adaption blockiert, Motortemperatur ausserhalb zul. Bereich |
-| 3 | Adaptation blocked, catalyst temperature outside permitted range | Adaption blockiert, KAT-Temperatur ausserhalb zul. Bereich |
-| 4 | Adaptation blocked due to fault memory entry | Adaption blockiert wegen Fehlerspeichereintrag |
-| 5 | Adaptation blocked because lambda not 1, fuel supply system not OK, catalyst heating active or component protection active | Adaption blockiert, weil Lambdawert nicht 1, Kraftstoffversorgungssystem nicht i.O., KAT-Heizen aktiv oder Bauteileschutz aktiv |
-| 6 | Adaptation blocked because tank venting or mixture adaptation active | Adaption blockiert, weil Tankentlueftung oder Gemischadaption aktiv |
-| 255 | Adaptation is blocked (other enable condition not met) | Adaption ist blockiert (sonstige Freigabebedingung nicht erfuellt) |
+| 0 | COMM_NO_COMMUNICATION | COMM_NO_COMMUNICATION |
+| 1 | COMM_SILENT_COMMUNICATION | COMM_SILENT_COMMUNICATION |
+| 2 | COMM_FULL_COMMUNICATION | COMM_FULL_COMMUNICATION |
 
 ## T_COM_STCOMMSTATE_LIN_DOP
 
@@ -102,49 +414,20 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Function not yet started | Funktion noch nicht gestartet |
-| 1 | Start conditions not met | Startbedingungen nicht erfuellt |
-| 2 | Transfer parameters not plausible | Uebergabeparameter nicht plausibel |
-| 3 | Function waiting for enable | Funktion wartet auf Freigabe |
-| 4 | Undefined state | Undefinierter Zustand |
-| 5 | Function test running | Funktionstest laeuft |
-| 6 | Function ended without result | Funktion ergebnislos beendet |
-| 7 | Function aborted | Funktion abgebrochen |
-| 8 | Function completed and no fault detected | Funktion durchlaufen und kein Fehler erkannt |
-| 9 | Function completed and fault detected | Funktion durchlaufen und Fehler erkannt |
+| 0 | EPM_NO_SYNC | EPM_NO_SYNC |
+| 10 | EPM_ALE_SYNC | EPM_ALE_SYNC |
+| 20 | EPM_CAS_SYNC | EPM_CAS_SYNC |
+| 21 | EPM_DIRSTALE_SYNC | EPM_DIRSTALE_SYNC |
+| 30 | EPM_FULL_SYNC | EPM_FULL_SYNC |
 
 ## T_IKCTL_FLGKNKDETN_SIGDOP
-
-| Value | Meaning | German |
-|---|---|---|
-| 1 | Gear 1 synchronised | Gang 1 Synchronisiert |
-| 2 | Gear 2 synchronised | Gang 2 Synchronisiert |
-| 3 | Neutral 12 | Neutral 12 |
-| 4 | Gear 3 synchronised | Gang 3 Synchronisiert |
-| 8 | Gear 4 synchronised | Gang 4 Synchronisiert |
-| 12 | Neutral 34 | Neutral 34 |
-| 16 | Gear 5 synchronised | Gang 5 Synchronisiert |
-| 32 | Gear 6 synchronised | Gang 6 Synchronisiert |
-| 48 | Neutral 56 | Neutral 56 |
-| 64 | Reverse gear synchronised | Rueckwaertsgang Synchronisiert |
-| 65 | Neutral reverse | Neutral Rueckwaerts |
-| 129 | Gear 1 | Gang 1 |
-| 130 | Gear 2 | Gang 2 |
-| 132 | Gear 3 | Gang 3 |
-| 136 | Gear 4 | Gang 4 |
-| 144 | Gear 5 | Gang 5 |
-| 160 | Gear 6 | Gang 6 |
-| 192 | Reverse gear | Rueckwaertsgang |
-| 255 | Invalid | Ungueltig |
-
-## T_INFO_MOTORAUSGEHER_DOP
 
 | Value | Meaning | German |
 |---|---|---|
 | 0 | ---- | ---- |
 | 1 | TRUE | TRUE |
 
-## T_INMRST_STCOMMSTATE_FA_DOP
+## T_INFO_MOTORAUSGEHER_DOP
 
 | Value | Meaning | German |
 |---|---|---|
@@ -156,6 +439,14 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 5 | Stall during operation (after SST start) | Ausgeher während Betrieb (nach SST- Start) |
 | 6 | Stall during operation (after MSA start) | Ausgeher während Betrieb (nach MSA- Start) |
 | 7 | Stall after CoM | Ausgeher nach CoM |
+
+## T_INMRST_STCOMMSTATE_FA_DOP
+
+| Value | Meaning | German |
+|---|---|---|
+| 0 | COMM_NO_COMMUNICATION | COMM_NO_COMMUNICATION |
+| 1 | COMM_SILENT_COMMUNICATION | COMM_SILENT_COMMUNICATION |
+| 2 | COMM_FULL_COMMUNICATION | COMM_FULL_COMMUNICATION |
 
 ## T_INMRST_STCOMMSTATE_LIN_DOP
 
@@ -169,14 +460,6 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | COMM_NO_COMMUNICATION | COMM_NO_COMMUNICATION |
-| 1 | COMM_SILENT_COMMUNICATION | COMM_SILENT_COMMUNICATION |
-| 2 | COMM_FULL_COMMUNICATION | COMM_FULL_COMMUNICATION |
-
-## T_INMRST_SYCSTPREDRV_DOP
-
-| Value | Meaning | German |
-|---|---|---|
 | 0 | SYC_POSTDRV_INACTV | SYC_POSTDRV_INACTV |
 | 1 | SYC_POSTDRV_DSM_BGN | SYC_POSTDRV_DSM_BGN |
 | 2 | SYC_POSTDRV_EEP_BGN | SYC_POSTDRV_EEP_BGN |
@@ -187,49 +470,50 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 7 | SYC_POSTDRV_MIN_TIME | SYC_POSTDRV_MIN_TIME |
 | 8 | SYC_POSTDRV_DONE | SYC_POSTDRV_DONE |
 
+## T_INMRST_SYCSTPREDRV_DOP
+
+| Value | Meaning | German |
+|---|---|---|
+| 0 | SYC_PREDRV_INI_DRV | SYC_PREDRV_INI_DRV |
+| 1 | SYC_PREDRV_DONE | SYC_PREDRV_DONE |
+| 2 | SYC_PREDRV_INI_SHDWN | SYC_PREDRV_INI_SHDWN |
+| 3 | SYC_PREDRV_PROLONG | SYC_PREDRV_PROLONG |
+| 4 | SYC_PREDRV_NWM | SYC_PREDRV_NWM |
+| 5 | SYC_PREDRV_EEP | SYC_PREDRV_EEP |
+| 6 | SYC_PREDRV_DSM | SYC_PREDRV_DSM |
+| 7 | SYC_PREDRV_MR | SYC_PREDRV_MR |
+| 8 | SYC_PREDRV_MOM | SYC_PREDRV_MOM |
+| 9 | SYC_PREDRV_EXIT | SYC_PREDRV_EXIT |
+
 ## T_PSPDIA_STFPCENFGND_SIGDOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | Unknown | unbekannt |
-| 1 | BSD generator | BSD-Generator |
-| 2 | VDA LIN generator | VDA-LIN-Generator |
-| 3 | Starter-generator SGR | Starter-Generator SGR |
-| 255 | Not defined | nicht Definiert |
+| 0 | NOINFO | NOINFO |
+| 1 | FLTHEATR | FLTHEATR |
+| 2 | FUPMPIHI | FUPMPIHI |
+| 3 | FUPMPUHI | FUPMPUHI |
+| 4 | FUPMPILO | FUPMPILO |
+| 5 | TEXSLVL2 | TEXSLVL2 |
+| 6 | FUPMPSHOCIRC | FUPMPSHOCIRC |
+| 7 | TEXSLVL3 | TEXSLVL3 |
+| 8 | INTFLT | INTFLT |
+| 9 | NOPRMACTV | NOPRMACTV |
+| 10 | NOCRASHSIGRX | NOCRASHSIGRX |
+| 11 | RESD | RESD |
 
 ## T_STATE_ENG_SIGDOP
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | START | START |
-| 1 | Reference leak measurement | Referenzleck Messung |
-| 2 | Large leak measurement | Grobleck Messung |
-| 3 | Small leak measurement | Feinleck Messung |
-| 4 | Second reference leak measurement | Zweite Referenzleck Messung |
-| 6 | Diagnosis ended | Diagnose beendet |
-| 10 | Function cannot be started | Funktion nicht Startbar |
-| 11 | Battery voltage out of range | Batteriespannung ausserhalb Bereich |
-| 12 | Reference current fluctuation too large | Schwankung von Referenzstrom zu gross |
-| 13 | Electrical fault present | Elektrischer Fehler vorhanden |
-| 14 | Max. diagnosis time reached/exceeded | Max. Diagnosezeit erreicht/ueberschritten |
-| 15 | No enable, TEV active | Kein Freigabe TEV Aktiv |
-| 20 | Function was aborted | Funktion wurde Abgebrochen |
-| 23 | Voltage fluctuation too large | Spannungsschwankung zu gross |
-| 24 | Ignition on | Zuendung an |
-| 30 | Function ended: tank sealed | Funktion beendet: Tank Dicht |
-| 31 | Function ended: small leak detected | Funktion beendet: Feinleck erkannt |
-| 32 | Function ended: large leak detected | Funktion beendet: Grobleck erkannt |
-| 33 | Function ended: module fault | Funktion beendet: Modulfehler |
-| 34 | Function ended: no large leak detected | Funktion beendet: Kein Grobleck erkannt |
-| 255 | Function not yet started | Funktion noch nicht gestartet |
+| 0 | COENG_STANDBY - initialisation state | COENG_STANDBY - Initialisierungszustand |
+| 1 | COENG_READY - waiting for engine speed | COENG_READY - Warten auf Drehzahl |
+| 2 | COENG_CRANKING - waiting for end of cranking | COENG_CRANKING - Warten auf Startabwurf |
+| 3 | COENG_RUNNING - engine running | COENG_RUNNING - Motor läuft |
+| 4 | COENG_STOPPING - run-on, engine still turning or direct shutdown from stationary engine | COENG_STOPPING - Nachlauf, Drehzahl noch vorhanden oder direkte Abschaltung aus stehendem Motor |
+| 5 | COENG_FINISH - run-on, engine stopped | COENG_FINISH - Nachlauf, Motor steht |
 
 ## T_SYC_STMNCOORD_DOP
-
-| Value | Meaning | German |
-|---|---|---|
-| 4 | Clear power management histogram | Powermanagement Histogramm loeschen. |
-
-## T_SYC_STPOSTDRV_DOP
 
 | Value | Meaning | German |
 |---|---|---|
@@ -246,7 +530,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 549 | FINALIZE | FINALIZE |
 | 804 | DRIVE_OPERATION | DRIVE_OPERATION |
 
-## T_SYC_STPREDRV_DOP
+## T_SYC_STPOSTDRV_DOP
 
 | Value | Meaning | German |
 |---|---|---|
@@ -260,7 +544,7 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 7 | SYC_POSTDRV_MIN_TIME | SYC_POSTDRV_MIN_TIME |
 | 8 | SYC_POSTDRV_DONE | SYC_POSTDRV_DONE |
 
-## T_SYC_STSUBOLD_DOP
+## T_SYC_STPREDRV_DOP
 
 | Value | Meaning | German |
 |---|---|---|
@@ -274,6 +558,18 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 | 7 | SYC_PREDRV_MR | SYC_PREDRV_MR |
 | 8 | SYC_PREDRV_MOM | SYC_PREDRV_MOM |
 | 9 | SYC_PREDRV_EXIT | SYC_PREDRV_EXIT |
+
+## T_SYC_STSUBOLD_DOP
+
+| Value | Meaning | German |
+|---|---|---|
+| 0 | SYC_INI | SYC_INI |
+| 1 | SYC_INISYN | SYC_INISYN |
+| 2 | SYC_INIEND | SYC_INIEND |
+| 3 | SYC_PREDRIVE | SYC_PREDRIVE |
+| 4 | SYC_DRIVE | SYC_DRIVE |
+| 5 | SYC_POSTDRIVE | SYC_POSTDRIVE |
+| 6 | SYC_POST_OS_EXIT | SYC_POST_OS_EXIT |
 
 ## T_SYC_STSUB_DOP
 
@@ -291,10 +587,9 @@ What the numbers of enumerated channels mean. The app logs and charts the number
 
 | Value | Meaning | German |
 |---|---|---|
-| 0 | SYC_INI | SYC_INI |
-| 1 | SYC_INISYN | SYC_INISYN |
-| 2 | SYC_INIEND | SYC_INIEND |
-| 3 | SYC_PREDRIVE | SYC_PREDRIVE |
-| 4 | SYC_DRIVE | SYC_DRIVE |
-| 5 | SYC_POSTDRIVE | SYC_POSTDRIVE |
-| 6 | SYC_POST_OS_EXIT | SYC_POST_OS_EXIT |
+| 0 | INIT | INIT |
+| 1 | STANDBY | STANDBY |
+| 2 | RUNNING | RUNNING |
+| 3 | ERROR_STOP | ERROR_STOP |
+| 4 | ERROR_PROCEED | ERROR_PROCEED |
+| 5 | ERROR_OFF | ERROR_OFF |

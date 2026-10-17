@@ -33,7 +33,10 @@ def test_the_freeze_catalog_has_the_odometer_and_the_dsc_exception():
     assert fields[(None, 0x1700)]["name_de"] == "KM_STAND"
     assert core.field_bytes(fields[(None, 0x1769)]["datatype"]) == 6
     assert core.field_bytes(fields[(0x29, 0x1769)]["datatype"]) == 4
-    assert all(k[1] in core.FREEZE_LABELS for k in fields)
+    assert all(k[1] in core.FREEZE_LABELS for k in fields if k[0] in (None, 0x29))
+    # The DME's own fields, for both DMEs, with real English.
+    assert fields[(0x12, 0x4300)] is fields[(0x13, 0x4300)]
+    assert fields[(0x12, 0x4300)]["name_en"] == "Engine temperature"
 
 
 # ------------------------------------------------------------ the parsers
@@ -58,10 +61,25 @@ def test_a_snapshot_is_decoded_field_by_field():
 
 
 def test_a_modules_own_value_stops_the_split_and_is_kept_raw():
-    body = bytes.fromhex("0103" "1700" "000010" "4abc" "1234" "1731" "01")
+    body = bytes.fromhex("0103" "1700" "000010" "0001" "1234" "1731" "01")
     rec, = core.parse_snapshots(HEAD4 + body, 0x12)
     assert [f["id"] for f in rec["fields"]] == [0x1700]
-    assert rec["rest"] == "4abc12341731" "01"
+    assert rec["rest"] == "000112341731" "01"
+
+
+def test_the_dmes_own_values_are_decoded():
+    # Engine temperature: signed, 0.1 degree steps, -273.14 offset; a value
+    # table; and German labels when asked for.
+    body = bytes.fromhex("0102" "4300" "0e9c" "4ABC" "1234")
+    rec, = core.parse_snapshots(HEAD4 + body, 0x13)
+    temp, air = rec["fields"]
+    assert temp["label"] == "Engine temperature" and temp["unit"] == "°C"
+    assert temp["value"] == pytest.approx(0x0E9C * 0.1 - 273.14)
+    assert air["value"] == pytest.approx(466) and air["unit"] == "kg/h"
+    de, = core.parse_snapshots(HEAD4 + body, 0x12, lang="text_de")
+    assert de["fields"][0]["label"] == "Motor-Temperatur"
+    neg, = core.parse_snapshots(HEAD4 + bytes.fromhex("0101" "4300" "fffe"), 0x12)
+    assert neg["fields"][0]["value"] == pytest.approx(-0.2 - 273.14)   # signed
 
 
 def test_the_dsc_stores_a_shorter_time():
@@ -92,7 +110,8 @@ def test_details_read_off_the_car_with_read_only_requests(car):
         none = core.fault_details(t, 0x12, "ABCDEF")
     fields = {f["id"]: f["value"] for f in got["snapshots"][0]["fields"]}
     assert fields[0x1700] == 54321 and fields[0x1750] == 10
-    assert got["snapshots"][0]["rest"] == "4abc1234"
+    assert got["snapshots"][0]["rest"] == ""            # the DME's own value decoded too
+    assert fields[0x4ABC] == pytest.approx(466)
     assert {e["name"]: e["value"] for e in got["extended"]} == {
         "CONDITION_BYTE": 0, "HFK": 3, "HLZ": 40}
     assert none["snapshots"] == [] and len(none["errors"]) == 2

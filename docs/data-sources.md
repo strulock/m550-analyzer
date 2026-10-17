@@ -15,8 +15,8 @@ German is the source of truth for every text; English columns are generated.
 | `N63TU2_DME_readable_measurements.csv` | 1,845 | `dme8ff_r.prg` (master DME; `dme8ff_l` carries a near-identical table) | `tools/sgbd_tables.py` plus manual extraction (before this repo's history); verified on the car |
 | `BMW_fault_code_texts.csv` | 8,404 | DME (`dme8ff_r`, `_l`), `BDC`, `BDC_G05`, `BDC_G11`, `ZGW_01`, `ZGW_SP18`, `KOMB_G11`, `KOMB01`, `KOMB25`, then every module catalog | merged by `tools/module_catalog.py` |
 | `BMW_dtc_status_byte.csv` | 92 | DME | statusOfDTC byte → BMW's text |
-| `BMW_enum_tables.csv` | 1,448 | DME | its 162 value tables. **Known problem:** the first extractor read each table's position from the directory entry before its name, so each table's texts sit under the next table's name and many engine value texts are wrong. Needs re-extracting from `dme8ff_r.prg` with `tools/module_catalog.py` |
-| `BMW_freeze_frame_fields.csv` | 10 | `DTCSNAPSHOTIDENTIFIER`, the same in every UDS module file supplied (one row for the DSC's shorter `0x1769`) | BMW's standard snapshot fields: odometer, time, SAE code, fault class, power state. Rebuilt in October 2026: the first extraction had picked up neighbouring tables and lost `0x1700` |
+| `BMW_enum_tables.csv` | 480 | DME (`dme8ff_r`; `dme8ff_l` has the same tables) | the 22 value tables the DME catalog refers to. Made by `tools/module_catalog.py --dme`. The first version (162 tables) came from an older extractor that read each table's position from the directory entry before its name, so each table's texts sat under the next table's name; replaced in October 2026 |
+| `BMW_freeze_frame_fields.csv` | 1,548 | `DTCSNAPSHOTIDENTIFIER` (the same in every UDS module file supplied; one row for the DSC's shorter `0x1769`), and the DME's `FUMWELTTEXTE` | BMW's standard snapshot fields (odometer, time, SAE code, fault class, power state) for every module, then the DME's own 1,538 for `0x12` and `0x13`, from `tools/module_catalog.py --dme`. Rebuilt in October 2026: the first extraction had picked up neighbouring tables and lost `0x1700` |
 | `G30_module_sgbd_map.csv` | 13 | BMW's variant list (G30 rows) | address → SGBD index → file |
 | `<MODULE>_measurements.csv` | see [Modules](modules.md) | `nbtevo`, `gszfb1`, `acsm5`, `dsc_g30n`, `bdc_g11`, `eps_g11`, `vdp_g11`, `lmv_g11`, `ihka_g11`, `ekp301`, `pma_20` | `tools/module_catalog.py` |
 | `<MODULE>_enum_tables.csv` | | the same | `tools/module_catalog.py` |
@@ -49,6 +49,7 @@ ARG_TABELLE, RES_TABELLE`) and no `MODULE`.
 
 ```
 python tools/module_catalog.py C:\EDIABAS\Ecu\nbtevo.prg ...   # catalogs + fault texts
+python tools/module_catalog.py --dme C:\EDIABAS\Ecu\dme8ff_r.prg   # DME value tables, snapshot fields
 python tools/translate.py                                      # English columns
 python tools/channel_docs.py                                   # docs/channels/
 ```
