@@ -269,3 +269,10 @@ def test_roof_camera_and_telematics_faults_have_texts(code, module):
     entry = core.load_fault_texts()[code]
     assert entry["text_en"] == "Energy-saving mode active"
     assert core.load_module_names()[module]
+
+
+@pytest.mark.parametrize("code, module", [("026D00", 0x6D), ("026E00", 0x6E), ("025E00", 0x5E),
+                                          ("022B00", 0x2B), ("020D00", 0x0D)])
+def test_seat_and_other_g11_family_faults_have_texts(code, module):
+    assert core.load_fault_texts()[code]["text_en"] == "Energy-saving mode active"
+    assert core.load_module_names()[module]

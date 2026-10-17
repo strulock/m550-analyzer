@@ -136,7 +136,21 @@ Fault texts only (no live values yet), added with
 | `0x56` | Roof function centre (FZD) | `fzd_g11` | address confirmed by its `025600` code |
 | `0x5D` | Camera-based driver assistance (KAFAS) | `kafasg11` | `025D00` |
 | `0x61` | Telematics | `atm02`, then `atm`, then `tcb4g` | all three are `0x61` variants and the car's isn't known yet; their texts agree on all but 3 codes, where `atm02`'s wording is kept |
+| `0x6D` | Driver's seat module (SM_FA) | `fas_g11` | `026D00` |
+| `0x6E` | Passenger seat module | `bfs_g11` | `026E00` |
+| `0x60` | Instrument cluster | `komb_g11` | fills in after the earlier cluster files |
+| `0x21` | Front radar, active cruise control | `frr_g11` | only on cars with the option |
+| `0x22` | Optional-equipment module (SAS) | `sas_g11` | |
+| `0x2B` | Rear-axle steering (Integral Active Steering) | `hsr_g11` | only on cars with the option |
+| `0x2C` | Ultrasonic park sensors | `uss_g11` | same address as `PMA_20`, whose texts stay first |
+| `0x2E` | Power control unit | `pcu_g11` | |
+| `0x08` | Lane-change warning | `hc2_g11` | only on cars with the option |
+| `0x0D` | Rear function module (tailgate) | `hkfm_g11` | |
+| `0x4F` | Light effect manager | `lem_g11` | |
+| `0x5E` | Gear selector | `gws_g11`, `gws_g11b` | the two agree on every code |
 
-Still without texts: `0x6D`, the driver's seat module (SM_FA); its file
-(`sm_fa*` or `smfa*`) hasn't been supplied. Send the `.prg` for any module
-here and it can be added the same way.
+Each file's address was confirmed by its energy-saving-mode code (`02AA00`).
+Texts for a module the car doesn't have are never shown. Supplied but left
+out: `fah_g11`/`bfh_g11` (the 7 Series' rear seats), `obc_g11` (a plug-in
+hybrid's charger), `dsc_g11` (`dsc_g30n` is the DSC the G30 map names) and
+the E-series and hybrid-battery files (`sm46*`, `sm53*`, `smg*`, `sme*`).
