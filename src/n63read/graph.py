@@ -11,8 +11,10 @@ holds the view while the data keeps coming.
 The unit and axis logic has no Tk in it, so it is tested on its own.
 """
 
+import bisect
 import math
 import tkinter as tk
+from array import array
 from tkinter import ttk
 
 # Unit families: unit -> factor to the family's base unit. Temperature is
@@ -98,6 +100,90 @@ def visible(points, window, now=None):
     return [p for p in points if p[0] >= end - window]
 
 
+class History:
+    """A channel's timed points, the last `maxlen` of them.
+
+    Two arrays of doubles: 16 bytes a point, where a deque of (t, v) tuples
+    takes about 120, and every watched channel keeps one for a whole drive.
+    Iterating gives (t, v) pairs; times only grow (a new session clears it),
+    so window() finds the visible part by bisection.
+    """
+
+    def __init__(self, maxlen):
+        self.maxlen = maxlen
+        self.t, self.v = array("d"), array("d")
+
+    def append(self, point):
+        self.t.append(point[0])
+        self.v.append(point[1])
+        if len(self.t) > 2 * self.maxlen:       # trim now and then, not every time
+            del self.t[:-self.maxlen]
+            del self.v[:-self.maxlen]
+
+    def _start(self):
+        return max(0, len(self.t) - self.maxlen)
+
+    def __len__(self):
+        return min(len(self.t), self.maxlen)
+
+    def __iter__(self):
+        s = self._start()
+        return zip(self.t[s:], self.v[s:])
+
+    def __getitem__(self, i):
+        n = len(self)
+        if i < 0:
+            i += n
+        if not 0 <= i < n:
+            raise IndexError("history index out of range")
+        s = self._start() + i
+        return self.t[s], self.v[s]
+
+    def clear(self):
+        del self.t[:]
+        del self.v[:]
+
+    def last(self):
+        return self[-1] if len(self) else None
+
+    def window(self, seconds):
+        """The (t, v) points inside the last `seconds` (None: all)."""
+        s = self._start()
+        if seconds is not None and len(self):
+            s = max(s, bisect.bisect_left(self.t, self.t[-1] - seconds, s))
+        return list(zip(self.t[s:], self.v[s:]))
+
+
+def thin(points, x_of, columns):
+    """At most about two points per pixel column - the lowest and highest,
+    in time order - so a long history draws as fast as a short one and
+    still shows every spike. `x_of(t)` is the point's x in pixels."""
+    if len(points) <= 2 * columns:
+        return points
+    out, col, lo, hi = [], None, None, None
+    for p in points:
+        x = int(x_of(p[0]))
+        if x != col:
+            if col is not None:
+                out += [lo, hi] if lo is not hi else [lo]
+            col, lo, hi = x, p, p
+        else:
+            if p[1] < lo[1]:
+                lo = p
+            if p[1] > hi[1]:
+                hi = p
+    out += [lo, hi] if lo is not hi else [lo]
+    out.sort(key=lambda p: p[0])
+    return out
+
+
+def nearest(points, t):
+    """The point whose time is nearest `t`; points are in time order."""
+    i = bisect.bisect_left(points, (t, -math.inf))
+    near = points[max(0, i - 1):i + 1]
+    return min(near, key=lambda p: abs(p[0] - t))
+
+
 def value_range(values, fixed=None):
     """(lo, hi) for the value axis: `fixed` if given, else the data with a
     little room, never empty."""
@@ -170,6 +256,8 @@ class GraphWindow(tk.Toplevel):
         self.minsize(520, 320)
         self.paused = None                  # the points frozen by Pause
         self.hover = None
+        self._drawn = None                  # what the last draw showed, to skip repeats
+        self._hover_job = None
         self.last_range = (0.0, 1.0)
 
         self.heading = ttk.Label(self, padding=(8, 6, 8, 0), font=("TkDefaultFont", 10, "bold"))
@@ -276,21 +364,44 @@ class GraphWindow(tk.Toplevel):
         self.pause_btn.config(text=self._t("resume" if self.paused is not None else "pause"))
 
     def _set_hover(self, x):
+        # Mouse moves come far faster than a redraw: draw once they settle.
         self.hover = x
+        if self._hover_job is None:
+            self._hover_job = self.after_idle(self._hover_draw)
+
+    def _hover_draw(self):
+        self._hover_job = None
         self.draw()
 
     def _motion(self, event):
         self._set_hover(event.x)
 
     def close(self):
-        if self._job:
-            self.after_cancel(self._job)
-            self._job = None
+        for job in (self._job, self._hover_job):
+            if job:
+                self.after_cancel(job)
+        self._job = self._hover_job = None
         self.destroy()
 
     def _tick(self):
-        self.draw()
+        # Redraw only when something shown would change: a new point, a
+        # setting, the window's size or the hover.
+        if self._signature() != self._drawn:
+            self.draw()
         self._job = self.after(self.REFRESH_MS, self._tick)
+
+    def _signature(self):
+        last = self.history.last() if hasattr(self.history, "last") else \
+            (self.history[-1] if len(self.history) else None)
+        return (last, len(self.history), self.paused is not None, self.settings(),
+                self.canvas.winfo_width(), self.canvas.winfo_height(), self.hover)
+
+    def _points(self, window):
+        if self.paused is not None:
+            return visible(self.paused, window)
+        if hasattr(self.history, "window"):
+            return self.history.window(window)
+        return visible(list(self.history), window)
 
     # -- drawing
 
@@ -308,6 +419,7 @@ class GraphWindow(tk.Toplevel):
         return window, TIME_UNITS.get(self.tunit_var.get(), 1.0), self.unit_var.get(), fixed
 
     def draw(self):
+        self._drawn = self._signature()
         c = self.canvas
         c.delete("all")
         col = self.colors.get
@@ -318,7 +430,7 @@ class GraphWindow(tk.Toplevel):
             conv = converter(self.unit, unit)
         except ValueError:
             conv, unit = (lambda v: v), self.unit
-        points = [(t, conv(v)) for t, v in visible(self.paused or list(self.history), window)]
+        points = [(t, conv(v)) for t, v in self._points(window)]
         self.stats_label.config(foreground=col("muted", "#555"))
         if len(points) < 2:
             c.create_text(w // 2, h // 2, text=self._t("waiting"), fill=col("muted", "#aaa"))
@@ -356,12 +468,13 @@ class GraphWindow(tk.Toplevel):
         c.create_text(8, T, anchor="nw", font=font, fill=axis, text=unit or self._t("axis_v"))
 
         coords = []
-        for t, v in points:
+        for t, v in thin(points, px, max(1, int(R - L))):
             coords += [px(t), min(max(py(v), T - 2), B + 2)]
-        c.create_line(*coords, fill=self.color, width=2)
+        if len(coords) >= 4:
+            c.create_line(*coords, fill=self.color, width=2)
 
         if self.hover is not None and L <= self.hover <= R:
-            t, v = min(points, key=lambda p: abs(px(p[0]) - self.hover))
+            t, v = nearest(points, t0 + (self.hover - L) / (R - L) * (t1 - t0))
             x, y = px(t), py(v)
             c.create_line(x, T, x, B, fill=col("muted", "#999"), dash=(2, 2))
             c.create_oval(x - 3, y - 3, x + 3, y + 3, outline=self.color, width=2)

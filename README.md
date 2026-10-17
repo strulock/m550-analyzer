@@ -240,7 +240,9 @@ refreshes every second, everything else every 10 seconds, at most six module
 reads per cycle, and the last value fills the log in between. That keeps the
 DME rate up. A module read waits at most half a second, an identifier the
 module refuses as unsupported is not asked for again, and a module that
-stops answering is left alone for 30 seconds.
+stops answering is left alone for 30 seconds. Engine channels get the same
+care: one that never answers waits at most a second and is then left alone,
+so a sleeping bank-2 DME doesn't slow the rest of the log.
 
 The GPS position and the fuel pump's values come from hand-coded jobs, not
 tables, so their layouts were worked out by disassembling

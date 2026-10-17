@@ -267,6 +267,7 @@ def op_log(args):
                 # We hold the car: lend it to other n63read processes.
                 host = share.Host(args.ip).start()
             while True:
+                cycle = time.time()
                 if host:
                     host.serve(h)
                     h.tidy()
@@ -283,7 +284,7 @@ def op_log(args):
                     os.fsync(out.fileno())
                     last_flush = time.time()
                     print("\r%d samples, %.1f s" % (n, time.time() - t0), end="")
-                time.sleep(args.interval)
+                time.sleep(core.rest(args.interval, cycle, time.time()))
     except KeyboardInterrupt:
         print("\nstopped")
     finally:

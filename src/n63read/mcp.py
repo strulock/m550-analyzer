@@ -12,12 +12,15 @@ same commands as the CLI, through the same allow-list of read services, and
 the file tools only read the logs folder and the diagnostics journal.
 """
 
+import collections
 import contextlib
 import csv
 import datetime
+import functools
 import glob
 import io
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -239,15 +242,21 @@ def tool_check_modules(a):
     return run_cli(_opt(["check", "--ip", _value(a["ip"]), "--source", SOURCE], "--module", a.get("module")))
 
 
+@functools.lru_cache(maxsize=1)
+def _search_catalog():
+    """Every channel, loaded once for the life of the server (read only)."""
+    cat = core.load_catalog()
+    cat.update(core.load_module_catalogs())
+    return cat
+
+
 def tool_search_channels(a):
     words = str(a.get("query") or "").lower().split()
     if not words:
         raise ToolError("query: say what to look for")
     limit = int(a.get("limit") or 40)
-    cat = core.load_catalog()
-    cat.update(core.load_module_catalogs())
     hits = []
-    for name, meta in cat.items():
+    for name, meta in _search_catalog().items():
         text = " ".join([name, meta.get("INFO_EN") or "", meta.get("INFO") or "",
                          meta.get("JOB_INFO_EN") or "", meta.get("JOB_INFO") or ""]).lower()
         if all(w in text for w in words):
@@ -303,31 +312,69 @@ def _number(v):
         return None
 
 
+DISTINCT_MAX = 1000         # distinct texts remembered per column
+
+
+class _Column:
+    """Running summary of one log column, so a log is read in one pass
+    without holding it in memory."""
+
+    def __init__(self):
+        self.filled = self.n = 0
+        self.lo, self.hi, self.total = math.inf, -math.inf, 0.0
+        self.distinct = set()
+
+    def add(self, cell):
+        if cell == "":
+            return
+        self.filled += 1
+        if len(self.distinct) < DISTINCT_MAX:
+            self.distinct.add(cell)
+        v = _number(cell)
+        if v is not None:
+            self.n += 1
+            self.lo, self.hi, self.total = min(self.lo, v), max(self.hi, v), self.total + v
+
+
 def tool_read_log(a):
     path = _find(a["name"])
     if not path.lower().endswith(".csv"):
         raise ToolError("read_log reads CSVs; for the journal use diagnostics_journal")
+    head_n = min(int(a.get("head") or 0), 200)
+    tail_n = min(int(a.get("tail") or 0), 200) if a.get("tail") else 0
     with open(path, newline="", encoding="utf-8-sig") as f:
-        rows = list(csv.reader(f))
-    if not rows:
-        return "empty file"
-    header, body = rows[0], rows[1:]
-    lines = ["%s: %d rows, %d columns" % (os.path.basename(path), len(body), len(header))]
-    if body and header and header[0].lower() == "time":
-        lines.append("time: %s .. %s" % (body[0][0], body[-1][0]))
-    for i, col in enumerate(header):
-        values = [_number(r[i]) for r in body if i < len(r) and r[i] != ""]
-        nums = [v for v in values if v is not None]
-        if nums and len(nums) == len(values) and col.lower() != "time":
+        reader = csv.reader(f)
+        header = next(reader, None)
+        if header is None:
+            return "empty file"
+        cols = [_Column() for _ in header]
+        head, tail = [], collections.deque(maxlen=tail_n or None)
+        count, first, last = 0, None, None
+        for r in reader:
+            count += 1
+            if first is None:
+                first = r
+            last = r
+            if len(head) < head_n:
+                head.append(r)
+            if tail_n:
+                tail.append(r)
+            for col, cell in zip(cols, r):
+                col.add(cell)
+    lines = ["%s: %d rows, %d columns" % (os.path.basename(path), count, len(header))]
+    if count and header and header[0].lower() == "time":
+        lines.append("time: %s .. %s" % (first[0] if first else "", last[0] if last else ""))
+    for name, col in zip(header, cols):
+        if col.n and col.n == col.filled and name.lower() != "time":
             lines.append("  %-40s min %-12g mean %-12g max %-12g (%d values)" % (
-                col, min(nums), sum(nums) / len(nums), max(nums), len(nums)))
+                name, col.lo, col.total / col.n, col.hi, col.n))
         else:
-            sample = sorted({r[i] for r in body if i < len(r) and r[i] != ""})
-            lines.append("  %-40s %d distinct: %s" % (col, len(sample), "; ".join(sample[:6])
-                                                       + (" ..." if len(sample) > 6 else "")))
-    for key, part in (("head", body[:min(int(a.get("head") or 0), 200)]),
-                      ("tail", body[-min(int(a.get("tail") or 0), 200):]
-                       if a.get("tail") else [])):
+            sample = sorted(col.distinct)
+            many = "+" if len(col.distinct) >= DISTINCT_MAX else ""
+            lines.append("  %-40s %d%s distinct: %s" % (
+                name, len(sample), many, "; ".join(sample[:6])
+                + (" ..." if len(sample) > 6 else "")))
+    for key, part in (("head", head), ("tail", list(tail) if tail_n else [])):
         if part:
             lines.append("\n%s rows:" % key)
             lines.append(",".join(header))

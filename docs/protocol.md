@@ -161,7 +161,10 @@ is how a module file's address was confirmed, see
 
 | Situation | Timeout | Why |
 |---|---|---|
-| Normal read (DME) | 2 s socket timeout, up to 5 attempts' worth of wait for pending replies | the DME is the priority |
+| Live DME read (0x12, 0x13) | **1 s** (`core.VALUE_TIMEOUT`) | read every cycle, so one that never answers must not stall the log |
+| DME identifier that didn't answer | the address is skipped for the rest of that cycle; the identifier is left alone for **30 s** (`VALUE_KEY_BACKOFF`) and, if nothing at that address had answered yet, the whole address for **5 s** (`VALUE_TARGET_BACKOFF`) | a sleeping bank-2 DME costs one timeout, not one per channel |
+| DME identifier refused as unsupported (NRC `0x11`, `0x12`, `0x31`) | not asked again this session | it will never answer |
+| Other DME request | 2 s socket timeout, up to 5 attempts' worth of wait for pending replies | the DME is the priority |
 | Read from another module | **0.5 s** (`core.MODULE_TIMEOUT`) | a missing or sleeping module would otherwise hold up every DME sample for 2 s |
 | Module that didn't answer | left alone for **30 s** (`NO_ANSWER_BACKOFF`) | it may be asleep; try again later |
 | Module scan (`3E 00`) | 0.5 s per address (`PROBE_TIMEOUT`), no retries; adjustable as **Probe wait s** in the GUI and `--probe-timeout` in the CLI (0.05–10 s) | most addresses are empty |

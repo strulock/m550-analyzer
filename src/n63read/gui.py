@@ -15,7 +15,6 @@ import threading
 import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
-from collections import deque
 
 import webbrowser
 
@@ -143,6 +142,7 @@ class Poller(threading.Thread):
                                   seconds=round(time.time() - t0, 3), bind=self.bind)
                 self.out_q.put(("status", "connected", self))
                 while not self._stop_event.is_set():
+                    cycle = time.time()
                     self._run_jobs(h)
                     if host:
                         host.serve(h)
@@ -159,7 +159,7 @@ class Poller(threading.Thread):
                     self.out_q.put(("sample", elapsed, sample))
                     samples += 1
                     self._write_log(elapsed, chans, sample)
-                    time.sleep(self.interval)
+                    self._stop_event.wait(core.rest(self.interval, cycle))
         except Exception as e:                                      # noqa: BLE001
             reason = "%s: %s" % (type(e).__name__, e)
             if connected:
@@ -267,8 +267,14 @@ class App(tk.Tk):
         self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
         self.series = {}                     # name -> [values]
-        self.history = {}                    # name -> deque of (seconds, value)
+        self.history = {}                    # name -> graph.History of (seconds, value)
         self.graphs = {}                     # name -> its pop-out GraphWindow
+        self._cells = {}                     # (name, column) -> text the table shows
+        self._chart_dirty = False            # a sample came in; redraw after the drain
+        self._hover_job = None
+        self._keys = {}                      # (name, DME address) -> availability key
+        self._dme = core.DME_MASTER          # the DME address box, as a number
+        self._marks_for = None               # answered keys the picker was last built for
         self.q = queue.Queue()
         self.poller = None
         self.modules = []                    # addresses found by the last scan
@@ -325,6 +331,7 @@ class App(tk.Tk):
 
         ttk.Label(bar, text="Target").pack(side="left", padx=(14, 2))
         self.target_var = tk.StringVar(value="0x12")
+        self.target_var.trace_add("write", lambda *a: self._target_changed())
         ttk.Entry(bar, textvariable=self.target_var, width=7).pack(side="left")
 
         ttk.Label(bar, text="Interval s").pack(side="left", padx=(14, 2))
@@ -740,7 +747,7 @@ class App(tk.Tk):
         for name, _did, meta in self.watch:
             if self.tree.exists(name):
                 self.tree.item(name, text=self._describe(meta) or name)
-                self.tree.set(name, "note", "")     # refilled in this language
+                self._set_cell(name, "note", "")    # refilled in this language
         for name, window in list(self.graphs.items()):
             if window.winfo_exists():
                 window.set_language(code, self._describe(self.catalog.get(name, {})))
@@ -821,7 +828,7 @@ class App(tk.Tk):
         for name, _did, meta in self.watch:
             if self.tree.exists(name):
                 self.tree.set(name, "u", self._shown_unit(meta))
-                self.tree.set(name, "v", "")            # refilled in the new unit
+                self._set_cell(name, "v", "")           # refilled in the new unit
         for name, window in list(self.graphs.items()):
             if window.winfo_exists():
                 window.set_unit(self._shown_unit(self.catalog.get(name, {})))
@@ -881,14 +888,24 @@ class App(tk.Tk):
         return info, order
 
     def _avail_key(self, name):
-        meta = self.catalog[name]
-        return core.channel_target(meta, self._dme_target()), int(meta["ID"], 16)
+        # Asked for every channel on every sample and every picker rebuild:
+        # worked out once, not by parsing the ID and reading a Tk variable.
+        target = self._dme
+        key = self._keys.get((name, target))
+        if key is None:
+            meta = self.catalog[name]
+            key = (core.channel_target(meta, target), int(meta["ID"], 16))
+            self._keys[(name, target)] = key
+        return key
 
     def _dme_target(self):
         try:
             return int(self.target_var.get(), 0)
         except ValueError:
             return core.DME_MASTER
+
+    def _target_changed(self):
+        self._dme = self._dme_target()
 
     def _answer_mark(self, name):
         return ANSWER_MARKS.get(self.avail.get(self._avail_key(name)), "     ")
@@ -899,8 +916,12 @@ class App(tk.Tk):
             self.after_cancel(self._refilter_job)
         self._refilter_job = self.after(250, self._refilter)
 
+    def _answered(self):
+        return frozenset(k for k, v in self.avail.items() if v in core.ANSWERS)
+
     def _refilter(self):
         self._refilter_job = None
+        self._marks_for = self._answered()
         term = self.filter_var.get().lower().strip()
         by_module = self.group_var.get() == "Module"
         only = self.only_var.get()
@@ -1072,7 +1093,9 @@ class App(tk.Tk):
         selection someone is in the middle of making.
         """
         if self.only_var.get():
-            self._refilter()
+            # Rebuild only when what answers changed, not every few seconds.
+            if self._answered() != self._marks_for:
+                self._refilter()
             return
         for iid in self._all_nodes():
             if iid.startswith("c|"):
@@ -1171,13 +1194,16 @@ class App(tk.Tk):
             self._answers_changed("recorded answers forgotten")
 
     def _add_names(self, names):
+        watched = {n for n, _, _ in self.watch}     # "Add all" passes thousands
         for name in names:
-            if any(n == name for n, _, _ in self.watch):
+            if name in watched:
                 continue
+            watched.add(name)
+            self._forget_cells(name)
             meta = self.catalog[name]
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
-            self.history[name] = deque(maxlen=HISTORY_POINTS)
+            self.history[name] = graph.History(HISTORY_POINTS)
             self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
                              values=("", self._shown_unit(meta), name, meta["ID"], ""))
         self._push_channels()
@@ -1200,6 +1226,7 @@ class App(tk.Tk):
 
     def _forget_history(self, name):
         self.history.pop(name, None)
+        self._forget_cells(name)
         window = self.graphs.pop(name, None)
         if window is not None:
             try:
@@ -1293,9 +1320,10 @@ class App(tk.Tk):
         self._clear()
         for name in names:
             meta = self.catalog[name]
+            self._forget_cells(name)
             self.watch.append((name, int(meta["ID"], 16), meta))
             self.series[name] = []
-            self.history[name] = deque(maxlen=HISTORY_POINTS)
+            self.history[name] = graph.History(HISTORY_POINTS)
             self.tree.insert("", "end", iid=name, text=self._describe(meta) or name,
                              values=("", self._shown_unit(meta), name, meta["ID"], ""))
         self._push_channels()
@@ -1341,12 +1369,30 @@ class App(tk.Tk):
             initialdir=core.logs_dir())
         if not path:
             return
-        try:
-            names, rows = playback.read_log(path)
-        except (OSError, ValueError, csv.Error) as e:
+        # An hour's log takes seconds to read: do it off the Tk thread, so
+        # the window keeps drawing, and carry on in _replay_loaded.
+        self.status.config(text="\u25cf reading %s..." % os.path.basename(path),
+                           foreground="#2d7dd2")
+        self.replay_btn.config(state="disabled")
+
+        def work():
+            try:
+                result = playback.read_log(path)
+            except (OSError, ValueError, csv.Error) as e:
+                result = e
+            self.q.put(("replayload", path, result))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _replay_loaded(self, path, result):
+        self.replay_btn.config(state="normal")
+        self.status.config(text="\u25cf not connected", foreground="#999")
+        if isinstance(result, Exception):
             messagebox.showerror("Replay", "Could not read %s:\n\n%s"
-                                 % (os.path.basename(path), e))
+                                 % (os.path.basename(path), result))
             return
+        if self.poller:
+            return                          # connected while it was reading
+        names, rows = result
         known = [n for n in names if n in self.catalog]
         if not known:
             messagebox.showerror("Replay", "None of the log's columns are known channels.")
@@ -1690,6 +1736,10 @@ class App(tk.Tk):
                                 error="%s: %s" % (type(e).__name__, e))
                     self.status.config(text="● display error: %s" % e,
                                        foreground="#c0392b")
+            # One redraw for however many samples were waiting.
+            if self._chart_dirty:
+                self._chart_dirty = False
+                self._plot()
         finally:
             self.after(60, self._drain)
 
@@ -1698,7 +1748,7 @@ class App(tk.Tk):
 
         if kind == "sample":
             self._learn(msg[2])
-            self._show_sample(msg[2], msg[1])
+            self._show_sample(msg[2], msg[1], plot=False)
 
         elif kind == "checkres":
             _, key, status, i, total = msg
@@ -1724,13 +1774,16 @@ class App(tk.Tk):
             _, feed, elapsed, sample = msg
             if feed is not self.feed:
                 return                      # left over from a stopped feed
-            self._show_sample(sample, elapsed)
+            self._show_sample(sample, elapsed, plot=False)
             if feed.kind == "replay":
                 self.status.config(
                     text="● replaying %s  %s / %s" % (
                         feed.name_shown, _clock(elapsed - feed.rows[0][0]),
                         _clock(feed.duration)),
                     foreground="#2d7dd2")
+
+        elif kind == "replayload":
+            self._replay_loaded(msg[1], msg[2])
 
         elif kind == "feeddone":
             if msg[1] is self.feed:
@@ -1844,7 +1897,7 @@ class App(tk.Tk):
             self.poller = None
             self._log_ended()
 
-    def _show_sample(self, sample, elapsed=None):
+    def _show_sample(self, sample, elapsed=None, plot=True):
         for name, (value, unit, note) in sample.items():
             if not self.tree.exists(name):
                 continue
@@ -1862,8 +1915,8 @@ class App(tk.Tk):
                 # Enumerated values stay numbers (they log and plot); the
                 # words go in Status.
                 note = core.enum_text(value, meta, self.enums, self._enum_lang()) or ""
-            self.tree.set(name, "v", shown)
-            self.tree.set(name, "note", note)
+            self._set_cell(name, "v", shown)
+            self._set_cell(name, "note", note)
             if isinstance(value, (int, float)):
                 s = self.series.setdefault(name, [])
                 s.append(float(value))
@@ -1873,7 +1926,21 @@ class App(tk.Tk):
                     if h and elapsed < h[-1][0]:
                         h.clear()               # a new session: its clock restarted
                     h.append((float(elapsed), float(value)))
-        self._plot()
+        if plot:
+            self._plot()
+        else:
+            self._chart_dirty = True
+
+    def _set_cell(self, name, col, text):
+        """Set a table cell, skipping the Tcl call when it already shows that:
+        most values repeat, and module values change only every 1-10 s."""
+        if self._cells.get((name, col)) != text:
+            self._cells[(name, col)] = text
+            self.tree.set(name, col, text)
+
+    def _forget_cells(self, name):
+        self._cells.pop((name, "v"), None)
+        self._cells.pop((name, "note"), None)
 
     # -- chart -----------------------------------------------------------
 
@@ -1961,7 +2028,13 @@ class App(tk.Tk):
         return text
 
     def _chart_hover(self, x):
+        # Mouse moves come far faster than a redraw: draw once they settle.
         self.chart_hover = x
+        if not self._hover_job:
+            self._hover_job = self.after_idle(self._hover_plot)
+
+    def _hover_plot(self):
+        self._hover_job = None
         self._plot()
 
     def _close(self):
