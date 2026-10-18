@@ -2,8 +2,6 @@
 
 import os
 import sys
-import time
-import types
 
 import pytest
 
@@ -33,13 +31,9 @@ def test_logs_dir_can_just_name_it(tmp_path):
 def test_cli_log_defaults_to_the_logs_folder(monkeypatch, capsys):
     c = FakeCar()
     monkeypatch.setattr(core.Hsfz.__init__, "__defaults__", (c.port, core.TESTER_ADDR, 3.0))
-
-    def sleep(_):
-        raise KeyboardInterrupt
-    monkeypatch.setattr(cli, "time", types.SimpleNamespace(
-        time=time.time, sleep=sleep, strftime=time.strftime))
     try:
-        cli.main(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0", "ILAG2"])
+        cli.main(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0",
+                  "--samples", "1", "ILAG2"])
     finally:
         c.close()
     files = os.listdir(core.logs_dir())

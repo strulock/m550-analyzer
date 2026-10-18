@@ -240,8 +240,10 @@ def stop(pids):
                                                                  "CREATE_NO_WINDOW", 0))
             else:
                 os.kill(pid, 15)
-        except (OSError, subprocess.SubprocessError):
-            pass
+        except (OSError, subprocess.SubprocessError) as e:
+            from n63read import diag            # diag imports update's caller
+            diag.record("problem", where="stopping process %s for an update" % pid,
+                        error="%s: %s" % (type(e).__name__, e))
 
 
 def install(setup, relaunch=False):

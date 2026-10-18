@@ -251,3 +251,15 @@ def test_cli_discover_lists_neighbours_when_nothing_answers(monkeypatch, capsys)
     cli.main(["discover", "--bind", "169.254.35.7"])
     out = capsys.readouterr().out
     assert "169.254.12.34" in out and "--ip 169.254.12.34" in out
+
+
+@pytest.mark.parametrize("hits, near, outcome", [
+    ([("169.254.1.2", IDENT)], [], ("found", "169.254.1.2")),
+    ([("169.254.1.2", bytes.fromhex("02fd0004"))], [], ("doip", "169.254.1.2")),
+    ([("192.168.1.9", b"junk")], ["169.254.12.34"], ("near", "169.254.12.34")),
+    ([("192.168.1.9", b"junk")], [], ("none", None)),
+    ([("169.254.1.3", bytes.fromhex("02fd0004")), ("169.254.1.2", IDENT)], [],
+     ("found", "169.254.1.2")),
+])
+def test_discovery_outcome(hits, near, outcome):
+    assert core.discovery_outcome(hits, near) == outcome

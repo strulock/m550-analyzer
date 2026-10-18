@@ -215,9 +215,10 @@ def test_logging_continues_during_a_fault_sweep(tmp_path, car, monkeypatch, rest
                 yield
         p.submit(job)
         before = len(lines(path))
-        time.sleep(3)
+        # The sweep takes about 8 s; rows come every 0.05 s.
+        assert wait_for(lambda: len(lines(path)) > before + 5 or done)
         assert not done                     # sweep still running...
-        assert len(lines(path)) > before    # ...and the log is still growing
+        assert len(lines(path)) > before + 5   # ...and the log kept growing
         assert wait_for(lambda: done, timeout=60)
     finally:
         p.stop()

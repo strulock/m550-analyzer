@@ -368,11 +368,13 @@ again as `NAME@0x13` for bank 2; in the GUI they're under **Engine bank 2
 
 The car takes two diagnostic connections at a time. n63read uses one for
 bank 1 and every other module, and opens the second for bank 2 only while
-you're reading bank 2. While the app is connected (or `n63read log` is
-running), other n63read commands and Claude borrow its connections instead of
-opening their own, so they work alongside it. If the car drops a connection
-because something else holds one (another diagnostic tool, say), n63read
-says so.
+you're reading bank 2. Whichever n63read holds the car - the app, a CLI log,
+a quick command, Claude - lends it to the others, and they borrow it instead
+of opening their own, so the app, the CLI and Claude all work at the same
+time. When the one holding it finishes, whoever is still reading carries on
+with the car itself: Claude finishing a log doesn't knock a test run in the
+app offline, and the other way round. If the car drops a connection because
+something else holds one (another diagnostic tool, say), n63read says so.
 
 ### Connection diagnostics
 
@@ -426,8 +428,9 @@ n63read log --ip 169.254.x.x --template "Idle check"
 n63read templates                            list the saved templates
 n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
                                              log to Documents\BMW Analyzer Logs
-                                             (or --out run.csv; --batch reads
-                                             several engine values per request)
+                                             (or --out run.csv; --samples 100 stops
+                                             after 100; --batch reads several
+                                             engine values per request)
 n63read speed --ip 169.254.x.x               engine values a second: one per request
                                              vs several (is --batch worth it?)
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position

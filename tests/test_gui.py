@@ -430,13 +430,13 @@ def test_an_unstubbed_dialog_fails_instead_of_hanging(app):
 
 def test_scan_shows_an_unexpected_error_and_carries_on(app, car, monkeypatch):
     monkeypatch.setattr(core, "SWEEP_RANGE", (0x0E, 0x14))
-    real = core.Hsfz.tester_present
+    real = core.Hsfz._request
 
-    def flaky(self, target):
+    def flaky(self, target, payload, retries):
         if target == 0x11:
             raise RuntimeError("adapter fell over")
-        return real(self, target)
-    monkeypatch.setattr(core.Hsfz, "tester_present", flaky)
+        return real(self, target, payload, retries)
+    monkeypatch.setattr(core.Hsfz, "_request", flaky)
     app.ip_var.set("127.0.0.1")
     app.probe_var.set("0.1")
     before = set(app.winfo_children())

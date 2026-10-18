@@ -1,6 +1,5 @@
 """Channel templates, and the pop-out graph's units and axes."""
 
-import time
 import types
 
 import pytest
@@ -69,15 +68,11 @@ def test_cli_logs_a_template(monkeypatch, tmp_path, capsys):
     core.save_template("Lambda", ["ILAG1", "ILAG2"])
     c = FakeCar()
     monkeypatch.setattr(core.Hsfz.__init__, "__defaults__", (c.port, core.TESTER_ADDR, 3.0))
-
-    def sleep(_):
-        raise KeyboardInterrupt
-    monkeypatch.setattr(cli, "time", types.SimpleNamespace(
-        time=time.time, sleep=sleep, strftime=time.strftime))
     out = tmp_path / "t.csv"
     try:
         cli.main(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0",
-                  "--template", "Lambda", "--out", str(out), "ILAG2", "ITKUA"])
+                  "--samples", "1", "--template", "Lambda", "--out", str(out),
+                  "ILAG2", "ITKUA"])
     finally:
         c.close()
     assert out.read_text(encoding="utf-8").splitlines()[0] == "Time,Clock,ILAG1,ILAG2,ITKUA,Event"

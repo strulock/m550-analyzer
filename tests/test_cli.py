@@ -2,7 +2,6 @@
 
 import csv
 import time
-import types
 
 import pytest
 
@@ -40,18 +39,11 @@ def test_read_reports_a_refused_identifier(car, capsys):
     assert "requestOutOfRange" in capsys.readouterr().out
 
 
-def test_log_writes_dme_and_head_unit_columns(car, tmp_path, monkeypatch, capsys):
-    calls = []
-
-    def sleep(_):
-        calls.append(1)
-        if len(calls) >= 3:
-            raise KeyboardInterrupt
-    monkeypatch.setattr(cli, "time", types.SimpleNamespace(time=time.time, sleep=sleep))
+def test_log_writes_dme_and_head_unit_columns(car, tmp_path, capsys):
     out = tmp_path / "run.csv"
     names = ["ILAG1", "ILAG2", "HU_STATUS_GPS_POSITION.LATITUDE", "HU_STATUS_SPEED.GPS_SPEED"]
     run(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0",
-         "--out", str(out)] + names)
+         "--samples", "3", "--out", str(out)] + names)
     assert "wrote 3 samples" in capsys.readouterr().out
     with open(out, encoding="utf-8") as f:
         rows = list(csv.reader(f))
@@ -167,3 +159,9 @@ def test_the_logo_is_there_and_drawn_at_every_size():
     assert int.from_bytes(head[4:6], "little") >= 8  # 16 px up to 256 px
     with open(core.resource_path("n63read.png"), "rb") as f:
         assert f.read(8) == b"\x89PNG\r\n\x1a\n"
+
+
+def test_scan_is_one_path_for_every_caller(car):
+    with core.Tester("127.0.0.1", timeout=1.0) as t:
+        found = dict(core.scan(t, 0x0E, 0x14, 0.1))
+    assert found == {0x10: "", 0x12: ""}

@@ -28,6 +28,7 @@ import re
 import socket
 import struct
 import sys
+import threading
 import time
 
 # ---------------------------------------------------------------- constants
@@ -155,6 +156,10 @@ class Hsfz:
         # (seconds since connect, "tx"/"rx", control, source, target, hex).
         self.trace = trace
         self._t0 = time.time()
+        # One request at a time: the holder's own reads and the requests it
+        # lends to other processes run on different threads.
+        self.lock = threading.RLock()
+        self.on_close = []              # called first by close() (stop lending)
 
     def __enter__(self):
         if self.sock is None:           # share.open_tester() hands it over open
@@ -176,11 +181,15 @@ class Hsfz:
                                control, src, dst, data.hex()))
 
     def close(self):
-        if self.sock:
-            try:
-                self.sock.close()
-            finally:
-                self.sock = None
+        callbacks, self.on_close = self.on_close, []
+        for callback in callbacks:
+            callback()
+        with self.lock:
+            if self.sock:
+                try:
+                    self.sock.close()
+                finally:
+                    self.sock = None
 
     def _set_timeout(self, seconds):
         self.timeout = seconds
@@ -230,6 +239,10 @@ class Hsfz:
 
     def request(self, target, payload, retries=4):
         """Send a UDS payload and return the positive response payload."""
+        with self.lock:
+            return self._request(target, payload, retries)
+
+    def _request(self, target, payload, retries):
         service = payload[0]
         if service not in ALLOWED_SERVICES:
             raise ValueError(
@@ -274,12 +287,13 @@ class Hsfz:
         sleeping module then costs that long, not the full timeout.
         """
         if timeout is not None:
-            saved = self.timeout
-            self._set_timeout(timeout)
-            try:
-                return self.read_did(target, did)
-            finally:
-                self._set_timeout(saved)
+            with self.lock:
+                saved = self.timeout
+                self._set_timeout(timeout)
+                try:
+                    return self.read_did(target, did)
+                finally:
+                    self._set_timeout(saved)
         resp = self.request(target, bytes([0x22, (did >> 8) & 0xFF, did & 0xFF]))
         if len(resp) < 3:
             raise HsfzError("short response")
@@ -292,12 +306,13 @@ class Hsfz:
         """UDS 0x22 with several identifiers in one request. Returns the reply
         after 0x62: each identifier echoed, then its data (split_reply())."""
         if timeout is not None:
-            saved = self.timeout
-            self._set_timeout(timeout)
-            try:
-                return self.read_dids(target, dids)
-            finally:
-                self._set_timeout(saved)
+            with self.lock:
+                saved = self.timeout
+                self._set_timeout(timeout)
+                try:
+                    return self.read_dids(target, dids)
+                finally:
+                    self._set_timeout(saved)
         resp = self.request(target, b"\x22" + b"".join(d.to_bytes(2, "big") for d in dids))
         return resp[1:]
 
@@ -312,17 +327,20 @@ class Hsfz:
         addresses. Raise it if real modules are being missed.
         """
         timeout = PROBE_TIMEOUT if timeout is None else timeout
-        saved = self.timeout
-        self._set_timeout(timeout)
-        try:
-            self.request(target, bytes([0x3E, 0x00]), retries=0)
-            return True
-        except NegativeResponse:
-            return True
-        except HsfzError:
-            return False
-        finally:
-            self._set_timeout(saved)
+        with self.lock:
+            saved = self.timeout
+            self._set_timeout(timeout)
+            try:
+                self.request(target, bytes([0x3E, 0x00]), retries=0)
+                return True
+            except NegativeResponse:
+                return True
+            except ConnectionLost:
+                raise
+            except HsfzError:
+                return False
+            finally:
+                self._set_timeout(saved)
 
     def read_dtcs(self, target, status_mask=0xFF):
         """UDS 0x19 sub-function 0x02 (reportDTCByStatusMask).
@@ -373,6 +391,10 @@ class Tester(Hsfz):
         self.slave_refused_until = 0.0
 
     def request(self, target, payload, retries=4):
+        with self.lock:                 # the bank-2 link is part of this one
+            return self._route(target, payload, retries)
+
+    def _route(self, target, payload, retries):
         if target != DME_SLAVE:
             return super().request(target, payload, retries)
         slave = self._slave()
@@ -405,15 +427,20 @@ class Tester(Hsfz):
     def tidy(self, now=None):
         """Close the bank-2 connection once nothing has used it for a while."""
         now = time.time() if now is None else now
-        if self.slave and now - self.slave_used > BANK2_IDLE:
-            self.close_slave()
+        with self.lock:
+            if self.slave and now - self.slave_used > BANK2_IDLE:
+                self.close_slave()
 
     def close_slave(self):
-        if self.slave:
-            self.slave.close()
-            self.slave = None
+        with self.lock:
+            if self.slave:
+                self.slave.close()
+                self.slave = None
 
     def close(self):
+        callbacks, self.on_close = self.on_close, []
+        for callback in callbacks:
+            callback()                  # stop lending before the line goes
         self.close_slave()
         super().close()
 
@@ -586,6 +613,38 @@ def fault_steps(h, modules=None, texts=None, names=None, probe_timeout=None):
         rows.extend(_module_fault_rows(h, addr, texts, names, read_at))
         yield ("reading", addr)
     yield ("done", rows)
+
+
+def scan(h, lo=None, hi=None, timeout=None):
+    """Who answers TesterPresent (3E 00) at lo..hi (default SWEEP_RANGE).
+
+    Yields (address, note) for each that answers: note "" for a plain
+    answer, the NRC's name for a negative one (still a module), or
+    "error: ..." when something other than silence went wrong there.
+    Silent addresses are skipped; a lost connection ends the scan.
+    """
+    lo = SWEEP_RANGE[0] if lo is None else lo
+    hi = SWEEP_RANGE[1] if hi is None else hi
+    timeout = PROBE_TIMEOUT if timeout is None else timeout
+    for addr in range(lo, hi + 1):
+        with h.lock:
+            saved = h.timeout
+            h._set_timeout(timeout)
+            try:
+                h.request(addr, bytes([0x3E, 0x00]), retries=0)
+                note = ""
+            except NegativeResponse as e:
+                note = NRC.get(e.code, "nrc 0x%02X" % e.code)
+            except (ConnectionLost, ConnectionError):
+                raise
+            except HsfzError:
+                note = None                     # nothing there
+            except Exception as e:                                  # noqa: BLE001
+                note = "error: %s: %s" % (type(e).__name__, e)
+            finally:
+                h._set_timeout(saved)
+        if note is not None:
+            yield addr, note
 
 
 def sweep_modules(h, lo=None, hi=None, progress=None, probe_timeout=None):
@@ -961,6 +1020,23 @@ def doip_help(ip):
             "- the ENET adapter or cable is meant for a different car.\n\n"
             "n63read can't read a DoIP car yet. A diagnostics report shows exactly what "
             "answered; send it on to get DoIP support added." % (ip, DOIP_PORT))
+
+
+def discovery_outcome(hits, near):
+    """What Discover found, as (what, ip): "found" (an HSFZ car; ip is the
+    first), "doip" (only a DoIP car answered), "near" (no answer, but a
+    device is on the car's link: probably the car) or "none" (ip None).
+    Only a well-formed HSFZ identification counts as the car; a stray
+    datagram never does."""
+    hsfz = [ip for ip, p in hits if reply_protocol(p) == "HSFZ"]
+    doip = [ip for ip, p in hits if reply_protocol(p) == "DoIP"]
+    if hsfz:
+        return "found", hsfz[0]
+    if doip:
+        return "doip", doip[0]
+    if near:
+        return "near", near[0]
+    return "none", None
 
 
 def reply_vin(payload):
@@ -1904,9 +1980,15 @@ def documents_dir():
             if ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf) == 0 \
                     and buf.value:
                 return buf.value
-        except Exception:                                           # noqa: BLE001
-            pass
+        except Exception as e:                                      # noqa: BLE001
+            _note_problem("documents folder", e)
     return os.path.join(os.path.expanduser("~"), "Documents")
+
+
+def _note_problem(where, error):
+    """Record a failure that is worked around, so it can be found later."""
+    from n63read import diag                    # diag imports core
+    diag.record("problem", where=where, error="%s: %s" % (type(error).__name__, error))
 
 
 def logs_dir(create=True):
@@ -1916,8 +1998,9 @@ def logs_dir(create=True):
     if create:
         try:
             os.makedirs(path, exist_ok=True)
-        except OSError:
-            pass
+        except OSError as e:
+            # Saving there will fail and say so; this says why, beforehand.
+            _note_problem("logs folder %s" % path, e)
     return path
 
 

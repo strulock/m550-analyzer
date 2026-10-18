@@ -28,12 +28,13 @@ import sys
 import threading
 import time
 
-from n63read import __version__, core, diag, share, update
+from n63read import __version__, core, diag, engine, share, update
 
 SERVER_NAME = "n63read"
 PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")    # newest first
 MAX_TEXT = 60000                # characters per tool result
 SAMPLE_MAX = 60.0               # seconds the sample tool reads, at most
+CONNECT_WAIT = 20.0             # s for a session to connect
 WINDOW_ROWS = 500               # rows read_log shows from a window
 EVENTS_MAX = 200                # events find_events lists
 # The car tools borrow the app's (or a running log's) connection when one is
@@ -521,31 +522,69 @@ def tool_read_channels(a):
     return "\n".join(_shown(n, sample[n], enums) for n, _, _ in chans)
 
 
+class _Collector:
+    """What a Claude session has to say (engine.Session's messages): how it
+    connected, any error, and the samples if wanted."""
+
+    def __init__(self, keep_samples=False):
+        self.keep = keep_samples
+        self.samples = []
+        self.status = self.error = None
+        self.changed = threading.Event()
+
+    def put(self, message):
+        kind = message[0]
+        if kind == "sample" and self.keep:
+            self.samples.append(message[2])
+        elif kind == "status":
+            self.status = message[1]
+            self.changed.set()
+        elif kind == "error":
+            self.error = message[1].split("\n")[0]
+            self.changed.set()
+
+
+def _start_session(ip, chans, interval, keep_samples=False):
+    """A Session like the app's: it borrows the car if the app (or a log)
+    holds it and lends it if Claude holds it, so neither knocks the other
+    off, and whichever carries on takes the car over when the other stops."""
+    out = _Collector(keep_samples)
+    session = engine.Session(_value(ip), core.DME_MASTER, int(SOURCE, 16), 2.0, out=out,
+                             layouts=core.record_layouts(_search_catalog()),
+                             interval=max(float(interval or 0.25), 0.05))
+    session.set_channels(chans)
+    session.start()
+    deadline = time.time() + CONNECT_WAIT
+    while time.time() < deadline and out.status != "connected" and out.error is None:
+        out.changed.wait(0.1)
+        out.changed.clear()
+    if out.status != "connected":
+        session.stop()
+        raise ToolError("cannot talk to %s: %s" % (ip, out.error or "no answer"))
+    return session, out
+
+
 def tool_sample(a):
     """Read channels for a few seconds and summarise each."""
     chans = _chans(a.get("names"))
     seconds = min(max(float(a.get("seconds") or 10), 1.0), SAMPLE_MAX)
-    interval = max(float(a.get("interval") or 0.25), 0.05)
-    reader = core.ChannelReader(core.record_layouts(_search_catalog()), core.DME_MASTER)
+    session, out = _start_session(a["ip"], chans, a.get("interval"), keep_samples=True)
+    time.sleep(seconds)
+    session.stop()
+    session.join(10)
     values = {n: [] for n, _, _ in chans}
-    texts, cycles = {}, 0
-    try:
-        with _tester(a["ip"]) as h:
-            end = time.time() + seconds
-            while time.time() < end:
-                started = time.time()
-                for name, (value, _unit, note) in reader.read(h, chans).items():
-                    if isinstance(value, (int, float)):
-                        values[name].append(float(value))
-                    elif value is not None:
-                        texts[name] = value
-                    elif note and not values[name]:
-                        texts.setdefault(name, "(%s)" % note)
-                cycles += 1
-                time.sleep(core.rest(interval, started))
-    except core.HsfzError as e:
-        raise ToolError("cannot talk to %s: %s" % (a["ip"], e)) from None
-    lines = ["%d cycles in %g s:" % (cycles, seconds)]
+    texts = {}
+    for sample in out.samples:
+        for name, (value, _unit, note) in sample.items():
+            if isinstance(value, (int, float)):
+                values[name].append(float(value))
+            elif value is not None:
+                texts[name] = value
+            elif note and not values[name]:
+                texts.setdefault(name, "(%s)" % note)
+    lines = ["%d cycles in %g s%s:" % (len(out.samples), seconds,
+                                       " (borrowing the app's connection)"
+                                       if session.borrowed else "")]
     for name, _, meta in chans:
         unit = meta.get("EINHEIT") or ""
         unit = "" if unit in ("-", "") else " " + unit
@@ -558,45 +597,13 @@ def tool_sample(a):
     return "\n".join(lines)
 
 
-class _Logger(threading.Thread):
-    """A drive log kept by the MCP server, as `n63read log` keeps one."""
-
-    def __init__(self, ip, chans, interval, path):
-        super().__init__(daemon=True)
-        self.ip, self.chans, self.interval, self.path = ip, chans, interval, path
-        self.rows, self.error = 0, None
-        self.stopping = threading.Event()
-
-    def run(self):
-        names = [n for n, _, _ in self.chans]
-        reader = core.ChannelReader(core.record_layouts(_search_catalog()), core.DME_MASTER)
-        try:
-            with open(self.path, "w", newline="", encoding="utf-8") as f, \
-                    share.open_tester(self.ip, int(SOURCE, 16), 2.0) as h:
-                w = csv.writer(f)
-                w.writerow(core.log_header(names))
-                t0 = last_flush = time.time()
-                while not self.stopping.is_set():
-                    started = time.time()
-                    sample = reader.read(h, self.chans)
-                    now = time.time()
-                    w.writerow(core.log_row(now - t0, now, names, sample))
-                    self.rows += 1
-                    if now - last_flush >= 1.0:
-                        f.flush()
-                        last_flush = now
-                    self.stopping.wait(core.rest(self.interval, started))
-        except Exception as e:                                       # noqa: BLE001
-            self.error = "%s: %s" % (type(e).__name__, e)
-
-
-_logger = None
+_logger = None                  # (session, path) of the log start_log began
 
 
 def tool_start_log(a):
     global _logger
-    if _logger is not None and _logger.is_alive():
-        raise ToolError("already logging to %s; stop_log first" % _logger.path)
+    if _logger is not None and _logger[0].is_alive():
+        raise ToolError("already logging to %s; stop_log first" % _logger[1])
     names = list(a.get("names") or [])
     template = a.get("template")
     if template:
@@ -607,25 +614,21 @@ def tool_start_log(a):
         names = saved[template] + [n for n in names if n not in saved[template]]
     chans = _chans(names)
     path = os.path.join(core.logs_dir(), time.strftime("n63_%Y-%m-%d_%H-%M-%S_claude.csv"))
-    _logger = _Logger(_value(a["ip"]), chans, max(float(a.get("interval") or 0.25), 0.05),
-                      path)
-    _logger.start()
-    time.sleep(0.5)
-    if not _logger.is_alive():
-        raise ToolError("the log stopped at once: %s" % (_logger.error or "unknown"))
-    return "Logging %d channel(s) to %s. stop_log ends it." % (len(chans), path)
+    session, _out = _start_session(a["ip"], chans, a.get("interval"))
+    session.start_log(path)
+    _logger = (session, path)
+    return "Logging %d channel(s) to %s%s. stop_log ends it." % (
+        len(chans), path, ", borrowing the app's connection" if session.borrowed else "")
 
 
 def tool_stop_log(a):
     global _logger
     if _logger is None:
         raise ToolError("not logging")
-    logger, _logger = _logger, None
-    logger.stopping.set()
-    logger.join(10)
-    return "Stopped: %d rows in %s%s" % (
-        logger.rows, os.path.basename(logger.path),
-        "\n(it had stopped early: %s)" % logger.error if logger.error else "")
+    (session, path), _logger = _logger, None
+    session.stop()
+    session.join(10)
+    return "Stopped: %d rows in %s" % (session.rows, os.path.basename(path))
 
 
 # ----------------------------------------------------- looking into logs
