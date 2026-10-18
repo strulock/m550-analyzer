@@ -145,7 +145,7 @@ def op_faults(args):
         print("\n%d listed code(s) never failed; --every-code shows them." % hidden)
     if unknown:
         print("\n%d code(s) had no catalog entry. The SGBD for this module "
-              "may not be among those extracted - see PROJECT.md." % unknown)
+              "may not be among those extracted - see docs/modules.md." % unknown)
 
 
 def _faults_report(args):

@@ -1,0 +1,6 @@
+# Exact versions for CI, so a new release of a tool can't change a build
+# unnoticed. Update them on purpose.
+pytest==9.1.1; python_version >= "3.10"
+pytest==8.4.2; python_version < "3.10"
+pyinstaller==6.22.3; sys_platform == "win32"
+ruff==0.15.22

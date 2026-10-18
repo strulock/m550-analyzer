@@ -88,7 +88,8 @@ def test_fuel_pump_rows_carry_byte_positions_without_sg_funktionen():
     rows, enums = mc.build({}, "EKP301", "0x17", "EKP_")
     assert enums == [] and {r["ID"] for r in rows} == {"0x4010"}
     pos = {r["ARG"].split(".")[1]: r["POS"] for r in rows}
-    assert pos["MOTOR_SPANNUNG_A"] == 2 and pos["SPANNUNG_KL30"] == 20 and pos["MOTOR_STROM_C"] == 44
+    assert pos["MOTOR_SPANNUNG_A"] == 2 and pos["SPANNUNG_KL30"] == 20
+    assert pos["MOTOR_STROM_C"] == 44
     assert all(r["DATENTYP"] == "unsigned char" for r in rows)
 
 

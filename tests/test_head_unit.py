@@ -37,7 +37,8 @@ def test_gps_fix_status_has_words():
 def test_private_channels_are_flagged():
     assert core.is_sensitive("HU_WLAN_AP_NETWORK.WLAN_AP_NETWORK_KEY_TEXT")
     assert core.is_sensitive("HU_PROVISIONING_PARAMETER.IMEI_TEXT")
-    assert core.is_sensitive("HU_STATUS_LAST_DESTINATIONS_FIRST_DATA_SET.GPS_POSITION_LATITUDE_1_DATA")
+    assert core.is_sensitive(
+        "HU_STATUS_LAST_DESTINATIONS_FIRST_DATA_SET.GPS_POSITION_LATITUDE_1_DATA")
     assert not core.is_sensitive("HU_STATUS_GPS_POSITION.LATITUDE")
     for name in CAT:
         if "NETWORK_KEY" in name or "IMEI" in name:
@@ -48,14 +49,16 @@ def test_decode_gps_record_matches_the_job_layout():
     rec = core.decode_record(HU_GPS, LAYOUTS[GPS])
     assert rec["HU_STATUS_GPS_POSITION.VALIDITY"][0] == 0
     assert rec["HU_STATUS_GPS_POSITION.LATITUDE"][0] == pytest.approx(30 + 8 / 60 + 4.56 / 3600)
-    assert rec["HU_STATUS_GPS_POSITION.LONGITUDE"][0] == pytest.approx(-(97 + 38 / 60 + 9.24 / 3600))
+    lon = -(97 + 38 / 60 + 9.24 / 3600)
+    assert rec["HU_STATUS_GPS_POSITION.LONGITUDE"][0] == pytest.approx(lon)
     assert rec["HU_STATUS_GPS_POSITION.HEIGHT"][0] == 160
     p = core.parse_gps_position(HU_GPS)
     assert rec["HU_STATUS_GPS_POSITION.LATITUDE"][0] == p["lat"]
 
 
 def test_decode_record_walks_fields_in_order():
-    raw = b"".join(v.to_bytes(2, "big", signed=True) for v in (10, 20, 30, 40, 25, -1)) + b"\x00\x05"
+    raw = b"".join(v.to_bytes(2, "big", signed=True)
+                   for v in (10, 20, 30, 40, 25, -1)) + b"\x00\x05"
     rec = core.decode_record(raw, LAYOUTS[SPEED])
     assert rec["HU_STATUS_SPEED.WHEEL3_SENSOR_SPEED"][0] == 30
     assert rec["HU_STATUS_SPEED.GPS_SPEED"][0] == -1

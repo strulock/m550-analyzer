@@ -473,28 +473,37 @@ separate range, so don't assume sequential identifiers:
 ```
 py -m venv .venv
 .venv\Scripts\pip install -e .[dev,build]
+.venv\Scripts\pip install -r requirements-ci.txt   # the exact tool versions CI uses
 .venv\Scripts\pytest
+.venv\Scripts\ruff check src tests tools
 build.bat
 ```
+
+The version is set in one place, `src/n63read/__init__.py`; `pyproject.toml`
+reads it from there, and a release tag (`v0.4.0`) must match it or CI stops.
 
 `build.bat` runs PyInstaller on `BMW-Analyzer.spec`, which writes one
 folder, `dist\BMW Analyzer\`: `n63read.exe` (GUI), `n63read-cli.exe` and the
 `_internal\` they share. The CLI is a console exe, or it would have no
 stdout. The installer is `installer\BMW-Analyzer.iss`
 ([Inno Setup 6](https://jrsoftware.org/isinfo.php)):
-`iscc /DAppVersion=0.3.4 installer\BMW-Analyzer.iss` writes
-`dist\BMW-Analyzer-Setup.exe`. CI builds on every push, zips the folder as
+`iscc /DAppVersion=<version> installer\BMW-Analyzer.iss` writes
+`dist\BMW-Analyzer-Setup.exe`. CI lints, runs the tests on Linux (Python 3.9
+and 3.12) and Windows, builds on every push, zips the folder as
 `BMW-Analyzer-portable.zip`, installs, reinstalls (as an update does) and
 uninstalls silently as a smoke test, and attaches the setup, the zip and
-`SHA256SUMS.txt` to the release when a `v*` tag is pushed. Keep the
-installer's `AppId`: upgrades and the uninstall entry depend on it.
+`SHA256SUMS.txt` to the release when a `v*` tag is pushed. Its actions are
+pinned to exact commits and its tools to exact versions
+(`requirements-ci.txt`), and only the release job may write to the
+repository. Keep the installer's `AppId`: upgrades and the uninstall entry
+depend on it.
 
 The data CSVs live in `src/n63read/data/`. At runtime they are found in
 the PyInstaller bundle, the package, next to the exe, or the working
 directory, so an updated CSV can be dropped next to the exe without
 rebuilding.
 
-`PROJECT.md` has the original design brief and safety rules; [docs/](docs/README.md)
+`PROJECT.md` has the original brief and the safety rules; [docs/](docs/README.md)
 is the reference. After changing a catalog, run `python tools/translate.py`
 and `python tools/channel_docs.py`; tests fail if either is out of date.
 

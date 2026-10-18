@@ -165,7 +165,7 @@ def test_channel_change_starts_a_new_file(tmp_path, car, restore_gui_core):
         p.join(3)
     first = lines(path)
     assert first[0] == "Time,Clock,ILAG2,Event"
-    assert all(not l.startswith("Time") for l in first[1:])   # one header only
+    assert all(not row.startswith("Time") for row in first[1:])   # one header only
     assert lines(second)[0] == "Time,Clock,ILAG1,ILAG2,Event"
     msgs = []
     while not q.empty():
