@@ -171,33 +171,38 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 8 — Tooling, CI and supply chain
 
-- [ ] Single-source the version: `pyproject.toml:7` and `__init__.py:3` are
-      set separately. Use `dynamic = ["version"]` and check that the release
-      tag matches.
-- [ ] Narrow `permissions: contents: write` to the release job; pull-request
-      runs don't need it (`build.yml:9-10`).
-- [ ] Pin actions by commit SHA, especially `softprops/action-gh-release`, and
-      pin the pip and choco installs.
-- [ ] Add a ruff config and a lint step. `.gitignore` already lists
-      `.ruff_cache/`.
-- [ ] Test the declared floor `requires-python = ">=3.9"`, or raise it.
-- [ ] Install with `pip install -e .[dev]` in CI, and add a Linux job for the
-      non-GUI tests.
+- [x] Single-source the version: `pyproject.toml` reads `__version__`
+      (`dynamic = ["version"]`), a test keeps it that way, and CI stops a
+      release whose tag doesn't match.
+- [x] Narrow `permissions: contents: write` to a separate release job that
+      only attaches what the build made; everything else is read-only.
+- [x] Pin actions by commit SHA (checkout, setup-python, upload/download
+      artifact, softprops/action-gh-release), and pin the pip installs
+      (`requirements-ci.txt`) and the choco Inno Setup fallback.
+- [x] Add a ruff config (pyflakes, pycodestyle, blind excepts) and a lint job.
+- [x] Test the declared floor `requires-python = ">=3.9"`: a Linux job runs
+      the tests on 3.9 and 3.12.
+- [x] Install with `pip install -e .` in CI (plus the pinned tools), and add
+      a Linux job for the non-GUI tests.
 - [ ] Sign the installer (Authenticode), or sign `SHA256SUMS.txt` with a key
       kept outside GitHub, and have the updater check it before running the
-      download (`update.py:112-128`, `171`, `251`).
+      download (`update.py`).
+
+> **Blocked:** needs a decision: a code-signing certificate (paid, for
+> Authenticode), or a signing key kept off GitHub and its public half built
+> into the app.
 
 ## Phase 9 — Docs and naming
 
-- [ ] Cut `PROJECT.md` down to a historical brief. Its layout, entry points
-      and onefile build command no longer match the code
-      (`PROJECT.md:19-20`, `157-169`, `215-230`).
-- [ ] Delete the stray untracked `n63read.spec` and `n63read-cli.spec` at the
+- [x] Cut `PROJECT.md` down to a historical brief: what it set out to do,
+      the safety rules, the verified decoding cases, the log format rule.
+      The layout, build and protocol details it had are in `docs/`.
+- [x] Delete the stray untracked `n63read.spec` and `n63read-cli.spec` at the
       repo root.
-- [ ] One app name: the window title says "N63TU2 DME Reader"
-      (`gui.py:238`), while the installer and folder say "BMW Analyzer".
-- [ ] Fix the stale `/DAppVersion=0.3.3` example in
-      `installer/BMW-Analyzer.iss:2`.
+- [x] One app name: the window, the package description and the docstring
+      say "BMW Analyzer", like the installer and the folder.
+- [x] Fix the stale `/DAppVersion=0.3.3` example in
+      `installer/BMW-Analyzer.iss`, and the `0.3.4` one in the README.
 
 ## Phase 10 — In-car verification
 

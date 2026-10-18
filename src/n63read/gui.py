@@ -67,7 +67,7 @@ class App(tk.Tk):
 
     def __init__(self):
         super().__init__()
-        self.title("N63TU2 DME Reader")
+        self.title("BMW Analyzer")
         self._set_icon()
         self.geometry("1060x680")
         self.minsize(900, 560)

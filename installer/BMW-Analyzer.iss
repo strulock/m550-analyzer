@@ -1,5 +1,5 @@
 ; BMW Analyzer installer (Inno Setup 6). Built by CI:
-;   iscc /DAppVersion=0.3.3 installer\BMW-Analyzer.iss
+;   iscc /DAppVersion=<version from n63read/__init__.py> installer\BMW-Analyzer.iss
 ; -> dist\BMW-Analyzer-Setup.exe
 ;
 ; Per-user: no admin prompt, installs to %LOCALAPPDATA%\Programs\BMW Analyzer.

@@ -77,7 +77,7 @@ def test_bank2_channels_read_from_the_slave(car):
 
 def test_cli_reads_bank2(car, capsys):
     cli.main(["read", "--ip", "127.0.0.1", "--timeout", "0.5", "ILAG2", "ILAG2@0x13"])
-    lines = {l.split()[0]: l for l in capsys.readouterr().out.splitlines()}
+    lines = {row.split()[0]: row for row in capsys.readouterr().out.splitlines()}
     assert "1.0" in lines["ILAG2"].split() and "0.9375" in lines["ILAG2@0x13"].split()
 
 

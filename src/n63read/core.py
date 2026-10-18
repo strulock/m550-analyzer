@@ -532,7 +532,7 @@ def sweep_seconds(probe_timeout=None):
     return (hi - lo + 1) * (PROBE_TIMEOUT if probe_timeout is None else probe_timeout)
 
 
-# Addresses confirmed for this car (PROJECT.md). Others are named from
+# Addresses confirmed for this car (docs/modules.md). Others are named from
 # G30_module_sgbd_map.csv where it has exactly one module at that address.
 KNOWN_MODULES = {
     0x01: "Airbag / crash safety (ACSM)",
@@ -1338,7 +1338,8 @@ FAST_DIDS = frozenset(
     + [(0x01, d) for d in (0x4101, 0x4102)]                                # acceleration, yaw
     + [(0x40, d) for d in (0xD601, 0xD611)]                                # ride height, drive mode
     + [(0x30, d) for d in (0xDB57, 0xDB99, 0xDB9A)]                        # steering angle, torque
-    + [(0x76, d) for d in (0xD665, 0xDC05, 0xDC0A)]                        # wheel accel, height, dampers
+    # wheel acceleration, ride height, dampers
+    + [(0x76, d) for d in (0xD665, 0xDC05, 0xDC0A)]
     + [(0x19, d) for d in (0xDB32, 0xDFEA)]                                # xDrive clutch torque
     + [(0x17, 0x4010)]                                                     # fuel pump current
     + [(0x2C, d) for d in (0xD645, 0xD646, 0xD647, 0xD648, 0xD64A, 0xD64B,

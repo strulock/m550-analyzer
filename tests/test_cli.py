@@ -1,6 +1,7 @@
 """CLI commands against the fake car: read, log, gps, and the data selftest."""
 
 import csv
+import os
 import time
 
 import pytest
@@ -27,7 +28,7 @@ def test_read_prints_dme_and_head_unit_values(car, capsys):
     run(["read", "--ip", "127.0.0.1", "--timeout", "0.5",
          "ILAG2", "HU_STATUS_GPS", "HU_STATUS_SPEED.GPS_SPEED", "NOT_A_CHANNEL"])
     out = capsys.readouterr().out.splitlines()
-    line = {l.split()[0]: l for l in out}
+    line = {row.split()[0]: row for row in out}
     assert "1.0" in line["ILAG2"].split() and "raw=1000" in line["ILAG2"]
     assert "3D position" in line["HU_STATUS_GPS"]               # enum text
     assert "98.0" in line["HU_STATUS_SPEED.GPS_SPEED"].split()  # field 5 of the record
@@ -165,3 +166,14 @@ def test_scan_is_one_path_for_every_caller(car):
     with core.Tester("127.0.0.1", timeout=1.0) as t:
         found = dict(core.scan(t, 0x0E, 0x14, 0.1))
     assert found == {0x10: "", 0x12: ""}
+
+
+def test_the_version_lives_in_one_place():
+    root = os.path.join(os.path.dirname(__file__), "..")
+    with open(os.path.join(root, "pyproject.toml"), encoding="utf-8") as f:
+        project = f.read().split("[project]")[1].split("\n[")[0]
+    assert 'dynamic = ["version"]' in project
+    assert not any(line.startswith("version") for line in project.splitlines())
+    import re
+    from n63read import __version__
+    assert re.fullmatch(r"\d+\.\d+\.\d+", __version__)

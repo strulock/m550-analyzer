@@ -261,11 +261,13 @@ def tool_discover(a):
 
 
 def tool_scan_modules(a):
-    return run_cli(_opt(["scan", "--ip", _value(a["ip"]), "--source", SOURCE], "--probe-timeout", a.get("probe_timeout")))
+    return run_cli(_opt(["scan", "--ip", _value(a["ip"]), "--source", SOURCE],
+                        "--probe-timeout", a.get("probe_timeout")))
 
 
 def tool_read_faults(a):
-    argv = _opt(["faults", "--ip", _value(a["ip"]), "--source", SOURCE, "-v"], "--target", a.get("target"))
+    argv = _opt(["faults", "--ip", _value(a["ip"]), "--source", SOURCE, "-v"],
+                "--target", a.get("target"))
     if a.get("all_modules"):
         argv.append("--all")
     if a.get("every_code"):
@@ -283,7 +285,8 @@ def tool_read_gps(a):
 
 
 def tool_check_modules(a):
-    return run_cli(_opt(["check", "--ip", _value(a["ip"]), "--source", SOURCE], "--module", a.get("module")))
+    return run_cli(_opt(["check", "--ip", _value(a["ip"]), "--source", SOURCE],
+                        "--module", a.get("module")))
 
 
 @functools.lru_cache(maxsize=1)

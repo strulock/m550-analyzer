@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "n63read"
-version = "0.3.8"
-description = "Read-only BMW N63TU2 DME reader over ENET (HSFZ)"
+dynamic = ["version"]           # from n63read/__init__.py: one place to change it
+description = "BMW Analyzer: read-only diagnostics for a BMW M550i (N63TU2) over ENET (HSFZ)"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -21,9 +21,27 @@ n63read = "n63read.cli:main"
 [project.gui-scripts]
 n63read-gui = "n63read.gui:main"
 
+[tool.setuptools.dynamic]
+version = {attr = "n63read.__version__"}
+
 [tool.setuptools.package-data]
 n63read = ["data/*.csv", "data/*.ico", "data/*.png"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+# pyflakes, pycodestyle, and blind excepts (each one marked noqa: BLE001 says
+# why it catches everything).
+select = ["F", "E", "W", "BLE"]
+
+[tool.ruff.lint.per-file-ignores]
+# An embedded PowerShell script, and word lists: wrapping makes them worse.
+"src/n63read/diag.py" = ["E501"]
+"tools/glossary.py" = ["E501"]

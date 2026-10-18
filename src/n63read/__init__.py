@@ -1,3 +1,3 @@
-"""Read-only BMW N63TU2 DME reader over ENET (HSFZ)."""
+"""BMW Analyzer: read-only diagnostics for a BMW M550i (N63TU2) over ENET (HSFZ)."""
 
 __version__ = "0.3.8"
