@@ -288,3 +288,59 @@ def test_cli_update_waits_while_others_run(monkeypatch, capsys):
     with pytest.raises(SystemExit, match="close these first"):
         cli.main(["update"])
     assert not ran
+
+
+# ------------------------------------------------------------ CLI and process
+
+def test_cli_update_installs_when_nothing_else_runs(monkeypatch, capsys):
+    from n63read import cli
+    monkeypatch.setattr(update, "installed", lambda exe_path=None: True)
+    monkeypatch.setattr(update, "update", lambda progress=None: {
+        "setup": "setup.exe", "current": "0.3.7", "latest": "9.9.9", "newer": True})
+    ran = []
+    monkeypatch.setattr(update, "install", lambda setup, relaunch=False: ran.append(setup))
+    cli.main(["update"])
+    assert ran == ["setup.exe"] and "Installing n63read 9.9.9" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("newer, says", [(True, "9.9.9 is available"),
+                                         (False, "is the latest version")])
+def test_cli_update_check(monkeypatch, capsys, newer, says):
+    from n63read import cli
+    monkeypatch.setattr(update, "check", lambda: {
+        "current": "0.3.7", "latest": "9.9.9" if newer else "0.3.7", "newer": newer,
+        "url": "https://example.invalid/release"})
+    cli.main(["update", "--check"])
+    assert says in capsys.readouterr().out
+
+
+def test_cli_update_failure_is_reported(monkeypatch):
+    from n63read import cli
+
+    def offline():
+        raise update.UpdateError("no network")
+    monkeypatch.setattr(update, "check", offline)
+    with pytest.raises(SystemExit, match="update failed: no network"):
+        cli.main(["update", "--check"])
+
+
+@pytest.mark.skipif(os.name != "nt", reason="lists Windows processes")
+def test_process_paths_include_this_one():
+    paths = update._process_paths()
+    # A virtual environment's python.exe runs the base one, so just the name.
+    assert os.path.basename(paths[os.getpid()]).lower().startswith("python")
+
+
+def test_a_process_that_wont_stop_is_noted(monkeypatch, quick_diagnostics):
+    from n63read import diag
+
+    def refuse(*a, **k):
+        raise OSError("access denied")
+    monkeypatch.setattr(update.subprocess, "run", refuse)
+    monkeypatch.setattr(update.os, "kill", refuse)
+    update.stop([12345])
+    entries = []
+    for f in os.listdir(diag.journal_dir()):
+        with open(os.path.join(diag.journal_dir(), f), encoding="utf-8") as fh:
+            entries += [json.loads(line) for line in fh]
+    assert any(e["event"] == "problem" and "12345" in e["where"] for e in entries)

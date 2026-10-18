@@ -148,20 +148,26 @@ the file and line it starts from, as of 0.3.8.
       `read_faults`, `read_gps`, `check_modules`) keep the CLI's report on
       purpose: the report is what they return.
 
-## Phase 7 — Code structure and tests
+## Phase 7 — Code structure, coordinated sessions and tests
 
-- [ ] Move `Poller` (`gui.py:45-210`) into its own `poller.py`. It has no Tk
-      dependency.
-- [ ] Turn `_drain` into a handler table, and move the decisions that don't
-      need Tk (`gui.py:1700-1742`) into plain functions.
-- [ ] One module scan: add NRC reporting to `core.sweep_modules` and use it
-      from `cli.py:188-201` and `gui.py:1448-1460`.
-- [ ] Log the silent failures at `core.py:1320`, `core.py:1331`,
-      `update.py:244` and `gui.py:1377` to the diag journal.
-- [ ] Replace the fixed `sleep(3)` in `test_faults.py:218` with a gate in the
-      fake car, and the `sleep(0.2)` in `test_diag.py:208`.
-- [ ] Tests for the `_drain` crash path, close-while-logging, the live
+- [x] One engine: `engine.Session` (connect, read loop, drive log, jobs,
+      reconnect) for the app's poller, `n63read log` and Claude's
+      `start_log`/`sample` (replaces the planned `poller.py`).
+- [x] Sessions never knock each other off: every holder of the car lends it
+      (one-off commands and Claude's tools too), a machine-wide lock stops
+      two processes connecting at once, borrowed requests take the
+      connection's lock, and a borrower takes the car over when the holder
+      stops. `tests/test_coordination.py`.
+- [x] Turn `_drain` into a handler table, and move the decisions that don't
+      need Tk into plain functions (`core.discovery_outcome`).
+- [x] One module scan: `core.scan`, used by the CLI and the app.
+- [x] Log the silent failures (Documents and logs folders, stopping a
+      process for an update, saving settings and answers) to the journal.
+- [x] Replace the fixed sleeps in `test_faults.py` and `test_diag.py` with
+      waits on a condition.
+- [x] Tests for the `_drain` crash path, close-while-logging, the live
       `op_faults` and `op_update` paths, and `update` download/install.
+- [x] `n63read log --samples N`: stop after N samples.
 
 ## Phase 8 — Tooling, CI and supply chain
 

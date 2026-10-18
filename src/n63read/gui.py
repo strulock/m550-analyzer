@@ -18,7 +18,7 @@ from tkinter import ttk, filedialog, messagebox, simpledialog
 
 import webbrowser
 
-from n63read import __version__, core, diag, graph, playback, share, theme, update
+from n63read import __version__, core, diag, engine, graph, playback, share, theme, update
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
@@ -35,246 +35,20 @@ ANSWER_MARKS = {"ok": "\u2713  ", "size": "\u2260  ", "refused": "\u2717  ",
                 "no answer": "\u2013  "}
 # Negative responses meaning the identifier does not exist on this car.
 REFUSALS = {core.NRC[c] for c in (0x11, 0x12, 0x31)}
-LOG_FLUSH_SECONDS = 1.0
 COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
 
 
 # --------------------------------------------------------------- poll thread
 
-class Poller(threading.Thread):
-    """Owns the socket. Polls watched channels and pushes samples to a queue."""
+class Poller(engine.Session):
+    """The app's session with the car (see engine.Session): its messages go
+    to the Tk event queue."""
 
     def __init__(self, ip, target, source, timeout, out_q, layouts=None, bind=None):
-        super().__init__(daemon=True)
-        self.ip, self.target = ip, target
-        # DME channels go to `target`; other modules' channels to their own.
-        self.reader = core.ChannelReader(layouts or {}, target)
-        self.bind = bind                # the 'via' address, for diagnostics
-        self.trace = []                 # first frames on the wire, for diagnostics
-        self.source, self.timeout = source, timeout
-        self.out_q = out_q
-        self.channels = []          # [(name, did, meta)]
-        self.lock = threading.Lock()
-        self.interval = 0.25
-        # Not `_stop`: that name is a threading.Thread internal, and
-        # shadowing it with an Event breaks join()/is_alive().
-        self._stop_event = threading.Event()
-        self.jobs = queue.Queue()   # callables run on this thread with the socket
-        self.steppers = []          # generator jobs, advanced one step per cycle
-        self.logfile = None
-        self.logwriter = None
-        self.log_header = None
-        self.log_path = None        # file the user picked
-        self.log_part = 1           # >1 once a channel change has split the log
-        self.last_flush = 0.0
-        self.log_t0 = None          # when logging started: the log's Time is from here
-        self.events = []            # text for the next row's Event cell
-
-    def set_channels(self, chans):
-        with self.lock:
-            self.channels = list(chans)
-
-    def submit(self, job):
-        """Run job(hsfz) on the poll thread, between samples.
-
-        The car gets one connection, so anything else that needs to talk to
-        it while connected (the fault reader) goes through here. If the job
-        returns a generator, it is advanced one step per poll cycle, so a
-        long job slows logging down but never stops it.
-        """
-        self.jobs.put(job)
-
-    def start_log(self, path):
-        with self.lock:
-            self.log_path, self.log_part = path, 1
-            self.log_t0 = time.time()
-            self.events = []
-            self._open_log(path)
-
-    def mark(self, text):
-        """Note something (an alert, a reconnect) in the log's Event column."""
-        with self.lock:
-            if self.logwriter:
-                self.events.append(text)
-
-    def _logging(self):
-        with self.lock:
-            return self.logwriter is not None
-
-    def _log_event_now(self, text):
-        """A row of its own for an event when no samples are coming (the
-        connection just dropped), pushed to disk at once."""
-        with self.lock:
-            if not self.logwriter:
-                return
-            if self.log_header is None:
-                self.events.append(text)        # no header yet: the first row carries it
-                return
-            now = time.time()
-            blank = {n: (None, "", "") for n in self.log_header}
-            self.logwriter.writerow(core.log_row(now - self.log_t0, now, self.log_header,
-                                                 blank, text))
-            self.logfile.flush()
-            os.fsync(self.logfile.fileno())
-
-    def _open_log(self, path):
-        self.logfile = open(path, "w", newline="", encoding="utf-8")
-        self.logwriter = csv.writer(self.logfile)
-        self.log_header = None
-        self.last_flush = time.time()
-
-    def stop_log(self):
-        with self.lock:
-            if self.logfile:
-                self.logfile.close()
-            self.logfile = self.logwriter = self.log_header = None
-
-    def stop(self):
-        self._stop_event.set()
-
-    def _run_jobs(self, h):
-        while True:
-            try:
-                job = self.jobs.get_nowait()
-            except queue.Empty:
-                break
-            try:
-                result = job(h)
-            except Exception as e:                                  # noqa: BLE001
-                self.out_q.put(("joberror", "background read failed: %s" % e))
-                continue
-            if hasattr(result, "__next__"):
-                self.steppers.append(result)
-        # One step of each stepped job per cycle.
-        for gen in list(self.steppers):
-            try:
-                next(gen)
-            except StopIteration:
-                self.steppers.remove(gen)
-            except Exception as e:                                  # noqa: BLE001
-                self.steppers.remove(gen)
-                self.out_q.put(("joberror", "background read failed: %s" % e))
-
-    def run(self):
-        t0 = time.time()
-        connected = False               # at some point this session
-        samples, reason = 0, "stopped"
-        lost_at = None                  # when the connection dropped, while it's down
-        try:
-            while not self._stop_event.is_set():
-                host = None
-                try:
-                    # Borrow the car from another n63read that holds it (a
-                    # running log), else hold it ourselves and lend it.
-                    with share.open_tester(self.ip, self.source, self.timeout,
-                                           trace=self.trace) as h:
-                        if not connected:
-                            diag.record_later("connect", ip=self.ip, result="ok",
-                                              seconds=round(time.time() - t0, 3),
-                                              bind=self.bind)
-                        connected = True
-                        if not getattr(h, "shared", False):
-                            host = share.Host(self.ip).start()
-                        if lost_at is not None:
-                            gap = round(time.time() - lost_at)
-                            diag.record("reconnect", ip=self.ip, seconds=gap)
-                            self.mark("reconnected after %d s" % gap)
-                            lost_at = None
-                        self.out_q.put(("status", "connected", self))
-                        while not self._stop_event.is_set():
-                            cycle = time.time()
-                            self._run_jobs(h)
-                            if host:
-                                host.serve(h)
-                                h.tidy()
-                            with self.lock:
-                                chans = list(self.channels)
-                            if not chans:
-                                time.sleep(0.15)
-                                continue
-
-                            elapsed = round(time.time() - t0, 3)
-                            sample = self.reader.read(h, chans)
-
-                            self.out_q.put(("sample", elapsed, sample))
-                            samples += 1
-                            self._write_log(chans, sample)
-                            self._stop_event.wait(core.rest(self.interval, cycle))
-                    break                       # stopped
-                except Exception as e:                              # noqa: BLE001
-                    # While logging, a cable bump or the car dozing off
-                    # shouldn't end the drive's log: mark the gap, keep the
-                    # file open, and keep trying. Otherwise it's an error.
-                    if not (connected and self._logging()) or self._stop_event.is_set():
-                        raise
-                    if lost_at is None:
-                        lost_at = time.time()
-                        diag.record("connection_lost", ip=self.ip,
-                                    error="%s: %s" % (type(e).__name__, e))
-                        self._log_event_now("connection lost: %s" % e)
-                        self.out_q.put(("status", "reconnecting", self))
-                    self._stop_event.wait(core.RECONNECT_WAIT)
-                finally:
-                    if host:
-                        host.stop()
-        except Exception as e:                                      # noqa: BLE001
-            reason = "%s: %s" % (type(e).__name__, e)
-            if connected:
-                why = core.connection_problem(e)
-                self.out_q.put(("error", "%s\n\n%s" % (e, why) if why else str(e), self))
-            else:
-                self.out_q.put(("error", no_answer_text(self.ip, e), self))
-                diag.connect_failed(self.ip, e, self.bind)
-        finally:
-            self.stop_log()
-            if connected:
-                r = self.reader
-                diag.record("session", ip=self.ip, seconds=round(time.time() - t0, 1),
-                            samples=samples, channels=len(self.channels), reason=reason,
-                            refused={"0x%02X:0x%04X" % k: v for k, v in r.refused.items()},
-                            silent_modules=["0x%02X" % m for m in r.quiet_until],
-                            log=self.log_path, trace=self.trace)
-            self.out_q.put(("status", "disconnected", self))
-
-    def _write_log(self, chans, sample):
-        with self.lock:
-            if not self.logwriter:
-                return
-            now = time.time()
-            names = [c[0] for c in chans]
-            if self.log_header is not None and self.log_header != names:
-                # The channel list changed mid-log. A second header row in
-                # the same file breaks Excel and pandas, so start a new file.
-                self.logfile.close()
-                self.log_part += 1
-                root, ext = os.path.splitext(self.log_path)
-                path = "%s_%d%s" % (root, self.log_part, ext or ".csv")
-                self._open_log(path)
-                self.out_q.put(("logfile", path))
-            if self.log_header is None:
-                self.logwriter.writerow(core.log_header(names))
-                self.log_header = names
-            # Time from the start of the log (a split file carries on the
-            # count), the wall clock beside it, and any events since the
-            # last row.
-            self.logwriter.writerow(core.log_row(now - self.log_t0, now, names, sample,
-                                                 "; ".join(self.events)))
-            self.events = []
-            # Push to disk about once a second, so a crash, sleep or flat
-            # battery loses at most that much of the drive.
-            if now - self.last_flush >= LOG_FLUSH_SECONDS:
-                self.logfile.flush()
-                os.fsync(self.logfile.fileno())
-                self.last_flush = now
+        super().__init__(ip, target, source, timeout, out=out_q, layouts=layouts, bind=bind)
 
 
-def no_answer_text(ip, error):
-    """What a failed connect means, for someone at the car."""
-    return ("Nothing answered at %s (port %d): %s.\n\n"
-            "Check that the IP box holds the car's address, not this PC's "
-            "(press Discover to find it), that the ignition is on, and that "
-            "Windows Firewall allows n63read on this network."
-            % (ip, core.HSFZ_DIAG_PORT, error))
+no_answer_text = engine.no_answer_text
 
 
 # ---------------------------------------------------------------------- app
@@ -569,11 +343,7 @@ class App(tk.Tk):
         return "n63read %s%s" % (__version__, where)
 
     def _set_auto_update(self):
-        self.settings["auto_update"] = self.autoupdate_var.get()
-        try:
-            core.save_settings(self.settings)
-        except OSError:
-            pass
+        self._save_setting("auto_update", self.autoupdate_var.get())
 
     def _update_tick(self):
         """Check now and then; never while connected (try again soon)."""
@@ -676,11 +446,7 @@ class App(tk.Tk):
 
     def _set_diagnostics(self):
         diag.enabled = self.diag_var.get()
-        self.settings["diagnostics"] = diag.enabled
-        try:
-            core.save_settings(self.settings)
-        except OSError:
-            pass
+        self._save_setting("diagnostics", diag.enabled)
 
     def _capture_packets(self):
         """Record the packets themselves (pktmon) for the next minute."""
@@ -810,11 +576,7 @@ class App(tk.Tk):
         if code == self.lang:
             return
         self.lang = code
-        self.settings["language"] = code
-        try:
-            core.save_settings(self.settings)
-        except OSError:
-            pass                        # the choice still applies this session
+        self._save_setting("language", code)
         self._info, self._order = self._index_catalog()
         self._refilter()
         for name, _did, meta in self.watch:
@@ -890,8 +652,8 @@ class App(tk.Tk):
         self.settings[key] = value
         try:
             core.save_settings(self.settings)
-        except OSError:
-            pass                        # it still applies this session
+        except OSError as e:            # it still applies this session
+            diag.record("problem", where="saving settings", error=str(e))
 
     def _set_units(self, system):
         if system not in ("metric", "imperial") or system == self.units:
@@ -1163,8 +925,8 @@ class App(tk.Tk):
             self._avail_dirty = False
             try:
                 core.save_availability(self.avail)
-            except OSError:
-                pass                    # a read-only profile shouldn't stop logging
+            except OSError as e:        # a read-only profile shouldn't stop logging
+                diag.record("problem", where="saving answers", error=str(e))
             self._refresh_marks()
         self.after(10000, self._save_answers)
 
@@ -1845,22 +1607,14 @@ class App(tk.Tk):
         def work():
             try:
                 with share.open_tester(ip, 0xF4, wait) as h:
-                    for t in range(lo, hi + 1):
-                        try:
-                            h.tester_present(t)
-                        except core.NegativeResponse as e:
-                            line = "0x%02X  responds (negative: %s)\n" % (
-                                t, core.NRC.get(e.code, "0x%02X" % e.code))
-                        except core.HsfzError:
+                    for t, note in core.scan(h, lo, hi, wait):
+                        if note.startswith("error"):
+                            # Not "nothing here": say what went wrong; the
+                            # scan carries on with the next address.
+                            emit("0x%02X  %s\n" % (t, note))
                             continue
-                        except Exception as e:                      # noqa: BLE001
-                            # Not "nothing here": say what went wrong, then
-                            # carry on with the next address.
-                            emit("0x%02X  error: %s: %s\n" % (t, type(e).__name__, e))
-                            continue
-                        else:
-                            line = "0x%02X  responds\n" % t
-                        emit(line)
+                        emit("0x%02X  responds%s\n" % (t, " (negative: %s)" % note
+                                                         if note else ""))
                         self.q.put(("module", t))
                 emit("\nDone. Faults will read these modules.\n")
             except Exception as e:                                  # noqa: BLE001
@@ -1876,7 +1630,8 @@ class App(tk.Tk):
         """
         try:
             mine = ip in core.local_ipv4s()
-        except Exception:                                           # noqa: BLE001
+        except Exception as e:                                      # noqa: BLE001
+            diag.record("problem", where="listing this PC's addresses", error=str(e))
             return False
         if mine:
             messagebox.showinfo(
@@ -2146,170 +1901,169 @@ class App(tk.Tk):
             self.after(60, self._drain)
 
     def _handle(self, msg):
+        """One message from a session, a worker thread or a feed: each kind
+        has its _on_<kind> method."""
         kind = msg[0]
-
-        if kind == "sample":
-            self._learn(msg[2])
-            self._show_sample(msg[2], msg[1], plot=False)
-
-        elif kind == "checkres":
-            _, key, status, i, total = msg
-            if status in core.ANSWERS or status == "refused" \
-                    or key not in self.avail:
-                self.avail[key] = status
-            if i % 50 == 0 or i == total:
-                self.status.config(text="\u25cf checking %d / %d" % (i, total),
-                                   foreground="#b8860b")
-
-        elif kind == "checkdone":
-            self._checking = None
-            by_module = {}
-            for (module, _did), status in self.avail.items():
-                counts = by_module.setdefault("0x%02X" % module, {})
-                counts[status] = counts.get(status, 0) + 1
-            diag.record("check", stopped=msg[1], modules=by_module)
-            answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
-            self._answers_changed("check %s: %d identifiers answer"
-                                  % ("stopped" if msg[1] else "done", answered))
-
-        elif kind == "feedsample":
-            _, feed, elapsed, sample = msg
-            if feed is not self.feed or getattr(feed, "whole", False):
-                return                      # left over from a stopped feed
-            self._show_sample(sample, elapsed, plot=False)
-            if feed.kind == "replay":
-                self._scrub_shown(elapsed - feed.rows[0][0])
-                self.status.config(
-                    text="● replaying %s  %s / %s" % (
-                        feed.name_shown, _clock(elapsed - feed.rows[0][0]),
-                        _clock(feed.duration)),
-                    foreground="#2d7dd2")
-
-        elif kind == "replayload":
-            self._replay_loaded(msg[1], msg[2])
-
-        elif kind == "feeddone":
-            if msg[1] is self.feed:
-                self.feed = None
-                self.replay_bar.pack_forget()
-                self.replay_btn.config(text="Open log...")
-                self.status.config(text="● replay finished", foreground="#999")
-
-        elif kind in ("status", "error") and self.poller is not None \
+        if kind in ("status", "error") and self.poller is not None \
                 and msg[2] is not self.poller:
             return      # from a poller already replaced by a new connection
+        handler = getattr(self, "_on_" + kind, None)
+        if handler is not None:
+            handler(msg)
 
-        elif kind == "status" and msg[1] == "reconnecting":
-            # Lost mid-log: the poller keeps the log open and keeps trying.
-            self.status.config(text="● connection lost - reconnecting, log kept open",
+    def _on_sample(self, msg):
+        self._learn(msg[2])
+        self._show_sample(msg[2], msg[1], plot=False)
+
+    def _on_checkres(self, msg):
+        _, key, status, i, total = msg
+        if status in core.ANSWERS or status == "refused" \
+                or key not in self.avail:
+            self.avail[key] = status
+        if i % 50 == 0 or i == total:
+            self.status.config(text="● checking %d / %d" % (i, total),
                                foreground="#b8860b")
 
-        elif kind == "status":
-            ok = msg[1] == "connected"
+    def _on_checkdone(self, msg):
+        self._checking = None
+        by_module = {}
+        for (module, _did), status in self.avail.items():
+            counts = by_module.setdefault("0x%02X" % module, {})
+            counts[status] = counts.get(status, 0) + 1
+        diag.record("check", stopped=msg[1], modules=by_module)
+        answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
+        self._answers_changed("check %s: %d identifiers answer"
+                              % ("stopped" if msg[1] else "done", answered))
+
+    def _on_feedsample(self, msg):
+        _, feed, elapsed, sample = msg
+        if feed is not self.feed or getattr(feed, "whole", False):
+            return                      # left over from a stopped feed
+        self._show_sample(sample, elapsed, plot=False)
+        if feed.kind == "replay":
+            self._scrub_shown(elapsed - feed.rows[0][0])
             self.status.config(
-                text="\u25cf " + msg[1],
-                foreground="#2a9d3f" if ok else "#999")
-            if not ok:
-                self.connect_btn.config(text="Connect")
-                self.poller = None
-                self._log_ended()
+                text="● replaying %s  %s / %s" % (
+                    feed.name_shown, _clock(elapsed - feed.rows[0][0]),
+                    _clock(feed.duration)),
+                foreground="#2d7dd2")
 
-        elif kind == "discovered":
-            hits = msg[1]
-            near = msg[2] if len(msg) > 2 else []
-            # Only a well-formed HSFZ identification counts as the car; a
-            # stray datagram ("unknown") never fills the IP box.
-            hsfz = [h for h in hits if core.reply_protocol(h[1]) == "HSFZ"]
-            doip = [h for h in hits if core.reply_protocol(h[1]) == "DoIP"]
-            if doip and not hsfz:
-                self.ip_var.set(doip[0][0])
-                self.status.config(text="\u25cf car speaks DoIP", foreground="#c0392b")
-                if messagebox.askyesno(
-                        "Discover", core.doip_help(doip[0][0]) +
-                        "\n\nSave a diagnostics report now?"):
-                    self._save_diag_report()
-            elif not hsfz and near:
-                self.ip_var.set(near[0])
-                self.status.config(text="\u25cf no reply; %s is on the link"
-                                   % near[0], foreground="#b8860b")
-                messagebox.showinfo(
-                    "Discover",
-                    "The car didn't answer Discover, but %s is on the car's "
-                    "link, so it's probably the car. It's in the IP box: "
-                    "press Connect.%s" % (near[0], "\n\nAlso seen: " +
-                                          ", ".join(near[1:]) if near[1:] else ""))
-            elif not hsfz:
-                messagebox.showinfo(
-                    "Discover",
-                    "No reply.\n\n"
-                    + ("This PC has no 169.254.x.x (ENET) address yet: "
-                       "the adapter isn't connected or Windows hasn't "
-                       "set it up (it takes 30-60 s after plugging in).\n\n"
-                       if self._no_enet_address else "")
-                    + "1. Ignition on (position 2)\n"
-                    "2. USB ENET adapter plugged into car and PC\n"
-                    "3. Pick the 169.254.x.x address in 'via' - an "
-                    "auto broadcast leaves over WiFi instead\n"
-                    "4. Allow Python through Windows Firewall, and set "
-                    "that network to Private")
-                self.status.config(text="\u25cf not connected", foreground="#999")
-            else:
-                self._found_car(hsfz)
+    def _on_replayload(self, msg):
+        self._replay_loaded(msg[1], msg[2])
 
-        elif kind == "module":
-            if msg[1] not in self.modules:
-                self.modules.append(msg[1])
+    def _on_feeddone(self, msg):
+        if msg[1] is self.feed:
+            self.feed = None
+            self.replay_bar.pack_forget()
+            self.replay_btn.config(text="Open log...")
+            self.status.config(text="● replay finished", foreground="#999")
 
-        elif kind == "faultmsg":
-            _, win, text = msg
-            if win.winfo_exists():
-                win.parts["msg"].config(text=text)
-
-        elif kind == "faultdetail":
-            _, win, module, code, details = msg
-            if win.winfo_exists():
-                self._set_detail(win, "%s  %s\n%s" % (module, code,
-                                                      "\n".join(core.format_details(details))))
-
-        elif kind == "faults_done":
-            _, win, rows = msg
-            if win.winfo_exists():
-                self._show_faults(win, rows)
-
-        elif kind == "logfile":
-            self.logging_to = msg[1]
-            self.status.config(text="● channels changed - logging to %s"
-                               % os.path.basename(msg[1]), foreground="#2a9d3f")
-
-        elif kind == "scanline":
-            _, box, text = msg
-            if box.winfo_exists():
-                box.insert("end", text)
-                box.see("end")
-
-        elif kind == "update":
-            self._show_update(*msg[1:])
-
-        elif kind == "claude":
-            self._show_claude(msg[1])
-
-        elif kind == "note":
-            # Information for the status line only; not a state change.
-            self.status.config(text="● " + msg[1], foreground="#2d7dd2")
-
-        elif kind == "joberror":
-            # A failed fault read, check or discovery: say so, but
-            # it is not a lost connection, so leave the poller be.
-            if not self.poller:
-                self.status.config(text="● error", foreground="#c0392b")
-            messagebox.showerror("Error", msg[1])
-
-        elif kind == "error":
-            self.status.config(text="\u25cf error", foreground="#c0392b")
-            messagebox.showerror("Connection", msg[1])
+    def _on_status(self, msg):
+        if msg[1] == "reconnecting":
+            # Lost mid-log, or the process we borrowed from has stopped: the
+            # session keeps the log open and connects again.
+            self.status.config(text="● connection lost - reconnecting, log kept open",
+                               foreground="#b8860b")
+            return
+        ok = msg[1] == "connected"
+        self.status.config(text="● " + msg[1], foreground="#2a9d3f" if ok else "#999")
+        if not ok:
             self.connect_btn.config(text="Connect")
             self.poller = None
             self._log_ended()
+
+    def _on_discovered(self, msg):
+        hits = msg[1]
+        near = msg[2] if len(msg) > 2 else []
+        what, ip = core.discovery_outcome(hits, near)
+        if what == "doip":
+            self.ip_var.set(ip)
+            self.status.config(text="● car speaks DoIP", foreground="#c0392b")
+            if messagebox.askyesno(
+                    "Discover", core.doip_help(ip) + "\n\nSave a diagnostics report now?"):
+                self._save_diag_report()
+        elif what == "near":
+            self.ip_var.set(ip)
+            self.status.config(text="● no reply; %s is on the link" % ip,
+                               foreground="#b8860b")
+            messagebox.showinfo(
+                "Discover",
+                "The car didn't answer Discover, but %s is on the car's "
+                "link, so it's probably the car. It's in the IP box: "
+                "press Connect.%s" % (ip, "\n\nAlso seen: " + ", ".join(near[1:])
+                                      if near[1:] else ""))
+        elif what == "none":
+            messagebox.showinfo(
+                "Discover",
+                "No reply.\n\n"
+                + ("This PC has no 169.254.x.x (ENET) address yet: "
+                   "the adapter isn't connected or Windows hasn't "
+                   "set it up (it takes 30-60 s after plugging in).\n\n"
+                   if self._no_enet_address else "")
+                + "1. Ignition on (position 2)\n"
+                "2. USB ENET adapter plugged into car and PC\n"
+                "3. Pick the 169.254.x.x address in 'via' - an "
+                "auto broadcast leaves over WiFi instead\n"
+                "4. Allow Python through Windows Firewall, and set "
+                "that network to Private")
+            self.status.config(text="● not connected", foreground="#999")
+        else:
+            self._found_car([h for h in hits if core.reply_protocol(h[1]) == "HSFZ"])
+
+    def _on_module(self, msg):
+        if msg[1] not in self.modules:
+            self.modules.append(msg[1])
+
+    def _on_faultmsg(self, msg):
+        _, win, text = msg
+        if win.winfo_exists():
+            win.parts["msg"].config(text=text)
+
+    def _on_faultdetail(self, msg):
+        _, win, module, code, details = msg
+        if win.winfo_exists():
+            self._set_detail(win, "%s  %s\n%s" % (module, code,
+                                                  "\n".join(core.format_details(details))))
+
+    def _on_faults_done(self, msg):
+        _, win, rows = msg
+        if win.winfo_exists():
+            self._show_faults(win, rows)
+
+    def _on_logfile(self, msg):
+        self.logging_to = msg[1]
+        self.status.config(text="● channels changed - logging to %s"
+                           % os.path.basename(msg[1]), foreground="#2a9d3f")
+
+    def _on_scanline(self, msg):
+        _, box, text = msg
+        if box.winfo_exists():
+            box.insert("end", text)
+            box.see("end")
+
+    def _on_update(self, msg):
+        self._show_update(*msg[1:])
+
+    def _on_claude(self, msg):
+        self._show_claude(msg[1])
+
+    def _on_note(self, msg):
+        # Information for the status line only; not a state change.
+        self.status.config(text="● " + msg[1], foreground="#2d7dd2")
+
+    def _on_joberror(self, msg):
+        # A failed fault read, check or discovery: say so, but it is not a
+        # lost connection, so leave the poller be.
+        if not self.poller:
+            self.status.config(text="● error", foreground="#c0392b")
+        messagebox.showerror("Error", msg[1])
+
+    def _on_error(self, msg):
+        self.status.config(text="● error", foreground="#c0392b")
+        messagebox.showerror("Connection", msg[1])
+        self.connect_btn.config(text="Connect")
+        self.poller = None
+        self._log_ended()
 
     def _show_sample(self, sample, elapsed=None, plot=True):
         for name, (value, unit, note) in sample.items():
@@ -2472,8 +2226,8 @@ class App(tk.Tk):
         if self._avail_dirty:
             try:
                 core.save_availability(self.avail)
-            except OSError:
-                pass
+            except OSError as e:
+                diag.record("problem", where="saving answers", error=str(e))
         if self.poller:
             self.poller.stop()
             # The poller is a daemon thread: without the wait the process can

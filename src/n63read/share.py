@@ -15,6 +15,7 @@ so the read-only allow-list applies to them as to everything else.
 """
 
 import binascii
+import contextlib
 import json
 import os
 import queue
@@ -29,6 +30,7 @@ WAIT = 120.0                    # s a client waits for its answer
 BUDGET = 2.0                    # s of shared requests per owner cycle, at most
 LINGER = 0.05                   # s to wait for a client's next request
 MAX_LINE = 0x10000              # bytes in one request line, at most
+CLAIM_WAIT = 15.0               # s to wait for another process deciding to connect
 
 
 def state_path():
@@ -45,6 +47,7 @@ class Host:
         self.requests = queue.Queue()
         self.sock = None
         self.served = 0
+        self.clients = set()            # borrowers' connections, closed by stop()
 
     def start(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -75,6 +78,13 @@ class Host:
         if self.sock:
             self.sock.close()
             self.sock = None
+        # Borrowers find out at once - their next request fails - and can
+        # take the car over, rather than waiting out WAIT for an answer.
+        for conn in list(self.clients):
+            try:
+                conn.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
         while True:                                 # nobody waits for nothing
             try:
                 _, reply = self.requests.get_nowait()
@@ -91,6 +101,13 @@ class Host:
             threading.Thread(target=self._client, args=(conn,), daemon=True).start()
 
     def _client(self, conn):
+        self.clients.add(conn)
+        try:
+            self._serve_client(conn)
+        finally:
+            self.clients.discard(conn)
+
+    def _serve_client(self, conn):
         with conn:
             f = conn.makefile("rwb")
             while True:
@@ -113,6 +130,8 @@ class Host:
                     done.set()
                 if msg.get("op") == "hello":
                     reply({"ok": "", "ip": self.ip})
+                elif self.sock is None:
+                    reply({"error": "closed", "message": "the tester disconnected"})
                 else:
                     self.requests.put((msg, reply))
                 if not done.wait(WAIT):
@@ -122,6 +141,21 @@ class Host:
                     f.flush()
                 except OSError:
                     return
+
+    def lend(self, h):
+        """Answer requests on a thread of their own, as they come, until
+        stop(). Each takes h's lock, so it slots in between the holder's own
+        requests and the holder needn't call serve()."""
+        def run():
+            while self.sock is not None:
+                try:
+                    msg, reply = self.requests.get(timeout=0.2)
+                except queue.Empty:
+                    continue
+                reply(self._answer(h, msg))
+                self.served += 1
+        threading.Thread(target=run, daemon=True).start()
+        return self
 
     def serve(self, h, budget=BUDGET):
         """Answer waiting requests on the owner's thread, for up to `budget` s."""
@@ -140,12 +174,14 @@ class Host:
     def _answer(h, msg):
         try:
             payload = binascii.unhexlify(msg["payload"])
-            saved = h.timeout
-            h._set_timeout(float(msg.get("timeout") or saved))
-            try:
-                resp = h.request(int(msg["target"]), payload, int(msg.get("retries", 4)))
-            finally:
-                h._set_timeout(saved)
+            with getattr(h, "lock", None) or contextlib.nullcontext():
+                saved = h.timeout
+                h._set_timeout(float(msg.get("timeout") or saved))
+                try:
+                    resp = h.request(int(msg["target"]), payload,
+                                     int(msg.get("retries", 4)))
+                finally:
+                    h._set_timeout(saved)
             return {"ok": resp.hex()}
         except core.NegativeResponse as e:
             return {"error": "negative", "service": e.service, "code": e.code}
@@ -237,14 +273,82 @@ def find(ip=None):
     return t
 
 
-def open_tester(ip, source=core.TESTER_ADDR, timeout=3.0, share=True, trace=None):
-    """The car: borrowed from whoever holds it, else a new Tester of our own."""
-    if share:
-        t = find(ip)
-        if t is not None:
-            t.timeout = timeout
-            return t
-    t = core.Tester(ip, source=source, timeout=timeout, trace=trace)
-    t.shared = False
-    t.connect()
+def lock_path():
+    return os.path.join(os.path.dirname(state_path()), "tester.lock")
+
+
+def _lock(f):
+    if os.name == "nt":
+        import msvcrt
+        f.seek(0)
+        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _unlock(f):
+    try:
+        if os.name == "nt":
+            import msvcrt
+            f.seek(0)
+            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(f, fcntl.LOCK_UN)
+    except OSError:
+        pass
+
+
+@contextlib.contextmanager
+def claim(wait=CLAIM_WAIT):
+    """Only one n63read process at a time decides to connect: find a holder,
+    or connect and start lending, under this lock. Without it two processes
+    starting together could both open the car, which takes two connections
+    at most, and bank 2 needs one of them."""
+    path = lock_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    f = open(path, "a+b")
+    deadline = time.time() + wait
+    try:
+        while True:
+            try:
+                _lock(f)
+                break
+            except OSError:
+                if time.time() > deadline:
+                    raise core.HsfzError("another n63read is connecting to the car; "
+                                         "try again in a moment") from None
+                time.sleep(0.05)
+        try:
+            yield
+        finally:
+            _unlock(f)
+    finally:
+        f.close()
+
+
+def open_tester(ip, source=core.TESTER_ADDR, timeout=3.0, share=True, trace=None,
+                lend=True):
+    """The car: borrowed from whoever holds it, else a new Tester of our own.
+
+    A Tester of our own is lent to the other n63read processes until it is
+    closed (`lend`), whatever it is for - a drive log or one quick read - so
+    anything that starts meanwhile borrows it instead of opening a second
+    connection. When it closes, a borrower that wants to carry on connects
+    again and so takes the car over.
+    """
+    with claim():
+        if share:
+            t = find(ip)
+            if t is not None:
+                t.timeout = timeout
+                return t
+        t = core.Tester(ip, source=source, timeout=timeout, trace=trace)
+        t.shared = False
+        t.connect()
+        if lend:
+            host = Host(ip).start().lend(t)
+            t.host = host
+            t.on_close.append(host.stop)
     return t

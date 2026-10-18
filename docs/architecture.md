@@ -16,8 +16,13 @@ src/n63read/
                 packet capture, the `n63read diag` check
   graph.py      a channel's pop-out graph: unit conversion, axes, the window
   theme.py      light and dark colours, applied to the running app
+  engine.py     a Session with the car: connect (borrow or hold and lend),
+                read loop, drive log, background jobs, reconnect and take
+                over; the app's poller, `n63read log` and Claude's logging
+                and sampling are all Sessions
   share.py      lends the car's connections (core.Tester) to other n63read
-                processes on this PC, so there are never more than two
+                processes on this PC, so there are never more than two; a
+                machine-wide lock means only one process connects at a time
   mcp.py        `n63read mcp`: an MCP server so Claude can use the read-only
                 commands and review logs; registers with Claude Code/Desktop
   update.py     self-update from GitHub releases: check, download and verify
@@ -33,6 +38,29 @@ tools/
   sgbd_tables.py      the original directory reader (DME)
 tests/          pytest; fake_car.py is an HSFZ stand-in for the car
 ```
+
+## Sharing the car
+
+The car takes two diagnostic connections at most, and bank 2 needs one. So:
+
+- Every connection n63read opens goes through `share.open_tester()`, under a
+  file lock (`share.claim()`): it borrows from a process that holds the car,
+  else connects and starts lending (`Host.lend()`, a thread that answers
+  other processes' requests). Two processes starting together can't both
+  connect.
+- Whoever holds the car lends it until it closes, whatever it is for: the
+  app, a CLI log, a one-line `n63read read`, a Claude tool. A borrowed
+  request takes the connection's lock (`Hsfz.lock`), so it slots in
+  between the holder's own requests and every reply stays with its request.
+- When the holder closes, its borrowers' connections are cut at once.
+  A `Session` that was borrowing connects again straight away and so holds
+  the car itself; one that held the car and lost it keeps trying only while
+  logging. Nobody is knocked offline by somebody else finishing.
+
+`tests/test_coordination.py` runs these cases: Claude logging while the app
+is connected and the other way round, a quick Claude read during a log,
+the app disconnecting under Claude's log, four processes starting at once,
+and borrowed and own requests interleaving.
 
 ## Reading: `core.ChannelReader`
 

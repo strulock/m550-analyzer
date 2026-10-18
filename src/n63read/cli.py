@@ -32,10 +32,11 @@ Usage
 import argparse
 import csv
 import os
+import queue
 import sys
 import time
 
-from n63read import __version__, core, diag, share, update
+from n63read import __version__, core, diag, engine, share, update
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
                           HsfzError, NegativeResponse, decode)
 
@@ -207,20 +208,13 @@ def op_scan(args):
     # The per-address wait is the probe timeout, not --timeout: most
     # addresses are empty and each one costs the full wait.
     with _tester(args, args.probe_timeout) as h:
-        for target in range(lo, hi + 1):
-            try:
-                h.tester_present(target)
-            except NegativeResponse as e:
-                # A negative response still proves something is listening.
-                alive.append((target, "responds (%s)" % NRC.get(e.code, "nrc 0x%02X" % e.code)))
-                print("  0x%02X  responds (negative: %s)" % (target, NRC.get(e.code, "0x%02X" % e.code)))
-            except HsfzError:
-                pass
-            except Exception as e:                      # noqa: BLE001
-                print("  0x%02X  error: %s" % (target, e), file=sys.stderr)
-            else:
-                alive.append((target, "responds"))
-                print("  0x%02X  responds" % target)
+        for target, note in core.scan(h, lo, hi, args.probe_timeout):
+            if note.startswith("error"):
+                print("  0x%02X  %s" % (target, note), file=sys.stderr)
+                continue
+            # A negative response still proves something is listening.
+            alive.append(target)
+            print("  0x%02X  responds%s" % (target, " (negative: %s)" % note if note else ""))
     print("\n%d module(s) answered." % len(alive))
 
 
@@ -271,70 +265,52 @@ def op_log(args):
         if not meta:
             sys.exit("unknown channel: %s" % name)
         chans.append((name, int(meta["ID"], 16), meta))
-    names = [n for n, _, _ in chans]
-    blank = {n: (None, "", "") for n in names}
 
     if not args.out:
         args.out = os.path.join(core.logs_dir(), time.strftime("n63_%Y-%m-%d_%H-%M-%S.csv"))
-    out = open(args.out, "w", newline="", encoding="utf-8")
-    w = csv.writer(out)
-    w.writerow(core.log_header(names))
+    # The same session as the app's (engine.Session): it borrows the car if
+    # the app or another n63read holds it, else holds it and lends it, and
+    # reconnects if it drops while logging.
+    q = queue.Queue()
+    session = engine.Session(args.ip, args.target, args.source, args.timeout, out=q,
+                             layouts=core.record_layouts(cat), interval=args.interval,
+                             batch=args.batch)
+    session.set_channels(chans)
+    session.stop_after = args.samples
+    session.start_log(args.out)
     print("Logging %d channel(s) to %s - Ctrl-C to stop" % (len(chans), args.out))
-
-    t0 = last_flush = time.time()
-    n = 0
-    lost_at = None              # when the connection dropped, while it's down
-    event = ""
-    reader = core.ChannelReader(core.record_layouts(cat), args.target, batch=args.batch)
+    session.start()
+    t0 = last_shown = time.time()
+    error = None
     try:
         while True:
-            host = None
             try:
-                with _tester(args) as h:
-                    if lost_at is not None:
-                        event = "reconnected after %d s" % round(time.time() - lost_at)
-                        print("\n" + event)
-                        lost_at = None
-                    if not getattr(h, "shared", False):
-                        # We hold the car: lend it to other n63read processes.
-                        host = share.Host(args.ip).start()
-                    while True:
-                        cycle = time.time()
-                        if host:
-                            host.serve(h)
-                            h.tidy()
-                        sample = reader.read(h, chans)
-                        now = time.time()
-                        w.writerow(core.log_row(now - t0, now, names, sample, event))
-                        event = ""
-                        n += 1
-                        # Push to disk about once a second; a crash loses at most that.
-                        if now - last_flush >= 1.0:
-                            out.flush()
-                            os.fsync(out.fileno())
-                            last_flush = now
-                            print("\r%d samples, %.1f s" % (n, now - t0), end="")
-                        time.sleep(core.rest(args.interval, cycle, time.time()))
-            except (HsfzError, OSError) as e:
-                if n == 0 and lost_at is None:
-                    raise                   # never got going: report it as before
-                if lost_at is None:
-                    # A cable bump or the car going to sleep: keep the log
-                    # going, mark the gap, and keep trying.
-                    lost_at = time.time()
-                    print("\nconnection lost (%s); reconnecting - Ctrl-C to stop" % e)
-                    w.writerow(core.log_row(lost_at - t0, lost_at, names, blank,
-                                            "connection lost: %s" % e))
-                    out.flush()
-                time.sleep(core.RECONNECT_WAIT)
-            finally:
-                if host:
-                    host.stop()
+                msg = q.get(timeout=0.5)
+            except queue.Empty:
+                if not session.is_alive():
+                    break
+                continue
+            kind = msg[0]
+            if kind == "sample":
+                if time.time() - last_shown >= 1.0:
+                    last_shown = time.time()
+                    print("\r%d samples, %.1f s" % (session.rows, last_shown - t0), end="")
+            elif kind == "status" and msg[1] == "reconnecting":
+                print("\nconnection lost; reconnecting - Ctrl-C to stop")
+            elif kind == "status" and msg[1] == "connected" and session.samples:
+                print("\nreconnected")
+            elif kind == "status" and msg[1] == "disconnected":
+                break
+            elif kind == "error":
+                error = msg[1]
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
-        out.close()
-        print("wrote %d samples to %s" % (n, args.out))
+        session.stop()
+        session.join(10)
+        print("wrote %d samples to %s" % (session.rows, args.out))
+    if error and not session.rows:
+        sys.exit("log: %s" % error.split("\n")[0])
 
 
 def op_speed(args):
@@ -657,6 +633,8 @@ def build_parser():
     sp.add_argument("--batch", action="store_true",
                     help="read engine values several to a request (falls back to one at "
                          "a time if the DME won't; try `speed` first)")
+    sp.add_argument("--samples", type=int, default=0,
+                    help="stop after this many samples (default: run until Ctrl-C)")
     sp.add_argument("names", nargs="*")
     sp.set_defaults(func=op_log)
 

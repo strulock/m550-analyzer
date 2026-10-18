@@ -207,7 +207,7 @@ def test_session_is_recorded_with_its_wire_trace(quick_diagnostics):
         p.set_channels([("ILAG2", 0x588A, meta)])
         p.start()
         assert wait_for(lambda: p.trace and any(t[1] == "rx" for t in p.trace))
-        time.sleep(0.2)
+        assert wait_for(lambda: p.samples >= 1)
         p.stop()
         p.join(5)
     finally:

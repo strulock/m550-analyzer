@@ -1,6 +1,5 @@
 """What a module stored with a fault, and reading several values per request."""
 
-import types
 
 import pytest
 
@@ -219,19 +218,10 @@ def test_cli_speed_says_when_the_dme_wont(car, capsys):
     assert "won't take several identifiers per request" in capsys.readouterr().out
 
 
-def test_cli_log_can_batch(car, tmp_path, monkeypatch):
+def test_cli_log_can_batch(car, tmp_path):
     out = tmp_path / "run.csv"
-    calls = {"n": 0}
-
-    def sleep(s):
-        calls["n"] += 1
-        if calls["n"] > 3:
-            raise KeyboardInterrupt
-    import time
-    monkeypatch.setattr(cli, "time", types.SimpleNamespace(
-        time=time.time, sleep=sleep, strftime=time.strftime))
     cli.main(["log", "--ip", "127.0.0.1", "--timeout", "1", "--interval", "0", "--batch",
-              "--out", str(out), "ILAG1", "ILAG2"])
+              "--samples", "3", "--out", str(out), "ILAG1", "ILAG2"])
     rows = out.read_text(encoding="utf-8").splitlines()
     assert rows[0] == "Time,Clock,ILAG1,ILAG2,Event" and rows[-1].split(",")[3] == "1.0"
     assert set(car.services) == {0x22}                  # still only reads

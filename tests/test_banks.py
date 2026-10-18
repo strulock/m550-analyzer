@@ -4,6 +4,7 @@ and logs that survive a dropped connection."""
 import csv
 import queue
 import socket
+import threading
 import time
 import types
 
@@ -138,22 +139,17 @@ def rows_of(path):
         return []
 
 
-def test_the_cli_log_carries_on_after_a_dropped_connection(tmp_path, car, monkeypatch):
+def test_the_cli_log_carries_on_after_a_dropped_connection(tmp_path, car):
     out = tmp_path / "drive.csv"
-    state = {"rows": 0, "dropped": False}
 
-    def sleep(seconds):
-        state["rows"] += 1
-        if state["rows"] == 3 and not state["dropped"]:
-            state["dropped"] = True
-            car.drop()
-        if state["rows"] > 12:
-            raise KeyboardInterrupt
-        time.sleep(min(seconds, 0.02))
-    monkeypatch.setattr(cli, "time", types.SimpleNamespace(
-        time=time.time, sleep=sleep, strftime=time.strftime))
-    cli.main(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0",
-              "--out", str(out), "ILAG2"])
+    def bump():                                         # a cable bump, once logging
+        deadline = time.time() + 5
+        while len(rows_of(out)) < 4 and time.time() < deadline:
+            time.sleep(0.02)
+        car.drop()
+    threading.Thread(target=bump, daemon=True).start()
+    cli.main(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0.02",
+              "--samples", "40", "--out", str(out), "ILAG2"])
     rows = rows_of(out)
     events = [r[-1] for r in rows[1:] if r[-1]]
     assert any(e.startswith("connection lost") for e in events)
