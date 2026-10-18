@@ -85,7 +85,7 @@ def exe(tmp_path, monkeypatch):
     folder.mkdir()
     path = folder / "n63read.exe"
     path.write_bytes(b"MZ old version")
-    monkeypatch.setattr(update, "install_location", lambda: str(folder) + "\\")
+    monkeypatch.setattr(update, "install_location", lambda: str(folder) + os.sep)
     return str(path)
 
 

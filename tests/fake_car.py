@@ -69,6 +69,12 @@ class FakeCar:
 
     def close(self):
         self._stop = True
+        try:
+            # Wakes the accept() thread; on Linux close() alone leaves the
+            # port listening until it returns.
+            self.srv.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
         self.srv.close()
 
     def _accept(self):
