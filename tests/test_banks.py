@@ -143,9 +143,11 @@ def test_the_cli_log_carries_on_after_a_dropped_connection(tmp_path, car):
     out = tmp_path / "drive.csv"
 
     def bump():                                         # a cable bump, once logging
+        # The car's request count, not the file: the log reaches disk only
+        # once a second, and a quick run can finish before that.
         deadline = time.time() + 5
-        while len(rows_of(out)) < 4 and time.time() < deadline:
-            time.sleep(0.02)
+        while len(car.services) < 5 and time.time() < deadline:
+            time.sleep(0.005)
         car.drop()
     threading.Thread(target=bump, daemon=True).start()
     cli.main(["log", "--ip", "127.0.0.1", "--timeout", "0.5", "--interval", "0.02",
