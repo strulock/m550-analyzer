@@ -10,14 +10,14 @@ file, from which `tools/module_catalog.py` builds a catalog.
 | Address | Module | SGBD | Catalog prefix | Channels | Status |
 |---|---|---|---|---|---|
 | `0x12` | Engine, master DME (Bosch, N63TU2) | `dme8ff_r` | *(none)* | 1,845 | **verified**: lambda, uneven running and misfire values read on the car; all 1,845 identifiers checked on 2026-10-18: 1,165 answered, every one the expected size; 680 refused |
-| `0x63` | Head unit, NBT Evo | `nbtevo` | `HU_` | 717 | **GPS verified** (2026-10-18): fix, satellites, position and height right on a drive. GPS speed is m/s, not the km/h the file says; corrected. Other values not yet checked |
+| `0x63` | Head unit, NBT Evo | `nbtevo` | `HU_` | 717 | **GPS verified** (2026-10-18): fix, satellites, position and height right on a drive. GPS speed is m/s, not the km/h the file says; corrected. **fits**: 57 of 57 answers the expected size; 37 identifiers answered busyRepeatRequest (asked again since) |
 | `0x18` | Transmission, ZF 8HP (EGS) | `gszfb1` | `EGS_` | 3,526 | **fits** (2026-10-18): 131 of 131 answers the expected size. Gear verified against the 8HP ratios |
 | `0x19` | Transfer case, xDrive (LMV) | `lmv_g11` | `LMV_` | 224 | **fits** (2026-10-18): 20 of 20 |
 | `0x29` | Stability control (DSC), EBC460 SP2018 | `dsc_g30n` | `DSC_` | 868 | **fits** (2026-10-18): 60 of 62 the expected size (`0x4007` CPU statistics and `0xD80D` button records differ); tire pressure plausible |
 | `0x30` | Electric power steering (EPS) | `eps_g11` | `EPS_` | 66 | **fits** (2026-10-18): 22 of 22 |
-| `0x40` | Body domain controller (BDC) | `bdc_g11` | `BDC_` | 1,357 | probably right (see below); gear from the bus reads; not yet checked |
-| `0x76` | Suspension, vertical dynamics (VDP) | `vdp_g11` | `VDP_` | 538 | not yet checked |
-| `0x78` | Climate control (IHKA) | `ihka_g11` | `IHKA_` | 154 | not yet checked |
+| `0x40` | Body domain controller (BDC) | `bdc_g11` | `BDC_` | 1,357 | **fits** (2026-10-18): 230 of 230 answers the expected size; the check stopped at `0xDA5F`-`0xDA77` (no answer in 0.5 s), 57 identifiers after them not yet checked |
+| `0x76` | Suspension, vertical dynamics (VDP) | `vdp_g11` | `VDP_` | 538 | **fits** (2026-10-18): 41 of 41 |
+| `0x78` | Climate control (IHKA) | `ihka_g11` | `IHKA_` | 154 | **fits** (2026-10-18): 28 of 28 |
 | `0x01` | Airbag / crash safety (ACSM) | `acsm5` | `ACSM_` | 565 | **fits** (2026-10-18): all 54 identifiers that answered are the expected size; lateral acceleration plausible |
 | `0x17` | Fuel pump control (EKP) | `ekp301` | `EKP_` | 13 | hand-decoded; **no answer** at `0x17` on 2026-10-18 (engine running): absent at that address, or asleep |
 | `0x2C` | Park assist (PMA / PDC) | `pma_20` | `PMA_` | 89 | **fits** (2026-10-18): 30 of 31 (`0xD67C` sensor signal paths: 36 bytes, file says 32) |

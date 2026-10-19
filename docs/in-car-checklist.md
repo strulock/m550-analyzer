@@ -12,10 +12,10 @@ settles it. Record results at the bottom.
 | Instrument cluster identification (`22 F1 50` at `0x60` → `KOMB_G11`) | confirmed on the car |
 | Module scan and fault read across modules | **working** (2026-10-18): 36 modules found and read at the default probe wait |
 | Head unit catalog and GPS position layout | **GPS verified** (2026-10-18). GPS speed turned out to be m/s; corrected. Rest of the catalog unverified |
-| Transmission, transfer case, DSC, steering, body, suspension, climate, airbag, fuel pump catalogs | **unverified**: right family by name and address; reply sizes not yet checked |
+| Transmission, transfer case, DSC, steering, body, suspension, climate, airbag, fuel pump catalogs | **fit** (2026-10-18), all but the fuel pump, which doesn't answer at `0x17` |
 | Fuel pump byte layout | **unverified**: decoded from bytecode |
-| Head unit is NBT Evo (not ENAVEVO as the G30 map lists at `0x63`) | **likely**: the NBT Evo catalog's GPS and fault texts fit; identification not yet read |
-| BDC is `BDC_G11` at this car's software level (SP2018) | **unverified** |
+| Head unit is NBT Evo (not ENAVEVO as the G30 map lists at `0x63`) | **confirmed** (2026-10-18): its HMI version reads `NBTevo_ID5_1911`, and the NBT Evo catalog fits |
+| BDC is `BDC_G11` at this car's software level (SP2018) | **confirmed** (2026-10-18): 230 of 230 answers the expected size |
 | DME logging rate with module channels added | **measured**: one row every 1.9 s with 95 channels (about 20 ms a read), one at a time. Batching not yet tried (`n63read speed`) |
 
 ## The session
@@ -89,4 +89,5 @@ if possible (a full check takes a few minutes).
 | 2026-10-18 | `ILUZ5` at `0x12` and `@0x13` | both answer, with different values (5.0 and 2.44 rad/s2) | one read each, so not yet settled which is cylinder 5; log both together |
 | 2026-10-18 | `ILUZ5`-`8` at `0x12` and `@0x13`, 60 rows at idle, batched (`--batch`) | the same values from both: within 0.2 rad/s2 in 49, 34, 52 and 56 of 60 rows; the rest differ where the value changed between the two reads | either DME gives cylinders 5-8, so the *Misfire hunt* set reading them from `0x12` is right. Batched logging on the car: 4.8 rows a second with 9 values from both DMEs |
 | 2026-10-18 | Idle log, 13 min, 95 channels | 1.8 s a row; 25-28 s gaps again while the CLI check and fault read ran | bank 2 cylinder 5 misfire counter went to 1 once |
-| 2026-10-18 | Not done yet | | check of BDC, head unit, VDP, IHKA on 0.4.1; fuel pump voltage; the DME snapshot |
+| 2026-10-18 | Check, BDC, head unit, VDP, IHKA (0.4.1) | all fit: BDC 230 ok, head unit 57, VDP 41, IHKA 28; none the wrong size | ran to the end. BDC: `0xDA5F`, `0xDA61`, `0xDA77` didn't answer in 0.5 s, so its last 57 were skipped (next release waits 2 s). Head unit: 37 answered busyRepeatRequest (`0x21`); the next release asks again |
+| 2026-10-18 | Not done yet | | the BDC's last 57 identifiers and the head unit's busy ones, on the next release; fuel pump; the DME snapshot |
