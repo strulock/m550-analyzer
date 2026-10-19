@@ -223,8 +223,8 @@ the file and line it starts from, as of 0.3.8.
       `I_EWG_POS@0x13` "wrong identifier".
 - [ ] Why a drive log stalls for 12-29 s while a check borrows the
       connection.
-- [ ] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
-      which DME reports cylinders 5-8.
+- [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
+      which DME reports cylinders 5-8: both give the same values.
 - [ ] Move each module catalog in `docs/modules.md` from "not yet checked" to
       verified, or record what differs.
 - [x] Measure the DME logging rate with module channels added: 1.9 s a row

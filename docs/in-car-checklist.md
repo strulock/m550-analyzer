@@ -87,5 +87,6 @@ if possible (a full check takes a few minutes).
 | 2026-10-18 | `n63read speed` | one per request 1.2 cycles/s, several per request 6.2 cycles/s, 18 of 18 answered | batching is 5.2x faster on this DME |
 | 2026-10-18 | `faults --details` | odometer and vehicle time decode and agree across faults (107,240-111,271 km, rising with time); counters read | the DME's snapshot timed out (its only engine fault, `1A400A`); module-specific values not decoded yet |
 | 2026-10-18 | `ILUZ5` at `0x12` and `@0x13` | both answer, with different values (5.0 and 2.44 rad/s2) | one read each, so not yet settled which is cylinder 5; log both together |
+| 2026-10-18 | `ILUZ5`-`8` at `0x12` and `@0x13`, 60 rows at idle, batched (`--batch`) | the same values from both: within 0.2 rad/s2 in 49, 34, 52 and 56 of 60 rows; the rest differ where the value changed between the two reads | either DME gives cylinders 5-8, so the *Misfire hunt* set reading them from `0x12` is right. Batched logging on the car: 4.8 rows a second with 9 values from both DMEs |
 | 2026-10-18 | Idle log, 13 min, 95 channels | 1.8 s a row; 25-28 s gaps again while the CLI check and fault read ran | bank 2 cylinder 5 misfire counter went to 1 once |
 | 2026-10-18 | Not done yet | | check of BDC, head unit, VDP, IHKA on 0.4.1; fuel pump voltage; the DME snapshot |
