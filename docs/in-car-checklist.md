@@ -90,5 +90,12 @@ if possible (a full check takes a few minutes).
 | 2026-10-18 | `ILUZ5`-`8` at `0x12` and `@0x13`, 60 rows at idle, batched (`--batch`) | the same values from both: within 0.2 rad/s2 in 49, 34, 52 and 56 of 60 rows; the rest differ where the value changed between the two reads | either DME gives cylinders 5-8, so the *Misfire hunt* set reading them from `0x12` is right. Batched logging on the car: 4.8 rows a second with 9 values from both DMEs |
 | 2026-10-18 | Idle log, 13 min, 95 channels | 1.8 s a row; 25-28 s gaps again while the CLI check and fault read ran | bank 2 cylinder 5 misfire counter went to 1 once |
 | 2026-10-18 | Check, BDC, head unit, VDP, IHKA (0.4.1) | all fit: BDC 230 ok, head unit 57, VDP 41, IHKA 28; none the wrong size | ran to the end. BDC: `0xDA5F`, `0xDA61`, `0xDA77` didn't answer in 0.5 s, so its last 57 were skipped (next release waits 2 s). Head unit: 37 answered busyRepeatRequest (`0x21`); the next release asks again |
+| 2026-10-18 | Check, first run (0.4.0) | stopped in the DME | at `0x557B`, on a late answer to `0x5579`: the same late-reply bug |
+| 2026-10-18 | `n63read speed`, second run | 5.1x faster batched | 1.1 cycles/s one per request, 5.6 batched; 18 of 18 answered both ways |
+| 2026-10-18 | Logging rate, batched (`--batch`) | DME columns fill every row | 14 DME channels: 0.61 s a row one at a time, 0.12 s batched. Plus 6 module channels: 0.78 and 0.27 s (module reads stay one per request) |
+| 2026-10-18 | Freeze frames against the car | match | the DSC's latest snapshot (111,271 km) was about 21 h before the dash read 111,305 km; its vehicle time agrees with the airbag module's clock |
+| 2026-10-18 | DME fault details | "no details stored" with a 6 s wait | at 2 s the read timed out; `1A400A` is status `0x20`, never confirmed. Details now wait 6 s |
+| 2026-10-18 | Batched CLI log while a check borrowed the connection | no stall | 0.21 s a row, worst gap 0.69 s, the same as without the check. Also no stall in a borrowing log during the app's fault read |
+| 2026-10-18 | `ILAG2` at `0x12` | refused (requestOutOfRange) | single read and in logs; it read on 2026-10-14. `ILAG1@0x13` gives bank 2 lambda |
 | 2026-10-18 | BDC fault details | odometer and time right in every snapshot | a second snapshot after the BDC's own values went undecoded (it held today's 111,304 km); fixed |
 | 2026-10-18 | Not done yet | | the BDC's last 57 identifiers and the head unit's busy ones, on the next release; fuel pump; the DME snapshot |

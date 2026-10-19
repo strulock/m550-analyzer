@@ -239,8 +239,10 @@ the file and line it starts from, as of 0.3.8.
       more stored codes (coding, brake pedal travel sensor, vacuum sensor)
       than 18:48 and 23:02, interleaved with the rest rather than cut off.
       Read it twice in a row to see whether it's the car or the read.
-- [x] The DME keeps no snapshot for `1A400A` (status 0x20, not confirmed);
-      the earlier timeout was the late-reply bug.
+- [x] The DME keeps no snapshot for `1A400A` (status 0x20, not confirmed),
+      but takes over 2 s to say so: fault details now wait up to 6 s.
+- [ ] `ILAG2` at `0x12` was refused on 2026-10-18 (it read before). Find
+      when it answers, or point bank 2 lambda at `ILAG1@0x13`.
 - [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
       which DME reports cylinders 5-8: both give the same values.
 - [ ] Move each module catalog in `docs/modules.md` from "not yet checked" to
