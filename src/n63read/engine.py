@@ -217,7 +217,12 @@ class Session(threading.Thread):
                 self._stop_event.wait(0.15)
                 continue
             elapsed = round(time.time() - t0, 3)
-            sample = self.reader.read(h, chans)
+            # The whole cycle under the connection's lock, so requests lent
+            # to another program wait for the end of it, not slot in between
+            # each read: a fault sweep's 0.5 s waits at empty addresses once
+            # stretched a 95-value row to 28 s (in-car, 2026-10-18).
+            with h.lock:
+                sample = self.reader.read(h, chans)
             self.out_q.put(("sample", elapsed, sample))
             self.samples += 1
             self._write_log(chans, sample)

@@ -187,6 +187,25 @@ def test_two_starting_together_make_one_connection(car):
             t.close()
 
 
+def test_a_read_cycle_holds_the_connection_until_it_ends(car):
+    """Requests lent to another program wait for the end of a cycle instead
+    of slotting in between each of its reads."""
+    app = App()
+    held = []
+    real = app.session.reader.read
+
+    def read(h, chans, now=None):
+        held.append(h.lock._is_owned())
+        return real(h, chans, now)
+    app.session.reader.read = read
+    app.start()
+    try:
+        assert wait_for(lambda: len(held) >= 3)
+    finally:
+        app.stop()
+    assert all(held)
+
+
 def test_borrowed_and_own_requests_take_turns(car):
     """The holder's reads and the requests it lends run on different threads;
     the connection's lock keeps every reply with its request."""

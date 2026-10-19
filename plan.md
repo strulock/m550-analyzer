@@ -229,8 +229,18 @@ the file and line it starts from, as of 0.3.8.
       0x22, sub-function for 0x19/0x3E) or it is skipped; a garbled reply
       is noted in the check and it carries on. Likely also the old
       `I_EWG_POS@0x13` "wrong identifier".
-- [ ] Why a drive log stalls for 12-29 s while a check borrows the
-      connection.
+- [x] Why a drive log stalls for 12-29 s while a check borrows the
+      connection: lent requests slotted in between each read of the
+      holder's cycle, and a sweep waits 0.5 s at each empty address, so a
+      95-value row took up to 28 s. A cycle now holds the connection to its
+      end. (A borrowing log during the app's fault read never stalled over
+      0.7 s.) Check at the car on the next release.
+- [ ] The DSC's fault list differs between reads: 23:15 listed about 35
+      more stored codes (coding, brake pedal travel sensor, vacuum sensor)
+      than 18:48 and 23:02, interleaved with the rest rather than cut off.
+      Read it twice in a row to see whether it's the car or the read.
+- [x] The DME keeps no snapshot for `1A400A` (status 0x20, not confirmed);
+      the earlier timeout was the late-reply bug.
 - [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
       which DME reports cylinders 5-8: both give the same values.
 - [ ] Move each module catalog in `docs/modules.md` from "not yet checked" to
@@ -245,8 +255,6 @@ the file and line it starts from, as of 0.3.8.
       Measured: 1.2 cycles/s one at a time, 6.2 batched, all 18 answered.
       Now the default in the app, `n63read log` and Claude's tools
       (`--one-at-a-time` to turn it off).
-- [ ] The DME's snapshot (`0x19 04`) timed out for `1A400A`: try record
-      `0x01` instead of `0xFF`, or a longer wait.
 - [ ] Check the freeze-frame details against a real fault: odometer, time and
       counters should match the car.
 
