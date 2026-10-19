@@ -232,10 +232,11 @@ the file and line it starts from, as of 0.3.8.
 - [x] Look into the bank-2 gaps: `I_EWG_POS@0x13` now reads bank 2's own
       values. `SOLL_POS_EWG` is refused by this DME; taken out of the
       *Boost and wastegates* set.
-- [ ] Run `n63read speed` at the car. If the DME takes several identifiers
+- [x] Run `n63read speed` at the car. If the DME takes several identifiers
       per request, consider making batching the default in the app too.
       Measured: 1.2 cycles/s one at a time, 6.2 batched, all 18 answered.
-      Make it the default.
+      Now the default in the app, `n63read log` and Claude's tools
+      (`--one-at-a-time` to turn it off).
 - [ ] The DME's snapshot (`0x19 04`) timed out for `1A400A`: try record
       `0x01` instead of `0xFF`, or a longer wait.
 - [ ] Check the freeze-frame details against a real fault: odometer, time and

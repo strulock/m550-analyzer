@@ -52,7 +52,7 @@ class Session(threading.Thread):
     """One connection to the car and everything that runs on it."""
 
     def __init__(self, ip, target=core.DME_MASTER, source=core.TESTER_ADDR, timeout=2.0,
-                 out=None, layouts=None, bind=None, interval=0.25, batch=False):
+                 out=None, layouts=None, bind=None, interval=0.25, batch=True):
         super().__init__(daemon=True)
         self.ip, self.target = ip, target
         # DME channels go to `target`; other modules' channels to their own.

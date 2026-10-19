@@ -208,7 +208,7 @@ def test_cli_speed_compares_both_ways(car, capsys):
               "ILAG1", "ILAG2"])
     out = capsys.readouterr().out
     assert "one per request" in out and "several per request" in out
-    assert "log --batch" in out
+    assert "n63read log` and the app use" in out
 
 
 def test_cli_speed_says_when_the_dme_wont(car, capsys):
@@ -218,11 +218,19 @@ def test_cli_speed_says_when_the_dme_wont(car, capsys):
     assert "won't take several identifiers per request" in capsys.readouterr().out
 
 
-def test_cli_log_can_batch(car, tmp_path):
+def test_cli_log_batches_by_default(car, tmp_path):
     out = tmp_path / "run.csv"
-    cli.main(["log", "--ip", "127.0.0.1", "--timeout", "1", "--interval", "0", "--batch",
+    cli.main(["log", "--ip", "127.0.0.1", "--timeout", "1", "--interval", "0",
               "--samples", "3", "--out", str(out), "ILAG1", "ILAG2"])
     rows = out.read_text(encoding="utf-8").splitlines()
     assert rows[0] == "Time,Clock,ILAG1,ILAG2,Event" and rows[-1].split(",")[3] == "1.0"
     assert set(car.services) == {0x22}                  # still only reads
     assert len(car.services) == len(rows) - 1           # one request a row, not two
+
+
+def test_cli_log_one_at_a_time(car, tmp_path):
+    out = tmp_path / "run.csv"
+    cli.main(["log", "--ip", "127.0.0.1", "--timeout", "1", "--interval", "0",
+              "--one-at-a-time", "--samples", "3", "--out", str(out), "ILAG1", "ILAG2"])
+    rows = out.read_text(encoding="utf-8").splitlines()
+    assert len(car.services) == 2 * (len(rows) - 1)     # two requests a row

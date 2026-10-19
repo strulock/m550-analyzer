@@ -515,7 +515,7 @@ def _shown(name, entry, enums):
 def tool_read_channels(a):
     chans = _chans(a.get("names"))
     reader = core.ChannelReader(core.record_layouts(_search_catalog()),
-                                _hex(a.get("target"), core.DME_MASTER))
+                                _hex(a.get("target"), core.DME_MASTER), batch=True)
     try:
         with _tester(a["ip"]) as h:
             sample = _read_all(h, reader, chans)
