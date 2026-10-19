@@ -210,7 +210,7 @@ the file and line it starts from, as of 0.3.8.
 
 - [ ] Work through `docs/in-car-checklist.md` and fill in its Results table.
       Done: discover, fault read, GPS, a drive log, DME and ACSM checks.
-      Left: the rest of the check (it stopped at DME `0x557A`), fuel pump.
+      Left: the check from the BDC on (with 0.4.1), fuel pump.
 - [x] GPS speed is m/s on the car, not km/h: corrected in the catalog and
       `tools/module_catalog.py` (`CAR_CORRECTIONS`), so the GPS speed
       minus vehicle speed channel is right.
@@ -234,6 +234,10 @@ the file and line it starts from, as of 0.3.8.
       *Boost and wastegates* set.
 - [ ] Run `n63read speed` at the car. If the DME takes several identifiers
       per request, consider making batching the default in the app too.
+      Measured: 1.2 cycles/s one at a time, 6.2 batched, all 18 answered.
+      Make it the default.
+- [ ] The DME's snapshot (`0x19 04`) timed out for `1A400A`: try record
+      `0x01` instead of `0xFF`, or a longer wait.
 - [ ] Check the freeze-frame details against a real fault: odometer, time and
       counters should match the car.
 

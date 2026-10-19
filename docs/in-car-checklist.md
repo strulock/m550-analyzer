@@ -83,4 +83,9 @@ if possible (a full check takes a few minutes).
 | 2026-10-18 | GPS (drive log) | ok | fix "3D position", 6-10 satellites, position and height match the route. **GPS speed was 0.275x vehicle speed: m/s, not km/h.** Fixed (x3.6) |
 | 2026-10-18 | 12-minute drive log, 95 channels | ok | 1.9 s a row; gaps of 12-29 s while the check ran alongside. Vehicle speed from DME and DSC agree; gear vs engine speed matches the 8HP ratios; lateral acceleration +-3.4 m/s2 in corners; tire pressure 2.46-2.56 bar |
 | 2026-10-18 | Bank 2 | `I_EWG_POS@0x13` reads its own values; `SOLL_POS_EWG` refused | `SOLL_POS_EWG` taken out of the *Boost and wastegates* set. `IUKZ5`/`IUKZ6` and `KNDS_SENS_ROH_KS_DRUCK` refused (requestOutOfRange) |
-| 2026-10-18 | Not done yet | | rest of the check, `n63read speed`, `faults --details`, fuel pump voltage, `ILUZ5`-`8` at `0x12` vs `@0x13` side by side |
+| 2026-10-18 | Check, second run (0.4.0) | DME 1,165 ok / 0 wrong size; transmission, transfer case, steering fit 100%; DSC and park assist 97%; fuel pump no answer | stopped in the BDC: `0xDA5F` took over 0.5 s, its late answer was taken for `0xDA77`. Fixed in 0.4.1 (late answers skipped), and the check now waits 2 s. Head unit, VDP, IHKA not reached |
+| 2026-10-18 | `n63read speed` | one per request 1.2 cycles/s, several per request 6.2 cycles/s, 18 of 18 answered | batching is 5.2x faster on this DME |
+| 2026-10-18 | `faults --details` | odometer and vehicle time decode and agree across faults (107,240-111,271 km, rising with time); counters read | the DME's snapshot timed out (its only engine fault, `1A400A`); module-specific values not decoded yet |
+| 2026-10-18 | `ILUZ5` at `0x12` and `@0x13` | both answer, with different values (5.0 and 2.44 rad/s2) | one read each, so not yet settled which is cylinder 5; log both together |
+| 2026-10-18 | Idle log, 13 min, 95 channels | 1.8 s a row; 25-28 s gaps again while the CLI check and fault read ran | bank 2 cylinder 5 misfire counter went to 1 once |
+| 2026-10-18 | Not done yet | | check of BDC, head unit, VDP, IHKA on 0.4.1; fuel pump voltage; the DME snapshot |

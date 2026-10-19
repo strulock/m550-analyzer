@@ -1360,6 +1360,8 @@ SLOW_READS_PER_CYCLE = 6       # module reads allowed per DME cycle
 NO_ANSWER_BACKOFF = 30.0       # seconds to leave a silent module alone
 MODULE_TIMEOUT = 0.5           # a present module answers in milliseconds; a
                                # missing or sleeping one must not stall the DME
+CHECK_TIMEOUT = 2.0            # the catalog check waits longer: the BDC takes
+                               # over 0.5 s for some records (in-car, 2026-10-18)
 # DME channels (0x12, and 0x13 for bank 2) are read every cycle, so one that
 # never answers would cost the full timeout every time and drag the whole
 # log down. Instead a timeout skips that address for the rest of the cycle,
@@ -1884,7 +1886,7 @@ def check_identifier(h, key, fields):
     """
     module, did = key
     try:
-        raw = h.read_did(module, did, timeout=MODULE_TIMEOUT)
+        raw = h.read_did(module, did, timeout=CHECK_TIMEOUT)
     except NegativeResponse as e:
         return "refused", NRC.get(e.code, "0x%02X" % e.code), b""
     except HsfzTimeout:
