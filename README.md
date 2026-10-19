@@ -429,10 +429,10 @@ n63read templates                            list the saved templates
 n63read log --ip 169.254.x.x ILAG1 ILAG2 ILUZ5 ILUZ7
                                              log to Documents\BMW Analyzer Logs
                                              (or --out run.csv; --samples 100 stops
-                                             after 100; --batch reads several
-                                             engine values per request)
+                                             after 100; --one-at-a-time reads one
+                                             engine value per request)
 n63read speed --ip 169.254.x.x               engine values a second: one per request
-                                             vs several (is --batch worth it?)
+                                             vs several per request
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?

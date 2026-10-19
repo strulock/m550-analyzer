@@ -90,7 +90,7 @@ else before it reaches the wire.
 
 | Service | Used for |
 |---|---|
-| `0x22` ReadDataByIdentifier | every live value: `22 <DID hi> <DID lo>`, reply `62 <DID> <data>`; with batching (`log --batch`), up to 8 identifiers in one request |
+| `0x22` ReadDataByIdentifier | every live value: `22 <DID hi> <DID lo>`, reply `62 <DID> <data>`; batched by default, up to 8 identifiers in one request |
 | `0x19` ReadDTCInformation | fault memory: sub-function `0x02` (reportDTCByStatusMask), mask `0xFF`; per fault, `0x04` (snapshots) and `0x06` (extended data) |
 | `0x3E` TesterPresent | the module scan (`3E 00`): does anything answer at this address? |
 
@@ -172,8 +172,10 @@ every echo is an identifier that was asked for, at exactly the place the
 sizes put it, with nothing left over. Identifiers the DME doesn't support
 are left out of the reply and read singly. A refusal, a timeout or anything
 that doesn't line up turns batching off for that DME for the session.
-`n63read speed` measures both ways; `n63read log --batch` uses it. Whether
-this DME takes it is still to be checked at the car.
+`n63read speed` measures both ways. This car's DME takes it: 6.2 cycles a
+second against 1.2 one at a time, 18 of 18 values answered (2026-10-18), so
+the app, `n63read log` and Claude's tools batch by default;
+`n63read log --one-at-a-time` turns it off.
 
 Many fault codes embed the module address: the generic *Energiesparmode
 aktiv* (energy-saving mode active) code is `02AA00`, where `AA` is the

@@ -345,7 +345,7 @@ def op_speed(args):
             print("\nDME 0x%02X won't take several identifiers per request (%s);"
                   " the log reads it one at a time." % (target, why))
     elif batched.batched and results[0][1]:
-        print("\n%.1fx faster several per request: `n63read log --batch` uses it."
+        print("\n%.1fx faster several per request, which `n63read log` and the app use."
               % (results[1][1] / results[0][1]))
 
 
@@ -630,9 +630,10 @@ def build_parser():
                                   "Documents\\%s)" % core.LOGS_FOLDER)
     sp.add_argument("--template", help="the channels of a template saved in the app "
                                        "(see `templates`), plus any named")
-    sp.add_argument("--batch", action="store_true",
-                    help="read engine values several to a request (falls back to one at "
-                         "a time if the DME won't; try `speed` first)")
+    sp.add_argument("--one-at-a-time", dest="batch", action="store_false",
+                    help="read engine values one per request (the default is several "
+                         "to a request, falling back to one at a time if the DME won't)")
+    sp.add_argument("--batch", action="store_true", help=argparse.SUPPRESS)  # the default now
     sp.add_argument("--samples", type=int, default=0,
                     help="stop after this many samples (default: run until Ctrl-C)")
     sp.add_argument("names", nargs="*")
