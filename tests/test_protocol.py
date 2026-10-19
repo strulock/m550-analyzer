@@ -64,6 +64,33 @@ def test_late_reply_from_another_module_is_not_credited():
         h.tester_present(0x13)
 
 
+def test_a_late_reply_to_an_earlier_identifier_is_skipped():
+    # 0xDA5F timed out; its answer arrives while 0xDA77 is being asked for.
+    h = hsfz([frame(0x18, 0xF4, bytes.fromhex("62DA5F01")),
+              frame(0x18, 0xF4, bytes.fromhex("62DA7702"))])
+    assert h.read_did(0x18, 0xDA77) == bytes.fromhex("02")
+
+
+def test_a_late_reply_alone_is_a_timeout_not_a_mismatch():
+    h = hsfz([frame(0x18, 0xF4, bytes.fromhex("62DA5F01"))])
+    with pytest.raises(core.HsfzTimeout):
+        h.read_did(0x18, 0xDA77)
+
+
+def test_a_late_fault_reply_of_another_kind_is_skipped():
+    h = hsfz([frame(0x12, 0xF4, bytes.fromhex("590401")),
+              frame(0x12, 0xF4, bytes.fromhex("5902FF"))])
+    assert h.request(0x12, bytes.fromhex("1902FF")) == bytes.fromhex("5902FF")
+
+
+def test_the_check_notes_a_bad_reply_and_carries_on():
+    class H:
+        def read_did(self, *a, **k):
+            raise core.HsfzError("short response")
+    status, detail, raw = core.check_identifier(H(), (0x18, 0xDA77), [])
+    assert (status, detail, raw) == ("no answer", "short response", b"")
+
+
 def test_silent_address_raises_hsfz_error_not_socket_timeout():
     with pytest.raises(core.HsfzError):
         hsfz([]).tester_present(0x55)

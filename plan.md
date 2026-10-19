@@ -214,8 +214,15 @@ the file and line it starts from, as of 0.3.8.
 - [x] GPS speed is m/s on the car, not km/h: corrected in the catalog and
       `tools/module_catalog.py` (`CAR_CORRECTIONS`), so the GPS speed
       minus vehicle speed channel is right.
-- [ ] Find why the check stopped partway, and why a drive log stalls for
-      12-29 s while a check borrows the connection.
+- [x] Find why the check stopped partway: a module answered after the
+      read had given up, and that late answer was taken for the next
+      identifier ("identifier mismatch: asked 0xDA77 got 0xDA5F"), which
+      ended the check. A reply must now echo what was asked (identifier for
+      0x22, sub-function for 0x19/0x3E) or it is skipped; a garbled reply
+      is noted in the check and it carries on. Likely also the old
+      `I_EWG_POS@0x13` "wrong identifier".
+- [ ] Why a drive log stalls for 12-29 s while a check borrows the
+      connection.
 - [ ] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
       which DME reports cylinders 5-8.
 - [ ] Move each module catalog in `docs/modules.md` from "not yet checked" to
