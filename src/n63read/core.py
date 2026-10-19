@@ -129,6 +129,12 @@ class NegativeResponse(HsfzError):
         super().__init__("negative response to 0x%02X: 0x%02X (%s)" % (service, code, name))
 
 
+# How many bytes after the service a positive reply echoes from the request:
+# the first identifier for 0x22, the sub-function for 0x19 and 0x3E. A reply
+# that echoes something else answers an earlier request that timed out.
+REPLY_ECHO = {0x22: 2, 0x19: 1, 0x3E: 1}
+
+
 class Hsfz:
     """
     HSFZ frame: [length:4 BE][control:2 BE][source:1][target:1][uds payload...]
@@ -275,7 +281,10 @@ class Hsfz:
                 raise NegativeResponse(data[1], code)
 
             if data[0] == service + 0x40:
-                return data
+                echo = REPLY_ECHO.get(service, 0)
+                if data[1:1 + echo] == payload[1:1 + echo]:
+                    return data
+                continue      # a late answer to an earlier request
             # Not ours (another module chattering) - keep waiting.
 
         raise HsfzTimeout("timed out waiting for response")
@@ -1880,6 +1889,10 @@ def check_identifier(h, key, fields):
         return "refused", NRC.get(e.code, "0x%02X" % e.code), b""
     except HsfzTimeout:
         return "no answer", "", b""
+    except ConnectionLost:
+        raise
+    except HsfzError as e:            # a garbled reply: note it, carry on
+        return "no answer", str(e), b""
     size, exact = expected_size(fields)
     if (exact and len(raw) == size) or (not exact and len(raw) >= size):
         return "ok", "%d bytes" % len(raw), raw
