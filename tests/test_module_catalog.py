@@ -84,6 +84,14 @@ def test_head_unit_gets_the_hand_decoded_gps_rows():
                                             "unsigned int"]
 
 
+def test_car_corrections_override_the_sgbd():
+    tabs = {"SG_FUNKTIONEN": (FUNC_HEAD, [func("STATUS_SPEED", "0xD030", res="RES_SPEED")]),
+            "RES_SPEED": (RES_HEAD, [res("STAT_GPS_SPEED_WERT", "signed int", unit="km/h")])}
+    rows, _ = mc.build(tabs, "NBTEVO", "0x63", "HU_")
+    gps = next(r for r in rows if r["ARG"] == "HU_STATUS_SPEED.GPS_SPEED")
+    assert gps["MUL"] == "3.6"                        # m/s on the car
+
+
 def test_fuel_pump_rows_carry_byte_positions_without_sg_funktionen():
     rows, enums = mc.build({}, "EKP301", "0x17", "EKP_")
     assert enums == [] and {r["ID"] for r in rows} == {"0x4010"}

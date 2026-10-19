@@ -206,16 +206,25 @@ the file and line it starts from, as of 0.3.8.
 
 ## Phase 10 — In-car verification
 
-> **Blocked:** needs the car.
+> First session 2026-10-18; results in `docs/in-car-checklist.md`.
 
 - [ ] Work through `docs/in-car-checklist.md` and fill in its Results table.
+      Done: discover, fault read, GPS, a drive log, DME and ACSM checks.
+      Left: the rest of the check (it stopped at DME `0x557A`), fuel pump.
+- [x] GPS speed is m/s on the car, not km/h: corrected in the catalog and
+      `tools/module_catalog.py` (`CAR_CORRECTIONS`), so the GPS speed
+      minus vehicle speed channel is right.
+- [ ] Find why the check stopped partway, and why a drive log stalls for
+      12-29 s while a check borrows the connection.
+- [ ] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
+      which DME reports cylinders 5-8.
 - [ ] Move each module catalog in `docs/modules.md` from "not yet checked" to
       verified, or record what differs.
-- [ ] Measure the DME logging rate with module channels added, before and
-      after Phase 3.
-- [ ] Look into the bank-2 gaps: `SOLL_POS_EWG` is unreadable and
-      `I_EWG_POS@0x13` replies with the wrong identifier
-      (`docs/modules.md:118-120`).
+- [x] Measure the DME logging rate with module channels added: 1.9 s a row
+      for 95 channels, about 20 ms a read.
+- [x] Look into the bank-2 gaps: `I_EWG_POS@0x13` now reads bank 2's own
+      values. `SOLL_POS_EWG` is refused by this DME; taken out of the
+      *Boost and wastegates* set.
 - [ ] Run `n63read speed` at the car. If the DME takes several identifiers
       per request, consider making batching the default in the app too.
 - [ ] Check the freeze-frame details against a real fault: odometer, time and

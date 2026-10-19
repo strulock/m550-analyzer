@@ -9,16 +9,16 @@ file, from which `tools/module_catalog.py` builds a catalog.
 
 | Address | Module | SGBD | Catalog prefix | Channels | Status |
 |---|---|---|---|---|---|
-| `0x12` | Engine, master DME (Bosch, N63TU2) | `dme8ff_r` | *(none)* | 1,845 | **verified**: lambda, uneven running and misfire values read on the car |
-| `0x63` | Head unit, NBT Evo | `nbtevo` | `HU_` | 717 | not yet checked |
-| `0x18` | Transmission, ZF 8HP (EGS) | `gszfb1` | `EGS_` | 3,526 | not yet checked |
+| `0x12` | Engine, master DME (Bosch, N63TU2) | `dme8ff_r` | *(none)* | 1,845 | **verified**: lambda, uneven running and misfire values read on the car; 824 identifiers checked on 2026-10-18, every answer the expected size |
+| `0x63` | Head unit, NBT Evo | `nbtevo` | `HU_` | 717 | **GPS verified** (2026-10-18): fix, satellites, position and height right on a drive. GPS speed is m/s, not the km/h the file says; corrected. Other values not yet checked |
+| `0x18` | Transmission, ZF 8HP (EGS) | `gszfb1` | `EGS_` | 3,526 | gear (`EGS_ISTGANG.ISTGANG`) verified: each gear's engine speed per km/h matches the 8HP ratios; oil temperature plausible. Rest not yet checked |
 | `0x19` | Transfer case, xDrive (LMV) | `lmv_g11` | `LMV_` | 224 | not yet checked |
-| `0x29` | Stability control (DSC), EBC460 SP2018 | `dsc_g30n` | `DSC_` | 868 | matches the G30 module map; not yet checked |
+| `0x29` | Stability control (DSC), EBC460 SP2018 | `dsc_g30n` | `DSC_` | 868 | matches the G30 module map; tire pressure plausible on the car; not yet checked |
 | `0x30` | Electric power steering (EPS) | `eps_g11` | `EPS_` | 66 | not yet checked |
-| `0x40` | Body domain controller (BDC) | `bdc_g11` | `BDC_` | 1,357 | probably right (see below); not yet checked |
+| `0x40` | Body domain controller (BDC) | `bdc_g11` | `BDC_` | 1,357 | probably right (see below); gear from the bus reads; not yet checked |
 | `0x76` | Suspension, vertical dynamics (VDP) | `vdp_g11` | `VDP_` | 538 | not yet checked |
 | `0x78` | Climate control (IHKA) | `ihka_g11` | `IHKA_` | 154 | not yet checked |
-| `0x01` | Airbag / crash safety (ACSM) | `acsm5` | `ACSM_` | 565 | not yet checked |
+| `0x01` | Airbag / crash safety (ACSM) | `acsm5` | `ACSM_` | 565 | **fits** (2026-10-18): all 54 identifiers that answered are the expected size; lateral acceleration plausible |
 | `0x17` | Fuel pump control (EKP) | `ekp301` | `EKP_` | 13 | hand-decoded; not yet checked |
 | `0x2C` | Park assist (PMA / PDC) | `pma_20` | `PMA_` | 89 | not yet checked |
 
@@ -116,8 +116,12 @@ and the slave at `0x13` (bank 2), with the same identifier table.
   *Engine bank 2* group), read from the slave over its own connection; see
   [protocol](protocol.md#two-connections).
 - Not readable on either DME in the default session: `SOLL_POS_EWG`
-  (`0x4659`). `I_EWG_POS` (`0x5927`) at `0x13` replies with the wrong
-  identifier (`0x4653`).
+  (`0x4659`, requestOutOfRange again on 2026-10-18), nor the fuel
+  low-pressure raw value `KNDS_SENS_ROH_KS_DRUCK` (`0x5463`).
+- `I_EWG_POS` (`0x5927`) at `0x13` once replied with the wrong identifier
+  (`0x4653`). On 2026-10-18 it answered throughout a 12-minute drive with
+  its own values (0-70 %, different from bank 1's), so bank 2's wastegate
+  position reads as `I_EWG_POS@0x13`.
 
 When a bank 2 value looks unavailable, try the bank-1 name with `@0x13`
 before concluding it can't be read.

@@ -73,7 +73,7 @@ def test_write_fault_csv_round_trips(tmp_path, car):
 def test_module_names_skip_ambiguous_addresses():
     names = core.load_module_names()
     assert names[0x60] == "Instrument cluster (KOMBI)"   # known, overrides map
-    assert names[0x29].startswith("Dynamische")          # one row in the map
+    assert names[0x65].startswith("Elektrische")        # one row in the map
     assert names[0x12] == "Engine, master DME"           # map has 3 variants
 
 

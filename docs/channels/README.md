@@ -10,11 +10,11 @@ Every channel the app can read: 9962 across 12 modules. One page per module, sec
 | [Airbag / crash safety (ACSM) (0x01)](ACSM5.md) | `acsm5.prg` | 565 | [values](ACSM5-values.md) |
 | [Body domain controller (BDC) (0x40)](BDC_G11.md) | `bdc_g11.prg` | 1357 | [values](BDC_G11-values.md) |
 | [Climate control (IHKA) (0x78)](IHKA_G11.md) | `ihka_g11.prg` | 154 | [values](IHKA_G11-values.md) |
-| [DSC (0x29)](DSC_G30N.md) | `dsc_g30n.prg` | 868 | [values](DSC_G30N-values.md) |
 | [Electric power steering (EPS) (0x30)](EPS_G11.md) | `eps_g11.prg` | 66 | [values](EPS_G11-values.md) |
 | [Fuel pump control (EKP) (0x17)](EKP301.md) | `ekp301.prg` | 13 | [values](EKP301-values.md) |
 | [Head unit (NBT Evo) (0x63)](NBTEVO.md) | `nbtevo.prg` | 717 | [values](NBTEVO-values.md) |
 | [Park assist (PMA / PDC) (0x2C)](PMA_20.md) | `pma_20.prg` | 89 | [values](PMA_20-values.md) |
+| [Stability control (DSC) (0x29)](DSC_G30N.md) | `dsc_g30n.prg` | 868 | [values](DSC_G30N-values.md) |
 | [Suspension, vertical dynamics (VDP) (0x76)](VDP_G11.md) | `vdp_g11.prg` | 538 | [values](VDP_G11-values.md) |
 | [Transfer case, xDrive (LMV) (0x19)](LMV_G11.md) | `lmv_g11.prg` | 224 | [values](LMV_G11-values.md) |
 | [Transmission, ZF 8HP (EGS) (0x18)](GSZFB1.md) | `gszfb1.prg` | 3526 | [values](GSZFB1-values.md) |

@@ -86,6 +86,13 @@ GPS_ROWS = [
 ]
 
 
+# Where the car disagrees with the SGBD. GPS speed is m/s on the car, not the
+# km/h the file says: 48 at 174 km/h on the speedometer (in-car, 2026-10-18).
+CAR_CORRECTIONS = {
+    "HU_STATUS_SPEED.GPS_SPEED": {"MUL": "3.6"},
+}
+
+
 # Fuel pump 0x4010, STATUS_ADC_BEWERTET. ekp301.prg has no SG_FUNKTIONEN; this
 # hand-coded job reads one scaled byte out of each 3-byte group of the reply,
 # at these payload offsets (its own indices minus the 3-byte 62 40 10 header).
@@ -204,6 +211,9 @@ def build(tabs, name, module, prefix):
             add("%sSTATUS_ADC_BEWERTET.%s" % (prefix, suffix), "0x4010", i,
                 "STAT_" + suffix, info, unit, "high", "unsigned char", "-", mul, "1.0",
                 add_, "STATUS_ADC_BEWERTET", pos, job_info=EKP_JOB_INFO)
+
+    for r in rows:
+        r.update(CAR_CORRECTIONS.get(r["ARG"], {}))
 
     names = [r["ARG"] for r in rows]
     dupes = sorted({n for n in names if names.count(n) > 1})

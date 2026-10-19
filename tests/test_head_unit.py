@@ -61,7 +61,7 @@ def test_decode_record_walks_fields_in_order():
                    for v in (10, 20, 30, 40, 25, -1)) + b"\x00\x05"
     rec = core.decode_record(raw, LAYOUTS[SPEED])
     assert rec["HU_STATUS_SPEED.WHEEL3_SENSOR_SPEED"][0] == 30
-    assert rec["HU_STATUS_SPEED.GPS_SPEED"][0] == -1
+    assert rec["HU_STATUS_SPEED.GPS_SPEED"][0] == pytest.approx(-3.6)   # m/s on the car
     assert rec["HU_STATUS_SPEED.SPEED_DIFFERENCE_PERCENT"][0] == 5
 
 
@@ -163,7 +163,7 @@ def test_reader_over_hsfz_with_the_fake_car():
         car.close()
     assert s["DME_X"][0] == 0x1000
     assert s["HU_STATUS_GPS_POSITION.LATITUDE"][0] == pytest.approx(30.13460, abs=1e-5)
-    assert s["HU_STATUS_SPEED.GPS_SPEED"][0] == 98
+    assert s["HU_STATUS_SPEED.GPS_SPEED"][0] == pytest.approx(100.8)   # 28 m/s
     assert s["HU_STATUS_GPS"][0] == 12
 
 
