@@ -539,7 +539,9 @@ KNOWN_MODULES = {
     0x08: "Lane-change warning (HC2)",
     0x0D: "Rear function module (HKFM)",
     0x10: "Central gateway (ZGW)",
+    0x06: "Surround view / reversing camera (ICAM2)",
     0x12: "Engine, master DME",
+    0x13: "Engine, slave DME (bank 2)",
     0x17: "Fuel pump control (EKP)",
     0x18: "Transmission, ZF 8HP (EGS)",
     0x19: "Transfer case, xDrive (LMV)",
@@ -547,6 +549,7 @@ KNOWN_MODULES = {
     0x22: "Optional-equipment module (SAS)",
     0x2B: "Rear-axle steering (HSR)",
     0x2C: "Park assist (PMA / PDC)",
+    0x29: "Stability control (DSC)",
     0x2E: "Power control unit (PCU)",
     0x30: "Electric power steering (EPS)",
     0x40: "Body domain controller (BDC)",
@@ -1567,7 +1570,7 @@ BUILTIN_TEMPLATES = {
     "Boost and wastegates, both banks": [
         "INMOT", "IPLAD", "S_LADEDRUCK", "CALC_BOOST_MINUS_TARGET"]
     + [n + s for n in ("LADEDRUCK_REGELDIFFERENZ_BANKSPEZ", "I_EWG_POS", "TV_EWG")
-       for s in ("", BANK2_SUFFIX)] + ["SOLL_POS_EWG"],
+       for s in ("", BANK2_SUFFIX)],
     "Lambda and trims, both banks": [
         n + s for n in ("LAMBDA_SONDE_IST", "LAMBDA_SONDE_SOLL",
                         "LAMBD_REGELFAKTOR_MITTEL_SCHNELL") for s in ("", BANK2_SUFFIX)]

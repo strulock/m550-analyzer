@@ -28,8 +28,9 @@ EXTENDED = bytes.fromhex("0100" "0203" "0328")
 # Sign and degrees are nine-bit two's complement, as the car sends them:
 # 97 W is 0x19F (-97), i.e. 01 9F.
 HU_GPS = bytes([0x00, 0x00, 30, 8, 4, 56, 0x01, 0x9F, 38, 9, 24, 0x00, 160])
-# Head unit speeds (0xD030): wheels 1-4, combined, GPS (signed int), diff % (unsigned int)
-HU_SPEED = b"".join(v.to_bytes(2, "big", signed=True) for v in (101, 102, 100, 101, 101, 98)) \
+# Head unit speeds (0xD030): wheels 1-4, combined, GPS (signed int, m/s on the
+# car: 28 m/s is 100.8 km/h), diff % (unsigned int)
+HU_SPEED = b"".join(v.to_bytes(2, "big", signed=True) for v in (101, 102, 100, 101, 101, 28)) \
     + (3).to_bytes(2, "big")
 # (address, DID) -> raw value
 # 0x13 is the slave DME (bank 2): same identifiers, its own values. It only

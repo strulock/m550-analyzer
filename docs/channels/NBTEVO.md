@@ -275,7 +275,7 @@ Groups: [Versions, coding & identification](#versions-coding--identification) (9
 | `HU_STATUS_SPEED.WHEEL3_SENSOR_SPEED` | 0xD030 | 2 | signed int | km/h |  |  | Speed at wheel 3 | Geschwindigkeit am Rad 3 |
 | `HU_STATUS_SPEED.WHEEL4_SENSOR_SPEED` | 0xD030 | 3 | signed int | km/h |  |  | Speed at wheel 4 | Geschwindigkeit am Rad 4 |
 | `HU_STATUS_SPEED.COMBINED_SENSOR_SPEED` | 0xD030 | 4 | signed int | km/h |  |  | Combined speed of the wheel sensors | Kombinierte Geschwindigkeit der Radsensoren |
-| `HU_STATUS_SPEED.GPS_SPEED` | 0xD030 | 5 | signed int | km/h |  |  | Speed based on the GPS signal | Geschwindigkeit basierend auf das GPS-Signal. |
+| `HU_STATUS_SPEED.GPS_SPEED` | 0xD030 | 5 | signed int | km/h | × 3.6 |  | Speed based on the GPS signal | Geschwindigkeit basierend auf das GPS-Signal. |
 | `HU_STATUS_SPEED.SPEED_DIFFERENCE_PERCENT` | 0xD030 | 6 | unsigned int | % |  |  | Deviation in percent between the speeds measured by the wheel sensors and by GPS | Abweichung in Prozent zwischen den Geschwindigkeiten, die mit den Radsensoren bzw. mittels GPS erfasst wurden |
 
 ## Body, lights & comfort

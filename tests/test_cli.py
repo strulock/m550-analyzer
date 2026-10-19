@@ -31,7 +31,7 @@ def test_read_prints_dme_and_head_unit_values(car, capsys):
     line = {row.split()[0]: row for row in out}
     assert "1.0" in line["ILAG2"].split() and "raw=1000" in line["ILAG2"]
     assert "3D position" in line["HU_STATUS_GPS"]               # enum text
-    assert "98.0" in line["HU_STATUS_SPEED.GPS_SPEED"].split()  # field 5 of the record
+    assert "100.8" in line["HU_STATUS_SPEED.GPS_SPEED"].split()  # field 5, m/s to km/h
     assert "UNKNOWN" in line["NOT_A_CHANNEL"]
 
 
@@ -56,7 +56,7 @@ def test_log_writes_dme_and_head_unit_columns(car, tmp_path, capsys):
         assert float(values["ILAG1"]) == pytest.approx(0.9765625)
         # Head unit values arrive on the first cycle and fill every row.
         assert float(values["HU_STATUS_GPS_POSITION.LATITUDE"]) == pytest.approx(30.1346, abs=1e-4)
-        assert float(values["HU_STATUS_SPEED.GPS_SPEED"]) == 98
+        assert float(values["HU_STATUS_SPEED.GPS_SPEED"]) == pytest.approx(100.8)
 
 
 def test_log_rejects_an_unknown_channel(car, tmp_path):
