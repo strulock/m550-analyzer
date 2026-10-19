@@ -67,6 +67,12 @@ Implementation: `core.Hsfz`, `core.discover`.
 | `0x0001` | diagnostic request / response |
 | `0x0002` | acknowledge: the gateway echoes every request back first; skip it |
 | `0x0011` | vehicle identification (discovery) |
+| `0x0040`-`0x0045` | the gateway refuses: incorrect tester address, control word, format or destination, message too large, application not ready |
+
+`0x0040` (*incorrect tester address*) came back to every request for minutes
+after the PC slept in the middle of a log: the car was still holding the
+connection from before. n63read treats it as a lost connection and keeps
+reconnecting; the car lets go of the old one within a few minutes.
 
 The tester's source address is `0xF4`. Each module has a 1-byte target
 address; see [Modules](modules.md).
@@ -74,6 +80,13 @@ address; see [Modules](modules.md).
 `Hsfz.request()` sends one UDS request and waits for the matching reply:
 
 - ack frames (`0x0002`) are skipped;
+- a gateway refusal (`0x0040`-`0x0045`) raises an error at once instead of
+  waiting for the timeout;
+- a positive reply must echo what was asked (the identifier for `0x22`, the
+  sub-function for `0x19` and `0x3E`); one that doesn't is a late answer to
+  an earlier request and is skipped;
+- `7F <service> 21` (*busyRepeatRequest*) sends the request again, up to
+  three times;
 - a reply must come **from** the target **to** `0xF4`, or it is ignored. A
   late reply from an earlier request, such as the previous address in a
   scan, must not be credited to this one;

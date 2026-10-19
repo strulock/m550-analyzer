@@ -48,6 +48,18 @@ SWEEP_RANGE = (0x00, 0x7F)
 CTRL_DIAG = 0x0001             # diagnostic request / response
 CTRL_ACK = 0x0002              # acknowledge transfer (ECU echoes the request)
 CTRL_IDENT = 0x0011            # vehicle identification data
+# The gateway's refusals: a frame with one of these control words instead of
+# an answer. 0x40 came back to every request for minutes after the PC slept
+# mid-log (in-car, 2026-10-19): the car still held the old session.
+HSFZ_NACK = {
+    0x0040: "incorrect tester address (the car may still hold an earlier "
+            "connection, e.g. from before the PC slept; it lets go within minutes)",
+    0x0041: "incorrect control word",
+    0x0042: "incorrect format",
+    0x0043: "incorrect destination address",
+    0x0044: "message too large",
+    0x0045: "diagnostic application not ready",
+}
 
 NRC = {
     0x10: "generalReject",
@@ -278,6 +290,11 @@ class Hsfz:
             # The gateway echoes the request back as an ack; ignore it.
             if control == CTRL_ACK:
                 continue
+            if control in HSFZ_NACK:
+                text = "the car refused the request: %s" % HSFZ_NACK[control]
+                if control == 0x0040:     # the whole connection: reconnect
+                    raise ConnectionLost(text)
+                raise HsfzError(text)
             if control != CTRL_DIAG or not data:
                 continue
             # A late reply from an earlier request (e.g. the previous address
