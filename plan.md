@@ -241,6 +241,14 @@ the file and line it starts from, as of 0.3.8.
       Read it twice in a row to see whether it's the car or the read.
 - [x] The DME keeps no snapshot for `1A400A` (status 0x20, not confirmed),
       but takes over 2 s to say so: fault details now wait up to 6 s.
+- [x] Reconnect after the PC slept: the car answered HSFZ control `0x0040`
+      (incorrect tester address) for minutes. Now reported in plain words
+      and handled as a lost connection; reconnecting carries on.
+- [x] The app raised TclError drawing a sample as it closed for an update:
+      it stops drawing once closing.
+- [ ] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
+      as its `CYL1`-`CYL4`. Offer them as cylinder 5-8 channels so the
+      *Misfire hunt* set can include them.
 - [ ] `ILAG2` at `0x12` was refused on 2026-10-18 (it read before). Find
       when it answers, or point bank 2 lambda at `ILAG1@0x13`.
 - [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle

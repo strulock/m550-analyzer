@@ -97,5 +97,10 @@ if possible (a full check takes a few minutes).
 | 2026-10-18 | DME fault details | "no details stored" with a 6 s wait | at 2 s the read timed out; `1A400A` is status `0x20`, never confirmed. Details now wait 6 s |
 | 2026-10-18 | Batched CLI log while a check borrowed the connection | no stall | 0.21 s a row, worst gap 0.69 s, the same as without the check. Also no stall in a borrowing log during the app's fault read |
 | 2026-10-18 | `ILAG2` at `0x12` | refused (requestOutOfRange) | single read and in logs; it read on 2026-10-14. `ILAG1@0x13` gives bank 2 lambda |
+| 2026-10-19 | Morning drives on 0.4.2, about 125 channels at about one row a second | ok | batched DME reads; misfire counters, spark burn time, knock, trims, tire pressure blocks and wheel speeds all logged |
+| 2026-10-19 | Reconnect after the PC slept mid-log | **failed for 3+ min** | the car answered every request with HSFZ control `0x0040` (incorrect tester address), then reset; a fresh connect 5 minutes later worked. Now recognised and reported; reconnecting carries on |
+| 2026-10-19 | GPS flags | right | `VALIDITY` 0 is "valid" and `HU_STATUS_GPS` 12 is "3D position"; both stay put while the position updates |
+| 2026-10-19 | GPS speed | 3.6 km/h steps | the head unit sends whole m/s; reads about 2.5% under the DSC speed |
+| 2026-10-19 | Spark burn time, cylinders 5-8 | read from `0x13` as `CYL1`-`CYL4` | `0x12` refuses `CYL5`/`CYL6` (requestOutOfRange), as for knock levels |
 | 2026-10-18 | BDC fault details | odometer and time right in every snapshot | a second snapshot after the BDC's own values went undecoded (it held today's 111,304 km); fixed |
 | 2026-10-18 | Not done yet | | the BDC's last 57 identifiers and the head unit's busy ones, on the next release; fuel pump; the DME snapshot |

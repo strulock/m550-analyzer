@@ -107,6 +107,20 @@ def test_a_module_that_stays_busy_is_a_negative_response(monkeypatch):
     assert e.value.code == 0x21 and len(h.sock.sent) == core.BUSY_RETRIES + 1
 
 
+def test_a_refused_tester_address_ends_the_connection():
+    # After the PC slept, the car answered every request with control 0x40.
+    h = hsfz([struct.pack(">IH", 0, 0x0040)])
+    with pytest.raises(core.ConnectionLost, match="incorrect tester address"):
+        h.read_did(0x12, 0x588A)
+
+
+def test_other_gateway_refusals_are_errors_for_that_request():
+    h = hsfz([struct.pack(">IH", 2, 0x0043) + bytes([0x99, 0xF4])])
+    with pytest.raises(core.HsfzError, match="destination address") as e:
+        h.read_did(0x99, 0x588A)
+    assert not isinstance(e.value, core.ConnectionLost)
+
+
 def test_silent_address_raises_hsfz_error_not_socket_timeout():
     with pytest.raises(core.HsfzError):
         hsfz([]).tester_present(0x55)

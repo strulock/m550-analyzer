@@ -75,6 +75,7 @@ class App(tk.Tk):
         self.settings = core.load_settings()
         self._updating = False
         self._update_ready = None       # version downloaded, waiting for a restart
+        self._closing = False           # set by _close: stop drawing
         self._update_setup = None       # ...and its verified installer
         self._update_url = None
         threading.Thread(target=update.tidy, daemon=True).start()
@@ -1879,7 +1880,11 @@ class App(tk.Tk):
 
     def _drain(self):
         # Reschedule whatever happens: if this loop stops, the window stops
-        # showing samples, errors and status, and nothing says so.
+        # showing samples, errors and status, and nothing says so. Except
+        # once the window is closing: its widgets are going (a sample drawn
+        # then raised TclError as the app closed for an update).
+        if self._closing:
+            return
         try:
             while True:
                 try:
@@ -2222,6 +2227,7 @@ class App(tk.Tk):
         self._plot()
 
     def _close(self):
+        self._closing = True
         self._stop_check()
         if self._avail_dirty:
             try:

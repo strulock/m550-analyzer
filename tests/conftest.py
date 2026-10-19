@@ -79,6 +79,7 @@ def reset_app(a):
         a.poller = None
     a._stop_check()
     a._checking = None
+    a._closing = False               # a test may have run _close()
     a._stop_feed()
     a._clear()
     a.avail.clear()
