@@ -10,7 +10,7 @@ settles it. Record results at the bottom.
 | ENET connection and DME reads | working on the car |
 | DME catalog (`dme8ff_r`) | verified: lambda bank 1/2, uneven running, misfire counters |
 | Instrument cluster identification (`22 F1 50` at `0x60` → `KOMB_G11`) | confirmed on the car |
-| Module scan and fault read across modules | **working** (2026-10-18): 38 modules found and read at the default probe wait |
+| Module scan and fault read across modules | **working** (2026-10-18): 36 modules found and read at the default probe wait |
 | Head unit catalog and GPS position layout | **GPS verified** (2026-10-18). GPS speed turned out to be m/s; corrected. Rest of the catalog unverified |
 | Transmission, transfer case, DSC, steering, body, suspension, climate, airbag, fuel pump catalogs | **unverified**: right family by name and address; reply sizes not yet checked |
 | Fuel pump byte layout | **unverified**: decoded from bytecode |
@@ -79,7 +79,7 @@ if possible (a full check takes a few minutes).
 | 2026-10-18 | Update to 0.4.0, Discover, Connect | ok | found the car first time |
 | 2026-10-18 | Check, DME (`0x12`) | fits: 487 ok, 0 wrong size, 335 refused | stopped after 824 of 1,845 identifiers (at `0x557A`, two unanswered); the rest and the other modules still to do |
 | 2026-10-18 | Check, ACSM (`0x01`) | fits: 54 ok, 0 wrong size, 3 refused | |
-| 2026-10-18 | Fault read, all modules | ok: 38 modules, texts for nearly all codes | no text for DSC `48073A`-`48073D`, nor for modules `0x04` and `0x25` (no file yet). Telematics `E14600` is in both ATM2 and ATM, so the variant is still open |
+| 2026-10-18 | Fault read, all modules | ok: 36 modules, texts for nearly all codes | no text for DSC `48073A`-`48073D`, nor for modules `0x04` and `0x25` (no file yet). Telematics `E14600` is in both ATM2 and ATM, so the variant is still open |
 | 2026-10-18 | GPS (drive log) | ok | fix "3D position", 6-10 satellites, position and height match the route. **GPS speed was 0.275x vehicle speed: m/s, not km/h.** Fixed (x3.6) |
 | 2026-10-18 | 12-minute drive log, 95 channels | ok | 1.9 s a row; gaps of 12-29 s while the check ran alongside. Vehicle speed from DME and DSC agree; gear vs engine speed matches the 8HP ratios; lateral acceleration +-3.4 m/s2 in corners; tire pressure 2.46-2.56 bar |
 | 2026-10-18 | Bank 2 | `I_EWG_POS@0x13` reads its own values; `SOLL_POS_EWG` refused | `SOLL_POS_EWG` taken out of the *Boost and wastegates* set. `IUKZ5`/`IUKZ6` and `KNDS_SENS_ROH_KS_DRUCK` refused (requestOutOfRange) |
