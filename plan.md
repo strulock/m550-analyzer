@@ -210,7 +210,11 @@ the file and line it starts from, as of 0.3.8.
 
 - [ ] Work through `docs/in-car-checklist.md` and fill in its Results table.
       Done: discover, fault read, GPS, a drive log, DME and ACSM checks.
-      Left: the check from the BDC on (with 0.4.1), fuel pump.
+      Done 2026-10-18: every catalog fits except the fuel pump (silent).
+      Left: the BDC's last 57 identifiers and the head unit's busy ones on
+      the next release, and the fuel pump.
+- [x] Ask again when a module answers busyRepeatRequest (`0x21`), up to
+      three times: the head unit said busy to 37 identifiers.
 - [x] GPS speed is m/s on the car, not km/h: corrected in the catalog and
       `tools/module_catalog.py` (`CAR_CORRECTIONS`), so the GPS speed
       minus vehicle speed channel is right.

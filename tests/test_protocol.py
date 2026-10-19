@@ -91,6 +91,22 @@ def test_the_check_notes_a_bad_reply_and_carries_on():
     assert (status, detail, raw) == ("no answer", "short response", b"")
 
 
+def test_a_busy_module_is_asked_again(monkeypatch):
+    monkeypatch.setattr(core, "BUSY_WAIT", 0)
+    h = hsfz([frame(0x63, 0xF4, bytes.fromhex("7F2221")),
+              frame(0x63, 0xF4, bytes.fromhex("62D03801"))])
+    assert h.read_did(0x63, 0xD038) == bytes.fromhex("01")
+    assert len(h.sock.sent) == 2                      # the request went twice
+
+
+def test_a_module_that_stays_busy_is_a_negative_response(monkeypatch):
+    monkeypatch.setattr(core, "BUSY_WAIT", 0)
+    h = hsfz([frame(0x63, 0xF4, bytes.fromhex("7F2221"))] * (core.BUSY_RETRIES + 1))
+    with pytest.raises(core.NegativeResponse) as e:
+        h.read_did(0x63, 0xD038)
+    assert e.value.code == 0x21 and len(h.sock.sent) == core.BUSY_RETRIES + 1
+
+
 def test_silent_address_raises_hsfz_error_not_socket_timeout():
     with pytest.raises(core.HsfzError):
         hsfz([]).tester_present(0x55)

@@ -53,11 +53,22 @@ NRC = {
     0x11: "serviceNotSupported",
     0x12: "subFunctionNotSupported",
     0x13: "incorrectMessageLengthOrInvalidFormat",
+    0x14: "responseTooLong",
+    0x21: "busyRepeatRequest",          # <- asked again, up to BUSY_RETRIES
     0x22: "conditionsNotCorrect",
+    0x24: "requestSequenceError",
     0x31: "requestOutOfRange",          # <- identifier not implemented here
     0x33: "securityAccessDenied",
     0x78: "responsePending",
+    0x7E: "subFunctionNotSupportedInActiveSession",
+    0x7F: "serviceNotSupportedInActiveSession",
 }
+
+# A module that answers busyRepeatRequest (0x21) is asked again, after a
+# pause, this many times. The head unit said busy to 37 identifiers in a
+# row during a check at the car (2026-10-18).
+BUSY_RETRIES = 3
+BUSY_WAIT = 0.2
 
 # Read-only services. 0x19 reports fault memory; it cannot clear it (that is
 # 0x14) and cannot write or command anything. Do not widen this set - see
@@ -258,6 +269,7 @@ class Hsfz:
 
         self._send(target, payload)
         deadline = time.time() + self.timeout * (retries + 1)
+        busy = 0
 
         while time.time() < deadline:
             control, src, dst, data = self._recv_frame()
@@ -277,6 +289,12 @@ class Hsfz:
                     continue
                 code = data[2]
                 if code == 0x78:          # responsePending - ECU is working
+                    continue
+                if code == 0x21 and busy < BUSY_RETRIES:   # busy: ask again
+                    busy += 1
+                    time.sleep(BUSY_WAIT)
+                    self._send(target, payload)
+                    deadline = time.time() + self.timeout * (retries + 1)
                     continue
                 raise NegativeResponse(data[1], code)
 
