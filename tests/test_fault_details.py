@@ -66,6 +66,18 @@ def test_a_modules_own_value_stops_the_split_and_is_kept_raw():
     assert rec["rest"] == "000112341731" "01"
 
 
+def test_a_later_snapshot_after_a_modules_own_values_is_still_found():
+    # The BDC's light switch fault at the car: its own values (0x4040,
+    # 0x4042) sit in each record, and record 2 holds the latest odometer.
+    body = bytes.fromhex("0104" "1700" "01ad7b" "1701" "0fb00ff5" "4040" "8b" "4042" "0a"
+                         "0204" "1700" "01b2c8" "1701" "0fe22bb4" "4040" "8c" "4042" "0a")
+    one, two = core.parse_snapshots(HEAD4 + body, 0x40)
+    assert [f["value"] for f in one["fields"]] == [109947, 0x0FB00FF5]
+    assert one["rest"] == "40408b40420a"
+    assert two["record"] == 2 and two["fields"][0]["value"] == 111304
+    assert two["rest"] == "40408c40420a"
+
+
 def test_the_dmes_own_values_are_decoded():
     # Engine temperature: signed, 0.1 degree steps, -273.14 offset; a value
     # table; and German labels when asked for.

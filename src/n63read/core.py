@@ -863,6 +863,7 @@ def parse_snapshots(resp, module, fields=None, lang="text_en", enums=None):
     body, i, records = resp[6:], 0, []
     while i + 2 <= len(body):
         number, count = body[i], body[i + 1]
+        first = body[i + 2:i + 4]       # the next record starts the same way
         i += 2
         record = {"record": number, "fields": [], "rest": ""}
         records.append(record)
@@ -873,10 +874,17 @@ def parse_snapshots(resp, module, fields=None, lang="text_en", enums=None):
             row = fields.get((module, uw)) or fields.get((None, uw))
             size = field_bytes(row.get("datatype")) if row else None
             if size is None or i + 2 + size > len(body):
-                # A module's own value of unknown size: nothing after it
-                # can be split reliably.
-                record["rest"] = body[i:].hex()
-                return records
+                # A module's own value of unknown size: the rest of this
+                # record can't be split. A later record (the latest time the
+                # fault set) begins with its number, the same count and the
+                # same first identifier; carry on from there if it's found.
+                header = bytes([(number + 1) & 0xFF, count]) + first
+                nxt = body.find(header, i) if len(first) == 2 else -1
+                record["rest"] = body[i:nxt if nxt > i else len(body)].hex()
+                if nxt <= i:
+                    return records
+                i = nxt
+                break
             raw = body[i + 2:i + 2 + size]
             value, text = _freeze_value(uw, raw, row, lang, enums)
             record["fields"].append({

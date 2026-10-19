@@ -215,6 +215,10 @@ the file and line it starts from, as of 0.3.8.
       the next release, and the fuel pump.
 - [x] Ask again when a module answers busyRepeatRequest (`0x21`), up to
       three times: the head unit said busy to 37 identifiers.
+- [x] Fault details lost a fault's second snapshot (the latest time it set)
+      when the first held a module's own values of unknown size: the BDC's
+      light switch fault hid today's odometer that way. The parser now finds
+      the next record by its number, count and first identifier.
 - [x] GPS speed is m/s on the car, not km/h: corrected in the catalog and
       `tools/module_catalog.py` (`CAR_CORRECTIONS`), so the GPS speed
       minus vehicle speed channel is right.
