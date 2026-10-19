@@ -21,6 +21,7 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   <MODULE>_enum_tables.csv               their value -> text enumerations
 """
 
+import contextlib
 import csv
 import json
 import os
@@ -911,20 +912,34 @@ def parse_extended(resp):
     return out
 
 
+# The DME takes more than the usual 2 s to say it keeps no snapshot for a
+# fault; with 6 s it answers (in-car, 2026-10-18).
+DETAILS_TIMEOUT = 6.0
+
+
 def fault_details(h, module, code, fields=None, lang="text_en"):
     """{"snapshots", "extended", "errors"} for one fault: each read is tried
     on its own, so a module that keeps no snapshots still gives counters."""
     out = {"snapshots": [], "extended": [], "errors": []}
-    for key, read, parse in (
-            ("snapshots", h.read_snapshots,
-             lambda r: parse_snapshots(r, module, fields, lang)),
-            ("extended", h.read_extended, parse_extended)):
+    saved = getattr(h, "timeout", None)
+    longer = saved is not None and saved < DETAILS_TIMEOUT and hasattr(h, "_set_timeout")
+    with getattr(h, "lock", None) or contextlib.nullcontext():
+        if longer:
+            h._set_timeout(DETAILS_TIMEOUT)
         try:
-            out[key] = parse(read(module, code))
-        except NegativeResponse as e:
-            out["errors"].append("%s: %s" % (key, NRC.get(e.code, "0x%02X" % e.code)))
-        except HsfzTimeout as e:
-            out["errors"].append("%s: %s" % (key, e))
+            for key, read, parse in (
+                    ("snapshots", h.read_snapshots,
+                     lambda r: parse_snapshots(r, module, fields, lang)),
+                    ("extended", h.read_extended, parse_extended)):
+                try:
+                    out[key] = parse(read(module, code))
+                except NegativeResponse as e:
+                    out["errors"].append("%s: %s" % (key, NRC.get(e.code, "0x%02X" % e.code)))
+                except HsfzTimeout as e:
+                    out["errors"].append("%s: %s" % (key, e))
+        finally:
+            if longer:
+                h._set_timeout(saved)
     return out
 
 

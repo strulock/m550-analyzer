@@ -19,7 +19,7 @@ file, from which `tools/module_catalog.py` builds a catalog.
 | `0x76` | Suspension, vertical dynamics (VDP) | `vdp_g11` | `VDP_` | 538 | **fits** (2026-10-18): 41 of 41 |
 | `0x78` | Climate control (IHKA) | `ihka_g11` | `IHKA_` | 154 | **fits** (2026-10-18): 28 of 28 |
 | `0x01` | Airbag / crash safety (ACSM) | `acsm5` | `ACSM_` | 565 | **fits** (2026-10-18): all 54 identifiers that answered are the expected size; lateral acceleration plausible |
-| `0x17` | Fuel pump control (EKP) | `ekp301` | `EKP_` | 13 | hand-decoded; **no answer** at `0x17` on 2026-10-18 (engine running): absent at that address, or asleep |
+| `0x17` | Fuel pump control (EKP) | `ekp301` | `EKP_` | 13 | hand-decoded; **not on this car's bus**: `0x17` doesn't answer a scan (2026-10-18; the same 36 modules as on 2026-10-14) |
 | `0x2C` | Park assist (PMA / PDC) | `pma_20` | `PMA_` | 89 | **fits** (2026-10-18): 30 of 31 (`0xD67C` sensor signal paths: 36 bytes, file says 32) |
 
 Fault texts for all of these, plus the gateway (`ZGW_01`, `ZGW_SP18`) and
@@ -105,7 +105,12 @@ engine. This car has two engine computers: the master DME at `0x12` (bank 1)
 and the slave at `0x13` (bank 2), with the same identifier table.
 
 - A few bank 2 values have identifiers of their own on the master: `ILAG2`
-  (`0x588A`, lambda bank 2) reads from `0x12`.
+  (`0x588A`, lambda bank 2) has read from `0x12`, but on 2026-10-18 it was
+  refused there (requestOutOfRange), engine idling. `ILAG1@0x13` reads.
+- Uneven running for cylinders 5-8 (`ILUZ5`-`ILUZ8`) answers at both DMEs
+  with the same signal: means within 0.3 rad/s2 over 300 batched samples at
+  idle (2026-10-18). The two reads are a moment apart, so the values rarely
+  match exactly.
 - Most don't. The catalog's `_BANK2` / `_2` identifiers (for example
   `SPG_POS_SENS_EWG_BANK2`, `0x4655`) are refused on both DMEs. Bank 2's
   values come from `0x13` under the bank-1 identifier: `SPG_POS_SENS_EWG`

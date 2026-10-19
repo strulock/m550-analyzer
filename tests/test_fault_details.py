@@ -107,6 +107,23 @@ def test_several_snapshots():
     assert [(r["record"], r["fields"][0]["value"]) for r in recs] == [(1, 1), (2, 2)]
 
 
+def test_details_wait_longer_than_a_value_read():
+    class H:
+        timeout = 2.0
+        seen = []
+
+        def _set_timeout(self, s):
+            self.timeout = s
+
+        def read_snapshots(self, module, code):
+            self.seen.append(self.timeout)
+            raise core.HsfzTimeout("timed out")
+        read_extended = read_snapshots
+    h = H()
+    core.fault_details(h, 0x12, "1A400A")
+    assert h.seen == [core.DETAILS_TIMEOUT] * 2 and h.timeout == 2.0
+
+
 def test_the_counters():
     got = core.parse_extended(HEAD6 + bytes.fromhex("0100" "0207" "0329"))
     assert [(e["name"], e["value"]) for e in got] == [
