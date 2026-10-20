@@ -10,6 +10,9 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
+  // Or a custom domain on one of your zones, with workers_dev false so Access
+  // on that hostname is the only way in:
+  // "routes": [{ "pattern": "car.example.com", "custom_domain": true }],
   "r2_buckets": [
     { "binding": "FILES", "bucket_name": "n63read-logs" }
   ],

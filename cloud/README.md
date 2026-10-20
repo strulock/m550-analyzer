@@ -53,6 +53,8 @@ Run these in `cloud/`; nothing here is created until you run it.
    - Policy 2, *Service Auth*: a service token made for the app
      (*Access > Service credentials > Service tokens > Create*). Copy its
      client ID and secret; the secret is shown once.
+   - *Advanced settings*: turn on **Managed OAuth**, so MCP clients and portals
+     can sign in through Access without a browser cookie.
    - Copy the application's *Application Audience (AUD) tag*.
 
    Then give the Worker the audience and your team domain:
@@ -74,7 +76,8 @@ Run these in `cloud/`; nothing here is created until you run it.
    ten minutes, so anything logged offline goes up once the PC is online.
 
 5. **Claude.** Add `https://<worker host>/mcp` to your MCP server portal
-   (*Zero Trust > Access controls > MCP Portals > MCP servers*), or to any
+   (*Zero Trust > Access controls > MCP Portals > MCP servers*, OAuth
+   credentials *Automatic*), or to any
    MCP client that can log in through Access. The tools then read the cloud
    copy, with or without the laptop.
 
