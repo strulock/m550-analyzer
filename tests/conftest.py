@@ -24,6 +24,9 @@ def quick_diagnostics(tmp_path, monkeypatch):
     monkeypatch.setattr(update, "latest_release", offline)
     updates = str(tmp_path / "updates")
     monkeypatch.setattr(update, "updates_dir", lambda: updates)
+    # Cloud sync state goes to the temp dir; nothing reaches a real Worker.
+    from n63read import cloud
+    monkeypatch.setattr(cloud, "state_path", lambda: str(tmp_path / "cloud_state.json"))
     # Never download map tiles from a test.
     from n63read import maps
 

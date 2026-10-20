@@ -1,0 +1,266 @@
+"""
+n63read.cloud - copy the logs folder to the cloud Worker (cloud/ in the repo).
+
+sync() uploads every drive log and fault list that is new or changed since
+the last upload (PUT /api/files/<path>), then the drive and fault summaries
+from history.scan() (PUT /api/history). What was sent is remembered in
+%APPDATA%\\n63read\\cloud_state.json, so a sync sends only what changed and a
+file that failed goes again next time. AutoSync runs it in the background:
+after a log closes, after a fault list is saved, and every few minutes, so
+whatever couldn't go while the PC was offline goes once it's back online.
+
+The Worker sits behind Cloudflare Access; requests carry an Access service
+token (CF-Access-Client-Id / CF-Access-Client-Secret). The secret is kept in
+the app's settings, encrypted for this Windows user (DPAPI) where possible.
+Nothing here is sent anywhere until a Worker URL and token are set.
+"""
+
+import base64
+import hashlib
+import json
+import os
+import sys
+import threading
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+from n63read import __version__, core, history
+
+STATE_FILE = "cloud_state.json"
+TIMEOUT = 60
+EVERY = 10 * 60             # s between background syncs
+FIRST_DELAY = 20            # s after start before the first
+USER_AGENT = "BMW-Analyzer/%s" % __version__
+
+
+class CloudError(Exception):
+    pass
+
+
+# ------------------------------------------------------------ the secret
+
+def _dpapi(data, protect):
+    import ctypes
+    from ctypes import wintypes
+
+    class Blob(ctypes.Structure):
+        _fields_ = [("cbData", wintypes.DWORD), ("pbData", ctypes.POINTER(ctypes.c_char))]
+    buf = ctypes.create_string_buffer(data, len(data))
+    src, dst = Blob(len(data), ctypes.cast(buf, ctypes.POINTER(ctypes.c_char))), Blob()
+    fn = ctypes.windll.crypt32.CryptProtectData if protect else \
+        ctypes.windll.crypt32.CryptUnprotectData
+    if not fn(ctypes.byref(src), None, None, None, None, 0, ctypes.byref(dst)):
+        raise OSError("DPAPI failed")
+    try:
+        return ctypes.string_at(dst.pbData, dst.cbData)
+    finally:
+        ctypes.windll.kernel32.LocalFree(dst.pbData)
+
+
+def protect(secret):
+    """The secret as kept in settings: encrypted for this Windows user."""
+    if not secret:
+        return ""
+    if sys.platform == "win32":
+        try:
+            return "dpapi:" + base64.b64encode(_dpapi(secret.encode(), True)).decode()
+        except (OSError, AttributeError):
+            pass
+    return "plain:" + secret
+
+
+def unprotect(stored):
+    if not stored:
+        return ""
+    if stored.startswith("dpapi:"):
+        return _dpapi(base64.b64decode(stored[6:]), False).decode()
+    return stored[6:] if stored.startswith("plain:") else stored
+
+
+# ------------------------------------------------------------ settings
+
+def config(settings):
+    """(url, client id, client secret) from the app's settings."""
+    return ((settings.get("cloud_url") or "").rstrip("/"),
+            settings.get("cloud_client_id") or "",
+            unprotect(settings.get("cloud_client_secret") or ""))
+
+
+def configured(settings):
+    return all(config(settings))
+
+
+def state_path():
+    return os.path.join(os.path.dirname(core.availability_path()), STATE_FILE)
+
+
+def load_state(path=None):
+    try:
+        with open(path or state_path(), encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def save_state(state, path=None):
+    path = path or state_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+    os.replace(tmp, path)
+
+
+# ------------------------------------------------------------ requests
+
+def request(settings, method, path, data=None, ctype="application/octet-stream"):
+    url, cid, secret = config(settings)
+    if not (url and cid and secret):
+        raise CloudError("set the Worker URL and the Access service token first")
+    req = urllib.request.Request(url + path, data=data, method=method, headers={
+        "CF-Access-Client-Id": cid, "CF-Access-Client-Secret": secret,
+        "User-Agent": USER_AGENT, "Content-Type": ctype})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            body = r.read()
+    except urllib.error.HTTPError as e:
+        detail = e.read(300).decode("utf-8", "replace")
+        if e.code in (401, 403):
+            raise CloudError("the Worker refused the service token (%d): check the token "
+                             "and the Access policy. %s" % (e.code, detail)) from None
+        raise CloudError("the Worker answered %d: %s" % (e.code, detail)) from None
+    except (urllib.error.URLError, OSError) as e:
+        raise CloudError("can't reach %s: %s" % (url, getattr(e, "reason", e))) from None
+    try:
+        return json.loads(body or b"{}")
+    except ValueError:
+        # Access answers a login page, not JSON, when the token isn't accepted.
+        raise CloudError("not the Worker's answer (a login page?): check the URL and that "
+                         "the Access policy allows the service token") from None
+
+
+# ------------------------------------------------------------ sync
+
+class Result:
+    def __init__(self):
+        self.uploaded, self.unchanged, self.errors, self.history = [], 0, [], None
+
+    def text(self):
+        parts = ["%d file%s uploaded" % (len(self.uploaded), "" if len(self.uploaded) == 1
+                                         else "s")]
+        if self.history:
+            parts.append("history: %d drives, %d faults" % self.history)
+        if self.errors:
+            parts.append("%d failed: %s" % (len(self.errors), self.errors[0]))
+        return ", ".join(parts)
+
+
+def _key(rel):
+    return urllib.parse.quote(rel.replace(os.sep, "/"), safe="/")
+
+
+def sync(settings, logs=None, state_file=None, progress=None):
+    """Upload what's new or changed, then the summaries. Raises CloudError
+    when the Worker can't be reached at all; a file that fails is listed
+    in the result and tried again next time."""
+    logs = logs or core.logs_dir()
+    state = load_state(state_file)
+    files = state.setdefault("files", {})
+    result = Result()
+    todo = []
+    for path in history._files(logs):
+        rel = os.path.relpath(path, logs)
+        st = os.stat(path)
+        stamp = [st.st_size, int(st.st_mtime)]
+        if files.get(rel, {}).get("stamp") == stamp:
+            result.unchanged += 1
+        else:
+            todo.append((rel, path, stamp))
+    for i, (rel, path, stamp) in enumerate(todo, 1):
+        with open(path, "rb") as f:
+            data = f.read()
+        sha = hashlib.sha256(data).hexdigest()
+        if files.get(rel, {}).get("sha256") == sha:
+            files[rel]["stamp"] = stamp             # touched, not changed
+            result.unchanged += 1
+            continue
+        try:
+            reply = request(settings, "PUT", "/api/files/" + _key(rel), data, "text/csv")
+        except CloudError as e:
+            if not result.uploaded and "can't reach" in str(e):
+                save_state(state, state_file)
+                raise                               # offline: try again later
+            result.errors.append("%s: %s" % (rel, e))
+            continue
+        if reply.get("sha256") not in (None, sha):
+            result.errors.append("%s: arrived damaged" % rel)
+            continue
+        files[rel] = {"stamp": stamp, "sha256": sha}
+        result.uploaded.append(rel)
+        save_state(state, state_file)
+        if progress:
+            progress(i, len(todo))
+    summary = history.scan(logs)
+    payload = json.dumps({"drives": summary.drives, "faults": summary.faults},
+                         sort_keys=True).encode()
+    digest = hashlib.sha256(payload).hexdigest()
+    if digest != state.get("history_sha256"):
+        reply = request(settings, "PUT", "/api/history", payload, "application/json")
+        state["history_sha256"] = digest
+        result.history = (reply.get("drives", 0), reply.get("faults", 0))
+    state["last_sync"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    save_state(state, state_file)
+    return result
+
+
+class AutoSync:
+    """sync() in the background: now and then, and soon after trigger().
+    `status` says how the last one went, for the app to show."""
+
+    def __init__(self, settings, logs=None, every=EVERY, first=FIRST_DELAY):
+        self.settings, self.logs, self.every = settings, logs, every
+        self.status = "not set up" if not configured(settings) else "waiting"
+        self._wake = threading.Event()
+        self._stop = threading.Event()
+        self._busy = threading.Lock()
+        self._first = first
+        self.thread = threading.Thread(target=self._run, daemon=True)
+
+    def start(self):
+        self.thread.start()
+        return self
+
+    def trigger(self):
+        self._wake.set()
+
+    def stop(self):
+        self._stop.set()
+        self._wake.set()
+
+    def enabled(self):
+        return self.settings.get("cloud_auto", True) and configured(self.settings)
+
+    def run_once(self):
+        if not configured(self.settings):
+            self.status = "not set up"
+            return None
+        with self._busy:
+            self.status = "syncing..."
+            try:
+                result = sync(self.settings, self.logs)
+            except (CloudError, OSError) as e:
+                self.status = "not synced: %s" % e
+                return None
+            self.status = "synced %s: %s" % (time.strftime("%H:%M"), result.text())
+            return result
+
+    def _run(self):
+        self._wake.wait(self._first)
+        while not self._stop.is_set():
+            self._wake.clear()
+            if self.enabled():
+                self.run_once()
+            self._wake.wait(self.every)

@@ -1,0 +1,208 @@
+"""cloud: uploading the logs folder to the Worker, against a stand-in Worker."""
+
+import hashlib
+import http.server
+import json
+import os
+import sys
+import threading
+import urllib.parse
+
+import pytest
+
+from n63read import cli, cloud, core
+
+from test_history import drive, fault_csv
+
+
+class FakeWorker:
+    """Answers like cloud/src/worker.js behind Access with one service token."""
+
+    def __init__(self, client_id="id.access", secret="s3cret"):
+        self.files, self.history, self.requests = {}, None, []
+        self.client_id, self.secret = client_id, secret
+        self.fail = None                         # a status to answer instead, once set
+        worker = self
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def _reply(self, status, body):
+                data = json.dumps(body).encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def do_PUT(self):
+                worker.requests.append((self.command, self.path,
+                                        {k.lower(): v for k, v in self.headers.items()}))
+                if (self.headers.get("CF-Access-Client-Id") != worker.client_id
+                        or self.headers.get("CF-Access-Client-Secret") != worker.secret):
+                    return self._reply(403, {"error": "forbidden"})
+                if worker.fail:
+                    return self._reply(worker.fail, {"error": "boom"})
+                body = self.rfile.read(int(self.headers["Content-Length"]))
+                if self.path.startswith("/api/files/"):
+                    key = urllib.parse.unquote(self.path[len("/api/files/"):])
+                    worker.files[key] = body
+                    return self._reply(200, {"ok": True, "key": key, "size": len(body),
+                                             "sha256": hashlib.sha256(body).hexdigest()})
+                if self.path == "/api/history":
+                    worker.history = json.loads(body)
+                    return self._reply(200, {"ok": True,
+                                             "drives": len(worker.history["drives"]),
+                                             "faults": len(worker.history["faults"])})
+                return self._reply(404, {"error": "not found"})
+
+        self.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.url = "http://127.0.0.1:%d" % self.server.server_address[1]
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def close(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+
+@pytest.fixture
+def worker():
+    w = FakeWorker()
+    yield w
+    w.close()
+
+
+def settings_for(w, secret="s3cret"):
+    return {"cloud_url": w.url + "/", "cloud_client_id": "id.access",
+            "cloud_client_secret": cloud.protect(secret)}
+
+
+def test_the_secret_is_kept_encrypted():
+    stored = cloud.protect("cfast_abc")
+    assert "cfast_abc" not in stored or sys.platform != "win32"
+    assert cloud.unprotect(stored) == "cfast_abc"
+    assert cloud.unprotect("plain:x") == "x" and cloud.protect("") == ""
+
+
+def test_sync_uploads_logs_and_history_then_only_what_changed(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    drive(os.path.join(logs, "claude", "n63_2.csv"))
+    fault_csv(os.path.join(logs, "n63_faults.csv"), "2026-10-19 07:00:00",
+              [("0x40", "804415", "present, stored")])
+    s = settings_for(worker)
+    r = cloud.sync(s, logs)
+    assert sorted(r.uploaded) == sorted(["n63_1.csv", os.path.join("claude", "n63_2.csv"),
+                                         "n63_faults.csv"])
+    assert set(worker.files) == {"n63_1.csv", "claude/n63_2.csv", "n63_faults.csv"}
+    assert r.history == (2, 1) and worker.history["drives"][0]["misfires_5"] == 2
+    method, path, headers = worker.requests[0]
+    assert headers["cf-access-client-secret"] == "s3cret"
+    assert headers["user-agent"].startswith("BMW-Analyzer/")
+    assert not any("History" in k for k in worker.files)        # the summaries go as JSON
+
+    sent = len(worker.requests)
+    r = cloud.sync(s, logs)                                      # nothing new
+    assert r.uploaded == [] and r.history is None and len(worker.requests) == sent
+
+    drive(os.path.join(logs, "n63_3.csv"), misfire5_at=(10,))
+    r = cloud.sync(s, logs)
+    assert r.uploaded == ["n63_3.csv"] and r.history == (3, 1)
+    assert "1 file uploaded" in r.text() and "3 drives" in r.text()
+
+
+def test_a_touched_but_unchanged_file_isnt_sent_again(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    path = os.path.join(logs, "n63_1.csv")
+    drive(path)
+    s = settings_for(worker)
+    cloud.sync(s, logs)
+    st = os.stat(path)
+    os.utime(path, (st.st_atime, st.st_mtime + 100))
+    sent = len(worker.requests)
+    assert cloud.sync(s, logs).uploaded == [] and len(worker.requests) == sent
+
+
+def test_a_refused_token_says_so_and_nothing_is_marked_sent(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    with pytest.raises(cloud.CloudError, match="refused the service token"):
+        cloud.sync(settings_for(worker, secret="wrong"), logs)
+    assert cloud.load_state().get("files", {}).get("n63_1.csv") is None
+
+
+def test_offline_raises_and_tries_everything_next_time(tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    s = {"cloud_url": "http://127.0.0.1:9", "cloud_client_id": "x",
+         "cloud_client_secret": cloud.protect("y")}
+    with pytest.raises(cloud.CloudError, match="can't reach"):
+        cloud.sync(s, logs)
+    assert not cloud.load_state().get("files")
+
+
+def test_a_failing_file_is_listed_and_retried(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    worker.fail = 500
+    with pytest.raises(cloud.CloudError):           # the history PUT fails too
+        cloud.sync(settings_for(worker), logs)
+    worker.fail = None
+    assert cloud.sync(settings_for(worker), logs).uploaded == ["n63_1.csv"]
+
+
+def test_not_set_up_sends_nothing(tmp_path):
+    with pytest.raises(cloud.CloudError, match="set the Worker URL"):
+        cloud.request({}, "GET", "/api/status")
+    a = cloud.AutoSync({}, logs=str(tmp_path), first=0)
+    assert a.status == "not set up" and a.run_once() is None and not a.enabled()
+
+
+def test_autosync_runs_when_triggered(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    a = cloud.AutoSync(settings_for(worker), logs=logs, every=3600, first=3600).start()
+    try:
+        a.trigger()
+        end = __import__("time").time() + 10
+        while "synced" not in a.status and __import__("time").time() < end:
+            __import__("time").sleep(0.05)
+        assert "synced" in a.status and "1 file uploaded" in a.status
+    finally:
+        a.stop()
+
+
+def test_cli_sync_saves_settings_and_uploads(worker, capsys):
+    drive(os.path.join(core.logs_dir(), "n63_1.csv"))
+    saved = {}
+    import n63read.core as c
+    real_load, real_save = c.load_settings, c.save_settings
+    c.load_settings = lambda path=None: dict(saved)
+    c.save_settings = lambda s, path=None: saved.update(s)
+    try:
+        cli.main(["sync", "--url", worker.url, "--client-id", "id.access",
+                  "--client-secret", "s3cret"])
+        out = capsys.readouterr().out
+        assert "1 file uploaded" in out and "n63_1.csv" in worker.files
+        assert saved["cloud_url"] == worker.url
+        assert cloud.unprotect(saved["cloud_client_secret"]) == "s3cret"
+        cli.main(["sync", "--status"])
+        assert "1 files sent" in capsys.readouterr().out
+    finally:
+        c.load_settings, c.save_settings = real_load, real_save
+
+
+def test_settings_window_saves_the_cloud_token(app):
+    app._open_settings()
+    try:
+        app.cloud_url_var.set("https://car.example.com")
+        app.cloud_id_var.set("id.access")
+        app.cloud_secret_var.set("s3cret")
+        app._save_cloud()
+        assert cloud.configured(app.settings)
+        assert cloud.unprotect(app.settings["cloud_client_secret"]) == "s3cret"
+    finally:
+        app.settings_window.destroy()
+        for k in ("cloud_url", "cloud_client_id", "cloud_client_secret"):
+            app.settings.pop(k, None)

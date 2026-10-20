@@ -36,7 +36,7 @@ import queue
 import sys
 import time
 
-from n63read import __version__, core, diag, engine, history, share, update
+from n63read import __version__, cloud, core, diag, engine, history, share, update
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
                           HsfzError, NegativeResponse, decode)
 
@@ -388,6 +388,39 @@ def op_history(args):
     print("\nSaved to %s (%s, %s)" % (s.folder, history.DRIVES_CSV, history.FAULTS_CSV))
 
 
+def op_sync(args):
+    """Upload new and changed logs and the history to the cloud Worker."""
+    settings = core.load_settings()
+    changed = False
+    for key, value in (("cloud_url", args.url), ("cloud_client_id", args.client_id)):
+        if value is not None:
+            settings[key] = value.strip()
+            changed = True
+    if args.client_secret is not None:
+        settings["cloud_client_secret"] = cloud.protect(args.client_secret.strip())
+        changed = True
+    if args.auto is not None:
+        settings["cloud_auto"] = args.auto == "on"
+        changed = True
+    if changed:
+        core.save_settings(settings)
+        print("Saved the cloud settings.")
+    if args.status:
+        state = cloud.load_state()
+        url = cloud.config(settings)[0] or "(no Worker URL set)"
+        print("%s: last sync %s, %d files sent" % (url, state.get("last_sync", "never"),
+                                                    len(state.get("files", {}))))
+        return
+    try:
+        result = cloud.sync(settings, progress=lambda i, n: print(
+            "\r  uploading %d/%d" % (i, n), end="", flush=True))
+    except cloud.CloudError as e:
+        sys.exit("cloud sync failed: %s" % e)
+    print("\r" + result.text())
+    for e in result.errors:
+        print("  " + e)
+
+
 def op_update(args):
     """Check GitHub for a newer release and, unless --check, install it."""
     try:
@@ -686,6 +719,15 @@ def build_parser():
     sp.add_argument("--limit", type=int, default=20, help="drives shown, newest (0: all)")
     sp.add_argument("--all", action="store_true", help="also faults no longer listed")
     sp.set_defaults(func=op_history)
+
+    sp = sub.add_parser("sync", help="upload new and changed logs and the history to the "
+                                     "cloud Worker (see cloud/README.md)")
+    sp.add_argument("--url", help="save the Worker URL")
+    sp.add_argument("--client-id", help="save the Access service token's client ID")
+    sp.add_argument("--client-secret", help="save its client secret (kept encrypted)")
+    sp.add_argument("--auto", choices=("on", "off"), help="the app uploads automatically")
+    sp.add_argument("--status", action="store_true", help="only say when it last synced")
+    sp.set_defaults(func=op_sync)
 
     sp = sub.add_parser("update", help="install the latest GitHub release")
     sp.add_argument("--check", action="store_true", help="only say whether one is available")

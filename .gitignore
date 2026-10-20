@@ -26,3 +26,9 @@ htmlcov/
 
 # ...except the build itself
 !/BMW-Analyzer.spec
+
+# Cloud Worker: the real config holds account IDs; wrangler's own cache
+cloud/wrangler.jsonc
+cloud/.wrangler/
+cloud/node_modules/
+cloud/.dev.vars

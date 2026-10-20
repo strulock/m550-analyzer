@@ -18,7 +18,8 @@ from tkinter import ttk, filedialog, messagebox, simpledialog
 
 import webbrowser
 
-from n63read import (__version__, core, diag, engine, graph, history, historywin, maps,
+from n63read import (__version__, cloud, core, diag, engine, graph, history, historywin,
+                     maps,
                      playback, share, theme, update)
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
@@ -214,6 +215,7 @@ class App(tk.Tk):
         self.map_window = None
         self.history_window = None
         self.tiles = maps.TileCache(fetch=self.settings.get("map_tiles", True))
+        self.cloud = cloud.AutoSync(self.settings).start()      # idle until set up
 
         self._build()
         self.palette = theme.apply(self, self.theme_name)
@@ -750,9 +752,51 @@ class App(tk.Tk):
         ttk.Label(f, text="Downloading tells the tile server roughly where the map is. "
                           "Tiles already downloaded still show without it.",
                   foreground=self.palette["muted"], wraplength=360).pack(anchor="w")
+        f = group("Cloud", 6)
+        self.cloud_url_var = tk.StringVar(value=self.settings.get("cloud_url", ""))
+        self.cloud_id_var = tk.StringVar(value=self.settings.get("cloud_client_id", ""))
+        self.cloud_secret_var = tk.StringVar(value=cloud.config(self.settings)[2])
+        self.cloud_auto_var = tk.BooleanVar(value=self.settings.get("cloud_auto", True))
+        for label, var, show in (("Worker URL", self.cloud_url_var, ""),
+                                 ("Access client ID", self.cloud_id_var, ""),
+                                 ("Access client secret", self.cloud_secret_var, "*")):
+            line = ttk.Frame(f)
+            line.pack(anchor="w", fill="x")
+            ttk.Label(line, text=label, width=18).pack(side="left")
+            ttk.Entry(line, textvariable=var, width=46, show=show).pack(side="left")
+        line = ttk.Frame(f)
+        line.pack(anchor="w", pady=(4, 0))
+        ttk.Checkbutton(line, text="Upload logs automatically", variable=self.cloud_auto_var,
+                        command=self._save_cloud).pack(side="left")
+        ttk.Button(line, text="Save", command=self._save_cloud).pack(side="left", padx=(10, 4))
+        ttk.Button(line, text="Sync now", command=self._sync_now).pack(side="left")
+        self.cloud_status = ttk.Label(f, text=self.cloud.status, wraplength=420,
+                                      foreground=self.palette["muted"])
+        self.cloud_status.pack(anchor="w")
+        self._cloud_status_tick(win)
         ttk.Button(body, text="Close", command=win.destroy).grid(
-            row=6, column=1, sticky="e")
+            row=7, column=1, sticky="e")
         theme.apply(self, self.theme_name)
+
+    def _save_cloud(self):
+        self.settings["cloud_url"] = self.cloud_url_var.get().strip()
+        self.settings["cloud_client_id"] = self.cloud_id_var.get().strip()
+        self.settings["cloud_client_secret"] = cloud.protect(self.cloud_secret_var.get().strip())
+        self._save_setting("cloud_auto", bool(self.cloud_auto_var.get()))
+        if cloud.configured(self.settings) and self.cloud.status == "not set up":
+            self.cloud.status = "waiting"
+
+    def _sync_now(self):
+        self._save_cloud()
+        if not cloud.configured(self.settings):
+            self.cloud_status.config(text="Set the Worker URL and the service token first.")
+            return
+        threading.Thread(target=self.cloud.run_once, daemon=True).start()
+
+    def _cloud_status_tick(self, win):
+        if win.winfo_exists():
+            self.cloud_status.config(text=self.cloud.status)
+            win.after(1000, lambda: self._cloud_status_tick(win))
 
     def _set_map_tiles(self):
         on = bool(self.tiles_var.get())
@@ -1972,6 +2016,7 @@ class App(tk.Tk):
             return
         msg = win.parts["msg"]
         msg.config(text=msg.cget("text").split("  Saved")[0] + "  Saved to %s" % path)
+        self.cloud.trigger()
 
     def _found_car(self, hsfz):
         """Put the car Discover found in the IP box. One car on the ENET
@@ -1999,6 +2044,7 @@ class App(tk.Tk):
         """The log is closed (the poller closes it on its way out); say so."""
         self.logging_to = None
         self.log_btn.config(text="Start logging")
+        self.cloud.trigger()                    # up it goes, if set up and online
 
     def _toggle_log(self):
         if not self.poller:
@@ -2375,6 +2421,7 @@ class App(tk.Tk):
 
     def _close(self):
         self._closing = True
+        self.cloud.stop()
         self._stop_check()
         if self._avail_dirty:
             try:

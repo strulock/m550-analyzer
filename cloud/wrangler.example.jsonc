@@ -1,0 +1,20 @@
+// Copy to wrangler.jsonc (git ignores it) and fill in your own IDs:
+//   npx wrangler r2 bucket create n63read-logs
+//   npx wrangler d1 create n63read
+// ACCESS_AUD and ACCESS_TEAM_DOMAIN come from the Access application put in
+// front of the Worker (see README.md); set them as secrets:
+//   npx wrangler secret put ACCESS_AUD
+//   npx wrangler secret put ACCESS_TEAM_DOMAIN
+{
+  "name": "n63read-cloud",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "r2_buckets": [
+    { "binding": "FILES", "bucket_name": "n63read-logs" }
+  ],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "n63read", "database_id": "<your D1 database id>" }
+  ],
+  "observability": { "enabled": true }
+}

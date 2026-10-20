@@ -1,0 +1,10 @@
+{
+  "name": "n63read-cloud",
+  "private": true,
+  "type": "module",
+  "description": "BMW Analyzer's cloud copy: drive logs in R2, history in D1, a remote MCP server.",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "deploy": "wrangler deploy"
+  }
+}
