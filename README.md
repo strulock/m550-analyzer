@@ -222,6 +222,15 @@ bump, the car going to sleep), the log stays open, the gap is marked, and the
 app keeps trying to reconnect and carries on in the same file. Replay skips
 `Clock` and `Event`.
 
+While connected to the car, n63read (the app, the CLI and Claude's sessions)
+keeps Windows from going to sleep; the screen can still turn off. Closing
+the lid still follows Windows' setting: to log with the lid shut, set *When I
+close the lid* to *Do nothing* (Control Panel > Power Options), or run
+`powercfg /setdcvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION 0` and
+`powercfg /setactive SCHEME_CURRENT` (on battery; `setacvalueindex` for
+plugged in). A PC that sleeps mid-log comes back to a car still holding the
+old connection; it lets go within a few minutes and the log carries on.
+
 The log is written to disk about once a second, so a crash or flat battery
 loses at most a second. Changing the watched channels while logging starts a
 new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in

@@ -26,12 +26,34 @@ session), ("joberror", text) and ("logfile", path).
 import csv
 import os
 import queue
+import sys
 import threading
 import time
 
 from n63read import core, diag, share
 
 LOG_FLUSH_SECONDS = 1.0         # a crash or flat battery loses at most this much
+
+# Windows' SetThreadExecutionState flags. The request belongs to the thread
+# that makes it and ends with it.
+ES_CONTINUOUS = 0x80000000
+ES_SYSTEM_REQUIRED = 0x00000001
+
+
+def keep_awake(on):
+    """Ask Windows not to sleep while this thread is connected to the car
+    (on=True), or drop the request. The screen may still turn off, and closing
+    the lid still follows the power settings. A PC that slept mid-log came
+    back to a car still holding the old connection, refusing every request
+    for minutes (in-car, 2026-10-19). Elsewhere it does nothing."""
+    if sys.platform != "win32":
+        return False
+    import ctypes
+    flags = ES_CONTINUOUS | (ES_SYSTEM_REQUIRED if on else 0)
+    try:
+        return bool(ctypes.windll.kernel32.SetThreadExecutionState(flags))
+    except (AttributeError, OSError):
+        return False
 
 
 class _Drop:
@@ -247,6 +269,8 @@ class Session(threading.Thread):
                             diag.record_later("connect", ip=self.ip, result="ok",
                                               seconds=round(time.time() - t0, 3),
                                               bind=self.bind, borrowed=self.borrowed)
+                        if not connected:
+                            keep_awake(True)    # until this session ends
                         connected = True
                         if lost_at is not None:
                             gap = round(time.time() - lost_at)
@@ -288,6 +312,7 @@ class Session(threading.Thread):
         finally:
             self.stop_log()
             if connected:
+                keep_awake(False)
                 r = self.reader
                 diag.record("session", ip=self.ip, seconds=round(time.time() - t0, 1),
                             samples=self.samples, channels=len(self.channels),
