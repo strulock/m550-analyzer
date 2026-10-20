@@ -187,6 +187,22 @@ def test_two_starting_together_make_one_connection(car):
             t.close()
 
 
+def test_the_pc_stays_awake_while_connected(car, monkeypatch):
+    calls = []
+    monkeypatch.setattr(engine, "keep_awake", lambda on: calls.append(
+        (on, threading.current_thread().name)))
+    app = App().start()
+    assert [on for on, _ in calls] == [True]
+    app.stop()
+    assert [on for on, _ in calls] == [True, False]
+    assert calls[0][1] == calls[1][1] == app.session.name   # the session's own thread
+
+
+def test_keep_awake_is_harmless_here():
+    assert engine.keep_awake(True) in (True, False)
+    assert engine.keep_awake(False) in (True, False)
+
+
 def test_a_read_cycle_holds_the_connection_until_it_ends(car):
     """Requests lent to another program wait for the end of a cycle instead
     of slotting in between each of its reads."""

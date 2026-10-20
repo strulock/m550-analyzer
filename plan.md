@@ -244,6 +244,9 @@ the file and line it starts from, as of 0.3.8.
 - [x] Reconnect after the PC slept: the car answered HSFZ control `0x0040`
       (incorrect tester address) for minutes. Now reported in plain words
       and handled as a lost connection; reconnecting carries on.
+- [x] Keep the PC awake while connected (Windows `SetThreadExecutionState`,
+      held by each session's thread). The lid still follows Windows'
+      setting; the README says how to change it.
 - [x] The app raised TclError drawing a sample as it closed for an update:
       it stops drawing once closing.
 - [ ] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
