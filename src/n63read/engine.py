@@ -318,6 +318,9 @@ class Session(threading.Thread):
                             samples=self.samples, channels=len(self.channels),
                             reason=reason,
                             refused={"0x%02X:0x%04X" % k: v for k, v in r.refused.items()},
-                            silent_modules=["0x%02X" % m for m in r.quiet_until],
+                            # Never answered, not merely quiet once: the car
+                            # resetting the connection silences everyone.
+                            silent_modules=["0x%02X" % m for m in r.quiet_until
+                                            if m not in r.heard],
                             log=self.log_path, trace=self.trace)
             self.out_q.put(("status", "disconnected", self))

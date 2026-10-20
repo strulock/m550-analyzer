@@ -249,6 +249,13 @@ the file and line it starts from, as of 0.3.8.
       setting; the README says how to change it.
 - [x] The app raised TclError drawing a sample as it closed for an update:
       it stops drawing once closing.
+- [x] The session summary called a module silent if it was quiet even
+      once (the car resetting the connection silences everyone); now only
+      modules that never answered.
+- [x] `SPEED_DIFFERENCE_PERCENT` 65535 is shown as no value.
+- [ ] Discover right after the PC wakes or the app updates can find no
+      169.254 address yet (the adapter is still coming up): retry for a
+      few seconds before saying no ENET link.
 - [ ] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
       as its `CYL1`-`CYL4`. Offer them as cylinder 5-8 channels so the
       *Misfire hunt* set can include them.

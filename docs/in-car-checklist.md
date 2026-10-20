@@ -102,5 +102,9 @@ if possible (a full check takes a few minutes).
 | 2026-10-19 | GPS flags | right | `VALIDITY` 0 is "valid" and `HU_STATUS_GPS` 12 is "3D position"; both stay put while the position updates |
 | 2026-10-19 | GPS speed | 3.6 km/h steps | the head unit sends whole m/s; reads about 2.5% under the DSC speed |
 | 2026-10-19 | Spark burn time, cylinders 5-8 | read from `0x13` as `CYL1`-`CYL4` | `0x12` refuses `CYL5`/`CYL6` (requestOutOfRange), as for knock levels |
+| 2026-10-19 | Evening drive on 0.4.4, 125 channels | ok | 0.89 s a row, longest gap 1.4 s; no stall |
+| 2026-10-19 | First connect after the update | failed once, then ok | Discover found no 169.254 address while the adapter was still coming up, and the first connect was aborted (WinError 10053); both worked seconds later |
+| 2026-10-19 | Session summary listed the transmission as silent | wrong | it answered all session; the car resetting the connection at the end silenced it once. Now only modules that never answered are listed |
+| 2026-10-19 | `HU_STATUS_SPEED.SPEED_DIFFERENCE_PERCENT` | 65535 at times | its "no value"; now shown blank |
 | 2026-10-18 | BDC fault details | odometer and time right in every snapshot | a second snapshot after the BDC's own values went undecoded (it held today's 111,304 km); fixed |
 | 2026-10-18 | Not done yet | | the BDC's last 57 identifiers and the head unit's busy ones, on the next release; fuel pump; the DME snapshot |

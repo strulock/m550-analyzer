@@ -1499,6 +1499,12 @@ def _field_pos(meta, pos):
     return int(given) if given else pos
 
 
+# Raw values a field sends for "no value", which would otherwise read as a
+# number. The head unit's speed difference is 65535 when it has none
+# (in-car, 2026-10-19).
+NO_VALUE = {"HU_STATUS_SPEED.SPEED_DIFFERENCE_PERCENT": 0xFFFF}
+
+
 def decode_record(raw, fields):
     """Split one identifier's reply into its fields, in order.
 
@@ -1518,6 +1524,8 @@ def decode_record(raw, fields):
         chunk = raw[pos:pos + size]
         if len(chunk) < size and not dtype.startswith("string"):
             out[meta["ARG"]] = (None, "", "short reply")
+        elif int.from_bytes(chunk, "big") == NO_VALUE.get(meta["ARG"], -1):
+            out[meta["ARG"]] = (None, "", "no value")
         else:
             value, unit = decode(chunk, meta)
             out[meta["ARG"]] = (value, unit, "")
@@ -1759,6 +1767,7 @@ class ChannelReader:
         self.last = {}          # (module, did) -> time of last read
         self.refused = {}       # (module, did) -> reason; not asked again
         self.quiet_until = {}   # module -> time; it did not answer
+        self.heard = set()      # modules that answered at least once
         self.value_quiet = {}   # DME (target, did) or target -> time; no answer
 
     @staticmethod
@@ -1886,6 +1895,7 @@ class ChannelReader:
         try:
             raw = h.read_did(module, did, timeout=MODULE_TIMEOUT)
         except NegativeResponse as e:
+            self.heard.add(module)                  # a refusal is an answer
             reason = NRC.get(e.code, "0x%02X" % e.code)
             if e.code in (0x11, 0x12, 0x31):
                 self.refused[key] = reason          # will never work: stop asking
@@ -1895,6 +1905,7 @@ class ChannelReader:
             self.quiet_until[module] = now + NO_ANSWER_BACKOFF
             self.cache.pop(key, None)
             return
+        self.heard.add(module)
         self.cache[key] = decode_record(raw, self.layouts[key])
 
 
