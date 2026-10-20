@@ -276,6 +276,18 @@ them, and Claude's `drive_history` tool reads them. Only new or changed
 files are read again, so it stays quick as logs pile up. A statistic is
 blank for a drive that didn't log its channel.
 
+#### Cloud copy
+
+Optionally, the app keeps a copy of the logs folder in your own Cloudflare
+account and Claude can read it from anywhere: a small Worker (in
+[`cloud/`](cloud/README.md)) stores the logs in R2 and the History in D1,
+behind Cloudflare Access, and serves read-only MCP tools (`drive_history`,
+`fault_history`, `trend`, `list_files`, `read_log`). Once deployed, enter
+its URL and an Access service token under *Settings > Cloud*; the app then
+uploads new and changed logs after each drive and fault read, and whatever
+it couldn't send offline once the PC is online again (`n63read sync` does
+it by hand). Nothing is uploaded until it's set up.
+
 ### Other modules: head unit, transmission, chassis, body, climate
 
 Besides the DME, the channel list holds the readable values of eleven more
@@ -484,6 +496,8 @@ n63read speed --ip 169.254.x.x               engine values a second: one per req
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?
+n63read sync                                 upload new logs and the history to your
+                                             cloud Worker (cloud/README.md)
 n63read history                              every drive and fault in the logs folder,
                                              summed up (also History\drives.csv)
 n63read selftest                             every data file bundled and loading

@@ -327,13 +327,19 @@ Decided 2026-10-20: the Trulock.com account; everything uploaded (logs with
 GPS and VIN, fault lists, summaries) into private storage; remote access
 behind Cloudflare Access; uploads automatic whenever the PC is online.
 
-- [ ] A Worker in the repo (`cloud/`, no account IDs or keys committed):
+- [x] A Worker in the repo (`cloud/`, no account IDs or keys committed):
       R2 for the raw files, D1 for drive summaries and fault history, an
-      upload API for the app, and a remote MCP endpoint (the same read-only
-      tools over the cloud copy: drive_history, read_log, compare_banks,
-      find_events) so Claude on the phone or web can use it.
-- [ ] Cloudflare Access in front of it; the app uploads with an Access
-      service token kept in its settings, not in the repo.
-- [ ] The app's uploader: an outbox of new and changed files, sent after a
-      log closes and after a fault read, retried when the PC is next online.
-- [ ] Deploy with `wrangler`, after reviewing what it creates.
+      upload API for the app, and a remote MCP endpoint (drive_history,
+      fault_history, trend, list_files, read_log). Plain JavaScript, no
+      packages; tested on Node 24 in CI.
+- [x] It checks the Access token itself (audience, issuer, signature,
+      expiry) and fails closed without Access configured; the app uploads
+      with an Access service token kept DPAPI-encrypted in its settings.
+- [x] The app's uploader: new and changed files (by size, time and SHA-256)
+      and the History summaries, after a log closes, after a fault list is
+      saved and every ten minutes; `n63read sync`.
+- [ ] Deploy on the Trulock.com account: R2 bucket, D1 database, Worker,
+      Access application and service token; add `/mcp` to the TrulockMCP
+      portal. Review before creating anything.
+- [ ] More MCP tools in the cloud: compare_banks and find_events over a
+      stored log, like the local ones.

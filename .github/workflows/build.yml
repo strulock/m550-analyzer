@@ -21,6 +21,17 @@ jobs:
       - run: python -m pip install -r requirements-ci.txt
       - run: python -m ruff check src tests tools
 
+  # The cloud Worker (cloud/): plain JavaScript, tested on Node's own runner
+  # and SQLite; no packages to install.
+  cloud:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+      - run: node --test "cloud/test/*.test.mjs"
+
   # The tests that need no Windows and no display, on the oldest Python the
   # package claims (requires-python) and a current one.
   test-linux:
@@ -164,7 +175,7 @@ jobs:
   # code from the repository: it attaches what the build job made.
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [build, lint, test-linux]
+    needs: [build, lint, test-linux, cloud]
     runs-on: ubuntu-latest
     permissions:
       contents: write
