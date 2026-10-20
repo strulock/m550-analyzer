@@ -18,7 +18,8 @@ from tkinter import ttk, filedialog, messagebox, simpledialog
 
 import webbrowser
 
-from n63read import __version__, core, diag, engine, graph, playback, share, theme, update
+from n63read import (__version__, core, diag, engine, graph, history, historywin, maps,
+                     playback, share, theme, update)
 
 CSV_NAME = core.DEFAULT_CSV         # resolved via core.resource_path()
 PLOT_POINTS = 240
@@ -36,6 +37,97 @@ ANSWER_MARKS = {"ok": "\u2713  ", "size": "\u2260  ", "refused": "\u2717  ",
 # Negative responses meaning the identifier does not exist on this car.
 REFUSALS = {core.NRC[c] for c in (0x11, 0x12, 0x31)}
 COLORS = ["#2d7dd2", "#d1495b", "#1b998b", "#e8a53e", "#8367c7", "#3f88c5"]
+GPS_LAT, GPS_LON = history.LAT, history.LON
+# What the map colours the route by at first, the first one watched.
+MAP_DEFAULTS = list(history.SPEEDS) + ["INMOT", "MITTL_MOTORDREHZAHL_PRO_ZYLSEGM"]
+
+
+class _MapSource:
+    """What the map window draws, from the app: during a replay the whole
+    log's route with the marker where the replay is; otherwise the route so
+    far, from the watched GPS channels."""
+
+    def __init__(self, app):
+        self.app = app
+
+    def _replay(self):
+        feed = self.app.feed
+        if feed is None or feed.kind != "replay" or getattr(feed, "whole", False):
+            return None
+        return feed
+
+    def gps_names(self):
+        names = [n for n, _, _ in self.app.watch]
+        lat = GPS_LAT if GPS_LAT in names else next(
+            (n for n in names if "LATITUDE" in n.upper()), None)
+        lon = GPS_LON if GPS_LON in names else next(
+            (n for n in names if "LONGITUDE" in n.upper()), None)
+        return lat, lon
+
+    def track(self):
+        lat, lon = self.gps_names()
+        if not lat or not lon:
+            return []
+        feed = self._replay()
+        if feed is not None:
+            if getattr(feed, "map_track", None) is None:
+                feed.map_track = history.gps_track(feed.rows, lat, lon)
+            return feed.map_track
+        a, o = self.app.history.get(lat), self.app.history.get(lon)
+        if not a or not o:
+            return []
+        lons = dict(o)
+        return [(t, la, lons[t]) for t, la in a
+                if t in lons and history.valid_fix(la, lons[t])]
+
+    def channels(self):
+        skip = set(self.gps_names())
+        return [(name, self.app._describe(meta) or name)
+                for name, _did, meta in self.app.watch if name not in skip]
+
+    def values(self, name):
+        feed = self._replay()
+        if feed is not None:
+            cache = getattr(feed, "map_values", None)
+            if cache is None:
+                cache = feed.map_values = {}
+            if name not in cache:
+                cache[name] = [(t, float(v.get(name))) for t, v in feed.rows
+                               if isinstance(v.get(name), (int, float))]
+            return cache[name]
+        h = self.app.history.get(name)
+        return list(h) if h else []
+
+    def shown(self, name, value):
+        meta = self.app.catalog.get(name, {})
+        unit = self.app._shown_unit(meta)
+        try:
+            value = graph.converter(meta.get("EINHEIT"), unit)(value)
+        except ValueError:
+            unit = meta.get("EINHEIT") or ""
+        return "%.4g" % value, unit
+
+    def now(self):
+        lat, _ = self.gps_names()
+        h = self.app.history.get(lat) if lat else None
+        last = h.last() if h else None
+        return last[0] if last else None
+
+    @property
+    def seek(self):
+        feed = self._replay()
+        if feed is None:
+            return None
+
+        def go(t):
+            offset = max(0.0, t - feed.rows[0][0])
+            feed.seek(offset)
+            self.app._scrub_shown(offset)
+        return go
+
+    def default(self):
+        names = [n for n, _, _ in self.app.watch]
+        return next((n for n in MAP_DEFAULTS if n in names), None)
 
 
 # --------------------------------------------------------------- poll thread
@@ -119,6 +211,9 @@ class App(tk.Tk):
         self.modules = []                    # addresses found by the last scan
         self.logging_to = None
         self.feed = None                     # DemoFeed or ReplayFeed while not connected
+        self.map_window = None
+        self.history_window = None
+        self.tiles = maps.TileCache(fetch=self.settings.get("map_tiles", True))
 
         self._build()
         self.palette = theme.apply(self, self.theme_name)
@@ -212,6 +307,8 @@ class App(tk.Tk):
         dmenu.add_command(label="Connect to Claude...", command=self._connect_claude)
         self.diag_btn["menu"] = dmenu
         self.diag_btn.pack(side="right", padx=(4, 0))
+        ttk.Button(bar, text="History", command=self._open_history).pack(side="right",
+                                                                         padx=(4, 0))
         ttk.Button(bar, text="Faults", command=self._faults).pack(side="right", padx=(4, 0))
         ttk.Button(bar, text="Scan modules", command=self._scan).pack(side="right")
         self.replay_btn = ttk.Button(bar, text="Open log...", command=self._toggle_replay)
@@ -314,6 +411,7 @@ class App(tk.Tk):
         ttk.Button(row, text="Remove", command=self._remove).pack(side="left")
         ttk.Button(row, text="Clear", command=self._clear).pack(side="left", padx=4)
         ttk.Button(row, text="Graph", command=self._pop_out).pack(side="left")
+        ttk.Button(row, text="Map", command=self._open_map).pack(side="left", padx=(4, 0))
         ttk.Button(row, text="Alert...", command=self._edit_alert).pack(side="left", padx=(4, 0))
         ttk.Checkbutton(row, text="Compare banks", variable=self.compare_var,
                         command=self._compare_changed).pack(side="left", padx=(8, 0))
@@ -645,9 +743,21 @@ class App(tk.Tk):
         f = group("Diagnostics", 4)
         ttk.Checkbutton(f, text="Record connection diagnostics", variable=self.diag_var,
                         command=self._set_diagnostics).pack(anchor="w")
+        f = group("Map", 5)
+        self.tiles_var = tk.BooleanVar(value=self.settings.get("map_tiles", True))
+        ttk.Checkbutton(f, text="Download street map tiles (OpenStreetMap)",
+                        variable=self.tiles_var, command=self._set_map_tiles).pack(anchor="w")
+        ttk.Label(f, text="Downloading tells the tile server roughly where the map is. "
+                          "Tiles already downloaded still show without it.",
+                  foreground=self.palette["muted"], wraplength=360).pack(anchor="w")
         ttk.Button(body, text="Close", command=win.destroy).grid(
-            row=5, column=1, sticky="e")
+            row=6, column=1, sticky="e")
         theme.apply(self, self.theme_name)
+
+    def _set_map_tiles(self):
+        on = bool(self.tiles_var.get())
+        self._save_setting("map_tiles", on)
+        self.tiles.fetch = on
 
     def _save_setting(self, key, value):
         self.settings[key] = value
@@ -677,8 +787,8 @@ class App(tk.Tk):
         self._save_setting("theme", name)
         self.palette = theme.apply(self, name)
         self._style_tags()
-        for window in list(self.graphs.values()):
-            if window.winfo_exists():
+        for window in list(self.graphs.values()) + [self.map_window]:
+            if window is not None and window.winfo_exists():
                 window.set_colors(self.palette)
         self._plot()
 
@@ -1131,6 +1241,35 @@ class App(tk.Tk):
             self.graphs[name] = window
         return [self.graphs[n] for n in names]
 
+    # -- map and history ---------------------------------------------------
+
+    def _open_map(self):
+        if self.map_window is not None and self.map_window.winfo_exists():
+            self.map_window.refresh_channels()
+            self.map_window.lift()
+            return
+        source = _MapSource(self)
+        lat, lon = source.gps_names()
+        if not lat or not lon:
+            if self.feed and self.feed.kind == "replay":
+                messagebox.showinfo("Map", "This log has no GPS position to draw.")
+                return
+            if not messagebox.askyesno(
+                    "Map", "The map needs the head unit's GPS position. Watch "
+                           "%s and %s?" % (GPS_LAT, GPS_LON)):
+                return
+            self._add_names([n for n in (GPS_LAT, GPS_LON) if n in self.catalog])
+        self.map_window = maps.MapWindow(self, source, tiles=self.tiles, lang=self.lang,
+                                         colors=self.palette)
+
+    def _open_history(self):
+        if self.history_window is not None and self.history_window.winfo_exists():
+            self.history_window.lift()
+            self.history_window.rescan()
+            return
+        self.history_window = historywin.HistoryWindow(self, on_open=self._open_log,
+                                                       colors=self.palette)
+
     # -- templates ---------------------------------------------------------
 
     def _fill_templates_menu(self):
@@ -1392,8 +1531,16 @@ class App(tk.Tk):
         path = filedialog.askopenfilename(
             filetypes=[("CSV log", "*.csv"), ("All files", "*.*")],
             initialdir=core.logs_dir())
-        if not path:
+        if path:
+            self._open_log(path)
+
+    def _open_log(self, path):
+        """Replay the log at `path` (the History window opens one this way)."""
+        if self.poller:
+            messagebox.showinfo("Replay", "Disconnect first.")
             return
+        if self.feed and self.feed.kind == "replay":
+            self._stop_feed()
         # An hour's log takes seconds to read: do it off the Tk thread, so
         # the window keeps drawing, and carry on in _replay_loaded.
         self.status.config(text="\u25cf reading %s..." % os.path.basename(path),

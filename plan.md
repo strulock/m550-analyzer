@@ -298,3 +298,42 @@ the file and line it starts from, as of 0.3.8.
       fault read will say), and drop the other two files' texts if they clash.
 - [x] The DME's own snapshot values: 1,538 fields from its `FUMWELTTEXTE`,
       for both DMEs (`dme8ff_l` has the same table).
+
+## Phase 12 — Map
+
+- [x] A Map window: OpenStreetMap tiles (cached in `%APPDATA%\n63read\tiles`,
+      a policy-conformant User-Agent, attribution, downloads switchable off),
+      the GPS route coloured by any watched channel, a marker that follows
+      live logging and replay, click to jump the replay, pan, zoom, fit.
+- [ ] Offer a channel's alert limits as the colour scale, so a route shows
+      where a value left its range.
+
+## Phase 13 — Long-term history
+
+- [x] `history.scan()`: every drive log in the logs folder summed up per
+      drive (misfires, uneven running, spark burn time and knock level per
+      cylinder; knock retard, trims and lambda per bank; temperatures,
+      battery, boost, tire pressures, distance, odometer) and every saved
+      fault list folded into a per-fault history (first and last seen,
+      reads, present / stored / gone now). Incremental via `index.json`.
+- [x] The History window (Drives, Trends, Faults), `drives.csv` and
+      `faults.csv`, `n63read history`, and Claude's `drive_history` tool.
+- [ ] Odometer per drive: log a mileage channel by default
+      (`LMV_DATEN_VERTEILERGETRIEBE.MILE_KM`), or take it from fault reads.
+
+## Phase 14 — Cloud storage and remote access (Cloudflare)
+
+Decided 2026-10-20: the Trulock.com account; everything uploaded (logs with
+GPS and VIN, fault lists, summaries) into private storage; remote access
+behind Cloudflare Access; uploads automatic whenever the PC is online.
+
+- [ ] A Worker in the repo (`cloud/`, no account IDs or keys committed):
+      R2 for the raw files, D1 for drive summaries and fault history, an
+      upload API for the app, and a remote MCP endpoint (the same read-only
+      tools over the cloud copy: drive_history, read_log, compare_banks,
+      find_events) so Claude on the phone or web can use it.
+- [ ] Cloudflare Access in front of it; the app uploads with an Access
+      service token kept in its settings, not in the repo.
+- [ ] The app's uploader: an outbox of new and changed files, sent after a
+      log closes and after a fault read, retried when the PC is next online.
+- [ ] Deploy with `wrangler`, after reviewing what it creates.

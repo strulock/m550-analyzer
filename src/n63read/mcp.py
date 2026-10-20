@@ -28,7 +28,7 @@ import sys
 import threading
 import time
 
-from n63read import __version__, core, diag, engine, share, update
+from n63read import __version__, core, diag, engine, history, share, update
 
 SERVER_NAME = "n63read"
 PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")    # newest first
@@ -128,6 +128,16 @@ TOOLS = [
      "inputSchema": {"type": "object", "properties": {
          "query": {"type": "string"},
          "limit": {"type": "integer", "description": "Default 40"}}, "required": ["query"]}},
+    {"name": "drive_history", "car": False,
+     "description": "Long-term statistics from every drive log and fault list in the logs "
+                    "folder: per drive, misfires, uneven running and spark burn time per "
+                    "cylinder, knock retard and fuel trims per bank, temperatures, battery, "
+                    "tire pressures and distance; and each fault's first and last sighting "
+                    "and whether it is present, stored or gone now. Newest drives last.",
+     "inputSchema": {"type": "object", "properties": {
+         "limit": {"type": "integer", "description": "Drives returned, newest; default 30"},
+         "faults": {"type": "string", "description": "current (default: present and "
+                                                     "stored) or all"}}}},
     {"name": "list_files", "car": False,
      "description": "Drive logs, fault lists and reports in the logs folder, and the "
                     "diagnostics journal and packet captures; newest first.",
@@ -329,6 +339,16 @@ def _files():
                 found.append(path)
     found.sort(key=lambda p: os.path.getmtime(p), reverse=True)
     return found
+
+
+def tool_drive_history(a):
+    s = history.scan()
+    limit = int(a.get("limit") or 30)
+    faults = s.faults if a.get("faults") == "all" else [f for f in s.faults
+                                                         if f["now"] != "gone"]
+    drives = [{k: v for k, v in d.items() if v is not None} for d in s.drives[-limit:]]
+    return json.dumps({"drives_total": len(s.drives), "drives": drives, "faults": faults,
+                       "folder": s.folder, "errors": s.errors[:20]}, indent=0)
 
 
 def tool_list_files(a):

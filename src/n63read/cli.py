@@ -36,7 +36,7 @@ import queue
 import sys
 import time
 
-from n63read import __version__, core, diag, engine, share, update
+from n63read import __version__, core, diag, engine, history, share, update
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
                           HsfzError, NegativeResponse, decode)
 
@@ -358,6 +358,36 @@ def op_templates(args):
         print("%s  (%d)\n    %s" % (name, len(saved[name]), " ".join(saved[name])))
 
 
+def _num(value, fmt="%.4g"):
+    return "" if value is None else fmt % value
+
+
+def op_history(args):
+    """Every drive log and fault list in the logs folder, summed up."""
+    s = history.scan()
+    drives = s.drives[-args.limit:] if args.limit else s.drives
+    print("%d drives in %s" % (len(s.drives), core.logs_dir(create=False)))
+    if drives:
+        print("\n%-19s %6s %7s %9s %8s %8s %8s %8s  %s" % (
+            "start", "min", "km", "misfires", "knock b1", "knock b2", "trim b1", "trim b2",
+            "by cylinder"))
+    for d in drives:
+        print("%-19s %6s %7s %9s %8s %8s %8s %8s  %s" % (
+            d["start"], _num(d["minutes"], "%.1f"), _num(d["km"], "%.1f"),
+            _num(d["misfires"], "%d"), _num(d["knock_b1"], "%.2f"), _num(d["knock_b2"], "%.2f"),
+            _num(d["trim_b1"], "%+.1f%%"), _num(d["trim_b2"], "%+.1f%%"),
+            history.misfire_text(d)))
+    print("\n%d faults seen" % len(s.faults))
+    for f in s.faults:
+        if f["now"] != "gone" or args.all:
+            print("  %-8s %-5s %s  %-50.50s  first %s, last %s, %d reads" % (
+                f["now"], f["module"], f["code"], f["text_en"], f["first_seen"][:10],
+                f["last_seen"][:10], f["reads_seen"]))
+    for e in s.errors:
+        print("could not read %s" % e)
+    print("\nSaved to %s (%s, %s)" % (s.folder, history.DRIVES_CSV, history.FAULTS_CSV))
+
+
 def op_update(args):
     """Check GitHub for a newer release and, unless --check, install it."""
     try:
@@ -650,6 +680,12 @@ def build_parser():
 
     sp = sub.add_parser("templates", help="list the channel templates saved in the app")
     sp.set_defaults(func=op_templates)
+
+    sp = sub.add_parser("history", help="sum up every drive log and fault list in the "
+                                        "logs folder (writes History\\drives.csv, faults.csv)")
+    sp.add_argument("--limit", type=int, default=20, help="drives shown, newest (0: all)")
+    sp.add_argument("--all", action="store_true", help="also faults no longer listed")
+    sp.set_defaults(func=op_history)
 
     sp = sub.add_parser("update", help="install the latest GitHub release")
     sp.add_argument("--check", action="store_true", help="only say whether one is available")

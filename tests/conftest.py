@@ -24,6 +24,12 @@ def quick_diagnostics(tmp_path, monkeypatch):
     monkeypatch.setattr(update, "latest_release", offline)
     updates = str(tmp_path / "updates")
     monkeypatch.setattr(update, "updates_dir", lambda: updates)
+    # Never download map tiles from a test.
+    from n63read import maps
+
+    def no_tiles(*a):
+        raise OSError("no network in tests")
+    monkeypatch.setattr(maps.TileCache, "_download", staticmethod(no_tiles))
     # No other n63read is running from the app's folder, unless a test says so.
     monkeypatch.setattr(update, "others_running", lambda folder=None: [])
     # Each test has its own shared-tester file, so a poller never borrows
