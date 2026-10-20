@@ -117,6 +117,14 @@ and the slave at `0x13` (bank 2), with the same identifier table.
   (`0x4653`) is bank 1's wastegate position voltage at `0x12` and bank 2's at
   `0x13` (4.37 V and 4.19 V at idle, so not an echo). Knock levels for
   cylinders 5–8 (`IUKZ5`...) likewise answer nothing at `0x12`.
+- Per-cylinder values the DME keeps for its own four cylinders follow the
+  same pattern: cylinders 5-8 are the slave's `CYL1`-`CYL4` / `ZYL1`-`ZYL4`
+  read `@0x13`. Seen for knock levels (`IUKZn`, and `SPG_KLOPF_ZYLn`, which
+  reports the same values under other identifiers), spark burn time
+  (`DIAG_BRENNDAUER_ZUENDFUNKE_CYLn`) and injection mode
+  (`AKT_EINSPRITZMODUS_ZYLn`, which the file lists only up to 6). Uneven
+  running and the misfire counters are the exception: the master reports
+  all eight.
 - n63read lists every DME channel a second time as `NAME@0x13` (the GUI's
   *Engine bank 2* group), read from the slave over its own connection; see
   [protocol](protocol.md#two-connections).
@@ -130,6 +138,14 @@ and the slave at `0x13` (bank 2), with the same identifier table.
 
 When a bank 2 value looks unavailable, try the bank-1 name with `@0x13`
 before concluding it can't be read.
+
+Fuel low pressure: `ROH_NIEDERDRUCK_UNFILT` reads exactly 580 kPa at idle
+and at full throttle, and the sensor voltage behind it
+(`SPG_KRAFTST_NIEDERDRUCKSENS`) is refused, so 580 is a substitute value,
+not a measurement (2026-10-19). Likewise refused on this DME:
+`KNDS_DRUCK_ABS_ROH`, `KNDS_SENS_ROH_KS_DRUCK`, `BED_SUPERKLOPFER`, and the
+electric fan's `ASG_ELUE_DXE`, `ASW_ELUE_DXE` and `ASG_E_LUEFTER`; its
+commanded speed `ASG_ELUE_LIN` reads.
 
 ## Modules not covered yet
 

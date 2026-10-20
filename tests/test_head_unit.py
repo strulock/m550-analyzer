@@ -65,6 +65,21 @@ def test_decode_record_walks_fields_in_order():
     assert rec["HU_STATUS_SPEED.SPEED_DIFFERENCE_PERCENT"][0] == 5
 
 
+def test_the_speed_difference_has_a_no_value_marker():
+    raw = bytes(12) + bytes.fromhex("ffff")
+    rec = core.decode_record(raw, LAYOUTS[SPEED])
+    assert rec["HU_STATUS_SPEED.SPEED_DIFFERENCE_PERCENT"] == (None, "", "no value")
+
+
+def test_a_module_that_answered_is_not_reported_silent_later():
+    h = FakeH({GPS: HU_GPS})
+    r = core.ChannelReader(LAYOUTS, 0x12)
+    r.read(h, [LAT], now=100.0)
+    h.answers[GPS] = core.HsfzTimeout("timed out")      # the car reset, say
+    r.read(h, [LAT], now=102.0)
+    assert 0x63 in r.quiet_until and 0x63 in r.heard
+
+
 def test_decode_record_unsized_strings_and_unknown_types():
     fields = [{"ARG": "a", "DATENTYP": "unsigned char"},
               {"ARG": "b", "DATENTYP": "string"},
