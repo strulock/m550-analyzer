@@ -237,6 +237,45 @@ new file (`run_2.csv`, `run_3.csv`, ...) rather than mixing column layouts in
 one file; `Time` carries on counting. A fault read while connected shares the
 connection: logging slows down during it but doesn't stop.
 
+#### Map
+
+**Map** (beside Graph) shows the route on a street map, coloured by any
+watched channel: speed, boost, uneven running, coolant temperature... A
+white marker follows the car while logging and the replay while replaying;
+click the route during a replay to jump to that moment. Drag to move the
+map, scroll or **+**/**−** to zoom, **Fit route** to see it all; **Follow**
+keeps the marker in view. It needs the head unit's GPS position
+(`HU_STATUS_GPS_POSITION.LATITUDE` and `.LONGITUDE`; the Map button offers
+to watch them). Logs from other tools work too if they have latitude and
+longitude columns.
+
+The street map is OpenStreetMap's, downloaded as needed and kept in
+`%APPDATA%\n63read\tiles`, so a route you've driven before shows without
+internet later; without tiles the route draws on a plain background.
+Downloading tells the tile server roughly where the map is: *Settings > Map*
+switches it off.
+
+#### History
+
+**History** (top bar) adds up every drive log and fault list in the logs
+folder, from the app, the CLI and Claude alike, and logs copied in from
+elsewhere:
+
+- **Drives:** one row a drive: date, length, distance, top speed, misfires
+  (and on which cylinders), knock retard and fuel trims per bank, peak
+  temperatures, battery, tire pressures. Double-click one to replay it.
+- **Trends:** a statistic across drives, one line per cylinder or bank:
+  misfires, uneven running, spark burn time, knock retard, fuel trims, tire
+  pressures, battery, temperatures, boost, distance.
+- **Faults:** every fault ever read, with when it first and last appeared,
+  how many reads listed it, and whether it's present, stored or gone now.
+
+The same tables are saved as `drives.csv` and `faults.csv` in
+`Documents\BMW Analyzer Logs\History` for Excel; `n63read history` prints
+them, and Claude's `drive_history` tool reads them. Only new or changed
+files are read again, so it stays quick as logs pile up. A statistic is
+blank for a drive that didn't log its channel.
+
 ### Other modules: head unit, transmission, chassis, body, climate
 
 Besides the DME, the channel list holds the readable values of eleven more
@@ -445,6 +484,8 @@ n63read speed --ip 169.254.x.x               engine values a second: one per req
 n63read gps --ip 169.254.x.x --watch         head unit GPS fix and position
 n63read check --ip 169.254.x.x --out check.csv
                                              does each module's catalog fit?
+n63read history                              every drive and fault in the logs folder,
+                                             summed up (also History\drives.csv)
 n63read selftest                             every data file bundled and loading
 n63read diag                                 connection check, step by step, recorded
 n63read diag --capture                       ...and record the packets (administrator)
