@@ -109,7 +109,9 @@ def test_a_log_row_has_time_clock_channels_and_event():
     now = time.mktime((2026, 10, 17, 14, 3, 22, 0, 0, -1)) + 0.25
     row = core.log_row(1.23456, now, names, {"A": (1.0, "", ""), "B": (None, "", "")},
                        "=bad")
-    assert row == [1.235, "2026-10-17 14:03:22.250", 1.0, "", "'=bad"]
+    assert row[0] == 1.235 and row[2:] == [1.0, "", "'=bad"]
+    assert row[1].startswith("2026-10-17 14:03:22.250")       # then the UTC offset
+    assert core.clock_epoch(row[1]) == pytest.approx(now, abs=0.001)
 
 
 def test_replay_skips_the_clock_and_event_columns(tmp_path):
@@ -352,3 +354,19 @@ def test_a_reconnecting_status_keeps_the_connection(app):
         app.poller = None
         app.logging_to = None
 
+
+
+def test_the_clock_carries_its_utc_offset():
+    import re
+    import time
+    now = 1792400000.25
+    text = core.log_clock(now)
+    assert re.fullmatch(r"\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.250[+-]\d\d:\d\d", text)
+    assert core.clock_epoch(text) == pytest.approx(now, abs=0.001)    # back to UTC exactly
+    assert core.clock_epoch("2026-10-19 07:42:50.123-05:00") == pytest.approx(
+        1792413770.123, abs=0.001)
+    assert core.clock_epoch("2026-10-19 12:42:50Z") == 1792413770
+    old = "2026-10-19 07:42:50.000"                  # before 0.6.2: this PC's local time
+    assert core.clock_epoch(old) == pytest.approx(
+        time.mktime((2026, 10, 19, 7, 42, 50, 0, 0, -1)), abs=0.001)
+    assert core.clock_epoch("x") is None and core.clock_epoch("") is None

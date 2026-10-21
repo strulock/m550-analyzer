@@ -21,6 +21,7 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   <MODULE>_enum_tables.csv               their value -> text enumerations
 """
 
+import calendar
 import contextlib
 import csv
 import json
@@ -1727,9 +1728,40 @@ def log_header(names):
 
 
 def log_clock(now=None):
+    """The PC's time of day with its offset from UTC, to the millisecond:
+    2026-10-19 07:42:50.123-05:00. The offset makes logs from different
+    time zones, or either side of a daylight-saving change, line up."""
     now = time.time() if now is None else now
-    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(now)) + ".%03d" % (
-        int(now * 1000) % 1000)
+    t = time.localtime(now)
+    off = (t.tm_gmtoff or 0) // 60
+    return "%s.%03d%s%02d:%02d" % (time.strftime("%Y-%m-%d %H:%M:%S", t),
+                                   int(now * 1000) % 1000, "-" if off < 0 else "+",
+                                   abs(off) // 60, abs(off) % 60)
+
+
+_CLOCK = re.compile(r"^(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d):(\d\d)(\.\d+)?"
+                    r"(?:([+-])(\d\d):?(\d\d)|Z)?$")
+
+
+def clock_epoch(text):
+    """Seconds since 1970 (UTC) of a log's Clock. Without an offset (logs
+    before 0.6.2) it is taken as this PC's local time then. None if it
+    isn't a clock time."""
+    m = _CLOCK.match((text or "").strip())
+    if not m:
+        return None
+    y, mo, d, hh, mm, ss = (int(g) for g in m.groups()[:6])
+    frac = float(m.group(7) or 0)
+    if m.group(8):
+        sign = -1 if m.group(8) == "-" else 1
+        off = sign * (int(m.group(9)) * 3600 + int(m.group(10)) * 60)
+        return calendar.timegm((y, mo, d, hh, mm, ss, 0, 0, 0)) - off + frac
+    if text.strip().endswith("Z"):
+        return calendar.timegm((y, mo, d, hh, mm, ss, 0, 0, 0)) + frac
+    try:
+        return time.mktime((y, mo, d, hh, mm, ss, 0, 0, -1)) + frac
+    except (OverflowError, ValueError):
+        return None
 
 
 def log_row(seconds, now, names, sample, event=""):
