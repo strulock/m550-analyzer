@@ -350,5 +350,9 @@ behind Cloudflare Access; uploads automatic whenever the PC is online.
       counters) and saves them in the fault CSV (`first_km`, `last_km`,
       `occurrences`, `details` JSON); History and the cloud keep the newest,
       and the cloud's `fault_history` returns them for one code.
-- [ ] Per-sample time series in the cloud (each row's channels queryable
-      across drives), beside the raw logs and per-drive summaries.
+- [x] Per-sample time series in the cloud: the app turns each drive log
+      into one UTC series per channel (series.py; Clock's offset, or this
+      PC's zone for older logs) and uploads it once; D1 keeps a row per
+      channel per drive; Claude's `list_channels` and `channel_series`
+      (bucketed, or per drive) query it.
+- [x] Logs' Clock carries its UTC offset (0.6.2).

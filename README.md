@@ -283,7 +283,10 @@ Optionally, the app keeps a copy of the logs folder in your own Cloudflare
 account and Claude can read it from anywhere: a small Worker (in
 [`cloud/`](cloud/README.md)) stores the logs in R2 and the History in D1,
 behind Cloudflare Access, and serves read-only MCP tools (`drive_history`,
-`fault_history`, `trend`, `list_files`, `read_log`, `list_templates`). The
+`fault_history`, `trend`, `list_files`, `read_log`, `list_templates`, and
+`list_channels` / `channel_series` over a time-series store holding every
+value of every drive with its UTC time, so one channel can be followed across
+all drives). The
 app's channel templates sync too, both ways, so a template saved on one PC
 appears on the others. Once deployed, enter
 its URL and an Access service token under *Settings > Cloud*; the app then
