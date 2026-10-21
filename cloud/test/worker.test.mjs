@@ -175,6 +175,59 @@ test("templates sync both ways, deletions included", async () => {
   assert.equal((await call("PUT", "/api/templates", { body: "nope" })).status, 400);
 });
 
+// --- time series
+
+function chunk(name, t0, values, unit = "") {
+  const data = values.map((v, i) => [i, v]);
+  return { name, unit, t0, t1: t0 + values.length - 1, n: values.length,
+    min: Math.min(...values), max: Math.max(...values),
+    mean: values.reduce((s, v) => s + v, 0) / values.length, data };
+}
+
+test("series: stored per drive, one channel across drives, resampled", async () => {
+  const day1 = Date.parse("2026-10-18T23:43:57Z") / 1000;
+  const day2 = Date.parse("2026-10-19T12:35:34Z") / 1000;
+  const put = (drive, chunks) => call("PUT", `/api/series/${drive}`,
+    { body: JSON.stringify({ start: chunks[0].t0, approx: false, chunks }) });
+  let r = await put("logs/a.csv", [chunk("ITKUA", day1, [80, 90, 100], "°C"),
+    chunk("ILUZ5", day1, [1, -2, 3])]);
+  assert.deepEqual(await r.json(), { ok: true, drive: "logs/a.csv", channels: 2, chunks: 2 });
+  await put("logs/b.csv", [chunk("ITKUA", day2, [85, 95], "°C")]);
+  await put("logs/a.csv", [chunk("ITKUA", day1, [81, 91, 101], "°C"),    // replaced, not added
+    chunk("ILUZ5", day1, [1, -2, 3])]);
+
+  const ch = (await tool("list_channels", {})).data.channels;
+  assert.deepEqual(ch.map((c) => [c.channel, c.drives, c.values]),
+    [["ILUZ5", 1, 3], ["ITKUA", 2, 5]]);
+  assert.equal(ch[1].first, "2026-10-18T23:43:57.000Z");
+
+  const s = (await tool("channel_series", { channel: "ITKUA" })).data;
+  assert.equal(s.count, 5);
+  assert.deepEqual(s.points.map((p) => p[1]), [81, 91, 101, 85, 95]);
+  assert.equal(s.points[3][0], "2026-10-19T12:35:34.000Z");
+  assert.deepEqual(s.drives, ["logs/a.csv", "logs/b.csv"]);
+
+  const win = (await tool("channel_series",
+    { channel: "ITKUA", start: "2026-10-19T00:00:00Z" })).data;
+  assert.deepEqual(win.points.map((p) => p[1]), [85, 95]);
+
+  const by = (await tool("channel_series", { channel: "ITKUA", by_drive: true })).data.drives;
+  assert.deepEqual(by.map((d) => [d.drive, d.min, d.max]),
+    [["logs/a.csv", 81, 101], ["logs/b.csv", 85, 95]]);
+
+  await put("logs/c.csv", [chunk("INMOT", day2, Array.from({ length: 300 }, (_, i) => i))]);
+  const many = (await tool("channel_series", { channel: "INMOT", points: 10 })).data;
+  assert.equal(many.resampled, true);
+  assert.equal(many.points.length, 10);
+  assert.deepEqual(many.columns, ["time", "mean", "min", "max", "n"]);
+  assert.equal(many.points[0][2], 0);
+  assert.equal(many.points[9][3], 299);
+
+  const http = await (await call("GET", "/api/series?channel=ITKUA&by_drive=1")).json();
+  assert.equal(http.drives.length, 2);
+  assert.equal((await call("PUT", "/api/series/x.csv", { body: "{}" })).status, 400);
+});
+
 // --- MCP
 
 async function mcp(method, params, id = 1) {

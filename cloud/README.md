@@ -9,6 +9,10 @@ serves it to Claude from anywhere:
   `drive_history`, `fault_history` (with each fault's stored details on
   request), `trend`, `list_files`, `read_log`, `list_templates`.
 - **Templates:** the app's saved channel sets, merged both ways on every sync.
+- **Time series:** every value of every drive log with its UTC time, one row
+  per channel per drive in D1 (`series`), so `list_channels` and
+  `channel_series` can follow a channel across every drive, averaged into
+  time buckets when long, or as per-drive min, mean and max.
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
@@ -94,6 +98,8 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/files` | list stored files: key, size, SHA-256, upload time |
 | `GET /api/files/<path>` | the file back |
 | `PUT /api/history` | replace the summaries: `{"drives": [...], "faults": [...]}` |
+| `PUT /api/series/<path>` | replace one drive's values: `{"start", "approx", "chunks": [{"name", "unit", "t0", "t1", "n", "min", "max", "mean", "data"}]}` |
+| `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
 | `POST /mcp` | MCP (JSON-RPC 2.0, streamable HTTP with JSON replies) |

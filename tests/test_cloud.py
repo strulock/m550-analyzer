@@ -21,6 +21,7 @@ class FakeWorker:
     def __init__(self, client_id="id.access", secret="s3cret"):
         self.files, self.history, self.requests = {}, None, []
         self.templates = {}                      # name -> {channels, deleted}
+        self.series = {}                         # drive -> body
         self.client_id, self.secret = client_id, secret
         self.fail = None                         # a status to answer instead, once set
         worker = self
@@ -67,6 +68,10 @@ class FakeWorker:
                     worker.files[key] = body
                     return self._reply(200, {"ok": True, "key": key, "size": len(body),
                                              "sha256": hashlib.sha256(body).hexdigest()})
+                if self.path.startswith("/api/series/"):
+                    drive = urllib.parse.unquote(self.path[len("/api/series/"):])
+                    worker.series[drive] = json.loads(body)
+                    return self._reply(200, {"ok": True, "drive": drive})
                 if self.path == "/api/templates":
                     for c in json.loads(body)["changes"]:
                         worker.templates[c["name"]] = {"channels": c["channels"],
@@ -148,6 +153,40 @@ def test_only_logs_fault_lists_and_checks_go_up(worker, tmp_path):
     with open(os.path.join(logs, "check.csv"), "w") as f:
         f.write("module,did,job,status,detail,reply_bytes,raw\n0x12,0x4807,X,ok,,2,0000\n")
     assert sorted(cloud.sync(settings_for(worker), logs).uploaded) == ["check.csv", "n63_1.csv"]
+
+
+def test_each_drive_logs_values_go_into_the_time_series_once(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    fault_csv(os.path.join(logs, "n63_faults.csv"), "2026-10-19 07:00:00",
+              [("0x40", "804415", "present, stored")])
+    s = settings_for(worker)
+    r = cloud.sync(s, logs)
+    assert r.series == 1 and list(worker.series) == ["n63_1.csv"]     # not the fault list
+    body = worker.series["n63_1.csv"]
+    by = {c["name"]: c for c in body["chunks"]}
+    assert by["IMUL1"]["n"] == 60 and by["IMUL1"]["data"][0] == [0.0, 1.05]
+    assert body["approx"] is False and by["INMOT"]["t0"] == pytest.approx(
+        core.clock_epoch("2026-10-19 07:00:00.000"), abs=0.01)
+    assert by["IUIBS"]["unit"] == "mV" and by["INMOT"]["max"] == 1559
+    assert "1 drive into the time series" in r.text()
+    assert cloud.sync(s, logs).series == 0                           # once
+    drive(os.path.join(logs, "n63_1.csv"), seconds=70)                 # changed: again
+    assert cloud.sync(s, logs).series == 1
+
+
+def test_a_drive_log_from_before_the_time_series_goes_up_on_the_next_sync(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    s = settings_for(worker)
+    cloud.sync(s, logs)
+    state = cloud.load_state()
+    state.pop("series")                          # as a 0.6.2 sync left it
+    for e in state["files"].values():
+        e.pop("kind", None)
+    cloud.save_state(state)
+    worker.series.clear()
+    assert cloud.sync(s, logs).series == 1 and "n63_1.csv" in worker.series
 
 
 def test_templates_travel_between_pcs(worker, tmp_path):

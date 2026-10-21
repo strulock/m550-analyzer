@@ -210,7 +210,124 @@ export const SCHEMA = [
      uploaded TEXT)`,
   `CREATE TABLE IF NOT EXISTS templates (name TEXT PRIMARY KEY, channels TEXT,
      updated TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0)`,
+  // One channel's values from one drive (in pieces when long): t0/t1 in UTC
+  // seconds, data = [[seconds after t0, value], ...].
+  `CREATE TABLE IF NOT EXISTS series (drive TEXT NOT NULL, channel TEXT NOT NULL,
+     t0 REAL NOT NULL, t1 REAL NOT NULL, n INTEGER NOT NULL, unit TEXT, min REAL,
+     max REAL, mean REAL, approx INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL,
+     PRIMARY KEY (drive, channel, t0))`,
+  `CREATE INDEX IF NOT EXISTS series_channel ON series (channel, t0)`,
 ];
+
+const MAX_POINTS = 2000;
+
+/** Replace one drive's series: {start, approx, chunks: [{name, unit, t0, t1, n, min,
+ * max, mean, data}]}. */
+async function putSeries(env, drive, body) {
+  const chunks = Array.isArray(body.chunks) ? body.chunks : null;
+  if (!chunks) throw new ToolError("body: {start, approx, chunks: [...]}");
+  const approx = body.approx ? 1 : 0;
+  const stmts = [env.DB.prepare("DELETE FROM series WHERE drive = ?").bind(drive)];
+  for (const c of chunks) {
+    if (!c || typeof c.name !== "string" || !Array.isArray(c.data) ||
+        !Number.isFinite(c.t0) || !Number.isFinite(c.t1)) {
+      throw new ToolError("bad chunk");
+    }
+    stmts.push(env.DB.prepare(
+      `INSERT OR REPLACE INTO series (drive, channel, t0, t1, n, unit, min, max, mean, approx,
+       data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
+      drive, c.name, c.t0, c.t1, c.data.length, String(c.unit || ""), number(c.min),
+      number(c.max), number(c.mean), approx, JSON.stringify(c.data)));
+  }
+  await ensureSchema(env);
+  await env.DB.batch(stmts);
+  return { drive, channels: new Set(chunks.map((c) => c.name)).size, chunks: chunks.length };
+}
+
+async function listChannels(env, match) {
+  await ensureSchema(env);
+  const r = await env.DB.prepare(
+    `SELECT channel, MAX(unit) AS unit, COUNT(DISTINCT drive) AS drives, SUM(n) AS values_,
+     MIN(t0) AS first, MAX(t1) AS last FROM series
+     WHERE (? IS NULL OR channel LIKE ?) GROUP BY channel ORDER BY channel`)
+    .bind(match ? 1 : null, match ? `%${match}%` : null).all();
+  return (r.results || []).map((x) => ({ channel: x.channel, unit: x.unit, drives: x.drives,
+    values: x.values_, first: iso(x.first), last: iso(x.last) }));
+}
+
+function iso(seconds) {
+  return seconds == null ? null : new Date(seconds * 1000).toISOString();
+}
+
+function when(v) {
+  if (v === undefined || v === null || v === "") return null;
+  const n = Number(v);
+  if (Number.isFinite(n)) return n;
+  const t = Date.parse(String(v));
+  return Number.isFinite(t) ? t / 1000 : null;
+}
+
+/** One channel across drives, between start and end (UTC; ISO or seconds),
+ * averaged into at most `points` buckets with min and max when longer. */
+export async function channelSeries(env, a) {
+  const channel = String(a.channel || "");
+  if (!channel) throw new ToolError("channel: a name from list_channels");
+  const start = when(a.start), end = when(a.end);
+  const max = Math.max(10, Math.min(MAX_POINTS, Number(a.points) || 500));
+  await ensureSchema(env);
+  const r = await env.DB.prepare(
+    `SELECT drive, t0, unit, approx, data FROM series WHERE channel = ?
+     AND (? IS NULL OR t1 >= ?) AND (? IS NULL OR t0 <= ?) ORDER BY t0`)
+    .bind(channel, start, start, end, end).all();
+  const rows = r.results || [];
+  const pts = [];
+  const drives = new Set();
+  let unit = "", approx = false;
+  for (const row of rows) {
+    unit = row.unit || unit;
+    approx = approx || !!row.approx;
+    for (const [dt, v] of JSON.parse(row.data)) {
+      const t = row.t0 + dt;
+      if ((start === null || t >= start) && (end === null || t <= end)) {
+        pts.push([t, v]);
+        drives.add(row.drive);
+      }
+    }
+  }
+  pts.sort((x, y) => x[0] - y[0]);
+  const out = { channel, unit, drives: [...drives], count: pts.length, approx_times: approx };
+  if (pts.length <= max) {
+    out.points = pts.map(([t, v]) => [iso(t), v]);
+    return out;
+  }
+  // Buckets of equal time; gaps between drives stay gaps.
+  const t0 = pts[0][0], span = pts[pts.length - 1][0] - t0 || 1;
+  const buckets = new Map();
+  for (const [t, v] of pts) {
+    const k = Math.min(max - 1, Math.floor(((t - t0) / span) * max));
+    const b = buckets.get(k) || { t: 0, sum: 0, n: 0, min: Infinity, max: -Infinity };
+    b.t += t; b.sum += v; b.n++; b.min = Math.min(b.min, v); b.max = Math.max(b.max, v);
+    buckets.set(k, b);
+  }
+  out.resampled = true;
+  out.columns = ["time", "mean", "min", "max", "n"];
+  out.points = [...buckets.keys()].sort((x, y) => x - y).map((k) => {
+    const b = buckets.get(k);
+    return [iso(b.t / b.n), +(b.sum / b.n).toFixed(6), b.min, b.max, b.n];
+  });
+  return out;
+}
+
+/** Per-drive min, mean and max of one channel, straight from the stored pieces. */
+async function channelByDrive(env, channel) {
+  await ensureSchema(env);
+  const r = await env.DB.prepare(
+    `SELECT drive, MIN(t0) AS t0, SUM(n) AS n, MIN(min) AS lo, MAX(max) AS hi,
+     SUM(mean * n) / SUM(n) AS mean, MAX(unit) AS unit FROM series WHERE channel = ?
+     GROUP BY drive ORDER BY t0`).bind(channel).all();
+  return (r.results || []).map((x) => ({ drive: x.drive, start: iso(x.t0), n: x.n,
+    min: x.lo, mean: x.mean === null ? null : +x.mean.toFixed(6), max: x.hi, unit: x.unit }));
+}
 
 const MAX_TEMPLATE_NAME = 100;
 const MAX_TEMPLATE_CHANNELS = 2000;
@@ -327,6 +444,23 @@ export const TOOLS = [
       prefix: { type: "string" }, limit: { type: "integer", description: "Default 50" } } },
   },
   {
+    name: "list_channels",
+    description: "Channels in the time-series store (every value of every uploaded drive log, " +
+      "with its UTC time): unit, how many drives logged it, how many values, first and last.",
+    inputSchema: { type: "object", properties: {
+      match: { type: "string", description: "Part of a channel name, e.g. ILUZ or RDC" } } },
+  },
+  {
+    name: "channel_series",
+    description: "One channel's values across all drives as a time series, in UTC. Narrow " +
+      "with start and end (ISO times or seconds since 1970). Long results are averaged into " +
+      "`points` time buckets (default 500) with min and max. by_drive: true gives per-drive " +
+      "min, mean and max instead.",
+    inputSchema: { type: "object", properties: {
+      channel: { type: "string" }, start: { type: "string" }, end: { type: "string" },
+      points: { type: "integer" }, by_drive: { type: "boolean" } }, required: ["channel"] },
+  },
+  {
     name: "list_templates",
     description: "The channel templates saved in the BMW Analyzer app (watch lists: a name and " +
       "its channel names), as synced to the cloud.",
@@ -375,6 +509,11 @@ async function callTool(env, name, a) {
       .map((o) => ({ name: o.key, size: o.size, uploaded: o.uploaded }));
     return { files };
   }
+  if (name === "list_channels") return { channels: await listChannels(env, a.match) };
+  if (name === "channel_series") {
+    if (a.by_drive) return { channel: a.channel, drives: await channelByDrive(env, a.channel) };
+    return channelSeries(env, a);
+  }
   if (name === "list_templates") {
     return { templates: (await templates(env)).filter((t) => !t.deleted)
       .map((t) => ({ name: t.name, channels: t.channels, updated: t.updated })) };
@@ -395,7 +534,8 @@ async function callTool(env, name, a) {
 const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault reads, " +
   "uploaded by the BMW Analyzer (n63read) app. Start with drive_history or fault_history; " +
   "trend follows one statistic (misfires_5, knock_b1...) over time; list_files and read_log " +
-  "look inside a drive; list_templates shows the app's saved channel sets. Read-only.";
+  "look inside a drive; list_channels and channel_series follow any channel across every " +
+  "drive in UTC time; list_templates shows the app's saved channel sets. Read-only.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
 export async function rpc(env, msg) {
@@ -455,6 +595,34 @@ export async function handle(request, env, fetcher = fetch) {
     }
     const one = await rpc(env, body);
     return one ? json(one) : new Response(null, { status: 202 });
+  }
+
+  if (url.pathname.startsWith("/api/series/") && request.method === "PUT") {
+    const drive = safeKey(url.pathname.slice("/api/series/".length));
+    if (!drive) return json({ error: "bad drive name" }, 400);
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "body: JSON {start, approx, chunks}" }, 400);
+    }
+    try {
+      return json({ ok: true, ...(await putSeries(env, drive, body)) });
+    } catch (e) {
+      if (e instanceof ToolError) return json({ error: e.message }, 400);
+      throw e;
+    }
+  }
+  if (url.pathname === "/api/series" && request.method === "GET") {
+    try {
+      const q = Object.fromEntries(url.searchParams);
+      if (!q.channel) return json({ channels: await listChannels(env, q.match) });
+      return json(q.by_drive ? { drives: await channelByDrive(env, q.channel) }
+        : await channelSeries(env, q));
+    } catch (e) {
+      if (e instanceof ToolError) return json({ error: e.message }, 400);
+      throw e;
+    }
   }
 
   if (url.pathname === "/api/templates") {

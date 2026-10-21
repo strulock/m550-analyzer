@@ -3,7 +3,8 @@ n63read.cloud - copy the logs folder to the cloud Worker (cloud/ in the repo).
 
 sync() uploads every drive log and fault list that is new or changed since
 the last upload (PUT /api/files/<path>), the channel templates both ways
-(/api/templates), then the drive and fault summaries from history.scan()
+(/api/templates), each drive log's values as time series (PUT /api/series/<path>,
+see series.py), then the drive and fault summaries from history.scan()
 (PUT /api/history). What was sent is remembered in
 %APPDATA%\\n63read\\cloud_state.json, so a sync sends only what changed and a
 file that failed goes again next time. AutoSync runs it in the background:
@@ -27,7 +28,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from n63read import __version__, core, history
+from n63read import __version__, core, history, series
 
 STATE_FILE = "cloud_state.json"
 TIMEOUT = 60
@@ -150,12 +151,16 @@ class Result:
     def __init__(self):
         self.uploaded, self.unchanged, self.errors, self.history = [], 0, [], None
         self.templates = (0, 0)                 # (sent, received)
+        self.series = 0                         # drive logs whose values went up
 
     def text(self):
         parts = ["%d file%s uploaded" % (len(self.uploaded), "" if len(self.uploaded) == 1
                                          else "s")]
         if any(self.templates):
             parts.append("templates: %d sent, %d received" % self.templates)
+        if self.series:
+            parts.append("%d drive%s into the time series" % (self.series, "" if
+                                                               self.series == 1 else "s"))
         if self.history:
             parts.append("history: %d drives, %d faults" % self.history)
         if self.errors:
@@ -193,6 +198,31 @@ def sync_templates(settings, state, path=None):
         core.save_settings(merged, path)
     state["templates_base"] = merged
     return len(changes), received
+
+
+def sync_series(settings, state, logs, result):
+    """Upload the values of each drive log not yet in the time-series store
+    (or changed since). Failures are noted and tried again next time."""
+    files, sent = state.get("files", {}), state.setdefault("series", {})
+    for rel, entry in sorted(files.items()):
+        path = os.path.join(logs, rel)
+        if not entry.get("sha256") or sent.get(rel) == entry["sha256"]:
+            continue
+        if "kind" not in entry:
+            entry["kind"] = history.kind(path) if os.path.exists(path) else None
+        if entry["kind"] != "drive" or not os.path.exists(path):
+            continue
+        try:
+            built = series.build(path)
+            chunks = [c for ch in built["channels"] for c in series.chunks(ch)]
+            body = json.dumps({"start": built["start"], "approx": built["approx"],
+                               "chunks": chunks}, separators=(",", ":")).encode()
+            request(settings, "PUT", "/api/series/" + _key(rel), body, "application/json")
+        except (CloudError, OSError, ValueError) as e:
+            result.errors.append("%s (time series): %s" % (rel, e))
+            continue
+        sent[rel] = entry["sha256"]
+        result.series += 1
 
 
 def _key(rel):
@@ -235,7 +265,7 @@ def sync(settings, logs=None, state_file=None, progress=None, templates_file=Non
         if reply.get("sha256") not in (None, sha):
             result.errors.append("%s: arrived damaged" % rel)
             continue
-        files[rel] = {"stamp": stamp, "sha256": sha}
+        files[rel] = {"stamp": stamp, "sha256": sha, "kind": history.kind(path)}
         result.uploaded.append(rel)
         save_state(state, state_file)
         if progress:
@@ -244,6 +274,8 @@ def sync(settings, logs=None, state_file=None, progress=None, templates_file=Non
         result.templates = sync_templates(settings, state, templates_file)
     except CloudError as e:
         result.errors.append("templates: %s" % e)
+    save_state(state, state_file)
+    sync_series(settings, state, logs, result)
     save_state(state, state_file)
     summary = history.scan(logs)
     payload = json.dumps({"drives": summary.drives, "faults": summary.faults},
