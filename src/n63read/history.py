@@ -27,7 +27,7 @@ FOLDER = "History"
 DRIVES_CSV = "drives.csv"
 FAULTS_CSV = "faults.csv"
 INDEX_JSON = "index.json"
-INDEX_VERSION = 4           # bump when a summary changes: everything is re-read
+INDEX_VERSION = 5           # bump when a summary changes: everything is re-read
 MIN_ROWS = 5                # fewer rows than this isn't a drive worth a line
 MAX_STEP = 5.0              # s; a longer gap between rows isn't driven through
 CYLINDERS = range(1, 9)
@@ -232,8 +232,10 @@ def misfire_text(drive):
     return ", ".join("cyl %d x%d" % (n, c) for c, n in sorted(parts, reverse=True) if c)
 
 
-def _first_clock(path):
-    """The Clock of a log's first row, else the file's time."""
+def _first_clock(path, seconds=0.0):
+    """The Clock of a log's first row. A log without one (another tool's, or
+    from before 0.3.6) was last written as it ended, so its start is the
+    file's time less the log's length in `seconds`."""
     try:
         with open(path, newline="", encoding="utf-8-sig") as f:
             reader = csv.reader(f)
@@ -244,7 +246,7 @@ def _first_clock(path):
                         return line[1].strip()[:19]
     except (OSError, csv.Error, UnicodeDecodeError):
         pass
-    return datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime(
+    return datetime.datetime.fromtimestamp(os.path.getmtime(path) - seconds).strftime(
         "%Y-%m-%d %H:%M:%S")
 
 
@@ -409,8 +411,9 @@ def scan(logs=None, progress=None):
                 if entry["kind"] == "drive":
                     names, rows = playback.read_log(path)
                     # Forward slashes: the same name as the file has in the cloud.
+                    length = rows[-1][0] - rows[0][0] if rows else 0.0
                     entry["drive"] = (summarize(names, rows, rel.replace(os.sep, "/"),
-                                                _first_clock(path))
+                                                _first_clock(path, length))
                                       if len(rows) >= MIN_ROWS else None)
                 elif entry["kind"] == "faults":
                     entry["faults"] = read_faults(path)
