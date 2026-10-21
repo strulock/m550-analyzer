@@ -135,6 +135,7 @@ def test_scan_reads_the_logs_folder_and_writes_the_csvs(tmp_path):
         f.write("module,did,job,status,detail,reply_bytes,raw\n0x12,0x4807,X,ok,,2,0000\n")
     s = history.scan(logs)
     assert [d["misfires"] for d in s.drives] == [2, 1]
+    assert [d["file"] for d in s.drives] == ["n63_1.csv", "claude/n63_2.csv"]
     assert s.faults[0]["code"] == "804415" and not s.errors
     with open(os.path.join(s.folder, history.DRIVES_CSV), encoding="utf-8") as f:
         rows = list(csv.DictReader(f))

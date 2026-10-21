@@ -27,7 +27,7 @@ FOLDER = "History"
 DRIVES_CSV = "drives.csv"
 FAULTS_CSV = "faults.csv"
 INDEX_JSON = "index.json"
-INDEX_VERSION = 2           # bump when a summary changes: everything is re-read
+INDEX_VERSION = 3           # bump when a summary changes: everything is re-read
 MIN_ROWS = 5                # fewer rows than this isn't a drive worth a line
 MAX_STEP = 5.0              # s; a longer gap between rows isn't driven through
 CYLINDERS = range(1, 9)
@@ -389,7 +389,9 @@ def scan(logs=None, progress=None):
             try:
                 if entry["kind"] == "drive":
                     names, rows = playback.read_log(path)
-                    entry["drive"] = (summarize(names, rows, rel, _first_clock(path))
+                    # Forward slashes: the same name as the file has in the cloud.
+                    entry["drive"] = (summarize(names, rows, rel.replace(os.sep, "/"),
+                                                _first_clock(path))
                                       if len(rows) >= MIN_ROWS else None)
                 elif entry["kind"] == "faults":
                     entry["faults"] = read_faults(path)
