@@ -263,8 +263,9 @@ the file and line it starts from, as of 0.3.8.
       when it answers, or point bank 2 lambda at `ILAG1@0x13`.
 - [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
       which DME reports cylinders 5-8: both give the same values.
-- [ ] Move each module catalog in `docs/modules.md` from "not yet checked" to
-      verified, or record what differs.
+- [x] Move each module catalog in `docs/modules.md` from "not yet checked" to
+      verified, or record what differs: every catalog fits but the fuel
+      pump's (not on this car's bus); three size differences recorded.
 - [x] Measure the DME logging rate with module channels added: 1.9 s a row
       for 95 channels, about 20 ms a read.
 - [x] Look into the bank-2 gaps: `I_EWG_POS@0x13` now reads bank 2's own
@@ -275,8 +276,8 @@ the file and line it starts from, as of 0.3.8.
       Measured: 1.2 cycles/s one at a time, 6.2 batched, all 18 answered.
       Now the default in the app, `n63read log` and Claude's tools
       (`--one-at-a-time` to turn it off).
-- [ ] Check the freeze-frame details against a real fault: odometer, time and
-      counters should match the car.
+- [x] Check the freeze-frame details against a real fault: odometer and
+      vehicle time match the car (2026-10-18).
 
 ## Phase 11 — More BMW files
 
@@ -338,9 +339,9 @@ behind Cloudflare Access; uploads automatic whenever the PC is online.
 - [x] The app's uploader: new and changed files (by size, time and SHA-256)
       and the History summaries, after a log closes, after a fault list is
       saved and every ten minutes; `n63read sync`.
-- [ ] Deploy on the Trulock.com account: R2 bucket, D1 database, Worker,
-      Access application and service token; add `/mcp` to the TrulockMCP
-      portal. Review before creating anything.
+- [x] Deploy on the Trulock.com account: R2 bucket, D1 database, Worker,
+      Access application and service token; `/mcp` in the TrulockMCP
+      portal (2026-10-20).
 - [ ] More MCP tools in the cloud: compare_banks and find_events over a
       stored log, like the local ones.
 - [x] Templates sync both ways through the cloud (merge against the last
