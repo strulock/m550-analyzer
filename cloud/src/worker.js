@@ -199,6 +199,84 @@ export function logWindow(text, { start = null, end = null, columns = null, resa
   return { columns: want.map((i) => header[i]), rows: out, total };
 }
 
+const BANK2 = "@0x13";
+const EVENTS_MAX = 200;
+
+/** A drive log's rows: {header, rows: [[t, {name: cell}]]} for numeric t. */
+export function logRows(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) return { header: [], rows: [] };
+  const header = rows[0].map((h) => h.trim());
+  const out = [];
+  for (const r of rows.slice(1)) {
+    const t = number(r[0]);
+    if (t === null) continue;
+    const cells = {};
+    header.forEach((h, i) => { if (i) cells[h] = r[i] ?? ""; });
+    out.push([t, cells]);
+  }
+  return { header, rows: out };
+}
+
+/** Bank 1 against bank 2 for every NAME / NAME@0x13 pair in a log. */
+export function compareBanks(text) {
+  const { header, rows } = logRows(text);
+  const pairs = header.filter((n) => n && !n.endsWith(BANK2) && header.includes(n + BANK2));
+  const mean = (xs) => xs.reduce((s, x) => s + x, 0) / xs.length;
+  return pairs.map((b1) => {
+    const both = rows.map(([t, c]) => [t, number(c[b1]), number(c[b1 + BANK2])])
+      .filter(([, x, y]) => x !== null && y !== null);
+    if (!both.length) return { channel: b1, rows: 0 };
+    const diffs = both.map(([t, x, y]) => [t, x - y]);
+    const [tMax, dMax] = diffs.reduce((m, d) => (Math.abs(d[1]) > Math.abs(m[1]) ? d : m));
+    return { channel: b1, rows: both.length, bank1_mean: mean(both.map((b) => b[1])),
+      bank2_mean: mean(both.map((b) => b[2])), difference_mean: mean(diffs.map((d) => d[1])),
+      largest_difference: dMax, largest_at_s: tMax };
+  });
+}
+
+/** Alerts and reconnects the log recorded, crossings of a threshold, and
+ * counters going up (the misfire counters by default). */
+export function findEvents(text, { column = null, above = null, below = null, counters = null } = {}) {
+  const { header, rows } = logRows(text);
+  const events = [];
+  if (header.includes("Event")) {
+    for (const [t, c] of rows) if (c.Event) events.push([t, c.Event]);
+  }
+  if (column) {
+    if (!header.includes(column)) throw new ToolError(`no column ${column} in this log`);
+    if (above === null && below === null) throw new ToolError("give above or below with column");
+    let outside = false, since = null;
+    for (const [t, c] of rows) {
+      const x = number(c[column]);
+      if (x === null) continue;
+      const high = above !== null && x > above, low = below !== null && x < below;
+      const now = high || low;
+      if (now && !outside) {
+        since = t;
+        events.push([t, `${column} ${high ? `above ${above}` : `below ${below}`} (${x})`]);
+      } else if (outside && !now) {
+        events.push([t, `${column} back in range after ${(t - since).toFixed(1)} s`]);
+      }
+      outside = now;
+    }
+  }
+  const watch = counters || header.filter((n) => n.startsWith("ZAEHLER_AUSSETZ"));
+  for (const name of watch) {
+    if (!header.includes(name)) continue;
+    let prev = null;
+    for (const [t, c] of rows) {
+      const x = number(c[name]);
+      if (x === null) continue;
+      if (prev !== null && x > prev) events.push([t, `${name} went up ${prev} -> ${x}`]);
+      prev = x;
+    }
+  }
+  events.sort((a, b) => a[0] - b[0]);
+  return { count: events.length, events: events.slice(0, EVENTS_MAX)
+    .map(([t, what]) => ({ at_s: t, what })) };
+}
+
 // ------------------------------------------------------------------ D1
 
 export const SCHEMA = [
@@ -461,6 +539,24 @@ export const TOOLS = [
       points: { type: "integer" }, by_drive: { type: "boolean" } }, required: ["channel"] },
   },
   {
+    name: "compare_banks",
+    description: "Bank 1 against bank 2 in one uploaded drive log: for every channel logged " +
+      "on both DMEs (NAME and NAME@0x13), each bank's mean, the mean difference, and the " +
+      "largest difference and when.",
+    inputSchema: { type: "object", properties: {
+      name: { type: "string", description: "A file from list_files" } }, required: ["name"] },
+  },
+  {
+    name: "find_events",
+    description: "Events in one uploaded drive log: what the log recorded (alerts, " +
+      "reconnects, the odometer), a column crossing above or below a value, and counters " +
+      "going up (the misfire counters by default).",
+    inputSchema: { type: "object", properties: {
+      name: { type: "string", description: "A file from list_files" },
+      column: { type: "string" }, above: { type: "number" }, below: { type: "number" },
+      counters: { type: "array", items: { type: "string" } } }, required: ["name"] },
+  },
+  {
     name: "list_templates",
     description: "The channel templates saved in the BMW Analyzer app (watch lists: a name and " +
       "its channel names), as synced to the cloud.",
@@ -509,6 +605,21 @@ async function callTool(env, name, a) {
       .map((o) => ({ name: o.key, size: o.size, uploaded: o.uploaded }));
     return { files };
   }
+  if (name === "compare_banks" || name === "find_events") {
+    const key = safeKey(String(a.name || ""));
+    if (!key) throw new ToolError("name: a file from list_files");
+    const obj = await env.FILES.get(key);
+    if (!obj) throw new ToolError(`no file ${key}; see list_files`);
+    const text = await obj.text();
+    if (name === "compare_banks") {
+      const pairs = compareBanks(text);
+      if (!pairs.length) throw new ToolError(`${key} has no bank pairs (NAME and NAME@0x13)`);
+      return { file: key, pairs };
+    }
+    return { file: key, ...findEvents(text, { column: a.column ? String(a.column) : null,
+      above: number(a.above), below: number(a.below),
+      counters: Array.isArray(a.counters) ? a.counters.map(String) : null }) };
+  }
   if (name === "list_channels") return { channels: await listChannels(env, a.match) };
   if (name === "channel_series") {
     if (a.by_drive) return { channel: a.channel, drives: await channelByDrive(env, a.channel) };
@@ -534,7 +645,8 @@ async function callTool(env, name, a) {
 const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault reads, " +
   "uploaded by the BMW Analyzer (n63read) app. Start with drive_history or fault_history; " +
   "trend follows one statistic (misfires_5, knock_b1...) over time; list_files and read_log " +
-  "look inside a drive; list_channels and channel_series follow any channel across every " +
+  "look inside a drive, compare_banks and find_events analyse one; list_channels and " +
+  "channel_series follow any channel across every " +
   "drive in UTC time; list_templates shows the app's saved channel sets. Read-only.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */

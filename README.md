@@ -245,7 +245,9 @@ watched channel: speed, boost, uneven running, coolant temperature... A
 white marker follows the car while logging and the replay while replaying;
 click the route during a replay to jump to that moment. Drag to move the
 map, scroll or **+**/**−** to zoom, **Fit route** to see it all; **Follow**
-keeps the marker in view. It needs the head unit's GPS position
+keeps the marker in view. For a channel with alert limits (**Alert...**),
+**By alert limits** colours the route green inside them, blue below and red
+above, so it shows where on the road a value left its range. It needs the head unit's GPS position
 (`HU_STATUS_GPS_POSITION.LATITUDE` and `.LONGITUDE`; the Map button offers
 to watch them). Logs from other tools work too if they have latitude and
 longitude columns.
@@ -262,7 +264,8 @@ switches it off.
 folder, from the app, the CLI and Claude alike, and logs copied in from
 elsewhere:
 
-- **Drives:** one row a drive: date, length, distance, top speed, misfires
+- **Drives:** one row a drive: date, odometer (read from the car as each log
+  starts, and noted in its first row's `Event`), length, distance, top speed, misfires
   (and on which cylinders), knock retard and fuel trims per bank, peak
   temperatures, battery, tire pressures. Double-click one to replay it.
 - **Trends:** a statistic across drives, one line per cylinder or bank:
@@ -283,7 +286,8 @@ Optionally, the app keeps a copy of the logs folder in your own Cloudflare
 account and Claude can read it from anywhere: a small Worker (in
 [`cloud/`](cloud/README.md)) stores the logs in R2 and the History in D1,
 behind Cloudflare Access, and serves read-only MCP tools (`drive_history`,
-`fault_history`, `trend`, `list_files`, `read_log`, `list_templates`, and
+`fault_history`, `trend`, `list_files`, `read_log`, `compare_banks`,
+`find_events`, `list_templates`, and
 `list_channels` / `channel_series` over a time-series store holding every
 value of every drive with its UTC time, so one channel can be followed across
 all drives). The

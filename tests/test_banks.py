@@ -370,3 +370,16 @@ def test_the_clock_carries_its_utc_offset():
     assert core.clock_epoch(old) == pytest.approx(
         time.mktime((2026, 10, 19, 7, 42, 50, 0, 0, -1)), abs=0.001)
     assert core.clock_epoch("x") is None and core.clock_epoch("") is None
+
+
+def test_the_slaves_own_cylinders_are_the_engines_5_to_8():
+    cat = core.add_bank2(core.load_catalog())
+    assert core.engine_cylinder("IUKZ1") == 1 and core.engine_cylinder("IUKZ1@0x13") == 5
+    assert core.engine_cylinder("DIAG_BRENNDAUER_ZUENDFUNKE_CYL4@0x13") == 8
+    assert core.engine_cylinder("ILUZ5@0x13") is None          # the master has all eight
+    info = cat["DIAG_BRENNDAUER_ZUENDFUNKE_CYL1@0x13"]["INFO_EN"]
+    assert info.startswith("Bank 2: ") and "cylinder 5" in info and "cylinder 1" not in info
+    assert "Zylinder 6" in cat["IUKZ2@0x13"]["INFO"]
+    hunt = core.BUILTIN_TEMPLATES["Misfire hunt"]
+    assert "DIAG_BRENNDAUER_ZUENDFUNKE_CYL4@0x13" in hunt and "IUKZ1@0x13" in hunt
+    assert all(n in cat or n in core.DERIVED for n in hunt)

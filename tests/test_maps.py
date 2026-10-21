@@ -120,8 +120,9 @@ def test_the_real_download_identifies_itself(monkeypatch):
 # ------------------------------------------------------------ the window
 
 class Source:
-    def __init__(self, track, values, now=None, seekable=False):
+    def __init__(self, track, values, now=None, seekable=False, limits=None):
         self._track, self._values, self._now = track, values, now
+        self._limits = limits
         self.seeks = []
         self.seek = self.seeks.append if seekable else None
 
@@ -142,6 +143,9 @@ class Source:
 
     def default(self):
         return "SPEED"
+
+    def limits(self, name):
+        return self._limits
 
 
 def route(n=40):
@@ -279,3 +283,36 @@ def test_converting_for_the_legend_uses_the_apps_units(app):
             graph.converter("km/h", "mph")(100.0), rel=1e-3)
     finally:
         app.units = "metric"
+
+
+def test_limit_colours():
+    assert maps.limit_colour(5, (10, 20)) == maps.LIMIT_COLOURS["low"]
+    assert maps.limit_colour(15, (10, 20)) == maps.LIMIT_COLOURS["ok"]
+    assert maps.limit_colour(25, (None, 20)) == maps.LIMIT_COLOURS["high"]
+    assert maps.limit_colour(-5, (None, 20)) == maps.LIMIT_COLOURS["ok"]
+
+
+def test_the_route_can_show_where_a_value_left_its_alert_limits(app, tmp_path):
+    values = [(t, float(t)) for t in range(40)]           # 0 ... 39
+    src = Source(route(), values, limits=(10.0, 30.0))
+    win = maps.MapWindow(app, src, tiles=maps.TileCache(str(tmp_path), fetch=False))
+    try:
+        win.update()
+        assert str(win.limits_check.cget("state")) == "normal"
+        win.limits_var.set(True)
+        win.draw()
+        colours = {win.canvas.itemcget(i, "fill") for i in win.canvas.find_all()
+                   if win.canvas.type(i) == "line"}
+        assert set(maps.LIMIT_COLOURS.values()) <= colours       # below, within, above
+        texts = [win.canvas.itemcget(i, "text") for i in win.canvas.find_all()
+                 if win.canvas.type(i) == "text"]
+        assert any(t.startswith("below 10") for t in texts)
+    finally:
+        win.close()
+    plain = maps.MapWindow(app, Source(route(), values),
+                           tiles=maps.TileCache(str(tmp_path), fetch=False))
+    try:
+        plain.update()
+        assert str(plain.limits_check.cget("state")) == "disabled"   # no limits set
+    finally:
+        plain.close()

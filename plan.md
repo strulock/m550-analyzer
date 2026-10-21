@@ -124,8 +124,9 @@ the file and line it starts from, as of 0.3.8.
       self-checking (a reply is used only if every echo lines up; any doubt
       turns batching off for that DME). `n63read speed` measures both ways
       and `n63read log --batch` uses it. Measuring at the car is in Phase 10.
-- [ ] Decode modules' own snapshot values: each module file's `FUMWELTTEXTE`
-      gives them, but the texts need English first (`tools/translate.py`).
+- [x] Decode modules' own snapshot values: each module file's `FUMWELTTEXTE`
+      gives them: 26 modules' own fields (`module_catalog.py --freeze`), names
+      in English (symbolic ones word by word), value tables kept per module.
 - [x] A clearer DoIP path: what a DoIP-only answer usually means, offered
       with a diagnostics report, in the app, `discover` and `diag`.
 
@@ -253,12 +254,12 @@ the file and line it starts from, as of 0.3.8.
       once (the car resetting the connection silences everyone); now only
       modules that never answered.
 - [x] `SPEED_DIFFERENCE_PERCENT` 65535 is shown as no value.
-- [ ] Discover right after the PC wakes or the app updates can find no
-      169.254 address yet (the adapter is still coming up): retry for a
-      few seconds before saying no ENET link.
-- [ ] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
-      as its `CYL1`-`CYL4`. Offer them as cylinder 5-8 channels so the
-      *Misfire hunt* set can include them.
+- [x] Discover right after the PC wakes or the app updates can find no
+      169.254 address yet (the adapter is still coming up): the app and the
+      CLI now wait up to 10 s for it before searching.
+- [x] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
+      as its `CYL1`-`CYL4`: those twins now say which cylinder they are
+      ("Bank 2: ... cylinder 5"), and *Misfire hunt* includes all eight.
 - [ ] `ILAG2` at `0x12` was refused on 2026-10-18 (it read before). Find
       when it answers, or point bank 2 lambda at `ILAG1@0x13`.
 - [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle
@@ -306,8 +307,9 @@ the file and line it starts from, as of 0.3.8.
       a policy-conformant User-Agent, attribution, downloads switchable off),
       the GPS route coloured by any watched channel, a marker that follows
       live logging and replay, click to jump the replay, pan, zoom, fit.
-- [ ] Offer a channel's alert limits as the colour scale, so a route shows
-      where a value left its range.
+- [x] Offer a channel's alert limits as the colour scale, so a route shows
+      where a value left its range: *By alert limits* (green within, blue
+      below, red above).
 
 ## Phase 13 — Long-term history
 
@@ -319,8 +321,10 @@ the file and line it starts from, as of 0.3.8.
       reads, present / stored / gone now). Incremental via `index.json`.
 - [x] The History window (Drives, Trends, Faults), `drives.csv` and
       `faults.csv`, `n63read history`, and Claude's `drive_history` tool.
-- [ ] Odometer per drive: log a mileage channel by default
-      (`LMV_DATEN_VERTEILERGETRIEBE.MILE_KM`), or take it from fault reads.
+- [x] Odometer per drive: each log reads the mileage once as it starts
+      (the transfer case's bus copy, else the suspension module's EEPROM
+      copy) and notes "odometer N km" in its first row's Event; History
+      takes it for the drive.
 
 ## Phase 14 — Cloud storage and remote access (Cloudflare)
 
@@ -342,7 +346,7 @@ behind Cloudflare Access; uploads automatic whenever the PC is online.
 - [x] Deploy on the Trulock.com account: R2 bucket, D1 database, Worker,
       Access application and service token; `/mcp` in the TrulockMCP
       portal (2026-10-20).
-- [ ] More MCP tools in the cloud: compare_banks and find_events over a
+- [x] More MCP tools in the cloud: compare_banks and find_events over a
       stored log, like the local ones.
 - [x] Templates sync both ways through the cloud (merge against the last
       synced state; deletions travel; this PC wins a clash); Claude's

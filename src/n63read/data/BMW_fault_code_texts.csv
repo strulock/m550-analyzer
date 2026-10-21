@@ -112,7 +112,7 @@
 02290C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,DSC-G30N
 02290D,Codierung: Codierdaten nicht qualifiziert,Coding: coding data not qualified,DSC-G30N
 022923,"LIN Fehler (SW, HW)","LIN fault (SW, HW)",DSC-G30N
-022924,NVM_E_HARDWARE,NVM_E_HARDWARE,DSC-G30N
+022924,NVM_E_HARDWARE,NVM E hardware,DSC-G30N
 022940,Spannungsversorgung - Lokale Überspannung,Power supply - Lokale overvoltage,DSC-G30N
 022941,Spannungsversorgung - Lokale Unterspannung,Power supply - Lokale undervoltage,DSC-G30N
 022943,Spannungsversorgung - Globale Überspannung extern,Power supply - global overvoltage extern,DSC-G30N
@@ -204,11 +204,11 @@
 02610B,Codierung: Codierdaten passen nicht zum Fahrzeug,Coding: coding data do not match the vehicle,ATM02; ATM; TCB4G
 02610C,Codierung: Unplausible Daten während Codierdatentransaktion,Coding: implausible data during coding data transaction,ATM02; ATM; TCB4G
 026123,Flash Memory Fehler (Sammelfehler),Flash Memory fault (group fault),ATM02; ATM
-026160,RSU_CLIENT_HW_FEHLER,RSU_CLIENT_HW_FEHLER,ATM02
-026170,IPSEC_NICHT_INITIALISIERT,IPSEC_NICHT_INITIALISIERT,ATM02
-026171,IPSEC_NICHT_VERRIEGELT,IPSEC_NICHT_VERRIEGELT,ATM02
-026172,IPSEC_FEHLER_AUFGETRETEN,IPSEC_FEHLER_AUFGETRETEN,ATM02
-026180,ZERTIFIKATE_UND_BINDINGS_TYP1_WERK_NICHT_BEREIT,ZERTIFIKATE_UND_BINDINGS_TYP1_WERK_NICHT_BEREIT,ATM02
+026160,RSU_CLIENT_HW_FEHLER,RSU client HW fault,ATM02
+026170,IPSEC_NICHT_INITIALISIERT,Ipsec not initialisiert,ATM02
+026171,IPSEC_NICHT_VERRIEGELT,Ipsec not locked,ATM02
+026172,IPSEC_FEHLER_AUFGETRETEN,Ipsec fault occurred,ATM02
+026180,ZERTIFIKATE_UND_BINDINGS_TYP1_WERK_NICHT_BEREIT,Certificate and bindings TYP1 WERK not bereit,ATM02
 026300,Energiesparmode aktiv,Energy-saving mode active,NBTEVO
 026308,Codierung: Steuergerät ist nicht codiert,Coding: control unit is not coded,NBTEVO
 026309,Codierung: Fehler bei Codierdatentransaktion aufgetreten,Coding: fault at coding data transaction occurred,NBTEVO
@@ -247,7 +247,7 @@
 02FF0D,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,HKFM-G11
 02FF12,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
 02FF13,Fehlerspeichereintrag: nur zum Test,Fault memory entry: nur to test,DME; DME-slave
-02FF17,DM_TEST_APPL,DM_TEST_APPL,EKP301
+02FF17,DM_TEST_APPL,DM TEST APPL,EKP301
 02FF18,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,GSZFB1
 02FF19,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,LMV-G11
 02FF21,Dummy-Fehlerspeichereintrag im Komponentenfehlerbereich nur für Testzwecke,Dummy-fault memory entry in the component fault range nur for Testzwecke,FRR-G11
@@ -3579,11 +3579,11 @@
 400100,Software: OSEK OS Assert,Software: OSEK OS Assert,BDC-G05
 400102,Software: OSEK OS ShutdownHook,Software: OSEK OS ShutdownHook,BDC-G05
 400104,Software: OSEK OS Stackoverflow,Software: OSEK OS Stackoverflow,BDC-G05
-400106,MCU_RESET_SELFTEST,MCU_RESET_SELFTEST,BDC-G05
+400106,MCU_RESET_SELFTEST,MCU reset selftest,BDC-G05
 4002FF,Too frequent writing on the same EEPROM block,Too frequent writing on the same EEPROM block,BDC; BDC-G05; BDC-G11
-400510,ECL_FUSI_SPI_ERROR,ECL_FUSI_SPI_ERROR,BDC
+400510,ECL_FUSI_SPI_ERROR,ECL FUSI SPI error,BDC
 400701,Secondary Network Dummy DTC,Secondary Network Dummy DTC,BDC; BDC-G11
-400711,UNEXPECTED_DIAGNOSTIC_REQUEST,UNEXPECTED_DIAGNOSTIC_REQUEST,BDC
+400711,UNEXPECTED_DIAGNOSTIC_REQUEST,Unexpected diagnostic request,BDC
 4007FF,DEM Logger Fehlerspeichereintrag,DEM Logger fault memory entry,BDC
 400DFF,Diagnose Logger Fehlerspeichereintrag,Diagnosis Logger fault memory entry,BDC
 400F00,Application Startup Error,Application startup Error,BDC
@@ -4120,15 +4120,15 @@
 481B0D,Crash- Abschaltung,Crash- shutdown,EKP301
 481B0E,Regelart unplausibel,Regelart implausible,EKP301
 481B13,Tankleerfahrt,Tankleerfahrt,EKP301
-481B20,MOTORSPANNUNG_B_ZU_NIEDRIG,MOTORSPANNUNG_B_ZU_NIEDRIG,EKP301
-481B21,MOTORSPANNUNG_C_ZU_NIEDRIG,MOTORSPANNUNG_C_ZU_NIEDRIG,EKP301
-481B22,MOTORSTROM_B_ZU_HOCH,MOTORSTROM_B_ZU_HOCH,EKP301
-481B23,MOTORSTROM_C_ZU_HOCH,MOTORSTROM_C_ZU_HOCH,EKP301
-481B24,MOTORSTROM_B_ZU_NIEDRIG,MOTORSTROM_B_ZU_NIEDRIG,EKP301
-481B25,MOTORSTROM_C_ZU_NIEDRIG,MOTORSTROM_C_ZU_NIEDRIG,EKP301
-481B26,MOTORSTROM_B_FEHLT,MOTORSTROM_B_FEHLT,EKP301
-481B27,MOTORSTROM_C_FEHLT,MOTORSTROM_C_FEHLT,EKP301
-481B28,KODIERUNGSFEHLER_EC_DC,KODIERUNGSFEHLER_EC_DC,EKP301
+481B20,MOTORSPANNUNG_B_ZU_NIEDRIG,Engine voltage B to low,EKP301
+481B21,MOTORSPANNUNG_C_ZU_NIEDRIG,Engine voltage C to low,EKP301
+481B22,MOTORSTROM_B_ZU_HOCH,Engine current B to high,EKP301
+481B23,MOTORSTROM_C_ZU_HOCH,Engine current C to high,EKP301
+481B24,MOTORSTROM_B_ZU_NIEDRIG,Engine current B to low,EKP301
+481B25,MOTORSTROM_C_ZU_NIEDRIG,Engine current C to low,EKP301
+481B26,MOTORSTROM_B_FEHLT,Engine current B missing,EKP301
+481B27,MOTORSTROM_C_FEHLT,Engine current C missing,EKP301
+481B28,KODIERUNGSFEHLER_EC_DC,Coding fault EC DC,EKP301
 481B2B,Saugstrahlpumpenfunktion defekt,Saugstrahlpumpenfunktion defective,EKP301
 481B2C,Montagemode Werk / Pumpensperre,Montagemode Werk / Pumpensperre,EKP301
 481CBB,Master-Slave - Hardwarefehler - hinten links Slave,Master-slave - Hardwarefehler - rear left slave,HC2-G11
@@ -5593,29 +5593,29 @@
 804012,Versorgungsüberspannung 16V5,Supply overvoltage 16V5,BDC-G05; BDC-G11
 804013,Versorgungsspannung Klemme 30L1 fehlt,Supply voltage terminal 30L1 missing,BDC; BDC-G11
 804014,Versorgungsspannung Klemme 30L2 fehlt,Supply voltage terminal 30L2 missing,BDC-G05; BDC-G11
-804015,ECUMA_ASSERT,ECUMA_ASSERT,BDC
+804015,ECUMA_ASSERT,Ecuma assert,BDC
 804016,Versorgungsspannung Klemme 30L4 fehlt,Supply voltage terminal 30L4 missing,BDC-G05
-804017,ECUMA_ERROR_HOOK,ECUMA_ERROR_HOOK,BDC
-804018,ECUMA_STACK_OVERFLOW,ECUMA_STACK_OVERFLOW,BDC-G11
+804017,ECUMA_ERROR_HOOK,Ecuma error HOOK,BDC
+804018,ECUMA_STACK_OVERFLOW,Ecuma stack overflow,BDC-G11
 804019,Interrupts deaktiviert aufgrund zu häufigem Aufruf,Interrupts deactivated due to to häufigem Aufruf,BDC
 80401A,Übertemperatur in ECU erkannt,Overtemperature in ECU detected,BDC; BDC-G05; BDC-G11
-80401C,PDUR_E_PDU_INSTANCE_LOST,PDUR_E_PDU_INSTANCE_LOST,BDC-G11
-80401E,NVM_E_INTEGRITY_FAILED,NVM_E_INTEGRITY_FAILED,BDC-G05; BDC-G11
-804022,WDG_E_SET_MODE,WDG_E_SET_MODE,BDC-G05; BDC-G11
-804025,WDG_E_MODE_SWITCH_FAILED,WDG_E_MODE_SWITCH_FAILED,BDC-G11
-804027,NVM_E_REQ_FAILED,NVM_E_REQ_FAILED,BDC-G05; BDC-G11
-804028,NVM_QUEUE_FLASH,NVM_QUEUE_FLASH,BDC
-804029,COMM_E_NET_START_IND_CHANNEL_0,COMM_E_NET_START_IND_CHANNEL_0,BDC-G11
-80402A,NVM_CONFIG_READ,NVM_CONFIG_READ,BDC
-80402B,LINIF_E_NC_NO_RESPONSE,LINIF_E_NC_NO_RESPONSE,BDC-G11
+80401C,PDUR_E_PDU_INSTANCE_LOST,PDUR E PDU instance LOST,BDC-G11
+80401E,NVM_E_INTEGRITY_FAILED,NVM E integrity failed,BDC-G05; BDC-G11
+804022,WDG_E_SET_MODE,WDG E SET MODE,BDC-G05; BDC-G11
+804025,WDG_E_MODE_SWITCH_FAILED,WDG E MODE switch failed,BDC-G11
+804027,NVM_E_REQ_FAILED,NVM E REQ failed,BDC-G05; BDC-G11
+804028,NVM_QUEUE_FLASH,NVM queue flash,BDC
+804029,COMM_E_NET_START_IND_CHANNEL_0,COMM E NET start IND channel 0,BDC-G11
+80402A,NVM_CONFIG_READ,NVM config READ,BDC
+80402B,LINIF_E_NC_NO_RESPONSE,Linif E NC NO response,BDC-G11
 80402C,NVM EEPROM Driver Fehler,NVM EEPROM Driver fault,BDC; BDC-G05
 80402F,Batterie Tiefentladen,Battery Tiefentladen,BDC; BDC-G11
 804030,Allgemeiner FuSi Fehler,Allgemeiner FuSi fault,BDC-G05; BDC-G11
 804031,KL50 Not allowed - FUSI Error,KL50 Not allowed - FUSI Error,BDC
 804033,ZSG Spielschutz: weckfähige Eingänge gesperrt,ZSG Spielschutz: weckfähige Eingänge blocked,BDC-G11
 804034,The Jtag of the BDC-Body is not Set,The Jtag of the BDC-Body is not Set,BDC
-804036,LINIF_E_RESPONSE,LINIF_E_RESPONSE,BDC-G05; BDC-G11
-804039,FLS_E_READ_FAILED,FLS_E_READ_FAILED,BDC-G11
+804036,LINIF_E_RESPONSE,Linif E response,BDC-G05; BDC-G11
+804039,FLS_E_READ_FAILED,FLS E READ failed,BDC-G11
 804040,Interface VAM-CLI: Timeout Crash-Entriegeln nach Rollover-Crash,Interface VAM-CLI: timeout Crash-Entriegeln to Rollover-Crash,BDC-G11
 804041,Interface CLI-VAM: Timeout Ermittlung aktuelle PIA-Einstellungen,Interface CLI-VAM: timeout Ermittlung current PIA-Einstellungen,BDC
 804044,Interrupts deaktiviert aufgrund zu häufigem Aufruf,Interrupts deactivated due to to häufigem Aufruf,BDC-G05
@@ -5625,7 +5625,7 @@
 804048,CA-HW-Treiber: Temperaturüberlast,CA-HW-driver: Temperaturüberlast,BDC-G11
 804049,CA-HW-Treiber: Vorwarnung Temperaturüberlast,CA-HW-driver: Vorwarnung Temperaturüberlast,BDC-G05
 80404A,CA: Antennenstatus niO,CA: antenna status niO,BDC-G11
-804052,LINSM_CODING_WRONG_DATA,LINSM_CODING_WRONG_DATA,BDC; BDC-G05; BDC-G11
+804052,LINSM_CODING_WRONG_DATA,Linsm coding wrong DATA,BDC; BDC-G05; BDC-G11
 804058,"ISV, Ansteuerleitung Abschalten 30B1 oder 30B2: Kurzschluss oder Leitungsunterbrechung","ISV, actuation line Abschalten 30B1 or 30B2: short circuit or open circuit",BDC-G05; BDC-G11
 80405A,"ISV, Ansteuerleitung Abschalten 30F1 oder 30F2: Kurzschluss oder Leitungsunterbrechung","ISV, actuation line Abschalten 30F1 or 30F2: short circuit or open circuit",BDC-G05; BDC-G11
 80405C,"ISV, Ansteuerleitung Einschalten 30B1 or 30B2: Kurzschluss oder Leitungsunterbrechung","ISV, actuation line Einschalten 30B1 or 30B2: short circuit or open circuit",BDC-G05; BDC-G11
@@ -5734,8 +5734,8 @@
 8040E3,Hecktür links: Leitungsunterbrechung,Hecktür left: open circuit,BDC-G05
 8040E5,Hecktür rechts: Kurzschluss nach Masse,Hecktür right: short circuit to ground,BDC-G05
 8040E7,Hecktür rechts: Kurzschluss nach Plus,Hecktür right: short circuit to positive,BDC-G05
-8040EB,CAN_E_TIMEOUT,CAN_E_TIMEOUT,BDC-G05; BDC-G11
-8040EE,CANNM_E_INIT_FAILED,CANNM_E_INIT_FAILED,BDC-G11
+8040EB,CAN_E_TIMEOUT,CAN E timeout,BDC-G05; BDC-G11
+8040EE,CANNM_E_INIT_FAILED,Cannm E INIT failed,BDC-G11
 8040F0,Transponderspule: Fehler Basestation,Transponderspule: fault Basestation,BDC-G11
 8040F1,Kryptodaten in einem Schlüssel,Kryptodaten in a Schlüssel,BDC; BDC-G05; BDC-G11
 8040F2,Transponderspule: Fehler Ersatzschlüsselanlernen,Transponderspule: fault Ersatzschlüsselanlernen,BDC-G11
@@ -6378,7 +6378,7 @@
 8049B5,Sonnenrollo BF hinten (LIN): Kurzschluss,Sun blind BF rear (LIN): short circuit,BDC-G11
 8049B6,Sonnenrollo BF hinten (LIN): Leitungsunterbrechung,Sun blind BF rear (LIN): open circuit,BDC-G05; BDC-G11
 8049B7,Sonnenrollo BF hinten (LIN): Schalter hängt,Sun blind BF rear (LIN): switch stuck,BDC-G11
-8049FC,IOHWAB_E_IO_SEQUENCE,IOHWAB_E_IO_SEQUENCE,BDC-G05; BDC-G11
+8049FC,IOHWAB_E_IO_SEQUENCE,Iohwab E IO sequence,BDC-G05; BDC-G11
 804A00,"Armauflagenheizung BF (LIN), Heizfeld Beifahrertür: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), Heizfeld passenger door: open circuit or short circuit",BDC-G05; BDC-G11
 804A01,"Armauflagenheizung BF (LIN), Heizfeld Mittelarmlehne: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), Heizfeld Mittelarmlehne: open circuit or short circuit",BDC-G11
 804A02,"Armauflagenheizung BF (LIN), Temperatursensor Beifahrertür: Leitungsunterbrechung oder Kurzschluss","Armrest heating BF (LIN), temperature sensor passenger door: open circuit or short circuit",BDC-G05; BDC-G11
@@ -7299,10 +7299,10 @@ B7F774,Kombi: Interner SW-Fehler (EEP_E_COMPARE_FAILED),Instrument cluster: inte
 B7F776,Kombi: Interner SW-Fehler (EEP_E_READ_FAILED),Instrument cluster: internal SW-fault (EEP_E_READ_FAILED),KOMBI-G11
 B7F778,Kombi: Ausfall Kontrolleuchte,Instrument cluster: failure Kontrolleuchte,KOMBI-G11
 B7F779,Kombi: Kilometerstand unplausibel,Instrument cluster: mileage implausible,KOMBI-25
-B7F780,KSS_RESET,KSS_RESET,KOMBI-G11
-B7F782,GSS_ALIVE,GSS_ALIVE,KOMBI-G11
-B7F784,IPC_TIMEOUT,IPC_TIMEOUT,KOMBI-G11
-B7F786,IPC_CRC,IPC_CRC,KOMBI-G11
+B7F780,KSS_RESET,KSS reset,KOMBI-G11
+B7F782,GSS_ALIVE,GSS alive,KOMBI-G11
+B7F784,IPC_TIMEOUT,IPC timeout,KOMBI-G11
+B7F786,IPC_CRC,IPC CRC,KOMBI-G11
 B7F788,GPU Temperaturgrenze ueberschritten,GPU temperature limit exceeded,KOMBI-G11
 B7F791,EEPROM Emulation Flash Driver (EEFLS_E_COMPARE_FAILED),EEPROM Emulation Flash Driver (EEFLS_E_COMPARE_FAILED),KOMBI-G11
 B7F793,EEPROM Emulation Flash Driver (EEFLS_E_ECC_ERROR_DETECTION),EEPROM Emulation Flash Driver (EEFLS_E_ECC_ERROR_DETECTION),KOMBI-G11
@@ -8546,7 +8546,7 @@ CDF810,"LP-CAN, Botschaft (Daten Getriebestrang, 0x1AF) bei Unterspannung: fehlt
 CDFA04,"FA-CAN, Botschaft (Schlafbereitschaft Global FZM, 0x3A5): fehlt","FA-CAN, message (Schlafbereitschaft global FZM, 0x3A5): missing",DME; DME-slave
 CEC40A,FA-CAN Control Module Bus OFF,FA-CAN control module bus OFF,EKP301
 CEC486,A-CAN Control Module Bus OFF,A-CAN control module bus OFF,EKP301
-CECBFF,DM_TEST_COM,DM_TEST_COM,EKP301
+CECBFF,DM_TEST_COM,DM TEST COM,EKP301
 CED400,Timeout CAN-Botschaft Fördermenge,Timeout CAN-message Fördermenge,EKP301
 CF0469,LP-CAN Physikalischer Busfehler,LP-CAN physical bus fault,GSZFB1
 CF0472,LP-CAN Control Module Bus OFF,LP-CAN control module bus OFF,GSZFB1
@@ -10653,11 +10653,11 @@ E71452,"Botschaft (0x328, Relativzeit BN2020): Ausfall. (OBD-relevant für Hybri
 E71453,"Botschaft (0x112, Status Hochvoltspeicher 2): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x112, status high-voltage memory 2): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
 E71454,"Botschaft (0x1B9, Wärmemanagement Motorsteuerung): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x1B9, heat management engine control): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
 E71455,"Botschaft (0x304, DME IBS_1): Ausfall. (OBD-relevant für Hybridfahrzeuge.)","Message (0x304, DME IBS_1): failure. (OBD-relevant for hybrid vehicle.)",IHKA-G11
-F00384,CANIF_E_INVALID_DLC,CANIF_E_INVALID_DLC,BDC-G11
-F00386,ADC_E_TIMEOUT,ADC_E_TIMEOUT,BDC-G11
-F00388,MCU_E_TIMEOUT_TRANSITION,MCU_E_TIMEOUT_TRANSITION,BDC-G05
-F0038A,SPI_E_TIMEOUT,SPI_E_TIMEOUT,BDC-G11
-F0038C,EEP_E_COM_FAILURE,EEP_E_COM_FAILURE,BDC-G05; BDC-G11
-F0042D,FLS_E_COMPARE_FAILED,FLS_E_COMPARE_FAILED,BDC-G11
-F0042F,FLS_E_TIMEOUT,FLS_E_TIMEOUT,BDC-G11
+F00384,CANIF_E_INVALID_DLC,Canif E invalid DLC,BDC-G11
+F00386,ADC_E_TIMEOUT,ADC E timeout,BDC-G11
+F00388,MCU_E_TIMEOUT_TRANSITION,MCU E timeout transition,BDC-G05
+F0038A,SPI_E_TIMEOUT,SPI E timeout,BDC-G11
+F0038C,EEP_E_COM_FAILURE,EEP E COM failure,BDC-G05; BDC-G11
+F0042D,FLS_E_COMPARE_FAILED,FLS E compare failed,BDC-G11
+F0042F,FLS_E_TIMEOUT,FLS E timeout,BDC-G11
 FFFFFF,-,-,DME; DME-slave; BDC; BDC-G05; BDC-G11; ZGW; ZGW-SP18; KOMBI-G11; KOMBI-01; KOMBI-25

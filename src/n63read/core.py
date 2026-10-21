@@ -14,6 +14,7 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   BMW_dtc_status_byte.csv                statusOfDTC byte -> text
   BMW_enum_tables.csv                    value -> text enumerations
   BMW_freeze_frame_fields.csv            FS_LESEN_DETAIL field catalog
+  BMW_freeze_enum_tables.csv             value tables of the modules' own fields
   G30_module_sgbd_map.csv                module address -> SGBD variant
   <MODULE>_measurements.csv              other modules' channels: NBTEVO (head
                                          unit, GPS), GSZFB1 (transmission),
@@ -93,6 +94,7 @@ DEFAULT_CSV = "N63TU2_DME_readable_measurements.csv"
 FAULT_CSV = "BMW_fault_code_texts.csv"
 STATUS_CSV = "BMW_dtc_status_byte.csv"
 ENUM_CSV = "BMW_enum_tables.csv"
+FREEZE_ENUM_CSV = "BMW_freeze_enum_tables.csv"   # modules' snapshot value tables
 FREEZE_CSV = "BMW_freeze_frame_fields.csv"
 MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
 # Per-module catalogs from tools/module_catalog.py: <NAME>_measurements.csv
@@ -101,7 +103,7 @@ MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
                    "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301",
                    "PMA_20")
 
-DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
+DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV, FREEZE_ENUM_CSV,
               MODULE_MAP_CSV)
 
 
@@ -881,7 +883,8 @@ def _freeze_value(uw, raw, row, lang, enums=None):
     if uw == 0x1702 or (row.get("unit") or "").upper() in ("HEX", "TEXT"):
         return raw.hex().upper(), ""
     dtype = (row.get("datatype") or "").strip().lower()
-    n = int.from_bytes(raw, "big", signed=dtype.startswith("signed"))
+    order = "little" if (row.get("byte_order") or "").strip().lower() == "low" else "big"
+    n = int.from_bytes(raw, order, signed=dtype.startswith("signed"))
     value = n * _number(row.get("mul"), 1.0) / (_number(row.get("div"), 1.0) or 1.0) + \
         _number(row.get("add"), 0.0)
     value = int(value) if value == int(value) else round(value, 6)
@@ -1188,6 +1191,48 @@ def link_local(addrs):
     return [a for a in addrs if a.startswith("169.254.")]
 
 
+LINK_WAIT = 10.0                # s to wait for the ENET adapter's address
+
+# Where the car keeps its mileage, tried in order: the transfer case's copy
+# from the bus (a field of a record), then the suspension module's EEPROM
+# copy (3 bytes, km). Both matched the dash at the car (2026-10-18).
+ODOMETERS = [(0x19, 0xDFE7, "LMV_DATEN_VERTEILERGETRIEBE.MILE_KM"), (0x76, 0x2540, None)]
+ODOMETER_EVENT = "odometer %d km"
+ODOMETER_RE = re.compile(r"\bodometer (\d+) km\b")
+
+
+def read_odometer(h, layouts):
+    """The car's mileage in km, or None if no module gives a believable one."""
+    for module, did, arg in ODOMETERS:
+        try:
+            raw = h.read_did(module, did, timeout=MODULE_TIMEOUT)
+        except ConnectionLost:
+            raise
+        except HsfzError:
+            continue
+        if arg:
+            fields = layouts.get((module, did))
+            value = decode_record(raw, fields).get(arg, (None,))[0] if fields else None
+        else:
+            value = int.from_bytes(raw[:3], "big") if len(raw) >= 3 else None
+        if isinstance(value, (int, float)) and 0 < value < 2000000:
+            return int(value)
+    return None
+
+
+def wait_for_link_local(timeout=None, step=0.5, addrs=None, sleep=time.sleep):
+    """This PC's 169.254.x.x addresses, waiting up to `timeout` s for one to
+    appear: right after the PC wakes or the app restarts for an update, the
+    adapter is still getting its address and Discover would find nothing."""
+    addrs = addrs or local_ipv4s
+    end = time.time() + (LINK_WAIT if timeout is None else timeout)
+    while True:
+        found = link_local(addrs())
+        if found or time.time() >= end:
+            return found
+        sleep(step)
+
+
 def discover(timeout=3.0, bind_ip=None, details=None):
     """
     UDP broadcast on 6811 (HSFZ) and 13400 (DoIP, to recognise such a car).
@@ -1329,7 +1374,8 @@ def load_enum_tables():
     """
     tables = {}
     # Module tables are prefixed with the module (NBTEVO.), so never collide.
-    for name in (ENUM_CSV,) + tuple(m + "_enum_tables.csv" for m in MODULE_CATALOGS):
+    for name in (ENUM_CSV, FREEZE_ENUM_CSV) + tuple(m + "_enum_tables.csv"
+                                                    for m in MODULE_CATALOGS):
         path = resource_path(name)
         if not os.path.exists(path):
             continue
@@ -1570,16 +1616,41 @@ def decode_record(raw, fields):
     return out
 
 
+# Values each DME keeps for its own four cylinders: the slave's cylinders
+# 1-4 are the engine's 5-8 (docs/modules.md, bank 2). Uneven running and the
+# misfire counters aren't among them: the master reports all eight.
+OWN_CYLINDERS = re.compile(r"^(?:DIAG_BRENNDAUER_ZUENDFUNKE_CYL|IUKZ|SPG_KLOPF_ZYL|"
+                           r"AKT_EINSPRITZMODUS_ZYL|FUNKENBRENNDAUER_FEHL_ZYL_)([1-4])$")
+_CYLINDER_WORD = re.compile(r"\b(cylinder|Zylinder)( ?)([1-4])\b")
+
+
+def engine_cylinder(name):
+    """The engine's cylinder for a channel the DMEs keep per own cylinder:
+    IUKZ1 -> 1, IUKZ1@0x13 -> 5. None for any other channel."""
+    bank2 = name.endswith(BANK2_SUFFIX)
+    m = OWN_CYLINDERS.match(name[:-len(BANK2_SUFFIX)] if bank2 else name)
+    return None if not m else int(m.group(1)) + (4 if bank2 else 0)
+
+
 def add_bank2(cat):
     """Add each DME channel again as NAME@0x13: the same identifier read from
-    the slave DME, i.e. bank 2. Returns the catalog."""
+    the slave DME, i.e. bank 2. Returns the catalog. A value the DMEs keep
+    per own cylinder says which of the engine's it is (cylinder 5 for the
+    slave's 1)."""
     for name, meta in list(cat.items()):
         if (meta.get("MODULE") or "").strip() or name.endswith(BANK2_SUFFIX):
             continue
         twin = dict(meta, ARG=name + BANK2_SUFFIX, TARGET="0x%02X" % DME_SLAVE)
+        cylinder = engine_cylinder(name + BANK2_SUFFIX)
         for key in ("INFO", "INFO_EN"):
             if twin.get(key):
-                twin[key] = "Bank 2: " + twin[key]
+                text = twin[key]
+                if cylinder:
+                    text, n = _CYLINDER_WORD.subn(
+                        lambda m: "%s%s%d" % (m.group(1), m.group(2), cylinder), text)
+                    if not n:
+                        text += " (cylinder %d)" % cylinder
+                twin[key] = "Bank 2: " + text
         cat[name + BANK2_SUFFIX] = twin
     return cat
 
@@ -1680,7 +1751,12 @@ BUILTIN_TEMPLATES = {
     "Misfire hunt": ["INMOT", "ZAEHLER_AUSSETZ_ABGASREL_SUM_ALLEZYL"]
     + ["ILUZ%d" % (i + 1) for i in range(CYLINDERS)]
     + ["ZAEHLER_AUSSETZERK_ZYL%d" % (i + 1) for i in range(CYLINDERS)]
-    + ["CALC_ILUZ%d_FROM_MEAN" % (i + 1) for i in range(CYLINDERS)],
+    + ["CALC_ILUZ%d_FROM_MEAN" % (i + 1) for i in range(CYLINDERS)]
+    # Spark burn time and knock level, cylinders 1-4 from the master and 5-8
+    # from the slave (its own 1-4).
+    + ["DIAG_BRENNDAUER_ZUENDFUNKE_CYL%d%s" % (i % 4 + 1, "" if i < 4 else BANK2_SUFFIX)
+       for i in range(CYLINDERS)]
+    + ["IUKZ%d%s" % (i % 4 + 1, "" if i < 4 else BANK2_SUFFIX) for i in range(CYLINDERS)],
     "Boost and wastegates, both banks": [
         "INMOT", "IPLAD", "S_LADEDRUCK", "CALC_BOOST_MINUS_TARGET"]
     + [n + s for n in ("LADEDRUCK_REGELDIFFERENZ_BANKSPEZ", "I_EWG_POS", "TV_EWG")

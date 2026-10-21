@@ -7,7 +7,9 @@ serves it to Claude from anywhere:
 - **D1** holds the drive and fault summaries (the app's History).
 - **`/mcp`** is a remote MCP server with read-only tools over that copy:
   `drive_history`, `fault_history` (with each fault's stored details on
-  request), `trend`, `list_files`, `read_log`, `list_templates`.
+  request), `trend`, `list_files`, `read_log`, `compare_banks` and
+  `find_events` (over one stored log), `list_channels`, `channel_series`,
+  `list_templates`.
 - **Templates:** the app's saved channel sets, merged both ways on every sync.
 - **Time series:** every value of every drive log with its UTC time, one row
   per channel per drive in D1 (`series`), so `list_channels` and

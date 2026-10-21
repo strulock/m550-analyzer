@@ -248,3 +248,57 @@ def test_a_log_without_a_clock_starts_its_length_before_the_file_time(tmp_path):
     os.utime(path, (end, end))
     d, = history.scan(logs).drives
     assert d["start"] == "2026-10-14 22:34:38"             # 9 minutes of log before
+
+
+def test_the_odometer_is_read_once_a_log_starts_and_history_finds_it(tmp_path, monkeypatch):
+    class H:
+        def __init__(self, answers):
+            self.answers, self.asked = answers, []
+
+        def read_did(self, module, did, timeout=None):
+            self.asked.append((module, did))
+            a = self.answers.get((module, did))
+            if isinstance(a, Exception):
+                raise a
+            if a is None:
+                raise core.HsfzTimeout("no answer")
+            return a
+    monkeypatch.setattr(core, "ODOMETERS", [(0x19, 0xDFE7, "X.MILE_KM"), (0x76, 0x2540, None)])
+    layouts = {(0x19, 0xDFE7): [{"ARG": "X.MILE_KM", "DATENTYP": "unsigned long"}]}
+    h = H({(0x19, 0xDFE7): (111321).to_bytes(4, "big")})
+    assert core.read_odometer(h, layouts) == 111321
+    h = H({(0x19, 0xDFE7): core.NegativeResponse(0x22, 0x31),
+           (0x76, 0x2540): bytes.fromhex("01b2c8")})
+    assert core.read_odometer(h, layouts) == 111304 and h.asked[-1] == (0x76, 0x2540)
+    assert core.read_odometer(H({}), layouts) is None
+
+    # A log that noted it in its first row: History takes it as the drive's.
+    logs = str(tmp_path / "logs")
+    os.makedirs(logs)
+    with open(os.path.join(logs, "n63_1.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["Time", "Clock", "INMOT", "Event"])
+        w.writerow([0.1, "2026-10-21 07:00:00.000-05:00", 800, "odometer 111321 km"])
+        for t in range(1, 10):
+            w.writerow([t, "x", 800, ""])
+    assert history.scan(logs).drives[0]["odometer_km"] == 111321
+
+
+def test_a_session_notes_the_odometer_in_the_first_row(tmp_path, monkeypatch):
+    from n63read import engine
+    from fake_car import FakeCar
+    car = FakeCar()
+    monkeypatch.setattr(core.Hsfz.__init__, "__defaults__", (car.port, core.TESTER_ADDR, 3.0))
+    monkeypatch.setattr(core, "read_odometer", lambda h, layouts: 111321)
+    path = str(tmp_path / "log.csv")
+    s = engine.Session("127.0.0.1", interval=0.02)
+    cat = core.load_catalog()
+    s.set_channels([("ILAG2", int(cat["ILAG2"]["ID"], 16), cat["ILAG2"])])
+    s.stop_after = 3
+    s.start_log(path)
+    s.start()
+    s.join(10)
+    car.close()
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    assert rows[1][-1] == "odometer 111321 km" and all(r[-1] == "" for r in rows[2:])

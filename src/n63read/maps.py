@@ -96,6 +96,20 @@ def ramp(frac):
     return "#%02x%02x%02x" % RAMP[-1][1]
 
 
+# Colouring by a channel's alert limits: inside them, below, above.
+LIMIT_COLOURS = {"ok": "#1a9641", "low": "#2c7bb6", "high": "#d7191c"}
+
+
+def limit_colour(value, limits):
+    """The route's colour for a value against (low, high) alert limits."""
+    lo, hi = limits
+    if lo is not None and value < lo:
+        return LIMIT_COLOURS["low"]
+    if hi is not None and value > hi:
+        return LIMIT_COLOURS["high"]
+    return LIMIT_COLOURS["ok"]
+
+
 def value_at(points, t):
     """The value of a channel's (t, v) points at time t: the latest at or
     before it, else the first."""
@@ -205,12 +219,15 @@ class TileCache:
 
 TEXT = {
     "en": {"title": "Map", "colour": "Colour by", "follow": "Follow", "fit": "Fit route",
+           "limits": "By alert limits", "below": "below", "within": "within", "above": "above",
            "waiting": "Waiting for a GPS position.\n\nWatch HU_STATUS_GPS_POSITION.LATITUDE "
                       "and .LONGITUDE (the Map button offers to add them),\nor open a log "
                       "that has them.",
            "nofix": "no GPS fix in this data yet", "click": "click the route to jump there",
            "km": "%.1f km"},
     "de": {"title": "Karte", "colour": "Farbe nach", "follow": "Folgen", "fit": "Ganze Route",
+           "limits": "Nach Alarmgrenzen", "below": "darunter", "within": "innerhalb",
+           "above": "darüber",
            "waiting": "Warte auf eine GPS-Position.\n\nHU_STATUS_GPS_POSITION.LATITUDE und "
                       ".LONGITUDE beobachten (die Karte bietet an, sie hinzuzufügen),\noder ein "
                       "Log mit Position öffnen.",
@@ -229,6 +246,8 @@ class MapWindow(tk.Toplevel):
     - now(): time of the marker, or None
     - seek(t) or None: jump a replay to time t
     - default(): the channel to colour by at first
+    - limits(name), optional: (low, high) alert limits, either may be None,
+      or None when the channel has none
     """
 
     REFRESH_MS = 400
@@ -254,7 +273,11 @@ class MapWindow(tk.Toplevel):
         self.channel_box = ttk.Combobox(bar, textvariable=self.channel_var, width=44,
                                         state="readonly")
         self.channel_box.pack(side="left", padx=(4, 12))
-        self.channel_box.bind("<<ComboboxSelected>>", lambda e: self.draw())
+        self.channel_box.bind("<<ComboboxSelected>>", lambda e: self._channel_changed())
+        self.limits_var = tk.BooleanVar(value=False)
+        self.limits_check = ttk.Checkbutton(bar, text=self._t("limits"),
+                                            variable=self.limits_var, command=self.draw)
+        self.limits_check.pack(side="left", padx=(0, 12))
         self.follow_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(bar, text=self._t("follow"), variable=self.follow_var,
                         command=self.draw).pack(side="left")
@@ -279,6 +302,7 @@ class MapWindow(tk.Toplevel):
         c.bind("<Leave>", lambda e: self._set_hover(None))
         self.protocol("WM_DELETE_WINDOW", self.close)
         self.refresh_channels()
+        self._limits_state()
         self._job = self.after(50, self._tick)
 
     def _t(self, key):
@@ -297,6 +321,25 @@ class MapWindow(tk.Toplevel):
             self.channel_box.current(self._names.index(want))
         elif self._names:
             self.channel_box.current(0)
+        if hasattr(self, "limits_check"):
+            self._limits_state()
+
+    def limits(self):
+        """The chosen channel's alert limits, if it has any; else None."""
+        name = self.channel()
+        get = getattr(self.source, "limits", None)
+        limits = get(name) if get and name else None
+        return tuple(limits) if limits and any(v is not None for v in limits) else None
+
+    def _channel_changed(self):
+        self._limits_state()
+        self.draw()
+
+    def _limits_state(self):
+        has = self.limits() is not None
+        self.limits_check.configure(state="normal" if has else "disabled")
+        if not has:
+            self.limits_var.set(False)
 
     def channel(self):
         i = self.channel_box.current()
@@ -394,7 +437,8 @@ class MapWindow(tk.Toplevel):
     def _signature(self):
         track = self.source.track()
         return (len(track), track[-1] if track else None, self.source.now(), self.channel(),
-                self.zoom, self.center, self.size(), self.follow_var.get(), self.hover)
+                self.zoom, self.center, self.size(), self.follow_var.get(), self.hover,
+                self.limits_var.get(), self.limits())
 
     def _image(self, z, x, y):
         key = (z, x, y)
@@ -469,9 +513,15 @@ class MapWindow(tk.Toplevel):
             # drawn in the same colours.
             c.create_line(*[v for x, y, _ in screen for v in (x, y)], fill="#1e1e1e",
                           width=7, capstyle="round", joinstyle="round")
+        by_limits = self.limits() if self.limits_var.get() else None
         for (x0, y0, t), (x, y, _) in zip(screen, screen[1:]):
             v = value_at(points, t) if points else None
-            colour = ramp((v - lo) / span) if v is not None else col("accent", "#2d7dd2")
+            if v is None:
+                colour = col("accent", "#2d7dd2")
+            elif by_limits:
+                colour = limit_colour(v, by_limits)
+            else:
+                colour = ramp((v - lo) / span)
             c.create_line(x0, y0, x, y, fill=colour, width=4, capstyle="round")
         if marker is not None:
             x, y = world_px(marker[1], marker[2], self.zoom)
@@ -481,7 +531,21 @@ class MapWindow(tk.Toplevel):
 
         # Legend, attribution, readout.
         font = ("TkDefaultFont", 8)
-        if values:
+        if values and by_limits:
+            lx, ly = 12, h - 22
+            low, high = by_limits
+            for kind, label, limit in (("low", "below", low), ("ok", "within", None),
+                                       ("high", "above", high)):
+                c.create_rectangle(lx, ly, lx + 12, ly + 10, fill=LIMIT_COLOURS[kind],
+                                   outline="#555")
+                text = self._t(label)
+                if limit is not None:
+                    shown, unit = self.source.shown(name, limit)
+                    text += " %s %s" % (shown, unit)
+                item = c.create_text(lx + 16, ly + 5, anchor="w", text=text, font=font,
+                                     fill="#1e1e1e")
+                lx = c.bbox(item)[2] + 12
+        elif values:
             lx, ly = 12, h - 34
             for i in range(120):
                 c.create_line(lx + i, ly, lx + i, ly + 10, fill=ramp(i / 119))
