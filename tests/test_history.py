@@ -235,3 +235,16 @@ def test_a_faults_stored_details_follow_it_into_the_history(tmp_path):
     f, = history.fault_history(history.read_faults(path))
     assert f["last_km"] == 111321 and f["occurrences"] == 3
     assert f["details"]["snapshots"][1]["fields"][0]["value"] == 111321
+
+
+def test_a_log_without_a_clock_starts_its_length_before_the_file_time(tmp_path):
+    logs = str(tmp_path / "logs")
+    os.makedirs(logs)
+    path = os.path.join(logs, "old.csv")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(["Time,INMOT"] + ["%d,800" % t for t in range(0, 600, 60)]) + "\n")
+    import time as _t
+    end = _t.mktime((2026, 10, 14, 22, 43, 38, 0, 0, -1))
+    os.utime(path, (end, end))
+    d, = history.scan(logs).drives
+    assert d["start"] == "2026-10-14 22:34:38"             # 9 minutes of log before
