@@ -131,6 +131,10 @@ class _MapSource:
         names = [n for n, _, _ in self.app.watch]
         return next((n for n in MAP_DEFAULTS if n in names), None)
 
+    def limits(self, name):
+        """The channel's alert limits (car's units), or None."""
+        return self.app.alerts.get(name)
+
 
 # --------------------------------------------------------------- poll thread
 

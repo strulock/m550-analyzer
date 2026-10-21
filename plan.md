@@ -307,8 +307,9 @@ the file and line it starts from, as of 0.3.8.
       a policy-conformant User-Agent, attribution, downloads switchable off),
       the GPS route coloured by any watched channel, a marker that follows
       live logging and replay, click to jump the replay, pan, zoom, fit.
-- [ ] Offer a channel's alert limits as the colour scale, so a route shows
-      where a value left its range.
+- [x] Offer a channel's alert limits as the colour scale, so a route shows
+      where a value left its range: *By alert limits* (green within, blue
+      below, red above).
 
 ## Phase 13 — Long-term history
 

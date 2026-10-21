@@ -245,7 +245,9 @@ watched channel: speed, boost, uneven running, coolant temperature... A
 white marker follows the car while logging and the replay while replaying;
 click the route during a replay to jump to that moment. Drag to move the
 map, scroll or **+**/**−** to zoom, **Fit route** to see it all; **Follow**
-keeps the marker in view. It needs the head unit's GPS position
+keeps the marker in view. For a channel with alert limits (**Alert...**),
+**By alert limits** colours the route green inside them, blue below and red
+above, so it shows where on the road a value left its range. It needs the head unit's GPS position
 (`HU_STATUS_GPS_POSITION.LATITUDE` and `.LONGITUDE`; the Map button offers
 to watch them). Logs from other tools work too if they have latitude and
 longitude columns.
