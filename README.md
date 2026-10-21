@@ -215,8 +215,9 @@ cylinder's uneven running minus the mean of all eight. Adding one adds what it
 needs; they show, chart, log and alert like any channel.
 
 A log has `Time` first (seconds from the start of the log, as in a BimmerLink
-export), then `Clock` (the time of day, to line it up with video or other
-logs), one column per channel, and `Event` last: alerts, and the connection
+export), then `Clock` (the date and time with its offset from UTC, such as
+`2026-10-19 07:42:50.123-05:00`, to line it up with video or other logs, across
+time zones and daylight-saving changes), one column per channel, and `Event` last: alerts, and the connection
 dropping and coming back. If the connection drops while logging (a cable
 bump, the car going to sleep), the log stays open, the gap is marked, and the
 app keeps trying to reconnect and carries on in the same file. Replay skips
