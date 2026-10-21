@@ -100,6 +100,22 @@ def test_fault_history_follows_each_fault_across_reads(tmp_path):
     assert faults[0]["now"] == "present"                  # present ones first
 
 
+def test_codes_that_never_failed_are_not_faults(tmp_path):
+    path = str(tmp_path / "every.csv")
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(core.FAULT_CSV_HEADER)
+        w.writerow(["2026-10-14 19:10:00", "0x12", "DME", "1A400A", "0x20", "not present",
+                    "fan", "", ""])
+        w.writerow(["2026-10-14 19:10:00", "0x12", "DME", "1A4000", "0x00", "not present",
+                    "never", "", ""])
+        w.writerow(["2026-10-14 19:10:00", "0x12", "DME", "1A4001", "0x50", "not present",
+                    "not tested", "", ""])
+    faults = history.fault_history(history.read_faults(path))
+    assert [f["code"] for f in faults] == ["1A400A"]
+    assert history.failed("") and history.failed("0x08") and not history.failed("0x40")
+
+
 def test_the_same_fault_list_saved_twice_counts_once(tmp_path):
     rows = [("0x40", "804415", "present, stored")]
     fault_csv(str(tmp_path / "a.csv"), "2026-10-18 18:00:00", rows)
@@ -115,7 +131,7 @@ def test_scan_reads_the_logs_folder_and_writes_the_csvs(tmp_path):
     drive(os.path.join(logs, "claude", "n63_2.csv"), misfire5_at=(10,))
     fault_csv(os.path.join(logs, "n63_faults.csv"), "2026-10-19 07:00:00",
               [("0x40", "804415", "present, stored")])
-    with open(os.path.join(logs, "check.csv"), "w") as f:      # a catalog check: skipped
+    with open(os.path.join(logs, "check.csv"), "w") as f:      # a catalog check: no drive
         f.write("module,did,job,status,detail,reply_bytes,raw\n0x12,0x4807,X,ok,,2,0000\n")
     s = history.scan(logs)
     assert [d["misfires"] for d in s.drives] == [2, 1]

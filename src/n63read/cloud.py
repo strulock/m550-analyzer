@@ -33,6 +33,7 @@ TIMEOUT = 60
 EVERY = 10 * 60             # s between background syncs
 FIRST_DELAY = 20            # s after start before the first
 USER_AGENT = "BMW-Analyzer/%s" % __version__
+UPLOADED = ("drive", "faults", "check")     # what goes up; other CSVs stay put
 
 
 class CloudError(Exception):
@@ -177,7 +178,7 @@ def sync(settings, logs=None, state_file=None, progress=None):
         stamp = [st.st_size, int(st.st_mtime)]
         if files.get(rel, {}).get("stamp") == stamp:
             result.unchanged += 1
-        else:
+        elif history.kind(path) in UPLOADED:
             todo.append((rel, path, stamp))
     for i, (rel, path, stamp) in enumerate(todo, 1):
         with open(path, "rb") as f:

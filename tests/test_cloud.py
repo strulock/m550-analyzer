@@ -112,6 +112,17 @@ def test_sync_uploads_logs_and_history_then_only_what_changed(worker, tmp_path):
     assert "1 file uploaded" in r.text() and "3 drives" in r.text()
 
 
+def test_only_logs_fault_lists_and_checks_go_up(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    os.makedirs(os.path.join(logs, "extra"))
+    with open(os.path.join(logs, "extra", "catalog.csv"), "w") as f:
+        f.write("ARG,ID,INFO\nINMOT,0x4807,Engine speed\n")
+    with open(os.path.join(logs, "check.csv"), "w") as f:
+        f.write("module,did,job,status,detail,reply_bytes,raw\n0x12,0x4807,X,ok,,2,0000\n")
+    assert sorted(cloud.sync(settings_for(worker), logs).uploaded) == ["check.csv", "n63_1.csv"]
+
+
 def test_a_touched_but_unchanged_file_isnt_sent_again(worker, tmp_path):
     logs = str(tmp_path / "logs")
     path = os.path.join(logs, "n63_1.csv")
