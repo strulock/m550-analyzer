@@ -67,6 +67,10 @@ def op_discover(args):
         for a in core.local_ipv4s():
             print("   ", a)
         return
+    if not args.bind and not core.link_local(core.local_ipv4s()):
+        print("No ENET (169.254.x.x) address yet; waiting up to %g s for the adapter..."
+              % core.LINK_WAIT)
+        core.wait_for_link_local()
     try:
         hits = core.discover(args.timeout, args.bind)
     except core.AddressNotAvailable as e:

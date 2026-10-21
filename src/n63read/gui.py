@@ -1752,7 +1752,16 @@ class App(tk.Tk):
         self.status.config(text=note, foreground="#b8860b")
         self.update_idletasks()
 
+        waiting = self._no_enet_address and bind == "auto"
+        if waiting:
+            self.status.config(text="\u25cf waiting for the ENET adapter's address...",
+                               foreground="#b8860b")
+
         def work():
+            # Just after the PC wakes or the app restarts, the adapter may
+            # still be getting its 169.254 address: give it a few seconds.
+            if waiting and core.wait_for_link_local():
+                self.q.put(("linkup",))
             # The answer goes to the window at once; the slow network
             # snapshot for the diagnostics journal is taken after.
             try:
@@ -1763,6 +1772,10 @@ class App(tk.Tk):
                 self.q.put(("joberror", "discover failed: %s" % e))
 
         threading.Thread(target=work, daemon=True).start()
+
+    def _on_linkup(self, msg):
+        """The ENET address appeared while Discover waited for it."""
+        self._no_enet_address = not core.link_local(self._refresh_interfaces())
 
     def _probe_wait(self, title):
         """The Probe wait box as seconds, or None after telling the user why not."""

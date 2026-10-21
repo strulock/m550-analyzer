@@ -1191,6 +1191,22 @@ def link_local(addrs):
     return [a for a in addrs if a.startswith("169.254.")]
 
 
+LINK_WAIT = 10.0                # s to wait for the ENET adapter's address
+
+
+def wait_for_link_local(timeout=None, step=0.5, addrs=None, sleep=time.sleep):
+    """This PC's 169.254.x.x addresses, waiting up to `timeout` s for one to
+    appear: right after the PC wakes or the app restarts for an update, the
+    adapter is still getting its address and Discover would find nothing."""
+    addrs = addrs or local_ipv4s
+    end = time.time() + (LINK_WAIT if timeout is None else timeout)
+    while True:
+        found = link_local(addrs())
+        if found or time.time() >= end:
+            return found
+        sleep(step)
+
+
 def discover(timeout=3.0, bind_ip=None, details=None):
     """
     UDP broadcast on 6811 (HSFZ) and 13400 (DoIP, to recognise such a car).
@@ -1574,16 +1590,41 @@ def decode_record(raw, fields):
     return out
 
 
+# Values each DME keeps for its own four cylinders: the slave's cylinders
+# 1-4 are the engine's 5-8 (docs/modules.md, bank 2). Uneven running and the
+# misfire counters aren't among them: the master reports all eight.
+OWN_CYLINDERS = re.compile(r"^(?:DIAG_BRENNDAUER_ZUENDFUNKE_CYL|IUKZ|SPG_KLOPF_ZYL|"
+                           r"AKT_EINSPRITZMODUS_ZYL|FUNKENBRENNDAUER_FEHL_ZYL_)([1-4])$")
+_CYLINDER_WORD = re.compile(r"\b(cylinder|Zylinder)( ?)([1-4])\b")
+
+
+def engine_cylinder(name):
+    """The engine's cylinder for a channel the DMEs keep per own cylinder:
+    IUKZ1 -> 1, IUKZ1@0x13 -> 5. None for any other channel."""
+    bank2 = name.endswith(BANK2_SUFFIX)
+    m = OWN_CYLINDERS.match(name[:-len(BANK2_SUFFIX)] if bank2 else name)
+    return None if not m else int(m.group(1)) + (4 if bank2 else 0)
+
+
 def add_bank2(cat):
     """Add each DME channel again as NAME@0x13: the same identifier read from
-    the slave DME, i.e. bank 2. Returns the catalog."""
+    the slave DME, i.e. bank 2. Returns the catalog. A value the DMEs keep
+    per own cylinder says which of the engine's it is (cylinder 5 for the
+    slave's 1)."""
     for name, meta in list(cat.items()):
         if (meta.get("MODULE") or "").strip() or name.endswith(BANK2_SUFFIX):
             continue
         twin = dict(meta, ARG=name + BANK2_SUFFIX, TARGET="0x%02X" % DME_SLAVE)
+        cylinder = engine_cylinder(name + BANK2_SUFFIX)
         for key in ("INFO", "INFO_EN"):
             if twin.get(key):
-                twin[key] = "Bank 2: " + twin[key]
+                text = twin[key]
+                if cylinder:
+                    text, n = _CYLINDER_WORD.subn(
+                        lambda m: "%s%s%d" % (m.group(1), m.group(2), cylinder), text)
+                    if not n:
+                        text += " (cylinder %d)" % cylinder
+                twin[key] = "Bank 2: " + text
         cat[name + BANK2_SUFFIX] = twin
     return cat
 
@@ -1684,7 +1725,12 @@ BUILTIN_TEMPLATES = {
     "Misfire hunt": ["INMOT", "ZAEHLER_AUSSETZ_ABGASREL_SUM_ALLEZYL"]
     + ["ILUZ%d" % (i + 1) for i in range(CYLINDERS)]
     + ["ZAEHLER_AUSSETZERK_ZYL%d" % (i + 1) for i in range(CYLINDERS)]
-    + ["CALC_ILUZ%d_FROM_MEAN" % (i + 1) for i in range(CYLINDERS)],
+    + ["CALC_ILUZ%d_FROM_MEAN" % (i + 1) for i in range(CYLINDERS)]
+    # Spark burn time and knock level, cylinders 1-4 from the master and 5-8
+    # from the slave (its own 1-4).
+    + ["DIAG_BRENNDAUER_ZUENDFUNKE_CYL%d%s" % (i % 4 + 1, "" if i < 4 else BANK2_SUFFIX)
+       for i in range(CYLINDERS)]
+    + ["IUKZ%d%s" % (i % 4 + 1, "" if i < 4 else BANK2_SUFFIX) for i in range(CYLINDERS)],
     "Boost and wastegates, both banks": [
         "INMOT", "IPLAD", "S_LADEDRUCK", "CALC_BOOST_MINUS_TARGET"]
     + [n + s for n in ("LADEDRUCK_REGELDIFFERENZ_BANKSPEZ", "I_EWG_POS", "TV_EWG")

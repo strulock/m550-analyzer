@@ -254,12 +254,12 @@ the file and line it starts from, as of 0.3.8.
       once (the car resetting the connection silences everyone); now only
       modules that never answered.
 - [x] `SPEED_DIFFERENCE_PERCENT` 65535 is shown as no value.
-- [ ] Discover right after the PC wakes or the app updates can find no
-      169.254 address yet (the adapter is still coming up): retry for a
-      few seconds before saying no ENET link.
-- [ ] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
-      as its `CYL1`-`CYL4`. Offer them as cylinder 5-8 channels so the
-      *Misfire hunt* set can include them.
+- [x] Discover right after the PC wakes or the app updates can find no
+      169.254 address yet (the adapter is still coming up): the app and the
+      CLI now wait up to 10 s for it before searching.
+- [x] Spark burn time and knock levels for cylinders 5-8 come from `0x13`
+      as its `CYL1`-`CYL4`: those twins now say which cylinder they are
+      ("Bank 2: ... cylinder 5"), and *Misfire hunt* includes all eight.
 - [ ] `ILAG2` at `0x12` was refused on 2026-10-18 (it read before). Find
       when it answers, or point bank 2 lambda at `ILAG1@0x13`.
 - [x] Log `ILUZ5`-`ILUZ8` at `0x12` and `@0x13` side by side to settle

@@ -226,3 +226,13 @@ def test_report_from_the_menu(app, quick_diagnostics, tmp_path, monkeypatch):
     diag.record("discover")
     app._save_diag_report()
     assert out.exists() and "Saved 1 entries" in shown[-1]
+
+
+def test_discover_waits_for_the_adapters_address():
+    from n63read import core
+    seen = iter([["192.168.1.5"], ["192.168.1.5"], ["169.254.35.7", "192.168.1.5"]])
+    naps = []
+    got = core.wait_for_link_local(timeout=5, step=0.5, addrs=lambda: next(seen),
+                                   sleep=naps.append)
+    assert got == ["169.254.35.7"] and naps == [0.5, 0.5]
+    assert core.wait_for_link_local(timeout=0, addrs=lambda: ["10.0.0.1"]) == []
