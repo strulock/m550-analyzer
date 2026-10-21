@@ -192,8 +192,13 @@ def test_fault_steps_one_round_trip_per_step(car, monkeypatch):
         steps = list(core.fault_steps(h))
     kinds = [k for k, _ in steps]
     assert kinds == ["found", "finding", "found", "finding",   # 0x10..0x13
-                     "reading", "reading", "done"]
-    assert [r["code"] for r in steps[-1][1] if r["code"]] == ["021200", "ABCDEF"]
+                     "reading", "reading", "detail", "detail", "done"]   # a step per fault
+    faults = [r for r in steps[-1][1] if r["code"]]
+    assert [r["code"] for r in faults] == ["021200", "ABCDEF"]
+    assert all(r["details"] for r in faults)          # what each one stored, read with it
+    with connect(car) as h:
+        quick = [k for k, _ in core.fault_steps(h, [0x12], details=False)]
+    assert quick == ["reading", "done"]
 
 
 def test_logging_continues_during_a_fault_sweep(tmp_path, car, monkeypatch, restore_gui_core):

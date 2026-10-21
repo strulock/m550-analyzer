@@ -282,7 +282,9 @@ Optionally, the app keeps a copy of the logs folder in your own Cloudflare
 account and Claude can read it from anywhere: a small Worker (in
 [`cloud/`](cloud/README.md)) stores the logs in R2 and the History in D1,
 behind Cloudflare Access, and serves read-only MCP tools (`drive_history`,
-`fault_history`, `trend`, `list_files`, `read_log`). Once deployed, enter
+`fault_history`, `trend`, `list_files`, `read_log`, `list_templates`). The
+app's channel templates sync too, both ways, so a template saved on one PC
+appears on the others. Once deployed, enter
 its URL and an Access service token under *Settings > Cloud*; the app then
 uploads new and changed logs after each drive and fault read, and whatever
 it couldn't send offline once the PC is online again (`n63read sync` does
@@ -479,9 +481,10 @@ n63read read --ip 169.254.x.x IUKZ5@0x13     bank 2: the same channel from the s
 n63read faults --ip 169.254.x.x -v           DME fault memory, decoded (codes that
                                              failed; --every-code for all)
 n63read faults --ip 169.254.x.x --all --out faults.csv
-                                             every module, saved to CSV
-n63read faults --ip 169.254.x.x --details    ...with odometer, time, fault class and
-                                             counts stored with each fault
+                                             every module, saved to CSV, each fault
+                                             with what was stored with it (odometer,
+                                             time, conditions, how often); quicker
+                                             without: --no-details
 n63read log --ip 169.254.x.x --template "Idle check"
                                              log a template saved in the app, or
                                              a ready-made set ("Misfire hunt")

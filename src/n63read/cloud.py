@@ -2,8 +2,9 @@
 n63read.cloud - copy the logs folder to the cloud Worker (cloud/ in the repo).
 
 sync() uploads every drive log and fault list that is new or changed since
-the last upload (PUT /api/files/<path>), then the drive and fault summaries
-from history.scan() (PUT /api/history). What was sent is remembered in
+the last upload (PUT /api/files/<path>), the channel templates both ways
+(/api/templates), then the drive and fault summaries from history.scan()
+(PUT /api/history). What was sent is remembered in
 %APPDATA%\\n63read\\cloud_state.json, so a sync sends only what changed and a
 file that failed goes again next time. AutoSync runs it in the background:
 after a log closes, after a fault list is saved, and every few minutes, so
@@ -148,10 +149,13 @@ def request(settings, method, path, data=None, ctype="application/octet-stream")
 class Result:
     def __init__(self):
         self.uploaded, self.unchanged, self.errors, self.history = [], 0, [], None
+        self.templates = (0, 0)                 # (sent, received)
 
     def text(self):
         parts = ["%d file%s uploaded" % (len(self.uploaded), "" if len(self.uploaded) == 1
                                          else "s")]
+        if any(self.templates):
+            parts.append("templates: %d sent, %d received" % self.templates)
         if self.history:
             parts.append("history: %d drives, %d faults" % self.history)
         if self.errors:
@@ -159,11 +163,43 @@ class Result:
         return ", ".join(parts)
 
 
+def sync_templates(settings, state, path=None):
+    """Two-way merge of the saved templates with the cloud's. Each side is
+    compared with what both looked like after the last sync (kept in the
+    state): a template changed only here is sent, one changed only in the
+    cloud is taken, deletions included; changed on both, this PC's wins.
+    Returns (sent, received)."""
+    path = path or core.templates_path()
+    local = core.load_templates(path)
+    base = state.get("templates_base") or {}
+    entries = {t["name"]: t for t in request(settings, "GET", "/api/templates")
+               .get("templates", []) if isinstance(t, dict) and t.get("name")}
+    remote = {n: (None if t.get("deleted") else t.get("channels")) for n, t in entries.items()}
+    merged, changes, received = dict(local), [], 0
+    for name in sorted(set(local) | set(base) | set(remote)):
+        mine, theirs, before = local.get(name), remote.get(name), base.get(name)
+        if mine != before:
+            changes.append({"name": name, "channels": mine})
+        elif name in entries and theirs != before:
+            received += 1
+            if theirs is None:
+                merged.pop(name, None)
+            else:
+                merged[name] = list(theirs)
+    if changes:
+        request(settings, "PUT", "/api/templates",
+                json.dumps({"changes": changes}).encode(), "application/json")
+    if merged != local:
+        core.save_settings(merged, path)
+    state["templates_base"] = merged
+    return len(changes), received
+
+
 def _key(rel):
     return urllib.parse.quote(rel.replace(os.sep, "/"), safe="/")
 
 
-def sync(settings, logs=None, state_file=None, progress=None):
+def sync(settings, logs=None, state_file=None, progress=None, templates_file=None):
     """Upload what's new or changed, then the summaries. Raises CloudError
     when the Worker can't be reached at all; a file that fails is listed
     in the result and tried again next time."""
@@ -204,6 +240,11 @@ def sync(settings, logs=None, state_file=None, progress=None):
         save_state(state, state_file)
         if progress:
             progress(i, len(todo))
+    try:
+        result.templates = sync_templates(settings, state, templates_file)
+    except CloudError as e:
+        result.errors.append("templates: %s" % e)
+    save_state(state, state_file)
     summary = history.scan(logs)
     payload = json.dumps({"drives": summary.drives, "faults": summary.faults},
                          sort_keys=True).encode()

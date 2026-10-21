@@ -165,8 +165,10 @@ def test_cli_faults_all_with_details(car, monkeypatch, capsys):
 def test_claude_can_ask_for_details(monkeypatch):
     ran = []
     monkeypatch.setattr(mcp, "run_cli", lambda argv: ran.append(argv) or "")
-    mcp.tool_read_faults({"ip": "127.0.0.1", "details": True})
-    assert "--details" in ran[0]
+    mcp.tool_read_faults({"ip": "127.0.0.1"})
+    assert "--no-details" not in ran[0]                 # details are read by default
+    mcp.tool_read_faults({"ip": "127.0.0.1", "details": False})
+    assert "--no-details" in ran[1]
 
 
 def test_the_fault_window_shows_details(app, car, monkeypatch):
