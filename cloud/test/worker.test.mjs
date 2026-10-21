@@ -228,6 +228,32 @@ test("series: stored per drive, one channel across drives, resampled", async () 
   assert.equal((await call("PUT", "/api/series/x.csv", { body: "{}" })).status, 400);
 });
 
+// --- analysing one stored log
+
+test("compare_banks and find_events over a stored log", async () => {
+  const lines = ["Time,Clock,ILAG1,ILAG1@0x13,ITOEL,ZAEHLER_AUSSETZERK_ZYL5,Event"];
+  for (let t = 0; t < 10; t++) {
+    lines.push([t, "x", 1.0, t === 6 ? 0.9 : 1.02, 90 + t * 3, t >= 4 ? 1 : 0,
+      t === 0 ? "odometer 111321 km" : ""].join(","));
+  }
+  await call("PUT", "/api/files/logs/drive.csv", { body: lines.join("\n") });
+  const banks = (await tool("compare_banks", { name: "logs/drive.csv" })).data;
+  assert.equal(banks.pairs.length, 1);
+  assert.equal(banks.pairs[0].channel, "ILAG1");
+  assert.equal(banks.pairs[0].largest_at_s, 6);
+  assert.ok(Math.abs(banks.pairs[0].largest_difference - 0.1) < 1e-9);
+
+  const ev = (await tool("find_events", { name: "logs/drive.csv", column: "ITOEL",
+    above: 105 })).data;
+  assert.deepEqual(ev.events.map((e) => [e.at_s, e.what]), [
+    [0, "odometer 111321 km"],
+    [4, "ZAEHLER_AUSSETZERK_ZYL5 went up 0 -> 1"],
+    [6, "ITOEL above 105 (108)"]]);
+  assert.equal((await tool("compare_banks", { name: "nope.csv" })).error, true);
+  assert.equal((await tool("find_events", { name: "logs/drive.csv", column: "X",
+    above: 1 })).error, true);
+});
+
 // --- MCP
 
 async function mcp(method, params, id = 1) {

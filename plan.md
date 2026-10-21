@@ -346,7 +346,7 @@ behind Cloudflare Access; uploads automatic whenever the PC is online.
 - [x] Deploy on the Trulock.com account: R2 bucket, D1 database, Worker,
       Access application and service token; `/mcp` in the TrulockMCP
       portal (2026-10-20).
-- [ ] More MCP tools in the cloud: compare_banks and find_events over a
+- [x] More MCP tools in the cloud: compare_banks and find_events over a
       stored log, like the local ones.
 - [x] Templates sync both ways through the cloud (merge against the last
       synced state; deletions travel; this PC wins a clash); Claude's
