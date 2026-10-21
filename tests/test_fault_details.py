@@ -32,7 +32,8 @@ def test_the_freeze_catalog_has_the_odometer_and_the_dsc_exception():
     assert fields[(None, 0x1700)]["name_de"] == "KM_STAND"
     assert core.field_bytes(fields[(None, 0x1769)]["datatype"]) == 6
     assert core.field_bytes(fields[(0x29, 0x1769)]["datatype"]) == 4
-    assert all(k[1] in core.FREEZE_LABELS for k in fields if k[0] in (None, 0x29))
+    assert all(k[1] in core.FREEZE_LABELS for k in fields if k[0] is None)
+    assert fields[(0x29, 0x1769)]["module"] == "0x29"            # kept beside the DSC's own
     # The DME's own fields, for both DMEs, with real English.
     assert fields[(0x12, 0x4300)] is fields[(0x13, 0x4300)]
     assert fields[(0x12, 0x4300)]["name_en"] == "Engine temperature"
@@ -66,12 +67,17 @@ def test_a_modules_own_value_stops_the_split_and_is_kept_raw():
     assert rec["rest"] == "000112341731" "01"
 
 
+def FIELDS_WITHOUT_BDC():
+    """The snapshot catalog as if the body module's own fields were unknown."""
+    return {k: v for k, v in core.load_freeze_fields().items() if k[0] != 0x40}
+
+
 def test_a_later_snapshot_after_a_modules_own_values_is_still_found():
     # The BDC's light switch fault at the car: its own values (0x4040,
     # 0x4042) sit in each record, and record 2 holds the latest odometer.
     body = bytes.fromhex("0104" "1700" "01ad7b" "1701" "0fb00ff5" "4040" "8b" "4042" "0a"
                          "0204" "1700" "01b2c8" "1701" "0fe22bb4" "4040" "8c" "4042" "0a")
-    one, two = core.parse_snapshots(HEAD4 + body, 0x40)
+    one, two = core.parse_snapshots(HEAD4 + body, 0x40, fields=FIELDS_WITHOUT_BDC())
     assert [f["value"] for f in one["fields"]] == [109947, 0x0FB00FF5]
     assert one["rest"] == "40408b40420a"
     assert two["record"] == 2 and two["fields"][0]["value"] == 111304
@@ -265,3 +271,18 @@ def test_cli_log_one_at_a_time(car, tmp_path):
               "--one-at-a-time", "--samples", "3", "--out", str(out), "ILAG1", "ILAG2"])
     rows = out.read_text(encoding="utf-8").splitlines()
     assert len(car.services) == 2 * (len(rows) - 1)     # two requests a row
+
+
+def test_a_modules_own_snapshot_values_are_decoded():
+    # The body module's light switch fault at the car: each record has its
+    # own on-board voltage (0x4040) and light switch position (0x4042).
+    body = bytes.fromhex("0104" "1700" "01ad7b" "1701" "0fb00ff5" "4040" "8b" "4042" "0a"
+                         "0204" "1700" "01b2c8" "1701" "0fe22bb4" "4040" "8c" "4042" "0a")
+    one, two = core.parse_snapshots(HEAD4 + body, 0x40)
+    got = {f["label"]: f["value"] for f in two["fields"]}
+    assert got["Odometer"] == 111304 and got["Voltage electrical system"] == 14
+    assert "Light switch position" in got and two["rest"] == "" and one["rest"] == ""
+    fields = core.load_freeze_fields()
+    assert sum(1 for m, _ in fields if m == 0x18) > 300          # the transmission's
+    assert fields[(0x40, 0x4042)]["name"] == "BDC_G11.TAB_UW_LICHTSCHALTER"
+    assert "BDC_G11.TAB_UW_LICHTSCHALTER" in core.load_enum_tables()

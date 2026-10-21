@@ -14,6 +14,7 @@ Reference data is loaded from CSVs extracted from BMW's SGBD (.prg) files:
   BMW_dtc_status_byte.csv                statusOfDTC byte -> text
   BMW_enum_tables.csv                    value -> text enumerations
   BMW_freeze_frame_fields.csv            FS_LESEN_DETAIL field catalog
+  BMW_freeze_enum_tables.csv             value tables of the modules' own fields
   G30_module_sgbd_map.csv                module address -> SGBD variant
   <MODULE>_measurements.csv              other modules' channels: NBTEVO (head
                                          unit, GPS), GSZFB1 (transmission),
@@ -93,6 +94,7 @@ DEFAULT_CSV = "N63TU2_DME_readable_measurements.csv"
 FAULT_CSV = "BMW_fault_code_texts.csv"
 STATUS_CSV = "BMW_dtc_status_byte.csv"
 ENUM_CSV = "BMW_enum_tables.csv"
+FREEZE_ENUM_CSV = "BMW_freeze_enum_tables.csv"   # modules' snapshot value tables
 FREEZE_CSV = "BMW_freeze_frame_fields.csv"
 MODULE_MAP_CSV = "G30_module_sgbd_map.csv"
 # Per-module catalogs from tools/module_catalog.py: <NAME>_measurements.csv
@@ -101,7 +103,7 @@ MODULE_CATALOGS = ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
                    "EPS_G11", "VDP_G11", "LMV_G11", "IHKA_G11", "EKP301",
                    "PMA_20")
 
-DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV,
+DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV, FREEZE_ENUM_CSV,
               MODULE_MAP_CSV)
 
 
@@ -881,7 +883,8 @@ def _freeze_value(uw, raw, row, lang, enums=None):
     if uw == 0x1702 or (row.get("unit") or "").upper() in ("HEX", "TEXT"):
         return raw.hex().upper(), ""
     dtype = (row.get("datatype") or "").strip().lower()
-    n = int.from_bytes(raw, "big", signed=dtype.startswith("signed"))
+    order = "little" if (row.get("byte_order") or "").strip().lower() == "low" else "big"
+    n = int.from_bytes(raw, order, signed=dtype.startswith("signed"))
     value = n * _number(row.get("mul"), 1.0) / (_number(row.get("div"), 1.0) or 1.0) + \
         _number(row.get("add"), 0.0)
     value = int(value) if value == int(value) else round(value, 6)
@@ -1329,7 +1332,8 @@ def load_enum_tables():
     """
     tables = {}
     # Module tables are prefixed with the module (NBTEVO.), so never collide.
-    for name in (ENUM_CSV,) + tuple(m + "_enum_tables.csv" for m in MODULE_CATALOGS):
+    for name in (ENUM_CSV, FREEZE_ENUM_CSV) + tuple(m + "_enum_tables.csv"
+                                                    for m in MODULE_CATALOGS):
         path = resource_path(name)
         if not os.path.exists(path):
             continue

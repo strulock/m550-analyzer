@@ -124,8 +124,9 @@ the file and line it starts from, as of 0.3.8.
       self-checking (a reply is used only if every echo lines up; any doubt
       turns batching off for that DME). `n63read speed` measures both ways
       and `n63read log --batch` uses it. Measuring at the car is in Phase 10.
-- [ ] Decode modules' own snapshot values: each module file's `FUMWELTTEXTE`
-      gives them, but the texts need English first (`tools/translate.py`).
+- [x] Decode modules' own snapshot values: each module file's `FUMWELTTEXTE`
+      gives them: 26 modules' own fields (`module_catalog.py --freeze`), names
+      in English (symbolic ones word by word), value tables kept per module.
 - [x] A clearer DoIP path: what a DoIP-only answer usually means, offered
       with a diagnostics report, in the app, `discover` and `diag`.
 

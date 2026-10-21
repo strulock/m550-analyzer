@@ -304,6 +304,17 @@ FREEZE = "BMW_freeze_frame_fields.csv"
 FREEZE_HEADER = ["uw_id", "module", "name_de", "name_en", "unit", "byte_order", "datatype",
                  "name", "mul", "div", "add"]
 DME_ADDRESSES = "0x12 0x13"     # master and slave carry the same environment table
+FREEZE_ENUMS = "BMW_freeze_enum_tables.csv"
+
+# The address of each module whose own snapshot fields (FUMWELTTEXTE) are
+# decoded: MODULES' and FAULTS_ONLY's files. One file per address: where two
+# files serve one address (telematics, gear selector) the first is used.
+FREEZE_ADDRESSES = {
+    "fzd_g11": "0x56", "kafasg11": "0x5D", "fas_g11": "0x6D", "bfs_g11": "0x6E",
+    "komb_g11": "0x60", "frr_g11": "0x21", "sas_g11": "0x22", "hsr_g11": "0x2B",
+    "uss_g11": "0x2C", "pcu_g11": "0x2E", "hc2_g11": "0x08", "hkfm_g11": "0x0D",
+    "lem_g11": "0x4F", "gws_g11": "0x5E", "atm02": "0x61", "zgw_01": "0x10",
+}
 
 
 def dme(prg):
@@ -313,6 +324,79 @@ def dme(prg):
     fields = dme_freeze(tabs)
     print("%s: %d value tables, %d rows\n%s: %d DME snapshot fields"
           % (DME_ENUMS, tables_n, enum_rows, FREEZE, fields))
+
+
+def freeze_key(path):
+    """The module file key of a .prg path, for --freeze."""
+    base = os.path.basename(path).lower()
+    known = {**{k: v[1] for k, v in MODULES.items()}, **FREEZE_ADDRESSES}
+    for key in sorted(known, key=len, reverse=True):
+        if re.search(r"(^|[^a-z0-9])%s\.prg$" % re.escape(key), base):
+            return key, known[key]
+    sys.exit("don't know which module %s is (see FREEZE_ADDRESSES)" % path)
+
+
+def module_freeze(paths):
+    """Add each module file's own snapshot fields (FUMWELTTEXTE) to
+    BMW_freeze_frame_fields.csv at its address, replacing what that address
+    had, and their value tables to BMW_freeze_enum_tables.csv, named
+    <file key>.<table> so modules never clash."""
+    path = os.path.join(DATA, FREEZE)
+    with open(path, encoding="utf-8-sig") as f:
+        kept = list(csv.DictReader(f))
+    epath = os.path.join(DATA, FREEZE_ENUMS)
+    enum_rows = []
+    if os.path.exists(epath):
+        with open(epath, encoding="utf-8-sig") as f:
+            enum_rows = [r for r in csv.reader(f)][1:]
+    standard = {r["uw_id"].upper() for r in kept if not (r.get("module") or "").strip()}
+    done = {}                       # address -> its fields so far this run
+    for prg in paths:
+        key, address = freeze_key(prg)
+        tabs = tables(deobfuscate(prg))
+        head, rows = tabs.get("FUMWELTTEXTE", ([], []))
+        if address not in done:     # replace what the address had, once; its
+            # versions of standard fields (the DSC's shorter time) stay
+            kept = [r for r in kept if (r.get("module") or "").strip() != address
+                    or r["uw_id"].upper() in standard]
+            done[address] = set()
+        prefix = key.upper() + "."
+        enum_rows = [r for r in enum_rows if not r[0].startswith(prefix)]
+        if not rows:
+            print("%-10s %s  no snapshot fields" % (key, address))
+            continue
+        c = {h: i for i, h in enumerate(head)}
+        own, used = [], set()
+        for r in rows:
+            uw = r[c["UWNR"]]
+            if uw.upper() in standard or "unbekannte" in r[c["UWTEXT"]].lower() \
+                    or uw.upper() in done[address]:
+                continue                    # standard, a placeholder, or an earlier file's
+            done[address].add(uw.upper())
+            name = r[c["NAME"]] if "NAME" in c else "-"
+            if name not in ("", "-") and name.upper() in tabs:
+                used.add(name.upper())
+                name = prefix + name.upper()
+            else:
+                name = "-"
+            own.append({"uw_id": uw, "module": address, "name_de": r[c["UWTEXT"]],
+                        "name_en": translate(r[c["UWTEXT"]]), "unit": r[c["UW_EINH"]],
+                        "byte_order": r[c["L/H"]] if "L/H" in c else "-",
+                        "datatype": r[c["UWTYP"]], "name": name,
+                        "mul": r[c["MUL"]], "div": r[c["DIV"]], "add": r[c["ADD"]]})
+        tables_n = 0
+        for ename in sorted(used):
+            ehead, erows = tabs[ename]
+            if "WERT" not in ehead or "TEXT" not in ehead:
+                continue
+            w, t = ehead.index("WERT"), ehead.index("TEXT")
+            tables_n += 1
+            enum_rows += [[prefix + ename, e[w], e[t], translate(e[t])] for e in erows]
+        kept += own
+        print("%-10s %s  %4d snapshot fields, %3d value tables" % (key, address, len(own),
+                                                                   tables_n))
+    write_csv(path, FREEZE_HEADER, kept)
+    write_csv(epath, ["table_name", "value", "text_de", "text_en"], enum_rows, dicts=False)
 
 
 def dme_freeze(tabs):
@@ -407,6 +491,10 @@ def main(argv=None):
     # --faults-only FILE...: only add these modules' fault texts.
     if argv[:1] == ["--faults-only"] and len(argv) > 1:
         faults_only(argv[1:])
+        return
+    # --freeze FILE...: add these modules' own snapshot fields.
+    if argv[:1] == ["--freeze"] and len(argv) > 1:
+        module_freeze(argv[1:])
         return
     # --dme dme8ff_r.prg: rewrite the DME's value tables and snapshot fields.
     if argv[:1] == ["--dme"] and len(argv) == 2:

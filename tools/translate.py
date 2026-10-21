@@ -53,6 +53,7 @@ COLUMNS = {
     "BMW_dtc_status_byte.csv": ("text_de", "text_en"),
     "BMW_enum_tables.csv": ("text_de", "text_en"),
     "BMW_freeze_frame_fields.csv": ("name_de", "name_en"),
+    "BMW_freeze_enum_tables.csv": ("text_de", "text_en"),
 }
 # Module catalogs from tools/module_catalog.py.
 for _name in ("NBTEVO", "GSZFB1", "ACSM5", "DSC_G30N", "BDC_G11",
@@ -202,7 +203,25 @@ def translate(text):
     is one, otherwise the glossary."""
     if not text or text.strip() in ("", "-"):
         return text
-    return CURATED_EN.get(text.strip()) or glossary_translate(text)
+    curated = CURATED_EN.get(text.strip())
+    if curated:
+        return curated
+    if IDENTIFIER.fullmatch(text.strip()):
+        # A symbolic name (SPANNUNG_BORDNETZ, STAT_MOTOR_LAEUFT_WERT): its
+        # words, a word at a time; short ones with no English (NVM, RSU, HW)
+        # are acronyms and stay as they are.
+        words = re.sub(r"^STAT_", "", text.strip())
+        words = re.sub(r"_(WERT|TEXT)$", "", words).split("_")
+        out = []
+        for w in words:
+            en = glossary_translate(w.lower())
+            out.append(en if en != w.lower() else w if len(w) <= 4 else w.lower())
+        english = " ".join(out)
+        return english[:1].upper() + english[1:]
+    return glossary_translate(text)
+
+
+IDENTIFIER = re.compile(r"[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+")
 
 
 def glossary_translate(text):
@@ -272,7 +291,9 @@ def regenerate(name):
     return old, _render(rows)
 
 
-CURATED_FILES = [n for n in COLUMNS if n.endswith(("_measurements.csv", "_enum_tables.csv"))]
+# Modules' snapshot value tables are left to the glossary, like fault texts.
+CURATED_FILES = [n for n in COLUMNS if n.endswith(("_measurements.csv", "_enum_tables.csv"))
+                 and n != "BMW_freeze_enum_tables.csv"]
 
 
 def uncurated():
