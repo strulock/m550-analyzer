@@ -320,8 +320,10 @@ the file and line it starts from, as of 0.3.8.
       reads, present / stored / gone now). Incremental via `index.json`.
 - [x] The History window (Drives, Trends, Faults), `drives.csv` and
       `faults.csv`, `n63read history`, and Claude's `drive_history` tool.
-- [ ] Odometer per drive: log a mileage channel by default
-      (`LMV_DATEN_VERTEILERGETRIEBE.MILE_KM`), or take it from fault reads.
+- [x] Odometer per drive: each log reads the mileage once as it starts
+      (the transfer case's bus copy, else the suspension module's EEPROM
+      copy) and notes "odometer N km" in its first row's Event; History
+      takes it for the drive.
 
 ## Phase 14 — Cloud storage and remote access (Cloudflare)
 

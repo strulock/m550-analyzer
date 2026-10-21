@@ -103,6 +103,7 @@ class Session(threading.Thread):
         self.last_flush = 0.0
         self.log_t0 = None              # when logging started: the log's Time is from here
         self.events = []                # text for the next row's Event cell
+        self.want_odometer = False      # read the mileage once a log starts
 
     # -- what the session reads -------------------------------------------
 
@@ -130,6 +131,7 @@ class Session(threading.Thread):
             self.log_path, self.log_part = path, 1
             self.log_t0 = time.time()
             self.events = []
+            self.want_odometer = True       # noted in the first row, for History
             self._open_log(path)
 
     def mark(self, text):
@@ -227,9 +229,23 @@ class Session(threading.Thread):
                 self.steppers.remove(gen)
                 self.out_q.put(("joberror", "background read failed: %s" % e))
 
+    def _note_odometer(self, h):
+        """The car's mileage in the log's first row (Event), once a log starts."""
+        self.want_odometer = False
+        try:
+            km = core.read_odometer(h, self.reader.layouts)
+        except core.ConnectionLost:
+            raise
+        except Exception:                                           # noqa: BLE001
+            km = None
+        if km:
+            self.mark(core.ODOMETER_EVENT % km)
+
     def _cycle_until_stopped(self, h, t0):
         while not self._stop_event.is_set():
             cycle = time.time()
+            if self.want_odometer and self._logging():
+                self._note_odometer(h)
             self._run_jobs(h)
             if not self.borrowed:
                 h.tidy()                # close bank 2's link when it's idle

@@ -1193,6 +1193,32 @@ def link_local(addrs):
 
 LINK_WAIT = 10.0                # s to wait for the ENET adapter's address
 
+# Where the car keeps its mileage, tried in order: the transfer case's copy
+# from the bus (a field of a record), then the suspension module's EEPROM
+# copy (3 bytes, km). Both matched the dash at the car (2026-10-18).
+ODOMETERS = [(0x19, 0xDFE7, "LMV_DATEN_VERTEILERGETRIEBE.MILE_KM"), (0x76, 0x2540, None)]
+ODOMETER_EVENT = "odometer %d km"
+ODOMETER_RE = re.compile(r"\bodometer (\d+) km\b")
+
+
+def read_odometer(h, layouts):
+    """The car's mileage in km, or None if no module gives a believable one."""
+    for module, did, arg in ODOMETERS:
+        try:
+            raw = h.read_did(module, did, timeout=MODULE_TIMEOUT)
+        except ConnectionLost:
+            raise
+        except HsfzError:
+            continue
+        if arg:
+            fields = layouts.get((module, did))
+            value = decode_record(raw, fields).get(arg, (None,))[0] if fields else None
+        else:
+            value = int.from_bytes(raw[:3], "big") if len(raw) >= 3 else None
+        if isinstance(value, (int, float)) and 0 < value < 2000000:
+            return int(value)
+    return None
+
 
 def wait_for_link_local(timeout=None, step=0.5, addrs=None, sleep=time.sleep):
     """This PC's 169.254.x.x addresses, waiting up to `timeout` s for one to

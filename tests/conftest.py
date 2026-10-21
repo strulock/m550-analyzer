@@ -24,6 +24,9 @@ def quick_diagnostics(tmp_path, monkeypatch):
     monkeypatch.setattr(update, "latest_release", offline)
     updates = str(tmp_path / "updates")
     monkeypatch.setattr(update, "updates_dir", lambda: updates)
+    # A log reads the car's mileage when it starts; tests that count requests
+    # don't expect it, so it's off unless a test turns it on.
+    monkeypatch.setattr(core, "ODOMETERS", [])
     # This PC has no ENET adapter: Discover mustn't wait for one in tests.
     monkeypatch.setattr(core, "LINK_WAIT", 0.0)
     # Cloud sync state goes to the temp dir; nothing reaches a real Worker.

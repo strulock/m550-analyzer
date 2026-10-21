@@ -27,7 +27,7 @@ FOLDER = "History"
 DRIVES_CSV = "drives.csv"
 FAULTS_CSV = "faults.csv"
 INDEX_JSON = "index.json"
-INDEX_VERSION = 5           # bump when a summary changes: everything is re-read
+INDEX_VERSION = 6           # bump when a summary changes: everything is re-read
 MIN_ROWS = 5                # fewer rows than this isn't a drive worth a line
 MAX_STEP = 5.0              # s; a longer gap between rows isn't driven through
 CYLINDERS = range(1, 9)
@@ -232,6 +232,26 @@ def misfire_text(drive):
     return ", ".join("cyl %d x%d" % (n, c) for c, n in sorted(parts, reverse=True) if c)
 
 
+def _event_odometer(path):
+    """The odometer the app noted when the log started (Event column)."""
+    try:
+        with open(path, newline="", encoding="utf-8-sig") as f:
+            reader = csv.reader(f)
+            header = [h.strip() for h in next(reader, [])]
+            if core.LOG_EVENT not in header:
+                return None
+            col = header.index(core.LOG_EVENT)
+            for i, line in enumerate(reader):
+                if i > 50:
+                    break
+                m = core.ODOMETER_RE.search(line[col] if col < len(line) else "")
+                if m:
+                    return int(m.group(1))
+    except (OSError, csv.Error, UnicodeDecodeError):
+        pass
+    return None
+
+
 def _first_clock(path, seconds=0.0):
     """The Clock of a log's first row. A log without one (another tool's, or
     from before 0.3.6) was last written as it ended, so its start is the
@@ -415,6 +435,8 @@ def scan(logs=None, progress=None):
                     entry["drive"] = (summarize(names, rows, rel.replace(os.sep, "/"),
                                                 _first_clock(path, length))
                                       if len(rows) >= MIN_ROWS else None)
+                    if entry["drive"] and entry["drive"]["odometer_km"] is None:
+                        entry["drive"]["odometer_km"] = _event_odometer(path)
                 elif entry["kind"] == "faults":
                     entry["faults"] = read_faults(path)
             except (OSError, ValueError, csv.Error, UnicodeDecodeError) as e:

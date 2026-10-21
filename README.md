@@ -262,7 +262,8 @@ switches it off.
 folder, from the app, the CLI and Claude alike, and logs copied in from
 elsewhere:
 
-- **Drives:** one row a drive: date, length, distance, top speed, misfires
+- **Drives:** one row a drive: date, odometer (read from the car as each log
+  starts, and noted in its first row's `Event`), length, distance, top speed, misfires
   (and on which cylinders), knock retard and fuel trims per bank, peak
   temperatures, battery, tire pressures. Double-click one to replay it.
 - **Trends:** a statistic across drives, one line per cylinder or bank:
