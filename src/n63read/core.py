@@ -612,7 +612,9 @@ KNOWN_MODULES = {
 }
 
 FAULT_CSV_HEADER = ("read_at", "module", "module_name", "code", "status",
-                    "state", "text_en", "text_de", "catalog_source")
+                    "state", "text_en", "text_de", "catalog_source",
+                    # What the module stored with the fault (fault_details):
+                    "first_km", "last_km", "occurrences", "details")
 
 
 def load_module_names():
@@ -634,13 +636,33 @@ def load_module_names():
     return names
 
 
-def fault_steps(h, modules=None, texts=None, names=None, probe_timeout=None):
+def detail_columns(details):
+    """A fault's stored details as fault-CSV columns: the odometer at its
+    first and latest snapshot, how often it occurred, and everything as JSON."""
+    kms = [f["value"] for rec in details.get("snapshots", []) for f in rec["fields"]
+           if f["id"] == 0x1700 and isinstance(f["value"], (int, float))]
+    times = next((e["value"] for e in details.get("extended", [])
+                  if e.get("name") == "HFK"), "")
+    return {"first_km": min(kms) if kms else "", "last_km": max(kms) if kms else "",
+            "occurrences": times,
+            "details": json.dumps(details, ensure_ascii=False, separators=(",", ":"))}
+
+
+def _add_details(h, row, fields, lang):
+    if row["code"] and dtc_failed(int(row["status"], 16)):
+        row.update(detail_columns(fault_details(h, int(row["module"], 16), row["code"],
+                                                fields, lang)))
+
+
+def fault_steps(h, modules=None, texts=None, names=None, probe_timeout=None, details=True,
+                lang="text_en"):
     """Sweep for modules (unless given) and read their faults, one step at a time.
 
     A generator that does one network round trip per step and yields
-    ("finding", addr), ("found", addr) or ("reading", addr) after each, then
-    ("done", rows). The GUI advances it between samples so a running log
-    keeps recording during the read.
+    ("finding", addr), ("found", addr), ("reading", addr) or ("detail", addr)
+    after each, then ("done", rows). With `details`, each fault's snapshots
+    and counters are read too (detail_columns). The GUI advances it between
+    samples so a running log keeps recording during the read.
     """
     if modules is None:
         lo, hi = SWEEP_RANGE
@@ -656,10 +678,17 @@ def fault_steps(h, modules=None, texts=None, names=None, probe_timeout=None):
     texts = load_fault_texts() if texts is None else texts
     names = load_module_names() if names is None else names
     read_at = time.strftime("%Y-%m-%d %H:%M:%S")
+    fields = load_freeze_fields() if details else None
     rows = []
     for addr in modules:
-        rows.extend(_module_fault_rows(h, addr, texts, names, read_at))
+        found = _module_fault_rows(h, addr, texts, names, read_at)
+        rows.extend(found)
         yield ("reading", addr)
+        if details:
+            for row in found:
+                if row["code"]:
+                    _add_details(h, row, fields, lang)
+                    yield ("detail", addr)
     yield ("done", rows)
 
 
@@ -708,22 +737,29 @@ def sweep_modules(h, lo=None, hi=None, progress=None, probe_timeout=None):
     return found
 
 
-def read_all_faults(h, modules, texts=None, names=None, progress=None, everything=False):
+def read_all_faults(h, modules, texts=None, names=None, progress=None, everything=False,
+                    details=False, lang="text_en"):
     """Read fault memory (0x19) from each module. Returns rows for a fault CSV.
 
     Every module gets at least one row, so the file shows what was checked:
     one per fault, or a single row saying "no faults" or why it refused.
     Modules list every code they can raise, mostly ones that never failed;
-    those are left out (see dtc_failed) unless `everything`.
+    those are left out (see dtc_failed) unless `everything`. With `details`,
+    each fault's snapshots and counters are read too (detail_columns).
     """
     texts = load_fault_texts() if texts is None else texts
     names = load_module_names() if names is None else names
+    fields = load_freeze_fields() if details else None
     read_at = time.strftime("%Y-%m-%d %H:%M:%S")
     rows = []
     for addr in modules:
         if progress:
             progress(addr)
-        rows.extend(_module_fault_rows(h, addr, texts, names, read_at, everything))
+        found = _module_fault_rows(h, addr, texts, names, read_at, everything)
+        if details:
+            for row in found:
+                _add_details(h, row, fields, lang)
+        rows.extend(found)
     return rows
 
 
@@ -981,7 +1017,7 @@ def format_details(details):
 def write_fault_csv(path, rows):
     """Write read_all_faults() rows. utf-8-sig so Excel shows umlauts."""
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=FAULT_CSV_HEADER)
+        w = csv.DictWriter(f, fieldnames=FAULT_CSV_HEADER, restval="", extrasaction="ignore")
         w.writeheader()
         w.writerows(rows)
 

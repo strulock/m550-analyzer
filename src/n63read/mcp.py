@@ -107,8 +107,9 @@ TOOLS = [
      "description": "Read and decode fault memory: the DME's, another module's, or with "
                     "all_modules every module that answers (a minute or more). Lists "
                     "codes that have failed; every_code adds the many that never did. "
-                    "details adds what was stored with each fault: odometer, vehicle "
-                    "time, fault class, power state, and how often it occurred.",
+                    "Each fault comes with what the module stored: odometer, vehicle "
+                    "time, fault class, power state, and how often it occurred "
+                    "(details false skips that, for a quicker read).",
      "inputSchema": _ip({"target": _target(),
                          "all_modules": {"type": "boolean"},
                          "every_code": {"type": "boolean"},
@@ -282,8 +283,8 @@ def tool_read_faults(a):
         argv.append("--all")
     if a.get("every_code"):
         argv.append("--every-code")
-    if a.get("details"):
-        argv.append("--details")
+    if a.get("details") is False:
+        argv.append("--no-details")             # details are read unless asked not to
     if a.get("save"):
         argv += ["--out", os.path.join(core.logs_dir(),
                                        time.strftime("faults_%Y-%m-%d_%H-%M-%S.csv"))]

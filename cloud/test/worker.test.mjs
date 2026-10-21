@@ -141,7 +141,9 @@ const DRIVES = [
   { file: "b.csv", start: "2026-10-19 07:42:50", misfires_5: 2, knock_b1: -0.3, km: 5.3 },
 ];
 const FAULTS = [
-  { module: "0x40", code: "804415", now: "present", last_seen: "2026-10-19", text_en: "fob" },
+  { module: "0x40", code: "804415", now: "present", last_seen: "2026-10-19", text_en: "fob",
+    last_km: 111321, occurrences: 1,
+    details: { snapshots: [{ record: 1, fields: [{ id: 5888, value: 107031 }] }] } },
   { module: "0x29", code: "4806DA", now: "gone", last_seen: "2026-10-18", text_en: "tire" },
 ];
 
@@ -151,6 +153,26 @@ test("history replaces the summaries", async () => {
     { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
   assert.deepEqual(await r.json(), { ok: true, drives: 2, faults: 2 });
   assert.equal((await call("PUT", "/api/history", { body: "not json" })).status, 400);
+});
+
+// --- templates
+
+test("templates sync both ways, deletions included", async () => {
+  const put = (changes) => call("PUT", "/api/templates", { body: JSON.stringify({ changes }) });
+  let r = await (await put([{ name: "Misfire hunt", channels: ["INMOT", "ILUZ5"] },
+    { name: "Old", channels: ["ITOEL"] }])).json();
+  assert.deepEqual(r.templates.map((t) => [t.name, t.deleted]),
+    [["Misfire hunt", false], ["Old", false]]);
+  r = await (await put([{ name: "Old", channels: null }])).json();
+  const old = r.templates.find((t) => t.name === "Old");
+  assert.equal(old.deleted, true);
+  assert.equal(old.channels, null);
+  const got = await (await call("GET", "/api/templates")).json();
+  assert.deepEqual(got.templates.find((t) => t.name === "Misfire hunt").channels,
+    ["INMOT", "ILUZ5"]);
+  assert.equal((await put([{ name: "", channels: [] }])).status, 400);
+  assert.equal((await put([{ name: "x", channels: [1, 2] }])).status, 400);
+  assert.equal((await call("PUT", "/api/templates", { body: "nope" })).status, 400);
 });
 
 // --- MCP
@@ -183,7 +205,13 @@ test("MCP tools read the history and the logs", async () => {
   await call("PUT", "/api/history", { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
   const h = await tool("drive_history", { limit: 10 });
   assert.deepEqual(h.data.drives.map((d) => d.file), ["a.csv", "b.csv"]);   // newest last
-  assert.deepEqual((await tool("fault_history", {})).data.faults.map((f) => f.code), ["804415"]);
+  const brief = (await tool("fault_history", {})).data.faults;
+  assert.deepEqual(brief.map((f) => f.code), ["804415"]);
+  assert.equal(brief[0].has_details, true);
+  assert.equal(brief[0].details, undefined);                 // long: only on request
+  assert.equal(brief[0].last_km, 111321);
+  const one = (await tool("fault_history", { code: "804415" })).data.faults;
+  assert.equal(one[0].details.snapshots[0].fields[0].value, 107031);
   assert.equal((await tool("fault_history", { which: "all" })).data.faults.length, 2);
   assert.deepEqual((await tool("trend", { key: "misfires_5" })).data.points,
     [["2026-10-18 18:43:57", 5], ["2026-10-19 07:42:50", 2]]);
@@ -198,6 +226,11 @@ test("MCP tools read the history and the logs", async () => {
   assert.deepEqual(w.data.columns, ["Time", "INMOT"]);
   assert.deepEqual(w.data.rows.map((r) => r[0]), ["5", "7", "9", "11"]);
   assert.equal((await tool("read_log", { name: "missing.csv" })).error, true);
+
+  await call("PUT", "/api/templates", { body: JSON.stringify({ changes: [
+    { name: "Boost", channels: ["IPLAD"] }, { name: "Gone", channels: null }] }) });
+  assert.deepEqual((await tool("list_templates", {})).data.templates.map((t) => t.name),
+    ["Boost"]);
 });
 
 test("MCP batches and parse errors", async () => {

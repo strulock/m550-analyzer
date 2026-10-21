@@ -20,6 +20,7 @@ class FakeWorker:
 
     def __init__(self, client_id="id.access", secret="s3cret"):
         self.files, self.history, self.requests = {}, None, []
+        self.templates = {}                      # name -> {channels, deleted}
         self.client_id, self.secret = client_id, secret
         self.fail = None                         # a status to answer instead, once set
         worker = self
@@ -36,6 +37,22 @@ class FakeWorker:
                 self.end_headers()
                 self.wfile.write(data)
 
+            def _authorised(self):
+                return (self.headers.get("CF-Access-Client-Id") == worker.client_id
+                        and self.headers.get("CF-Access-Client-Secret") == worker.secret)
+
+            def _all_templates(self):
+                return {"templates": [dict(name=n, **t) for n, t in
+                                      sorted(worker.templates.items())]}
+
+            def do_GET(self):
+                worker.requests.append((self.command, self.path, {}))
+                if not self._authorised():
+                    return self._reply(403, {"error": "forbidden"})
+                if self.path == "/api/templates":
+                    return self._reply(200, self._all_templates())
+                return self._reply(404, {"error": "not found"})
+
             def do_PUT(self):
                 worker.requests.append((self.command, self.path,
                                         {k.lower(): v for k, v in self.headers.items()}))
@@ -50,6 +67,11 @@ class FakeWorker:
                     worker.files[key] = body
                     return self._reply(200, {"ok": True, "key": key, "size": len(body),
                                              "sha256": hashlib.sha256(body).hexdigest()})
+                if self.path == "/api/templates":
+                    for c in json.loads(body)["changes"]:
+                        worker.templates[c["name"]] = {"channels": c["channels"],
+                                                       "deleted": c["channels"] is None}
+                    return self._reply(200, self._all_templates())
                 if self.path == "/api/history":
                     worker.history = json.loads(body)
                     return self._reply(200, {"ok": True,
@@ -71,6 +93,11 @@ def worker():
     w = FakeWorker()
     yield w
     w.close()
+
+
+def puts(w):
+    """Uploads made: every sync also asks for the templates (a GET)."""
+    return sum(1 for r in w.requests if r[0] == "PUT")
 
 
 def settings_for(w, secret="s3cret"):
@@ -102,9 +129,9 @@ def test_sync_uploads_logs_and_history_then_only_what_changed(worker, tmp_path):
     assert headers["user-agent"].startswith("BMW-Analyzer/")
     assert not any("History" in k for k in worker.files)        # the summaries go as JSON
 
-    sent = len(worker.requests)
+    sent = puts(worker)
     r = cloud.sync(s, logs)                                      # nothing new
-    assert r.uploaded == [] and r.history is None and len(worker.requests) == sent
+    assert r.uploaded == [] and r.history is None and puts(worker) == sent
 
     drive(os.path.join(logs, "n63_3.csv"), misfire5_at=(10,))
     r = cloud.sync(s, logs)
@@ -123,6 +150,49 @@ def test_only_logs_fault_lists_and_checks_go_up(worker, tmp_path):
     assert sorted(cloud.sync(settings_for(worker), logs).uploaded) == ["check.csv", "n63_1.csv"]
 
 
+def test_templates_travel_between_pcs(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    os.makedirs(logs)
+    a = (str(tmp_path / "a_templates.json"), str(tmp_path / "a_state.json"))
+    b = (str(tmp_path / "b_templates.json"), str(tmp_path / "b_state.json"))
+    s = settings_for(worker)
+
+    def on(pc):
+        return cloud.sync(s, logs, state_file=pc[1], templates_file=pc[0])
+
+    core.save_template("Misfire hunt", ["INMOT", "ILUZ5"], a[0])
+    core.save_template("Tires", ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT"], a[0])
+    assert on(a).templates == (2, 0)
+    r = on(b)                                    # the other PC pulls them down
+    assert r.templates == (0, 2) and "2 received" in r.text()
+    assert core.load_templates(b[0]) == core.load_templates(a[0])
+
+    core.delete_template("Tires", b[0])           # deleted there...
+    core.save_template("Boost", ["IPLAD"], b[0])
+    assert on(b).templates == (2, 0)
+    assert on(a).templates == (0, 2)              # ...and gone here, Boost arrived
+    assert sorted(core.load_templates(a[0])) == ["Boost", "Misfire hunt"]
+    assert on(a).templates == (0, 0) and on(b).templates == (0, 0)   # settled
+
+
+def test_both_pcs_changed_a_template_this_pc_wins(worker, tmp_path):
+    logs = str(tmp_path / "logs")
+    os.makedirs(logs)
+    a = (str(tmp_path / "a.json"), str(tmp_path / "as.json"))
+    b = (str(tmp_path / "b.json"), str(tmp_path / "bs.json"))
+    s = settings_for(worker)
+    core.save_template("Set", ["INMOT"], a[0])
+    cloud.sync(s, logs, state_file=a[1], templates_file=a[0])
+    cloud.sync(s, logs, state_file=b[1], templates_file=b[0])
+    core.save_template("Set", ["INMOT", "ITOEL"], a[0])
+    core.save_template("Set", ["INMOT", "IPLAD"], b[0])
+    cloud.sync(s, logs, state_file=b[1], templates_file=b[0])
+    cloud.sync(s, logs, state_file=a[1], templates_file=a[0])   # a's edit wins on a...
+    assert core.load_templates(a[0])["Set"] == ["INMOT", "ITOEL"]
+    cloud.sync(s, logs, state_file=b[1], templates_file=b[0])   # ...and reaches b
+    assert core.load_templates(b[0])["Set"] == ["INMOT", "ITOEL"]
+
+
 def test_a_touched_but_unchanged_file_isnt_sent_again(worker, tmp_path):
     logs = str(tmp_path / "logs")
     path = os.path.join(logs, "n63_1.csv")
@@ -131,8 +201,8 @@ def test_a_touched_but_unchanged_file_isnt_sent_again(worker, tmp_path):
     cloud.sync(s, logs)
     st = os.stat(path)
     os.utime(path, (st.st_atime, st.st_mtime + 100))
-    sent = len(worker.requests)
-    assert cloud.sync(s, logs).uploaded == [] and len(worker.requests) == sent
+    sent = puts(worker)
+    assert cloud.sync(s, logs).uploaded == [] and puts(worker) == sent
 
 
 def test_a_refused_token_says_so_and_nothing_is_marked_sent(worker, tmp_path):

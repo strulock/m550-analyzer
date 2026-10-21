@@ -343,3 +343,12 @@ behind Cloudflare Access; uploads automatic whenever the PC is online.
       portal. Review before creating anything.
 - [ ] More MCP tools in the cloud: compare_banks and find_events over a
       stored log, like the local ones.
+- [x] Templates sync both ways through the cloud (merge against the last
+      synced state; deletions travel; this PC wins a clash); Claude's
+      `list_templates`.
+- [x] Every fault scan reads each fault's stored details (snapshots and
+      counters) and saves them in the fault CSV (`first_km`, `last_km`,
+      `occurrences`, `details` JSON); History and the cloud keep the newest,
+      and the cloud's `fault_history` returns them for one code.
+- [ ] Per-sample time series in the cloud (each row's channels queryable
+      across drives), beside the raw logs and per-drive summaries.

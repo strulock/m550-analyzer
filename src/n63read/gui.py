@@ -7,6 +7,7 @@ Run:  n63read-gui   (or: python -m n63read.gui)
 """
 
 import csv
+import json
 import os
 import queue
 import subprocess
@@ -1969,6 +1970,9 @@ class App(tk.Tk):
             return
         module, code = int(r["module"], 16), r["code"]
         lang = self._enum_lang()
+        if r.get("details"):                     # read with the faults already
+            self.q.put(("faultdetail", win, r["module"], code, json.loads(r["details"])))
+            return
         self._set_detail(win, "Reading what %s stored with %s..." % (r["module"], code))
 
         def job(h):

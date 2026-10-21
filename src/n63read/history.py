@@ -27,7 +27,7 @@ FOLDER = "History"
 DRIVES_CSV = "drives.csv"
 FAULTS_CSV = "faults.csv"
 INDEX_JSON = "index.json"
-INDEX_VERSION = 3           # bump when a summary changes: everything is re-read
+INDEX_VERSION = 4           # bump when a summary changes: everything is re-read
 MIN_ROWS = 5                # fewer rows than this isn't a drive worth a line
 MAX_STEP = 5.0              # s; a longer gap between rows isn't driven through
 CYLINDERS = range(1, 9)
@@ -120,7 +120,8 @@ TRENDS = [
 ]
 
 FAULT_FIELDS = ["module", "module_name", "code", "text_en", "now", "first_seen",
-                "last_seen", "reads_seen", "reads_present", "last_state", "last_status"]
+                "last_seen", "reads_seen", "reads_present", "last_state", "last_status",
+                "first_km", "last_km", "occurrences"]
 
 
 def folder(logs=None):
@@ -304,8 +305,17 @@ def read_faults(path):
             if not row.get("module") or not row.get("read_at"):
                 continue
             out.append({k: row.get(k, "") for k in ("read_at", "module", "module_name", "code",
-                                                     "status", "state", "text_en")})
+                                                     "status", "state", "text_en", "first_km",
+                                                     "last_km", "occurrences", "details")})
     return out
+
+
+def _num(text):
+    try:
+        v = float(text)
+    except (TypeError, ValueError):
+        return text
+    return int(v) if v.is_integer() else v
 
 
 def fault_history(rows):
@@ -326,6 +336,15 @@ def fault_history(rows):
                                   "first_seen": r["read_at"], "reads_seen": 0,
                                   "reads_present": 0})
         f.update(last_seen=r["read_at"], last_state=r["state"], last_status=r["status"])
+        # What the module stored, from the newest read that has it.
+        if r.get("details"):
+            try:
+                f["details"] = json.loads(r["details"])
+            except ValueError:
+                pass
+            for k in ("first_km", "last_km", "occurrences"):
+                if r.get(k) not in (None, ""):
+                    f[k] = _num(r[k])
         f["module_name"] = r["module_name"] or f["module_name"]
         f["text_en"] = r["text_en"] or f["text_en"]
         f["reads_seen"] += 1

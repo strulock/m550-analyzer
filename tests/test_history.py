@@ -215,3 +215,23 @@ def test_the_history_window_lists_drives_trends_and_faults(app):
     finally:
         win.destroy()
         app.history_window = None
+
+
+def test_a_faults_stored_details_follow_it_into_the_history(tmp_path):
+    details = {"snapshots": [
+        {"record": 1, "fields": [{"id": 0x1700, "label": "Odometer", "value": 107031,
+                                  "unit": "km", "text": "", "name": ""}], "rest": ""},
+        {"record": 2, "fields": [{"id": 0x1700, "label": "Odometer", "value": 111321,
+                                  "unit": "km", "text": "", "name": ""}], "rest": ""}],
+        "extended": [{"record": 2, "name": "HFK", "label": "times it occurred", "value": 3}],
+        "errors": []}
+    cols = core.detail_columns(details)
+    assert (cols["first_km"], cols["last_km"], cols["occurrences"]) == (107031, 111321, 3)
+    path = str(tmp_path / "f.csv")
+    row = {"read_at": "2026-10-19 20:08:31", "module": "0x29", "module_name": "DSC",
+           "code": "4806DA", "status": "0x68", "state": "not present, stored",
+           "text_en": "No reception, front right", "text_de": "", "catalog_source": ""}
+    core.write_fault_csv(path, [dict(row, **cols)])
+    f, = history.fault_history(history.read_faults(path))
+    assert f["last_km"] == 111321 and f["occurrences"] == 3
+    assert f["details"]["snapshots"][1]["fields"][0]["value"] == 111321

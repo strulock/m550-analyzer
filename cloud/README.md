@@ -6,7 +6,9 @@ serves it to Claude from anywhere:
 - **R2** holds every drive log and fault list the app uploads.
 - **D1** holds the drive and fault summaries (the app's History).
 - **`/mcp`** is a remote MCP server with read-only tools over that copy:
-  `drive_history`, `fault_history`, `trend`, `list_files`, `read_log`.
+  `drive_history`, `fault_history` (with each fault's stored details on
+  request), `trend`, `list_files`, `read_log`, `list_templates`.
+- **Templates:** the app's saved channel sets, merged both ways on every sync.
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
@@ -92,5 +94,7 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/files` | list stored files: key, size, SHA-256, upload time |
 | `GET /api/files/<path>` | the file back |
 | `PUT /api/history` | replace the summaries: `{"drives": [...], "faults": [...]}` |
+| `GET /api/templates` | the templates, deleted ones marked |
+| `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
 | `POST /mcp` | MCP (JSON-RPC 2.0, streamable HTTP with JSON replies) |
 | `GET /api/status` | who you're signed in as |

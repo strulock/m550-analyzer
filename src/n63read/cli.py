@@ -31,6 +31,7 @@ Usage
 
 import argparse
 import csv
+import json
 import os
 import queue
 import sys
@@ -116,7 +117,7 @@ def op_faults(args):
         if args.details:
             fields = core.load_freeze_fields()
             details = {code: core.fault_details(h, args.target, code, fields, lang)
-                       for code, _ in dtcs}
+                       for code, status in dtcs if core.dtc_failed(status)}
     if not dtcs:
         print("No fault codes reported by module 0x%02X%s." % (
             args.target, " (%d listed codes never failed; --every-code shows them)"
@@ -164,14 +165,9 @@ def _faults_report(args):
             modules = [args.target]
         rows = core.read_all_faults(
             h, modules, progress=lambda a: print("Reading 0x%02X..." % a, end="\r", flush=True),
-            everything=args.every_code)
-        details = {}
-        if args.details:
-            fields = core.load_freeze_fields()
-            for r in rows:
-                if r["code"]:
-                    details[(r["module"], r["code"])] = core.fault_details(
-                        h, int(r["module"], 16), r["code"], fields, lang)
+            everything=args.every_code, details=args.details, lang=lang)
+        details = {(r["module"], r["code"]): json.loads(r["details"])
+                   for r in rows if r.get("details")}
 
     current = None
     for r in rows:
@@ -674,9 +670,10 @@ def build_parser():
                     help="also list the individual statusOfDTC bits")
     sp.add_argument("--all", action="store_true",
                     help="find every module that answers and read them all")
-    sp.add_argument("--details", action="store_true",
-                    help="also read what was stored with each fault: odometer, "
-                         "time, fault class, power state, how often it occurred")
+    sp.add_argument("--no-details", dest="details", action="store_false",
+                    help="skip what was stored with each fault (odometer, time, fault "
+                         "class, power state, how often it occurred); read by default")
+    sp.add_argument("--details", action="store_true", help=argparse.SUPPRESS)  # the default
     sp.add_argument("--every-code", action="store_true",
                     help="also list codes that never failed (modules list every "
                          "code they can raise)")

@@ -208,7 +208,43 @@ export const SCHEMA = [
      now TEXT, last_seen TEXT, data TEXT NOT NULL, PRIMARY KEY (module, code))`,
   `CREATE TABLE IF NOT EXISTS uploads (key TEXT PRIMARY KEY, size INTEGER, sha256 TEXT,
      uploaded TEXT)`,
+  `CREATE TABLE IF NOT EXISTS templates (name TEXT PRIMARY KEY, channels TEXT,
+     updated TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0)`,
 ];
+
+const MAX_TEMPLATE_NAME = 100;
+const MAX_TEMPLATE_CHANNELS = 2000;
+
+async function templates(env) {
+  await ensureSchema(env);
+  const r = await env.DB.prepare(
+    "SELECT name, channels, updated, deleted FROM templates ORDER BY name").all();
+  return (r.results || []).map((t) => ({ name: t.name, updated: t.updated,
+    deleted: !!t.deleted, channels: t.deleted ? null : JSON.parse(t.channels) }));
+}
+
+/** Apply [{name, channels}] (channels null: deleted) and return them all.
+ * A deletion is kept as a marker, so other PCs learn of it. */
+async function putTemplates(env, changes) {
+  if (!Array.isArray(changes)) throw new ToolError("changes: a list");
+  const now = new Date().toISOString();
+  const stmts = [];
+  for (const c of changes) {
+    const name = c && typeof c.name === "string" ? c.name.trim() : "";
+    if (!name || name.length > MAX_TEMPLATE_NAME) throw new ToolError("bad template name");
+    const ch = c.channels;
+    if (ch !== null && !(Array.isArray(ch) && ch.length <= MAX_TEMPLATE_CHANNELS &&
+        ch.every((x) => typeof x === "string" && x.length <= 200))) {
+      throw new ToolError(`bad channels for ${name}`);
+    }
+    stmts.push(env.DB.prepare(
+      "INSERT OR REPLACE INTO templates (name, channels, updated, deleted) VALUES (?, ?, ?, ?)")
+      .bind(name, ch === null ? null : JSON.stringify(ch), now, ch === null ? 1 : 0));
+  }
+  await ensureSchema(env);
+  if (stmts.length) await env.DB.batch(stmts);
+  return templates(env);
+}
 
 const schemaReady = new WeakSet();       // per D1 binding, once per isolate
 
@@ -269,9 +305,12 @@ export const TOOLS = [
   {
     name: "fault_history",
     description: "Every fault read from the car's modules: first and last seen, how many reads " +
-      "listed it, and whether it is present, stored or gone now.",
+      "listed it, whether it is present, stored or gone now, the odometer when it set and how " +
+      "often it occurred. Pass code for the full stored details of one fault.",
     inputSchema: { type: "object", properties: {
-      which: { type: "string", description: "current (default) or all" } } },
+      which: { type: "string", description: "current (default) or all" },
+      code: { type: "string", description: "One fault code, e.g. 4806DA: returns it with " +
+        "everything the module stored (snapshots: odometer, time, conditions; counters)" } } },
   },
   {
     name: "trend",
@@ -286,6 +325,12 @@ export const TOOLS = [
     description: "The uploaded drive logs and fault lists, newest first.",
     inputSchema: { type: "object", properties: {
       prefix: { type: "string" }, limit: { type: "integer", description: "Default 50" } } },
+  },
+  {
+    name: "list_templates",
+    description: "The channel templates saved in the BMW Analyzer app (watch lists: a name and " +
+      "its channel names), as synced to the cloud.",
+    inputSchema: { type: "object", properties: {} },
   },
   {
     name: "read_log",
@@ -307,7 +352,15 @@ async function callTool(env, name, a) {
     const limit = Math.max(1, Math.min(500, Number(a.limit) || 30));
     return { drives: await drives(env, limit) };
   }
-  if (name === "fault_history") return { faults: await faults(env, a.which) };
+  if (name === "fault_history") {
+    const all = await faults(env, a.code ? "all" : a.which);
+    if (a.code) {
+      const code = String(a.code).toUpperCase();
+      return { faults: all.filter((f) => f.code.toUpperCase() === code) };
+    }
+    // The stored details are long; ask for one code to see them.
+    return { faults: all.map(({ details, ...f }) => ({ ...f, has_details: !!details })) };
+  }
   if (name === "trend") {
     if (!/^[a-z0-9_]+$/.test(String(a.key || ""))) throw new ToolError("key: a statistic name");
     const limit = Math.max(1, Math.min(1000, Number(a.limit) || 100));
@@ -321,6 +374,10 @@ async function callTool(env, name, a) {
       .slice(0, Math.max(1, Math.min(1000, Number(a.limit) || 50)))
       .map((o) => ({ name: o.key, size: o.size, uploaded: o.uploaded }));
     return { files };
+  }
+  if (name === "list_templates") {
+    return { templates: (await templates(env)).filter((t) => !t.deleted)
+      .map((t) => ({ name: t.name, channels: t.channels, updated: t.updated })) };
   }
   if (name === "read_log") {
     const key = safeKey(String(a.name || ""));
@@ -338,7 +395,7 @@ async function callTool(env, name, a) {
 const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault reads, " +
   "uploaded by the BMW Analyzer (n63read) app. Start with drive_history or fault_history; " +
   "trend follows one statistic (misfires_5, knock_b1...) over time; list_files and read_log " +
-  "look inside a drive. Read-only.";
+  "look inside a drive; list_templates shows the app's saved channel sets. Read-only.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
 export async function rpc(env, msg) {
@@ -398,6 +455,25 @@ export async function handle(request, env, fetcher = fetch) {
     }
     const one = await rpc(env, body);
     return one ? json(one) : new Response(null, { status: 202 });
+  }
+
+  if (url.pathname === "/api/templates") {
+    if (request.method === "GET") return json({ templates: await templates(env) });
+    if (request.method === "PUT") {
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: "body: JSON {changes: [{name, channels}]}" }, 400);
+      }
+      try {
+        return json({ templates: await putTemplates(env, body.changes) });
+      } catch (e) {
+        if (e instanceof ToolError) return json({ error: e.message }, 400);
+        throw e;
+      }
+    }
+    return new Response(null, { status: 405 });
   }
 
   if (url.pathname === "/api/history" && request.method === "PUT") {
