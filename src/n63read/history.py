@@ -27,7 +27,7 @@ FOLDER = "History"
 DRIVES_CSV = "drives.csv"
 FAULTS_CSV = "faults.csv"
 INDEX_JSON = "index.json"
-INDEX_VERSION = 1           # bump when a summary changes: everything is re-read
+INDEX_VERSION = 2           # bump when a summary changes: everything is re-read
 MIN_ROWS = 5                # fewer rows than this isn't a drive worth a line
 MAX_STEP = 5.0              # s; a longer gap between rows isn't driven through
 CYLINDERS = range(1, 9)
@@ -258,8 +258,23 @@ def _sniff(path):
         return ","
 
 
+# Status bits that mean a fault really happened (ISO 14229): failed now, this
+# cycle, pending, confirmed, or since the last clear. A listed code without
+# them never failed: `faults --every-code` lists those too.
+FAILED_BITS = 0x2F
+
+
+def failed(status):
+    """True if a fault-list status ("0x28") shows the fault happened; True
+    when there's no status to go by."""
+    try:
+        return bool(int(status, 16) & FAILED_BITS)
+    except (TypeError, ValueError):
+        return True
+
+
 def kind(path):
-    """'drive', 'faults' or None, from a CSV's header."""
+    """'drive', 'faults', 'check' or None, from a CSV's header."""
     try:
         delimiter = _sniff(path)
         with open(path, newline="", encoding="utf-8-sig") as f:
@@ -271,6 +286,8 @@ def kind(path):
         return None
     if "read_at" in header and "code" in header and "module" in header:
         return "faults"
+    if header[:3] == ["module", "did", "job"]:
+        return "check"
     if playback._is_time(header[0]):
         return "drive"
     return None
@@ -301,8 +318,8 @@ def fault_history(rows):
                   key=lambda r: r["read_at"])
     for r in rows:
         latest[r["module"]] = max(latest.get(r["module"], ""), r["read_at"])
-        if not r["code"]:
-            continue
+        if not r["code"] or not failed(r["status"]):
+            continue                    # the module was read; this code never failed
         key = (r["module"], r["code"])
         f = seen.setdefault(key, {"module": r["module"], "module_name": r["module_name"],
                                   "code": r["code"], "text_en": r["text_en"],
