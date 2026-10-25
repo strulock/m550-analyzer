@@ -644,10 +644,63 @@ static bool uploadOne(const String& name) {
   return ok;
 }
 
+// The networks the board knows (logger_secrets.h): WIFI_SSID first, and
+// WIFI_SSID2 as a backup (a phone hotspot uses mobile data, so home wins
+// whenever it's in range).
+static bool wifiKnown = false;
+static const uint32_t WIFI_RETRY_MS = 30000;       // off both: try again
+static const uint32_t WIFI_HOME_CHECK_MS = 120000; // on the backup: look for home
+
+static bool join(const char* ssid, const char* pass, uint32_t ms) {
+  WiFi.begin(ssid, pass);
+  uint32_t t0 = millis();
+  while (!WiFi.isConnected() && millis() - t0 < ms) delay(100);
+  return WiFi.isConnected();
+}
+
+static bool joinPreferred() {
+#ifdef WIFI_SSID
+  if (join(WIFI_SSID, WIFI_PASS, 8000)) return true;
+#ifdef WIFI_SSID2
+  WiFi.disconnect();
+  if (join(WIFI_SSID2, WIFI_PASS2, 8000)) return true;
+#endif
+#endif
+  return false;
+}
+
+// Keep a network up, home first (from this task, between uploads, so the
+// logging on the other core never waits for a scan or a join).
+static void keepWifi() {
+  static uint32_t lastTry = 0, lastHomeCheck = 0;
+  static bool mdns = false;
+  if (!wifiKnown) return;
+  if (!WiFi.isConnected()) {
+    if (lastTry && millis() - lastTry < WIFI_RETRY_MS) return;
+    lastTry = millis();
+    if (joinPreferred() && !mdns) mdns = MDNS.begin(HOSTNAME);
+    return;
+  }
+#if defined(WIFI_SSID) && defined(WIFI_SSID2)
+  if (WiFi.SSID() != WIFI_SSID2 || millis() - lastHomeCheck < WIFI_HOME_CHECK_MS) return;
+  lastHomeCheck = millis();
+  int n = WiFi.scanNetworks();             // the connection stays up meanwhile
+  bool home = false;
+  for (int i = 0; i < n; i++) home = home || WiFi.SSID(i) == WIFI_SSID;
+  WiFi.scanDelete();
+  if (home) {
+    out.printf("[wifi] %s in range again; moving off the backup\n", WIFI_SSID);
+    WiFi.disconnect();
+    joinPreferred();
+  }
+#endif
+}
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(500));
+    keepWifi();
     if (!uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     uploadNow = false;
     last = millis();
@@ -683,27 +736,25 @@ static void onEvent(arduino_event_id_t e) {
 static void startWifi() {
   setenv("TZ", TZ_INFO, 1);
   tzset();
+#if defined(WIFI_SSID) || defined(AP_PASS)
+  terminal.begin();                          // answers on whichever network comes up
+  terminal.setNoDelay(true);
+#endif
 #ifdef WIFI_SSID
   WiFi.setHostname(HOSTNAME);
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
-  WiFi.setAutoReconnect(true);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
-  uint32_t t0 = millis();
-  while (!WiFi.isConnected() && millis() - t0 < 8000) delay(100);
-  if (WiFi.isConnected()) {
+  WiFi.setAutoReconnect(false);              // keepWifi decides which network
+  wifiKnown = true;
+  if (joinPreferred()) {
     MDNS.begin(HOSTNAME);
-    terminal.begin();
-    terminal.setNoDelay(true);
     return;
   }
-  out.printf("[wifi] %s not in range; logging only, uploads when it is\n", WIFI_SSID);
+  out.println("[wifi] no known network in range; logging only, uploads when one is");
 #endif
 #ifdef AP_PASS
-  WiFi.mode(WIFI_AP_STA);                    // keep trying the network for uploads
+  WiFi.mode(WIFI_AP_STA);                    // keep trying the networks for uploads
   WiFi.softAP(HOSTNAME, AP_PASS);
-  terminal.begin();
-  terminal.setNoDelay(true);
   out.printf("[wifi] access point %s, terminal on %s:%u\n", HOSTNAME,
              WiFi.softAPIP().toString().c_str(), TERMINAL_PORT);
 #endif
@@ -742,9 +793,10 @@ static void status() {
     std::lock_guard<std::recursive_mutex> g(sdLock);
     last = lastUpload;
   }
-  out.printf("[status] clock %s, wifi %s, uploads to %s: %u done, last %s\n",
+  out.printf("[status] clock %s, wifi %s %s, uploads to %s: %u done, last %s\n",
              timeKnown() ? clockNow().c_str() : "unknown",
-             WiFi.isConnected() ? WiFi.localIP().toString().c_str() : "off",
+             WiFi.isConnected() ? WiFi.SSID().c_str() : "off",
+             WiFi.isConnected() ? WiFi.localIP().toString().c_str() : "",
              strlen(WORKER_HOST) ? WORKER_HOST : "(none set)", (unsigned)uploadedFiles,
              last.c_str());
   out.printf("[status] SD %s, %.1f of %.1f MB used; PSRAM %u KB free; heap %u KB free\n",

@@ -4,6 +4,12 @@
 // without it and uploads the next time it's in range.
 #define WIFI_SSID "your-network"
 #define WIFI_PASS "your-password"
+// Optional: a backup network (a phone hotspot, say) for when the first isn't
+// working. The board joins WIFI_SSID when it can, the backup otherwise (and
+// moves back when the first is in range again), and tries again every 30 s
+// while it has neither.
+// #define WIFI_SSID2 "backup-network"
+// #define WIFI_PASS2 "backup-password"
 // Optional: an access point "m550-logger" when WIFI_SSID isn't in range at
 // boot, for the terminal (TCP 23 at 192.168.4.1). Uploads need WIFI_SSID.
 #define AP_PASS "change-me-8-plus"
