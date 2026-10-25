@@ -58,6 +58,18 @@ test("a log without a Clock ends at the upload and is marked approximate", () =>
   assert.equal(drive.start, "1970-01-01 00:16:30");
 });
 
+test("a clock that fills in later dates the drive from its first row", () => {
+  // The logger booted away from Wi-Fi: no Clock until it joined, 90 s in.
+  const { series, drive } = processLog("Time,Clock,INMOT,Event\n" +
+    "0.5,,700,start\n30.5,,710,\n60.5,,720,\n" +
+    "90.5,2026-10-25 12:55:20.500-05:00,730,\n120.5,2026-10-25 12:55:50.500-05:00,740,\n",
+    "logger/nt-00035-01.csv", 0);
+  assert.equal(series.approx, false);
+  assert.equal(series.start, Date.UTC(2026, 9, 25, 17, 53, 50) / 1000);   // 90.5 s before
+  assert.equal(chunksOf(series)[0].t0, Date.UTC(2026, 9, 25, 17, 53, 50, 500) / 1000);
+  assert.equal(drive.start, "2026-10-25 12:53:50");     // local, the first row's
+});
+
 test("too few rows: series kept, no drive", () => {
   const { series, drive } = processLog("Time,INMOT\n0,700\n1,710\n", "logger/x.csv", 0);
   assert.equal(chunksOf(series).length, 1);

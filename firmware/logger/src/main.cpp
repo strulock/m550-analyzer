@@ -84,7 +84,7 @@ static const char* DRIVES = "/drives";
 
 static const uint32_t REQUEST_MS = 1500;     // a reply takes 3-60 ms; more is a dead read
 static const uint32_t CAR_GONE_MS = 10000;   // nothing answered this long: the drive is over
-static const uint32_t SEARCH_MS = 3000;      // between discovery tries
+static const uint32_t SEARCH_MS = 1000;      // between tries (the car is usually there at once)
 static const uint32_t FLUSH_MS = 2000;       // a power cut loses at most this much
 static const uint32_t SWEEP_MS = 25;         // sweep time per cycle, after the fast reads
 static const uint32_t MIN_CYCLE_MS = 50;     // at most 20 fast rows a second
@@ -214,10 +214,12 @@ static void loadChannelsInto() {
   if (f) {
     std::string line;
     bool ok = true;
-    while (ok && f.available()) {
-      int c = f.read();
-      if (c == '\n' || c < 0) { ok = table.line(line.c_str()); line.clear(); }
-      else line += (char)c;
+    static uint8_t buf[4096];                // a byte at a time takes seconds for 9,000 rows
+    for (int n; ok && (n = f.read(buf, sizeof(buf))) > 0;) {
+      for (int i = 0; i < n && ok; i++) {
+        if (buf[i] == '\n') { ok = table.line(line.c_str()); line.clear(); }
+        else line += (char)buf[i];
+      }
     }
     if (ok && !line.empty()) ok = table.line(line.c_str());
     f.close();
@@ -418,31 +420,72 @@ static size_t sweepAt = 0;
 static std::vector<double> values;
 static LogFile fastLayout, sweepLayout;
 
-// A file left without a .done (the power went mid-drive): hash what's there
-// and queue it like any other.
-static void recoverDrives() {
+// Notes for the next fast row's Event column: the board's own story (boot,
+// rates, plan changes, the end) kept in the log, since its terminal output
+// is lost with the power. No commas: the column is CSV.
+static std::string note;
+static const uint32_t STATS_MS = 60000;
+static uint32_t lastStatsNoteMs = 0;
+
+static void addNote(const std::string& text) {
+  if (!note.empty()) note += "; ";
+  note += text;
+}
+
+static const char* resetReason() {
+  switch (esp_reset_reason()) {
+    case ESP_RST_POWERON: return "power on";
+    case ESP_RST_BROWNOUT: return "brownout";
+    case ESP_RST_SW: return "software reset";
+    case ESP_RST_PANIC: return "crash";
+    case ESP_RST_INT_WDT: case ESP_RST_TASK_WDT: case ESP_RST_WDT: return "watchdog";
+    case ESP_RST_EXT: return "reset pin";
+    case ESP_RST_USB: return "usb reset";
+    case ESP_RST_DEEPSLEEP: return "wake";
+    default: return "other reset";
+  }
+}
+
+// Files left without a .done (the power went mid-drive), listed at boot
+// before a new drive starts, and hashed and queued by the upload task, so
+// logging doesn't wait for it.
+static std::vector<String> leftovers;
+
+static void listLeftovers() {
   std::lock_guard<std::recursive_mutex> g(sdLock);
   if (!SD.exists(DRIVES)) SD.mkdir(DRIVES);
   File dir = SD.open(DRIVES);
-  std::vector<String> open;
   for (File f = dir.openNextFile(); f; f = dir.openNextFile()) {
     String name = f.name();
     f.close();
     if (name.endsWith(".csv") && !SD.exists(String(DRIVES) + "/" + name + ".done")) {
-      open.push_back(name);
+      leftovers.push_back(name);
     }
   }
   dir.close();
+}
+
+// The lock is held only to open and to write the .done: reading under it
+// would keep the new drive from opening its files for the second or two a
+// megabyte takes (FatFS itself is reentrant).
+static void recoverDrives() {
   static uint8_t buf[4096];
+  std::vector<String> open;
+  open.swap(leftovers);
   for (const String& name : open) {
     String path = String(DRIVES) + "/" + name;
-    File f = SD.open(path);
+    File f;
+    {
+      std::lock_guard<std::recursive_mutex> g(sdLock);
+      f = SD.open(path);
+    }
     Sha256 sha;
     uint32_t size = 0;
     for (int n; (n = f.read(buf, sizeof(buf))) > 0;) { sha.update(buf, n); size += n; }
     f.close();
     char hex[65];
     sha.finishHex(hex);
+    std::lock_guard<std::recursive_mutex> g(sdLock);
     File d = SD.open(path + ".done", FILE_WRITE);
     if (d) { d.printf("%s %u\n", hex, (unsigned)size); d.close(); }
     out.printf("[sd] %s was left open (power cut); closed at %u bytes\n", name.c_str(),
@@ -451,8 +494,9 @@ static void recoverDrives() {
 }
 
 static void startDrive() {
-  // A drive started at home usually has Wi-Fi: give the clock a moment.
-  for (int i = 0; i < 50 && WiFi.isConnected() && !timeKnown(); i++) delay(100);
+  // With Wi-Fi up already, give the clock a moment; otherwise it fills in
+  // the Clock column once Wi-Fi joins.
+  for (int i = 0; i < 20 && WiFi.isConnected() && !timeKnown(); i++) delay(100);
   static uint32_t seq = 0;
   char base[40];
   if (timeKnown()) {
@@ -470,8 +514,14 @@ static void startDrive() {
   if (ok && !sweepLayout.columns.empty()) {
     ok = sweepFile.begin(dir + driveName + ".sweep.csv", sweepLayout.header(table));
   }
-  driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = millis();
+  driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = lastStatsNoteMs = millis();
   fastRows = sweepRows = cycles = 0;
+  note.clear();
+  char start[160];
+  snprintf(start, sizeof(start), "start VIN %s; boot %u after %s; up %.1f s; %u channels from %s",
+           vin, (unsigned)bootCount, resetReason(), millis() / 1000.0f,
+           (unsigned)table.channels.size(), channelsFromCard ? "the card" : "the built-in table");
+  addNote(start);
   sweepAt = plan.sweepStart();
   sweepPassStart = millis();
   out.printf("[drive] %s started%s%s\n", driveName.c_str(), timeKnown() ? "" : " (clock unknown)",
@@ -479,6 +529,12 @@ static void startDrive() {
 }
 
 static void endDrive(const char* why) {
+  if (fastFile.open && !fastLayout.columns.empty()) {
+    addNote(std::string("end: ") + why);
+    fastFile.add(fastLayout.row(table, (millis() - driveStartMs) / 1000.0, clockNow(), values,
+                                note.c_str()));
+    note.clear();
+  }
   fastFile.finish();
   sweepFile.finish();
   disconnectCar();
@@ -519,10 +575,21 @@ static void ask(const std::vector<size_t>& batch) {
   }
   if (r.result == hsfz::OK) lastOkMs = now;       // it answered, just not in line
   if (batch.size() > 1) {
-    // The module can't take this batch: one identifier at a time from now on.
+    // The module can't take this batch: one identifier at a time from now on,
+    // starting with these (a module that answered at all, that is: after a
+    // timeout eight more would cost seconds).
     plan.noBatches(first.module);
-    out.printf("[plan] module 0x%02X: one identifier per request (%s)\n", first.module,
-               r.result == hsfz::OK ? "reply out of line" : hsfz::resultName(r.result));
+    const char* why = r.result == hsfz::OK ? "reply out of line" : hsfz::resultName(r.result);
+    out.printf("[plan] module 0x%02X: one identifier per request (%s)\n", first.module, why);
+    char text[80];
+    snprintf(text, sizeof(text), "module 0x%02X one identifier per request (%s)", first.module, why);
+    addNote(text);
+    if (r.result == hsfz::OK || r.result == hsfz::NEGATIVE) {
+      for (size_t i : batch) {
+        if (connectionLost) break;
+        ask(std::vector<size_t>{i});
+      }
+    }
     return;
   }
   plan.failed(batch[0], now);
@@ -540,8 +607,29 @@ static void cycle() {
   tFast += afterFast - start;
   const double secs = (millis() - driveStartMs) / 1000.0;
   if (!fastLayout.columns.empty()) {
-    fastFile.add(fastLayout.row(table, secs, clockNow(), values,
-                                fastRows == 0 ? (std::string("start VIN ") + vin).c_str() : ""));
+    if (millis() - lastStatsNoteMs >= STATS_MS) {
+      lastStatsNoteMs = millis();
+      size_t rested = 0;
+      for (const Read& rd : plan.reads) rested += rd.restUntil != 0;
+      std::string single;
+      for (const Read& rd : plan.reads) {
+        char m[8];
+        snprintf(m, sizeof(m), "0x%02X", rd.module);
+        if (plan.batchFor(rd.module) == 1 && single.find(m) == std::string::npos) {
+          single += single.empty() ? "" : " ";
+          single += m;
+        }
+      }
+      char text[200];
+      snprintf(text, sizeof(text),
+               "stats %.1f rows/s; fast %.0f ms; sweep %.0f ms; files %.0f ms; sweep pass %.0f s; "
+               "%u resting; one per request: %s",
+               cycleRate, msFast, msSweep, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
+               single.empty() ? "none" : single.c_str());
+      addNote(text);
+    }
+    fastFile.add(fastLayout.row(table, secs, clockNow(), values, note.c_str()));
+    note.clear();
     fastRows++;
   }
   // The sweep, a few requests a cycle; a finished pass is one row.
@@ -695,12 +783,22 @@ static bool joinPreferred() {
 // logging on the other core never waits for a scan or a join).
 static void keepWifi() {
   static uint32_t lastTry = 0, lastHomeCheck = 0;
-  static bool mdns = false;
+  static bool mdns = false, tried = false;
   if (!wifiKnown) return;
   if (!WiFi.isConnected()) {
-    if (lastTry && millis() - lastTry < WIFI_RETRY_MS) return;
+    if (tried && millis() - lastTry < WIFI_RETRY_MS) return;
     lastTry = millis();
-    if (joinPreferred() && !mdns) mdns = MDNS.begin(HOSTNAME);
+    bool joined = joinPreferred();
+    if (joined && !mdns) mdns = MDNS.begin(HOSTNAME);
+#ifdef AP_PASS
+    if (!joined && !tried) {
+      WiFi.mode(WIFI_AP_STA);                // the terminal, while the networks are away
+      WiFi.softAP(HOSTNAME, AP_PASS);
+      out.printf("[wifi] no known network in range; access point %s, terminal on %s:%u\n",
+                 HOSTNAME, WiFi.softAPIP().toString().c_str(), TERMINAL_PORT);
+    }
+#endif
+    tried = true;
     return;
   }
 #if defined(WIFI_SSID) && defined(WIFI_SSID2)
@@ -720,6 +818,7 @@ static void keepWifi() {
 
 static void uploadTask(void*) {
   uint32_t last = 0;
+  if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(500));
     keepWifi();
@@ -738,7 +837,8 @@ static void onEvent(arduino_event_id_t e) {
   switch (e) {
     case ARDUINO_EVENT_ETH_CONNECTED:
       linkUp = true;
-      out.printf("[eth] link up %d Mbit/s\n", ETH.linkSpeed());
+      out.printf("[eth] link up %d Mbit/s (%u ms after boot)\n", ETH.linkSpeed(),
+                 (unsigned)millis());
       break;
     case ARDUINO_EVENT_ETH_DISCONNECTED:
       linkUp = false;
@@ -755,6 +855,8 @@ static void onEvent(arduino_event_id_t e) {
   }
 }
 
+// Set Wi-Fi up; the upload task joins in the background (keepWifi), so a
+// boot logs within seconds instead of waiting for a network.
 static void startWifi() {
   setenv("TZ", TZ_INFO, 1);
   tzset();
@@ -768,17 +870,9 @@ static void startWifi() {
   WiFi.setSleep(false);
   WiFi.setAutoReconnect(false);              // keepWifi decides which network
   wifiKnown = true;
-  if (joinPreferred()) {
-    MDNS.begin(HOSTNAME);
-    return;
-  }
-  out.println("[wifi] no known network in range; logging only, uploads when one is");
-#endif
-#ifdef AP_PASS
-  WiFi.mode(WIFI_AP_STA);                    // keep trying the networks for uploads
+#elif defined(AP_PASS)
+  WiFi.mode(WIFI_AP);
   WiFi.softAP(HOSTNAME, AP_PASS);
-  out.printf("[wifi] access point %s, terminal on %s:%u\n", HOSTNAME,
-             WiFi.softAPIP().toString().c_str(), TERMINAL_PORT);
 #endif
 }
 
@@ -880,23 +974,27 @@ static void discardPending() {
   out.printf("[files] deleted %u\n", (unsigned)names.size());
 }
 
-// The first and last lines of a file, each cut to 240 characters.
+// A long line's start and end (the Event column, with the board's notes, is
+// last).
+static void showLine(const String& s) {
+  if (s.length() <= 240) out.printf("  %s\n", s.c_str());
+  else out.printf("  %s ... %s\n", s.substring(0, 140).c_str(), s.substring(s.length() - 220).c_str());
+}
+
+// The first and last lines of a file.
 static void showFile(const String& path) {
   std::lock_guard<std::recursive_mutex> g(sdLock);
   File f = SD.open(path);
   if (!f) { out.printf("[view] %s: none\n", path.c_str()); return; }
   out.printf("[view] %s, %u bytes\n", path.c_str(), (unsigned)f.size());
-  auto line = [&](size_t max) {
-    String s = f.readStringUntil('\n');
-    out.printf("  %s%s\n", s.substring(0, max).c_str(), s.length() > max ? " ..." : "");
-  };
-  for (int i = 0; i < 3 && f.available(); i++) line(240);
+  for (int i = 0; i < 3 && f.available(); i++) showLine(f.readStringUntil('\n'));
   if (f.size() > 2048) {
-    f.seek(f.size() - 1024);
+    f.seek(f.size() > 70000 ? f.size() - 70000 : 0);   // a sweep row is up to ~60 KB
     f.readStringUntil('\n');                 // to a line start
     String last, s;
     while (f.available()) { s = f.readStringUntil('\n'); if (s.length()) last = s; }
-    out.printf("  ...\n  %s%s\n", last.substring(0, 240).c_str(), last.length() > 240 ? " ..." : "");
+    out.println("  ...");
+    showLine(last);
   }
   f.close();
 }
@@ -982,27 +1080,18 @@ void setup() {
   Serial.begin(115200);
   // With the cable in a PC that isn't reading the port, each write would
   // wait 100 ms for room and the logging with it; drop the output instead.
+  // No waiting for a USB host either: in the car there isn't one, and every
+  // second of boot is a second not logged after an engine restart.
   Serial.setTxTimeoutMs(0);
-  uint32_t t0 = millis();
-  while (!Serial && millis() - t0 < 3000) delay(10);
   Preferences prefs;
   prefs.begin("logger");
   bootCount = prefs.getUInt("boots", 0) + 1;
   prefs.putUInt("boots", bootCount);
   prefs.end();
-  out.printf("\nm550 logger (read-only), boot %u, PSRAM %u KB\n", (unsigned)bootCount,
-             (unsigned)(ESP.getPsramSize() / 1024));
+  out.printf("\nm550 logger (read-only), boot %u after %s, PSRAM %u KB\n", (unsigned)bootCount,
+             resetReason(), (unsigned)(ESP.getPsramSize() / 1024));
 
-  sdSpi.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
-  sdOk = SD.begin(SD_CS, sdSpi, 20000000);
-  if (sdOk) {
-    out.printf("[sd] %.1f GB card, %.1f MB used\n", SD.cardSize() / 1e9, SD.usedBytes() / 1e6);
-    recoverDrives();
-  } else {
-    out.println("[sd] NO CARD (or not FAT): logging needs one");
-  }
-  loadChannels();
-
+  // Ethernet first: the link negotiates while the card and channels load.
   Network.onEvent(onEvent);
   if (ETH.begin(ETH_PHY_W5500, 1, ETH_CS, ETH_INT, ETH_RST, SPI2_HOST, ETH_SCLK, ETH_MISO,
                 ETH_MOSI)) {
@@ -1010,8 +1099,19 @@ void setup() {
   } else {
     out.println("[eth] W5500 did not start");
   }
+
+  sdSpi.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
+  sdOk = SD.begin(SD_CS, sdSpi, 20000000);
+  if (sdOk) {
+    out.printf("[sd] %.1f GB card, %.1f MB used\n", SD.cardSize() / 1e9, SD.usedBytes() / 1e6);
+    listLeftovers();
+  } else {
+    out.println("[sd] NO CARD (or not FAT): logging needs one");
+  }
+  loadChannels();
   startWifi();
   xTaskCreatePinnedToCore(uploadTask, "upload", 12288, nullptr, 1, nullptr, 0);
+  out.printf("[boot] ready in %u ms\n", (unsigned)millis());
   help();
 }
 
@@ -1024,9 +1124,11 @@ void loop() {
       break;
     case SEARCH: {
       static uint32_t lastTry = 0;
+      static bool tried = false;
       if (!linkUp) { state = WAIT_LINK; break; }
-      if (!sdOk || millis() - lastTry < SEARCH_MS) { delay(50); break; }
+      if (!sdOk || (tried && millis() - lastTry < SEARCH_MS)) { delay(50); break; }
       lastTry = millis();
+      tried = true;
       // The gateway keeps its link-local address from drive to drive: try the
       // last one first, then ask (discovery reaches it by the subnet broadcast).
       bool connected = rememberCar(false) && connectOne(tMain, mainClient, hsfz::TESTER, 1000);
@@ -1040,7 +1142,8 @@ void loop() {
         disconnectCar();
         break;
       }
-      out.printf("[car] %s%s%s\n", carIp.toString().c_str(), vin[0] ? " VIN " : "", vin);
+      out.printf("[car] %s%s%s (%u ms after boot)\n", carIp.toString().c_str(),
+                 vin[0] ? " VIN " : "", vin, (unsigned)millis());
       rememberCar(true);
       connectionLost = false;
       endRequested = false;
