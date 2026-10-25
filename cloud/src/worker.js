@@ -617,20 +617,13 @@ async function ingestLog(env, key, bytes) {
 }
 
 /** The newest `limit` drives, oldest first; a log two installations both
- * have counts once. */
+ * have counts once (SQLite takes the other columns from the MAX(start) row). */
 async function drives(env, limit) {
   await ensureSchema(env);
-  // A log is kept once per installation that has it: a few times `limit` rows cover it.
   const r = await env.DB.prepare(
-    "SELECT file, data FROM drives ORDER BY start DESC, source LIMIT ?").bind(limit * 4).all();
-  const seen = new Set(), out = [];
-  for (const x of r.results || []) {
-    if (seen.has(x.file)) continue;
-    seen.add(x.file);
-    out.push(JSON.parse(x.data));
-    if (out.length >= limit) break;
-  }
-  return out.reverse();
+    `SELECT data, MAX(start) AS latest FROM drives GROUP BY file
+     ORDER BY latest DESC, file LIMIT ?`).bind(limit).all();
+  return (r.results || []).map((x) => JSON.parse(x.data)).reverse();
 }
 
 /** Each fault once: as the installation that saw it most recently has it,
