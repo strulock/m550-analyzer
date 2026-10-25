@@ -194,6 +194,7 @@ class App(tk.Tk):
         self.avail = core.load_availability()   # (module, DID) -> what the car said
         self._avail_dirty = False
         self._checking = None                    # stop flag of a running check
+        self._check_rows, self._check_jobs = [], {}   # its answers, for the check CSV
         self._no_enet_address = False            # last Discover found no 169.254.x.x
         self.enums = core.load_enum_tables()
         self.watch = []                      # [(name, did, meta)]
@@ -1135,6 +1136,10 @@ class App(tk.Tk):
             return
         stop = self._checking = {"stop": False}
         total = len(layouts)
+        # Every answer, for the check CSV saved at the end (and synced).
+        self._check_rows = []
+        self._check_jobs = {key: fields[0].get("JOB") or fields[0]["ARG"]
+                            for key, fields in layouts.items()}
 
         reported = []
 
@@ -2136,6 +2141,7 @@ class App(tk.Tk):
 
     def _on_checkres(self, msg):
         _, key, status, i, total = msg
+        self._check_rows.append((key[0], key[1], self._check_jobs.get(key, ""), status))
         if status in core.ANSWERS or status == "refused" \
                 or key not in self.avail:
             self.avail[key] = status
@@ -2151,8 +2157,20 @@ class App(tk.Tk):
             counts[status] = counts.get(status, 0) + 1
         diag.record("check", stopped=msg[1], modules=by_module)
         answered = sum(1 for v in self.avail.values() if v in core.ANSWERS)
-        self._answers_changed("check %s: %d identifiers answer"
-                              % ("stopped" if msg[1] else "done", answered))
+        note = "check %s: %d identifiers answer" % ("stopped" if msg[1] else "done", answered)
+        # The results as a check CSV in the logs folder, which the cloud sync
+        # uploads: the logger's channel file is made from them (logger-channels).
+        rows, self._check_rows = self._check_rows, []
+        if rows:
+            path = os.path.join(core.logs_dir(),
+                                "check_%s.csv" % time.strftime("%Y-%m-%d_%H-%M-%S"))
+            try:
+                core.write_check_csv(rows, path)
+                note += ", saved to %s" % os.path.basename(path)
+                self.cloud.trigger()
+            except OSError as e:
+                note += " (results not saved: %s)" % e
+        self._answers_changed(note)
 
     def _on_feedsample(self, msg):
         _, feed, elapsed, sample = msg

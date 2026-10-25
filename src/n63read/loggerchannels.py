@@ -12,7 +12,8 @@ economy and misfire templates by default. "sweep" is everything else that
 answers, read in rotation and logged to the drive's second file.
 
 What answers comes from the app's record (Answers > Check car now, kept in
-availability.json) or a `n63read check --out` CSV. Only "ok" counts: an
+availability.json), `n63read check --out` CSVs, or every check the cloud
+holds (the app uploads them with the drive logs). Only "ok" counts: an
 identifier whose reply isn't the catalog's size would decode wrongly. The
 slave DME runs the master's software, so a bank 2 channel counts as
 answering where the master's does, unless the slave was checked itself.
@@ -33,6 +34,21 @@ TYPES = {"unsigned char": "u8", "signed char": "s8", "unsigned int": "u16",
 
 HEADER = ["name", "module", "did", "did_size", "offset", "type", "order", "mul", "div",
           "add", "no_value", "unit", "tier"]
+
+
+def merge_answers(answers):
+    """One {(module, DID): status} from several checks, oldest first. An
+    identifier that answered "ok" in any of them stays "ok": a module also
+    refuses or stays silent while it wakes up, or is skipped after three
+    silent identifiers in a row (seen: the head unit refused 70 identifiers
+    on 2026-10-18 and answered 57 of them two days later), and the board
+    rests a read that keeps failing anyway. Otherwise the newest result."""
+    out = {}
+    for one in answers:
+        for key, status in one.items():
+            if out.get(key) != "ok":
+                out[key] = status
+    return out
 
 
 def fast_names(templates=FAST_TEMPLATES):

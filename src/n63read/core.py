@@ -2348,19 +2348,39 @@ def save_availability(avail, path=None):
     os.replace(tmp, path)
 
 
-def import_check_csv(path):
-    """{(module, DID): status} from a `n63read check --out` CSV."""
+# A check's results, as `n63read check --out` and the app's Check car now
+# write them; history.kind() knows the file by its first three columns, and
+# the cloud sync uploads it like a drive log.
+CHECK_HEADER = ["module", "did", "job", "status", "detail", "reply_bytes", "raw"]
+
+
+def write_check_csv(rows, path):
+    """Save [(module, DID, job, status)] in the check CSV layout."""
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(CHECK_HEADER)
+        for module, did, job, status in rows:
+            w.writerow(["0x%02X" % module, "0x%04X" % did, job, status, "", "", ""])
+
+
+def check_answers(lines):
+    """{(module, DID): status} from a check CSV's lines (any iterable of text)."""
     out = {}
-    with open(path, newline="", encoding="utf-8-sig") as f:
-        for row in csv.DictReader(f):
-            try:
-                key = (int(row["module"], 16), int(row["did"], 16))
-            except (KeyError, ValueError):
-                continue
-            out[key] = row.get("status") or ""
+    for row in csv.DictReader(lines):
+        try:
+            key = (int(row["module"], 16), int(row["did"], 16))
+        except (KeyError, TypeError, ValueError):
+            continue
+        out[key] = row.get("status") or ""
     if not out:
         raise ValueError("no module/did/status rows - is this a `n63read check` CSV?")
     return out
+
+
+def import_check_csv(path):
+    """{(module, DID): status} from a `n63read check --out` CSV."""
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        return check_answers(f)
 
 
 def check_steps(h, layouts, keys=None):

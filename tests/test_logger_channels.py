@@ -95,3 +95,61 @@ def test_cli_writes_the_file(tmp_path, monkeypatch, capsys):
     assert rows[0].keys() == set(loggerchannels.HEADER)
     assert {r["tier"] for r in rows} == {"fast", "sweep"}
     assert "channels ->" in capsys.readouterr().out
+
+
+def test_merging_checks_keeps_what_answered():
+    old = {GPS: "ok", (0x40, 1): "ok", (0x40, 2): "no answer", (0x40, 3): "refused",
+           (0x40, 5): "refused"}
+    new = {GPS: "no answer", (0x40, 1): "refused", (0x40, 2): "ok", (0x40, 3): "no answer",
+           (0x76, 4): "no answer"}
+    assert loggerchannels.merge_answers([old, new]) == {
+        GPS: "ok", (0x40, 1): "ok",      # asleep or not ready this time: still answers
+        (0x40, 2): "ok",
+        (0x40, 3): "no answer",          # never answered: the newest says
+        (0x40, 5): "refused", (0x76, 4): "no answer"}
+
+
+def _check_csv(path, rows):
+    core.write_check_csv(rows, str(path))
+    return str(path)
+
+
+def test_cli_merges_several_checks(tmp_path, capsys):
+    a = _check_csv(tmp_path / "a.csv", [(0x63, 0xD039, "STATUS_GPS_POSITION", "ok")])
+    b = _check_csv(tmp_path / "b.csv", [(0x63, 0xD039, "STATUS_GPS_POSITION", "no answer"),
+                                       (0x63, 0xD030, "STATUS_SPEED", "ok")])
+    out = tmp_path / "channels.csv"
+    cli.main(["logger-channels", "--check", a, "--check", b, "--out", str(out)])
+    with open(out, newline="", encoding="utf-8") as f:
+        sweep = {r["did"] for r in csv.DictReader(f) if r["tier"] == "sweep"}
+    assert sweep == {"0xD039", "0xD030"}
+
+
+def test_cli_takes_the_checks_from_the_cloud(tmp_path, monkeypatch, capsys):
+    from n63read import cloud
+    monkeypatch.setattr(cloud, "check_files", lambda settings: [
+        ({GPS: "ok"}, "logs/check.csv"), ({(0x63, 0xD030): "ok"}, "check_2026-10-26.csv")])
+    out = tmp_path / "channels.csv"
+    cli.main(["logger-channels", "--from-cloud", "--out", str(out)])
+    with open(out, newline="", encoding="utf-8") as f:
+        sweep = {r["did"] for r in csv.DictReader(f) if r["tier"] == "sweep"}
+    assert sweep == {"0xD039", "0xD030"}
+    assert "cloud: check_2026-10-26.csv" in capsys.readouterr().out
+
+
+def test_cloud_check_files_reads_only_checks(monkeypatch):
+    from n63read import cloud
+    listing = {"files": [
+        {"key": "check_b.csv", "uploaded": "2026-10-26T10:00:00Z"},
+        {"key": "logs/check_a.csv", "uploaded": "2026-10-20T10:00:00Z"},
+        {"key": "n63_drive.csv", "uploaded": "2026-10-21T10:00:00Z"},
+        {"key": "check_notes.csv", "uploaded": "2026-10-22T10:00:00Z"}]}
+    bodies = {
+        "/api/files/logs/check_a.csv": b"module,did,job,status\n0x63,0xD039,X,ok\n",
+        "/api/files/check_b.csv": b"\xef\xbb\xbfmodule,did,job,status\n0x63,0xD030,Y,refused\n",
+        "/api/files/check_notes.csv": b"note\nnot a check\n"}
+    monkeypatch.setattr(cloud, "request", lambda s, m, p, *a, **k: listing)
+    monkeypatch.setattr(cloud, "fetch", lambda s, p: bodies[p])
+    got = cloud.check_files({})
+    assert [k for _, k in got] == ["logs/check_a.csv", "check_b.csv"]     # oldest first
+    assert got[1][0] == {(0x63, 0xD030): "refused"}

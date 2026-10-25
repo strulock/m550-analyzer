@@ -18,6 +18,7 @@ Nothing here is sent anywhere until a Worker URL and token are set.
 """
 
 import base64
+import csv
 import hashlib
 import json
 import os
@@ -120,6 +121,40 @@ def save_state(state, path=None):
 # ------------------------------------------------------------ requests
 
 def request(settings, method, path, data=None, ctype="application/octet-stream"):
+    """Call the Worker; its JSON answer."""
+    body = _send(settings, method, path, data, ctype)
+    try:
+        return json.loads(body or b"{}")
+    except ValueError:
+        # Access answers a login page, not JSON, when the token isn't accepted.
+        raise CloudError("not the Worker's answer (a login page?): check the URL and that "
+                         "the Access policy allows the service token") from None
+
+
+def fetch(settings, path):
+    """GET a file the Worker stores (path: /api/files/<key>); its bytes."""
+    return _send(settings, "GET", path)
+
+
+def check_files(settings):
+    """The check results in the cloud (`n63read check --out` and the app's
+    Check car now, both uploaded by sync): [(answers, key)], oldest first."""
+    listed = request(settings, "GET", "/api/files").get("files", [])
+    out = []
+    for f in sorted(listed, key=lambda f: f.get("uploaded") or ""):
+        key = f.get("key") or ""
+        name = key.rsplit("/", 1)[-1].lower()
+        if "check" not in name or not name.endswith(".csv"):
+            continue
+        text = fetch(settings, "/api/files/" + _key(key)).decode("utf-8-sig", "replace")
+        try:
+            out.append((core.check_answers(text.splitlines()), key))
+        except (ValueError, csv.Error):
+            continue                        # named "check" but not a check
+    return out
+
+
+def _send(settings, method, path, data=None, ctype="application/octet-stream"):
     url, cid, secret = config(settings)
     if not (url and cid and secret):
         raise CloudError("set the Worker URL and the Access service token first")
@@ -137,12 +172,7 @@ def request(settings, method, path, data=None, ctype="application/octet-stream")
         raise CloudError("the Worker answered %d: %s" % (e.code, detail)) from None
     except (urllib.error.URLError, OSError) as e:
         raise CloudError("can't reach %s: %s" % (url, getattr(e, "reason", e))) from None
-    try:
-        return json.loads(body or b"{}")
-    except ValueError:
-        # Access answers a login page, not JSON, when the token isn't accepted.
-        raise CloudError("not the Worker's answer (a login page?): check the URL and that "
-                         "the Access policy allows the service token") from None
+    return body
 
 
 # ------------------------------------------------------------ sync

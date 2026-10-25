@@ -531,14 +531,28 @@ def op_selftest(args):
 
 def op_logger_channels(args):
     """Write the logger board's channel file: every channel the car answers."""
+    answers = []
     try:
-        avail = (core.import_check_csv(args.check) if args.check
-                 else core.load_availability(args.availability))
+        if args.from_cloud:
+            found = cloud.check_files(core.load_settings())
+            for one, key in found:
+                print("  cloud: %s (%d identifiers)" % (key, len(one)))
+            if not found:
+                sys.exit("no check files in the cloud yet: run a check on the laptop "
+                         "(n63read check --out into the logs folder) and let it sync")
+            answers.extend(one for one, _ in found)
+        for path in args.check or ():
+            answers.append(core.import_check_csv(path))
+        if not answers:
+            answers.append(core.load_availability(args.availability))
+    except cloud.CloudError as e:
+        sys.exit("cloud: %s" % e)
     except (OSError, ValueError, csv.Error) as e:
         sys.exit("can't read what the car answers: %s" % e)
+    avail = loggerchannels.merge_answers(answers)
     if not avail:
         sys.exit("nothing recorded yet: in the app, Answers > Check car now "
-                 "(or pass --check with a `n63read check --out` CSV)")
+                 "(or pass --check with a `n63read check --out` CSV, or --from-cloud)")
     try:
         fast = loggerchannels.fast_names(args.fast or loggerchannels.FAST_TEMPLATES)
     except KeyError as e:
@@ -568,7 +582,7 @@ def op_check(args):
     if args.out:
         out = open(args.out, "w", newline="", encoding="utf-8")
         w = csv.writer(out)
-        w.writerow(["module", "did", "job", "status", "detail", "reply_bytes", "raw"])
+        w.writerow(core.CHECK_HEADER)
     try:
         with _tester(args) as h:
             for module in modules:
@@ -792,9 +806,12 @@ def build_parser():
                                                 "every channel the car answers (no car needed)")
     sp.add_argument("--out", default="channels.csv", metavar="CSV",
                     help="where to write it (default channels.csv); copy it to the SD card")
-    sp.add_argument("--check", metavar="CSV",
-                    help="what answers, from a `n63read check --out` CSV (default: the "
-                         "app's record, Answers > Check car now)")
+    sp.add_argument("--check", metavar="CSV", action="append",
+                    help="what answers, from a `n63read check --out` CSV; repeatable, "
+                         "later ones win (default: the app's record, Answers > Check car now)")
+    sp.add_argument("--from-cloud", action="store_true",
+                    help="use every check file in the cloud (uploaded by the app's sync), "
+                         "before any --check")
     sp.add_argument("--availability", metavar="JSON", help=argparse.SUPPRESS)
     sp.add_argument("--fast", action="append", metavar="TEMPLATE",
                     help="a built-in template for the every-cycle tier; repeatable "
