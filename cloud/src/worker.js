@@ -489,6 +489,7 @@ async function ensureSchema(env) {
 }
 
 export const LEGACY = "legacy";             // apps from before sources
+const MAX_HISTORY = 20000;                  // drives or faults in one upload
 const SOURCE_RE = /^[\w .@()+,=-]{1,64}$/;
 
 /** Who a history upload is from: the app's installation name, or "legacy". */
@@ -504,6 +505,9 @@ function sourceOf(body) {
 async function putHistory(env, body) {
   const drives = Array.isArray(body.drives) ? body.drives : [];
   const faults = Array.isArray(body.faults) ? body.faults : [];
+  if (drives.length > MAX_HISTORY || faults.length > MAX_HISTORY) {
+    throw new ToolError(`at most ${MAX_HISTORY} drives and ${MAX_HISTORY} faults`);
+  }
   const source = sourceOf(body);
   await ensureSchema(env);
   const stmts = [
@@ -616,8 +620,9 @@ async function ingestLog(env, key, bytes) {
  * have counts once. */
 async function drives(env, limit) {
   await ensureSchema(env);
-  const r = await env.DB.prepare("SELECT file, data FROM drives ORDER BY start DESC, source")
-    .all();
+  // A log is kept once per installation that has it: a few times `limit` rows cover it.
+  const r = await env.DB.prepare(
+    "SELECT file, data FROM drives ORDER BY start DESC, source LIMIT ?").bind(limit * 4).all();
   const seen = new Set(), out = [];
   for (const x of r.results || []) {
     if (seen.has(x.file)) continue;

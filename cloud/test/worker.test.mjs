@@ -153,6 +153,9 @@ test("history replaces the summaries", async () => {
     { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
   assert.deepEqual(await r.json(), { ok: true, source: "legacy", drives: 2, faults: 2 });
   assert.equal((await call("PUT", "/api/history", { body: "not json" })).status, 400);
+  const huge = Array.from({ length: 20001 }, (_, i) => ({ file: `x${i}.csv`, start: "" }));
+  assert.equal((await call("PUT", "/api/history",
+    { body: JSON.stringify({ drives: huge, faults: [] }) })).status, 400);
   for (const bad of ["../x", "logger", "a".repeat(65)]) {
     assert.equal((await call("PUT", "/api/history",
       { body: JSON.stringify({ source: bad, drives: [], faults: [] }) })).status, 400, bad);
