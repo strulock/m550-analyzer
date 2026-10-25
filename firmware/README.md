@@ -23,6 +23,8 @@ the same PR.
     cd firmware
     g++ -std=c++17 -Wall -Ilib/hsfz test/host_test.cpp -o host_test && ./host_test
 
+One function per case; `./host_test busy_retry` runs just that one.
+
 ## Spike
 
 Board: Waveshare ESP32-S3-ETH.
