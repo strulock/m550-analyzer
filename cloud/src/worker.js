@@ -4,6 +4,9 @@
  *
  * - The app uploads every drive log and fault list (PUT /api/files/<path>)
  *   into R2, and its drive and fault summaries (PUT /api/history) into D1.
+ * - The logger board uploads its drive logs under logger/; the Worker works
+ *   out their time series and drive summary itself (drive.js), and the
+ *   app's history leaves those drives alone.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with read-only tools over that copy: drive_history,
  *   fault_history, trend, list_files, read_log.
@@ -17,9 +20,13 @@
  * No dependencies: plain JavaScript, deployed with `wrangler deploy`.
  */
 
+import { BANK2, buildSeries, isDriveLog, readLog, summarizeDrive } from "./drive.js";
+
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 const MAX_UPLOAD = 50 * 1024 * 1024;
+export const LOGGER = "logger/";          // where the logger board's drive logs go
+export const SWEEP = ".sweep.csv";        // a logger drive's second file
 const MAX_ROWS = 500;
 const MAX_TEXT = 60000;
 
@@ -199,7 +206,6 @@ export function logWindow(text, { start = null, end = null, columns = null, resa
   return { columns: want.map((i) => header[i]), rows: out, total };
 }
 
-const BANK2 = "@0x13";
 const EVENTS_MAX = 200;
 
 /** A drive log's rows: {header, rows: [[t, {name: cell}]]} for numeric t. */
@@ -304,22 +310,29 @@ const MAX_POINTS = 2000;
 async function putSeries(env, drive, body) {
   const chunks = Array.isArray(body.chunks) ? body.chunks : null;
   if (!chunks) throw new ToolError("body: {start, approx, chunks: [...]}");
-  const approx = body.approx ? 1 : 0;
-  const stmts = [env.DB.prepare("DELETE FROM series WHERE drive = ?").bind(drive)];
   for (const c of chunks) {
     if (!c || typeof c.name !== "string" || !Array.isArray(c.data) ||
         !Number.isFinite(c.t0) || !Number.isFinite(c.t1)) {
       throw new ToolError("bad chunk");
     }
-    stmts.push(env.DB.prepare(
-      `INSERT OR REPLACE INTO series (drive, channel, t0, t1, n, unit, min, max, mean, approx,
-       data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
-      drive, c.name, c.t0, c.t1, c.data.length, String(c.unit || ""), number(c.min),
-      number(c.max), number(c.mean), approx, JSON.stringify(c.data)));
+  }
+  const stmts = [env.DB.prepare("DELETE FROM series WHERE drive = ?").bind(drive)];
+  for (const c of chunks) {
+    stmts.push(insertChunk(env, drive, body.approx,
+      { ...c, n: c.data.length, json: JSON.stringify(c.data) }));
   }
   await ensureSchema(env);
   await env.DB.batch(stmts);
   return { drive, channels: new Set(chunks.map((c) => c.name)).size, chunks: chunks.length };
+}
+
+/** The statement storing one chunk whose data is already JSON (`json`). */
+function insertChunk(env, drive, approx, c) {
+  return env.DB.prepare(
+    `INSERT OR REPLACE INTO series (drive, channel, t0, t1, n, unit, min, max, mean, approx,
+     data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
+    drive, c.name, c.t0, c.t1, c.n, String(c.unit || ""), number(c.min),
+    number(c.max), number(c.mean), approx ? 1 : 0, c.json);
 }
 
 async function listChannels(env, match) {
@@ -449,13 +462,16 @@ async function ensureSchema(env) {
   schemaReady.add(env.DB);
 }
 
+/** The app's summaries replace its own; the logger's drives (logger/) stay. */
 async function putHistory(env, body) {
   const drives = Array.isArray(body.drives) ? body.drives : [];
   const faults = Array.isArray(body.faults) ? body.faults : [];
   await ensureSchema(env);
-  const stmts = [env.DB.prepare("DELETE FROM drives"), env.DB.prepare("DELETE FROM faults")];
+  const stmts = [
+    env.DB.prepare("DELETE FROM drives WHERE substr(file, 1, ?) != ?").bind(LOGGER.length, LOGGER),
+    env.DB.prepare("DELETE FROM faults")];
   for (const d of drives) {
-    if (!d || typeof d.file !== "string") continue;
+    if (!d || typeof d.file !== "string" || d.file.startsWith(LOGGER)) continue;
     stmts.push(env.DB.prepare("INSERT OR REPLACE INTO drives (file, start, data) VALUES (?, ?, ?)")
       .bind(d.file, String(d.start || ""), JSON.stringify(d)));
   }
@@ -467,6 +483,72 @@ async function putHistory(env, body) {
   }
   await env.DB.batch(stmts);
   return { drives: drives.length, faults: faults.length };
+}
+
+/** Units the app stored for these channels (a bank 2 twin takes bank 1's). */
+async function knownUnits(env, names) {
+  const base = (n) => (n.endsWith(BANK2) ? n.slice(0, -BANK2.length) : n);
+  const wanted = [...new Set(names.map(base))];
+  const units = {};
+  for (let i = 0; i < wanted.length; i += 50) {
+    const part = wanted.slice(i, i + 50);
+    const r = await env.DB.prepare(
+      `SELECT channel, MAX(unit) AS unit FROM series WHERE unit != '' AND channel IN
+       (${part.map(() => "?").join(",")}) GROUP BY channel`).bind(...part).all();
+    for (const x of r.results || []) units[x.channel] = x.unit;
+  }
+  return Object.fromEntries(names.map((n) => [n, units[base(n)] || ""]));
+}
+
+/** The drive a logger file belongs to: the logger writes each drive as a
+ * fast file (logger/<start>.csv, every cycle) and a sweep file
+ * (logger/<start>.sweep.csv, everything else in rotation); both are stored
+ * under the fast file's name. */
+export function driveKey(key) {
+  return key.endsWith(SWEEP) ? key.slice(0, -SWEEP.length) + ".csv" : key;
+}
+
+/** A logger drive log just stored (its bytes): its series and its drive row. */
+async function ingestLog(env, key, bytes) {
+  if (!isDriveLog(bytes)) return { processed: false, reason: "not a drive log" };
+  const drive = driveKey(key), sweep = drive !== key;
+  const now = Date.now() / 1000;
+  const log = readLog(bytes);
+  const series = buildSeries(log, now);
+  await ensureSchema(env);
+  const units = await knownUnits(env, series.names);
+  // This file's channels only (the drive's other file keeps its own), one
+  // channel at a time to keep within the Worker's memory. A re-upload
+  // replaces whatever an interrupted one left.
+  for (let i = 0; i < series.names.length; i += 50) {
+    const part = series.names.slice(i, i + 50);
+    await env.DB.prepare(`DELETE FROM series WHERE drive = ? AND channel IN
+      (${part.map(() => "?").join(",")})`).bind(drive, ...part).run();
+  }
+  let channels = 0;
+  for (const chunks of series.channels()) {
+    for (const c of chunks) c.unit = units[c.name];
+    await env.DB.batch(chunks.map((c) => insertChunk(env, drive, series.approx, c)));
+    channels++;
+  }
+  // The summary from both files once both are here.
+  const obj = await env.FILES.get(sweep ? drive : drive.slice(0, -".csv".length) + SWEEP);
+  let other = null;
+  if (obj) {
+    try {
+      other = readLog(new Uint8Array(await obj.arrayBuffer()));
+    } catch {
+      other = null;                     // that file says why when it's uploaded
+    }
+  }
+  const row = summarizeDrive((sweep ? [other, log] : [log, other]).filter(Boolean), drive, now);
+  await env.DB.prepare(row
+    ? "INSERT OR REPLACE INTO drives (file, start, data) VALUES (?, ?, ?)"
+    : "DELETE FROM drives WHERE file = ?")
+    .bind(...(row ? [drive, String(row.start), JSON.stringify(row)] : [drive])).run();
+  return { processed: true, drive_file: drive, channels, approx_time: series.approx,
+    with_other_file: !!other,
+    drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
 }
 
 async function drives(env, limit) {
@@ -789,7 +871,16 @@ export async function handle(request, env, fetcher = fetch) {
       await env.DB.prepare(
         "INSERT OR REPLACE INTO uploads (key, size, sha256, uploaded) VALUES (?, ?, ?, ?)")
         .bind(key, data.byteLength, sha, new Date().toISOString()).run();
-      return json({ ok: true, key, size: data.byteLength, sha256: sha });
+      const stored = { ok: true, key, size: data.byteLength, sha256: sha };
+      if (!key.startsWith(LOGGER)) return json(stored);
+      // The file is safe in R2 either way; a log that can't be read only
+      // misses its series and summary, and says why.
+      try {
+        return json({ ...stored, ...(await ingestLog(env, key, new Uint8Array(data))) });
+      } catch (e) {
+        console.error(e);
+        return json({ ...stored, processed: false, reason: String(e.message || e) });
+      }
     }
     if (request.method === "GET") {
       const obj = await env.FILES.get(key);
