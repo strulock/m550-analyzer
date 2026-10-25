@@ -20,6 +20,7 @@ import datetime
 import json
 import math
 import os
+import statistics
 
 from n63read import core, playback
 
@@ -27,7 +28,7 @@ FOLDER = "History"
 DRIVES_CSV = "drives.csv"
 FAULTS_CSV = "faults.csv"
 INDEX_JSON = "index.json"
-INDEX_VERSION = 6           # bump when a summary changes: everything is re-read
+INDEX_VERSION = 7           # bump when a summary changes: everything is re-read
 MIN_ROWS = 5                # fewer rows than this isn't a drive worth a line
 MAX_STEP = 5.0              # s; a longer gap between rows isn't driven through
 CYLINDERS = range(1, 9)
@@ -37,6 +38,11 @@ LAT = "HU_STATUS_GPS_POSITION.LATITUDE"
 LON = "HU_STATUS_GPS_POSITION.LONGITUDE"
 SPEEDS = ("FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "IVKMH", "HU_STATUS_SPEED.GPS_SPEED")
 ODOMETERS = ("LMV_DATEN_VERTEILERGETRIEBE.MILE_KM", "BDC_ZUSATZINFO_LICHT.KM_STAND_1")
+
+FUEL_DENSITY = 0.745        # kg/l, petrol
+MIN_ECONOMY_KM = 1.0        # a shorter drive's economy says little
+MPG_US = 235.215            # US mpg = this / (l/100 km)
+TANK_WINDOW = 60.0          # s at each end of a drive for the tank level
 
 
 def _per_cylinder(bank1, bank2):
@@ -97,8 +103,9 @@ for _n in range(1, 5):
 # Scaling from the channel's unit to the column's: battery mV to V.
 SCALE = {"battery_min": 0.001, "battery_max": 0.001}
 
-DRIVE_FIELDS = (["file", "start", "minutes", "rows", "km", "odometer_km", "gps_points",
-                 "misfires"] + [m[0] for m in METRICS])
+DRIVE_FIELDS = (["file", "start", "minutes", "rows", "km", "fuel_l", "l_per_100km", "mpg",
+                 "tank_used_l", "odometer_km", "gps_points", "misfires"]
+                + [m[0] for m in METRICS])
 
 # Charts in the History window: (title, unit, [(column, legend)]).
 TRENDS = [
@@ -116,6 +123,9 @@ TRENDS = [
                                  ("gearbox_oil_max", "transmission oil"),
                                  ("intake_max", "intake air")]),
     ("Boost, max", "hPa", [("boost_max", "boost")]),
+    ("Fuel economy", "mpg", [("mpg", "mpg (US)")]),
+    ("Fuel consumption", "l/100 km", [("l_per_100km", "l/100 km")]),
+    ("Fuel used", "l", [("fuel_l", "from the injectors"), ("tank_used_l", "from the tank")]),
     ("Distance and odometer", "km", [("km", "drive"), ("odometer_km", "odometer")]),
 ]
 
@@ -199,6 +209,34 @@ def _distance(rows, names):
                for (_, a1, o1), (_, a2, o2) in zip(track, track[1:]))
 
 
+def _fuel_litres(rows, names):
+    """Litres burned: each DME's fuel mass flow integrated over time, summed;
+    None if neither was logged."""
+    flows = [n for n in core.FUEL_FLOWS if n in names]
+    if not flows:
+        return None
+    kg = 0.0
+    for name in flows:
+        points = _series(rows, name)
+        kg += sum(v * min(t2 - t1, MAX_STEP) / 3600.0
+                  for (t1, v), (t2, _) in zip(points, points[1:]) if t2 > t1)
+    return kg / FUEL_DENSITY
+
+
+def _tank_used(rows, names):
+    """The tank level's fall over the drive (l), from the median of its first
+    and last minute, as the fuel sloshes; None if not logged."""
+    if core.FUEL_TANK not in names:
+        return None
+    points = _series(rows, core.FUEL_TANK)
+    if len(points) < 2:
+        return None
+    t0, t1 = points[0][0], points[-1][0]
+    first = [v for t, v in points if t <= t0 + TANK_WINDOW]
+    last = [v for t, v in points if t >= t1 - TANK_WINDOW]
+    return statistics.median(first) - statistics.median(last)
+
+
 def summarize(names, rows, file="", start=""):
     """One drive's statistics: {column: value}, None where not logged."""
     names = set(names)
@@ -214,6 +252,16 @@ def summarize(names, rows, file="", start=""):
         if value is not None:
             out[key] = round(value * SCALE.get(key, 1.0), 4)
     out["km"] = round(_distance(rows, names), 2)
+    fuel = _fuel_litres(rows, names)
+    if fuel is not None:
+        out["fuel_l"] = round(fuel, 3)
+        if out["km"] >= MIN_ECONOMY_KM and fuel > 0:
+            per_100 = fuel / out["km"] * 100.0
+            out["l_per_100km"] = round(per_100, 2)
+            out["mpg"] = round(MPG_US / per_100, 2)
+    tank = _tank_used(rows, names)
+    if tank is not None:
+        out["tank_used_l"] = round(tank, 1)
     out["gps_points"] = len(gps_track(rows)) if LAT in names and LON in names else 0
     for name in ODOMETERS:
         if name in names:

@@ -1747,6 +1747,12 @@ def derive(name, sample):
 
 # ---------------------------------------------------------- built-in channel sets
 
+# Fuel: each DME's fuel mass flow (kg/h, its own bank's injectors) and the
+# tank level (l). History integrates the flows for a drive's fuel economy.
+FUEL_FLOWS = ("MASSENSTROM_KRAFTSTOFF", "MASSENSTROM_KRAFTSTOFF" + BANK2_SUFFIX)
+FUEL_TANK = "IKTFS"
+FUEL_CHANNELS = FUEL_FLOWS + (FUEL_TANK,)
+
 BUILTIN_TEMPLATES = {
     "Misfire hunt": ["INMOT", "ZAEHLER_AUSSETZ_ABGASREL_SUM_ALLEZYL"]
     + ["ILUZ%d" % (i + 1) for i in range(CYLINDERS)]
@@ -1772,7 +1778,10 @@ BUILTIN_TEMPLATES = {
         "IPLAD", "S_LADEDRUCK", "ITOEL", "ITKUA", "HU_STATUS_GPS",
         "HU_STATUS_GPS_POSITION.LATITUDE", "HU_STATUS_GPS_POSITION.LONGITUDE",
         "HU_STATUS_GPS_POSITION.HEIGHT", "HU_STATUS_SPEED.GPS_SPEED",
-        "CALC_GPS_SPEED_MINUS_VEHICLE_SPEED"],
+        "CALC_GPS_SPEED_MINUS_VEHICLE_SPEED"] + list(FUEL_CHANNELS),
+    # History works out each drive's fuel economy from these.
+    "Fuel economy": ["INMOT", "FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "BUS_FAHRPEDALWERT"]
+    + list(FUEL_CHANNELS),
 }
 
 
