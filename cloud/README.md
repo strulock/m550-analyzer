@@ -15,13 +15,25 @@ serves it to Claude from anywhere:
   per channel per drive in D1 (`series`), so `list_channels` and
   `channel_series` can follow a channel across every drive, averaged into
   time buckets when long, or as per-drive min, mean and max.
+- **The logger board** (`firmware/`) uploads its drive logs under `logger/`,
+  two files a drive: `<start>.csv` (the fast channels, every cycle) and
+  `<start>.sweep.csv` (every other channel the car answers, in rotation).
+  The Worker works out their time series and drive summary itself
+  (`src/drive.js`, a port of the app's `series.py` and `history.summarize`),
+  both files counting as one drive under the first's name, so they show in
+  `drive_history`, `trend` and the series tools without the PC. The app's
+  history sync replaces only its own drives, and each PC's sync only its own
+  drives and faults (the app sends its PC's name).
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
   you and MCP portals sign in with your Access login.
 
-Plain JavaScript, no packages: `src/worker.js`. Tests run on Node 24:
-`node --test "cloud/test/*.test.mjs"` (from the repo root).
+Plain JavaScript, no packages: `src/worker.js` and `src/drive.js`. Tests run
+on Node 24: `node --test "cloud/test/*.test.mjs"` (from the repo root).
+`cloud/test/parity` holds two logs and what the Python code makes of them;
+both test suites check against it, so the port can't drift. After changing
+a summary or the series on purpose: `python tests/test_cloud_parity.py`.
 
 ## What it holds
 
@@ -96,10 +108,10 @@ All requests need an Access token (a login, or the service token headers
 
 | Request | Does |
 |---|---|
-| `PUT /api/files/<path>` | store a log (CSV body); replies with its size and SHA-256 |
+| `PUT /api/files/<path>` | store a log (CSV body); replies with its size and SHA-256. Under `logger/`, a drive log also gets its series and drive row, and the reply says so: `processed`, `channels`, `approx_time` (no Clock), `drive` (start, minutes, km), or `processed: false` and a `reason` |
 | `GET /api/files` | list stored files: key, size, SHA-256, upload time |
 | `GET /api/files/<path>` | the file back |
-| `PUT /api/history` | replace the summaries: `{"drives": [...], "faults": [...]}` |
+| `PUT /api/history` | replace one installation's summaries: `{"source": "<PC name>", "drives": [...], "faults": [...]}`. Only that source's drives and faults are replaced; other PCs', the board's (`logger/`) and those from apps that send no source (kept as `legacy`) stay. History lists a log once and each fault as the installation that saw it last has it |
 | `PUT /api/series/<path>` | replace one drive's values: `{"start", "approx", "chunks": [{"name", "unit", "t0", "t1", "n", "min", "max", "mean", "data"}]}` |
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |

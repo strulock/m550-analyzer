@@ -6,7 +6,7 @@ import tkinter as tk
 
 import pytest
 
-from n63read import core, playback
+from n63read import core, history, playback
 
 from conftest import pump
 from fake_car import FakeCar
@@ -317,6 +317,12 @@ def test_check_car_not_connected(app, car, small_check, dialogs):
     assert app.avail == small_check
     assert core.load_availability(app.avail_file) == small_check
     assert "check done: 4 identifiers answer" in app.status.cget("text")
+    # The answers are also a check CSV in the logs folder, for the cloud sync.
+    saved = [n for n in os.listdir(core.logs_dir()) if n.startswith("check_")]
+    assert len(saved) == 1 and saved[0] in app.status.cget("text")
+    path = os.path.join(core.logs_dir(), saved[0])
+    assert history.kind(path) == "check"
+    assert core.import_check_csv(path) == small_check
 
 
 def test_check_car_on_the_live_connection(app, car, small_check, dialogs):

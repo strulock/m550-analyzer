@@ -38,7 +38,7 @@ class R2 {
     const o = this.objects.get(key);
     if (!o) return null;
     const text = new TextDecoder().decode(o.data);
-    return { text: async () => text, body: text };
+    return { text: async () => text, body: text, arrayBuffer: async () => o.data.slice().buffer };
   }
   async list({ prefix } = {}) {
     return { objects: [...this.objects.values()].filter((o) => !prefix || o.key.startsWith(prefix)) };
@@ -151,8 +151,184 @@ test("history replaces the summaries", async () => {
   await call("PUT", "/api/history", { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
   const r = await call("PUT", "/api/history",
     { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
-  assert.deepEqual(await r.json(), { ok: true, drives: 2, faults: 2 });
+  assert.deepEqual(await r.json(), { ok: true, source: "legacy", drives: 2, faults: 2 });
   assert.equal((await call("PUT", "/api/history", { body: "not json" })).status, 400);
+  const huge = Array.from({ length: 20001 }, (_, i) => ({ file: `x${i}.csv`, start: "" }));
+  assert.equal((await call("PUT", "/api/history",
+    { body: JSON.stringify({ drives: huge, faults: [] }) })).status, 400);
+  for (const bad of ["../x", "logger", "a".repeat(65)]) {
+    assert.equal((await call("PUT", "/api/history",
+      { body: JSON.stringify({ source: bad, drives: [], faults: [] }) })).status, 400, bad);
+  }
+});
+
+// --- several app installations
+
+async function history(source, drives, faults) {
+  const body = { drives, faults };
+  if (source) body.source = source;
+  return (await call("PUT", "/api/history", { body: JSON.stringify(body) })).json();
+}
+
+test("one installation's history leaves another's alone", async () => {
+  await history("desk-pc", DRIVES, FAULTS);
+  // The laptop has only its own drive, and an empty fault history.
+  await history("laptop", [{ file: "c.csv", start: "2026-10-20 08:00:00", km: 1.5 }], []);
+  const files = async () => (await toolData("drive_history")).drives.map((d) => d.file);
+  assert.deepEqual(await files(), ["a.csv", "b.csv", "c.csv"]);
+  assert.equal((await toolData("fault_history", { which: "all" })).faults.length, 2);
+  // An app from before sources ("legacy") with nothing: only legacy rows go.
+  await history(null, [], []);
+  assert.deepEqual(await files(), ["a.csv", "b.csv", "c.csv"]);
+  // The desk PC deleting a log takes its drive away, not the laptop's.
+  await history("desk-pc", DRIVES.slice(1), FAULTS);
+  assert.deepEqual(await files(), ["b.csv", "c.csv"]);
+});
+
+test("a log two installations have counts once; faults merge", async () => {
+  await history("desk-pc", DRIVES, [
+    { module: "0x40", code: "804415", now: "gone", first_seen: "2026-10-01", first_km: 110000,
+      last_seen: "2026-10-10", text_en: "fob" }]);
+  await history("laptop", [DRIVES[1]], [
+    { module: "0x40", code: "804415", now: "present", first_seen: "2026-10-05", first_km: 110500,
+      last_seen: "2026-10-19", text_en: "fob" }]);
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file), ["a.csv", "b.csv"]);
+  const [f] = (await toolData("fault_history", { which: "all" })).faults;
+  assert.equal(f.now, "present");                       // the laptop saw it last
+  assert.equal(f.last_seen, "2026-10-19");
+  assert.equal(f.first_seen, "2026-10-01");             // the desk PC saw it first
+  assert.equal(f.first_km, 110000);
+  assert.equal((await toolData("fault_history")).faults.length, 1);   // current: present
+});
+
+test("tables from before sources are converted, rows kept", async () => {
+  const db = env.DB.db;
+  db.exec(`CREATE TABLE drives (file TEXT PRIMARY KEY, start TEXT, data TEXT NOT NULL);
+    CREATE TABLE faults (module TEXT NOT NULL, code TEXT NOT NULL, now TEXT, last_seen TEXT,
+      data TEXT NOT NULL, PRIMARY KEY (module, code));`);
+  db.prepare("INSERT INTO drives VALUES (?, ?, ?)").run("a.csv", "2026-10-18", JSON.stringify(DRIVES[0]));
+  db.prepare("INSERT INTO drives VALUES (?, ?, ?)").run("logger/x.csv", "2026-10-25",
+    JSON.stringify({ file: "logger/x.csv", start: "2026-10-25" }));
+  db.prepare("INSERT INTO faults VALUES (?, ?, ?, ?, ?)").run("0x40", "804415", "present",
+    "2026-10-19", JSON.stringify(FAULTS[0]));
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file),
+    ["a.csv", "logger/x.csv"]);
+  const sources = db.prepare("SELECT file, source FROM drives ORDER BY file").all()
+    .map((x) => [x.file, x.source]);
+  assert.deepEqual(sources, [["a.csv", "legacy"], ["logger/x.csv", "logger"]]);
+  assert.equal(db.prepare("SELECT source FROM faults").get().source, "legacy");
+  // A named installation's sync now leaves those rows alone.
+  await history("desk-pc", [DRIVES[1]], []);
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file),
+    ["a.csv", "b.csv", "logger/x.csv"]);
+});
+
+// --- the logger board's logs
+
+const LOGGER_CSV = "Time,Clock,INMOT,INMOT@0x13,IUIBS,Event\n" +
+  [0, 1, 2, 3, 4, 5].map((t) =>
+    `${t},2026-10-25 07:00:0${t}.000-05:00,${700 + t},${705 + t},${14100 - t},`).join("\n") + "\n";
+
+async function toolData(name, args = {}) {
+  const r = await rpc(env, { jsonrpc: "2.0", id: 1, method: "tools/call",
+    params: { name, arguments: args } });
+  return JSON.parse(r.result.content[0].text);
+}
+
+test("a logger log gets its series and drive row on upload", async () => {
+  // Units come from what the app stored for the same channels.
+  await call("PUT", "/api/series/app.csv", { body: JSON.stringify({ start: 0, approx: false,
+    chunks: [{ name: "INMOT", unit: "rpm", t0: 0, t1: 1, n: 1, min: 1, max: 1, mean: 1,
+      data: [[0, 1]] }] }) });
+  const put = await (await call("PUT", "/api/files/logger/2026-10-25_07-00-00.csv",
+    { body: LOGGER_CSV })).json();
+  assert.equal(put.processed, true);
+  assert.equal(put.channels, 3);
+  assert.equal(put.approx_time, false);
+  assert.deepEqual(put.drive, { start: "2026-10-25 07:00:00", minutes: 0.08, km: 0 });
+  assert.match(put.sha256, /^[0-9a-f]{64}$/);
+
+  const [d] = (await toolData("drive_history")).drives;
+  assert.equal(d.file, "logger/2026-10-25_07-00-00.csv");
+  assert.equal(d.rpm_max, 705);
+  assert.equal(d.battery_min, 14.095);                  // mV to V, as the app does
+
+  const channels = Object.fromEntries((await toolData("list_channels")).channels
+    .map((c) => [c.channel, c.unit]));
+  assert.deepEqual(channels, { INMOT: "rpm", "INMOT@0x13": "rpm", IUIBS: "" });
+  const s = await toolData("channel_series", { channel: "INMOT@0x13" });
+  assert.deepEqual(s.points[0], ["2026-10-25T12:00:00.000Z", 705]);
+});
+
+test("the app's history sync leaves logger drives in place", async () => {
+  await call("PUT", "/api/files/logger/a.csv", { body: LOGGER_CSV });
+  await call("PUT", "/api/history", { body: JSON.stringify({
+    drives: [...DRIVES, { file: "logger/a.csv", start: "x", km: 999 }], faults: [] }) });
+  const files = (await toolData("drive_history")).drives.map((d) => [d.file, d.km]);
+  assert.deepEqual(files, [["a.csv", 3.7], ["b.csv", 5.3], ["logger/a.csv", 0]]);
+});
+
+test("a drive's fast and sweep files make one drive, in either order", async () => {
+  const tire = "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT";
+  const odo = "BDC_ZUSATZINFO_LICHT.KM_STAND_1";
+  const sweepCsv = `Time,Clock,${tire},${odo}\n` + [0, 2, 4, 6, 8].map((t) =>
+    `${t},2026-10-25 07:00:0${t}.000-05:00,2.4,41234`).join("\n") + "\n";
+  const s = await (await call("PUT", "/api/files/logger/d.sweep.csv", { body: sweepCsv })).json();
+  assert.equal(s.drive_file, "logger/d.csv");
+  assert.equal(s.with_other_file, false);
+  const f = await (await call("PUT", "/api/files/logger/d.csv", { body: LOGGER_CSV })).json();
+  assert.equal(f.with_other_file, true);
+
+  const [d] = (await toolData("drive_history")).drives;
+  assert.equal(d.file, "logger/d.csv");
+  assert.equal(d.rows, 6);                              // the fast file's
+  assert.equal(d.rpm_max, 705);                         // fast
+  assert.equal(d.tire_1, 2.4);                          // sweep
+  assert.equal(d.odometer_km, 41234);                   // sweep
+
+  const channels = async () => (await toolData("list_channels")).channels
+    .map((c) => [c.channel, c.drives]).sort();
+  const both = [["BDC_ZUSATZINFO_LICHT.KM_STAND_1", 1], ["DSC_RDC_MESSDATENBLOCK_1." +
+    "LETZTER_REIFENDRUCKWERT", 1], ["INMOT", 1], ["INMOT@0x13", 1], ["IUIBS", 1]];
+  assert.deepEqual(await channels(), both);
+  // Sending one file again leaves the other's channels alone.
+  await call("PUT", "/api/files/logger/d.csv", { body: LOGGER_CSV });
+  assert.deepEqual(await channels(), both);
+});
+
+test("a sweep file with thousands of channels stays within D1's query count", async () => {
+  const names = Array.from({ length: 3000 }, (_, i) => `BDC_CH_${i}`);
+  const csvText = `Time,Clock,${names.join(",")}\n` + [0, 60, 120, 180, 240].map((t) =>
+    `${t},2026-10-25 07:00:00.000-05:00,${names.map((_, k) => (k + t) % 97).join(",")}`)
+    .join("\n") + "\n";
+  let statements = 0;
+  const prepare = env.DB.prepare.bind(env.DB);
+  env.DB.prepare = (sql) => { statements++; return prepare(sql); };
+  const put = await (await call("PUT", "/api/files/logger/w.sweep.csv", { body: csvText })).json();
+  assert.equal(put.processed, true);
+  assert.equal(put.channels, 3000);
+  assert.ok(statements < 40, `${statements} statements`);         // D1 allows 1,000
+  env.DB.prepare = prepare;
+  const listed = (await (await call("GET", "/api/series?match=BDC_CH_")).json()).channels;
+  assert.equal(listed.length, 3000);
+  const one = await toolData("channel_series", { channel: "BDC_CH_7" });
+  assert.deepEqual(one.points.map((p) => p[1]), [7, 67, 30, 90, 53]);
+});
+
+test("logger uploads that aren't drive logs are stored and say why", async () => {
+  const faults = await (await call("PUT", "/api/files/logger/faults.csv",
+    { body: "read_at,module,code\n2026-10-25,0x12,1A400A\n" })).json();
+  assert.equal(faults.processed, false);
+  assert.equal(faults.reason, "not a drive log");
+  const empty = await (await call("PUT", "/api/files/logger/empty.csv",
+    { body: "Time,INMOT\n" })).json();
+  assert.equal(empty.ok, true);
+  assert.equal(empty.processed, false);
+  assert.match(empty.reason, /no samples/);
+  // Elsewhere nothing changes: the app's own uploads aren't processed.
+  const app = await (await call("PUT", "/api/files/n63.csv", { body: LOGGER_CSV })).json();
+  assert.equal(app.processed, undefined);
+  assert.deepEqual((await toolData("drive_history")).drives, []);
 });
 
 // --- templates

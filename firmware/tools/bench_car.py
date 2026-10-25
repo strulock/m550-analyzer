@@ -13,11 +13,19 @@ acknowledge frame first, as the real gateway does. Anything but 0x22 and
 0x3E is refused (NRC 0x11) and printed, which on the bench means the
 firmware sent something it never should.
 
+For the logger, pass its channel file and every identifier in it answers too,
+on any module, with bytes of the right size (a slowly changing pattern, not
+real values):
+
+    python firmware/tools/bench_car.py --channels channels.csv
+
 Windows asks whether Python may use the network: allow it on Public networks
 too, because a direct cable is an "unidentified" (public) network.
 Standard library only; Ctrl+C to stop.
 """
 
+import argparse
+import csv
 import math
 import socket
 import struct
@@ -28,6 +36,9 @@ CTRL_DIAG, CTRL_ACK, CTRL_IDENT = 0x0001, 0x0002, 0x0011
 FAKE_VIN = "WBAFAKEBENCH00001"
 IDENT = ("DIAGADR10BMWMAC0012BENCHCARBMWVIN" + FAKE_VIN).encode()
 T0 = time.time()
+DMES = (0x12, 0x13)
+EXTRA = {}                  # (module, identifier) -> reply size, from --channels
+EXTRA_MODULES = set()
 
 
 def u16(v):
@@ -53,8 +64,24 @@ def frame(control, src, dst, payload):
     return struct.pack(">IH", len(payload) + 2, control) + bytes([src, dst]) + payload
 
 
+def load_channels(path):
+    """Answer every identifier in a logger channel file (n63read logger-channels)."""
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            key = (int(row["module"], 16), int(row["did"], 16))
+            EXTRA[key] = int(row["did_size"]) if row["did_size"] else 8
+            EXTRA_MODULES.add(key[0])
+
+
+def filler(module, did, size):
+    """Bytes for an identifier from the channel file: changing a few times a
+    second, so a log shows movement."""
+    t = int((time.time() - T0) * 4)
+    return bytes((did + module * 7 + i * 13 + t) & 0x7F for i in range(size))
+
+
 def answer(dme, uds):
-    if dme not in (0x12, 0x13):
+    if dme not in DMES and dme not in EXTRA_MODULES:
         return None                                  # silent, like an empty address
     service = uds[0]
     if service == 0x3E:
@@ -62,12 +89,14 @@ def answer(dme, uds):
     if service != 0x22:
         print("  !! refused service 0x%02X: the firmware should never send this" % service)
         return bytes([0x7F, service, 0x11])
-    table = values(dme)
+    table = values(dme) if dme in DMES else {}
     dids = [int.from_bytes(uds[i:i + 2], "big") for i in range(1, len(uds) - 1, 2)]
     out = b""
     for did in dids:
         if did in table:
             out += did.to_bytes(2, "big") + table[did]
+        elif (dme, did) in EXTRA:
+            out += did.to_bytes(2, "big") + filler(dme, did, EXTRA[(dme, did)])
     if not out:
         return bytes([0x7F, 0x22, 0x31])             # requestOutOfRange
     return b"\x62" + out
@@ -129,6 +158,13 @@ def udp_loop():
 
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description="a stand-in for the car's ENET gateway")
+    ap.add_argument("--channels", metavar="CSV",
+                    help="also answer every identifier in this logger channel file")
+    args = ap.parse_args()
+    if args.channels:
+        load_channels(args.channels)
+        print("answering %d identifiers from %s too" % (len(EXTRA), args.channels))
     threading.Thread(target=udp_loop, daemon=True).start()
     threading.Thread(target=tcp_loop, daemon=True).start()
     print("bench car up: UDP 6811 + TCP 6801, VIN %s. Ctrl+C to stop." % FAKE_VIN)

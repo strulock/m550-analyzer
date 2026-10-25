@@ -326,3 +326,13 @@ def test_settings_window_saves_the_cloud_token(app):
         app.settings_window.destroy()
         for k in ("cloud_url", "cloud_client_id", "cloud_client_secret"):
             app.settings.pop(k, None)
+
+
+def test_history_says_which_installation_sent_it(worker, tmp_path, monkeypatch):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    monkeypatch.setattr(cloud.socket, "gethostname", lambda: "DESK-PC")
+    cloud.sync(settings_for(worker), logs)
+    assert worker.history["source"] == "DESK-PC"
+    assert cloud.source_name({"cloud_source": "laptop / garage"}) == "laptop - garage"
+    assert cloud.source_name({"cloud_source": "logger"}) == "pc"      # the board's

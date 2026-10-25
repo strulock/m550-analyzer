@@ -123,8 +123,7 @@ class Client {
         }
         r.result = NEGATIVE; r.nrc = data[2]; return r;
       }
-      if (data[0] == service + 0x40 && dlen >= 1 + echo &&
-          memcmp(data + 1, req + 1, echo) == 0) {
+      if (data[0] == service + 0x40 && dlen >= 1 + echo && echoes(req, reqLen, data + 1)) {
         r.len = dlen < outCap ? dlen : outCap;
         memcpy(out, data, r.len);
         r.result = OK;
@@ -137,6 +136,17 @@ class Client {
   }
 
  private:
+  // Whether a positive reply starting at `p` answers this request: 0x3E echoes
+  // its sub-function; 0x22 starts with one of the identifiers asked for (a
+  // module leaves out ones it doesn't have, the first included).
+  static bool echoes(const uint8_t* req, size_t reqLen, const uint8_t* p) {
+    if (req[0] != 0x22) return reqLen < 2 || p[0] == req[1];
+    for (size_t i = 1; i + 1 < reqLen; i += 2) {
+      if (p[0] == req[i] && p[1] == req[i + 1]) return true;
+    }
+    return false;
+  }
+
   bool send(uint8_t target, const uint8_t* p, size_t n) {
     uint8_t frame[8 + 64];
     if (n > 64) return false;

@@ -126,6 +126,17 @@ static void test_split_reply() {
   CHECK(!hsfz::splitReply(dup, sizeof(dup), ch, 3, off));
 }
 
+// a batch whose first identifier the module leaves out is still ours;
+// an answer about an identifier we didn't ask for isn't
+static void test_batch_without_first() {
+  Fake f; hsfz::Client c(f, 0xF4);
+  const uint8_t two[] = {0x22, 0x48, 0x07, 0x4A, 0x21};
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x46, 0x0C, 0, 1}));
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x4A, 0x21, 0x0E, 0x2F}));
+  auto r = c.request(0x12, two, sizeof(two), out, sizeof(out));
+  CHECK(r.result == hsfz::OK && r.len == 5 && out[1] == 0x4A && out[2] == 0x21);
+}
+
 static void test_discovery_reply() {
   const char* txt = "DIAGADR10BMWMAC001A37C0FFEEBMWVINWBAJB9C55JB287123";
   Bytes p = {0, 0, 0, 0, 0x00, 0x11};
@@ -146,6 +157,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"writes_refused", test_writes_refused},
   {"oversized_frame", test_oversized_frame},
   {"split_reply", test_split_reply},
+  {"batch_without_first", test_batch_without_first},
   {"discovery_reply", test_discovery_reply},
 };
 

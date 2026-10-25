@@ -18,9 +18,12 @@ Nothing here is sent anywhere until a Worker URL and token are set.
 """
 
 import base64
+import csv
 import hashlib
 import json
 import os
+import re
+import socket
 import sys
 import threading
 import time
@@ -95,6 +98,15 @@ def configured(settings):
     return all(config(settings))
 
 
+def source_name(settings):
+    """This installation's name in the cloud: its drives and faults are kept
+    under it, so another PC's sync never replaces them. The cloud_source
+    setting, else the PC's name."""
+    name = (settings.get("cloud_source") or socket.gethostname() or "").strip()
+    name = re.sub(r"[^\w .@()+,=-]", "-", name)[:64].strip()
+    return name if name and name != "logger" else "pc"
+
+
 def state_path():
     return os.path.join(os.path.dirname(core.availability_path()), STATE_FILE)
 
@@ -120,6 +132,40 @@ def save_state(state, path=None):
 # ------------------------------------------------------------ requests
 
 def request(settings, method, path, data=None, ctype="application/octet-stream"):
+    """Call the Worker; its JSON answer."""
+    body = _send(settings, method, path, data, ctype)
+    try:
+        return json.loads(body or b"{}")
+    except ValueError:
+        # Access answers a login page, not JSON, when the token isn't accepted.
+        raise CloudError("not the Worker's answer (a login page?): check the URL and that "
+                         "the Access policy allows the service token") from None
+
+
+def fetch(settings, path):
+    """GET a file the Worker stores (path: /api/files/<key>); its bytes."""
+    return _send(settings, "GET", path)
+
+
+def check_files(settings):
+    """The check results in the cloud (`n63read check --out` and the app's
+    Check car now, both uploaded by sync): [(answers, key)], oldest first."""
+    listed = request(settings, "GET", "/api/files").get("files", [])
+    out = []
+    for f in sorted(listed, key=lambda f: f.get("uploaded") or ""):
+        key = f.get("key") or ""
+        name = key.rsplit("/", 1)[-1].lower()
+        if "check" not in name or not name.endswith(".csv"):
+            continue
+        text = fetch(settings, "/api/files/" + _key(key)).decode("utf-8-sig", "replace")
+        try:
+            out.append((core.check_answers(text.splitlines()), key))
+        except (ValueError, csv.Error):
+            continue                        # named "check" but not a check
+    return out
+
+
+def _send(settings, method, path, data=None, ctype="application/octet-stream"):
     url, cid, secret = config(settings)
     if not (url and cid and secret):
         raise CloudError("set the Worker URL and the Access service token first")
@@ -137,12 +183,7 @@ def request(settings, method, path, data=None, ctype="application/octet-stream")
         raise CloudError("the Worker answered %d: %s" % (e.code, detail)) from None
     except (urllib.error.URLError, OSError) as e:
         raise CloudError("can't reach %s: %s" % (url, getattr(e, "reason", e))) from None
-    try:
-        return json.loads(body or b"{}")
-    except ValueError:
-        # Access answers a login page, not JSON, when the token isn't accepted.
-        raise CloudError("not the Worker's answer (a login page?): check the URL and that "
-                         "the Access policy allows the service token") from None
+    return body
 
 
 # ------------------------------------------------------------ sync
@@ -278,8 +319,8 @@ def sync(settings, logs=None, state_file=None, progress=None, templates_file=Non
     sync_series(settings, state, logs, result)
     save_state(state, state_file)
     summary = history.scan(logs)
-    payload = json.dumps({"drives": summary.drives, "faults": summary.faults},
-                         sort_keys=True).encode()
+    payload = json.dumps({"source": source_name(settings), "drives": summary.drives,
+                          "faults": summary.faults}, sort_keys=True).encode()
     digest = hashlib.sha256(payload).hexdigest()
     if digest != state.get("history_sha256"):
         reply = request(settings, "PUT", "/api/history", payload, "application/json")
