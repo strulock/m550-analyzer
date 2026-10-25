@@ -35,6 +35,7 @@
 #include <SPI.h>
 #include <WiFi.h>
 #include <errno.h>
+#include <esp_heap_caps.h>
 #include <lwip/sockets.h>
 #include <sys/time.h>
 #include <time.h>
@@ -193,7 +194,20 @@ static Table table;
 static Plan plan;
 static bool channelsFromCard = false;
 
+// The table and plan make thousands of small allocations (a vector per read,
+// strings while parsing). Left in internal RAM they break it into pieces too
+// small for a TLS handshake (seen: 123 KB free, largest block 17 KB, uploads
+// failing "SSL - Memory allocation failed"), so while loading every
+// allocation goes to PSRAM.
+static void loadChannelsInto();
+
 static void loadChannels() {
+  heap_caps_malloc_extmem_enable(0);
+  loadChannelsInto();
+  heap_caps_malloc_extmem_enable(4096);       // back to the default
+}
+
+static void loadChannelsInto() {
   table = Table();
   File f;
   if (sdOk) f = SD.open(CHANNELS_FILE);
@@ -633,8 +647,12 @@ static bool uploadOne(const String& name) {
                  p < 0 ? "" : body.substring(p + 12, p + 17) == "false" ? ", not processed"
                                                                          : ", processed");
     } else {
-      out.printf("[up] %s: %s %d %s\n", name.c_str(), code == 200 ? "hash differs:" : "failed:",
-                 code, body.substring(0, 160).c_str());
+      char tlsErr[100] = "";
+      if (code < 0) tls.lastError(tlsErr, sizeof(tlsErr));
+      out.printf("[up] %s: %s %d %s%s%s\n", name.c_str(), code == 200 ? "hash differs:" : "failed:",
+                 code, code < 0 ? HTTPClient::errorToString(code).c_str()
+                                : body.substring(0, 160).c_str(),
+                 tlsErr[0] ? "; TLS: " : "", tlsErr);
     }
   }
   f.close();
@@ -804,10 +822,12 @@ static void status() {
              WiFi.isConnected() ? WiFi.localIP().toString().c_str() : "",
              strlen(WORKER_HOST) ? WORKER_HOST : "(none set)", (unsigned)uploadedFiles,
              last.c_str());
-  out.printf("[status] SD %s, %.1f of %.1f MB used; PSRAM %u KB free; heap %u KB free\n",
+  out.printf("[status] SD %s, %.1f of %.1f MB used; PSRAM %u KB free; internal %u KB free, "
+             "largest block %u KB\n",
              sdOk ? "ok" : "MISSING", sdOk ? SD.usedBytes() / 1e6 : 0.0,
              sdOk ? SD.totalBytes() / 1e6 : 0.0, (unsigned)(ESP.getFreePsram() / 1024),
-             (unsigned)(ESP.getFreeHeap() / 1024));
+             (unsigned)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024),
+             (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024));
 }
 
 static void listPending() {
