@@ -60,6 +60,15 @@ finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).
 
+The same task checks in with the Worker once at power-on and every 10 s
+while Wi-Fi is up: a small JSON report with the boot number and why it
+booted (a brownout shows there), uptime, what it's doing, the speed, rpm and
+battery voltage when the channel table has them (battery is `IUIBS`, not in
+the built-in fast tier), files waiting, Wi-Fi and memory. A long upload
+delays the check-ins; a failed one is skipped. Each is a new TLS connection,
+about 2 MB an hour on a phone hotspot. `logger_status` (MCP) and
+`GET /api/logger` show the last one and each power-on.
+
 A module that can't take eight identifiers in a request drops to one; an
 identifier that keeps failing is rested for a minute. On the bench (bench
 car, 49 fast and 1,587 sweep channels) it logs about 12 fast rows a second

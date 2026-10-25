@@ -6,7 +6,8 @@
  *   into R2, and its drive and fault summaries (PUT /api/history) into D1.
  * - The logger board uploads its drive logs under logger/; the Worker works
  *   out their time series and drive summary itself (drive.js), and the
- *   app's history leaves those drives alone.
+ *   app's history leaves those drives alone. It also checks in (POST
+ *   /api/logger/heartbeat) at power-on and every 10 s while it has Wi-Fi.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with read-only tools over that copy: drive_history,
  *   fault_history, trend, list_files, read_log.
@@ -305,6 +306,11 @@ export const SCHEMA = [
      max REAL, mean REAL, approx INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL,
      PRIMARY KEY (drive, channel, t0))`,
   `CREATE INDEX IF NOT EXISTS series_channel ON series (channel, t0)`,
+  // The logger board's check-ins: one at power-on (event "boot"), then one
+  // every 10 s while it has Wi-Fi; data is what it sent.
+  `CREATE TABLE IF NOT EXISTS heartbeats (received TEXT NOT NULL, boot INTEGER,
+     event TEXT, data TEXT NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS heartbeats_received ON heartbeats (received)`,
 ];
 
 const MAX_POINTS = 2000;
@@ -650,6 +656,49 @@ async function faults(env, which) {
   return all.sort((a, b) => (k(a) < k(b) ? -1 : k(a) > k(b) ? 1 : 0));
 }
 
+// ------------------------------------------------------------------ heartbeats
+
+const MAX_BEAT = 4096;                      // bytes in one check-in
+const KEEP_BEATS_DAYS = 30;
+export const ONLINE_S = 30;                 // three missed beats: offline
+
+/** Store one check-in from the board; older than KEEP_BEATS_DAYS go. */
+async function putBeat(env, body, now = new Date()) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw new ToolError("body: a JSON object");
+  }
+  const boot = Number.isInteger(body.boot) ? body.boot : null;
+  const event = body.event === "boot" ? "boot" : "beat";
+  const received = now.toISOString();
+  const cutoff = new Date(now.getTime() - KEEP_BEATS_DAYS * 86400e3).toISOString();
+  await ensureSchema(env);
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO heartbeats (received, boot, event, data) VALUES (?, ?, ?, ?)")
+      .bind(received, boot, event, JSON.stringify(body)),
+    env.DB.prepare("DELETE FROM heartbeats WHERE received < ?").bind(cutoff),
+  ]);
+  return { received };
+}
+
+/** The newest check-in and how long ago, and each power-on in the last
+ * `hours`: when it started and last checked in, why it booted, top speed. */
+async function loggerStatus(env, hours, now = new Date()) {
+  await ensureSchema(env);
+  const last = (await env.DB.prepare(
+    "SELECT received, data FROM heartbeats ORDER BY received DESC, rowid DESC LIMIT 1").all()).results;
+  const since = new Date(now.getTime() - hours * 3600e3).toISOString();
+  const sessions = (await env.DB.prepare(
+    `SELECT boot, MIN(received) AS first, MAX(received) AS last, COUNT(*) AS beats,
+       MAX(json_extract(data, '$.reset')) AS reset,
+       MAX(json_extract(data, '$.speed_kmh')) AS max_speed_kmh
+     FROM heartbeats WHERE received >= ? GROUP BY boot ORDER BY first, boot`).bind(since).all())
+    .results || [];
+  if (!last || !last.length) return { online: false, last: null, sessions };
+  const age = Math.round((now.getTime() - Date.parse(last[0].received)) / 1000);
+  return { online: age <= ONLINE_S, seen_s_ago: age,
+    last: { received: last[0].received, ...JSON.parse(last[0].data) }, sessions };
+}
+
 // ------------------------------------------------------------------ MCP tools
 
 export const TOOLS = [
@@ -739,6 +788,16 @@ export const TOOLS = [
       columns: { type: "array", items: { type: "string" } },
       resample: { type: "number" } }, required: ["name"] },
   },
+  {
+    name: "logger_status",
+    description: "The logger board in the car: whether it is on now (it checks in every 10 s " +
+      "while it has Wi-Fi, and once at power-on), its last check-in (state, the drive being " +
+      "logged, speed, rpm, battery voltage when logged, files waiting to upload, Wi-Fi, " +
+      "memory) and each power-on in the last `hours` (first and last check-in, why it " +
+      "booted, top speed). Times in UTC.",
+    inputSchema: { type: "object", properties: {
+      hours: { type: "number", description: "Power-ons this far back; default 24" } } },
+  },
 ];
 
 class ToolError extends Error {}
@@ -806,6 +865,9 @@ async function callTool(env, name, a) {
       columns: Array.isArray(a.columns) ? a.columns.map(String) : null,
       resample: number(a.resample) || 0 });
   }
+  if (name === "logger_status") {
+    return loggerStatus(env, Math.max(0.1, Math.min(24 * KEEP_BEATS_DAYS, Number(a.hours) || 24)));
+  }
   throw new ToolError(`unknown tool ${name}`);
 }
 
@@ -814,7 +876,8 @@ const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault 
   "trend follows one statistic (misfires_5, knock_b1...) over time; list_files and read_log " +
   "look inside a drive, compare_banks and find_events analyse one; list_channels and " +
   "channel_series follow any channel across every " +
-  "drive in UTC time; list_templates shows the app's saved channel sets. Read-only.";
+  "drive in UTC time; list_templates shows the app's saved channel sets; logger_status " +
+  "says whether the logger board in the car is on and what it last reported. Read-only.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
 export async function rpc(env, msg) {
@@ -936,6 +999,28 @@ export async function handle(request, env, fetcher = fetch) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
     }
+  }
+
+  if (url.pathname === "/api/logger/heartbeat" && request.method === "POST") {
+    const text = await request.text();
+    if (text.length > MAX_BEAT) return json({ error: "too large" }, 413);
+    let body;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      return json({ error: "body: JSON {boot, event, ...}" }, 400);
+    }
+    try {
+      return json({ ok: true, ...(await putBeat(env, body)) });
+    } catch (e) {
+      if (e instanceof ToolError) return json({ error: e.message }, 400);
+      throw e;
+    }
+  }
+  if (url.pathname === "/api/logger" && request.method === "GET") {
+    const hours = Math.max(0.1, Math.min(24 * KEEP_BEATS_DAYS,
+      Number(url.searchParams.get("hours")) || 24));
+    return json(await loggerStatus(env, hours));
   }
 
   if (url.pathname === "/api/files" && request.method === "GET") {

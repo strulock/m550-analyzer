@@ -497,6 +497,42 @@ test("MCP batches and parse errors", async () => {
   assert.equal((await rpc(env, { jsonrpc: "1.0" })).error.code, -32600);
 });
 
+// --- logger check-ins
+
+test("logger check-ins: stored, the newest says online, power-ons grouped", async () => {
+  const off = await (await call("GET", "/api/logger")).json();
+  assert.equal(off.online, false);
+  assert.equal(off.last, null);
+  const beat = (b) => call("POST", "/api/logger/heartbeat", { body: JSON.stringify(b) });
+  assert.equal((await beat({ boot: 7, event: "boot", reset: "power on", state: "searching" }))
+    .status, 200);
+  await beat({ boot: 7, event: "beat", reset: "power on", state: "logging", speed_kmh: 42.5 });
+  await beat({ boot: 8, event: "boot", reset: "brownout", speed_kmh: null });
+  const s = await (await call("GET", "/api/logger")).json();
+  assert.equal(s.online, true);
+  assert.equal(s.last.boot, 8);
+  assert.equal(s.last.reset, "brownout");
+  assert.deepEqual(s.sessions.map((x) => [x.boot, x.beats, x.reset, x.max_speed_kmh]),
+    [[7, 2, "power on", 42.5], [8, 1, "brownout", null]]);
+  const t = await tool("logger_status", { hours: 1 });
+  assert.equal(t.data.last.boot, 8);
+  assert.equal(t.data.sessions.length, 2);
+});
+
+test("logger check-ins: bad bodies refused, old ones dropped", async () => {
+  const post = (body) => call("POST", "/api/logger/heartbeat", { body });
+  assert.equal((await post("not json")).status, 400);
+  assert.equal((await post("[1]")).status, 400);
+  assert.equal((await post(JSON.stringify({ pad: "x".repeat(5000) }))).status, 413);
+  env.DB.db.exec("CREATE TABLE IF NOT EXISTS heartbeats (received TEXT NOT NULL, boot INTEGER, " +
+    "event TEXT, data TEXT NOT NULL)");
+  env.DB.db.prepare("INSERT INTO heartbeats VALUES (?, 1, 'beat', '{}')")
+    .run("2020-01-01T00:00:00.000Z");
+  await post(JSON.stringify({ boot: 2 }));
+  const n = env.DB.db.prepare("SELECT COUNT(*) AS n FROM heartbeats").get().n;
+  assert.equal(n, 1);
+});
+
 // --- CSV
 
 test("CSV: quotes, semicolons, a BOM, CRLF", () => {
