@@ -32,6 +32,18 @@ jobs:
           node-version: "24"
       - run: node --test "cloud/test/*.test.mjs"
 
+  # The logger firmware's HSFZ client (firmware/lib/hsfz) against a scripted
+  # fake gateway; plain g++, no board or PlatformIO needed.
+  firmware:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - run: g++ -std=c++17 -Wall -Wextra -Werror -Ilib/hsfz test/host_test.cpp -o host_test
+      - run: ./host_test
+
   # The tests that need no Windows and no display, on the oldest Python the
   # package claims (requires-python) and a current one.
   test-linux:
