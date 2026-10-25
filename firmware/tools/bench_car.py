@@ -6,7 +6,7 @@ Run it on a PC whose Ethernet port is cabled straight to the logger board
     python firmware/tools/bench_car.py
 
 It answers HSFZ discovery on UDP 6811 with a FAKE VIN, and UDS reads on TCP
-6801 for the spike's eight channels, from the master DME (0x12) and the slave
+6801 for the spike's seven channels, from the master DME (0x12) and the slave
 (0x13), single or several identifiers to a request. Engine speed swings
 slowly so you can see live values change. Every request is echoed as an
 acknowledge frame first, as the real gateway does. Anything but 0x22 and
@@ -44,7 +44,6 @@ def values(dme):
         0x460C: u16(12.62 / 0.023481),                         # V
         0x4402: u16((96 + 48) / 0.75),                         # C
         0x4AB1: u16(0),                                        # km/h
-        0x5621: u16((3.6 if bank2 else 3.5) * 8192 / 5),       # MPa
         0x4201: u16(1003 * 256 / 10),                          # hPa
         0x5545: u16(0),                                        # %
     }

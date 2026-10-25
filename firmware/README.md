@@ -53,7 +53,7 @@ press `s` for status or `a` to run everything again.
    `python firmware/tools/bench_car.py` and allow Python through the Windows
    firewall on Public networks (a direct cable counts as public). Wait about
    a minute for Windows to give the port a 169.254.x.y address, then press
-   `a`. Expect discovery with VIN `WBAFAKEBENCH00001`, all eight channels
+   `a`. Expect discovery with VIN `WBAFAKEBENCH00001`, all seven channels
    from 0x12 and 0x13 (about 745 rpm swinging, 90 / 91.5 C coolant, 12.6 V),
    then a batch rate. The bench car prints each connection and flags any
    request other than a read.
@@ -68,7 +68,7 @@ OBD to the board's RJ45, laptop on USB-C, press RESET. A pass, in order:
 
 1. `[eth] LINK UP 100 Mbit/s full duplex`
 2. `[disc] HSFZ reply from 169.254.x.y ... VIN ...`
-3. 0x12 then 0x13: tester present, then 8 channels with value, raw hex and ms
+3. 0x12 then 0x13: tester present, then 7 channels with value, raw hex and ms
 4. `[batch] ... cycles/s (n63read: 6.2)`
 
 Keys: `a` run all, `s` status, `d` discover, `r` read once, `b` batch test, `x` close connections,
@@ -76,6 +76,18 @@ Keys: `a` run all, `s` status, `d` discover, `r` read once, `b` batch test, `x` 
 pin 8 high and keeps the gateway awake. Then read the same channels with
 n63read to compare (the spike uses both of the car's tester connections, so
 the two can't run at once).
+
+### Result, 2026-10-24
+
+Passed in the car (engine idling, board on a power bank, driven over Wi-Fi):
+
+- Link 100 Mbit/s full duplex through the ENET cable: the W5500's missing
+  auto-MDIX is not a problem with this cable.
+- Discovery found the gateway at 169.254.49.40 with the car's VIN.
+- Both DMEs on their own connections, 17-52 ms per single read.
+- Batch: 16.2 cycles/s (n63read: 6.2), 0 failures in 20 s, slowest 63 ms.
+- Rail pressure 0x5621 got NRC 0x31 from both DMEs, so it's out of the
+  channel list. Values not yet compared with n63read.
 
 ### Terminal over Wi-Fi
 
@@ -92,8 +104,9 @@ watch from the bench. Copy `spike/src/wifi_secrets.example.h` to
   `pio device monitor --port socket://192.168.4.1:23`
 
 The board decides at boot, so power it up where it will stay. Connecting
-prints status and help; boot output before that only goes to USB, so press
-`a` to run the tests. One terminal at a time; a new one takes over.
+replays the last 8 KB of output (the boot run, or whatever a dropped
+connection missed), then prints status and help. One terminal at a time; a
+new one takes over.
 
 There's no password: anyone on that network can connect, see the VIN and
 live values, and run the tests. That's deliberate for a bench tool; the

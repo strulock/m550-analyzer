@@ -54,7 +54,7 @@ static const hsfz::Channel CH[] = {
     {0x460C, "Battery voltage (ADC)", 2, false, 0.023481f, 1.0f, 0.0f, "V"},
     {0x4402, "Oil temp after filter", 2, false, 0.75f, 1.0f, -48.0f, "C"},
     {0x4AB1, "Vehicle speed", 2, true, 0.01f, 1.0f, 0.0f, "km/h"},
-    {0x5621, "Rail pressure (corrected)", 2, false, 5.0f, 8192.0f, 0.0f, "MPa"},
+    // Rail pressure 0x5621 dropped: both DMEs answer NRC 0x31 in the car.
     {0x4201, "Ambient pressure", 2, false, 10.0f, 256.0f, 0.0f, "hPa"},
     {0x5545, "Accelerator pedal", 2, false, 0.025f, 1.0f, 0.0f, "%"},
 };
@@ -67,15 +67,24 @@ static const uint16_t TERMINAL_PORT = 23;
 // Wi-Fi output goes a line at a time: one packet per printf fragment (two
 // bytes each in hexdump) fills the send queue and stalls the tests.
 // Network events print from another task, hence the lock.
+// The last 8 KB is kept and replayed to each new terminal, so the boot run
+// and anything lost to a dropped connection can still be read.
 struct Console : Print {
   NetworkClient remote;
   uint8_t line[256];
   size_t used = 0;
+  uint8_t hist[8192];
+  size_t head = 0;
+  bool wrapped = false;
   std::recursive_mutex lock;
   size_t write(uint8_t b) override { return write(&b, 1); }
   size_t write(const uint8_t* d, size_t n) override {
     std::lock_guard<std::recursive_mutex> g(lock);
     Serial.write(d, n);
+    for (size_t i = 0; i < n; i++) {
+      hist[head++] = d[i];
+      if (head == sizeof(hist)) { head = 0; wrapped = true; }
+    }
     for (size_t i = 0; i < n && remote.connected(); i++) {
       if (used >= sizeof(line)) flush();
       line[used++] = d[i];
@@ -100,6 +109,11 @@ struct Console : Print {
     used = 0;
     remote = c;
     remote.setNoDelay(true);
+    static const char start[] = "---- recent output ----\n", end[] = "---- live ----\n";
+    remote.write((const uint8_t*)start, sizeof(start) - 1);
+    if (wrapped) remote.write(hist + head, sizeof(hist) - head);
+    remote.write(hist, head);
+    remote.write((const uint8_t*)end, sizeof(end) - 1);
   }
 };
 
