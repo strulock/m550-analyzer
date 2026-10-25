@@ -32,3 +32,5 @@ cloud/wrangler.jsonc
 cloud/.wrangler/
 cloud/node_modules/
 cloud/.dev.vars
+firmware/**/.pio/
+firmware/test/host_test
