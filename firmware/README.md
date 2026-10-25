@@ -8,6 +8,7 @@ the Windows build.
 | --- | --- |
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
 | `test/host_test.cpp` | Runs `lib/hsfz` against a scripted fake gateway on a PC (CI job `firmware`) |
+| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs) |
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
 | `logger/` | The real logger firmware, later |
 
@@ -34,7 +35,33 @@ Board: Waveshare ESP32-S3-ETH.
 3. Serial monitor at 115200. With no cable: `[eth] W5500 up`, then `no link`
    after 15 s.
 
-In the car: ignition on (engine off is fine), close n63read, ENET cable from
+### On the bench first
+
+With native USB the boot messages often scroll past before the monitor opens:
+press `s` for status or `a` to run everything again.
+
+1. **Board alive**: `s` shows the MAC, our address 169.254.100.100 and
+   `link down`. That proves the W5500 answers over SPI.
+2. **Link**: cable from the board to a home switch or router. Expect
+   `[eth] LINK UP 100 Mbit/s full duplex`; unplug for `link down`. Discovery
+   finds nothing on a home network, as expected. A switch fixes up crossed
+   pairs on its side, so this doesn't test the car's wiring.
+3. **Dry run against a bench car**: cable the board straight to the PC's
+   Ethernet port (or a USB Ethernet dongle), no router. Run
+   `python firmware/tools/bench_car.py` and allow Python through the Windows
+   firewall on Public networks (a direct cable counts as public). Wait about
+   a minute for Windows to give the port a 169.254.x.y address, then press
+   `a`. Expect discovery with VIN `WBAFAKEBENCH00001`, all eight channels
+   from 0x12 and 0x13 (about 745 rpm swinging, 90 / 91.5 C coolant, 12.6 V),
+   then a batch rate. The bench car prints each connection and flags any
+   request other than a read.
+
+The bench rate is not the car's: the car's DMEs take a few milliseconds per
+answer, the bench car none.
+
+### In the car
+
+Ignition on (engine off is fine), close n63read, ENET cable from
 OBD to the board's RJ45, laptop on USB-C, press RESET. A pass, in order:
 
 1. `[eth] LINK UP 100 Mbit/s full duplex`
@@ -42,7 +69,7 @@ OBD to the board's RJ45, laptop on USB-C, press RESET. A pass, in order:
 3. 0x12 then 0x13: tester present, then 8 channels with value, raw hex and ms
 4. `[batch] ... cycles/s (n63read: 6.2)`
 
-Keys: `d` discover, `r` read once, `b` batch test, `x` close connections,
+Keys: `a` run all, `s` status, `d` discover, `r` read once, `b` batch test, `x` close connections,
 `h` help. Type `x` before unplugging, and unplug the cable when done: it holds
 pin 8 high and keeps the gateway awake. Then read the same channels with
 n63read to compare (the spike uses both of the car's tester connections, so

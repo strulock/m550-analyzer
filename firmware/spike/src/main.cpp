@@ -4,6 +4,8 @@
 // USB-C to the laptop, ignition on, then open the serial monitor (115200).
 // It runs every test once at boot; type a letter to run one again:
 //
+//   a  run everything again
+//   s  status: link, addresses, open connections
 //   d  discover the car (UDP 6811)
 //   r  read test channels once from 0x12 and 0x13
 //   b  batch rate test, 20 s
@@ -244,7 +246,16 @@ static void batchTest() {
 }
 
 static void help() {
-  Serial.println("d discover  r read once  b batch rate test  x close connections  h help");
+  Serial.println("a run all  d discover  r read once  b batch rate test  s status  x close connections  h help");
+}
+
+static void status() {
+  Serial.printf("[status] link %s", linkUp ? "UP" : "down");
+  if (linkUp) Serial.printf(" %d Mbit/s %s duplex", ETH.linkSpeed(), ETH.fullDuplex() ? "full" : "half");
+  Serial.printf(", MAC %s, our address %s, car %s, connections: main %s, bank 2 %s\n",
+                ETH.macAddress().c_str(), MY_IP.toString().c_str(),
+                carIp == IPAddress(0, 0, 0, 0) ? "not found yet" : carIp.toString().c_str(),
+                tMain.c.connected() ? "open" : "closed", tBank2.c.connected() ? "open" : "closed");
 }
 
 static void runAll() {
@@ -287,6 +298,8 @@ void loop() {
   if (!Serial.available()) { delay(20); return; }
   char c = (char)Serial.read();
   switch (c) {
+    case 'a': runAll(); break;
+    case 's': status(); break;
     case 'd': discover(); break;
     case 'r': if (carIp != IPAddress(0, 0, 0, 0) || discover()) readTest(); break;
     case 'b': if (carIp != IPAddress(0, 0, 0, 0) || discover()) batchTest(); break;
