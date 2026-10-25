@@ -55,7 +55,10 @@
 #if __has_include("logger_secrets.h")
 #include "logger_secrets.h"
 #endif
-#ifndef WORKER_HOST
+#if !defined(WORKER_HOST) || defined(LOGGER_NO_UPLOAD)
+// No Worker, or a bench build (PLATFORMIO_BUILD_FLAGS=-DLOGGER_NO_UPLOAD):
+// log only, so bench drives never reach the cloud.
+#undef WORKER_HOST
 #define WORKER_HOST ""
 #endif
 #ifndef TZ_INFO
