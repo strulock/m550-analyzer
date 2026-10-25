@@ -26,6 +26,8 @@
 #include <SPI.h>
 #include <WiFi.h>
 
+#include <mutex>
+
 #include "hsfz.h"
 
 #if __has_include("wifi_secrets.h")
@@ -64,27 +66,40 @@ static const uint16_t TERMINAL_PORT = 23;
 
 // Wi-Fi output goes a line at a time: one packet per printf fragment (two
 // bytes each in hexdump) fills the send queue and stalls the tests.
+// Network events print from another task, hence the lock.
 struct Console : Print {
   NetworkClient remote;
   uint8_t line[256];
   size_t used = 0;
+  std::recursive_mutex lock;
   size_t write(uint8_t b) override { return write(&b, 1); }
   size_t write(const uint8_t* d, size_t n) override {
+    std::lock_guard<std::recursive_mutex> g(lock);
     Serial.write(d, n);
     for (size_t i = 0; i < n && remote.connected(); i++) {
+      if (used >= sizeof(line)) flush();
       line[used++] = d[i];
-      if (d[i] == '\n' || used == sizeof(line)) flush();
+      if (d[i] == '\n') flush();
     }
     return n;
   }
   void flush() override {
+    std::lock_guard<std::recursive_mutex> g(lock);
     if (used && remote.connected() && remote.write(line, used) != used) remote.stop();
     used = 0;
   }
   int read() {
+    std::lock_guard<std::recursive_mutex> g(lock);
     if (Serial.available()) return Serial.read();
     if (remote.connected() && remote.available()) return remote.read();
     return -1;
+  }
+  void attach(NetworkClient& c) {
+    std::lock_guard<std::recursive_mutex> g(lock);
+    if (remote.connected()) remote.stop();
+    used = 0;
+    remote = c;
+    remote.setNoDelay(true);
   }
 };
 
@@ -183,10 +198,7 @@ static void startWifi() {
 static bool acceptTerminal() {
   NetworkClient c = terminal.accept();
   if (!c) return false;
-  if (out.remote.connected()) out.remote.stop();
-  out.used = 0;
-  out.remote = c;
-  out.remote.setNoDelay(true);
+  out.attach(c);
   out.println("\nm550 HSFZ spike (read-only), Wi-Fi terminal");
   return true;
 }
