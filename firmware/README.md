@@ -77,6 +77,32 @@ pin 8 high and keeps the gateway awake. Then read the same channels with
 n63read to compare (the spike uses both of the car's tester connections, so
 the two can't run at once).
 
+### Terminal over Wi-Fi
+
+The same keys and output are on Wi-Fi, TCP port 23, so the board can sit in
+the car on a USB power supply (the car's USB port or a power bank) while you
+watch from the bench. Copy `spike/src/wifi_secrets.example.h` to
+`wifi_secrets.h` next to it (gitignored) and fill in either or both:
+
+- `WIFI_SSID` / `WIFI_PASS`: a network that reaches the car, e.g. home Wi-Fi
+  in the garage. Then, from `firmware/spike`:
+  `pio device monitor --port socket://m550-spike.local:23`
+- `AP_PASS`: used when that network isn't in range at boot. The board starts
+  an access point `m550-spike`; join it, then
+  `pio device monitor --port socket://192.168.4.1:23`
+
+The board decides at boot, so power it up where it will stay. Connecting
+prints status and help; boot output before that only goes to USB, so press
+`a` to run the tests. One terminal at a time; a new one takes over.
+
+- `.local` names don't cross VLANs: if the PC and the IoT network are on
+  different subnets, use the address `s` shows (or the router's DHCP list).
+  A DHCP reservation keeps it fixed.
+- Closing a USB serial connection resets the board (the ESP32-S3's native USB
+  treats it as a reset), and the boot run takes about 30 s, during which the
+  Wi-Fi terminal accepts but doesn't answer. Not an issue in the car, where
+  nothing is on USB.
+
 Set `CAR_IP_OVERRIDE` in `spike/src/main.cpp` to skip discovery if the
 broadcast fails but n63read shows the car's address.
 
