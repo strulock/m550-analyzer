@@ -37,7 +37,7 @@ import queue
 import sys
 import time
 
-from n63read import __version__, cloud, core, diag, engine, history, share, update
+from n63read import __version__, cloud, core, diag, engine, history, loggerchannels, share, update
 from n63read.core import (DEFAULT_CSV, DME_MASTER, FAULT_CSV, NRC, TESTER_ADDR,
                           HsfzError, NegativeResponse, decode)
 
@@ -529,6 +529,31 @@ def op_selftest(args):
     print("selftest ok")
 
 
+def op_logger_channels(args):
+    """Write the logger board's channel file: every channel the car answers."""
+    try:
+        avail = (core.import_check_csv(args.check) if args.check
+                 else core.load_availability(args.availability))
+    except (OSError, ValueError, csv.Error) as e:
+        sys.exit("can't read what the car answers: %s" % e)
+    if not avail:
+        sys.exit("nothing recorded yet: in the app, Answers > Check car now "
+                 "(or pass --check with a `n63read check --out` CSV)")
+    try:
+        fast = loggerchannels.fast_names(args.fast or loggerchannels.FAST_TEMPLATES)
+    except KeyError as e:
+        sys.exit("no template %s; built in: %s" % (e, ", ".join(core.BUILTIN_TEMPLATES)))
+    rows = loggerchannels.channels(_catalog(core.DEFAULT_CSV), avail, fast)
+    loggerchannels.write(rows, args.out)
+    print("%-6s %-34s %6s %6s %6s" % ("module", "", "fast", "sweep", "ids"))
+    for module, n in loggerchannels.summary(rows).items():
+        name = core.MODULE_LABELS.get(int(module, 16), "DME" if module in ("0x12", "0x13")
+                                      else "")
+        print("%-6s %-34s %6d %6d %6d" % (module, name[:34], n["fast"], n["sweep"],
+                                          n["identifiers"]))
+    print("%d channels -> %s" % (len(rows), args.out))
+
+
 def op_check(args):
     """Read every catalogued identifier and check its reply size against the file.
 
@@ -762,6 +787,19 @@ def build_parser():
     sp.add_argument("-v", "--verbose", action="store_true",
                     help="print every identifier, not just size mismatches")
     sp.set_defaults(func=op_check)
+
+    sp = sub.add_parser("logger-channels", help="write the logger board's channel file: "
+                                                "every channel the car answers (no car needed)")
+    sp.add_argument("--out", default="channels.csv", metavar="CSV",
+                    help="where to write it (default channels.csv); copy it to the SD card")
+    sp.add_argument("--check", metavar="CSV",
+                    help="what answers, from a `n63read check --out` CSV (default: the "
+                         "app's record, Answers > Check car now)")
+    sp.add_argument("--availability", metavar="JSON", help=argparse.SUPPRESS)
+    sp.add_argument("--fast", action="append", metavar="TEMPLATE",
+                    help="a built-in template for the every-cycle tier; repeatable "
+                         "(default: %s)" % ", ".join(loggerchannels.FAST_TEMPLATES))
+    sp.set_defaults(func=op_logger_channels)
 
     sp = sub.add_parser("mcp", help="let Claude use n63read (an MCP server on stdin/stdout)")
     sp.add_argument("--register", action="store_true",
