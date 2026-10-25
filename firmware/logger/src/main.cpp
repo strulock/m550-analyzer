@@ -18,7 +18,8 @@
 // Terminal: USB serial at 115200, and TCP 23 over Wi-Fi (logger_secrets.h):
 //   s status   l files waiting to upload   u upload now   e end this drive
 //   v view the newest files   C load a channels.csv sent over the terminal
-//   X delete the files waiting to upload (asks first)   h help
+//   X delete the files waiting to upload (asks first)
+//   T queue a small test file (not a drive) to try uploads   h help
 
 #include <Arduino.h>
 #include <ESPmDNS.h>
@@ -767,7 +768,8 @@ static bool endRequested = false;
 
 static void help() {
   out.println("s status  l files waiting to upload  u upload now  e end this drive  v view the files");
-  out.println("C load channels.csv (send it, then a line with a dot)  X delete waiting files  h help");
+  out.println("C load channels.csv (send it, then a line with a dot)  X delete waiting files");
+  out.println("T queue an upload test file  h help");
 }
 
 static void status() {
@@ -818,6 +820,28 @@ static void listPending() {
 
 // Delete the files waiting to upload (bench runs, say), after a "y" within
 // ten seconds. The drive being logged isn't touched.
+// Queue a small file that isn't a drive log, to try the upload path: the
+// Worker stores it (logger/upload-test-<n>.csv) and answers "not a drive
+// log", so nothing reaches History. Then u sends it straight away.
+static void uploadTest() {
+  char name[48];
+  snprintf(name, sizeof(name), "%s/upload-test-%u.csv", DRIVES, (unsigned)bootCount);
+  std::string text = "note\nupload test from the m550 logger, boot " + std::to_string(bootCount) +
+                     (timeKnown() ? ", " + clockNow() : std::string()) + "\n";
+  Sha256 sha;
+  sha.update(text.data(), text.size());
+  char hex[65];
+  sha.finishHex(hex);
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  File f = SD.open(name, FILE_WRITE);
+  if (!f) { out.println("[up] can't write the test file"); return; }
+  f.write((const uint8_t*)text.data(), text.size());
+  f.close();
+  File d = SD.open(String(name) + ".done", FILE_WRITE);
+  if (d) { d.printf("%s %u\n", hex, (unsigned)text.size()); d.close(); }
+  out.printf("[up] queued %s (%u bytes); u to send it now\n", name, (unsigned)text.size());
+}
+
 static void discardPending() {
   std::vector<String> names = pending();
   out.printf("[files] delete %u files waiting to upload? y to confirm\n", (unsigned)names.size());
@@ -924,6 +948,7 @@ static void serviceTerminal() {
     case 'v': view(); break;
     case 'C': receiveChannels(); break;
     case 'X': discardPending(); break;
+    case 'T': uploadTest(); break;
     case 'h': help(); break;
     default: break;
   }
