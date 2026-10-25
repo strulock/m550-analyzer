@@ -488,16 +488,25 @@ async function putHistory(env, body) {
 /** Units the app stored for these channels (a bank 2 twin takes bank 1's). */
 async function knownUnits(env, names) {
   const base = (n) => (n.endsWith(BANK2) ? n.slice(0, -BANK2.length) : n);
-  const wanted = [...new Set(names.map(base))];
-  const units = {};
-  for (let i = 0; i < wanted.length; i += 50) {
-    const part = wanted.slice(i, i + 50);
-    const r = await env.DB.prepare(
-      `SELECT channel, MAX(unit) AS unit FROM series WHERE unit != '' AND channel IN
-       (${part.map(() => "?").join(",")}) GROUP BY channel`).bind(...part).all();
-    for (const x of r.results || []) units[x.channel] = x.unit;
-  }
+  const r = await env.DB.prepare(
+    `SELECT channel, MAX(unit) AS unit FROM series WHERE unit != '' AND channel IN
+     (SELECT value FROM json_each(?)) GROUP BY channel`)
+    .bind(JSON.stringify([...new Set(names.map(base))])).all();
+  const units = Object.fromEntries((r.results || []).map((x) => [x.channel, x.unit]));
   return Object.fromEntries(names.map((n) => [n, units[base(n)] || ""]));
+}
+
+// D1 allows 1,000 queries a request, and a sweep file has thousands of
+// channels: chunks go in many at a time, as one JSON parameter unpacked by
+// json_each, up to this many bytes a statement.
+const INSERT_BYTES = 400000;
+
+function insertMany(env, drive, approx, json) {
+  return env.DB.prepare(
+    `INSERT OR REPLACE INTO series (drive, channel, t0, t1, n, unit, min, max, mean, approx,
+     data) SELECT ?, value->>'name', value->>'t0', value->>'t1', value->>'n', value->>'unit',
+     value->>'min', value->>'max', value->>'mean', ?, value->>'data' FROM json_each(?)`)
+    .bind(drive, approx ? 1 : 0, json);
 }
 
 /** The drive a logger file belongs to: the logger writes each drive as a
@@ -517,20 +526,30 @@ async function ingestLog(env, key, bytes) {
   const series = buildSeries(log, now);
   await ensureSchema(env);
   const units = await knownUnits(env, series.names);
-  // This file's channels only (the drive's other file keeps its own), one
-  // channel at a time to keep within the Worker's memory. A re-upload
-  // replaces whatever an interrupted one left.
-  for (let i = 0; i < series.names.length; i += 50) {
-    const part = series.names.slice(i, i + 50);
-    await env.DB.prepare(`DELETE FROM series WHERE drive = ? AND channel IN
-      (${part.map(() => "?").join(",")})`).bind(drive, ...part).run();
-  }
-  let channels = 0;
+  // This file's channels only (the drive's other file keeps its own). A
+  // re-upload replaces whatever an interrupted one left.
+  await env.DB.prepare(`DELETE FROM series WHERE drive = ? AND channel IN
+    (SELECT value FROM json_each(?))`).bind(drive, JSON.stringify(series.names)).run();
+  // A channel's JSON is made as it's needed and sent a few hundred KB at a
+  // time, to keep within the Worker's memory and D1's query count.
+  let channels = 0, part = [], partBytes = 0;
+  const send = async () => {
+    if (part.length) await insertMany(env, drive, series.approx, `[${part.join(",")}]`).run();
+    part = [];
+    partBytes = 0;
+  };
   for (const chunks of series.channels()) {
-    for (const c of chunks) c.unit = units[c.name];
-    await env.DB.batch(chunks.map((c) => insertChunk(env, drive, series.approx, c)));
+    for (const c of chunks) {
+      const one = `{"name":${JSON.stringify(c.name)},"t0":${c.t0},"t1":${c.t1},"n":${c.n},` +
+        `"unit":${JSON.stringify(units[c.name] || "")},"min":${c.min},"max":${c.max},` +
+        `"mean":${c.mean},"data":${c.json}}`;
+      if (partBytes + one.length > INSERT_BYTES) await send();
+      part.push(one);
+      partBytes += one.length;
+    }
     channels++;
   }
+  await send();
   // The summary from both files once both are here.
   const obj = await env.FILES.get(sweep ? drive : drive.slice(0, -".csv".length) + SWEEP);
   let other = null;

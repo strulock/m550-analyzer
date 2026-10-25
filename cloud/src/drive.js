@@ -196,7 +196,7 @@ function fields(line, delim) {
 }
 
 class Growable {
-  constructor() { this.a = new Float64Array(1024); this.n = 0; }
+  constructor() { this.a = new Float64Array(16); this.n = 0; }   // a sweep file has thousands of columns
   push(v) {
     if (this.n === this.a.length) {
       const b = new Float64Array(this.a.length * 2);

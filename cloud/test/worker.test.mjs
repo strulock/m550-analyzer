@@ -228,6 +228,25 @@ test("a drive's fast and sweep files make one drive, in either order", async () 
   assert.deepEqual(await channels(), both);
 });
 
+test("a sweep file with thousands of channels stays within D1's query count", async () => {
+  const names = Array.from({ length: 3000 }, (_, i) => `BDC_CH_${i}`);
+  const csvText = `Time,Clock,${names.join(",")}\n` + [0, 60, 120, 180, 240].map((t) =>
+    `${t},2026-10-25 07:00:00.000-05:00,${names.map((_, k) => (k + t) % 97).join(",")}`)
+    .join("\n") + "\n";
+  let statements = 0;
+  const prepare = env.DB.prepare.bind(env.DB);
+  env.DB.prepare = (sql) => { statements++; return prepare(sql); };
+  const put = await (await call("PUT", "/api/files/logger/w.sweep.csv", { body: csvText })).json();
+  assert.equal(put.processed, true);
+  assert.equal(put.channels, 3000);
+  assert.ok(statements < 40, `${statements} statements`);         // D1 allows 1,000
+  env.DB.prepare = prepare;
+  const listed = (await (await call("GET", "/api/series?match=BDC_CH_")).json()).channels;
+  assert.equal(listed.length, 3000);
+  const one = await toolData("channel_series", { channel: "BDC_CH_7" });
+  assert.deepEqual(one.points.map((p) => p[1]), [7, 67, 30, 90, 53]);
+});
+
 test("logger uploads that aren't drive logs are stored and say why", async () => {
   const faults = await (await call("PUT", "/api/files/logger/faults.csv",
     { body: "read_at,module,code\n2026-10-25,0x12,1A400A\n" })).json();
