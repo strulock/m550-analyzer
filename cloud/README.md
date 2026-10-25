@@ -16,8 +16,8 @@ serves it to Claude from anywhere:
   `channel_series` can follow a channel across every drive, averaged into
   time buckets when long, or as per-drive min, mean and max.
 - **The logger board** (`firmware/`) uploads its drive logs under `logger/`,
-  two files a drive: `<start>.csv` (the fast channels, every cycle) and
-  `<start>.sweep.csv` (every other channel the car answers, in rotation).
+  two files a drive: `<start>.csv` (the fast and medium channels, every
+  cycle) and `<start>.sweep.csv` (the slow channels, one row a pass).
   The Worker works out their time series and drive summary itself
   (`src/drive.js`, a port of the app's `series.py` and `history.summarize`),
   both files counting as one drive under the first's name, so they show in

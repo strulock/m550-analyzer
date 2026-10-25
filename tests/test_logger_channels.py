@@ -7,7 +7,7 @@ GPS = (0x63, 0xD039)
 
 
 def _rows(avail, fast=()):
-    return {r["name"]: r for r in loggerchannels.channels(CAT, avail, fast)}
+    return {r["name"]: r for r in loggerchannels.channels(CAT, avail, fast, ())}
 
 
 def test_only_identifiers_that_answer_ok_are_swept():
@@ -15,7 +15,7 @@ def test_only_identifiers_that_answer_ok_are_swept():
     assert "HU_STATUS_GPS_POSITION.LATITUDE" in rows
     assert not any(r["did"] == "0xD030" for r in rows.values())     # wrong size: would misdecode
     assert {r["did"] for r in rows.values()} == {"0xD039"}
-    assert all(r["tier"] == "sweep" for r in rows.values())
+    assert all(r["tier"] == "slow" for r in rows.values())
 
 
 def test_fast_channels_are_kept_whatever_was_recorded():
@@ -75,11 +75,23 @@ def test_strings_private_and_calculated_channels_are_left_out():
             assert not names & set(after), key
 
 
-def test_default_fast_tier_is_the_three_templates():
-    fast = loggerchannels.fast_names()
-    assert "INMOT" in fast and "MASSENSTROM_KRAFTSTOFF@0x13" in fast
-    assert "HU_STATUS_GPS_POSITION.LATITUDE" in fast
-    assert not any(n in core.DERIVED for n in fast)
+def test_default_tiers():
+    fast, medium = loggerchannels.tier_lists()
+    assert {"INMOT", "I_EWG_POS", "I_EWG_POS@0x13", "TV_EWG@0x13", "ILAG1@0x13",
+            "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT@0x13", "IWDKL"} <= set(fast)
+    assert {"MASSENSTROM_KRAFTSTOFF@0x13", "HU_STATUS_GPS_POSITION.LATITUDE", "IMUL1@0x13",
+            "SPG_POS_SENS_EWG", "ZAEHLER_AUSSETZERK_ZYL5"} <= set(medium)
+    assert not set(fast) & set(medium)                    # fast wins
+    assert not any(n in core.DERIVED for n in fast + medium)
+
+
+def test_app_templates_replace_the_tiers():
+    fast, medium = loggerchannels.tier_lists({"Logger fast": ["INMOT", "CALC_BOOST_MINUS_TARGET"],
+                                              "Logger medium": ["INMOT", "ITOEL"]})
+    assert fast == ["INMOT", "IPLAD", "S_LADEDRUCK"]      # calculated: its inputs
+    assert medium == ["ITOEL"]
+    rows = {r["name"]: r["tier"] for r in loggerchannels.channels(CAT, {}, fast, medium)}
+    assert rows == {"INMOT": "fast", "IPLAD": "fast", "S_LADEDRUCK": "fast", "ITOEL": "medium"}
 
 
 def test_cli_writes_the_file(tmp_path, monkeypatch, capsys):
@@ -93,7 +105,7 @@ def test_cli_writes_the_file(tmp_path, monkeypatch, capsys):
     with open(out, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     assert rows[0].keys() == set(loggerchannels.HEADER)
-    assert {r["tier"] for r in rows} == {"fast", "sweep"}
+    assert {r["tier"] for r in rows} == {"fast", "medium", "slow"}
     assert "channels ->" in capsys.readouterr().out
 
 
@@ -121,7 +133,7 @@ def test_cli_merges_several_checks(tmp_path, capsys):
     out = tmp_path / "channels.csv"
     cli.main(["logger-channels", "--check", a, "--check", b, "--out", str(out)])
     with open(out, newline="", encoding="utf-8") as f:
-        sweep = {r["did"] for r in csv.DictReader(f) if r["tier"] == "sweep"}
+        sweep = {r["did"] for r in csv.DictReader(f) if r["tier"] == "slow"}
     assert sweep == {"0xD039", "0xD030"}
 
 
@@ -132,7 +144,7 @@ def test_cli_takes_the_checks_from_the_cloud(tmp_path, monkeypatch, capsys):
     out = tmp_path / "channels.csv"
     cli.main(["logger-channels", "--from-cloud", "--out", str(out)])
     with open(out, newline="", encoding="utf-8") as f:
-        sweep = {r["did"] for r in csv.DictReader(f) if r["tier"] == "sweep"}
+        sweep = {r["did"] for r in csv.DictReader(f) if r["tier"] == "slow"}
     assert sweep == {"0xD039", "0xD030"}
     assert "cloud: check_2026-10-26.csv" in capsys.readouterr().out
 

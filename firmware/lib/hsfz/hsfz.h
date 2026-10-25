@@ -82,20 +82,45 @@ class Client {
   uint8_t source() const { return src_; }
 
   // Send one UDS request and wait for its positive answer. Only 0x22 and 0x3E
-  // leave this function: the logger never writes to the car.
+  // leave this client: the logger never writes to the car.
   Reply request(uint8_t target, const uint8_t* req, size_t reqLen,
                 uint8_t* out, size_t outCap, uint32_t timeout_ms = 6000) {
     Reply r;
+    if (!start(target, req, reqLen, r)) return r;
+    return finish(target, req, reqLen, out, outCap, timeout_ms);
+  }
+
+  // The two halves of request(), so requests on two connections (the two
+  // DMEs) can be in flight at once: start() sends, finish() waits for the
+  // answer. False from start() with r.result REFUSED or CLOSED.
+  bool start(uint8_t target, const uint8_t* req, size_t reqLen, Reply& r) {
     if (reqLen == 0 || (req[0] != 0x22 && req[0] != 0x3E)) {
       r.result = REFUSED;
-      return r;
+      return false;
     }
-    const uint8_t service = req[0];
-    const size_t echo = service == 0x22 ? 2 : 1;
-    if (!send(target, req, reqLen)) { r.result = CLOSED; return r; }
+    if (!send(target, req, reqLen)) { r.result = CLOSED; return false; }
+    return true;
+  }
 
-    uint32_t deadline = t_.now_ms() + timeout_ms;
+  // Several requests can be in flight on one connection, to different
+  // modules (never two to one module): an answer from a module other than
+  // the one being waited for is kept for its own finish().
+  Reply finish(uint8_t target, const uint8_t* req, size_t reqLen,
+               uint8_t* out, size_t outCap, uint32_t timeout_ms = 6000) {
+    Reply r;
     int busy = 0;
+    for (Stashed& s : stash_) {                          // it may have come already
+      if (!s.used || s.src != target) continue;
+      s.used = false;
+      Verdict v = judge(req, reqLen, s.data, s.len, out, outCap, r);
+      if (v == DONE) return r;
+      if (v == BUSY) {
+        busy++;
+        t_.sleep_ms(200);
+        if (!send(target, req, reqLen)) { r.result = CLOSED; return r; }
+      }
+    }
+    uint32_t deadline = t_.now_ms() + timeout_ms;
     while ((int32_t)(deadline - t_.now_ms()) > 0) {
       uint16_t control; uint32_t length;
       Result fr = readFrame(deadline, control, length);
@@ -109,33 +134,79 @@ class Client {
       const uint8_t fsrc = buf_[0], fdst = buf_[1];
       const uint8_t* data = buf_ + 2;
       const size_t dlen = length - 2;
-      if (fsrc != target || fdst != src_) continue;      // someone else's
+      if (fdst != src_) continue;                        // someone else's
+      if (fsrc != target) { keep(fsrc, data, dlen); continue; }
 
-      if (data[0] == 0x7F && dlen >= 3) {
-        if (data[1] != service) continue;
-        if (data[2] == 0x78) continue;                   // response pending
-        if (data[2] == 0x21 && busy < 3) {               // busy: ask again
-          busy++;
-          t_.sleep_ms(200);
-          if (!send(target, req, reqLen)) { r.result = CLOSED; return r; }
-          deadline = t_.now_ms() + timeout_ms;
-          continue;
-        }
-        r.result = NEGATIVE; r.nrc = data[2]; return r;
+      Verdict v = judge(req, reqLen, data, dlen, out, outCap, r);
+      if (v == DONE) return r;
+      if (v == BUSY && busy < 3) {                       // busy: ask again
+        busy++;
+        t_.sleep_ms(200);
+        if (!send(target, req, reqLen)) { r.result = CLOSED; return r; }
+        deadline = t_.now_ms() + timeout_ms;
+      } else if (v == BUSY) {
+        r.result = NEGATIVE; r.nrc = 0x21; return r;
       }
-      if (data[0] == service + 0x40 && dlen >= 1 + echo && echoes(req, reqLen, data + 1)) {
-        r.len = dlen < outCap ? dlen : outCap;
-        memcpy(out, data, r.len);
-        r.result = OK;
-        return r;
-      }
-      // a late answer to an earlier request, or chatter: keep waiting
+      // WAIT: a late answer to an earlier request, chatter, or pending
     }
     r.result = TIMEOUT;
     return r;
   }
 
+  // Forget kept answers (a cycle's leftovers, e.g. after a timeout), so an
+  // old one never stands in for a new request.
+  void clearStash() {
+    for (Stashed& s : stash_) s.used = false;
+  }
+
  private:
+  enum Verdict { WAIT, DONE, BUSY };
+
+  // An answer from the target to this request: DONE (r filled), BUSY (ask
+  // again), or WAIT (not this request's: pending, late, another service).
+  static Verdict judge(const uint8_t* req, size_t reqLen, const uint8_t* data, size_t dlen,
+                       uint8_t* out, size_t outCap, Reply& r) {
+    const uint8_t service = req[0];
+    const size_t echo = service == 0x22 ? 2 : 1;
+    if (data[0] == 0x7F && dlen >= 3) {
+      if (data[1] != service || data[2] == 0x78) return WAIT;   // not ours, or pending
+      if (data[2] == 0x21) return BUSY;
+      r.result = NEGATIVE; r.nrc = data[2];
+      return DONE;
+    }
+    if (data[0] == service + 0x40 && dlen >= 1 + echo && echoes(req, reqLen, data + 1)) {
+      r.len = dlen < outCap ? dlen : outCap;
+      memcpy(out, data, r.len);
+      r.result = OK;
+      return DONE;
+    }
+    return WAIT;
+  }
+
+  // Keep another module's answer (a response-pending notice isn't one); the
+  // oldest goes when all slots are full.
+  void keep(uint8_t src, const uint8_t* data, size_t len) {
+    if (len > STASH_BYTES || (data[0] == 0x7F && len >= 3 && data[2] == 0x78)) return;
+    Stashed* slot = &stash_[0];
+    for (Stashed& s : stash_) {
+      if (!s.used) { slot = &s; break; }
+      if (s.seq < slot->seq) slot = &s;
+    }
+    slot->used = true; slot->src = src; slot->len = len; slot->seq = ++seq_;
+    memcpy(slot->data, data, len);
+  }
+
+  static constexpr int STASH = 4;
+  static constexpr size_t STASH_BYTES = 3100;      // a batch's answer (plan.h MAX_REPLY)
+  struct Stashed {
+    bool used = false;
+    uint8_t src = 0;
+    size_t len = 0;
+    uint32_t seq = 0;
+    uint8_t data[STASH_BYTES];
+  };
+  Stashed stash_[STASH];
+  uint32_t seq_ = 0;
   // Whether a positive reply starting at `p` answers this request: 0x3E echoes
   // its sub-function; 0x22 starts with one of the identifiers asked for (a
   // module leaves out ones it doesn't have, the first included).

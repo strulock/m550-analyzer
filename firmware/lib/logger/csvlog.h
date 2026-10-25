@@ -112,10 +112,11 @@ class LogFile {
  public:
   std::vector<uint32_t> columns;
 
-  void setup(const Table& t, bool fast) {
+  // The fast file: the fast and medium tiers; the sweep file: the slow one.
+  void setup(const Table& t, bool fastFile) {
     columns.clear();
     for (uint32_t i = 0; i < t.channels.size(); i++) {
-      if (t.channels[i].fast == fast) columns.push_back(i);
+      if ((t.channels[i].tier != SLOW) == fastFile) columns.push_back(i);
     }
   }
 

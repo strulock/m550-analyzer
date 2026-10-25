@@ -17,6 +17,10 @@ namespace logger {
 
 enum Type : uint8_t { U8, S8, U16, S16, U32, S32, F32, GPS };
 
+// fast: every cycle; medium: in rotation, a few times a second (both in the
+// drive's fast file); slow: in rotation, one row a pass (the sweep file).
+enum Tier : uint8_t { FAST, MEDIUM, SLOW };
+
 inline int typeWidth(Type t) {
   switch (t) {
     case U8: case S8: return 1;
@@ -35,7 +39,7 @@ struct Channel {
   uint16_t offset;      // this value's place in it
   Type type;
   bool little;          // byte order "little"; else most significant first
-  bool fast;            // tier "fast": every cycle; else the sweep
+  Tier tier;            // "fast", "medium", or "slow" ("sweep", the old name)
   bool hasNoValue;
   uint32_t noValue;     // the raw value (big-endian) that means "none"
   double mul, div, add;
@@ -82,9 +86,9 @@ class Table {
     return true;
   }
 
-  size_t count(bool fast) const {
+  size_t count(Tier tier) const {
     size_t n = 0;
-    for (const Channel& c : channels) n += c.fast == fast;
+    for (const Channel& c : channels) n += c.tier == tier;
     return n;
   }
 
@@ -140,7 +144,8 @@ class Table {
     c.type = (Type)t;
     if (size && offset + typeWidth(c.type) > size) return false;
     c.little = f[col_[ORDER]] == "little";
-    c.fast = f[col_[TIER]] == "fast";
+    const std::string& tier = f[col_[TIER]];
+    c.tier = tier == "fast" ? FAST : tier == "medium" ? MEDIUM : SLOW;
     if (!num(f[col_[MUL]], c.mul) || !num(f[col_[DIV]], c.div) || !num(f[col_[ADD]], c.add)) {
       return false;
     }

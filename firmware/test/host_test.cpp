@@ -137,6 +137,44 @@ static void test_batch_without_first() {
   CHECK(r.result == hsfz::OK && r.len == 5 && out[1] == 0x4A && out[2] == 0x21);
 }
 
+// two connections in flight at once: both sent before either answer is read
+static void test_start_then_finish() {
+  Fake a, b; hsfz::Client ca(a, 0xF4), cb(b, 0xF5);
+  hsfz::Reply r;
+  CHECK(ca.start(0x12, rpm, 3, r) && cb.start(0x13, rpm, 3, r));
+  CHECK(a.sent.size() == 1 && b.sent.size() == 1);
+  b.push(frame(hsfz::CTRL_DIAG, 0x13, 0xF5, {0x62, 0x48, 0x07, 0x05, 0xDC}));
+  a.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x48, 0x07, 0x05, 0xD0}));
+  CHECK(ca.finish(0x12, rpm, 3, out, sizeof(out)).result == hsfz::OK && out[4] == 0xD0);
+  CHECK(cb.finish(0x13, rpm, 3, out, sizeof(out)).result == hsfz::OK && out[4] == 0xDC);
+  const uint8_t write[] = {0x2E, 0x48, 0x07, 0};
+  CHECK(!ca.start(0x12, write, 4, r) && r.result == hsfz::REFUSED && a.sent.size() == 1);
+}
+
+// two modules' requests on one connection: answers in either order reach
+// the right finish(); a pending notice isn't kept; clearStash forgets
+static void test_two_modules_one_connection() {
+  Fake f; hsfz::Client c(f, 0xF4);
+  const uint8_t gear[] = {0x22, 0xDA, 0x2E};
+  hsfz::Reply r;
+  CHECK(c.start(0x12, rpm, 3, r) && c.start(0x18, gear, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x7F, 0x22, 0x78}));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x62, 0xDA, 0x2E, 0x04, 0x00}));
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x48, 0x07, 0x05, 0xDC}));
+  r = c.finish(0x12, rpm, 3, out, sizeof(out), 500);
+  CHECK(r.result == hsfz::OK && out[1] == 0x48 && out[4] == 0xDC);
+  r = c.finish(0x18, gear, 3, out, sizeof(out), 500);           // already here
+  CHECK(r.result == hsfz::OK && out[1] == 0xDA && out[3] == 0x04);
+  CHECK(f.in.empty());
+  // an answer kept from a request given up on doesn't answer the next one
+  CHECK(c.start(0x12, rpm, 3, r) && c.start(0x18, gear, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x62, 0xDA, 0x2E, 0x09, 0x00}));
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x48, 0x07, 0x05, 0xDC}));
+  CHECK(c.finish(0x12, rpm, 3, out, sizeof(out), 500).result == hsfz::OK);
+  c.clearStash();
+  CHECK(c.finish(0x18, gear, 3, out, sizeof(out), 500).result == hsfz::TIMEOUT);
+}
+
 static void test_discovery_reply() {
   const char* txt = "DIAGADR10BMWMAC001A37C0FFEEBMWVINWBAJB9C55JB287123";
   Bytes p = {0, 0, 0, 0, 0x00, 0x11};
@@ -158,6 +196,8 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"oversized_frame", test_oversized_frame},
   {"split_reply", test_split_reply},
   {"batch_without_first", test_batch_without_first},
+  {"start_then_finish", test_start_then_finish},
+  {"two_modules_one_connection", test_two_modules_one_connection},
   {"discovery_reply", test_discovery_reply},
 };
 

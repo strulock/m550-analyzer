@@ -553,18 +553,19 @@ def op_logger_channels(args):
     if not avail:
         sys.exit("nothing recorded yet: in the app, Answers > Check car now "
                  "(or pass --check with a `n63read check --out` CSV, or --from-cloud)")
-    try:
-        fast = loggerchannels.fast_names(args.fast or loggerchannels.FAST_TEMPLATES)
-    except KeyError as e:
-        sys.exit("no template %s; built in: %s" % (e, ", ".join(core.BUILTIN_TEMPLATES)))
-    rows = loggerchannels.channels(_catalog(core.DEFAULT_CSV), avail, fast)
+    templates = core.load_templates()
+    fast, medium = loggerchannels.tier_lists(templates)
+    for t in (loggerchannels.TEMPLATE_FAST, loggerchannels.TEMPLATE_MEDIUM):
+        if templates.get(t):
+            print("  tier from your template %r" % t)
+    rows = loggerchannels.channels(_catalog(core.DEFAULT_CSV), avail, fast, medium)
     loggerchannels.write(rows, args.out)
-    print("%-6s %-34s %6s %6s %6s" % ("module", "", "fast", "sweep", "ids"))
+    print("%-6s %-30s %6s %6s %6s %6s" % ("module", "", "fast", "medium", "slow", "ids"))
     for module, n in loggerchannels.summary(rows).items():
         name = core.MODULE_LABELS.get(int(module, 16), "DME" if module in ("0x12", "0x13")
                                       else "")
-        print("%-6s %-34s %6d %6d %6d" % (module, name[:34], n["fast"], n["sweep"],
-                                          n["identifiers"]))
+        print("%-6s %-30s %6d %6d %6d %6d" % (module, name[:30], n["fast"], n["medium"],
+                                              n["slow"], n["identifiers"]))
     print("%d channels -> %s" % (len(rows), args.out))
 
 
@@ -803,7 +804,9 @@ def build_parser():
     sp.set_defaults(func=op_check)
 
     sp = sub.add_parser("logger-channels", help="write the logger board's channel file: "
-                                                "every channel the car answers (no car needed)")
+                                                "every channel the car answers, in fast, medium "
+                                                "and slow tiers (app templates 'Logger fast' and "
+                                                "'Logger medium' replace the built-in lists)")
     sp.add_argument("--out", default="channels.csv", metavar="CSV",
                     help="where to write it (default channels.csv); copy it to the SD card")
     sp.add_argument("--check", metavar="CSV", action="append",
@@ -813,9 +816,6 @@ def build_parser():
                     help="use every check file in the cloud (uploaded by the app's sync), "
                          "before any --check")
     sp.add_argument("--availability", metavar="JSON", help=argparse.SUPPRESS)
-    sp.add_argument("--fast", action="append", metavar="TEMPLATE",
-                    help="a built-in template for the every-cycle tier; repeatable "
-                         "(default: %s)" % ", ".join(loggerchannels.FAST_TEMPLATES))
     sp.set_defaults(func=op_logger_channels)
 
     sp = sub.add_parser("mcp", help="let Claude use n63read (an MCP server on stdin/stdout)")
