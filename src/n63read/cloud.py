@@ -22,6 +22,8 @@ import csv
 import hashlib
 import json
 import os
+import re
+import socket
 import sys
 import threading
 import time
@@ -94,6 +96,15 @@ def config(settings):
 
 def configured(settings):
     return all(config(settings))
+
+
+def source_name(settings):
+    """This installation's name in the cloud: its drives and faults are kept
+    under it, so another PC's sync never replaces them. The cloud_source
+    setting, else the PC's name."""
+    name = (settings.get("cloud_source") or socket.gethostname() or "").strip()
+    name = re.sub(r"[^\w .@()+,=-]", "-", name)[:64].strip()
+    return name if name and name != "logger" else "pc"
 
 
 def state_path():
@@ -308,8 +319,8 @@ def sync(settings, logs=None, state_file=None, progress=None, templates_file=Non
     sync_series(settings, state, logs, result)
     save_state(state, state_file)
     summary = history.scan(logs)
-    payload = json.dumps({"drives": summary.drives, "faults": summary.faults},
-                         sort_keys=True).encode()
+    payload = json.dumps({"source": source_name(settings), "drives": summary.drives,
+                          "faults": summary.faults}, sort_keys=True).encode()
     digest = hashlib.sha256(payload).hexdigest()
     if digest != state.get("history_sha256"):
         reply = request(settings, "PUT", "/api/history", payload, "application/json")

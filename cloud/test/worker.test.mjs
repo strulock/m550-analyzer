@@ -151,8 +151,73 @@ test("history replaces the summaries", async () => {
   await call("PUT", "/api/history", { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
   const r = await call("PUT", "/api/history",
     { body: JSON.stringify({ drives: DRIVES, faults: FAULTS }) });
-  assert.deepEqual(await r.json(), { ok: true, drives: 2, faults: 2 });
+  assert.deepEqual(await r.json(), { ok: true, source: "legacy", drives: 2, faults: 2 });
   assert.equal((await call("PUT", "/api/history", { body: "not json" })).status, 400);
+  for (const bad of ["../x", "logger", "a".repeat(65)]) {
+    assert.equal((await call("PUT", "/api/history",
+      { body: JSON.stringify({ source: bad, drives: [], faults: [] }) })).status, 400, bad);
+  }
+});
+
+// --- several app installations
+
+async function history(source, drives, faults) {
+  const body = { drives, faults };
+  if (source) body.source = source;
+  return (await call("PUT", "/api/history", { body: JSON.stringify(body) })).json();
+}
+
+test("one installation's history leaves another's alone", async () => {
+  await history("desk-pc", DRIVES, FAULTS);
+  // The laptop has only its own drive, and an empty fault history.
+  await history("laptop", [{ file: "c.csv", start: "2026-10-20 08:00:00", km: 1.5 }], []);
+  const files = async () => (await toolData("drive_history")).drives.map((d) => d.file);
+  assert.deepEqual(await files(), ["a.csv", "b.csv", "c.csv"]);
+  assert.equal((await toolData("fault_history", { which: "all" })).faults.length, 2);
+  // An app from before sources ("legacy") with nothing: only legacy rows go.
+  await history(null, [], []);
+  assert.deepEqual(await files(), ["a.csv", "b.csv", "c.csv"]);
+  // The desk PC deleting a log takes its drive away, not the laptop's.
+  await history("desk-pc", DRIVES.slice(1), FAULTS);
+  assert.deepEqual(await files(), ["b.csv", "c.csv"]);
+});
+
+test("a log two installations have counts once; faults merge", async () => {
+  await history("desk-pc", DRIVES, [
+    { module: "0x40", code: "804415", now: "gone", first_seen: "2026-10-01", first_km: 110000,
+      last_seen: "2026-10-10", text_en: "fob" }]);
+  await history("laptop", [DRIVES[1]], [
+    { module: "0x40", code: "804415", now: "present", first_seen: "2026-10-05", first_km: 110500,
+      last_seen: "2026-10-19", text_en: "fob" }]);
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file), ["a.csv", "b.csv"]);
+  const [f] = (await toolData("fault_history", { which: "all" })).faults;
+  assert.equal(f.now, "present");                       // the laptop saw it last
+  assert.equal(f.last_seen, "2026-10-19");
+  assert.equal(f.first_seen, "2026-10-01");             // the desk PC saw it first
+  assert.equal(f.first_km, 110000);
+  assert.equal((await toolData("fault_history")).faults.length, 1);   // current: present
+});
+
+test("tables from before sources are converted, rows kept", async () => {
+  const db = env.DB.db;
+  db.exec(`CREATE TABLE drives (file TEXT PRIMARY KEY, start TEXT, data TEXT NOT NULL);
+    CREATE TABLE faults (module TEXT NOT NULL, code TEXT NOT NULL, now TEXT, last_seen TEXT,
+      data TEXT NOT NULL, PRIMARY KEY (module, code));`);
+  db.prepare("INSERT INTO drives VALUES (?, ?, ?)").run("a.csv", "2026-10-18", JSON.stringify(DRIVES[0]));
+  db.prepare("INSERT INTO drives VALUES (?, ?, ?)").run("logger/x.csv", "2026-10-25",
+    JSON.stringify({ file: "logger/x.csv", start: "2026-10-25" }));
+  db.prepare("INSERT INTO faults VALUES (?, ?, ?, ?, ?)").run("0x40", "804415", "present",
+    "2026-10-19", JSON.stringify(FAULTS[0]));
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file),
+    ["a.csv", "logger/x.csv"]);
+  const sources = db.prepare("SELECT file, source FROM drives ORDER BY file").all()
+    .map((x) => [x.file, x.source]);
+  assert.deepEqual(sources, [["a.csv", "legacy"], ["logger/x.csv", "logger"]]);
+  assert.equal(db.prepare("SELECT source FROM faults").get().source, "legacy");
+  // A named installation's sync now leaves those rows alone.
+  await history("desk-pc", [DRIVES[1]], []);
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file),
+    ["a.csv", "b.csv", "logger/x.csv"]);
 });
 
 // --- the logger board's logs

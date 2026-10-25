@@ -286,10 +286,14 @@ export function findEvents(text, { column = null, above = null, below = null, co
 // ------------------------------------------------------------------ D1
 
 export const SCHEMA = [
-  `CREATE TABLE IF NOT EXISTS drives (file TEXT PRIMARY KEY, start TEXT, data TEXT NOT NULL)`,
+  // Drives and faults belong to whoever sent them (`source`): each app
+  // installation by its name, older apps as "legacy", the board as "logger".
+  `CREATE TABLE IF NOT EXISTS drives (source TEXT NOT NULL, file TEXT NOT NULL, start TEXT,
+     data TEXT NOT NULL, PRIMARY KEY (source, file))`,
   `CREATE INDEX IF NOT EXISTS drives_start ON drives (start)`,
-  `CREATE TABLE IF NOT EXISTS faults (module TEXT NOT NULL, code TEXT NOT NULL,
-     now TEXT, last_seen TEXT, data TEXT NOT NULL, PRIMARY KEY (module, code))`,
+  `CREATE TABLE IF NOT EXISTS faults (source TEXT NOT NULL, module TEXT NOT NULL,
+     code TEXT NOT NULL, now TEXT, last_seen TEXT, data TEXT NOT NULL,
+     PRIMARY KEY (source, module, code))`,
   `CREATE TABLE IF NOT EXISTS uploads (key TEXT PRIMARY KEY, size INTEGER, sha256 TEXT,
      uploaded TEXT)`,
   `CREATE TABLE IF NOT EXISTS templates (name TEXT PRIMARY KEY, channels TEXT,
@@ -456,33 +460,71 @@ async function putTemplates(env, changes) {
 
 const schemaReady = new WeakSet();       // per D1 binding, once per isolate
 
+// Tables from before sources: the rows they hold become "legacy" (the board's
+// drives "logger").
+const MIGRATE = [
+  `CREATE TABLE drives_new (source TEXT NOT NULL, file TEXT NOT NULL, start TEXT,
+     data TEXT NOT NULL, PRIMARY KEY (source, file))`,
+  `INSERT INTO drives_new (source, file, start, data) SELECT CASE WHEN substr(file, 1, 7) =
+     'logger/' THEN 'logger' ELSE 'legacy' END, file, start, data FROM drives`,
+  `DROP TABLE drives`,
+  `ALTER TABLE drives_new RENAME TO drives`,
+  `CREATE INDEX IF NOT EXISTS drives_start ON drives (start)`,
+  `CREATE TABLE faults_new (source TEXT NOT NULL, module TEXT NOT NULL, code TEXT NOT NULL,
+     now TEXT, last_seen TEXT, data TEXT NOT NULL, PRIMARY KEY (source, module, code))`,
+  `INSERT INTO faults_new (source, module, code, now, last_seen, data) SELECT 'legacy',
+     module, code, now, last_seen, data FROM faults`,
+  `DROP TABLE faults`,
+  `ALTER TABLE faults_new RENAME TO faults`,
+];
+
 async function ensureSchema(env) {
   if (schemaReady.has(env.DB)) return;
   await env.DB.batch(SCHEMA.map((s) => env.DB.prepare(s)));
+  const cols = await env.DB.prepare("SELECT name FROM pragma_table_info('drives')").all();
+  if (!(cols.results || []).some((c) => c.name === "source")) {
+    await env.DB.batch(MIGRATE.map((s) => env.DB.prepare(s)));
+  }
   schemaReady.add(env.DB);
 }
 
-/** The app's summaries replace its own; the logger's drives (logger/) stay. */
+export const LEGACY = "legacy";             // apps from before sources
+const SOURCE_RE = /^[\w .@()+,=-]{1,64}$/;
+
+/** Who a history upload is from: the app's installation name, or "legacy". */
+function sourceOf(body) {
+  const s = typeof body.source === "string" ? body.source.trim() : "";
+  if (!s) return LEGACY;
+  if (!SOURCE_RE.test(s) || s === "logger") throw new ToolError("bad source");
+  return s;
+}
+
+/** One installation's summaries replace that installation's alone: another
+ * PC's drives and faults, older apps' ("legacy") and the board's stay. */
 async function putHistory(env, body) {
   const drives = Array.isArray(body.drives) ? body.drives : [];
   const faults = Array.isArray(body.faults) ? body.faults : [];
+  const source = sourceOf(body);
   await ensureSchema(env);
   const stmts = [
-    env.DB.prepare("DELETE FROM drives WHERE substr(file, 1, ?) != ?").bind(LOGGER.length, LOGGER),
-    env.DB.prepare("DELETE FROM faults")];
+    env.DB.prepare("DELETE FROM drives WHERE source = ?").bind(source),
+    env.DB.prepare("DELETE FROM faults WHERE source = ?").bind(source)];
   for (const d of drives) {
     if (!d || typeof d.file !== "string" || d.file.startsWith(LOGGER)) continue;
-    stmts.push(env.DB.prepare("INSERT OR REPLACE INTO drives (file, start, data) VALUES (?, ?, ?)")
-      .bind(d.file, String(d.start || ""), JSON.stringify(d)));
+    stmts.push(env.DB.prepare(
+      "INSERT OR REPLACE INTO drives (source, file, start, data) VALUES (?, ?, ?, ?)")
+      .bind(source, d.file, String(d.start || ""), JSON.stringify(d)));
   }
   for (const f of faults) {
     if (!f || typeof f.code !== "string" || typeof f.module !== "string") continue;
     stmts.push(env.DB.prepare(
-      "INSERT OR REPLACE INTO faults (module, code, now, last_seen, data) VALUES (?, ?, ?, ?, ?)")
-      .bind(f.module, f.code, String(f.now || ""), String(f.last_seen || ""), JSON.stringify(f)));
+      `INSERT OR REPLACE INTO faults (source, module, code, now, last_seen, data)
+       VALUES (?, ?, ?, ?, ?, ?)`)
+      .bind(source, f.module, f.code, String(f.now || ""), String(f.last_seen || ""),
+        JSON.stringify(f)));
   }
   await env.DB.batch(stmts);
-  return { drives: drives.length, faults: faults.length };
+  return { source, drives: drives.length, faults: faults.length };
 }
 
 /** Units the app stored for these channels (a bank 2 twin takes bank 1's). */
@@ -562,28 +604,52 @@ async function ingestLog(env, key, bytes) {
   }
   const row = summarizeDrive((sweep ? [other, log] : [log, other]).filter(Boolean), drive, now);
   await env.DB.prepare(row
-    ? "INSERT OR REPLACE INTO drives (file, start, data) VALUES (?, ?, ?)"
-    : "DELETE FROM drives WHERE file = ?")
+    ? "INSERT OR REPLACE INTO drives (source, file, start, data) VALUES ('logger', ?, ?, ?)"
+    : "DELETE FROM drives WHERE source = 'logger' AND file = ?")
     .bind(...(row ? [drive, String(row.start), JSON.stringify(row)] : [drive])).run();
   return { processed: true, drive_file: drive, channels, approx_time: series.approx,
     with_other_file: !!other,
     drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
 }
 
+/** The newest `limit` drives, oldest first; a log two installations both
+ * have counts once. */
 async function drives(env, limit) {
   await ensureSchema(env);
-  const r = await env.DB.prepare("SELECT data FROM drives ORDER BY start DESC LIMIT ?")
-    .bind(limit).all();
-  return (r.results || []).map((x) => JSON.parse(x.data)).reverse();
+  const r = await env.DB.prepare("SELECT file, data FROM drives ORDER BY start DESC, source")
+    .all();
+  const seen = new Set(), out = [];
+  for (const x of r.results || []) {
+    if (seen.has(x.file)) continue;
+    seen.add(x.file);
+    out.push(JSON.parse(x.data));
+    if (out.length >= limit) break;
+  }
+  return out.reverse();
 }
 
+/** Each fault once: as the installation that saw it most recently has it,
+ * with the earliest first sighting any of them has. "current": not gone. */
 async function faults(env, which) {
   await ensureSchema(env);
-  const sql = which === "all"
-    ? "SELECT data FROM faults ORDER BY now, module, code"
-    : "SELECT data FROM faults WHERE now != 'gone' ORDER BY now, module, code";
-  const r = await env.DB.prepare(sql).all();
-  return (r.results || []).map((x) => JSON.parse(x.data));
+  const r = await env.DB.prepare("SELECT module, code, data FROM faults").all();
+  const by = new Map();
+  for (const x of r.results || []) {
+    const f = JSON.parse(x.data), key = `${x.module} ${x.code}`;
+    const have = by.get(key);
+    if (!have) { by.set(key, f); continue; }
+    const [newer, older] = String(f.last_seen || "") > String(have.last_seen || "")
+      ? [f, have] : [have, f];
+    const merged = { ...newer };
+    if (older.first_seen && (!newer.first_seen || older.first_seen < newer.first_seen)) {
+      merged.first_seen = older.first_seen;
+      if (older.first_km !== undefined) merged.first_km = older.first_km;
+    }
+    by.set(key, merged);
+  }
+  const all = [...by.values()].filter((f) => which === "all" || f.now !== "gone");
+  const k = (f) => `${f.now || ""} ${f.module} ${f.code}`;
+  return all.sort((a, b) => (k(a) < k(b) ? -1 : k(a) > k(b) ? 1 : 0));
 }
 
 // ------------------------------------------------------------------ MCP tools
@@ -866,7 +932,12 @@ export async function handle(request, env, fetcher = fetch) {
     } catch {
       return json({ error: "body: JSON {drives, faults}" }, 400);
     }
-    return json({ ok: true, ...(await putHistory(env, body)) });
+    try {
+      return json({ ok: true, ...(await putHistory(env, body)) });
+    } catch (e) {
+      if (e instanceof ToolError) return json({ error: e.message }, 400);
+      throw e;
+    }
   }
 
   if (url.pathname === "/api/files" && request.method === "GET") {
