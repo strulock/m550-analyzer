@@ -142,6 +142,15 @@ export function clockEpoch(text) {
   return t.endsWith("Z") ? base + frac : null;
 }
 
+/** A log's local clock text moved back `seconds`: "YYYY-MM-DD HH:MM:SS". */
+function shiftClock(text, seconds) {
+  const m = CLOCK_RE.exec(text.trim());
+  if (!m) return text.slice(0, 19);
+  const t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) +
+    Math.round(((m[7] ? Number(m[7]) : 0) - seconds) * 1000);
+  return new Date(t).toISOString().slice(0, 19).replace("T", " ");
+}
+
 function isTime(name) {
   const n = name.trim().toLowerCase();
   return /^(time|zeit|timestamp)/.test(n) || ["t", "s", "sec", "seconds"].includes(n);
@@ -244,9 +253,8 @@ export function readColumns(input) {
     if (!line.length) continue;             // a blank line ends nothing, like csv.reader's []
     const cells = fields(line, delim);
     // history._first_clock and _event_odometer read every line, junk included.
-    if (firstClock === null && firstClockCol !== null && cells.length > 1 && cells[1].trim()) {
-      firstClock = cells[1].trim().slice(0, 19);
-    }
+    const clockText = firstClock === null && firstClockCol !== null && cells.length > 1
+      ? cells[1].trim() : "";
     if (odometer === null && eventCol >= 0 && lineNo <= 51) {
       const m = ODOMETER_RE.exec(eventCol < cells.length ? cells[eventCol] : "");
       if (m) odometer = parseInt(m[1], 10);
@@ -262,10 +270,20 @@ export function readColumns(input) {
       }
     }
     const ts = seriesNumber(c0);
+    if (clockText) {
+      // The logger starts before it knows the time when it boots away from
+      // Wi-Fi; its Clock column fills in later. Then the drive started that
+      // row's clock less the time since the first row. (The app's logs have a
+      // clock from the first row, as history._first_clock expects.)
+      firstClock = tl !== null && logTime.n > 0
+        ? shiftClock(clockText, tl - logTime.a[0]) : clockText.slice(0, 19);
+    }
     if (tl === null && ts === null) continue;
-    if (ts !== null && firstSeries === null) {
-      firstSeries = ts;
-      if (clockCol !== null && clockCol < cells.length) {
+    if (ts !== null) {
+      if (firstSeries === null) firstSeries = ts;
+      // series.build takes the first row's clock; a later one does as well
+      // (above), where the first row has none.
+      if (seriesStart === null && clockCol !== null && clockCol < cells.length) {
         const utc = clockEpoch(cells[clockCol]);
         if (utc !== null) seriesStart = utc - ts;
       }
