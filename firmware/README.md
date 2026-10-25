@@ -95,6 +95,10 @@ The board decides at boot, so power it up where it will stay. Connecting
 prints status and help; boot output before that only goes to USB, so press
 `a` to run the tests. One terminal at a time; a new one takes over.
 
+There's no password: anyone on that network can connect, see the VIN and
+live values, and run the tests. That's deliberate for a bench tool; the
+client still sends nothing but reads and tester present.
+
 - `.local` names don't cross VLANs: if the PC and the IoT network are on
   different subnets, use the address `s` shows (or the router's DHCP list).
   A DHCP reservation keeps it fixed.
