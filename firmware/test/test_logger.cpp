@@ -1,5 +1,5 @@
 // Host test of lib/logger: SHA-256, the channel file, decoding, the read
-// plan and the CSV layout.
+// plan, the CSV layout and the fault reads.
 //   cd firmware && g++ -std=c++17 -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 // Run one case by name: ./test_logger decode
 #include <cmath>
@@ -10,6 +10,7 @@
 
 #include "channels.h"
 #include "csvlog.h"
+#include "faults.h"
 #include "plan.h"
 #include "sha256.h"
 
@@ -323,6 +324,80 @@ static void test_csv_rows() {
   CHECK(r.size() >= 2 && r.substr(r.size() - 2) == ",\n");
 }
 
+static void test_fault_parse() {
+  // 59 02 FF, then two records: 480A14 failed and stored, 930A17 listed only
+  const uint8_t reply[] = {0x59, 0x02, 0xFF, 0x48, 0x0A, 0x14, 0x2F, 0x93, 0x0A, 0x17, 0x50, 0x01};
+  std::vector<Dtc> d;
+  CHECK(parseDtcs(reply, sizeof(reply), d));
+  CHECK(d.size() == 2);                       // the trailing odd byte is ignored
+  CHECK(d[0].code == 0x480A14 && d[0].status == 0x2F);
+  CHECK(d[1].code == 0x930A17 && d[1].status == 0x50);
+  const uint8_t other[] = {0x62, 0x48, 0x07};
+  CHECK(!parseDtcs(other, sizeof(other), d));
+  const uint8_t none[] = {0x59, 0x02, 0xFF};
+  CHECK(parseDtcs(none, sizeof(none), d) && d.empty());
+}
+
+static void test_fault_status() {
+  CHECK(dtcFailed(0x01) && dtcFailed(0x04) && dtcFailed(0x20));
+  CHECK(dtcFailed(0x08));                     // confirmed, tested since the clear
+  CHECK(!dtcFailed(0x18));                    // confirmed, but not tested since: the DSC's list
+  CHECK(!dtcFailed(0x50) && !dtcFailed(0x00));
+  CHECK(dtcState(0x09) == "present, stored");
+  CHECK(dtcState(0x01) == "present, not yet stored");
+  CHECK(dtcState(0x2C) == "not present, stored");
+  CHECK(dtcState(0x80) == "not present, warning lamp requested");
+}
+
+static void test_fault_rows() {
+  std::vector<Dtc> d = {{0x930A17, 0x50}, {0x480A14, 0x2F}, {0x0A1B2C, 0x09}};
+  std::string rows = faultRows("2026-10-25 12:43:10", 65.04, 0x12, 0, d);
+  CHECK(rows ==
+        "2026-10-25 12:43:10,0x12,\"Engine, master DME\",0A1B2C,0x09,\"present, stored\",,,,,,,,65.0\n"
+        "2026-10-25 12:43:10,0x12,\"Engine, master DME\",480A14,0x2F,\"present, stored\",,,,,,,,65.0\n");
+  std::vector<Dtc> quiet = {{0x930A17, 0x50}};
+  CHECK(faultRows("", 70, 0x29, 0, quiet) ==
+        ",0x29,\"Stability control (DSC)\",,,\"no faults (1 listed codes never failed)\",,,,,,,,70.0\n");
+  CHECK(faultRows("", 70, 0x29, 0, {}) == ",0x29,\"Stability control (DSC)\",,,\"no faults\",,,,,,,,70.0\n");
+  CHECK(faultRows("", 1, 0x99, 0x31, {}) == ",0x99,\"\",,,\"refused (nrc 0x31)\",,,,,,,,1.0\n");
+  CHECK(faultRows("", 1, 0x60, -1, {}) ==
+        ",0x60,\"Instrument cluster (KOMBI)\",,,\"no reply\",,,,,,,,1.0\n");
+  // as many columns as the header
+  auto commas = [](const std::string& s) {
+    size_t n = 0; bool q = false;
+    for (char c : s) { if (c == '"') q = !q; else if (c == ',' && !q) n++; }
+    return n;
+  };
+  std::string one = rows.substr(0, rows.find('\n') + 1);
+  CHECK(commas(one) == commas(FAULT_HEADER));
+}
+
+static void test_fault_scan() {
+  FaultScan s;
+  s.start(1000);
+  CHECK(s.next(1000) == -1);
+  CHECK(s.next(1000 + FaultScan::FIRST_MS - 1) == -1);     // the first minute is the logging's
+  uint32_t t = 1000 + FaultScan::FIRST_MS;
+  std::vector<int> seen;
+  for (size_t i = 0; i < FAULT_MODULE_COUNT; i++) {
+    int m = s.next(t);
+    CHECK(m >= 0);
+    CHECK(s.next(t + 1) == -1);                           // one at a time, a gap between
+    seen.push_back(m);
+    t += FaultScan::GAP_MS;
+  }
+  CHECK(seen.size() == FAULT_MODULE_COUNT && seen[0] == 0x01 && seen.back() == 0x78);
+  CHECK(s.next(t) == -1);                                 // all read; the DMEs come later
+  CHECK(s.fullScanDone());
+  CHECK(s.next(t + FaultScan::DME_EVERY_MS - 1) == -1);
+  t += FaultScan::DME_EVERY_MS;
+  CHECK(s.next(t) == 0x12);
+  CHECK(s.next(t + FaultScan::GAP_MS) == 0x13);
+  CHECK(s.next(t + 2 * FaultScan::GAP_MS) == -1);
+  CHECK(s.next(t + FaultScan::DME_EVERY_MS) == 0x12);
+  CHECK(std::string(moduleName(0x40)) == "Body domain controller (BDC)" && !*moduleName(0x99));
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
   {"sha256", test_sha256},
   {"channel_file", test_channel_file},
@@ -334,6 +409,10 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"clock_and_names", test_clock_and_names},
   {"value_cells", test_value_cells},
   {"csv_rows", test_csv_rows},
+  {"fault_parse", test_fault_parse},
+  {"fault_status", test_fault_status},
+  {"fault_rows", test_fault_rows},
+  {"fault_scan", test_fault_scan},
 };
 
 int main(int argc, char** argv) {

@@ -6,14 +6,16 @@
 //   1. Recover: a drive the last power cut left open is closed and queued.
 //   2. Find the car (HSFZ discovery) and log while it answers: the fast
 //      channels every cycle to drives/<start>.csv, everything else in
-//      rotation, one row a pass, to drives/<start>.sweep.csv.
+//      rotation, one row a pass, to drives/<start>.sweep.csv; from a minute
+//      in, each module's fault list in turn, and the DMEs' every three
+//      minutes, to drives/<start>.faults.csv.
 //   3. Meanwhile, on the other core: whenever Wi-Fi is up, upload finished
 //      files, compare the SHA-256 the Worker reports with the board's own,
 //      and delete a file only when they match.
 //
 // What to read comes from channels.csv on the card (n63read logger-channels),
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
-// but UDS 0x22 and 0x3E.
+// but UDS 0x22, 0x3E and 0x19 02 (the fault list; never a clear).
 //
 // Terminal: USB serial at 115200, and TCP 23 over Wi-Fi (logger_secrets.h):
 //   s status   l files waiting to upload   u upload now   e end this drive
@@ -48,6 +50,7 @@
 
 #include "channels.h"
 #include "csvlog.h"
+#include "faults.h"
 #include "default_channels.h"
 #include "hsfz.h"
 #include "plan.h"
@@ -448,7 +451,8 @@ struct DriveFile {
 enum State { WAIT_LINK, SEARCH, LOGGING };
 static State state = WAIT_LINK;
 
-static DriveFile fastFile, sweepFile;
+static DriveFile fastFile, sweepFile, faultFile;
+static FaultScan faultScan;
 static String driveName;
 static uint32_t driveStartMs = 0, lastOkMs = 0, lastFlushMs = 0, lastCycleMs = 0;
 static uint32_t fastRows = 0, sweepRows = 0, cycles = 0, cycleStatsMs = 0;
@@ -563,6 +567,7 @@ static void startDrive() {
            (unsigned)table.channels.size(), channelsFromCard ? "the card" : "the built-in table");
   addNote(start);
   scheduler.build(plan);
+  faultScan.start(millis());
   sweepPassStart = millis();
   out.printf("[drive] %s started%s%s\n", driveName.c_str(), timeKnown() ? "" : " (clock unknown)",
              ok ? "" : ": FILES COULD NOT BE OPENED");
@@ -577,6 +582,7 @@ static void endDrive(const char* why) {
   }
   fastFile.finish();
   sweepFile.finish();
+  faultFile.finish();
   disconnectCar();
   out.printf("[drive] %s ended (%s): %u rows, %u sweep rows, %.1f min\n", driveName.c_str(), why,
              (unsigned)fastRows, (unsigned)sweepRows, (millis() - driveStartMs) / 60000.0f);
@@ -777,6 +783,49 @@ static void cycle() {
   if (spent < MIN_CYCLE_MS) delay(MIN_CYCLE_MS - spent);
 }
 
+// ---- fault memory ------------------------------------------------------------
+// One module's fault list when FaultScan says, between cycles, a row per
+// failed code (or one saying there are none) in <drive>.faults.csv. It holds
+// up that cycle's row by the module's answer time; a module that doesn't
+// answer costs FAULT_MS once a drive.
+static const uint32_t FAULT_MS = 3000;
+static uint16_t failedBy[256];               // failed codes per module, last read
+static std::atomic<int> faultsNow{-1};       // their sum; -1 until the first read
+
+static void readFaults() {
+  int m = faultScan.next(millis());
+  if (m < 0 || connectionLost) return;
+  hsfz::Client* cl = m == hsfz::DME_SLAVE ? bank2Client : mainClient;
+  if (!cl) return;
+  hsfz::Reply r = cl->request((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), rx, sizeof(rx), FAULT_MS);
+  if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
+  std::vector<Dtc> dtcs;
+  int result = -1;
+  if (r.result == hsfz::OK && parseDtcs(rx, r.len, dtcs)) result = 0;
+  else if (r.result == hsfz::NEGATIVE) result = r.nrc;
+  if (result >= 0) lastOkMs = millis();
+  if (!faultFile.open) {
+    faultFile.begin(String(DRIVES) + "/" + driveName + ".faults.csv", FAULT_HEADER);
+    if (faultsNow < 0) { memset(failedBy, 0, sizeof(failedBy)); faultsNow = 0; }
+  }
+  std::string at = timeKnown() ? clockNow().substr(0, 19) : "";
+  faultFile.add(faultRows(at, (millis() - driveStartMs) / 1000.0, (uint8_t)m, result, dtcs));
+  faultFile.flush();
+  if (result != 0) return;
+  uint16_t failed = 0;
+  for (const Dtc& d : dtcs) failed += dtcFailed(d.status);
+  if (failed != failedBy[m]) {
+    char text[64];
+    snprintf(text, sizeof(text), "faults 0x%02X: %u", m, (unsigned)failed);
+    addNote(text);
+    out.printf("[faults] module 0x%02X: %u failed codes\n", m, (unsigned)failed);
+  }
+  failedBy[m] = failed;
+  int sum = 0;
+  for (uint16_t n : failedBy) sum += n;
+  faultsNow = sum;
+}
+
 // ---- uploads (core 0) --------------------------------------------------------
 static volatile bool uploadNow = false;
 static std::atomic<uint32_t> uploadedFiles{0};
@@ -966,6 +1015,8 @@ static std::string beatJson(bool boot) {
   jsonNumber(j, "speed_kmh", live(SPEED), 1);
   jsonNumber(j, "rpm", live(RPM), 0);
   jsonNumber(j, "battery_v", live(BATTERY) / 1000.0, 2);
+  int faults = faultsNow;
+  jsonNumber(j, "faults", faults < 0 ? NAN : faults, 0);
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
   jsonText(j, "vin", vin);
   if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
@@ -1106,6 +1157,10 @@ static void status() {
              channelsFromCard ? "card" : "built in", (unsigned)plan.reads.size(), (unsigned)rested);
   out.printf("[status] car %s%s%s, link %s\n", carIp.toString().c_str(), vin[0] ? " VIN " : "",
              vin, linkUp ? "up" : "down");
+  int faults = faultsNow;
+  if (faults < 0) out.println("[status] faults: not read yet (from a minute into a drive)");
+  else out.printf("[status] faults: %d failed codes in the modules' last reads%s\n", faults,
+                  faultScan.fullScanDone() ? "" : " (first pass still running)");
   String last;
   {
     std::lock_guard<std::recursive_mutex> g(sdLock);
@@ -1354,6 +1409,7 @@ void loop() {
     }
     case LOGGING:
       cycle();
+      readFaults();
       if (endRequested) { endDrive("ended from the terminal"); state = SEARCH; }
       else if (connectionLost) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }

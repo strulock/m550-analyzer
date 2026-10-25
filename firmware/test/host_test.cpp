@@ -98,11 +98,24 @@ static void test_writes_refused() {
   Fake f; hsfz::Client c(f, 0xF4);
   const uint8_t clear[] = {0x14, 0xFF, 0xFF, 0xFF};
   const uint8_t write[] = {0x2E, 0x48, 0x07, 0};
-  const uint8_t dtc[] = {0x19, 0x02, 0xFF};
+  const uint8_t snapshot[] = {0x19, 0x04, 0x48, 0x0A, 0x14, 0xFF};
+  const uint8_t noMask[] = {0x19, 0x02};
   CHECK(c.request(0x12, clear, 4, out, sizeof(out)).result == hsfz::REFUSED);
   CHECK(c.request(0x12, write, 4, out, sizeof(out)).result == hsfz::REFUSED);
-  CHECK(c.request(0x12, dtc, 3, out, sizeof(out)).result == hsfz::REFUSED);
+  CHECK(c.request(0x12, snapshot, 6, out, sizeof(out)).result == hsfz::REFUSED);
+  CHECK(c.request(0x12, noMask, 2, out, sizeof(out)).result == hsfz::REFUSED);
   CHECK(f.sent.empty());
+}
+
+// the fault list: sent, pending, then the 59 02 answer (echoing the sub-function)
+static void test_fault_list() {
+  Fake f; hsfz::Client c(f, 0xF4);
+  const uint8_t dtc[] = {0x19, 0x02, 0xFF};
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x7F, 0x19, 0x78}));
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x59, 0x02, 0xFF, 0x48, 0x0A, 0x14, 0x2F}));
+  auto r = c.request(0x12, dtc, 3, out, sizeof(out));
+  CHECK(r.result == hsfz::OK && r.len == 7 && out[0] == 0x59 && out[6] == 0x2F);
+  CHECK(f.sent.size() == 1 && f.sent[0] == frame(hsfz::CTRL_DIAG, 0xF4, 0x12, {0x19, 0x02, 0xFF}));
 }
 
 static void test_oversized_frame() {
@@ -193,6 +206,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"gateway_nack", test_gateway_nack},
   {"timeout_and_closed", test_timeout_and_closed},
   {"writes_refused", test_writes_refused},
+  {"fault_list", test_fault_list},
   {"oversized_frame", test_oversized_frame},
   {"split_reply", test_split_reply},
   {"batch_without_first", test_batch_without_first},

@@ -24,6 +24,11 @@ serves it to Claude from anywhere:
   `drive_history`, `trend` and the series tools without the PC. The app's
   history sync replaces only its own drives, and each PC's sync only its own
   drives and faults (the app sends its PC's name).
+  Its fault reads during a drive (`<start>.faults.csv`) go into fault
+  history under source `logger`, merged as the app's own reads are: first
+  and last seen, reads listing it, present, stored or gone. The board sends
+  codes only; the texts come from n63read's table, which the app uploads once
+  to `ref/BMW_fault_code_texts.csv` (again when it changes).
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
@@ -108,7 +113,7 @@ All requests need an Access token (a login, or the service token headers
 
 | Request | Does |
 |---|---|
-| `PUT /api/files/<path>` | store a log (CSV body); replies with its size and SHA-256. Under `logger/`, a drive log also gets its series and drive row, and the reply says so: `processed`, `channels`, `approx_time` (no Clock), `drive` (start, minutes, km), or `processed: false` and a `reason` |
+| `PUT /api/files/<path>` | store a log (CSV body); replies with its size and SHA-256. Under `logger/`, a drive log also gets its series and drive row, and the reply says so: `processed`, `channels`, `approx_time` (no Clock), `drive` (start, minutes, km), or `processed: false` and a `reason`. A `logger/…faults.csv` goes into fault history instead: `fault_reads` applied, `modules`, `present`, `stored` |
 | `GET /api/files` | list stored files: key, size, SHA-256, upload time |
 | `GET /api/files/<path>` | the file back |
 | `PUT /api/history` | replace one installation's summaries: `{"source": "<PC name>", "drives": [...], "faults": [...]}`. Only that source's drives and faults are replaced; other PCs', the board's (`logger/`) and those from apps that send no source (kept as `legacy`) stay. History lists a log once and each fault as the installation that saw it last has it |

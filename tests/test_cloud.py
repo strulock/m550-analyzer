@@ -127,7 +127,8 @@ def test_sync_uploads_logs_and_history_then_only_what_changed(worker, tmp_path):
     r = cloud.sync(s, logs)
     assert sorted(r.uploaded) == sorted(["n63_1.csv", os.path.join("claude", "n63_2.csv"),
                                          "n63_faults.csv"])
-    assert set(worker.files) == {"n63_1.csv", "claude/n63_2.csv", "n63_faults.csv"}
+    assert set(worker.files) == {"n63_1.csv", "claude/n63_2.csv", "n63_faults.csv",
+                                 cloud.FAULT_TEXTS}                # once, for the logger's faults
     assert r.history == (2, 1) and worker.history["drives"][0]["misfires_5"] == 2
     method, path, headers = worker.requests[0]
     assert headers["cf-access-client-secret"] == "s3cret"
@@ -142,6 +143,24 @@ def test_sync_uploads_logs_and_history_then_only_what_changed(worker, tmp_path):
     r = cloud.sync(s, logs)
     assert r.uploaded == ["n63_3.csv"] and r.history == (3, 1)
     assert "1 file uploaded" in r.text() and "3 drives" in r.text()
+
+
+def test_the_fault_texts_go_up_once_and_again_when_they_change(worker, tmp_path, monkeypatch):
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    s = settings_for(worker)
+    cloud.sync(s, logs)
+    with open(core.resource_path(core.FAULT_CSV), "rb") as f:
+        assert worker.files[cloud.FAULT_TEXTS] == f.read()
+    worker.files.clear()
+    cloud.sync(s, logs)
+    assert cloud.FAULT_TEXTS not in worker.files
+    texts = tmp_path / "texts.csv"
+    texts.write_text("code,text_de,text_en,source_module\n480A14,x,y,DME\n", encoding="utf-8")
+    monkeypatch.setattr(core, "resource_path",
+                        lambda name: str(texts) if name == core.FAULT_CSV else name)
+    cloud.sync(s, logs)
+    assert worker.files[cloud.FAULT_TEXTS] == texts.read_bytes()
 
 
 def test_only_logs_fault_lists_and_checks_go_up(worker, tmp_path):

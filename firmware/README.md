@@ -14,8 +14,9 @@ the Windows build.
 | `logger/` | The logger: logs the car to the SD card, uploads each drive to the cloud Worker |
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
 
-Read-only, as n63read: the client refuses anything but UDS 0x22 and 0x3E, and
-the host test checks that nothing else is ever sent.
+Read-only, as n63read: the client refuses anything but UDS 0x22, 0x3E and
+0x19 02 (the fault list; never 0x14, which clears faults), and the host test
+checks that nothing else is ever sent.
 
 When `core.py` changes how it frames, routes or decodes, change `lib/hsfz` in
 the same PR.
@@ -80,6 +81,18 @@ read time, slow pass, resting reads, smaller batches), batch changes and the
 reset reason. On the bench (bench car with `--delay 30`, a 30 ms answer per
 request; 15 fast, 51 medium and 9,219 slow channels) it logs about 14 rows a
 second with a slow pass every 10 s.
+
+From a minute into a drive the board also reads fault memory, one module
+at a time between cycles: every module n63read knows on this car once a
+drive (`lib/logger/faults.h`, kept equal to `core.KNOWN_MODULES` by
+`tests/test_logger_faults.py`), then both DMEs every three minutes. Each read
+adds rows to `drives/<start>.faults.csv` in n63read's fault-list format (plus
+`time_s`), uploaded with the drive: a row per failed code, or one saying the
+module has none, refused or didn't answer. Codes only; the texts and stored
+details stay with the app and the Worker. A read holds up that cycle's row by
+the module's answer time, and a module that doesn't answer costs 3 s once a
+drive. Status (`s`) and the check-ins give the failed codes in the modules'
+last reads.
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it

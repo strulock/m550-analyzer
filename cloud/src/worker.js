@@ -6,7 +6,9 @@
  *   into R2, and its drive and fault summaries (PUT /api/history) into D1.
  * - The logger board uploads its drive logs under logger/; the Worker works
  *   out their time series and drive summary itself (drive.js), and the
- *   app's history leaves those drives alone. It also checks in (POST
+ *   app's history leaves those drives alone.
+ * - Its fault reads (<drive>.faults.csv) go into fault history as source
+ *   "logger", with texts from n63read's table the app sends (FAULT_TEXTS). It also checks in (POST
  *   /api/logger/heartbeat) at power-on and every 10 s while it has Wi-Fi.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with read-only tools over that copy: drive_history,
@@ -311,6 +313,8 @@ export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS heartbeats (received TEXT NOT NULL, boot INTEGER,
      event TEXT, data TEXT NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS heartbeats_received ON heartbeats (received)`,
+  // The newest logger fault read applied per module (ingestFaults).
+  `CREATE TABLE IF NOT EXISTS logger_fault_reads (module TEXT PRIMARY KEY, latest TEXT)`,
 ];
 
 const MAX_POINTS = 2000;
@@ -622,6 +626,150 @@ async function ingestLog(env, key, bytes) {
     drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
 }
 
+// ------------------------------------------------------------------ logger faults
+
+export const FAULTS = ".faults.csv";           // a logger drive's fault reads
+export const FAULT_TEXTS = "ref/BMW_fault_code_texts.csv";   // n63read's, sent by the app
+
+/** "YYYY-MM-DD HH:MM:SS" plus seconds, as local time stays local. */
+function addSeconds(text, s) {
+  const t = Date.parse(text.slice(0, 19).replace(" ", "T") + "Z");
+  return Number.isFinite(t) ? stamp((t + s * 1000) / 1000) : "";
+}
+
+function stamp(seconds) {
+  return new Date(seconds * 1000).toISOString().slice(0, 19).replace("T", " ");
+}
+
+/** One comma-separated line's fields; quotes allowed. */
+function csvLine(line) {
+  const out = [""];
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (quoted) {
+      if (c === '"' && line[i + 1] === '"') { out[out.length - 1] += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else out[out.length - 1] += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") out.push("");
+    else if (c !== "\r") out[out.length - 1] += c;
+  }
+  return out;
+}
+
+/** English texts for these codes, from n63read's table in R2 (absent: none).
+ * Each code's line is found directly rather than parsing 10,000 rows. */
+async function faultTexts(env, codes) {
+  const out = {};
+  if (!codes.length) return out;
+  const obj = await env.FILES.get(FAULT_TEXTS);
+  if (!obj) return out;
+  const text = (await obj.text()).replace(/^﻿/, "");
+  const at = csvLine(text.slice(0, text.indexOf("\n"))).map((h) => h.trim()).indexOf("text_en");
+  if (at < 0) return out;
+  for (const code of codes) {
+    const i = text.indexOf(`\n${code},`);
+    if (i < 0) continue;
+    const end = text.indexOf("\n", i + 1);
+    const row = csvLine(text.slice(i + 1, end < 0 ? undefined : end));
+    if (row[at]) out[code] = row[at];
+  }
+  return out;
+}
+
+/** A logger drive's fault reads (n63read's fault CSV, plus time_s) merged
+ * into the board's fault history, as history.fault_history does for the
+ * app: a fault's first and last read, how many reads listed it and were
+ * present, and `now` from its module's newest read (gone once a later read
+ * doesn't list it). Each module's reads are applied once, in order, so a
+ * re-upload changes nothing. */
+async function ingestFaults(env, key, text) {
+  const rows = parseCsv(text);
+  const head = (rows.shift() || []).map((h) => h.trim());
+  const col = (name) => head.indexOf(name);
+  if (col("module") < 0 || col("read_at") < 0 || col("state") < 0) {
+    return { processed: false, reason: "not a fault list" };
+  }
+  await ensureSchema(env);
+  // Reads made before the board knew the time: the drive's start plus time_s.
+  const drive = key.slice(0, -FAULTS.length) + ".csv";
+  const d = (await env.DB.prepare(
+    "SELECT start FROM drives WHERE source = 'logger' AND file = ?").bind(drive).all()).results;
+  const driveStart = d && d.length ? String(d[0].start || "") : "";
+  const reads = new Map();                     // "read_at module" -> rows
+  for (const r of rows) {
+    const get = (name) => (col(name) >= 0 && col(name) < r.length ? r[col(name)].trim() : "");
+    const module = get("module");
+    if (!module) continue;
+    let at = get("read_at");
+    if (!at && driveStart && get("time_s") !== "") at = addSeconds(driveStart, Number(get("time_s")));
+    if (!at) continue;
+    const k = `${at} ${module}`;
+    if (!reads.has(k)) reads.set(k, []);
+    reads.get(k).push({ module, at, name: get("module_name"), code: get("code").toUpperCase(),
+      status: get("status"), state: get("state") });
+  }
+  const known = new Map(), latest = new Map();
+  for (const x of (await env.DB.prepare(
+    "SELECT module, code, data FROM faults WHERE source = 'logger'").all()).results || []) {
+    known.set(`${x.module} ${x.code}`, JSON.parse(x.data));
+  }
+  for (const x of (await env.DB.prepare(
+    "SELECT module, latest FROM logger_fault_reads").all()).results || []) {
+    latest.set(x.module, x.latest);
+  }
+  const touched = new Set(), changed = new Set();
+  let applied = 0;
+  for (const k of [...reads.keys()].sort()) {
+    const group = reads.get(k), { module, at } = group[0];
+    if (group[0].state.startsWith("refused") || group[0].state.startsWith("no reply")) continue;
+    if (at <= (latest.get(module) || "")) continue;
+    latest.set(module, at);
+    touched.add(module);
+    applied++;
+    for (const r of group) {
+      if (!r.code) continue;
+      const fk = `${module} ${r.code}`;
+      const f = known.get(fk) || { module, module_name: r.name, code: r.code, text_en: "",
+        first_seen: at, reads_seen: 0, reads_present: 0 };
+      Object.assign(f, { last_seen: at, last_state: r.state, last_status: r.status });
+      f.module_name = r.name || f.module_name;
+      f.reads_seen += 1;
+      if (r.state.startsWith("present")) f.reads_present += 1;
+      known.set(fk, f);
+      changed.add(fk);
+    }
+  }
+  for (const [fk, f] of known) {
+    if (!touched.has(f.module)) continue;
+    const now = f.last_seen < latest.get(f.module) ? "gone"
+      : String(f.last_state || "").startsWith("present") ? "present" : "stored";
+    if (now !== f.now) { f.now = now; changed.add(fk); }
+  }
+  const texts = await faultTexts(env,
+    [...changed].map((fk) => known.get(fk)).filter((f) => !f.text_en).map((f) => f.code));
+  const stmts = [];
+  for (const fk of changed) {
+    const f = known.get(fk);
+    if (!f.text_en && texts[f.code]) f.text_en = texts[f.code];
+    stmts.push(env.DB.prepare(
+      `INSERT OR REPLACE INTO faults (source, module, code, now, last_seen, data)
+       VALUES ('logger', ?, ?, ?, ?, ?)`)
+      .bind(f.module, f.code, f.now, f.last_seen, JSON.stringify(f)));
+  }
+  for (const module of touched) {
+    stmts.push(env.DB.prepare(
+      "INSERT OR REPLACE INTO logger_fault_reads (module, latest) VALUES (?, ?)")
+      .bind(module, latest.get(module)));
+  }
+  if (stmts.length) await env.DB.batch(stmts);
+  const mine = [...known.values()].filter((f) => touched.has(f.module));
+  return { processed: true, fault_reads: applied, modules: touched.size,
+    present: mine.filter((f) => f.now === "present").length,
+    stored: mine.filter((f) => f.now === "stored").length };
+}
+
 /** The newest `limit` drives, oldest first; a log two installations both
  * have counts once (SQLite takes the other columns from the MAX(start) row). */
 async function drives(env, limit) {
@@ -716,7 +864,9 @@ export const TOOLS = [
     name: "fault_history",
     description: "Every fault read from the car's modules: first and last seen, how many reads " +
       "listed it, whether it is present, stored or gone now, the odometer when it set and how " +
-      "often it occurred. Pass code for the full stored details of one fault.",
+      "often it occurred. From the app's fault scans and the logger board's reads during " +
+      "drives (every module a drive, the engine every few minutes). Pass code for the full " +
+      "stored details of one fault (the app's scans only).",
     inputSchema: { type: "object", properties: {
       which: { type: "string", description: "current (default) or all" },
       code: { type: "string", description: "One fault code, e.g. 4806DA: returns it with " +
@@ -1049,6 +1199,10 @@ export async function handle(request, env, fetcher = fetch) {
       // The file is safe in R2 either way; a log that can't be read only
       // misses its series and summary, and says why.
       try {
+        if (key.endsWith(FAULTS)) {
+          return json({ ...stored, ...(await ingestFaults(env, key,
+            new TextDecoder().decode(data))) });
+        }
         return json({ ...stored, ...(await ingestLog(env, key, new Uint8Array(data))) });
       } catch (e) {
         console.error(e);

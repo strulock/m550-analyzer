@@ -15,7 +15,8 @@
 // The same terminal is on Wi-Fi, TCP port 23, so the board can sit in the car
 // on a USB power supply: see wifi_secrets.example.h.
 //
-// Read-only: the HSFZ client refuses anything but UDS 0x22 and 0x3E.
+// Read-only: the HSFZ client refuses anything but UDS 0x22, 0x3E and 0x19 02
+// (the fault list; the spike sends only the first two).
 
 #include <Arduino.h>
 #include <ESPmDNS.h>
