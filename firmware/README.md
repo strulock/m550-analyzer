@@ -81,6 +81,15 @@ reset reason. On the bench (bench car with `--delay 30`, a 30 ms answer per
 request; 15 fast, 51 medium and 9,219 slow channels) it logs about 14 rows a
 second with a slow pass every 10 s.
 
+The same task checks in with the Worker once at power-on and every 10 s
+while Wi-Fi is up: a small JSON report with the boot number and why it
+booted (a brownout shows there), uptime, what it's doing, the speed, rpm and
+battery voltage when the channel table has them (battery is `IUIBS`, not in
+the built-in fast tier), files waiting, Wi-Fi and memory. A long upload
+delays the check-ins; a failed one is skipped. Each is a new TLS connection,
+about 2 MB an hour on a phone hotspot. `logger_status` (MCP) and
+`GET /api/logger` show the last one and each power-on.
+
 Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
 status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end
 the drive, `v` the newest files' first and last lines, `C` take a channel

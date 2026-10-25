@@ -193,6 +193,43 @@ static Table table;
 static Plan plan;
 static bool channelsFromCard = false;
 
+// The few values the check-ins report, kept by the logging core as they are
+// read (the sweep's too) and read by the upload task. The first name the
+// table has wins: the DME's speed, else the head unit's GPS speed.
+enum Live { SPEED, RPM, BATTERY, LIVE_N };
+static const char* const LIVE_NAMES[LIVE_N][2] = {
+    {"FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "HU_STATUS_SPEED.GPS_SPEED"},
+    {"INMOT", nullptr},
+    {"IUIBS", nullptr},                      // mV
+};
+static int liveCh[LIVE_N] = {-1, -1, -1};
+static std::atomic<float> liveValue[LIVE_N];
+static std::atomic<uint32_t> liveAt[LIVE_N];
+static const uint32_t LIVE_FRESH_MS = 30000;  // older: not reported
+
+static void findLive() {
+  for (int k = 0; k < LIVE_N; k++) {
+    liveCh[k] = -1;
+    liveAt[k] = 0;
+    for (const char* want : LIVE_NAMES[k]) {
+      for (size_t i = 0; want && liveCh[k] < 0 && i < table.channels.size(); i++) {
+        if (!strcmp(table.name(table.channels[i]), want)) liveCh[k] = (int)i;
+      }
+    }
+  }
+}
+
+static void noteLive(uint32_t ch, double v, uint32_t now) {
+  for (int k = 0; k < LIVE_N; k++) {
+    if (liveCh[k] == (int)ch) { liveValue[k] = (float)v; liveAt[k] = now ? now : 1; }
+  }
+}
+
+static float live(Live k) {
+  uint32_t at = liveAt[k];
+  return at && millis() - at < LIVE_FRESH_MS ? liveValue[k].load() : NAN;
+}
+
 // The table and plan make thousands of small allocations (a vector per read,
 // strings while parsing). Left in internal RAM they break it into pieces too
 // small for a TLS handshake (seen: 123 KB free, largest block 17 KB, uploads
@@ -239,6 +276,7 @@ static void loadChannelsInto() {
     }
   }
   plan.build(table);
+  findLive();
   out.printf("[chan] %u channels (%u fast, %u medium, %u slow) in %u reads, from %s%s\n",
              (unsigned)table.channels.size(), (unsigned)table.count(FAST),
              (unsigned)table.count(MEDIUM), (unsigned)table.count(SLOW), (unsigned)plan.reads.size(),
@@ -406,6 +444,9 @@ struct DriveFile {
     if (d) { d.printf("%s %u\n", hex, (unsigned)size); d.close(); }
   }
 };
+
+enum State { WAIT_LINK, SEARCH, LOGGING };
+static State state = WAIT_LINK;
 
 static DriveFile fastFile, sweepFile;
 static String driveName;
@@ -576,7 +617,9 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
       plan.answered(batch[k]);
       for (uint32_t ci : plan.reads[batch[k]].channels) {
         double v;
-        if (decode(table.channels[ci], data[k], len[k], v)) values[ci] = v;
+        if (!decode(table.channels[ci], data[k], len[k], v)) continue;
+        values[ci] = v;
+        noteLive(ci, v, now);
       }
     }
     return;
@@ -882,18 +925,112 @@ static void keepWifi() {
 #endif
 }
 
+// ---- check-ins (core 0) ------------------------------------------------------
+// A small JSON report to the Worker (POST /api/logger/heartbeat) once at
+// power-on and every 10 s while Wi-Fi is up, so the cloud knows the board is
+// on, and what it's doing, between uploads. One that fails is skipped; a
+// long upload delays them.
+static const uint32_t BEAT_MS = 10000;
+static std::atomic<uint32_t> beatsSent{0};
+
+static void jsonText(std::string& j, const char* key, const char* v) {
+  j += ",\"";
+  j += key;
+  j += "\":\"";
+  for (const char* p = v; *p; p++) {
+    if (*p != '"' && *p != '\\' && (uint8_t)*p >= 0x20) j += *p;
+  }
+  j += '"';
+}
+
+static void jsonNumber(std::string& j, const char* key, double v, int decimals) {
+  char s[48];
+  if (isnan(v)) snprintf(s, sizeof(s), ",\"%s\":null", key);
+  else snprintf(s, sizeof(s), ",\"%s\":%.*f", key, decimals, v);
+  j += s;
+}
+
+static std::string beatJson(bool boot) {
+  static const char* const states[] = {"waiting for link", "searching", "logging"};
+  std::string j = "{\"boot\":" + std::to_string(bootCount);
+  jsonText(j, "event", boot ? "boot" : "beat");
+  jsonText(j, "reset", resetReason());
+  jsonNumber(j, "up_s", millis() / 1000.0, 0);
+  State s = state;
+  jsonText(j, "state", states[s]);
+  if (s == LOGGING) {
+    jsonNumber(j, "drive_min", (millis() - driveStartMs) / 60000.0, 1);
+    jsonNumber(j, "rows", fastRows, 0);
+    jsonNumber(j, "rows_per_s", cycleRate, 1);
+  }
+  jsonNumber(j, "speed_kmh", live(SPEED), 1);
+  jsonNumber(j, "rpm", live(RPM), 0);
+  jsonNumber(j, "battery_v", live(BATTERY) / 1000.0, 2);
+  j += linkUp ? ",\"link\":true" : ",\"link\":false";
+  jsonText(j, "vin", vin);
+  if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
+  jsonText(j, "wifi", WiFi.SSID().c_str());
+  jsonNumber(j, "rssi", WiFi.RSSI(), 0);
+  jsonNumber(j, "pending", sdOk ? pending().size() : 0, 0);
+  jsonNumber(j, "uploaded", uploadedFiles, 0);
+  jsonNumber(j, "sd_free_mb", sdOk ? (SD.totalBytes() - SD.usedBytes()) / 1e6 : NAN, 0);
+  jsonNumber(j, "heap_kb", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024, 0);
+  jsonNumber(j, "largest_kb", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024, 0);
+  return j + "}";
+}
+
+static int postBeat(const std::string& body) {
+  NetworkClientSecure tls;
+  tls.useBuiltinCACertBundle();
+  HTTPClient http;
+  http.setTimeout(8000);
+  http.setConnectTimeout(5000);
+  if (!http.begin(tls, String("https://") + WORKER_HOST + "/api/logger/heartbeat")) return -1;
+#ifdef ACCESS_CLIENT_ID
+  http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
+  http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
+#endif
+  http.addHeader("Content-Type", "application/json");
+  int code = http.POST((uint8_t*)body.data(), body.size());
+  http.end();
+  return code;
+}
+
+static void beatIfDue() {
+  static uint32_t last = 0;
+  static bool tried = false, booted = false, failing = false;
+  if (!WiFi.isConnected() || !strlen(WORKER_HOST)) return;
+  if (tried && millis() - last < BEAT_MS) return;
+  tried = true;
+  last = millis();
+  int code = postBeat(beatJson(!booted));
+  if (code == 200) {
+    beatsSent++;
+    if (!booted) out.printf("[beat] checked in (boot %u)\n", (unsigned)bootCount);
+    else if (failing) out.println("[beat] checking in again");
+    booted = true;
+    failing = false;
+  } else if (!failing) {
+    out.printf("[beat] check-in failed: %d %s\n", code,
+               code < 0 ? HTTPClient::errorToString(code).c_str() : "");
+    failing = true;
+  }
+}
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(500));
     keepWifi();
+    beatIfDue();
     if (!uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     uploadNow = false;
     last = millis();
     if (!sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) continue;
     for (const String& name : pending()) {
       if (!WiFi.isConnected() || !uploadOne(name)) break;
+      beatIfDue();
     }
   }
 }
@@ -943,8 +1080,6 @@ static void startWifi() {
 }
 
 // ---- terminal commands -------------------------------------------------------
-enum State { WAIT_LINK, SEARCH, LOGGING };
-static State state = WAIT_LINK;
 static bool endRequested = false;
 
 static void help() {
@@ -976,12 +1111,12 @@ static void status() {
     std::lock_guard<std::recursive_mutex> g(sdLock);
     last = lastUpload;
   }
-  out.printf("[status] clock %s, wifi %s %s, uploads to %s: %u done, last %s\n",
+  out.printf("[status] clock %s, wifi %s %s, uploads to %s: %u done, last %s; %u check-ins\n",
              timeKnown() ? clockNow().c_str() : "unknown",
              WiFi.isConnected() ? WiFi.SSID().c_str() : "off",
              WiFi.isConnected() ? WiFi.localIP().toString().c_str() : "",
              strlen(WORKER_HOST) ? WORKER_HOST : "(none set)", (unsigned)uploadedFiles,
-             last.c_str());
+             last.c_str(), (unsigned)beatsSent);
   out.printf("[status] SD %s, %.1f of %.1f MB used; PSRAM %u KB free; internal %u KB free, "
              "largest block %u KB\n",
              sdOk ? "ok" : "MISSING", sdOk ? SD.usedBytes() / 1e6 : 0.0,

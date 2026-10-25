@@ -116,5 +116,7 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
+| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`, `speed_kmh`, `rpm`, `battery_v`, `pending`, ...) of at most 4 KB, kept 30 days |
+| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in, and each power-on in the last `?hours=` (default 24) |
 | `POST /mcp` | MCP (JSON-RPC 2.0, streamable HTTP with JSON replies) |
 | `GET /api/status` | who you're signed in as |
