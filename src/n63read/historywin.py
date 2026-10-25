@@ -22,7 +22,8 @@ COLORS = ["#2d7dd2", "#e4572e", "#29a35a", "#8e44ad", "#f2a541", "#17becf", "#7f
 
 DRIVE_COLUMNS = [
     ("start", "Start", 130), ("minutes", "Min", 50), ("km", "km", 55),
-    ("speed_max", "Max km/h", 70), ("misfires", "Misfires", 60), ("where", "By cylinder", 150),
+    ("speed_max", "Max km/h", 70), ("l_per_100km", "l/100 km", 65), ("mpg", "mpg", 50),
+    ("misfires", "Misfires", 60), ("where", "By cylinder", 150),
     ("knock_b1", "Knock b1", 65), ("knock_b2", "Knock b2", 65),
     ("trim_b1", "Trim b1 %", 70), ("trim_b2", "Trim b2 %", 70),
     ("coolant_max", "Coolant max", 80), ("battery_min", "Battery min", 80),

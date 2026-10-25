@@ -128,11 +128,12 @@ in `Documents\BMW Analyzer Logs`.
 - **Templates ▾** saves the watch list under a name and brings it back for
   the next run (it replaces the watch list). **Delete** removes one. They're
   kept in `%APPDATA%\n63read\templates.json`, and `n63read log --template
-  NAME` logs one from the command line. **Ready-made sets** has five to start
+  NAME` logs one from the command line. **Ready-made sets** has six to start
   from: *Misfire hunt* (engine speed, uneven running and misfire counters for
   all eight cylinders, and each cylinder's difference from the rest),
   *Boost and wastegates, both banks*, *Lambda and trims, both banks*,
-  *Temperatures*, and *Drive log with GPS*.
+  *Temperatures*, *Drive log with GPS* and *Fuel economy* (both DMEs' fuel
+  flow and the tank level, for History's fuel economy per drive).
 - **Compare banks** folds each engine channel's bank-2 twin into its bank-1
   row, with **Bank 2** and **Δ 1−2** columns, and adds the twin of every
   engine channel you watch. The chart draws bank 2 dashed on bank 1's scale,
@@ -265,12 +266,14 @@ folder, from the app, the CLI and Claude alike, and logs copied in from
 elsewhere:
 
 - **Drives:** one row a drive: date, odometer (read from the car as each log
-  starts, and noted in its first row's `Event`), length, distance, top speed, misfires
+  starts, and noted in its first row's `Event`), length, distance, top speed,
+  fuel used and economy (l/100 km and US mpg), misfires
   (and on which cylinders), knock retard and fuel trims per bank, peak
   temperatures, battery, tire pressures. Double-click one to replay it.
 - **Trends:** a statistic across drives, one line per cylinder or bank:
   misfires, uneven running, spark burn time, knock retard, fuel trims, tire
-  pressures, battery, temperatures, boost, distance.
+  pressures, battery, temperatures, boost, fuel economy and fuel used,
+  distance.
 - **Faults:** every fault ever read, with when it first and last appeared,
   how many reads listed it, and whether it's present, stored or gone now.
 
@@ -279,6 +282,13 @@ The same tables are saved as `drives.csv` and `faults.csv` in
 them, and Claude's `drive_history` tool reads them. Only new or changed
 files are read again, so it stays quick as logs pile up. A statistic is
 blank for a drive that didn't log its channel.
+
+Fuel used is each DME's fuel mass flow (`MASSENSTROM_KRAFTSTOFF`, kg/h, for
+its own bank's injectors) integrated over the drive at 0.745 kg/l, and the
+economy divides it by the distance from the speedometer, for drives of 1 km
+or more. The tank level's fall over the drive (`IKTFS`, the median of its
+first and last minute) is listed beside it as a rough cross-check. Log the
+*Fuel economy* or *Drive log with GPS* set to get it.
 
 #### Cloud copy
 

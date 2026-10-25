@@ -368,12 +368,13 @@ def op_history(args):
     drives = s.drives[-args.limit:] if args.limit else s.drives
     print("%d drives in %s" % (len(s.drives), core.logs_dir(create=False)))
     if drives:
-        print("\n%-19s %6s %7s %9s %8s %8s %8s %8s  %s" % (
-            "start", "min", "km", "misfires", "knock b1", "knock b2", "trim b1", "trim b2",
-            "by cylinder"))
+        print("\n%-19s %6s %7s %6s %9s %8s %8s %8s %8s  %s" % (
+            "start", "min", "km", "mpg", "misfires", "knock b1", "knock b2", "trim b1",
+            "trim b2", "by cylinder"))
     for d in drives:
-        print("%-19s %6s %7s %9s %8s %8s %8s %8s  %s" % (
+        print("%-19s %6s %7s %6s %9s %8s %8s %8s %8s  %s" % (
             d["start"], _num(d["minutes"], "%.1f"), _num(d["km"], "%.1f"),
+            _num(d.get("mpg"), "%.1f"),
             _num(d["misfires"], "%d"), _num(d["knock_b1"], "%.2f"), _num(d["knock_b2"], "%.2f"),
             _num(d["trim_b1"], "%+.1f%%"), _num(d["trim_b2"], "%+.1f%%"),
             history.misfire_text(d)))

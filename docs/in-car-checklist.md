@@ -56,6 +56,13 @@ if possible (a full check takes a few minutes).
    - gear changes line up with engine speed;
    - lateral acceleration is ≈ 0 driving straight and swings in corners.
 5. **Look over the picker** on screen: groups, marks, filter.
+6. **Fuel flow.** Log the *Fuel economy* set: at idle, warm, the N63's
+   whole engine burns roughly 2 kg/h. If `MASSENSTROM_KRAFTSTOFF` and its
+   `@0x13` twin each read about half that, each DME reports its own bank
+   and History's sum is right. If each reads the whole amount, the master
+   already reports the engine: drop the twin from `core.FUEL_FLOWS`. Then
+   reset the trip computer's average before a drive and compare its
+   figure with History's mpg afterwards.
 
 ## What to do with the results
 

@@ -492,7 +492,8 @@ export const TOOLS = [
     name: "drive_history",
     description: "The car's long-term statistics, one entry per drive (newest last): misfires, " +
       "uneven running and spark burn time per cylinder, knock retard and fuel trims per bank, " +
-      "temperatures, battery, tire pressures, distance. From the logs the BMW Analyzer app " +
+      "temperatures, battery, tire pressures, distance, fuel used and economy (fuel_l, " +
+      "l_per_100km, mpg, tank_used_l). From the logs the BMW Analyzer app " +
       "uploaded (2018 BMW M550i, N63TU2 V8).",
     inputSchema: { type: "object", properties: {
       limit: { type: "integer", description: "Drives, newest; default 30" } } },
@@ -510,7 +511,8 @@ export const TOOLS = [
   {
     name: "trend",
     description: "One statistic across drives, e.g. misfires_5, uneven_5, spark_5, knock_b1, " +
-      "trim_b2, tire_2, battery_min, coolant_max, km. Returns [start, value] pairs.",
+      "trim_b2, tire_2, battery_min, coolant_max, km, mpg, l_per_100km, fuel_l. " +
+      "Returns [start, value] pairs.",
     inputSchema: { type: "object", properties: {
       key: { type: "string" }, limit: { type: "integer", description: "Drives; default 100" } },
       required: ["key"] },

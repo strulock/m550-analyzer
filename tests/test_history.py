@@ -302,3 +302,31 @@ def test_a_session_notes_the_odometer_in_the_first_row(tmp_path, monkeypatch):
     with open(path, encoding="utf-8") as f:
         rows = list(csv.reader(f))
     assert rows[1][-1] == "odometer 111321 km" and all(r[-1] == "" for r in rows[2:])
+
+
+def test_fuel_economy_from_both_dmes_fuel_flow(tmp_path):
+    # 10 min at 90 km/h = 15 km; each bank burns 4.47 kg/h, 8.94 kg/h in all
+    # = 12 l/h = 2 l in 10 min: 13.33 l/100 km, 17.6 mpg.
+    path = str(tmp_path / "fuel.csv")
+    flow, flow2 = core.FUEL_FLOWS
+    write_log(path, ["FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", flow, flow2, core.FUEL_TANK],
+              [(t, 90.0, 4.47, 4.47, 60 if t < 300 else 58) for t in range(601)])
+    names, rows = history.playback.read_log(path)
+    d = history.summarize(names, rows)
+    assert d["km"] == pytest.approx(15.0)
+    assert d["fuel_l"] == pytest.approx(2.0, rel=0.001)
+    assert d["l_per_100km"] == pytest.approx(13.33, abs=0.01)
+    assert d["mpg"] == pytest.approx(17.64, abs=0.01)
+    assert d["tank_used_l"] == 2
+
+
+def test_no_fuel_economy_without_the_flow_or_for_a_short_drive(tmp_path):
+    path = str(tmp_path / "short.csv")
+    write_log(path, ["FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", core.FUEL_FLOWS[0]],
+              [(t, 10.0, 2.0) for t in range(60)])           # 0.16 km
+    names, rows = history.playback.read_log(path)
+    d = history.summarize(names, rows)
+    assert d["fuel_l"] > 0 and d["l_per_100km"] is None and d["mpg"] is None
+    names, rows = history.playback.read_log(path)
+    d = history.summarize([names[0]], rows)
+    assert d["fuel_l"] is None and d["tank_used_l"] is None
