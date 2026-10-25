@@ -7,10 +7,12 @@ the Windows build.
 | Path | What |
 | --- | --- |
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
-| `test/host_test.cpp` | Runs `lib/hsfz` against a scripted fake gateway on a PC (CI job `firmware`) |
-| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs) |
+| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, CSV layout and SHA-256. No Arduino code |
+| `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
+| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`) |
+| `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
+| `logger/` | The logger: logs the car to the SD card, uploads each drive to the cloud Worker |
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
-| `logger/` | The real logger firmware, later |
 
 Read-only, as n63read: the client refuses anything but UDS 0x22 and 0x3E, and
 the host test checks that nothing else is ever sent.
@@ -22,8 +24,52 @@ the same PR.
 
     cd firmware
     g++ -std=c++17 -Wall -Ilib/hsfz test/host_test.cpp -o host_test && ./host_test
+    g++ -std=c++17 -Wall -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 
 One function per case; `./host_test busy_retry` runs just that one.
+
+## Logger
+
+Waveshare ESP32-S3-ETH (16 MB flash, 8 MB PSRAM), a FAT-formatted microSD
+card, the car's ENET cable, and USB power that comes on with the ignition.
+
+1. **Secrets.** Copy `logger/src/logger_secrets.example.h` to
+   `logger_secrets.h` (gitignored): Wi-Fi, the Worker's host
+   (`m550.trulock.com`), an Access service token made for the board, and the
+   time zone. With `WORKER_HOST` empty it only logs.
+2. **Channels.** `n63read logger-channels --out channels.csv` writes every
+   channel the car answers (after the app's Answers > Check car now). Copy it
+   to the card's root, or send it over Wi-Fi:
+   `python firmware/tools/send_channels.py <address> channels.csv`. Without
+   one the board reads its built-in fast tier: the drive log, fuel economy and
+   misfire templates.
+3. **Flash.** Open `firmware/logger` in PlatformIO and Upload.
+
+Each boot it closes a drive a power cut left open, then looks for the car
+(the address it had last time first, then discovery) and logs while it
+answers:
+
+- `drives/<start>.csv`: the fast channels, every cycle.
+- `drives/<start>.sweep.csv`: every other channel, in rotation, one row a
+  pass.
+
+`<start>` is the local time when the clock is known (from the internet at
+boot), else `nt-<boot>-<n>`. A drive ends when the car stops answering for
+10 s, or when the power goes. Whenever Wi-Fi is up, the other core uploads
+finished files to `logger/` on the Worker, compares the SHA-256 the Worker
+reports with the board's own, and only then deletes them. The Worker turns
+each pair into one drive in History and the time series (cloud/README.md).
+
+A module that can't take eight identifiers in a request drops to one; an
+identifier that keeps failing is rested for a minute. On the bench (bench
+car, 49 fast and 1,587 sweep channels) it logs about 12 fast rows a second
+with a sweep pass every half second; in the car each read takes longer.
+
+Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
+status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end
+the drive, `v` the newest files' first and last lines, `C` take a channel
+file (`send_channels.py` does this), `X` delete waiting files (after bench
+runs; asks first), `h` help.
 
 ## Spike
 
