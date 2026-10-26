@@ -542,7 +542,85 @@ static void test_periodic() {
   CHECK(!periodicDue(MONTHLY, now - 29 * 86400, now, -300) && periodicDue(MONTHLY, now - 30 * 86400, now, -300));
 }
 
+// A shrunk batch size grows back after enough whole answers, needing twice
+// as many each time the bigger size fails; medium keeps a share of a module
+// whose fast reads fill its requests.
+static void test_batch_recovery() {
+  Plan p;
+  CHECK(p.batchFor(0x12) == MAX_BATCH && !p.goodBatch(0x12, MAX_BATCH));   // nothing to grow
+  p.smallerBatches(0x12, MAX_BATCH);                       // 24 -> 12
+  CHECK(p.batchFor(0x12) == MAX_BATCH / 2);
+  int n = 0;
+  while (!p.goodBatch(0x12, MAX_BATCH / 2) && n < 1000) n++;
+  CHECK(n + 1 == RECOVER_AFTER && p.batchFor(0x12) == MAX_BATCH);
+  p.smallerBatches(0x12, MAX_BATCH);                       // fails again: twice as long
+  n = 0;
+  while (!p.goodBatch(0x12, MAX_BATCH / 2) && n < 1000) n++;
+  CHECK(n + 1 == 2 * RECOVER_AFTER);
+  // Answers smaller than the current size prove nothing.
+  p.smallerBatches(0x12, MAX_BATCH);
+  for (int k = 0; k < 500; k++) CHECK(!p.goodBatch(0x12, 3));
+  CHECK(p.batchFor(0x12) == MAX_BATCH / 2);
+  // A module that only takes one at a time comes back to one.
+  Plan one;
+  for (int k = 0; k < 5; k++) one.smallerBatches(0x40, one.batchFor(0x40));
+  CHECK(one.batchFor(0x40) == 1);
+  n = 0;
+  while (!one.goodBatch(0x40, 1) && n < 100000) n++;
+  CHECK(one.batchFor(0x40) == 2);
+  one.smallerBatches(0x40, 2);
+  CHECK(one.batchFor(0x40) == 1);
+
+  // Ten fast reads, batches of six: every cycle medium gets its share (two
+  // of six), and every other cycle a third request carries medium and slow.
+  Table t;
+  t.line("name,module,did,did_size,offset,type,order,mul,div,add,no_value,unit,tier");
+  char line[96];
+  for (int k = 0; k < 10; k++) {
+    snprintf(line, sizeof(line), "F%d,0x12,0x%04X,2,0,u16,big,1,1,0,,,fast", k, 0x10 + k);
+    t.line(line);
+  }
+  for (int k = 0; k < 30; k++) {
+    snprintf(line, sizeof(line), "M%d,0x12,0x%04X,2,0,u16,big,1,1,0,,,medium", k, 0x100 + k);
+    t.line(line);
+    snprintf(line, sizeof(line), "S%d,0x12,0x%04X,2,0,u16,big,1,1,0,,,slow", k, 0x200 + k);
+    t.line(line);
+  }
+  Plan mp;
+  mp.build(t);
+  mp.smallerBatches(0x12, MAX_BATCH);
+  mp.smallerBatches(0x12, MAX_BATCH / 2);
+  CHECK(mp.batchFor(0x12) == 6);
+  Scheduler s;
+  s.build(mp);
+  size_t slowSeen = 0, requests = 0;
+  for (int c = 0; c < 4; c++) {
+    size_t fast = 0, med = 0, slw = 0;
+    std::vector<std::vector<size_t>> reqs = s.cycle(mp, 0);
+    for (const auto& b : reqs) {
+      CHECK(b.size() <= 6);
+      for (size_t i : b) {
+        fast += mp.reads[i].tier == FAST;
+        med += mp.reads[i].tier == MEDIUM;
+        slw += mp.reads[i].tier == SLOW;
+      }
+    }
+    CHECK(fast == 10 && med >= 2);
+    slowSeen += slw;
+    requests += reqs.size();
+  }
+  CHECK(slowSeen >= 2 && requests == 10);                   // 3, 2, 3, 2
+  // At full size nothing changes: one request, medium and slow halve what's left.
+  Plan full;
+  full.build(t);
+  Scheduler f;
+  f.build(full);
+  std::vector<std::vector<size_t>> reqs = f.cycle(full, 0);
+  CHECK(reqs.size() == 1 && reqs[0].size() == MAX_BATCH);
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"batch_recovery", test_batch_recovery},
   {"periodic", test_periodic},
   {"sha256", test_sha256},
   {"channel_file", test_channel_file},

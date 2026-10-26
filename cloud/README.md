@@ -123,7 +123,7 @@ All requests need an Access token (a login, or the service token headers
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
 | `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`, `speed_kmh`, `rpm`, `battery_v`, `pending`, ...) of at most 4 KB, kept 30 days |
 | `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in, and each power-on in the last `?hours=` (default 24) |
-| `GET /logger` | the logger channel page: every channel the board can decode, what the car answers, a tier for each, presets |
+| `GET /logger` | the logger channel page: every channel the board can decode, what the car answers, a tier for each, presets, and the rates the selection should get (`estimate.js`: a model of the board's scheduler fitted to a real drive, using the batch sizes and answer times from its last check-in) |
 | `PUT /api/logger/catalog` | the app's channel catalog (`n63read loggerchannels.catalog_payload`): `{"columns", "rows", "answers", "modules", "defaults"}`. Answers merge with the stored ones (an identifier that answered "ok" stays "ok"); the first one makes the preset "Default" (`defaults`, everything else slow) and makes it active |
 | `GET /api/logger/catalog` | the stored catalog |
 | `GET /api/logger/presets` | `{"active", "presets": [{"name", "rest", "tiers", "updated"}], "file": {"preset", "etag", "counts"}}`. `tiers` is `{channel: tier}` (fast, medium, slow, drive, daily, weekly, monthly, off); `rest` ("slow" or "off") is the tier of every channel not named that the car answers |
