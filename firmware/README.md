@@ -9,13 +9,14 @@ the Windows build.
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
 | `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, CSV layout and SHA-256. No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
-| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`) |
+| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
 | `logger/` | The logger: logs the car to the SD card, uploads each drive to the cloud Worker |
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
 
-Read-only, as n63read: the client refuses anything but UDS 0x22 and 0x3E, and
-the host test checks that nothing else is ever sent.
+Read-only, as n63read: the client refuses anything but UDS 0x22, 0x3E and
+0x19 02 (the fault list; never 0x14, which clears faults), and the host test
+checks that nothing else is ever sent.
 
 When `core.py` changes how it frames, routes or decodes, change `lib/hsfz` in
 the same PR.
@@ -40,18 +41,23 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
 2. **Channels.** `n63read logger-channels --out channels.csv` writes every
    channel the car answers (after the app's Answers > Check car now). Copy it
    to the card's root, or send it over Wi-Fi:
-   `python firmware/tools/send_channels.py <address> channels.csv`. Without
-   one the board reads its built-in fast tier: the drive log, fuel economy and
-   misfire templates.
+   `python firmware/tools/send_channels.py <address> channels.csv`. Each row
+   has a tier: **fast** (boost, wastegates, lambda and knock per bank, RPM,
+   throttle, pedal, gear, speed; or the app's "Logger fast" template),
+   **medium** (the drive log, fuel economy and misfire templates plus trims,
+   uneven running, wastegate sensors and oil pressure; or "Logger medium"),
+   and **slow**, everything else the check found. Without a file the board
+   reads its built-in fast and medium tiers.
 3. **Flash.** Open `firmware/logger` in PlatformIO and Upload.
 
 Each boot it closes a drive a power cut left open, then looks for the car
 (the address it had last time first, then discovery) and logs while it
 answers:
 
-- `drives/<start>.csv`: the fast channels, every cycle.
-- `drives/<start>.sweep.csv`: every other channel, in rotation, one row a
-  pass.
+- `drives/<start>.csv`: the fast and medium channels, one row a cycle (a
+  medium cell is empty in cycles that didn't read it).
+- `drives/<start>.sweep.csv`: the slow channels, one row each time all of
+  them have come round.
 
 `<start>` is the local time when the clock is known (from the internet at
 boot), else `nt-<boot>-<n>`. A drive ends when the car stops answering for
@@ -59,6 +65,34 @@ boot), else `nt-<boot>-<n>`. A drive ends when the car stops answering for
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).
+
+Each cycle sends one request to every module that has fast or medium reads
+(and to one slow-only module, in turn), all in flight together, both DMEs
+side by side on their own connections. A module's request carries all its
+fast identifiers, then the next medium and slow ones in rotation, up to 24
+identifiers; medium takes at most half of what's left so slow keeps moving.
+A module that can't take that many (refuses, times out or answers out of
+line) halves its batch, down to one; an identifier that keeps failing is
+rested for a minute. If the gateway won't take several requests on one
+connection at once, the board falls back to one at a time and notes it.
+
+The log's `note` column records the start, a stats line every minute (rate,
+read time, slow pass, resting reads, smaller batches), batch changes and the
+reset reason. On the bench (bench car with `--delay 30`, a 30 ms answer per
+request; 15 fast, 51 medium and 9,219 slow channels) it logs about 14 rows a
+second with a slow pass every 10 s.
+
+From a minute into a drive the board also reads fault memory, one module
+at a time between cycles: every module n63read knows on this car once a
+drive (`lib/logger/faults.h`, kept equal to `core.KNOWN_MODULES` by
+`tests/test_logger_faults.py`), then both DMEs every three minutes. Each read
+adds rows to `drives/<start>.faults.csv` in n63read's fault-list format (plus
+`time_s`), uploaded with the drive: a row per failed code, or one saying the
+module has none, refused or didn't answer. Codes only; the texts and stored
+details stay with the app and the Worker. A read holds up that cycle's row by
+the module's answer time, and a module that doesn't answer costs 3 s once a
+drive. Status (`s`) and the check-ins give the failed codes in the modules'
+last reads.
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
@@ -68,11 +102,6 @@ the built-in fast tier), files waiting, Wi-Fi and memory. A long upload
 delays the check-ins; a failed one is skipped. Each is a new TLS connection,
 about 2 MB an hour on a phone hotspot. `logger_status` (MCP) and
 `GET /api/logger` show the last one and each power-on.
-
-A module that can't take eight identifiers in a request drops to one; an
-identifier that keeps failing is rested for a minute. On the bench (bench
-car, 49 fast and 1,587 sweep channels) it logs about 12 fast rows a second
-with a sweep pass every half second; in the car each read takes longer.
 
 Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
 status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end

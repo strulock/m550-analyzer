@@ -6,14 +6,16 @@
 //   1. Recover: a drive the last power cut left open is closed and queued.
 //   2. Find the car (HSFZ discovery) and log while it answers: the fast
 //      channels every cycle to drives/<start>.csv, everything else in
-//      rotation, one row a pass, to drives/<start>.sweep.csv.
+//      rotation, one row a pass, to drives/<start>.sweep.csv; from a minute
+//      in, each module's fault list in turn, and the DMEs' every three
+//      minutes, to drives/<start>.faults.csv.
 //   3. Meanwhile, on the other core: whenever Wi-Fi is up, upload finished
 //      files, compare the SHA-256 the Worker reports with the board's own,
 //      and delete a file only when they match.
 //
 // What to read comes from channels.csv on the card (n63read logger-channels),
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
-// but UDS 0x22 and 0x3E.
+// but UDS 0x22, 0x3E and 0x19 02 (the fault list; never a clear).
 //
 // Terminal: USB serial at 115200, and TCP 23 over Wi-Fi (logger_secrets.h):
 //   s status   l files waiting to upload   u upload now   e end this drive
@@ -48,6 +50,7 @@
 
 #include "channels.h"
 #include "csvlog.h"
+#include "faults.h"
 #include "default_channels.h"
 #include "hsfz.h"
 #include "plan.h"
@@ -86,7 +89,6 @@ static const uint32_t REQUEST_MS = 1500;     // a reply takes 3-60 ms; more is a
 static const uint32_t CAR_GONE_MS = 10000;   // nothing answered this long: the drive is over
 static const uint32_t SEARCH_MS = 1000;      // between tries (the car is usually there at once)
 static const uint32_t FLUSH_MS = 2000;       // a power cut loses at most this much
-static const uint32_t SWEEP_MS = 25;         // sweep time per cycle, after the fast reads
 static const uint32_t MIN_CYCLE_MS = 50;     // at most 20 fast rows a second
 static const uint32_t UPLOAD_EVERY_MS = 15000;
 
@@ -278,9 +280,9 @@ static void loadChannelsInto() {
   }
   plan.build(table);
   findLive();
-  out.printf("[chan] %u channels (%u fast, %u sweep) in %u reads, from %s%s\n",
-             (unsigned)table.channels.size(), (unsigned)table.count(true),
-             (unsigned)table.count(false), (unsigned)plan.reads.size(),
+  out.printf("[chan] %u channels (%u fast, %u medium, %u slow) in %u reads, from %s%s\n",
+             (unsigned)table.channels.size(), (unsigned)table.count(FAST),
+             (unsigned)table.count(MEDIUM), (unsigned)table.count(SLOW), (unsigned)plan.reads.size(),
              channelsFromCard ? "the card" : "the built-in table",
              table.skipped ? " (some rows skipped)" : "");
 }
@@ -449,15 +451,16 @@ struct DriveFile {
 enum State { WAIT_LINK, SEARCH, LOGGING };
 static State state = WAIT_LINK;
 
-static DriveFile fastFile, sweepFile;
+static DriveFile fastFile, sweepFile, faultFile;
+static FaultScan faultScan;
 static String driveName;
 static uint32_t driveStartMs = 0, lastOkMs = 0, lastFlushMs = 0, lastCycleMs = 0;
 static uint32_t fastRows = 0, sweepRows = 0, cycles = 0, cycleStatsMs = 0;
 static float cycleRate = 0;
-static uint32_t tFast = 0, tSweep = 0, tWrite = 0;     // ms spent per stats window
-static float msFast = 0, msSweep = 0, msWrite = 0;     // per cycle, last window
+static uint32_t tFast = 0, tWrite = 0;                 // ms spent per stats window
+static float msFast = 0, msWrite = 0;                  // per cycle, last window
 static uint32_t sweepPassMs = 0, sweepPassStart = 0;
-static size_t sweepAt = 0;
+static Scheduler scheduler;                 // this drive's rotation through the tiers
 static std::vector<double> values;
 static LogFile fastLayout, sweepLayout;
 
@@ -563,7 +566,8 @@ static void startDrive() {
            vin, (unsigned)bootCount, resetReason(), millis() / 1000.0f,
            (unsigned)table.channels.size(), channelsFromCard ? "the card" : "the built-in table");
   addNote(start);
-  sweepAt = plan.sweepStart();
+  scheduler.build(plan);
+  faultScan.start(millis());
   sweepPassStart = millis();
   out.printf("[drive] %s started%s%s\n", driveName.c_str(), timeKnown() ? "" : " (clock unknown)",
              ok ? "" : ": FILES COULD NOT BE OPENED");
@@ -578,26 +582,36 @@ static void endDrive(const char* why) {
   }
   fastFile.finish();
   sweepFile.finish();
+  faultFile.finish();
   disconnectCar();
   out.printf("[drive] %s ended (%s): %u rows, %u sweep rows, %.1f min\n", driveName.c_str(), why,
              (unsigned)fastRows, (unsigned)sweepRows, (millis() - driveStartMs) / 60000.0f);
   driveName = "";
 }
 
-// ---- one request -------------------------------------------------------------
+// ---- requests ----------------------------------------------------------------
 static bool connectionLost = false;
 
-static void ask(const std::vector<size_t>& batch) {
-  const Read& first = plan.reads[batch[0]];
-  hsfz::Client* cl = first.module == hsfz::DME_SLAVE ? bank2Client : mainClient;
-  if (!cl) { for (size_t i : batch) plan.failed(i, millis()); return; }
-  uint8_t req[1 + 2 * MAX_BATCH];
+// The slave DME is on its own connection (tester 0xF5); everything else on
+// the main one. Requests on the two can be in flight together.
+static hsfz::Client* clientFor(const std::vector<size_t>& batch) {
+  return plan.reads[batch[0]].module == hsfz::DME_SLAVE ? bank2Client : mainClient;
+}
+
+static size_t buildRequest(const std::vector<size_t>& batch, uint8_t* req) {
   req[0] = 0x22;
   for (size_t k = 0; k < batch.size(); k++) {
     req[1 + 2 * k] = plan.reads[batch[k]].did >> 8;
     req[2 + 2 * k] = plan.reads[batch[k]].did & 0xFF;
   }
-  hsfz::Reply r = cl->request(first.module, req, 1 + 2 * batch.size(), rx, sizeof(rx), REQUEST_MS);
+  return 1 + 2 * batch.size();
+}
+
+static void ask(const std::vector<size_t>& batch);
+
+// What came back for a batch (its answer is in rx).
+static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
+  const Read& first = plan.reads[batch[0]];
   const uint32_t now = millis();
   if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
   std::vector<const uint8_t*> data;
@@ -618,97 +632,198 @@ static void ask(const std::vector<size_t>& batch) {
   }
   if (r.result == hsfz::OK) lastOkMs = now;       // it answered, just not in line
   if (batch.size() > 1) {
-    // The module can't take this batch: one identifier at a time from now on,
-    // starting with these (a module that answered at all, that is: after a
-    // timeout eight more would cost seconds).
-    plan.noBatches(first.module);
+    // The module can't take a batch this big: half the size from now on, and
+    // these asked again in two halves straight away (if it answered at all:
+    // after a timeout that would cost seconds more).
+    plan.smallerBatches(first.module, batch.size());
     const char* why = r.result == hsfz::OK ? "reply out of line" : hsfz::resultName(r.result);
-    out.printf("[plan] module 0x%02X: one identifier per request (%s)\n", first.module, why);
-    char text[80];
-    snprintf(text, sizeof(text), "module 0x%02X one identifier per request (%s)", first.module, why);
+    out.printf("[plan] module 0x%02X: %u identifiers per request (%s)\n", first.module,
+               (unsigned)plan.batchFor(first.module), why);
+    char text[96];
+    snprintf(text, sizeof(text), "module 0x%02X %u identifiers per request (%s)", first.module,
+             (unsigned)plan.batchFor(first.module), why);
     addNote(text);
     if (r.result == hsfz::OK || r.result == hsfz::NEGATIVE) {
-      for (size_t i : batch) {
-        if (connectionLost) break;
-        ask(std::vector<size_t>{i});
-      }
+      size_t half = batch.size() / 2;
+      std::vector<size_t> a(batch.begin(), batch.begin() + half), b(batch.begin() + half, batch.end());
+      if (!connectionLost) ask(a);
+      if (!connectionLost) ask(b);
     }
     return;
   }
   plan.failed(batch[0], now);
 }
 
+static void ask(const std::vector<size_t>& batch) {
+  hsfz::Client* cl = clientFor(batch);
+  if (!cl) { for (size_t i : batch) plan.failed(i, millis()); return; }
+  uint8_t req[1 + 2 * MAX_BATCH];
+  size_t n = buildRequest(batch, req);
+  process(batch, cl->request(plan.reads[batch[0]].module, req, n, rx, sizeof(rx), REQUEST_MS));
+}
+
+// Requests in flight together: at most one per module (a module answers one
+// at a time), on both connections, several to different modules on one
+// connection while the gateway allows it. If such a wave times out, one
+// request at a time per connection from then on.
+static bool sameConnection = true;
+
+static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
+  struct Sent { hsfz::Client* cl; uint8_t req[1 + 2 * MAX_BATCH]; size_t n; uint8_t target;
+                hsfz::Reply r; bool ok; };
+  std::vector<Sent> sent(wave.size());
+  for (size_t i = 0; i < wave.size(); i++) {
+    Sent& s = sent[i];
+    s.cl = clientFor(*wave[i]);
+    s.target = plan.reads[(*wave[i])[0]].module;
+    s.n = buildRequest(*wave[i], s.req);
+    s.ok = s.cl && s.cl->start(s.target, s.req, s.n, s.r);
+    if (!s.cl) s.r.result = hsfz::TIMEOUT;
+  }
+  bool shared = false, timedOut = false;
+  for (size_t i = 0; i < wave.size(); i++) {
+    for (size_t j = 0; j < i; j++) shared = shared || sent[j].cl == sent[i].cl;
+  }
+  for (size_t i = 0; i < wave.size() && !connectionLost; i++) {
+    Sent& s = sent[i];
+    hsfz::Reply r = s.ok ? s.cl->finish(s.target, s.req, s.n, rx, sizeof(rx), REQUEST_MS) : s.r;
+    timedOut = timedOut || r.result == hsfz::TIMEOUT;
+    process(*wave[i], r);
+  }
+  if (shared && timedOut && sameConnection) {
+    sameConnection = false;
+    out.println("[plan] one request at a time per connection (a shared wave timed out)");
+    addNote("one request at a time per connection (a shared wave timed out)");
+  }
+}
+
+// Send `batches` in waves: each wave takes the next batch of every module
+// not yet in it (and, without sameConnection, of every connection).
+static void askAll(std::vector<const std::vector<size_t>*> batches) {
+  while (!batches.empty() && !connectionLost) {
+    std::vector<const std::vector<size_t>*> wave, rest;
+    for (const std::vector<size_t>* b : batches) {
+      bool clash = false;
+      for (const std::vector<size_t>* w : wave) {
+        clash = clash || plan.reads[(*w)[0]].module == plan.reads[(*b)[0]].module ||
+                (!sameConnection && clientFor(*w) == clientFor(*b));
+      }
+      (clash ? rest : wave).push_back(b);
+    }
+    askWave(wave);
+    batches.swap(rest);
+  }
+}
+
 // ---- the logging cycle -------------------------------------------------------
+// Each cycle: one request per module (the scheduler packs each module's fast
+// reads with the next medium and slow ones), all in flight together.
 static void cycle() {
   const uint32_t start = millis();
-  for (uint32_t i : fastLayout.columns) values[i] = NAN;
-  size_t at = 0;
-  for (std::vector<size_t> b; !connectionLost && !(b = plan.next(true, at, millis())).empty();) {
-    ask(b);
-  }
-  const uint32_t afterFast = millis();
-  tFast += afterFast - start;
-  const double secs = (millis() - driveStartMs) / 1000.0;
+  for (uint32_t i : fastLayout.columns) values[i] = NAN;     // fast and medium cells
+  if (mainClient) mainClient->clearStash();
+  if (bank2Client) bank2Client->clearStash();
+  std::vector<std::vector<size_t>> requests = scheduler.cycle(plan, millis());
+  std::vector<const std::vector<size_t>*> batches;
+  for (const std::vector<size_t>& b : requests) batches.push_back(&b);
+  askAll(batches);
+  const uint32_t afterReads = millis();
+  tFast += afterReads - start;
+  const double secs = (afterReads - driveStartMs) / 1000.0;
   if (!fastLayout.columns.empty()) {
     if (millis() - lastStatsNoteMs >= STATS_MS) {
       lastStatsNoteMs = millis();
       size_t rested = 0;
       for (const Read& rd : plan.reads) rested += rd.restUntil != 0;
-      std::string single;
+      std::string smaller;
       for (const Read& rd : plan.reads) {
-        char m[8];
-        snprintf(m, sizeof(m), "0x%02X", rd.module);
-        if (plan.batchFor(rd.module) == 1 && single.find(m) == std::string::npos) {
-          single += single.empty() ? "" : " ";
-          single += m;
+        char m[16];
+        snprintf(m, sizeof(m), "0x%02X:%u", rd.module, (unsigned)plan.batchFor(rd.module));
+        if (plan.batchFor(rd.module) < MAX_BATCH && smaller.find(m) == std::string::npos) {
+          smaller += smaller.empty() ? "" : " ";
+          smaller += m;
         }
       }
-      char text[200];
+      char text[220];
       snprintf(text, sizeof(text),
-               "stats %.1f rows/s; fast %.0f ms; sweep %.0f ms; files %.0f ms; sweep pass %.0f s; "
-               "%u resting; one per request: %s",
-               cycleRate, msFast, msSweep, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
-               single.empty() ? "none" : single.c_str());
+               "stats %.1f rows/s; reads %.0f ms; files %.0f ms; slow pass %.0f s; %u resting; "
+               "%s; smaller batches: %s",
+               cycleRate, msFast, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
+               sameConnection ? "overlapping requests" : "one request at a time per connection",
+               smaller.empty() ? "none" : smaller.c_str());
       addNote(text);
     }
     fastFile.add(fastLayout.row(table, secs, clockNow(), values, note.c_str()));
     note.clear();
     fastRows++;
   }
-  // The sweep, a few requests a cycle; a finished pass is one row.
-  const uint32_t sweepFrom = millis();
-  tWrite += sweepFrom - afterFast;
-  while (!connectionLost && !sweepLayout.columns.empty() && millis() - sweepFrom < SWEEP_MS) {
-    std::vector<size_t> b = plan.next(false, sweepAt, millis());
-    if (b.empty()) {
-      sweepFile.add(sweepLayout.row(table, (millis() - driveStartMs) / 1000.0, clockNow(), values));
-      sweepRows++;
-      for (uint32_t i : sweepLayout.columns) values[i] = NAN;
-      sweepPassMs = millis() - sweepPassStart;
-      sweepPassStart = millis();
-      sweepAt = plan.sweepStart();
-      break;
-    }
-    ask(b);
+  // Every module's slow reads all come round: one row of the sweep file.
+  if (scheduler.slowPassDone() && !sweepLayout.columns.empty()) {
+    sweepFile.add(sweepLayout.row(table, secs, clockNow(), values));
+    sweepRows++;
+    for (uint32_t i : sweepLayout.columns) values[i] = NAN;
+    sweepPassMs = millis() - sweepPassStart;
+    sweepPassStart = millis();
   }
-  const uint32_t flushFrom = millis();
-  tSweep += flushFrom - sweepFrom;
   if (millis() - lastFlushMs >= FLUSH_MS) {
     fastFile.flush();
     sweepFile.flush();
     lastFlushMs = millis();
   }
-  tWrite += millis() - flushFrom;
+  tWrite += millis() - afterReads;
   cycles++;
   if (millis() - cycleStatsMs >= 5000) {
     cycleRate = cycles * 1000.0f / (millis() - cycleStatsMs);
-    msFast = (float)tFast / cycles; msSweep = (float)tSweep / cycles; msWrite = (float)tWrite / cycles;
-    tFast = tSweep = tWrite = 0;
+    msFast = (float)tFast / cycles; msWrite = (float)tWrite / cycles;
+    tFast = tWrite = 0;
     cycles = 0;
     cycleStatsMs = millis();
   }
   uint32_t spent = millis() - start;
   if (spent < MIN_CYCLE_MS) delay(MIN_CYCLE_MS - spent);
+}
+
+// ---- fault memory ------------------------------------------------------------
+// One module's fault list when FaultScan says, between cycles, a row per
+// failed code (or one saying there are none) in <drive>.faults.csv. It holds
+// up that cycle's row by the module's answer time; a module that doesn't
+// answer costs FAULT_MS once a drive.
+static const uint32_t FAULT_MS = 3000;
+static uint16_t failedBy[256];               // failed codes per module, last read
+static std::atomic<int> faultsNow{-1};       // their sum; -1 until the first read
+
+static void readFaults() {
+  int m = faultScan.next(millis());
+  if (m < 0 || connectionLost) return;
+  hsfz::Client* cl = m == hsfz::DME_SLAVE ? bank2Client : mainClient;
+  if (!cl) return;
+  hsfz::Reply r = cl->request((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), rx, sizeof(rx), FAULT_MS);
+  if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
+  std::vector<Dtc> dtcs;
+  int result = -1;
+  if (r.result == hsfz::OK && parseDtcs(rx, r.len, dtcs)) result = 0;
+  else if (r.result == hsfz::NEGATIVE) result = r.nrc;
+  if (result >= 0) lastOkMs = millis();
+  if (!faultFile.open) {
+    faultFile.begin(String(DRIVES) + "/" + driveName + ".faults.csv", FAULT_HEADER);
+    if (faultsNow < 0) { memset(failedBy, 0, sizeof(failedBy)); faultsNow = 0; }
+  }
+  std::string at = timeKnown() ? clockNow().substr(0, 19) : "";
+  faultFile.add(faultRows(at, (millis() - driveStartMs) / 1000.0, (uint8_t)m, result, dtcs));
+  faultFile.flush();
+  if (result != 0) return;
+  uint16_t failed = 0;
+  for (const Dtc& d : dtcs) failed += dtcFailed(d.status);
+  if (failed != failedBy[m]) {
+    char text[64];
+    snprintf(text, sizeof(text), "faults 0x%02X: %u", m, (unsigned)failed);
+    addNote(text);
+    out.printf("[faults] module 0x%02X: %u failed codes\n", m, (unsigned)failed);
+  }
+  failedBy[m] = failed;
+  int sum = 0;
+  for (uint16_t n : failedBy) sum += n;
+  faultsNow = sum;
 }
 
 // ---- uploads (core 0) --------------------------------------------------------
@@ -900,6 +1015,8 @@ static std::string beatJson(bool boot) {
   jsonNumber(j, "speed_kmh", live(SPEED), 1);
   jsonNumber(j, "rpm", live(RPM), 0);
   jsonNumber(j, "battery_v", live(BATTERY) / 1000.0, 2);
+  int faults = faultsNow;
+  jsonNumber(j, "faults", faults < 0 ? NAN : faults, 0);
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
   jsonText(j, "vin", vin);
   if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
@@ -1029,17 +1146,21 @@ static void status() {
     out.printf(" %s: %.1f min, %u rows (%.1f/s), %u sweep rows (pass %.1f s)", driveName.c_str(),
                (millis() - driveStartMs) / 60000.0f, (unsigned)fastRows, cycleRate,
                (unsigned)sweepRows, sweepPassMs / 1000.0f);
-    out.printf("; per cycle: fast reads %.0f ms, sweep %.0f ms, rows and files %.0f ms",
-               msFast, msSweep, msWrite);
+    out.printf("; per cycle: reads %.0f ms, rows and files %.0f ms; %s", msFast, msWrite,
+               sameConnection ? "overlapping requests" : "one request at a time per connection");
   }
   out.println();
   size_t rested = 0;
   for (const Read& r : plan.reads) rested += r.restUntil != 0;
-  out.printf("[status] channels %u fast, %u sweep (%s), %u reads, %u resting\n",
-             (unsigned)table.count(true), (unsigned)table.count(false),
+  out.printf("[status] channels %u fast, %u medium, %u slow (%s), %u reads, %u resting\n",
+             (unsigned)table.count(FAST), (unsigned)table.count(MEDIUM), (unsigned)table.count(SLOW),
              channelsFromCard ? "card" : "built in", (unsigned)plan.reads.size(), (unsigned)rested);
   out.printf("[status] car %s%s%s, link %s\n", carIp.toString().c_str(), vin[0] ? " VIN " : "",
              vin, linkUp ? "up" : "down");
+  int faults = faultsNow;
+  if (faults < 0) out.println("[status] faults: not read yet (from a minute into a drive)");
+  else out.printf("[status] faults: %d failed codes in the modules' last reads%s\n", faults,
+                  faultScan.fullScanDone() ? "" : " (first pass still running)");
   String last;
   {
     std::lock_guard<std::recursive_mutex> g(sdLock);
@@ -1288,6 +1409,7 @@ void loop() {
     }
     case LOGGING:
       cycle();
+      readFaults();
       if (endRequested) { endDrive("ended from the terminal"); state = SEARCH; }
       else if (connectionLost) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }

@@ -7,9 +7,16 @@ reply, the data type and scaling, and the name it logs under (the app's own
 column names, so History and the cloud treat the board's logs like the
 app's). No Tk here.
 
-Two tiers. "fast" channels are read on every cycle: the drive log, fuel
-economy and misfire templates by default. "sweep" is everything else that
-answers, read in rotation and logged to the drive's second file.
+Three tiers, for the sampling rate where it matters (wastegate, boost and
+knock under load):
+- "fast": every cycle, aiming at 10-20 a second - engine speed, boost,
+  wastegates, lambda and knock retard per bank, throttle, pedal, gear, speed.
+- "medium": in rotation, a few times a second - trims, uneven running,
+  misfire counters, spark burn time, fuel flow, GPS and the like.
+- "slow": everything else that answers, in rotation, one row a pass in the
+  drive's second file.
+A template saved in the app as "Logger fast" or "Logger medium" replaces
+that tier's list.
 
 What answers comes from the app's record (Answers > Check car now, kept in
 availability.json), `n63read check --out` CSVs, or every check the cloud
@@ -23,7 +30,24 @@ import csv
 
 from n63read import core
 
-FAST_TEMPLATES = ("Drive log with GPS", "Fuel economy", "Misfire hunt")
+B2 = core.BANK2_SUFFIX
+TIERS = ("fast", "medium", "slow")
+TEMPLATE_FAST, TEMPLATE_MEDIUM = "Logger fast", "Logger medium"
+
+# The sampling-rate spec (2026-10-25): what wastegate, boost and knock
+# analysis needs every cycle, with both banks where each DME has its own.
+FAST = (["INMOT", "IPLAD", "S_LADEDRUCK"]
+        + [n + s for n in ("I_EWG_POS", "TV_EWG", "ILAG1", "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT")
+           for s in ("", B2)]
+        + ["IWDKL", "BUS_FAHRPEDALWERT", "EGS_ISTGANG.ISTGANG",
+           "FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP"])
+
+# The drive log, fuel economy and misfire templates (what the fast tier was
+# before, and what History needs), plus trims, intake air, oil pressure and
+# the wastegate position sensors.
+MEDIUM_TEMPLATES = ("Drive log with GPS", "Fuel economy", "Misfire hunt")
+MEDIUM_EXTRA = ([n + s for n in ("IMUL1", "SPG_POS_SENS_EWG", "LADEDRUCK_REGELDIFFERENZ_BANKSPEZ")
+                 for s in ("", B2)] + ["RTANS", "OELDRUCK"])
 
 # Catalog data type -> the board's: width and signedness, or a float, or the
 # head unit's 5-byte coordinates. Anything else (strings, data[n], bitfields)
@@ -51,13 +75,24 @@ def merge_answers(answers):
     return out
 
 
-def fast_names(templates=FAST_TEMPLATES):
-    """The fast tier: the templates' channels, calculated ones replaced by
-    their inputs (the board logs readings; the app works out the rest)."""
-    names = []
-    for t in templates:
-        names.extend(core.BUILTIN_TEMPLATES[t])
+def _readings(names):
+    """Calculated channels replaced by their inputs (the board logs
+    readings; the app works out the rest), each once, in order."""
     return [n for n in core.with_inputs(names) if n not in core.DERIVED]
+
+
+def tier_lists(templates=None):
+    """(fast, medium) channel names: the built-in lists, or the app's
+    templates "Logger fast" and "Logger medium" where they exist. A channel
+    in both is fast."""
+    templates = templates or {}
+    fast = _readings(templates.get(TEMPLATE_FAST) or FAST)
+    if templates.get(TEMPLATE_MEDIUM):
+        medium = templates[TEMPLATE_MEDIUM]
+    else:
+        medium = [n for t in MEDIUM_TEMPLATES for n in core.BUILTIN_TEMPLATES[t]] + MEDIUM_EXTRA
+    taken = set(fast)
+    return fast, [n for n in _readings(medium) if n not in taken]
 
 
 def _number(meta, key, default):
@@ -79,15 +114,18 @@ def _offsets(fields):
     return out
 
 
-def channels(catalog, avail, fast=None):
-    """The channel file's rows, as dicts in HEADER order: fast tier first,
-    then by module, identifier and offset.
+def channels(catalog, avail, fast=None, medium=None):
+    """The channel file's rows, as dicts in HEADER order: by tier, then by
+    module, identifier and offset.
 
     `catalog`: the full catalog with bank 2 twins (cli._catalog()).
-    `avail`: {(module, DID): status}. Fast channels are kept whatever it says
-    (the templates are known to work); the rest only where it says "ok".
+    `avail`: {(module, DID): status}. Fast and medium channels are kept
+    whatever it says (chosen on purpose; the board rests one that doesn't
+    answer); the slow tier only where it says "ok".
     """
-    fast = set(fast_names() if fast is None else fast)
+    default_fast, default_medium = tier_lists()
+    fast = set(default_fast if fast is None else fast)
+    medium = set(default_medium if medium is None else medium) - fast
     layouts = core.record_layouts(catalog)
     offsets = {key: _offsets(fields) for key, fields in layouts.items()}
     out = []
@@ -113,8 +151,8 @@ def channels(catalog, avail, fast=None):
             status = avail.get((module, did))
             if status is None and module == core.DME_SLAVE:
                 status = avail.get((core.DME_MASTER, did))
-        tier = "fast" if name in fast else "sweep"
-        if tier == "sweep" and status != "ok":
+        tier = "fast" if name in fast else "medium" if name in medium else "slow"
+        if tier == "slow" and status != "ok":
             continue
         no_value = core.NO_VALUE.get(name)
         out.append({
@@ -129,7 +167,7 @@ def channels(catalog, avail, fast=None):
             "unit": "" if (meta.get("EINHEIT") or "").strip() == "-"
             else (meta.get("EINHEIT") or "").strip(),
             "tier": tier})
-    out.sort(key=lambda r: (r["tier"] != "fast", int(r["module"], 16), int(r["did"], 16),
+    out.sort(key=lambda r: (TIERS.index(r["tier"]), int(r["module"], 16), int(r["did"], 16),
                             r["offset"], r["name"]))
     return out
 
@@ -142,11 +180,11 @@ def write(rows, path):
 
 
 def summary(rows):
-    """{module: {"fast": n, "sweep": n, "identifiers": n}} for a report."""
+    """{module: {"fast": n, "medium": n, "slow": n, "identifiers": n}}."""
     out = {}
     for r in rows:
-        m = out.setdefault(r["module"], {"fast": 0, "sweep": 0, "ids": set()})
+        m = out.setdefault(r["module"], {t: 0 for t in TIERS} | {"ids": set()})
         m[r["tier"]] += 1
         m["ids"].add(r["did"])
-    return {k: {"fast": v["fast"], "sweep": v["sweep"], "identifiers": len(v["ids"])}
+    return {k: {**{t: v[t] for t in TIERS}, "identifiers": len(v["ids"])}
             for k, v in sorted(out.items())}

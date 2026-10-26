@@ -39,6 +39,7 @@ T0 = time.time()
 DMES = (0x12, 0x13)
 EXTRA = {}                  # (module, identifier) -> reply size, from --channels
 EXTRA_MODULES = set()
+DELAY = 0.0                 # s before each answer (--delay): the car's DMEs take ~30 ms
 
 
 def u16(v):
@@ -102,10 +103,19 @@ def answer(dme, uds):
     return b"\x62" + out
 
 
+def send_later(conn, lock, data):
+    try:
+        with lock:
+            conn.sendall(data)
+    except OSError:
+        pass
+
+
 def serve(conn, peer):
     print("[tcp] %s connected" % peer[0])
     count = 0
     buf = b""
+    lock = threading.Lock()
     with conn:
         while True:
             try:
@@ -126,8 +136,20 @@ def serve(conn, peer):
                 count += 1
                 reply = answer(dst, uds)
                 try:
-                    conn.sendall(frame(CTRL_ACK, src, dst, uds))
-                    if reply is not None:
+                    with lock:
+                        conn.sendall(frame(CTRL_ACK, src, dst, uds))
+                except OSError:
+                    break
+                if reply is None:
+                    continue
+                if DELAY:
+                    # Each module answers after its own delay, as on the car,
+                    # where requests to different modules overlap.
+                    threading.Timer(DELAY, send_later, (conn, lock, frame(CTRL_DIAG, dst, src,
+                                                                          reply))).start()
+                    continue
+                try:
+                    with lock:
                         conn.sendall(frame(CTRL_DIAG, dst, src, reply))
                 except OSError:
                     break
@@ -161,7 +183,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="a stand-in for the car's ENET gateway")
     ap.add_argument("--channels", metavar="CSV",
                     help="also answer every identifier in this logger channel file")
+    ap.add_argument("--delay", type=float, default=0.0, metavar="MS",
+                    help="wait this long before each answer, as the car does (~30)")
     args = ap.parse_args()
+    DELAY = args.delay / 1000.0
     if args.channels:
         load_channels(args.channels)
         print("answering %d identifiers from %s too" % (len(EXTRA), args.channels))

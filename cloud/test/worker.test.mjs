@@ -497,6 +497,78 @@ test("MCP batches and parse errors", async () => {
   assert.equal((await rpc(env, { jsonrpc: "1.0" })).error.code, -32600);
 });
 
+// --- logger fault reads
+
+const FAULT_HEAD = "read_at,module,module_name,code,status,state,text_en,text_de," +
+  "catalog_source,first_km,last_km,occurrences,details,time_s\n";
+const faultRow = (at, module, code, status, state, t = 0) =>
+  `${at},${module},"Engine, master DME",${code},${status},"${state}",,,,,,,,${t}\n`;
+
+test("logger fault reads go into fault history, gone once a later read drops them", async () => {
+  await env.FILES.put("ref/BMW_fault_code_texts.csv", new TextEncoder().encode(
+    "﻿code,text_de,text_en,source_module\n480A14,Klopf,\"Knock, cylinder 1\",DME\n"));
+  const first = FAULT_HEAD +
+    faultRow("2026-10-25 12:43:10", "0x12", "480A14", "0x2F", "present, stored") +
+    faultRow("2026-10-25 12:43:12", "0x29", "", "", "no faults") +
+    faultRow("2026-10-25 12:46:10", "0x12", "480A14", "0x2C", "not present, stored");
+  let r = await (await call("PUT", "/api/files/logger/2026-10-25_12-42-05.faults.csv",
+    { body: first })).json();
+  assert.equal(r.processed, true);
+  assert.equal(r.fault_reads, 3);
+  let f = (await tool("fault_history", {})).data.faults;
+  assert.equal(f.length, 1);
+  assert.deepEqual([f[0].module, f[0].code, f[0].now, f[0].text_en, f[0].reads_seen,
+    f[0].reads_present, f[0].first_seen, f[0].last_seen],
+  ["0x12", "480A14", "stored", "Knock, cylinder 1", 2, 1, "2026-10-25 12:43:10",
+    "2026-10-25 12:46:10"]);
+  // The same file again changes nothing.
+  r = await (await call("PUT", "/api/files/logger/2026-10-25_12-42-05.faults.csv",
+    { body: first })).json();
+  assert.equal(r.fault_reads, 0);
+  assert.equal((await tool("fault_history", {})).data.faults[0].reads_seen, 2);
+  // The next drive's read doesn't list it: gone (kept under which: all).
+  await call("PUT", "/api/files/logger/2026-10-26_08-00-00.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-26 08:01:00", "0x12", "", "", "no faults (40 listed codes never failed)") });
+  assert.equal((await tool("fault_history", {})).data.faults.length, 0);
+  f = (await tool("fault_history", { which: "all" })).data.faults;
+  assert.equal(f[0].now, "gone");
+});
+
+test("logger fault reads: a refused or silent module isn't a read; no clock uses the drive", async () => {
+  await call("PUT", "/api/files/logger/x.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-25 12:43:10", "0x12", "480A14", "0x2F", "present, stored") });
+  await call("PUT", "/api/files/logger/y.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-25 13:00:00", "0x12", "", "", "no reply") +
+    faultRow("2026-10-25 13:00:02", "0x12", "", "", "refused (nrc 0x31)") });
+  assert.equal((await tool("fault_history", {})).data.faults[0].now, "present");
+  // A drive without a clock: its fault reads are dated from the drive's start.
+  env.DB.db.prepare("INSERT INTO drives (source, file, start, data) VALUES (?, ?, ?, ?)")
+    .run("logger", "logger/nt-00035-01.csv", "2026-10-25 14:00:00", "{}");
+  const r = await (await call("PUT", "/api/files/logger/nt-00035-01.faults.csv", { body: FAULT_HEAD +
+    faultRow("", "0x12", "", "", "no faults", 75.5) })).json();
+  assert.equal(r.fault_reads, 1);
+  const f = (await tool("fault_history", { which: "all" })).data.faults[0];
+  assert.equal(f.now, "gone");
+  const reads = env.DB.db.prepare("SELECT latest FROM logger_fault_reads WHERE module = '0x12'")
+    .get();
+  assert.equal(reads.latest, "2026-10-25 14:01:15");
+});
+
+test("logger faults and the app's: each fault once, the newest sighting wins", async () => {
+  await call("PUT", "/api/history", { body: JSON.stringify({ source: "pc", drives: [],
+    faults: [{ module: "0x12", code: "480A14", now: "present", first_seen: "2026-10-01 09:00:00",
+      last_seen: "2026-10-20 09:00:00", text_en: "Knock" }] }) });
+  await call("PUT", "/api/files/logger/z.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-25 12:43:10", "0x12", "", "", "no faults") });
+  // The logger never listed it, so it has no row of its own: the app's stands.
+  assert.equal((await tool("fault_history", {})).data.faults[0].now, "present");
+  await call("PUT", "/api/files/logger/w.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-25 12:50:00", "0x12", "480A14", "0x2C", "not present, stored") });
+  const f = (await tool("fault_history", {})).data.faults[0];
+  assert.equal(f.now, "stored");
+  assert.equal(f.first_seen, "2026-10-01 09:00:00");      // the earliest sighting anywhere
+});
+
 // --- logger check-ins
 
 test("logger check-ins: stored, the newest says online, power-ons grouped", async () => {

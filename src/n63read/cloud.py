@@ -266,6 +266,23 @@ def sync_series(settings, state, logs, result):
         result.series += 1
 
 
+FAULT_TEXTS = "ref/BMW_fault_code_texts.csv"   # where the Worker finds the fault texts
+
+
+def sync_fault_texts(settings, state):
+    """Send n63read's fault texts, for the logger board's fault reads (the
+    board sends codes only); again only when this version's table differs.
+    True if sent."""
+    with open(core.resource_path(core.FAULT_CSV), "rb") as f:
+        data = f.read()
+    sha = hashlib.sha256(data).hexdigest()
+    if state.get("fault_texts_sha256") == sha:
+        return False
+    request(settings, "PUT", "/api/files/" + FAULT_TEXTS, data, "text/csv")
+    state["fault_texts_sha256"] = sha
+    return True
+
+
 def _key(rel):
     return urllib.parse.quote(rel.replace(os.sep, "/"), safe="/")
 
@@ -315,6 +332,10 @@ def sync(settings, logs=None, state_file=None, progress=None, templates_file=Non
         result.templates = sync_templates(settings, state, templates_file)
     except CloudError as e:
         result.errors.append("templates: %s" % e)
+    try:
+        sync_fault_texts(settings, state)
+    except CloudError as e:
+        result.errors.append("fault texts: %s" % e)
     save_state(state, state_file)
     sync_series(settings, state, logs, result)
     save_state(state, state_file)
