@@ -19,7 +19,19 @@ enum Type : uint8_t { U8, S8, U16, S16, U32, S32, F32, GPS };
 
 // fast: every cycle; medium: in rotation, a few times a second (both in the
 // drive's fast file); slow: in rotation, one row a pass (the sweep file).
-enum Tier : uint8_t { FAST, MEDIUM, SLOW };
+// The periodic tiers are read once, in a drive they're due (drive: every
+// drive; daily: the first of the day; weekly, monthly: 7 or 30 days after
+// the last), into the sweep file. Faster first: a read takes the fastest
+// tier of its channels.
+enum Tier : uint8_t { FAST, MEDIUM, SLOW, DRIVE, DAILY, WEEKLY, MONTHLY, TIER_N };
+
+inline bool periodic(Tier t) { return t >= DRIVE; }
+
+inline const char* tierName(Tier t) {
+  static const char* const names[TIER_N] = {"fast", "medium", "slow", "drive", "daily",
+                                            "weekly", "monthly"};
+  return t < TIER_N ? names[t] : "?";
+}
 
 inline int typeWidth(Type t) {
   switch (t) {
@@ -39,7 +51,7 @@ struct Channel {
   uint16_t offset;      // this value's place in it
   Type type;
   bool little;          // byte order "little"; else most significant first
-  Tier tier;            // "fast", "medium", or "slow" ("sweep", the old name)
+  Tier tier;            // by name; "sweep" (the old name) or one unknown: slow
   bool hasNoValue;
   uint32_t noValue;     // the raw value (big-endian) that means "none"
   double mul, div, add;
@@ -145,7 +157,9 @@ class Table {
     if (size && offset + typeWidth(c.type) > size) return false;
     c.little = f[col_[ORDER]] == "little";
     const std::string& tier = f[col_[TIER]];
-    c.tier = tier == "fast" ? FAST : tier == "medium" ? MEDIUM : SLOW;
+    if (tier == "off") return false;
+    c.tier = SLOW;
+    for (int k = 0; k < TIER_N; k++) if (tier == tierName((Tier)k)) c.tier = (Tier)k;
     if (!num(f[col_[MUL]], c.mul) || !num(f[col_[DIV]], c.div) || !num(f[col_[ADD]], c.add)) {
       return false;
     }

@@ -32,6 +32,12 @@ def quick_diagnostics(tmp_path, monkeypatch):
     # Cloud sync state goes to the temp dir; nothing reaches a real Worker.
     from n63read import cloud
     monkeypatch.setattr(cloud, "state_path", lambda: str(tmp_path / "cloud_state.json"))
+    # The car's recorded answers and the saved templates (beside them) too:
+    # the logger catalog that sync sends is built from both. The app fixture
+    # has its own file already.
+    if core.availability_path.__module__ == core.__name__:
+        monkeypatch.setattr(core, "availability_path",
+                            lambda: str(tmp_path / "n63read" / "availability.json"))
     # Never download map tiles from a test.
     from n63read import maps
 

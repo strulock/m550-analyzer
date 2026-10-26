@@ -165,3 +165,35 @@ def test_cloud_check_files_reads_only_checks(monkeypatch):
     got = cloud.check_files({})
     assert [k for _, k in got] == ["logs/check_a.csv", "check_b.csv"]     # oldest first
     assert got[1][0] == {(0x63, 0xD030): "refused"}
+
+
+def test_the_catalog_for_the_cloud_has_every_decodable_channel_and_the_answers():
+    tire = "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT"
+    did = int(CAT["ITOEL"]["ID"], 16)
+    p = loggerchannels.catalog_payload(CAT, {(0x29, 0xDC98): "ok", (0x12, did): "ok",
+                                             (0x63, 0xD030): "size"})
+    cols = p["columns"]
+    rows = {r[cols.index("name")]: dict(zip(cols, r)) for r in p["rows"]}
+    # Every channel the board can decode, answering or not, and nothing it can't.
+    assert len(rows) > 10000 and "INMOT" in rows and tire in rows
+    assert "VIN" not in rows and not any(n.endswith("_TEXT") for n in rows if n in CAT and
+                                         CAT[n].get("DATENTYP", "").startswith("string"))
+    t = rows[tire]
+    assert (t["module"], t["did"], t["offset"], t["type"], t["div"], t["unit"]) == (
+        "0x29", "0xDC98", 5, "u16", "1000", "bar")
+    assert t["info"].startswith("Last valid tire pressure") and t["group"] == "RDC_MESSDATENBLOCK_1"
+    # Answers per identifier; the slave DME takes the master's where it wasn't checked.
+    assert p["answers"]["0x29:0xDC98"] == "ok" and p["answers"]["0x63:0xD030"] == "size"
+    assert p["answers"]["0x13:0x%04X" % did] == "ok"
+    # The built-in lists are the first preset's tiers.
+    assert p["defaults"]["INMOT"] == "fast" and p["defaults"]["IMUL1"] == "medium"
+    assert p["modules"]["0x29"] == "DSC" and p["modules"]["0x13"] == "DME (bank 2)"
+
+
+def test_the_catalog_rows_decode_like_the_channel_file():
+    p = loggerchannels.catalog_payload(CAT, {GPS: "ok"})
+    cols = p["columns"]
+    from_catalog = {r[0]: dict(zip(cols, r)) for r in p["rows"]}
+    for r in loggerchannels.channels(CAT, {GPS: "ok"}):
+        want = {k: r[k] for k in loggerchannels.HEADER if k != "tier"}
+        assert {k: from_catalog[r["name"]][k] for k in want} == want

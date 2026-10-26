@@ -38,15 +38,25 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    `logger_secrets.h` (gitignored): Wi-Fi, the Worker's host
    (`m550.trulock.com`), an Access service token made for the board, and the
    time zone. With `WORKER_HOST` empty it only logs.
-2. **Channels.** `n63read logger-channels --out channels.csv` writes every
-   channel the car answers (after the app's Answers > Check car now). Copy it
-   to the card's root, or send it over Wi-Fi:
-   `python firmware/tools/send_channels.py <address> channels.csv`. Each row
-   has a tier: **fast** (boost, wastegates, lambda and knock per bank, RPM,
-   throttle, pedal, gear, speed; or the app's "Logger fast" template),
-   **medium** (the drive log, fuel economy and misfire templates plus trims,
-   uneven running, wastegate sensors and oil pressure; or "Logger medium"),
-   and **slow**, everything else the check found. Without a file the board
+2. **Channels.** Pick them on the logger channel page, `https://<worker>/logger`
+   (the app opens it: Answers > Logger channels, or Settings > Cloud): every
+   channel the board can decode, filtered to what the car answers, a tier for
+   each, saved as presets. The board downloads the active preset's
+   `channels.csv` (`GET /api/logger/channels`) soon after Wi-Fi comes up and
+   every 10 minutes, only when it changed, and uses it from the next drive.
+   The tiers: **fast** (every cycle), **medium** (a few times a second),
+   **slow** (in rotation), and the periodic ones, read once in a drive
+   they're due: **drive** (every drive), **daily** (the first drive of the
+   day), **weekly** and **monthly** (7 or 30 days after the last read; the
+   board keeps when). The first preset, "Default", is the built-in lists:
+   fast (boost, wastegates, lambda and knock per bank, RPM, throttle, pedal,
+   gear, speed), medium (the drive log, fuel economy and misfire templates
+   plus trims, uneven running, wastegate sensors and oil pressure), and slow,
+   everything else the car answers.
+   Offline, `n63read logger-channels --out channels.csv` still writes a file
+   (fast, medium and slow only) to copy to the card's root or send over Wi-Fi:
+   `python firmware/tools/send_channels.py <address> channels.csv`. A file sent
+   that way stays until the active preset changes. Without a file the board
    reads its built-in fast and medium tiers.
 3. **Flash.** Open `firmware/logger` in PlatformIO and Upload.
 
@@ -57,7 +67,9 @@ answers:
 - `drives/<start>.csv`: the fast and medium channels, one row a cycle (a
   medium cell is empty in cycles that didn't read it).
 - `drives/<start>.sweep.csv`: the slow channels, one row each time all of
-  them have come round.
+  them have come round; the periodic ones (from a minute in) in a row of
+  their own once all are read; and at the end, a row with whatever came in
+  since the last.
 
 `<start>` is the local time when the clock is known (from the internet at
 boot), else `nt-<boot>-<n>`. A drive ends when the car stops answering for
@@ -113,7 +125,10 @@ The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
 booted (a brownout shows there), uptime, what it's doing, the speed, rpm and
 battery voltage when the channel table has them (battery is `IUIBS`, not in
-the built-in fast tier), files waiting, Wi-Fi and memory. A long upload
+the built-in fast tier), files waiting, Wi-Fi and memory, and which channel
+file it's running (`channels`: the active preset's ETag, `manual` for one
+sent over the terminal, `card` or `built-in`), which the logger channel page
+compares with the active preset. A long upload
 delays the check-ins; a failed one is skipped. Each is a new TLS connection,
 about 2 MB an hour on a phone hotspot. `logger_status` (MCP) and
 `GET /api/logger` show the last one and each power-on.

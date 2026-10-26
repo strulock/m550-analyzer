@@ -470,7 +470,80 @@ static void test_fault_scan() {
   CHECK(std::string(moduleName(0x40)) == "Body domain controller (BDC)" && !*moduleName(0x99));
 }
 
+// The periodic tiers: parsed by name, logged in the sweep file, asked once
+// each (due tiers only, after openOnce), and when each is due.
+static void test_periodic() {
+  Table t;
+  t.line("name,module,did,did_size,offset,type,order,mul,div,add,no_value,unit,tier");
+  t.line("F,0x12,0x0001,2,0,u16,big,1,1,0,,,fast");
+  t.line("S,0x12,0x0002,2,0,u16,big,1,1,0,,,slow");
+  t.line("ODO,0x12,0x0003,2,0,u16,big,1,1,0,,,drive");
+  t.line("TIRE1,0x29,0xDC98,24,5,u16,big,1,1000,0,,bar,daily");
+  t.line("TIRE1T,0x29,0xDC98,24,7,u8,big,1,1,-50,,,daily");
+  t.line("CODING,0x40,0x1000,,0,u8,big,1,1,0,,,weekly");     // unsized: alone
+  t.line("SERVICE,0x40,0x1001,2,0,u16,big,1,1,0,,,monthly");
+  t.line("NOPE,0x40,0x1002,2,0,u16,big,1,1,0,,,off");
+  t.line("ODD,0x40,0x1003,2,0,u16,big,1,1,0,,,hourly");     // unknown: slow
+  CHECK(t.channels.size() == 8 && t.skipped == 1);
+  CHECK(t.count(DRIVE) == 1 && t.count(DAILY) == 2 && t.count(WEEKLY) == 1 && t.count(MONTHLY) == 1);
+  CHECK(find(t, "ODD").tier == SLOW && periodic(DAILY) && !periodic(SLOW));
+  CHECK(std::string(tierName(MONTHLY)) == "monthly");
+  LogFile fast, sweep;
+  fast.setup(t, true);
+  sweep.setup(t, false);
+  CHECK(fast.columns.size() == 1 && sweep.columns.size() == 7);
+
+  Plan p;
+  p.build(t);
+  auto asked = [&](Scheduler& s, int cycles) {
+    std::vector<uint16_t> d;
+    for (int k = 0; k < cycles; k++) {
+      for (const auto& b : s.cycle(p, 0, {}, 4)) for (size_t i : b) d.push_back(p.reads[i].did);
+    }
+    return d;
+  };
+  auto count = [](const std::vector<uint16_t>& d, uint16_t did) {
+    return (int)std::count(d.begin(), d.end(), did);
+  };
+  // Due: drive and daily only. Nothing periodic before openOnce.
+  Scheduler s;
+  s.build(p, (1u << DRIVE) | (1u << DAILY));
+  CHECK(s.onceCount() == 2 && s.hasSlow());
+  std::vector<uint16_t> d = asked(s, 5);
+  CHECK(count(d, 0x0003) == 0 && count(d, 0xDC98) == 0 && count(d, 0x0002) >= 1);
+  CHECK(!s.onceDone());
+  s.openOnce();
+  d = asked(s, 10);
+  CHECK(count(d, 0x0003) == 1 && count(d, 0xDC98) == 1);       // once each, one read for both fields
+  CHECK(count(d, 0x1000) == 0 && count(d, 0x1001) == 0);       // weekly and monthly not due
+  CHECK(s.onceDone() && !s.onceDone());                         // reported once
+  // All due: the unsized weekly read goes alone, once.
+  Scheduler all;
+  all.build(p);
+  all.openOnce();
+  d = asked(all, 10);
+  CHECK(count(d, 0x1000) == 1 && count(d, 0x1001) == 1 && count(d, 0xDC98) == 1);
+  CHECK(all.onceDone());
+  // No periodic reads: never "done", so no extra sweep row.
+  Scheduler none;
+  none.build(p, 0);
+  none.openOnce();
+  asked(none, 3);
+  CHECK(none.onceCount() == 0 && !none.onceDone());
+
+  // When each is due. 2026-10-26 08:00 UTC; Central time is UTC-5 then.
+  const uint32_t now = 1793001600u;
+  CHECK(periodicDue(DRIVE, now, now, -300));
+  CHECK(periodicDue(DAILY, 0, now, -300) && periodicDue(WEEKLY, 0, 0, -300));   // never / no clock
+  CHECK(!periodicDue(DAILY, now - 3600, now, -300));            // earlier the same local day
+  CHECK(periodicDue(DAILY, now - 10 * 3600, now, -300));         // 17:00 local, the day before
+  CHECK(!periodicDue(WEEKLY, now - 6 * 86400, now, -300));
+  CHECK(periodicDue(WEEKLY, now - 7 * 86400 + 1800, now, -300)); // within the hour's slack
+  CHECK(!periodicDue(MONTHLY, now - 29 * 86400, now, -300) && periodicDue(MONTHLY, now - 30 * 86400, now, -300));
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"periodic", test_periodic},
   {"sha256", test_sha256},
   {"channel_file", test_channel_file},
   {"decode", test_decode},
