@@ -202,6 +202,12 @@ static bool channelsFromCard = false;
 // before downloads) or "built-in". The upload task reads it.
 static std::mutex tagLock;
 static std::string channelsTag = "built-in";
+// From the last stats note, for the check-ins (the logger channel page's rate
+// estimates): the smaller batch sizes ("0x12:6 0x18:1"), each collected-later
+// module's answer time ("0x63:260"), the slow pass and the reads per cycle.
+// Under tagLock too.
+static std::string liveBatches, liveAnswers;
+static float liveSlowPassS = NAN, liveReadsMs = NAN;
 static std::atomic<bool> channelsDownloaded{false};   // a new file is on the card
 
 // The few values the check-ins report, kept by the logging core as they are
@@ -701,6 +707,13 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
   std::vector<const uint8_t*> data;
   std::vector<size_t> len;
   if (r.result == hsfz::OK && splitReply(rx + 1, r.len - 1, plan.reads, batch, data, len)) {
+    if (plan.goodBatch(module, batch.size())) {
+      char text[96];
+      snprintf(text, sizeof(text), "module 0x%02X %u identifiers per request again", module,
+               (unsigned)plan.batchFor(module));
+      out.printf("[plan] %s\n", text);
+      addNote(text);
+    }
     for (size_t k = 0; k < batch.size(); k++) {
       if (!data[k]) { plan.failed(batch[k], now); continue; }
       plan.answered(batch[k]);
@@ -777,6 +790,7 @@ struct Pending {
   uint32_t sentMs;
 };
 static std::vector<Pending> pendingReqs;
+static float answerMs[256];                       // per module, collected-later answers, averaged
 static const uint32_t LATER_MS = 3000;            // given up on after this
 static const size_t MAX_LATER = 6;                // in flight at once (hsfz keeps 8 answers)
 static const size_t SLOW_ONLY_PER_CYCLE = 4;
@@ -832,6 +846,11 @@ static void collect() {
       done = true;
     }
     if (!done) { k++; continue; }
+    if (!p.batch.empty() && (r.result == hsfz::OK || r.result == hsfz::NEGATIVE)) {
+      float ms = millis() - p.sentMs;                   // as the cycles see it
+      float& a = answerMs[p.target];
+      a = a > 0 ? 0.8f * a + 0.2f * ms : ms;
+    }
     Pending got = p;
     pendingReqs.erase(pendingReqs.begin() + k);
     if (got.batch.empty()) faultAnswer(got.target, r);
@@ -999,6 +1018,18 @@ static void cycle() {
                smallerList.empty() ? "none" : smallerList.c_str());
       addNote(text);
       laterSent = laterTimeouts = 0;
+      std::string answers;
+      for (int m = 0; m < 256; m++) {
+        if (answerMs[m] <= 0) continue;
+        char a[20];
+        snprintf(a, sizeof(a), "%s0x%02X:%.0f", answers.empty() ? "" : " ", m, answerMs[m]);
+        answers += a;
+      }
+      std::lock_guard<std::mutex> g(tagLock);
+      liveBatches = smallerList.empty() ? "none" : smallerList;
+      liveAnswers = answers;
+      liveSlowPassS = sweepPassMs ? sweepPassMs / 1000.0f : NAN;
+      liveReadsMs = msFast;
     }
     fastFile.add(fastLayout.row(table, secs, clockNow(), values, note.c_str()));
     note.clear();
@@ -1297,6 +1328,10 @@ static std::string beatJson(bool boot) {
   {
     std::lock_guard<std::mutex> g(tagLock);
     jsonText(j, "channels", channelsTag.c_str());
+    if (!liveBatches.empty()) jsonText(j, "batches", liveBatches.c_str());
+    if (!liveAnswers.empty()) jsonText(j, "answer_ms", liveAnswers.c_str());
+    jsonNumber(j, "slow_pass_s", liveSlowPassS, 0);
+    jsonNumber(j, "reads_ms", liveReadsMs, 0);
   }
   return j + "}";
 }

@@ -2,9 +2,12 @@
  * The logger channel page (GET /logger): every channel the board can read,
  * filtered to what the car answers, a tier for each, saved as presets. It
  * talks to /api/logger/catalog and /api/logger/presets (logger.js) with the
- * visitor's Access login. No dependencies; the script avoids backticks so
- * it can sit in this template.
+ * visitor's Access login, and estimates the rates the selection gets
+ * (estimate.js, its source embedded). No dependencies; the script avoids
+ * backticks and template placeholders so it can sit in this template.
  */
+
+import { estimateRates } from "./estimate.js";
 
 export const LOGGER_PAGE = String.raw`<!doctype html>
 <html lang="en">
@@ -51,6 +54,8 @@ input[type=search] { min-width: 240px; flex: 1; }
 .tier { border-left: 4px solid var(--c); padding: 4px 8px; }
 .tier b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
 .tier span { font-size: 12px; color: var(--muted); }
+.tier span.est { display: block; margin-top: 2px; color: var(--fg); font-weight: 600; }
+.tier span.est.warn { color: var(--warn); }
 .scroll { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; }
 th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 8px;
@@ -107,7 +112,10 @@ label { display: inline-flex; gap: 6px; align-items: center; }
       <select id="rest"><option value="slow">slow</option><option value="off">off</option></select></label>
   </section>
 
-  <section class="card tiers" id="summary"></section>
+  <section class="card">
+    <div class="tiers" id="summary"></div>
+    <p class="muted" id="estNote" style="font-size:12.5px;margin:10px 0 0"></p>
+  </section>
 
   <section class="card row">
     <input type="search" id="q" placeholder="Search names, descriptions, groups">
@@ -145,6 +153,9 @@ label { display: inline-flex; gap: 6px; align-items: center; }
 </div>
 
 <script>
+${estimateRates.toString()}
+</script>
+<script>
 (function () {
   "use strict";
   var TIERS = ["fast", "medium", "slow", "drive", "daily", "weekly", "monthly", "off"];
@@ -156,6 +167,7 @@ label { display: inline-flex; gap: 6px; align-items: center; }
   var $ = function (id) { return document.getElementById(id); };
   var cat = null, items = [], presets = [], activeName = null, file = null;
   var edit = null, savedJson = "", sel = new Set(), shown = PAGE, matches = [];
+  var live = {};                 // from the logger's last check-in: {batches, answers, from}
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -195,16 +207,55 @@ label { display: inline-flex; gap: 6px; align-items: center; }
     return by;
   }
 
+  // Estimated rates (estimateRates, above): fast rows a second, each medium
+  // identifier's reads a second (the slowest module's), a slow pass.
+  function estimates(byId) {
+    var mods = {};
+    Object.keys(byId).forEach(function (k) {
+      var t = byId[k], m = k.split(":")[0];
+      if (t !== "fast" && t !== "medium" && t !== "slow") return;
+      var n = mods[m] || (mods[m] = { fast: 0, medium: 0, slow: 0 });
+      n[t]++;
+    });
+    return estimateRates(mods, live);
+  }
+
+  function rate(r) { return r >= 10 ? Math.round(r) : r >= 1 ? r.toFixed(1) : r.toFixed(2); }
+  function duration(s) {
+    return !isFinite(s) ? "never (no room)" : s < 90 ? Math.round(s) + " s" : s < 5400 ?
+      Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h";
+  }
+
+  function estimateLine(t, e) {
+    var mod = function (m) { return esc(cat.modules[m] || m); };
+    if (t === "fast") {
+      return e.rowsPerS ? { text: "≈ " + rate(e.rowsPerS) + " rows/s", warn: e.rowsPerS < 8 } : null;
+    }
+    if (t === "medium" && e.mediumMin !== null) {
+      return { text: "≈ " + rate(e.mediumMin) + "/s each, slowest " + mod(e.mediumSlowest), warn: e.mediumMin < 0.5 };
+    }
+    if (t === "slow" && e.slowest) {
+      return { text: "≈ " + duration(e.slowPassS) + " a pass, slowest " + mod(e.slowest), warn: e.slowPassS > 300 };
+    }
+    if (t === "drive" || t === "daily" || t === "weekly" || t === "monthly") return { text: "once, from a minute in" };
+    return null;
+  }
+
   function renderSummary(byId) {
-    var ch = {}, ids = {};
+    var ch = {}, ids = {}, e = estimates(byId);
     TIERS.forEach(function (t) { ch[t] = 0; ids[t] = 0; });
     items.forEach(function (it) { ch[effective(it)]++; });
     Object.keys(byId).forEach(function (k) { ids[byId[k]]++; });
     $("summary").innerHTML = TIERS.map(function (t) {
+      var est = ids[t] || t === "fast" ? estimateLine(t, e) : null;
       return '<div class="tier" style="--c:' + color(t) + '"><span>' + LABEL[t] + "</span><b>" +
         ch[t].toLocaleString() + "</b><span>" + (t === "off" ? HINT[t] : ids[t].toLocaleString() +
-        " identifier" + (ids[t] === 1 ? "" : "s") + " · " + HINT[t]) + "</span></div>";
+        " identifier" + (ids[t] === 1 ? "" : "s") + " · " + HINT[t]) + "</span>" +
+        (est ? '<span class="est' + (est.warn ? " warn" : "") + '">' + est.text + "</span>" : "") + "</div>";
     }).join("");
+    $("estNote").textContent = "Rates are estimates from a model of the logger's scheduler, fitted to a real drive" +
+      (live.from ? ", with the request sizes and answer times from its check-in of " + live.from : "") +
+      ". Every fast identifier slows every row; medium and slow share what's left of each request.";
   }
 
   function renderPresetBar() {
@@ -289,6 +340,20 @@ label { display: inline-flex; gap: 6px; align-items: center; }
       if (!last) { $("logger").textContent = "The logger hasn't checked in yet."; return; }
       var ago = s.seen_s_ago, when = ago < 90 ? ago + " s" : ago < 5400 ? Math.round(ago / 60) + " min" :
         ago < 172800 ? Math.round(ago / 3600) + " h" : Math.round(ago / 86400) + " days";
+      // What the board measured: request sizes it's down to, answer times.
+      var pairs = function (text) {
+        var out = {};
+        String(text || "").split(" ").forEach(function (p) {
+          var kv = p.split(":"), v = Number(kv[1]);
+          if (kv.length === 2 && v > 0) out[kv[0]] = v;
+        });
+        return out;
+      };
+      if (last.batches || last.answer_ms) {
+        live = { batches: pairs(last.batches), answers: pairs(last.answer_ms),
+          from: new Date(last.received).toLocaleString() };
+        render(false);
+      }
       var has = last.channels || "", text = "Logger " + (s.online ? "online" : "last seen " + when + " ago");
       if (!has) text += "; running a channel file from before downloads (needs the new firmware)";
       else if (file && has === file.etag) text += "; running the active preset ✓";
@@ -354,6 +419,7 @@ label { display: inline-flex; gap: 6px; align-items: center; }
       setTier(names, $("bulkTier").value);
       say("Set " + names.length.toLocaleString() + " channel" + (names.length === 1 ? "" : "s") + " to " +
         ($("bulkTier").value ? LABEL[$("bulkTier").value] : "the default") + ". Save to keep it.", true);
+      sel.clear();                         // so a later search's selection starts empty
       render(true);
     });
     $("clearSel").addEventListener("click", function () { sel.clear(); render(false); });

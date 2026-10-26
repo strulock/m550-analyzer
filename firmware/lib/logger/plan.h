@@ -31,6 +31,8 @@ struct Read {
 
 constexpr size_t MAX_BATCH = 24;         // identifiers per request, to start (HSFZ fits 31)
 constexpr size_t MAX_REPLY = 3000;       // bytes a batch may expect back (hsfz buffer 4096)
+constexpr uint16_t RECOVER_AFTER = 50;    // whole answers before a shrunk batch tries bigger
+constexpr uint16_t RECOVER_MAX = 3200;    // doubled each time the bigger size fails, to this
 constexpr uint8_t FAILURES_TO_REST = 3;
 constexpr uint32_t REST_MS = 60000;
 constexpr uint32_t OUT_OF_RANGE_REST_MS = 600000;   // an identifier the module says it hasn't
@@ -76,10 +78,29 @@ class Plan {
     return it == batch_.end() ? MAX_BATCH : it->second;
   }
   // A batch of `size` was too big for the module: from now on at most half
-  // of it (and never more than half the current size).
+  // of it (and never more than half the current size). It takes twice as
+  // many clean answers as last time before trying bigger again.
   void smallerBatches(uint8_t module, size_t size) {
     size_t now = std::min(batchFor(module), size);
-    if (now > 1) batch_[module] = now / 2;
+    if (now <= 1) return;
+    batch_[module] = now / 2;
+    Grow& g = grow_[module];
+    g.good = 0;
+    g.need = g.need ? (uint16_t)std::min<uint32_t>(g.need * 2u, RECOVER_MAX) : RECOVER_AFTER;
+  }
+
+  // A batch of `size` came back whole. After enough of them at the module's
+  // current size, twice that size is tried again (one answer out of line
+  // shouldn't cost a module its batches for the rest of the drive). True
+  // when it grew.
+  bool goodBatch(uint8_t module, size_t size) {
+    size_t now = batchFor(module);
+    if (now >= MAX_BATCH || size < now) return false;
+    Grow& g = grow_[module];
+    if (++g.good < (g.need ? g.need : RECOVER_AFTER)) return false;
+    g.good = 0;
+    batch_[module] = std::min(now * 2, MAX_BATCH);
+    return true;
   }
 
   // A module that didn't answer: how many times in a row now. Any answer
@@ -133,8 +154,13 @@ class Plan {
   }
 
  private:
+  struct Grow {
+    uint16_t good = 0;           // whole answers at the current size, in a row
+    uint16_t need = 0;           // how many before trying bigger (0: RECOVER_AFTER)
+  };
   std::map<uint8_t, size_t> batch_;
   std::map<uint8_t, uint8_t> timeouts_;
+  std::map<uint8_t, Grow> grow_;
 };
 
 // One request per module per cycle, so a cycle is one wave of requests in
@@ -239,20 +265,28 @@ class Scheduler {
         bytes = 0;
         add(p, i, now, b, bytes, room);
       }
-      // Fast reads filled the request: every other cycle another one for
-      // medium and slow, so they don't stop.
-      if (b.size() >= room && (!q.medium.empty() || !q.slow.empty()) &&
-          (q.extraTurn = !q.extraTurn)) {
+      // Medium's share of every cycle: a quarter of a request, at least one
+      // read. When the fast reads leave less, another request this cycle
+      // carries it, so a module whose batches shrank doesn't starve its
+      // medium reads. When they leave nothing beyond it, slow gets another
+      // request every other cycle.
+      size_t share = q.medium.empty() ? 0 : std::min(q.medium.size(), (room + 3) / 4);
+      size_t left = room - b.size();
+      if (!b.empty() && (left < share ||
+                         (!q.slow.empty() && left <= share && (q.extraTurn = !q.extraTurn)))) {
         out.push_back(b);
         b.clear();
         bytes = 0;
+        left = room;
       }
-      // What's left: medium gets at most half when there's slow to read
-      // (one slot left: medium and slow take turns), slow the rest.
-      size_t left = room > b.size() ? room - b.size() : 0;
+      // What's left: medium its share or half, whichever is more, and slow
+      // at least one where there's room beyond the share (one slot: medium
+      // and slow take turns); slow the rest.
       size_t forMedium = left;
       if (!q.slow.empty() && !q.medium.empty()) {
-        forMedium = left == 1 ? ((q.slowTurn = !q.slowTurn) ? 0 : 1) : (left + 1) / 2;
+        forMedium = left == 1      ? ((q.slowTurn = !q.slowTurn) ? 0 : 1)
+                    : left > share ? std::min(left - 1, std::max(share, (left + 1) / 2))
+                                   : left;
       }
       take(p, q.medium, q.mediumAt, now, b, bytes, b.size() + forMedium, nullptr);
       if (onceOpen_) takeOnce(p, q.once, now, b, bytes, room);

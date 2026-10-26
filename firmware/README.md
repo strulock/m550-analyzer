@@ -81,9 +81,12 @@ each pair into one drive in History and the time series (cloud/README.md).
 Each cycle sends one request to every module that has fast or medium reads
 (and to slow-only modules in turn), both DMEs side by side on their own
 connections. A module's request carries all its fast identifiers, then the
-next medium and slow ones in rotation, up to 24 identifiers; medium takes
-at most half of what's left so slow keeps moving (at one identifier a
-request they take turns). Only modules with fast channels (the DMEs, the
+next medium and slow ones in rotation, up to 24 identifiers. Medium gets a
+quarter of a request each cycle, or half of what the fast reads leave if
+that's more, and slow the rest (at one identifier a request they take
+turns). When the fast reads leave less than medium's quarter, another
+request that cycle carries it; when they leave nothing beyond it, slow gets
+another request every other cycle. Only modules with fast channels (the DMEs, the
 gearbox) are waited for: the rest (head unit, body modules), which can take
 most of a second, are sent alongside and their answers collected in
 whichever cycle they come, up to six at once, given up after 3 s.
@@ -97,6 +100,12 @@ The module's error code decides what happens to a batch it won't answer:
 - any other refusal: the batch's identifiers rest for a minute;
 - no answer: counts against the identifiers (three in a row rest them), and
   two timeouts in a row halve the module's batches.
+
+A module whose batches halved tries twice the size again after 50 whole
+answers at its current size, and needs twice as many each time the bigger
+size fails again, so one answer out of line (the bank 1 DME's, on 26 Oct)
+no longer costs it the rest of the drive, and a module that only takes one
+identifier at a time is rarely asked for more.
 
 If the requests waited for keep timing out (three in a row) while sharing a
 connection, the board falls back to one request at a time and notes it.
@@ -128,7 +137,10 @@ battery voltage when the channel table has them (battery is `IUIBS`, not in
 the built-in fast tier), files waiting, Wi-Fi and memory, and which channel
 file it's running (`channels`: the active preset's ETag, `manual` for one
 sent over the terminal, `card` or `built-in`), which the logger channel page
-compares with the active preset. A long upload
+compares with the active preset. From the last minute's stats it adds the
+modules on smaller batches (`batches`, "0x12:6 0x18:1"), each collected-later
+module's answer time (`answer_ms`, "0x63:170"), the slow pass and the reads
+per cycle, which the page's rate estimates use. A long upload
 delays the check-ins; a failed one is skipped. Each is a new TLS connection,
 about 2 MB an hour on a phone hotspot. `logger_status` (MCP) and
 `GET /api/logger` show the last one and each power-on.
