@@ -35,6 +35,7 @@ struct Fake : hsfz::Transport {
   }
   uint32_t now_ms() override { return t; }
   void sleep_ms(uint32_t ms) override { t += ms; }
+  size_t available() override { return in.size(); }
 };
 
 static int fails = 0;
@@ -165,7 +166,8 @@ static void test_start_then_finish() {
 }
 
 // two modules' requests on one connection: answers in either order reach
-// the right finish(); a pending notice isn't kept; clearStash forgets
+// the right finish(); a pending notice isn't kept; a new start() drops the
+// module's old answer
 static void test_two_modules_one_connection() {
   Fake f; hsfz::Client c(f, 0xF4);
   const uint8_t gear[] = {0x22, 0xDA, 0x2E};
@@ -184,8 +186,41 @@ static void test_two_modules_one_connection() {
   f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x62, 0xDA, 0x2E, 0x09, 0x00}));
   f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x48, 0x07, 0x05, 0xDC}));
   CHECK(c.finish(0x12, rpm, 3, out, sizeof(out), 500).result == hsfz::OK);
-  c.clearStash();
+  CHECK(c.start(0x18, gear, 3, r));
   CHECK(c.finish(0x18, gear, 3, out, sizeof(out), 500).result == hsfz::TIMEOUT);
+}
+
+// a slow module's answer collected later: poll() says not yet, the answer
+// comes in while another module's finish() reads, and the next poll() has
+// it; a busy answer is asked again; forget() drops one given up on
+static void test_poll_later() {
+  Fake f; hsfz::Client c(f, 0xF4);
+  const uint8_t gear[] = {0x22, 0xDA, 0x2E};
+  hsfz::Reply r;
+  CHECK(c.start(0x18, gear, 3, r));
+  uint32_t t0 = f.t;
+  CHECK(!c.poll(0x18, gear, 3, out, sizeof(out), r));
+  CHECK(f.t == t0);                                          // didn't wait
+  CHECK(c.start(0x12, rpm, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x62, 0xDA, 0x2E, 0x04, 0x00}));
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x48, 0x07, 0x05, 0xDC}));
+  CHECK(c.finish(0x12, rpm, 3, out, sizeof(out), 500).result == hsfz::OK && out[4] == 0xDC);
+  CHECK(c.poll(0x18, gear, 3, out, sizeof(out), r) && r.result == hsfz::OK && out[3] == 0x04);
+
+  CHECK(c.start(0x18, gear, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x7F, 0x22, 0x21}));
+  size_t sent = f.sent.size();
+  CHECK(!c.poll(0x18, gear, 3, out, sizeof(out), r) && f.sent.size() == sent + 1);
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x7F, 0x22, 0x31}));
+  CHECK(c.poll(0x18, gear, 3, out, sizeof(out), r) && r.result == hsfz::NEGATIVE && r.nrc == 0x31);
+
+  CHECK(c.start(0x18, gear, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x62, 0xDA, 0x2E, 0x07, 0x00}));
+  CHECK(c.start(0x12, rpm, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x62, 0x48, 0x07, 0x05, 0xDC}));
+  CHECK(c.finish(0x12, rpm, 3, out, sizeof(out), 500).result == hsfz::OK);
+  c.forget(0x18);
+  CHECK(!c.poll(0x18, gear, 3, out, sizeof(out), r));
 }
 
 static void test_discovery_reply() {
@@ -212,6 +247,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"batch_without_first", test_batch_without_first},
   {"start_then_finish", test_start_then_finish},
   {"two_modules_one_connection", test_two_modules_one_connection},
+  {"poll_later", test_poll_later},
   {"discovery_reply", test_discovery_reply},
 };
 

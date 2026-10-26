@@ -139,6 +139,7 @@ struct TcpTransport : hsfz::Transport {
   }
   uint32_t now_ms() override { return millis(); }
   void sleep_ms(uint32_t ms) override { delay(ms); }
+  size_t available() override { int a = c.available(); return a > 0 ? (size_t)a : 0; }
 };
 
 static TcpTransport tMain, tBank2;

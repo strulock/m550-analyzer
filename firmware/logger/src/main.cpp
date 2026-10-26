@@ -4,11 +4,13 @@
 // Board: Waveshare ESP32-S3-ETH on the car's ENET cable, powered with the
 // ignition. Each boot:
 //   1. Recover: a drive the last power cut left open is closed and queued.
-//   2. Find the car (HSFZ discovery) and log while it answers: the fast
-//      channels every cycle to drives/<start>.csv, everything else in
+//   2. Find the car (HSFZ discovery) and log while it answers: the fast and
+//      medium channels every cycle to drives/<start>.csv, the slow ones in
 //      rotation, one row a pass, to drives/<start>.sweep.csv; from a minute
 //      in, each module's fault list in turn, and the DMEs' every three
-//      minutes, to drives/<start>.faults.csv.
+//      minutes, to drives/<start>.faults.csv. Only modules with fast
+//      channels are waited for each cycle; the others' answers are
+//      collected when they come.
 //   3. Meanwhile, on the other core: whenever Wi-Fi is up, upload finished
 //      files, compare the SHA-256 the Worker reports with the board's own,
 //      and delete a file only when they match.
@@ -325,6 +327,7 @@ struct TcpTransport : hsfz::Transport {
   }
   uint32_t now_ms() override { return millis(); }
   void sleep_ms(uint32_t ms) override { delay(ms); }
+  size_t available() override { int a = c.available(); return a > 0 ? (size_t)a : 0; }
 };
 
 static TcpTransport tMain, tBank2;
@@ -388,6 +391,7 @@ static bool connectOne(TcpTransport& t, hsfz::Client*& cl, uint8_t source, uint3
   if (!t.c.connect(carIp, hsfz::DIAG_PORT, timeoutMs)) return false;
   t.c.setNoDelay(true);
   if (!cl) cl = new hsfz::Client(t, source);
+  else cl->clearStash();                      // nothing from the last connection
   return true;
 }
 
@@ -537,6 +541,8 @@ static void recoverDrives() {
   }
 }
 
+static void resetRequests();
+
 static void startDrive() {
   // With Wi-Fi up already, give the clock a moment; otherwise it fills in
   // the Clock column once Wi-Fi joins.
@@ -567,6 +573,7 @@ static void startDrive() {
            (unsigned)table.channels.size(), channelsFromCard ? "the card" : "the built-in table");
   addNote(start);
   scheduler.build(plan);
+  resetRequests();
   faultScan.start(millis());
   sweepPassStart = millis();
   out.printf("[drive] %s started%s%s\n", driveName.c_str(), timeKnown() ? "" : " (clock unknown)",
@@ -583,6 +590,7 @@ static void endDrive(const char* why) {
   fastFile.finish();
   sweepFile.finish();
   faultFile.finish();
+  resetRequests();
   disconnectCar();
   out.printf("[drive] %s ended (%s): %u rows, %u sweep rows, %.1f min\n", driveName.c_str(), why,
              (unsigned)fastRows, (unsigned)sweepRows, (millis() - driveStartMs) / 60000.0f);
@@ -594,9 +602,11 @@ static bool connectionLost = false;
 
 // The slave DME is on its own connection (tester 0xF5); everything else on
 // the main one. Requests on the two can be in flight together.
-static hsfz::Client* clientFor(const std::vector<size_t>& batch) {
-  return plan.reads[batch[0]].module == hsfz::DME_SLAVE ? bank2Client : mainClient;
+static hsfz::Client* clientFor(uint8_t module) {
+  return module == hsfz::DME_SLAVE ? bank2Client : mainClient;
 }
+
+static uint8_t moduleOf(const std::vector<size_t>& batch) { return plan.reads[batch[0]].module; }
 
 static size_t buildRequest(const std::vector<size_t>& batch, uint8_t* req) {
   req[0] = 0x22;
@@ -607,17 +617,46 @@ static size_t buildRequest(const std::vector<size_t>& batch, uint8_t* req) {
   return 1 + 2 * batch.size();
 }
 
-static void ask(const std::vector<size_t>& batch);
+// A note when a module's batches get smaller, and at most one a minute per
+// module when it refuses reads (the stats line counts the rest).
+static uint32_t refusedNoteMs[256];
+static uint32_t refusedReads = 0;                 // this drive
 
-// What came back for a batch (its answer is in rx).
+static void smaller(uint8_t module, size_t size, const char* why) {
+  size_t was = plan.batchFor(module);
+  plan.smallerBatches(module, size);
+  if (plan.batchFor(module) == was) return;
+  char text[96];
+  snprintf(text, sizeof(text), "module 0x%02X %u identifiers per request (%s)", module,
+           (unsigned)plan.batchFor(module), why);
+  out.printf("[plan] %s\n", text);
+  addNote(text);
+}
+
+static void retryHalves(const std::vector<size_t>& batch) {
+  size_t half = batch.size() / 2;
+  scheduler.retry(plan, std::vector<size_t>(batch.begin(), batch.begin() + half));
+  scheduler.retry(plan, std::vector<size_t>(batch.begin() + half, batch.end()));
+}
+
+// What came back for a batch (its answer is in rx). The module's error code
+// says what to do: too long or badly formed (0x13, 0x14), or an answer out
+// of line, means the batch is too big for it; out of range (0x31) means one
+// identifier in it is one the module hasn't, found by asking the halves
+// again; anything else refuses the reads, which rest. No answer at all
+// counts against the reads, and against the batch size when it keeps
+// happening.
 static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
-  const Read& first = plan.reads[batch[0]];
+  const uint8_t module = moduleOf(batch);
   const uint32_t now = millis();
   if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
+  if (r.result == hsfz::OK || r.result == hsfz::NEGATIVE) {
+    lastOkMs = now;                                       // it answered, whatever it said
+    plan.moduleAnswered(module);
+  }
   std::vector<const uint8_t*> data;
   std::vector<size_t> len;
   if (r.result == hsfz::OK && splitReply(rx + 1, r.len - 1, plan.reads, batch, data, len)) {
-    lastOkMs = now;
     for (size_t k = 0; k < batch.size(); k++) {
       if (!data[k]) { plan.failed(batch[k], now); continue; }
       plan.answered(batch[k]);
@@ -630,52 +669,152 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
     }
     return;
   }
-  if (r.result == hsfz::OK) lastOkMs = now;       // it answered, just not in line
-  if (batch.size() > 1) {
-    // The module can't take a batch this big: half the size from now on, and
-    // these asked again in two halves straight away (if it answered at all:
-    // after a timeout that would cost seconds more).
-    plan.smallerBatches(first.module, batch.size());
-    const char* why = r.result == hsfz::OK ? "reply out of line" : hsfz::resultName(r.result);
-    out.printf("[plan] module 0x%02X: %u identifiers per request (%s)\n", first.module,
-               (unsigned)plan.batchFor(first.module), why);
-    char text[96];
-    snprintf(text, sizeof(text), "module 0x%02X %u identifiers per request (%s)", first.module,
-             (unsigned)plan.batchFor(first.module), why);
-    addNote(text);
-    if (r.result == hsfz::OK || r.result == hsfz::NEGATIVE) {
-      size_t half = batch.size() / 2;
-      std::vector<size_t> a(batch.begin(), batch.begin() + half), b(batch.begin() + half, batch.end());
-      if (!connectionLost) ask(a);
-      if (!connectionLost) ask(b);
+  const bool tooBig = r.result == hsfz::OK ||
+                      (r.result == hsfz::NEGATIVE && (r.nrc == 0x13 || r.nrc == 0x14));
+  if (tooBig && batch.size() > 1) {
+    char why[40];
+    if (r.result == hsfz::OK) snprintf(why, sizeof(why), "reply out of line");
+    else snprintf(why, sizeof(why), "negative response 0x%02X", r.nrc);
+    smaller(module, batch.size(), why);
+    retryHalves(batch);
+    return;
+  }
+  if (r.result == hsfz::OK) { plan.failed(batch[0], now); return; }   // one, out of line
+  if (r.result == hsfz::NEGATIVE && (tooBig || r.nrc == 0x31)) {
+    if (batch.size() > 1) { retryHalves(batch); return; }            // which one?
+    plan.rest(batch[0], now, OUT_OF_RANGE_REST_MS);
+    refusedReads++;
+    out.printf("[plan] module 0x%02X hasn't 0x%04X (0x%02X): rested\n", module,
+               plan.reads[batch[0]].did, r.nrc);
+    return;
+  }
+  if (r.result == hsfz::NEGATIVE) {
+    for (size_t i : batch) plan.rest(i, now, REST_MS);
+    refusedReads += batch.size();
+    if (now - refusedNoteMs[module] >= STATS_MS || !refusedNoteMs[module]) {
+      refusedNoteMs[module] = now | 1;
+      char text[96];
+      snprintf(text, sizeof(text), "module 0x%02X refused %u identifiers (0x%02X): rested", module,
+               (unsigned)batch.size(), r.nrc);
+      out.printf("[plan] %s\n", text);
+      addNote(text);
     }
     return;
   }
-  plan.failed(batch[0], now);
-}
-
-static void ask(const std::vector<size_t>& batch) {
-  hsfz::Client* cl = clientFor(batch);
-  if (!cl) { for (size_t i : batch) plan.failed(i, millis()); return; }
-  uint8_t req[1 + 2 * MAX_BATCH];
-  size_t n = buildRequest(batch, req);
-  process(batch, cl->request(plan.reads[batch[0]].module, req, n, rx, sizeof(rx), REQUEST_MS));
+  for (size_t i : batch) plan.failed(i, now);           // no answer
+  if (r.result == hsfz::TIMEOUT && plan.timedOut(module) >= TIMEOUTS_TO_SHRINK &&
+      batch.size() > 1) {
+    smaller(module, batch.size(), "timeouts");
+    plan.moduleAnswered(module);                          // count again at the new size
+  }
 }
 
 // Requests in flight together: at most one per module (a module answers one
 // at a time), on both connections, several to different modules on one
-// connection while the gateway allows it. If such a wave times out, one
-// request at a time per connection from then on.
+// connection while the gateway allows it. If the waited-for requests keep
+// timing out while they share a connection, one request at a time per
+// connection from then on.
 static bool sameConnection = true;
+static uint8_t sharedTimeouts = 0;                // in a row
+static const uint8_t SHARED_TIMEOUTS_TO_FALL_BACK = 3;
 
+// ---- requests not waited for -------------------------------------------------
+// A module with no fast reads (the head unit, the body modules, ...) can take
+// most of a second to answer, and the fast row shouldn't wait for it: its
+// request is sent with the cycle's and its answer collected in whichever
+// cycle it comes (the hsfz client keeps it meanwhile). A fault read to such
+// a module goes the same way.
+struct Pending {
+  hsfz::Client* cl;
+  uint8_t target;
+  uint8_t req[1 + 2 * MAX_BATCH];
+  size_t n;
+  std::vector<size_t> batch;                      // empty: a fault read
+  uint32_t sentMs;
+};
+static std::vector<Pending> pendingReqs;
+static const uint32_t LATER_MS = 3000;            // given up on after this
+static const size_t MAX_LATER = 6;                // in flight at once (hsfz keeps 8 answers)
+static const size_t SLOW_ONLY_PER_CYCLE = 4;
+static uint32_t laterSent = 0, laterTimeouts = 0; // this stats window
+static int faultWanted = -1;                      // held from reads until its fault list goes
+
+static bool waitingOn(uint8_t module) {
+  for (const Pending& p : pendingReqs) if (p.target == module) return true;
+  return false;
+}
+
+static void faultAnswer(uint8_t m, const hsfz::Reply& r);
+
+static bool sendLater(uint8_t module, const uint8_t* req, size_t n, const std::vector<size_t>& batch) {
+  hsfz::Client* cl = clientFor(module);
+  if (!cl) return false;
+  Pending p;
+  p.cl = cl;
+  p.target = module;
+  memcpy(p.req, req, n);
+  p.n = n;
+  p.batch = batch;
+  p.sentMs = millis();
+  hsfz::Reply r;
+  if (!cl->start(module, p.req, n, r)) {
+    if (r.result == hsfz::CLOSED) connectionLost = true;
+    return false;
+  }
+  pendingReqs.push_back(p);
+  laterSent++;
+  return true;
+}
+
+static void sendLater(const std::vector<size_t>& batch) {
+  uint8_t req[1 + 2 * MAX_BATCH];
+  size_t n = buildRequest(batch, req);
+  if (!sendLater(moduleOf(batch), req, n, batch) && !connectionLost) {
+    for (size_t i : batch) plan.failed(i, millis());
+  }
+}
+
+// Whatever has come in, without waiting; requests past LATER_MS given up.
+static void collect() {
+  for (size_t k = 0; k < pendingReqs.size() && !connectionLost;) {
+    Pending& p = pendingReqs[k];
+    hsfz::Reply r;
+    bool done = p.cl->poll(p.target, p.req, p.n, rx, sizeof(rx), r);
+    if (!done && millis() - p.sentMs >= LATER_MS) {
+      p.cl->forget(p.target);
+      r = hsfz::Reply();
+      r.result = hsfz::TIMEOUT;
+      laterTimeouts++;
+      done = true;
+    }
+    if (!done) { k++; continue; }
+    Pending got = p;
+    pendingReqs.erase(pendingReqs.begin() + k);
+    if (got.batch.empty()) faultAnswer(got.target, r);
+    else process(got.batch, r);
+  }
+}
+
+// A drive starts or ends: nothing in flight, nothing assumed about the
+// gateway.
+static void resetRequests() {
+  pendingReqs.clear();
+  sameConnection = true;
+  sharedTimeouts = 0;
+  refusedReads = laterSent = laterTimeouts = 0;
+  memset(refusedNoteMs, 0, sizeof(refusedNoteMs));
+  faultWanted = -1;
+}
+
+// ---- requests waited for -----------------------------------------------------
 static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
   struct Sent { hsfz::Client* cl; uint8_t req[1 + 2 * MAX_BATCH]; size_t n; uint8_t target;
                 hsfz::Reply r; bool ok; };
   std::vector<Sent> sent(wave.size());
   for (size_t i = 0; i < wave.size(); i++) {
     Sent& s = sent[i];
-    s.cl = clientFor(*wave[i]);
-    s.target = plan.reads[(*wave[i])[0]].module;
+    s.target = moduleOf(*wave[i]);
+    s.cl = clientFor(s.target);
     s.n = buildRequest(*wave[i], s.req);
     s.ok = s.cl && s.cl->start(s.target, s.req, s.n, s.r);
     if (!s.cl) s.r.result = hsfz::TIMEOUT;
@@ -683,6 +822,7 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
   bool shared = false, timedOut = false;
   for (size_t i = 0; i < wave.size(); i++) {
     for (size_t j = 0; j < i; j++) shared = shared || sent[j].cl == sent[i].cl;
+    for (const Pending& p : pendingReqs) shared = shared || p.cl == sent[i].cl;
   }
   for (size_t i = 0; i < wave.size() && !connectionLost; i++) {
     Sent& s = sent[i];
@@ -690,10 +830,12 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
     timedOut = timedOut || r.result == hsfz::TIMEOUT;
     process(*wave[i], r);
   }
-  if (shared && timedOut && sameConnection) {
+  if (!shared || !sameConnection) return;
+  sharedTimeouts = timedOut ? sharedTimeouts + 1 : 0;
+  if (sharedTimeouts >= SHARED_TIMEOUTS_TO_FALL_BACK) {
     sameConnection = false;
-    out.println("[plan] one request at a time per connection (a shared wave timed out)");
-    addNote("one request at a time per connection (a shared wave timed out)");
+    out.println("[plan] one request at a time per connection (shared requests kept timing out)");
+    addNote("one request at a time per connection (shared requests kept timing out)");
   }
 }
 
@@ -705,8 +847,8 @@ static void askAll(std::vector<const std::vector<size_t>*> batches) {
     for (const std::vector<size_t>* b : batches) {
       bool clash = false;
       for (const std::vector<size_t>* w : wave) {
-        clash = clash || plan.reads[(*w)[0]].module == plan.reads[(*b)[0]].module ||
-                (!sameConnection && clientFor(*w) == clientFor(*b));
+        clash = clash || moduleOf(*w) == moduleOf(*b) ||
+                (!sameConnection && clientFor(moduleOf(*w)) == clientFor(moduleOf(*b)));
       }
       (clash ? rest : wave).push_back(b);
     }
@@ -717,16 +859,29 @@ static void askAll(std::vector<const std::vector<size_t>*> batches) {
 
 // ---- the logging cycle -------------------------------------------------------
 // Each cycle: one request per module (the scheduler packs each module's fast
-// reads with the next medium and slow ones), all in flight together.
+// reads with the next medium and slow ones). The ones to modules with fast
+// reads are waited for, all in flight together; the rest are sent alongside
+// and collected when they come.
 static void cycle() {
   const uint32_t start = millis();
   for (uint32_t i : fastLayout.columns) values[i] = NAN;     // fast and medium cells
-  if (mainClient) mainClient->clearStash();
-  if (bank2Client) bank2Client->clearStash();
-  std::vector<std::vector<size_t>> requests = scheduler.cycle(plan, millis());
-  std::vector<const std::vector<size_t>*> batches;
-  for (const std::vector<size_t>& b : requests) batches.push_back(&b);
-  askAll(batches);
+  collect();
+  std::vector<uint8_t> busy;
+  for (const Pending& p : pendingReqs) busy.push_back(p.target);
+  if (faultWanted >= 0) busy.push_back((uint8_t)faultWanted);
+  size_t slowOnly = 1;                                       // one at a time: as before
+  if (sameConnection) {
+    slowOnly = pendingReqs.size() >= MAX_LATER ? 0 : MAX_LATER - pendingReqs.size();
+    if (slowOnly > SLOW_ONLY_PER_CYCLE) slowOnly = SLOW_ONLY_PER_CYCLE;
+  }
+  std::vector<std::vector<size_t>> requests = scheduler.cycle(plan, millis(), busy, slowOnly);
+  std::vector<const std::vector<size_t>*> waited;
+  for (const std::vector<size_t>& b : requests) {
+    if (!sameConnection || scheduler.waits(moduleOf(b))) waited.push_back(&b);
+    else sendLater(b);
+  }
+  askAll(waited);
+  collect();
   const uint32_t afterReads = millis();
   tFast += afterReads - start;
   const double secs = (afterReads - driveStartMs) / 1000.0;
@@ -735,23 +890,25 @@ static void cycle() {
       lastStatsNoteMs = millis();
       size_t rested = 0;
       for (const Read& rd : plan.reads) rested += rd.restUntil != 0;
-      std::string smaller;
+      std::string smallerList;
       for (const Read& rd : plan.reads) {
         char m[16];
         snprintf(m, sizeof(m), "0x%02X:%u", rd.module, (unsigned)plan.batchFor(rd.module));
-        if (plan.batchFor(rd.module) < MAX_BATCH && smaller.find(m) == std::string::npos) {
-          smaller += smaller.empty() ? "" : " ";
-          smaller += m;
+        if (plan.batchFor(rd.module) < MAX_BATCH && smallerList.find(m) == std::string::npos) {
+          smallerList += smallerList.empty() ? "" : " ";
+          smallerList += m;
         }
       }
-      char text[220];
+      char text[260];
       snprintf(text, sizeof(text),
-               "stats %.1f rows/s; reads %.0f ms; files %.0f ms; slow pass %.0f s; %u resting; "
-               "%s; smaller batches: %s",
+               "stats %.1f rows/s; reads %.0f ms; files %.0f ms; slow pass %.0f s; %u resting "
+               "(%u refused); collected later %u (%u timed out); %s; smaller batches: %s",
                cycleRate, msFast, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
+               (unsigned)refusedReads, (unsigned)laterSent, (unsigned)laterTimeouts,
                sameConnection ? "overlapping requests" : "one request at a time per connection",
-               smaller.empty() ? "none" : smaller.c_str());
+               smallerList.empty() ? "none" : smallerList.c_str());
       addNote(text);
+      laterSent = laterTimeouts = 0;
     }
     fastFile.add(fastLayout.row(table, secs, clockNow(), values, note.c_str()));
     note.clear();
@@ -785,19 +942,32 @@ static void cycle() {
 
 // ---- fault memory ------------------------------------------------------------
 // One module's fault list when FaultScan says, between cycles, a row per
-// failed code (or one saying there are none) in <drive>.faults.csv. It holds
-// up that cycle's row by the module's answer time; a module that doesn't
-// answer costs FAULT_MS once a drive.
+// failed code (or one saying there are none) in <drive>.faults.csv. A DME's
+// is waited for (it answers in milliseconds); any other module's is
+// collected when it comes, like its reads. A module still answering a read
+// is held from new ones until its fault list has gone.
 static const uint32_t FAULT_MS = 3000;
 static uint16_t failedBy[256];               // failed codes per module, last read
 static std::atomic<int> faultsNow{-1};       // their sum; -1 until the first read
 
 static void readFaults() {
-  int m = faultScan.next(millis());
-  if (m < 0 || connectionLost) return;
-  hsfz::Client* cl = m == hsfz::DME_SLAVE ? bank2Client : mainClient;
+  if (connectionLost) return;
+  if (faultWanted < 0) faultWanted = faultScan.next(millis());
+  if (faultWanted < 0 || waitingOn((uint8_t)faultWanted)) return;
+  const int m = faultWanted;
+  faultWanted = -1;
+  hsfz::Client* cl = clientFor((uint8_t)m);
   if (!cl) return;
-  hsfz::Reply r = cl->request((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), rx, sizeof(rx), FAULT_MS);
+  if (sameConnection && !scheduler.waits((uint8_t)m)) {
+    sendLater((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), {});
+    return;
+  }
+  faultAnswer((uint8_t)m,
+              cl->request((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), rx, sizeof(rx), FAULT_MS));
+}
+
+// A fault list's answer (in rx).
+static void faultAnswer(uint8_t m, const hsfz::Reply& r) {
   if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
   std::vector<Dtc> dtcs;
   int result = -1;
@@ -809,7 +979,7 @@ static void readFaults() {
     if (faultsNow < 0) { memset(failedBy, 0, sizeof(failedBy)); faultsNow = 0; }
   }
   std::string at = timeKnown() ? clockNow().substr(0, 19) : "";
-  faultFile.add(faultRows(at, (millis() - driveStartMs) / 1000.0, (uint8_t)m, result, dtcs));
+  faultFile.add(faultRows(at, (millis() - driveStartMs) / 1000.0, m, result, dtcs));
   faultFile.flush();
   if (result != 0) return;
   uint16_t failed = 0;

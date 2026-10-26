@@ -66,6 +66,8 @@ struct Transport {
   virtual int read(uint8_t* buf, size_t len, uint32_t timeout_ms) = 0;
   virtual uint32_t now_ms() = 0;
   virtual void sleep_ms(uint32_t ms) = 0;
+  // Bytes ready to read now, without waiting (poll() reads only these).
+  virtual size_t available() = 0;
 };
 
 struct Reply {
@@ -93,65 +95,63 @@ class Client {
 
   // The two halves of request(), so requests on two connections (the two
   // DMEs) can be in flight at once: start() sends, finish() waits for the
-  // answer. False from start() with r.result REFUSED or CLOSED.
+  // answer. False from start() with r.result REFUSED or CLOSED. An answer
+  // the module gave to an earlier request is dropped, so it never stands in
+  // for this one.
   bool start(uint8_t target, const uint8_t* req, size_t reqLen, Reply& r) {
     if (!allowed(req, reqLen)) {
       r.result = REFUSED;
       return false;
     }
+    forget(target);
     if (!send(target, req, reqLen)) { r.result = CLOSED; return false; }
     return true;
   }
 
   // Several requests can be in flight on one connection, to different
-  // modules (never two to one module): an answer from a module other than
-  // the one being waited for is kept for its own finish().
+  // modules (never two to one module): every answer read is kept by module
+  // until its own finish() or poll() takes it.
   Reply finish(uint8_t target, const uint8_t* req, size_t reqLen,
                uint8_t* out, size_t outCap, uint32_t timeout_ms = 6000) {
     Reply r;
     int busy = 0;
-    for (Stashed& s : stash_) {                          // it may have come already
-      if (!s.used || s.src != target) continue;
-      s.used = false;
-      Verdict v = judge(req, reqLen, s.data, s.len, out, outCap, r);
-      if (v == DONE) return r;
-      if (v == BUSY) {
-        busy++;
-        t_.sleep_ms(200);
-        if (!send(target, req, reqLen)) { r.result = CLOSED; return r; }
-      }
-    }
     uint32_t deadline = t_.now_ms() + timeout_ms;
-    while ((int32_t)(deadline - t_.now_ms()) > 0) {
-      uint16_t control; uint32_t length;
-      Result fr = readFrame(deadline, control, length);
-      if (fr != OK) { r.result = fr; return r; }
-
-      if (control == CTRL_ACK) continue;                 // our own echo
-      if (control >= 0x0040 && control <= 0x0044) {
-        r.result = NACK; r.nack = control; return r;
-      }
-      if (control != CTRL_DIAG || length < 3) continue;
-      const uint8_t fsrc = buf_[0], fdst = buf_[1];
-      const uint8_t* data = buf_ + 2;
-      const size_t dlen = length - 2;
-      if (fdst != src_) continue;                        // someone else's
-      if (fsrc != target) { keep(fsrc, data, dlen); continue; }
-
-      Verdict v = judge(req, reqLen, data, dlen, out, outCap, r);
+    for (;;) {
+      Verdict v = take(target, req, reqLen, out, outCap, r);
       if (v == DONE) return r;
-      if (v == BUSY && busy < 3) {                       // busy: ask again
+      if (v == BUSY && busy >= 3) { r.result = NEGATIVE; r.nrc = 0x21; return r; }
+      if (v == BUSY) {                                   // busy: ask again
         busy++;
         t_.sleep_ms(200);
         if (!send(target, req, reqLen)) { r.result = CLOSED; return r; }
         deadline = t_.now_ms() + timeout_ms;
-      } else if (v == BUSY) {
-        r.result = NEGATIVE; r.nrc = 0x21; return r;
       }
-      // WAIT: a late answer to an earlier request, chatter, or pending
+      if ((int32_t)(deadline - t_.now_ms()) <= 0) { r.result = TIMEOUT; return r; }
+      Result fr = pump(deadline);
+      if (fr != OK) { r.result = fr; return r; }
     }
-    r.result = TIMEOUT;
-    return r;
+  }
+
+  // finish() without waiting: reads whatever has arrived, then true with r
+  // filled if the answer is here, false if it isn't yet (the caller keeps
+  // the deadline, and forget()s the module when it gives up). A busy answer
+  // sends the request again.
+  bool poll(uint8_t target, const uint8_t* req, size_t reqLen, uint8_t* out, size_t outCap,
+            Reply& r) {
+    while (t_.available() > 0) {
+      Result fr = pump(t_.now_ms() + FRAME_REST_MS);
+      if (fr == TIMEOUT) break;
+      if (fr != OK) { r.result = fr; return true; }
+    }
+    Verdict v = take(target, req, reqLen, out, outCap, r);
+    if (v == DONE) return true;
+    if (v == BUSY && !send(target, req, reqLen)) { r.result = CLOSED; return true; }
+    return false;
+  }
+
+  // Drop what's kept from one module (a request given up on).
+  void forget(uint8_t src) {
+    for (Stashed& s : stash_) if (s.src == src) s.used = false;
   }
 
   // Reads only: values (0x22), presence (0x3E) and the fault list (0x19 02).
@@ -161,10 +161,10 @@ class Client {
     return req[0] == 0x19 && reqLen == 3 && req[1] == 0x02;
   }
 
-  // Forget kept answers (a cycle's leftovers, e.g. after a timeout), so an
-  // old one never stands in for a new request.
+  // Forget every kept answer (a new connection).
   void clearStash() {
     for (Stashed& s : stash_) s.used = false;
+    nack_ = 0;
   }
 
  private:
@@ -191,7 +191,38 @@ class Client {
     return WAIT;
   }
 
-  // Keep another module's answer (a response-pending notice isn't one); the
+  // Read one frame: an answer to this tester is kept by module, a gateway
+  // NACK held for the next take(); echoes and others' frames dropped.
+  Result pump(uint32_t deadline) {
+    uint16_t control; uint32_t length;
+    Result fr = readFrame(deadline, control, length);
+    if (fr != OK) return fr;
+    if (control >= 0x0040 && control <= 0x0044) { nack_ = control; return OK; }
+    if (control != CTRL_DIAG || length < 3 || buf_[1] != src_) return OK;
+    keep(buf_[0], buf_ + 2, length - 2);
+    return OK;
+  }
+
+  // The target's kept answers, oldest first: DONE (r filled) at the first
+  // that answers this request, BUSY to ask again, WAIT if none does (late
+  // answers to earlier requests are dropped on the way). A NACK the gateway
+  // sent goes to whoever takes next.
+  Verdict take(uint8_t target, const uint8_t* req, size_t reqLen, uint8_t* out, size_t outCap,
+               Reply& r) {
+    if (nack_) { r.result = NACK; r.nack = nack_; nack_ = 0; return DONE; }
+    for (;;) {
+      Stashed* s = nullptr;
+      for (Stashed& k : stash_) {
+        if (k.used && k.src == target && (!s || k.seq < s->seq)) s = &k;
+      }
+      if (!s) return WAIT;
+      s->used = false;
+      Verdict v = judge(req, reqLen, s->data, s->len, out, outCap, r);
+      if (v != WAIT) return v;
+    }
+  }
+
+  // Keep a module's answer (a response-pending notice isn't one); the
   // oldest goes when all slots are full.
   void keep(uint8_t src, const uint8_t* data, size_t len) {
     if (len > STASH_BYTES || (data[0] == 0x7F && len >= 3 && data[2] == 0x78)) return;
@@ -204,8 +235,9 @@ class Client {
     memcpy(slot->data, data, len);
   }
 
-  static constexpr int STASH = 4;
-  static constexpr size_t STASH_BYTES = 3100;      // a batch's answer (plan.h MAX_REPLY)
+  static constexpr int STASH = 8;                  // answers in flight on one connection
+  static constexpr size_t STASH_BYTES = MAX_FRAME;
+  static constexpr uint32_t FRAME_REST_MS = 200;   // the rest of a frame already started
   struct Stashed {
     bool used = false;
     uint8_t src = 0;
@@ -215,6 +247,7 @@ class Client {
   };
   Stashed stash_[STASH];
   uint32_t seq_ = 0;
+  uint16_t nack_ = 0;
   // Whether a positive reply starting at `p` answers this request: 0x3E echoes
   // its sub-function; 0x22 starts with one of the identifiers asked for (a
   // module leaves out ones it doesn't have, the first included).

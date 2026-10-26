@@ -3,10 +3,11 @@
 // 0x22 requests (the spike proved eight at a time on the DMEs, 2.6x
 // n63read's rate; MAX_BATCH asks for more). No Arduino code.
 //
-// A module that can't take a batch (refuses it, times out, or answers out
-// of line) halves its batch size, down to one identifier a request; a read
-// that keeps failing is rested and tried again now and then, so one dead
-// identifier doesn't cost a timeout every cycle.
+// A module that can't take a batch (says it's too long or badly formed,
+// answers out of line, or keeps timing out) halves its batch size, down to
+// one identifier a request; a read that keeps failing, or that the module
+// refuses, is rested and tried again now and then, so one dead identifier
+// doesn't cost a request every cycle.
 #pragma once
 #include <stdint.h>
 
@@ -32,6 +33,8 @@ constexpr size_t MAX_BATCH = 24;         // identifiers per request, to start (H
 constexpr size_t MAX_REPLY = 3000;       // bytes a batch may expect back (hsfz buffer 4096)
 constexpr uint8_t FAILURES_TO_REST = 3;
 constexpr uint32_t REST_MS = 60000;
+constexpr uint32_t OUT_OF_RANGE_REST_MS = 600000;   // an identifier the module says it hasn't
+constexpr uint8_t TIMEOUTS_TO_SHRINK = 2;           // in a row, before a module's batches shrink
 
 class Plan {
  public:
@@ -72,12 +75,17 @@ class Plan {
     auto it = batch_.find(module);
     return it == batch_.end() ? MAX_BATCH : it->second;
   }
-  // A batch of `size` failed: smaller from now on (a batch that was already
-  // smaller than the current size says nothing new).
+  // A batch of `size` was too big for the module: from now on at most half
+  // of it (and never more than half the current size).
   void smallerBatches(uint8_t module, size_t size) {
-    size_t now = batchFor(module);
-    if (size >= now && now > 1) batch_[module] = now / 2 ? now / 2 : 1;
+    size_t now = std::min(batchFor(module), size);
+    if (now > 1) batch_[module] = now / 2;
   }
+
+  // A module that didn't answer: how many times in a row now. Any answer
+  // starts the count again.
+  uint8_t timedOut(uint8_t module) { return ++timeouts_[module]; }
+  void moduleAnswered(uint8_t module) { timeouts_[module] = 0; }
 
   // The next request from `reads[from..]` of one tier: consecutive reads of
   // one module, up to its batch size (a read of unknown size goes alone).
@@ -112,6 +120,10 @@ class Plan {
     }
   }
   void answered(size_t i) { reads[i].failures = 0; reads[i].restUntil = 0; }
+  void rest(size_t i, uint32_t now, uint32_t ms) {
+    reads[i].restUntil = (now + ms) | 1;
+    reads[i].failures = 0;
+  }
 
   // The first index of a tier (reads are sorted by tier).
   size_t tierStart(Tier tier) const {
@@ -122,14 +134,18 @@ class Plan {
 
  private:
   std::map<uint8_t, size_t> batch_;
+  std::map<uint8_t, uint8_t> timeouts_;
 };
 
 // One request per module per cycle, so a cycle is one wave of requests in
 // flight together (each module answers one at a time; different modules in
 // parallel). A module's request carries all its fast reads, then the next
 // medium ones and the next slow ones in rotation, up to its batch size.
-// Modules with only slow reads take turns, one a cycle. Reads of unknown
-// reply size go alone, one a cycle, when their module isn't asked otherwise.
+// Modules with only slow reads take turns, `slowOnlyMax` a cycle. Reads of
+// unknown reply size go alone, one a cycle, when their module isn't asked
+// otherwise. A module still answering an earlier request (`busy`) is
+// skipped; batches to ask again (halves of one the module couldn't take)
+// go out on its next turn.
 class Scheduler {
  public:
   void build(const Plan& p) {
@@ -145,14 +161,43 @@ class Scheduler {
     for (Queue& q : queues_) q.slowRound = q.slow.empty();
   }
 
-  // This cycle's requests, at most one per module.
-  std::vector<std::vector<size_t>> cycle(const Plan& p, uint32_t now) {
+  // Whether the logger waits for this module's answers each cycle (it has
+  // fast reads); the others are collected when they come.
+  bool waits(uint8_t module) const {
+    for (const Queue& q : queues_) if (q.module == module) return !q.fast.empty();
+    return false;
+  }
+
+  // Ask these again on the module's next turn.
+  void retry(const Plan& p, const std::vector<size_t>& batch) {
+    if (!batch.empty()) queue(p.reads[batch[0]].module).retries.push_back(batch);
+  }
+
+  // This cycle's requests: one per module (more for a module whose fast
+  // reads or retries don't fit in one), none to a busy module.
+  std::vector<std::vector<size_t>> cycle(const Plan& p, uint32_t now,
+                                         const std::vector<uint8_t>& busy = {},
+                                         size_t slowOnlyMax = 1) {
     std::vector<std::vector<size_t>> out;
     std::vector<uint8_t> asked;
-    std::vector<size_t> slowOnly;
-    for (size_t k = 0; k < queues_.size(); k++) {
-      Queue& q = queues_[k];
-      if (q.fast.empty() && q.medium.empty()) { if (!q.slow.empty()) slowOnly.push_back(k); continue; }
+    auto in = [](const std::vector<uint8_t>& v, uint8_t m) {
+      return std::find(v.begin(), v.end(), m) != v.end();
+    };
+    for (Queue& q : queues_) {
+      if (in(busy, q.module)) continue;
+      // Retries: a module the logger waits for sends them alongside its
+      // usual request; any other sends one instead of it.
+      while (!q.retries.empty()) {
+        std::vector<size_t> b;
+        for (size_t i : q.retries.front()) if (!resting(p.reads[i], now)) b.push_back(i);
+        q.retries.erase(q.retries.begin());
+        if (b.empty()) continue;
+        out.push_back(b);
+        asked.push_back(q.module);
+        if (q.fast.empty()) break;
+      }
+      if (q.fast.empty() && in(asked, q.module)) continue;
+      if (q.fast.empty() && q.medium.empty()) continue;   // slow-only: below
       std::vector<size_t> b;
       size_t bytes = 0, room = p.batchFor(q.module);
       for (size_t i : q.fast) {                    // all of them: more requests if need be
@@ -162,25 +207,40 @@ class Scheduler {
         bytes = 0;
         add(p, i, now, b, bytes, room);
       }
-      // What's left after the fast reads: medium gets at most half (when
-      // there's slow to read), slow the rest, so both keep moving.
+      // Fast reads filled the request: every other cycle another one for
+      // medium and slow, so they don't stop.
+      if (b.size() >= room && (!q.medium.empty() || !q.slow.empty()) &&
+          (q.extraTurn = !q.extraTurn)) {
+        out.push_back(b);
+        b.clear();
+        bytes = 0;
+      }
+      // What's left: medium gets at most half when there's slow to read
+      // (one slot left: medium and slow take turns), slow the rest.
       size_t left = room > b.size() ? room - b.size() : 0;
-      size_t forMedium = q.slow.empty() ? left : (left + 1) / 2;
+      size_t forMedium = left;
+      if (!q.slow.empty() && !q.medium.empty()) {
+        forMedium = left == 1 ? ((q.slowTurn = !q.slowTurn) ? 0 : 1) : (left + 1) / 2;
+      }
       take(p, q.medium, q.mediumAt, now, b, bytes, b.size() + forMedium, nullptr);
       take(p, q.slow, q.slowAt, now, b, bytes, room, &q.slowRound);
       if (!b.empty()) { out.push_back(b); asked.push_back(q.module); }
     }
-    if (!slowOnly.empty()) {                                 // one slow-only module a cycle
-      Queue& q = queues_[slowOnly[slowOnlyAt_++ % slowOnly.size()]];
+    // Slow-only modules in turn, up to slowOnlyMax not otherwise asked.
+    size_t picked = 0;
+    for (size_t n = 0; n < queues_.size() && picked < slowOnlyMax; n++) {
+      Queue& q = queues_[slowOnlyAt_++ % queues_.size()];
+      if (!q.fast.empty() || !q.medium.empty() || q.slow.empty()) continue;
+      if (in(busy, q.module) || in(asked, q.module)) continue;
       std::vector<size_t> b;
       size_t bytes = 0, room = p.batchFor(q.module);
       take(p, q.slow, q.slowAt, now, b, bytes, room, &q.slowRound);
-      if (!b.empty()) { out.push_back(b); asked.push_back(q.module); }
+      if (!b.empty()) { out.push_back(b); asked.push_back(q.module); picked++; }
     }
     for (size_t tries = 0; tries < singles_.size(); tries++) {   // one alone, module free
       size_t i = singles_[singleAt_++ % singles_.size()];
       const Read& r = p.reads[i];
-      if (std::find(asked.begin(), asked.end(), r.module) != asked.end() || resting(r, now)) continue;
+      if (in(asked, r.module) || in(busy, r.module) || resting(r, now)) continue;
       out.push_back({i});
       break;
     }
@@ -197,15 +257,18 @@ class Scheduler {
 
  private:
   struct Queue {
-    uint8_t module;
+    uint8_t module = 0;
     std::vector<size_t> fast, medium, slow;
+    std::vector<std::vector<size_t>> retries;
     size_t mediumAt = 0, slowAt = 0;
     bool slowRound = false;              // every slow read taken since the last pass
+    bool slowTurn = false, extraTurn = false;
   };
 
   Queue& queue(uint8_t module) {
     for (Queue& q : queues_) if (q.module == module) return q;
-    queues_.push_back(Queue{module, {}, {}, {}, 0, 0, false});
+    queues_.push_back(Queue{});
+    queues_.back().module = module;
     return queues_.back();
   }
 

@@ -9,15 +9,22 @@ It answers HSFZ discovery on UDP 6811 with a FAKE VIN, and UDS reads on TCP
 6801 for the spike's seven channels, from the master DME (0x12) and the slave
 (0x13), single or several identifiers to a request. Engine speed swings
 slowly so you can see live values change. Every request is echoed as an
-acknowledge frame first, as the real gateway does. Anything but 0x22 and
-0x3E is refused (NRC 0x11) and printed, which on the bench means the
-firmware sent something it never should.
+acknowledge frame first, as the real gateway does. The fault list (0x19 02)
+answers with no faults. Anything but 0x22, 0x3E and 0x19 02 is refused (NRC
+0x11) and printed, which on the bench means the firmware sent something it
+never should.
 
 For the logger, pass its channel file and every identifier in it answers too,
 on any module, with bytes of the right size (a slowly changing pattern, not
 real values):
 
     python firmware/tools/bench_car.py --channels channels.csv
+
+To act like the car did on a drive: --delay 30 (the DMEs' answer time),
+--slow 0x63=800 (a module that takes most of a second), --bad 0x19:0x1234
+(an identifier that makes the module refuse the whole request with 0x31),
+--single 0x18 (a module that refuses requests for several identifiers with
+0x13). Each can be given more than once.
 
 Windows asks whether Python may use the network: allow it on Public networks
 too, because a direct cable is an "unidentified" (public) network.
@@ -40,6 +47,9 @@ DMES = (0x12, 0x13)
 EXTRA = {}                  # (module, identifier) -> reply size, from --channels
 EXTRA_MODULES = set()
 DELAY = 0.0                 # s before each answer (--delay): the car's DMEs take ~30 ms
+SLOW = {}                   # module -> s before its answers (--slow)
+BAD = set()                 # (module, identifier) refused with the whole request (--bad)
+SINGLE = set()              # modules that take one identifier a request (--single)
 
 
 def u16(v):
@@ -87,11 +97,17 @@ def answer(dme, uds):
     service = uds[0]
     if service == 0x3E:
         return b"\x7E" + uds[1:2]
+    if service == 0x19 and uds[1:2] == b"\x02":
+        return b"\x59\x02\xFF"                       # status mask, no faults
     if service != 0x22:
         print("  !! refused service 0x%02X: the firmware should never send this" % service)
         return bytes([0x7F, service, 0x11])
     table = values(dme) if dme in DMES else {}
     dids = [int.from_bytes(uds[i:i + 2], "big") for i in range(1, len(uds) - 1, 2)]
+    if dme in SINGLE and len(dids) > 1:
+        return bytes([0x7F, 0x22, 0x13])             # incorrectMessageLengthOrInvalidFormat
+    if any((dme, did) in BAD for did in dids):
+        return bytes([0x7F, 0x22, 0x31])             # one it hasn't spoils the request
     out = b""
     for did in dids:
         if did in table:
@@ -142,11 +158,12 @@ def serve(conn, peer):
                     break
                 if reply is None:
                     continue
-                if DELAY:
+                wait = SLOW.get(dst, DELAY)
+                if wait:
                     # Each module answers after its own delay, as on the car,
                     # where requests to different modules overlap.
-                    threading.Timer(DELAY, send_later, (conn, lock, frame(CTRL_DIAG, dst, src,
-                                                                          reply))).start()
+                    threading.Timer(wait, send_later, (conn, lock, frame(CTRL_DIAG, dst, src,
+                                                                         reply))).start()
                     continue
                 try:
                     with lock:
@@ -185,8 +202,21 @@ if __name__ == "__main__":
                     help="also answer every identifier in this logger channel file")
     ap.add_argument("--delay", type=float, default=0.0, metavar="MS",
                     help="wait this long before each answer, as the car does (~30)")
+    ap.add_argument("--slow", action="append", default=[], metavar="MODULE=MS",
+                    help="this module answers after MS instead (e.g. 0x63=800)")
+    ap.add_argument("--bad", action="append", default=[], metavar="MODULE:DID",
+                    help="a request naming this identifier is refused with 0x31")
+    ap.add_argument("--single", action="append", default=[], metavar="MODULE",
+                    help="this module refuses several identifiers a request (0x13)")
     args = ap.parse_args()
     DELAY = args.delay / 1000.0
+    for item in args.slow:
+        module, ms = item.split("=")
+        SLOW[int(module, 16)] = float(ms) / 1000.0
+    for item in args.bad:
+        module, did = item.split(":")
+        BAD.add((int(module, 16), int(did, 16)))
+    SINGLE.update(int(m, 16) for m in args.single)
     if args.channels:
         load_channels(args.channels)
         print("answering %d identifiers from %s too" % (len(EXTRA), args.channels))
