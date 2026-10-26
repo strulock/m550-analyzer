@@ -3,9 +3,10 @@ n63read.cloud - copy the logs folder to the cloud Worker (cloud/ in the repo).
 
 sync() uploads every drive log and fault list that is new or changed since
 the last upload (PUT /api/files/<path>), the channel templates both ways
-(/api/templates), each drive log's values as time series (PUT /api/series/<path>,
-see series.py), then the drive and fault summaries from history.scan()
-(PUT /api/history). What was sent is remembered in
+(/api/templates), the logger board's channel catalog with what the car
+answered (PUT /api/logger/catalog, for the logger channel page), each drive
+log's values as time series (PUT /api/series/<path>, see series.py), then
+the drive and fault summaries from history.scan() (PUT /api/history). What was sent is remembered in
 %APPDATA%\\n63read\\cloud_state.json, so a sync sends only what changed and a
 file that failed goes again next time. AutoSync runs it in the background:
 after a log closes, after a fault list is saved, and every few minutes, so
@@ -283,6 +284,44 @@ def sync_fault_texts(settings, state):
     return True
 
 
+def full_catalog():
+    """Every channel the app knows: the DME's with bank 2 twins, and the
+    other modules' (as cli._catalog)."""
+    cat = core.load_catalog(core.DEFAULT_CSV)
+    cat.update(core.load_module_catalogs())
+    return core.add_derived(core.add_bank2(cat))
+
+
+def sync_logger_catalog(settings, state, force=False):
+    """Send the logger board's channel catalog (loggerchannels.catalog_payload:
+    what it can decode, what the car answered here, the built-in tiers) for
+    the logger channel page; again only when it changed. True if sent."""
+    from n63read import loggerchannels
+    # Building it takes seconds: only when the app, the answers or the
+    # templates changed since it last went.
+    key = [__version__] + [os.path.getmtime(p) if os.path.exists(p) else None
+                           for p in (core.availability_path(), core.templates_path())]
+    if not force and state.get("logger_catalog_key") == key:
+        return False
+    fast, medium = loggerchannels.tier_lists(core.load_templates())
+    payload = loggerchannels.catalog_payload(full_catalog(), core.load_availability(),
+                                             fast, medium)
+    data = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+    sha = hashlib.sha256(data).hexdigest()
+    sent = False
+    if force or state.get("logger_catalog_sha256") != sha:
+        request(settings, "PUT", "/api/logger/catalog", data, "application/json")
+        state["logger_catalog_sha256"] = sha
+        sent = True
+    state["logger_catalog_key"] = key
+    return sent
+
+
+def logger_page(settings):
+    """The logger channel page's address on the Worker."""
+    return config(settings)[0] + "/logger"
+
+
 def _key(rel):
     return urllib.parse.quote(rel.replace(os.sep, "/"), safe="/")
 
@@ -336,6 +375,10 @@ def sync(settings, logs=None, state_file=None, progress=None, templates_file=Non
         sync_fault_texts(settings, state)
     except CloudError as e:
         result.errors.append("fault texts: %s" % e)
+    try:
+        sync_logger_catalog(settings, state)
+    except (CloudError, OSError, ValueError) as e:
+        result.errors.append("logger catalog: %s" % e)
     save_state(state, state_file)
     sync_series(settings, state, logs, result)
     save_state(state, state_file)
@@ -392,6 +435,14 @@ class AutoSync:
                 return None
             self.status = "synced %s: %s" % (time.strftime("%H:%M"), result.text())
             return result
+
+    def send_logger_catalog(self):
+        """The logger catalog now, if it changed (before opening the logger
+        channel page). Raises CloudError."""
+        with self._busy:
+            state = load_state()
+            sync_logger_catalog(self.settings, state)
+            save_state(state)
 
     def _run(self):
         self._wake.wait(self._first)

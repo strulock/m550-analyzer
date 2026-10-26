@@ -10,6 +10,10 @@
  * - Its fault reads (<drive>.faults.csv) go into fault history as source
  *   "logger", with texts from n63read's table the app sends (FAULT_TEXTS). It also checks in (POST
  *   /api/logger/heartbeat) at power-on and every 10 s while it has Wi-Fi.
+ * - What the board reads comes from here too (logger.js): the app sends the
+ *   channel catalog, the page at /logger picks each channel's tier in
+ *   presets, and the board downloads the active one's channels.csv
+ *   (GET /api/logger/channels) when it changes.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with read-only tools over that copy: drive_history,
  *   fault_history, trend, list_files, read_log.
@@ -24,6 +28,9 @@
  */
 
 import { BANK2, buildSeries, isDriveLog, readLog, summarizeDrive } from "./drive.js";
+import { channelFile, ConfigError, getCatalog, getPresets, LOGGER_SCHEMA, putCatalog, putPresets }
+  from "./logger.js";
+import { LOGGER_PAGE } from "./loggerpage.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -315,6 +322,8 @@ export const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS heartbeats_received ON heartbeats (received)`,
   // The newest logger fault read applied per module (ingestFaults).
   `CREATE TABLE IF NOT EXISTS logger_fault_reads (module TEXT PRIMARY KEY, latest TEXT)`,
+  // What the board reads: presets of channel tiers, and which is active.
+  ...LOGGER_SCHEMA,
 ];
 
 const MAX_POINTS = 2000;
@@ -1064,6 +1073,58 @@ export async function rpc(env, msg) {
   }
 }
 
+// ------------------------------------------------------------------ logger config
+
+/** The logger's channel catalog, presets and channel file (logger.js);
+ * null for a path that isn't one of them. */
+async function loggerConfig(request, env, url) {
+  const path = url.pathname.slice("/api/logger/".length);
+  const method = request.method;
+  const body = async () => {
+    try {
+      return await request.json();
+    } catch {
+      throw new ConfigError("body: JSON");
+    }
+  };
+  try {
+    if (path === "catalog" && method === "PUT") {
+      await ensureSchema(env);
+      return json({ ok: true, ...(await putCatalog(env, await body())) });
+    }
+    if (path === "catalog" && method === "GET") {
+      const catalog = await getCatalog(env);
+      return catalog ? json(catalog) : json({ error: "no catalog yet: the app sends it " +
+        "(Answers > Logger channels, or any sync)" }, 404);
+    }
+    if (path === "presets" && (method === "GET" || method === "PUT")) {
+      await ensureSchema(env);
+      const presets = method === "PUT" ? await putPresets(env, await body())
+        : await getPresets(env);
+      const file = await channelFile(env);
+      return json({ ...presets, file: file && { preset: file.preset, etag: file.etag,
+        counts: file.counts } });
+    }
+    if (path === "channels" && method === "GET") {
+      await ensureSchema(env);
+      const file = await channelFile(env);
+      if (!file) return json({ error: "no catalog or no active preset yet" }, 404);
+      const etag = `"${file.etag}"`;
+      const headers = { etag, "x-preset": encodeURIComponent(file.preset),
+        "cache-control": "no-store" };
+      const have = (request.headers.get("If-None-Match") || "").split(",").map((s) => s.trim());
+      if (have.includes(etag) || have.includes(file.etag)) {
+        return new Response(null, { status: 304, headers });
+      }
+      return new Response(file.csv, { headers: { ...headers, "content-type": "text/csv" } });
+    }
+  } catch (e) {
+    if (e instanceof ConfigError) return json({ error: e.message }, 400);
+    throw e;
+  }
+  return null;
+}
+
 // ------------------------------------------------------------------ routes
 
 export async function handle(request, env, fetcher = fetch) {
@@ -1166,6 +1227,14 @@ export async function handle(request, env, fetcher = fetch) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
     }
+  }
+  if (url.pathname === "/logger" && request.method === "GET") {
+    return new Response(LOGGER_PAGE, { headers: { "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store" } });
+  }
+  if (url.pathname.startsWith("/api/logger/")) {
+    const reply = await loggerConfig(request, env, url);
+    if (reply) return reply;
   }
   if (url.pathname === "/api/logger" && request.method === "GET") {
     const hours = Math.max(0.1, Math.min(24 * KEEP_BEATS_DAYS,

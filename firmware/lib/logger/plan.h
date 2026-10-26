@@ -146,19 +146,51 @@ class Plan {
 // otherwise. A module still answering an earlier request (`busy`) is
 // skipped; batches to ask again (halves of one the module couldn't take)
 // go out on its next turn.
+//
+// Periodic reads (once a drive, daily, weekly, monthly) are asked once each,
+// those of tiers in `due` only, once openOnce() is called (a minute into the
+// drive, as the fault reads): ahead of slow in a module's request, in the
+// slow-only turns too.
 class Scheduler {
  public:
-  void build(const Plan& p) {
+  void build(const Plan& p, uint32_t due = ~0u) {
     queues_.clear();
     singles_.clear();
+    onceSingles_.clear();
     singleAt_ = slowOnlyAt_ = 0;
+    onceOpen_ = onceReported_ = false;
+    onceCount_ = 0;
     for (size_t i = 0; i < p.reads.size(); i++) {
       const Read& r = p.reads[i];
+      if (periodic(r.tier)) {
+        if (!(due & (1u << r.tier))) continue;
+        onceCount_++;
+        if (r.size == 0) onceSingles_.push_back(i);
+        else queue(r.module).once.push_back(i);
+        continue;
+      }
       if (r.size == 0) { singles_.push_back(i); continue; }
       Queue& q = queue(r.module);
       (r.tier == FAST ? q.fast : r.tier == MEDIUM ? q.medium : q.slow).push_back(i);
     }
     for (Queue& q : queues_) q.slowRound = q.slow.empty();
+  }
+
+  // Start asking the periodic reads.
+  void openOnce() { onceOpen_ = true; }
+  // How many periodic reads this drive asks.
+  size_t onceCount() const { return onceCount_; }
+  // True once, when every periodic read has been asked (or was resting).
+  bool onceDone() {
+    if (!onceOpen_ || onceReported_ || !onceCount_ || !onceSingles_.empty()) return false;
+    for (const Queue& q : queues_) if (!q.once.empty()) return false;
+    onceReported_ = true;
+    return true;
+  }
+  // Whether any module has slow reads (a sweep row a pass).
+  bool hasSlow() const {
+    for (const Queue& q : queues_) if (!q.slow.empty()) return true;
+    return false;
   }
 
   // Whether the logger waits for this module's answers each cycle (it has
@@ -197,7 +229,7 @@ class Scheduler {
         if (q.fast.empty()) break;
       }
       if (q.fast.empty() && in(asked, q.module)) continue;
-      if (q.fast.empty() && q.medium.empty()) continue;   // slow-only: below
+      if (q.fast.empty() && q.medium.empty()) continue;   // slow and periodic only: below
       std::vector<size_t> b;
       size_t bytes = 0, room = p.batchFor(q.module);
       for (size_t i : q.fast) {                    // all of them: more requests if need be
@@ -223,21 +255,39 @@ class Scheduler {
         forMedium = left == 1 ? ((q.slowTurn = !q.slowTurn) ? 0 : 1) : (left + 1) / 2;
       }
       take(p, q.medium, q.mediumAt, now, b, bytes, b.size() + forMedium, nullptr);
+      if (onceOpen_) takeOnce(p, q.once, now, b, bytes, room);
       take(p, q.slow, q.slowAt, now, b, bytes, room, &q.slowRound);
       if (!b.empty()) { out.push_back(b); asked.push_back(q.module); }
+    }
+    // A periodic read of unknown size, alone: ahead of the slow-only turns
+    // (which could take its module every cycle), or as an extra request to
+    // a module the logger waits for.
+    bool alone = false;
+    for (size_t k = 0; onceOpen_ && k < onceSingles_.size(); k++) {
+      size_t i = onceSingles_[k];
+      const Read& r = p.reads[i];
+      if (in(busy, r.module) || (in(asked, r.module) && !waits(r.module))) continue;
+      onceSingles_.erase(onceSingles_.begin() + k);
+      if (resting(r, now)) { k--; continue; }
+      out.push_back({i});
+      if (!in(asked, r.module)) asked.push_back(r.module);
+      alone = true;
+      break;
     }
     // Slow-only modules in turn, up to slowOnlyMax not otherwise asked.
     size_t picked = 0;
     for (size_t n = 0; n < queues_.size() && picked < slowOnlyMax; n++) {
       Queue& q = queues_[slowOnlyAt_++ % queues_.size()];
-      if (!q.fast.empty() || !q.medium.empty() || q.slow.empty()) continue;
+      bool once = onceOpen_ && !q.once.empty();
+      if (!q.fast.empty() || !q.medium.empty() || (q.slow.empty() && !once)) continue;
       if (in(busy, q.module) || in(asked, q.module)) continue;
       std::vector<size_t> b;
       size_t bytes = 0, room = p.batchFor(q.module);
+      if (once) takeOnce(p, q.once, now, b, bytes, room);
       take(p, q.slow, q.slowAt, now, b, bytes, room, &q.slowRound);
       if (!b.empty()) { out.push_back(b); asked.push_back(q.module); picked++; }
     }
-    for (size_t tries = 0; tries < singles_.size(); tries++) {   // one alone, module free
+    for (size_t tries = 0; !alone && tries < singles_.size(); tries++) {   // one alone, module free
       size_t i = singles_[singleAt_++ % singles_.size()];
       const Read& r = p.reads[i];
       if (in(asked, r.module) || in(busy, r.module) || resting(r, now)) continue;
@@ -259,6 +309,7 @@ class Scheduler {
   struct Queue {
     uint8_t module = 0;
     std::vector<size_t> fast, medium, slow;
+    std::vector<size_t> once;            // periodic reads still to ask this drive
     std::vector<std::vector<size_t>> retries;
     size_t mediumAt = 0, slowAt = 0;
     bool slowRound = false;              // every slow read taken since the last pass
@@ -299,10 +350,38 @@ class Scheduler {
     }
   }
 
+  // From the front of `list`, as many as fit, each taken off it (a resting
+  // one too: it isn't waited for).
+  static void takeOnce(const Plan& p, std::vector<size_t>& list, uint32_t now,
+                       std::vector<size_t>& b, size_t& bytes, size_t room) {
+    size_t k = 0;
+    while (k < list.size()) {
+      if (resting(p.reads[list[k]], now)) { k++; continue; }
+      if (!add(p, list[k], now, b, bytes, room)) break;
+      k++;
+    }
+    list.erase(list.begin(), list.begin() + k);
+  }
+
   std::vector<Queue> queues_;
-  std::vector<size_t> singles_;
+  std::vector<size_t> singles_, onceSingles_;
   size_t singleAt_ = 0, slowOnlyAt_ = 0;
+  bool onceOpen_ = false, onceReported_ = false;
+  size_t onceCount_ = 0;
 };
+
+// Whether a periodic tier is due this drive: `last` when it was last read
+// and `now`, in epoch seconds (0: never, or the clock is unknown: due),
+// `offsetMin` the local time's offset from UTC (a day is a local day).
+inline bool periodicDue(Tier t, uint32_t last, uint32_t now, int offsetMin) {
+  if (t == DRIVE || !last || !now || now < last) return true;
+  if (t == DAILY) {
+    int64_t off = (int64_t)offsetMin * 60;
+    return ((int64_t)now + off) / 86400 != ((int64_t)last + off) / 86400;
+  }
+  uint32_t days = t == WEEKLY ? 7 : 30;
+  return now - last >= days * 86400u - 3600u;   // an hour's slack: drives aren't to the minute
+}
 
 // Split the body of a 0x22 reply (after the 0x62) to the reads asked for.
 // data[k] / len[k]: where read k's data starts and how long it is, or null

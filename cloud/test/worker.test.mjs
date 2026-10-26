@@ -619,3 +619,113 @@ test("the default export answers, and hides internal errors", async () => {
     { ACCESS_AUD: "", ACCESS_TEAM_DOMAIN: "" });
   assert.equal(r.status, 403);
 });
+
+// --- logger channels: catalog, presets, the board's channel file
+
+const COLS = ["name", "module", "did", "did_size", "offset", "type", "order", "mul", "div", "add",
+  "no_value", "unit", "info", "group"];
+const CATALOG = {
+  version: 1, columns: COLS,
+  rows: [
+    ["INMOT", "0x12", "0x4807", 2, 0, "s16", "big", "1", "4", "0", "", "1/min", "Engine speed", ""],
+    ["ITOEL", "0x12", "0x4402", 2, 0, "u16", "big", "0.75", "1", "-48", "", "°C", "Oil temperature", ""],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT", "0x29", "0xDC98", 24, 5, "u16", "big", "1",
+      "1000", "0", "", "bar", "Last valid tire pressure", "RDC_MESSDATENBLOCK_1"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT", "0x29", "0xDC98", 24, 7, "u8", "big",
+      "1", "1", "-50", "", "°C", "Last valid tire temperature", "RDC_MESSDATENBLOCK_1"],
+    ["HU_ODD, \"quoted\"", "0x63", "0xD030", "", 0, "u8", "big", "1", "1", "0", "", "", "", ""],
+  ],
+  answers: { "0x12:0x4807": "ok", "0x12:0x4402": "ok", "0x29:0xDC98": "ok", "0x63:0xD030": "size" },
+  modules: { "0x29": "DSC", "0x12": "DME (bank 1)" },
+  defaults: { INMOT: "fast" },
+};
+const putCatalog = (c = CATALOG) => call("PUT", "/api/logger/catalog", { body: JSON.stringify(c) });
+const presets = async (body) => (await call(body ? "PUT" : "GET", "/api/logger/presets",
+  body ? { body: JSON.stringify(body) } : {})).json();
+const channelRows = async (headers = {}) => {
+  const r = await call("GET", "/api/logger/channels", { headers });
+  if (r.status !== 200) return { r, rows: null };
+  const [head, ...body] = parseCsv(await r.text());
+  return { r, rows: body.map((x) => Object.fromEntries(head.map((h, i) => [h, x[i]]))) };
+};
+
+test("the first catalog makes the Default preset from the built-in tiers, active", async () => {
+  assert.equal((await call("GET", "/api/logger/channels")).status, 404);   // nothing yet
+  const put = await (await putCatalog()).json();
+  assert.deepEqual([put.channels, put.answered], [5, 3]);
+  const p = await presets();
+  assert.equal(p.active, "Default");
+  assert.deepEqual(p.presets.map((x) => [x.name, x.rest, x.tiers]), [["Default", "slow", { INMOT: "fast" }]]);
+  assert.deepEqual(p.file.counts, { fast: 1, slow: 3 });
+  const { r, rows } = await channelRows();
+  assert.equal(r.headers.get("content-type"), "text/csv");
+  // Fast first; the identifier that answered the wrong size is left out.
+  assert.deepEqual(rows.map((x) => [x.name, x.tier]), [["INMOT", "fast"], ["ITOEL", "slow"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT", "slow"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT", "slow"]]);
+  assert.deepEqual(Object.keys(rows[0]).slice(0, 13), ["name", "module", "did", "did_size", "offset",
+    "type", "order", "mul", "div", "add", "no_value", "unit", "tier"]);
+  assert.equal(rows[2].div, "1000");
+});
+
+test("answers merge: one that answered ok stays ok", async () => {
+  await putCatalog();
+  await putCatalog({ ...CATALOG, answers: { "0x29:0xDC98": "no answer", "0x63:0xD030": "ok" } });
+  const c = await (await call("GET", "/api/logger/catalog")).json();
+  assert.equal(c.answers["0x29:0xDC98"], "ok");
+  assert.equal(c.answers["0x63:0xD030"], "ok");
+  assert.equal((await presets()).presets.length, 1);                // Default made once only
+});
+
+test("presets: save, activate, and the board downloads only when it changed", async () => {
+  await putCatalog();
+  const first = await channelRows();
+  const etag = first.r.headers.get("etag");
+  assert.match(etag, /^"[0-9a-f]{16}"$/);
+  assert.equal((await channelRows({ "If-None-Match": etag })).r.status, 304);
+  const tires = { "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT": "daily",
+    INMOT: "fast", ITOEL: "off", "HU_ODD, \"quoted\"": "weekly" };
+  let p = await presets({ changes: [{ name: "Tires", rest: "off", tiers: tires }] });
+  assert.equal(p.active, "Default");                                 // saving doesn't activate
+  assert.equal((await channelRows({ "If-None-Match": etag })).r.status, 304);
+  p = await presets({ active: "Tires" });
+  assert.equal(p.active, "Tires");
+  const { r, rows } = await channelRows({ "If-None-Match": etag });
+  assert.equal(r.status, 200);
+  assert.equal(decodeURIComponent(r.headers.get("x-preset")), "Tires");
+  assert.deepEqual(rows.map((x) => [x.name, x.tier]), [["INMOT", "fast"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT", "daily"], ["HU_ODD, \"quoted\"", "weekly"]]);
+  assert.equal(rows[2].did_size, "");                                // a name with a comma survives
+});
+
+test("presets refuse bad tiers, bad names and deleting the active one", async () => {
+  await putCatalog();
+  const put = (body) => call("PUT", "/api/logger/presets", { body: JSON.stringify(body) });
+  assert.equal((await put({ changes: [{ name: "X", rest: "slow", tiers: { INMOT: "hourly" } }] })).status, 400);
+  assert.equal((await put({ changes: [{ name: "X", rest: "fast", tiers: {} }] })).status, 400);
+  assert.equal((await put({ changes: [{ name: " ", rest: "slow", tiers: {} }] })).status, 400);
+  assert.equal((await put({ active: "Nope" })).status, 400);
+  const r = await put({ changes: [{ name: "Default", deleted: true }] });
+  assert.equal(r.status, 400);
+  assert.match((await r.json()).error, /active/);
+  // Renamed in one go: the new one saved and made active, the old one gone.
+  const p = await presets({ active: "Mine", changes: [{ name: "Mine", rest: "slow", tiers: {} },
+    { name: "Default", deleted: true }] });
+  assert.deepEqual([p.active, p.presets.map((x) => x.name)], ["Mine", ["Mine"]]);
+});
+
+test("the catalog must have the board's columns", async () => {
+  const bad = { ...CATALOG, columns: COLS.filter((c) => c !== "offset") };
+  assert.equal((await putCatalog(bad)).status, 400);
+  assert.equal((await putCatalog({ ...CATALOG, rows: [["x"]] })).status, 400);
+});
+
+test("the logger page is served, behind Access like the rest", async () => {
+  const r = await call("GET", "/logger");
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get("content-type"), /text\/html/);
+  const html = await r.text();
+  assert.match(html, /<title>Logger Channels<\/title>/);
+  assert.match(html, /\/api\/logger\/presets/);
+  assert.equal((await call("GET", "/logger", { auth: false })).status, 403);
+});

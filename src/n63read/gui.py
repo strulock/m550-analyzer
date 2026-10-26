@@ -358,6 +358,7 @@ class App(tk.Tk):
         menu.add_command(label="Check car now", command=self._check_car)
         menu.add_command(label="Stop check", command=self._stop_check)
         menu.add_command(label="Import n63read check CSV...", command=self._import_check)
+        menu.add_command(label="Logger channels (web page)...", command=self._logger_channels)
         menu.add_separator()
         menu.add_command(label="Forget recorded answers", command=self._forget_answers)
         self.answers_btn["menu"] = menu
@@ -776,6 +777,8 @@ class App(tk.Tk):
                         command=self._save_cloud).pack(side="left")
         ttk.Button(line, text="Save", command=self._save_cloud).pack(side="left", padx=(10, 4))
         ttk.Button(line, text="Sync now", command=self._sync_now).pack(side="left")
+        ttk.Button(line, text="Logger channels...", command=self._logger_channels).pack(
+            side="left", padx=(4, 0))
         self.cloud_status = ttk.Label(f, text=self.cloud.status, wraplength=420,
                                       foreground=self.palette["muted"])
         self.cloud_status.pack(anchor="w")
@@ -1178,6 +1181,29 @@ class App(tk.Tk):
     def _stop_check(self):
         if self._checking:
             self._checking["stop"] = True
+
+    def _logger_channels(self):
+        """The cloud's logger channel page, in the browser: what the logger
+        board reads, and how often. The catalog and the car's answers go up
+        first, so the page shows what this PC knows."""
+        if not cloud.configured(self.settings):
+            messagebox.showinfo("Logger channels", "Set up the cloud first: Settings > Cloud "
+                                "(the Worker URL and the service token).")
+            return
+        try:
+            core.save_availability(self.avail)
+        except OSError:
+            pass                                # the page shows the last saved answers
+
+        def work():
+            try:
+                self.cloud.send_logger_catalog()
+            except (cloud.CloudError, OSError) as e:
+                self.q.put(("joberror", "Logger catalog not sent (the page shows the last "
+                            "one): %s" % e))
+            webbrowser.open(cloud.logger_page(self.settings))
+
+        threading.Thread(target=work, daemon=True).start()
 
     def _import_check(self):
         path = filedialog.askopenfilename(

@@ -22,6 +22,7 @@ class FakeWorker:
         self.files, self.history, self.requests = {}, None, []
         self.templates = {}                      # name -> {channels, deleted}
         self.series = {}                         # drive -> body
+        self.catalog = None                      # the logger catalog, as sent
         self.client_id, self.secret = client_id, secret
         self.fail = None                         # a status to answer instead, once set
         worker = self
@@ -77,6 +78,9 @@ class FakeWorker:
                         worker.templates[c["name"]] = {"channels": c["channels"],
                                                        "deleted": c["channels"] is None}
                     return self._reply(200, self._all_templates())
+                if self.path == "/api/logger/catalog":
+                    worker.catalog = json.loads(body)
+                    return self._reply(200, {"ok": True, "channels": len(worker.catalog["rows"])})
                 if self.path == "/api/history":
                     worker.history = json.loads(body)
                     return self._reply(200, {"ok": True,
@@ -355,3 +359,30 @@ def test_history_says_which_installation_sent_it(worker, tmp_path, monkeypatch):
     assert worker.history["source"] == "DESK-PC"
     assert cloud.source_name({"cloud_source": "laptop / garage"}) == "laptop - garage"
     assert cloud.source_name({"cloud_source": "logger"}) == "pc"      # the board's
+
+
+def test_the_logger_catalog_goes_up_once_and_again_when_the_answers_change(worker, tmp_path,
+                                                                          monkeypatch):
+    monkeypatch.setattr(core, "availability_path",
+                        lambda: str(tmp_path / "n63read" / "availability.json"))
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    s = settings_for(worker)
+    cloud.sync(s, logs)
+    sent = worker.catalog
+    assert len(sent["rows"]) > 10000 and sent["answers"] == {}
+    assert sent["defaults"]["INMOT"] == "fast"
+    worker.catalog = None
+    cloud.sync(s, logs)
+    assert worker.catalog is None                               # unchanged: not sent again
+    core.save_availability({(0x29, 0xDC98): "ok"})
+    cloud.sync(s, logs)
+    assert worker.catalog["answers"] == {"0x29:0xDC98": "ok"}
+
+
+def test_the_logger_page_sends_the_catalog_first(worker):
+    s = settings_for(worker)
+    sync = cloud.AutoSync(s)
+    sync.send_logger_catalog()
+    assert worker.catalog is not None
+    assert cloud.logger_page(s) == worker.url + "/logger"

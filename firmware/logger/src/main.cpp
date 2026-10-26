@@ -197,6 +197,12 @@ static uint32_t bootCount = 0;
 static Table table;
 static Plan plan;
 static bool channelsFromCard = false;
+// Where the loaded table came from, for the check-ins: the cloud's ETag for
+// the active preset, "manual" (sent over the terminal), "card" (a file from
+// before downloads) or "built-in". The upload task reads it.
+static std::mutex tagLock;
+static std::string channelsTag = "built-in";
+static std::atomic<bool> channelsDownloaded{false};   // a new file is on the card
 
 // The few values the check-ins report, kept by the logging core as they are
 // read (the sweep's too) and read by the upload task. The first name the
@@ -242,6 +248,10 @@ static float live(Live k) {
 // allocation goes to PSRAM.
 static void loadChannelsInto();
 
+static size_t periodicCount() {
+  return table.count(DRIVE) + table.count(DAILY) + table.count(WEEKLY) + table.count(MONTHLY);
+}
+
 static void loadChannels() {
   heap_caps_malloc_extmem_enable(0);
   loadChannelsInto();
@@ -282,11 +292,23 @@ static void loadChannelsInto() {
   }
   plan.build(table);
   findLive();
-  out.printf("[chan] %u channels (%u fast, %u medium, %u slow) in %u reads, from %s%s\n",
+  std::string tag = "built-in";
+  if (channelsFromCard) {
+    Preferences prefs;
+    prefs.begin("logger", true);
+    tag = prefs.isKey("chsrc") ? prefs.getString("chsrc").c_str() : "card";
+    prefs.end();
+  }
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    channelsTag = tag;
+  }
+  out.printf("[chan] %u channels (%u fast, %u medium, %u slow, %u periodic) in %u reads, from %s "
+             "(%s)%s\n",
              (unsigned)table.channels.size(), (unsigned)table.count(FAST),
-             (unsigned)table.count(MEDIUM), (unsigned)table.count(SLOW), (unsigned)plan.reads.size(),
-             channelsFromCard ? "the card" : "the built-in table",
-             table.skipped ? " (some rows skipped)" : "");
+             (unsigned)table.count(MEDIUM), (unsigned)table.count(SLOW), (unsigned)periodicCount(),
+             (unsigned)plan.reads.size(), channelsFromCard ? "the card" : "the built-in table",
+             tag.c_str(), table.skipped ? " (some rows skipped)" : "");
 }
 
 // ---- time --------------------------------------------------------------------
@@ -464,6 +486,8 @@ static float cycleRate = 0;
 static uint32_t tFast = 0, tWrite = 0;                 // ms spent per stats window
 static float msFast = 0, msWrite = 0;                  // per cycle, last window
 static uint32_t sweepPassMs = 0, sweepPassStart = 0;
+static uint32_t dueTiers = 0;               // this drive's periodic tiers that are due, a bit each
+static uint32_t onceRowAt = 0;              // ms: the periodic reads' sweep row then (0: none)
 static Scheduler scheduler;                 // this drive's rotation through the tiers
 static std::vector<double> values;
 static LogFile fastLayout, sweepLayout;
@@ -542,6 +566,8 @@ static void recoverDrives() {
 }
 
 static void resetRequests();
+static uint32_t duePeriodic();
+static void sweepRow(double secs);
 
 static void startDrive() {
   // With Wi-Fi up already, give the clock a moment; otherwise it fills in
@@ -572,7 +598,20 @@ static void startDrive() {
            vin, (unsigned)bootCount, resetReason(), millis() / 1000.0f,
            (unsigned)table.channels.size(), channelsFromCard ? "the card" : "the built-in table");
   addNote(start);
-  scheduler.build(plan);
+  dueTiers = duePeriodic();
+  onceRowAt = 0;
+  scheduler.build(plan, dueTiers);
+  if (scheduler.onceCount()) {
+    std::string which;
+    for (int t = DRIVE; t <= MONTHLY; t++) {
+      if (!(dueTiers & (1u << t)) || !table.count((Tier)t)) continue;
+      which += std::string(" ") + tierName((Tier)t);
+    }
+    char text[96];
+    snprintf(text, sizeof(text), "periodic reads due:%s (%u identifiers)", which.c_str(),
+             (unsigned)scheduler.onceCount());
+    addNote(text);
+  }
   resetRequests();
   faultScan.start(millis());
   sweepPassStart = millis();
@@ -587,6 +626,11 @@ static void endDrive(const char* why) {
                                 note.c_str()));
     note.clear();
   }
+  // Whatever the sweep columns hold since the last row (a pass cut short,
+  // periodic reads): a last row, so it isn't lost.
+  bool held = false;
+  for (uint32_t i : sweepLayout.columns) held = held || !isnan(values[i]);
+  if (sweepFile.open && held) sweepRow((millis() - driveStartMs) / 1000.0);
   fastFile.finish();
   sweepFile.finish();
   faultFile.finish();
@@ -857,6 +901,51 @@ static void askAll(std::vector<const std::vector<size_t>*> batches) {
   }
 }
 
+// ---- periodic reads ----------------------------------------------------------
+// Once a drive, daily, weekly, monthly: which are due comes from when each
+// was last read (kept between boots); they're asked from a minute in, as the
+// fault reads, and get a sweep row of their own once all are in.
+static const uint32_t ONCE_AFTER_MS = 60000;
+static const char* const PERIODIC_KEYS[] = {"pd_daily", "pd_weekly", "pd_monthly"};
+
+static uint32_t duePeriodic() {
+  uint32_t due = 1u << DRIVE;
+  uint32_t now = timeKnown() ? (uint32_t)time(nullptr) : 0;
+  int off = now ? offsetMinutes((time_t)now) : 0;
+  Preferences prefs;
+  prefs.begin("logger", true);
+  for (int t = DAILY; t <= MONTHLY; t++) {
+    if (periodicDue((Tier)t, prefs.getUInt(PERIODIC_KEYS[t - DAILY], 0), now, off)) due |= 1u << t;
+  }
+  prefs.end();
+  return due;
+}
+
+// Every periodic read asked: remember when, for the tiers that were due
+// (only with the clock known; otherwise they're read again next drive).
+static void periodicDone() {
+  std::string which;
+  bool known = timeKnown();
+  Preferences prefs;
+  prefs.begin("logger");
+  for (int t = DRIVE; t <= MONTHLY; t++) {
+    if (!(dueTiers & (1u << t)) || !table.count((Tier)t)) continue;
+    which += which.empty() ? "" : " ";
+    which += tierName((Tier)t);
+    if (t >= DAILY && known) prefs.putUInt(PERIODIC_KEYS[t - DAILY], (uint32_t)time(nullptr));
+  }
+  prefs.end();
+  addNote("periodic reads done: " + which);
+  out.printf("[drive] periodic reads done (%s)\n", which.c_str());
+}
+
+static void sweepRow(double secs) {
+  if (sweepLayout.columns.empty()) return;
+  sweepFile.add(sweepLayout.row(table, secs, clockNow(), values));
+  sweepRows++;
+  for (uint32_t i : sweepLayout.columns) values[i] = NAN;
+}
+
 // ---- the logging cycle -------------------------------------------------------
 // Each cycle: one request per module (the scheduler packs each module's fast
 // reads with the next medium and slow ones). The ones to modules with fast
@@ -865,6 +954,7 @@ static void askAll(std::vector<const std::vector<size_t>*> batches) {
 static void cycle() {
   const uint32_t start = millis();
   for (uint32_t i : fastLayout.columns) values[i] = NAN;     // fast and medium cells
+  if (millis() - driveStartMs >= ONCE_AFTER_MS) scheduler.openOnce();
   collect();
   std::vector<uint8_t> busy;
   for (const Pending& p : pendingReqs) busy.push_back(p.target);
@@ -914,13 +1004,20 @@ static void cycle() {
     note.clear();
     fastRows++;
   }
-  // Every module's slow reads all come round: one row of the sweep file.
-  if (scheduler.slowPassDone() && !sweepLayout.columns.empty()) {
-    sweepFile.add(sweepLayout.row(table, secs, clockNow(), values));
-    sweepRows++;
-    for (uint32_t i : sweepLayout.columns) values[i] = NAN;
+  // Every module's slow reads all come round: one row of the sweep file. The
+  // periodic reads all asked: one more, once their answers are in.
+  if (scheduler.slowPassDone() && scheduler.hasSlow()) {
+    sweepRow(secs);
     sweepPassMs = millis() - sweepPassStart;
     sweepPassStart = millis();
+  }
+  if (scheduler.onceDone()) {
+    periodicDone();
+    onceRowAt = (millis() + LATER_MS + 500) | 1;
+  }
+  if (onceRowAt && (int32_t)(millis() - onceRowAt) >= 0) {
+    onceRowAt = 0;
+    sweepRow(secs);
   }
   if (millis() - lastFlushMs >= FLUSH_MS) {
     fastFile.flush();
@@ -1197,6 +1294,10 @@ static std::string beatJson(bool boot) {
   jsonNumber(j, "sd_free_mb", sdOk ? (SD.totalBytes() - SD.usedBytes()) / 1e6 : NAN, 0);
   jsonNumber(j, "heap_kb", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024, 0);
   jsonNumber(j, "largest_kb", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024, 0);
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    jsonText(j, "channels", channelsTag.c_str());
+  }
   return j + "}";
 }
 
@@ -1238,6 +1339,94 @@ static void beatIfDue() {
   }
 }
 
+// ---- channels from the cloud (core 0) -----------------------------------------
+// The Worker makes channels.csv from the active preset on the logger channel
+// page (GET /api/logger/channels). The board asks soon after Wi-Fi comes up
+// and every 10 minutes, with the ETag of the last one it took, so it
+// downloads only a changed file. A new file replaces the card's and is used
+// from the next drive. One sent over the terminal stays until the active
+// preset changes.
+static const uint32_t CHANNELS_CHECK_MS = 10 * 60 * 1000;
+static const char* CHANNELS_DOWNLOAD = "/channels.dl";
+
+static void fetchChannels() {
+  NetworkClientSecure tls;
+  tls.useBuiltinCACertBundle();
+  HTTPClient http;
+  http.setTimeout(30000);
+  http.setConnectTimeout(10000);
+  if (!http.begin(tls, String("https://") + WORKER_HOST + "/api/logger/channels")) return;
+#ifdef ACCESS_CLIENT_ID
+  http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
+  http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
+#endif
+  String have;
+  {
+    Preferences prefs;
+    prefs.begin("logger", true);
+    if (prefs.isKey("cltag")) have = prefs.getString("cltag");
+    prefs.end();
+  }
+  if (have.length()) http.addHeader("If-None-Match", "\"" + have + "\"");
+  const char* keep[] = {"ETag", "X-Preset"};
+  http.collectHeaders(keep, 2);
+  int code = http.GET();
+  if (code == 304) { http.end(); return; }
+  if (code != 200) {
+    String why = code < 0 ? HTTPClient::errorToString(code) : http.getString().substring(0, 120);
+    out.printf("[chan] channel check failed: %d %s\n", code, why.c_str());
+    http.end();
+    return;
+  }
+  String etag = http.header("ETag");
+  etag.replace("\"", "");
+  String preset = http.header("X-Preset");
+  int expect = http.getSize();
+  File f;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    f = SD.open(CHANNELS_DOWNLOAD, FILE_WRITE);
+  }
+  if (!f) { http.end(); out.println("[chan] can't write the download to the card"); return; }
+  int got = http.writeToStream(&f);
+  f.close();
+  http.end();
+  bool ok = got > 0 && (expect < 0 || got == expect) && etag.length();
+  if (ok) {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    File c = SD.open(CHANNELS_DOWNLOAD);
+    char head[6] = "";
+    if (c) { c.read((uint8_t*)head, 5); c.close(); }
+    ok = !strcmp(head, "name,");
+  }
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  if (!ok) {
+    SD.remove(CHANNELS_DOWNLOAD);
+    out.printf("[chan] download incomplete (%d of %d bytes); card unchanged\n", got, expect);
+    return;
+  }
+  SD.remove(CHANNELS_FILE);
+  SD.rename(CHANNELS_DOWNLOAD, CHANNELS_FILE);
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.putString("cltag", etag);
+  prefs.putString("chsrc", etag);
+  prefs.end();
+  channelsDownloaded = true;
+  out.printf("[chan] downloaded preset %s (%s, %d bytes); used from the next drive\n",
+             preset.c_str(), etag.c_str(), got);
+}
+
+static void channelsIfDue() {
+  static uint32_t last = 0;
+  static bool tried = false;
+  if (!sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) return;
+  if (tried && millis() - last < CHANNELS_CHECK_MS) return;
+  tried = true;
+  last = millis();
+  fetchChannels();
+}
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
@@ -1245,6 +1434,7 @@ static void uploadTask(void*) {
     vTaskDelay(pdMS_TO_TICKS(500));
     keepWifi();
     beatIfDue();
+    channelsIfDue();
     if (!uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     uploadNow = false;
     last = millis();
@@ -1322,9 +1512,16 @@ static void status() {
   out.println();
   size_t rested = 0;
   for (const Read& r : plan.reads) rested += r.restUntil != 0;
-  out.printf("[status] channels %u fast, %u medium, %u slow (%s), %u reads, %u resting\n",
+  std::string tag;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    tag = channelsTag;
+  }
+  out.printf("[status] channels %u fast, %u medium, %u slow, %u periodic (%s), %u reads, "
+             "%u resting%s\n",
              (unsigned)table.count(FAST), (unsigned)table.count(MEDIUM), (unsigned)table.count(SLOW),
-             channelsFromCard ? "card" : "built in", (unsigned)plan.reads.size(), (unsigned)rested);
+             (unsigned)periodicCount(), tag.c_str(), (unsigned)plan.reads.size(), (unsigned)rested,
+             channelsDownloaded ? "; a new file is waiting for the next drive" : "");
   out.printf("[status] car %s%s%s, link %s\n", carIp.toString().c_str(), vin[0] ? " VIN " : "",
              vin, linkUp ? "up" : "down");
   int faults = faultsNow;
@@ -1472,6 +1669,10 @@ static void receiveChannels() {
   if (!done) { SD.remove("/channels.tmp"); out.println("[chan] timed out; card unchanged"); return; }
   SD.remove(CHANNELS_FILE);
   SD.rename("/channels.tmp", CHANNELS_FILE);
+  Preferences prefs;                         // until the cloud's active preset changes
+  prefs.begin("logger");
+  prefs.putString("chsrc", "manual");
+  prefs.end();
   out.printf("[chan] %u lines saved\n", (unsigned)lines);
   reloadRequested = true;
 }
@@ -1589,6 +1790,11 @@ void loop() {
   if (reloadRequested) {
     reloadRequested = false;
     if (state == LOGGING) { endDrive("new channels"); state = SEARCH; }
+    channelsFromCard = false;
+    loadChannels();
+  }
+  if (channelsDownloaded && state != LOGGING) {   // from the cloud: between drives
+    channelsDownloaded = false;
     channelsFromCard = false;
     loadChannels();
   }

@@ -1,0 +1,425 @@
+/**
+ * The logger channel page (GET /logger): every channel the board can read,
+ * filtered to what the car answers, a tier for each, saved as presets. It
+ * talks to /api/logger/catalog and /api/logger/presets (logger.js) with the
+ * visitor's Access login. No dependencies; the script avoids backticks so
+ * it can sit in this template.
+ */
+
+export const LOGGER_PAGE = String.raw`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logger Channels</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  --bg: #f4f5f7; --panel: #fff; --fg: #1d2126; --muted: #5d6670; --rule: #d9dde2;
+  --accent: #1f6feb; --accent-bg: #e8f0fe; --warn: #9a5b00; --warn-bg: #fff4e0;
+  --ok: #1a7f37; --bad: #b42318;
+  --t-fast: #c2410c; --t-medium: #b7791f; --t-slow: #2f6f4f; --t-drive: #6d4fc2;
+  --t-daily: #2563a8; --t-weekly: #0f766e; --t-monthly: #7c5a3a; --t-off: #8a939c;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #121417; --panel: #1b1e23; --fg: #e4e7eb; --muted: #9aa3ad; --rule: #2e333a;
+  --accent: #6aa5ff; --accent-bg: #1c2a40; --warn: #f0b35a; --warn-bg: #2d2416;
+  --ok: #4fc06b; --bad: #ff7b6e;
+  --t-fast: #ff8a4c; --t-medium: #e8b44d; --t-slow: #5fbf8e; --t-drive: #a58bff;
+  --t-daily: #6aa5ff; --t-weekly: #3ec7b8; --t-monthly: #c9a27c; --t-off: #6c757e;
+  color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 14px; }
+.wrap > * { min-width: 0; }
+h1 { font-size: 22px; margin: 0; }
+.muted { color: var(--muted); }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, select, input[type=search] { font: inherit; color: var(--fg); background: var(--panel);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 6px 10px; }
+button { cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled { opacity: 0.5; cursor: default; }
+input[type=search] { min-width: 240px; flex: 1; }
+.badge { font-size: 12px; padding: 2px 8px; border-radius: 99px; background: var(--accent-bg); color: var(--accent); }
+.badge.warn { background: var(--warn-bg); color: var(--warn); }
+.tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.tier { border-left: 4px solid var(--c); padding: 4px 8px; }
+.tier b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+.tier span { font-size: 12px; color: var(--muted); }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 8px;
+  border-bottom: 1px solid var(--rule); white-space: nowrap; position: sticky; top: 0; background: var(--panel); }
+td { padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td.name { font-family: var(--mono); font-size: 12.5px; word-break: break-all; min-width: 220px; }
+td.name .info { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 12.5px;
+  color: var(--muted); word-break: normal; }
+td.id { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+td.id small { display: block; color: var(--muted); font-size: 11px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+.dot.ok { background: var(--ok); } .dot.no { background: transparent; border: 1.5px solid var(--muted); }
+select.t { min-width: 140px; border-left: 4px solid var(--c); }
+select.t.inherited { color: var(--muted); }
+tr.sel td { background: var(--accent-bg); }
+.more { justify-self: center; }
+.msg { padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
+.msg.ok { background: var(--accent-bg); color: var(--accent); }
+.hide { display: none !important; }
+label { display: inline-flex; gap: 6px; align-items: center; }
+@media (max-width: 640px) {
+  td.unit, th.unit, td.mod, th.mod, td.id, th.id { display: none; }
+  input[type=search] { min-width: 0; flex-basis: 100%; }
+  .card { padding: 10px; }
+  td, th { padding: 6px 4px; }
+  td.name { min-width: 0; }
+  select.t { min-width: 0; max-width: 112px; padding: 6px 4px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="row" style="justify-content:space-between">
+    <div>
+      <h1>Logger channels</h1>
+      <div class="muted" id="catinfo">Loading the catalog…</div>
+    </div>
+    <div class="muted" id="logger"></div>
+  </header>
+
+  <div id="msg" class="msg hide"></div>
+
+  <section class="card row">
+    <label>Preset <select id="preset"></select></label>
+    <span id="activeBadge" class="badge hide">Active</span>
+    <span id="dirtyBadge" class="badge warn hide">Unsaved changes</span>
+    <button id="save" class="primary">Save</button>
+    <button id="saveAs">Save as…</button>
+    <button id="rename">Rename…</button>
+    <button id="del">Delete</button>
+    <button id="activate">Make active</button>
+    <button id="revert">Revert</button>
+    <label style="margin-left:auto">Channels not set, that the car answers:
+      <select id="rest"><option value="slow">slow</option><option value="off">off</option></select></label>
+  </section>
+
+  <section class="card tiers" id="summary"></section>
+
+  <section class="card row">
+    <input type="search" id="q" placeholder="Search names, descriptions, groups">
+    <select id="mod"><option value="">All modules</option></select>
+    <select id="ans">
+      <option value="yes">The car answers</option>
+      <option value="all">All channels</option>
+      <option value="no">Doesn't answer / unknown</option>
+    </select>
+    <select id="tierf"><option value="">Any tier</option><option value="set">Set in this preset</option></select>
+  </section>
+
+  <section class="card row" id="bulk">
+    <label><input type="checkbox" id="all"> <span id="allText">Select all matching</span></label>
+    <span class="muted" id="selText"></span>
+    <select id="bulkTier"></select>
+    <button id="apply" disabled>Set tier</button>
+    <button id="clearSel" disabled>Clear selection</button>
+  </section>
+
+  <section class="card">
+    <div class="muted" id="count" style="margin-bottom:6px"></div>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Channel</th><th class="mod">Module</th><th class="id">Identifier</th>
+        <th class="unit">Unit</th><th title="The car answered this identifier">Ans.</th><th>Tier</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button id="more" class="more hide">Show more</button></div>
+  </section>
+
+  <p class="muted">Fast: every cycle. Medium: a few times a second. Slow: in rotation, a row of the sweep file
+  each pass. Once a drive, daily, weekly, monthly: read once, in the first drive they're due, into that
+  drive's sweep file. Channels of one identifier are read together, at the fastest tier any of them has.
+  The logger downloads the active preset on its next Wi-Fi check and uses it from its next drive.</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var TIERS = ["fast", "medium", "slow", "drive", "daily", "weekly", "monthly", "off"];
+  var LABEL = { fast: "Fast", medium: "Medium", slow: "Slow", drive: "Once a drive", daily: "Daily",
+    weekly: "Weekly", monthly: "Monthly", off: "Off" };
+  var HINT = { fast: "every cycle", medium: "a few a second", slow: "in rotation", drive: "each drive",
+    daily: "first drive a day", weekly: "every 7 days", monthly: "every 30 days", off: "not read" };
+  var PAGE = 200;
+  var $ = function (id) { return document.getElementById(id); };
+  var cat = null, items = [], presets = [], activeName = null, file = null;
+  var edit = null, savedJson = "", sel = new Set(), shown = PAGE, matches = [];
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  function color(t) { return "var(--t-" + t + ")"; }
+  function say(text, ok) { var m = $("msg"); m.textContent = text; m.className = "msg" + (ok ? " ok" : "") + (text ? "" : " hide"); }
+  function api(method, path, body) {
+    return fetch(path, { method: method, credentials: "same-origin",
+      headers: body ? { "content-type": "application/json" } : {},
+      body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) throw new Error(j.error || ("HTTP " + r.status)); return j; }); });
+  }
+
+  function effective(it) {
+    return edit.tiers[it.name] || (it.ok ? edit.rest : "off");
+  }
+  function isDirty() { return edit && JSON.stringify({ r: edit.rest, t: edit.tiers }) !== savedJson; }
+
+  function loadPreset(name) {
+    var p = presets.find(function (x) { return x.name === name; }) || presets[0];
+    if (!p) { edit = { name: null, rest: "slow", tiers: {} }; savedJson = ""; return; }
+    edit = { name: p.name, rest: p.rest, tiers: Object.assign({}, p.tiers) };
+    savedJson = JSON.stringify({ r: p.rest, t: p.tiers });
+  }
+
+  function readTiers() {
+    // Each identifier's read tier: the fastest of its channels'.
+    var by = {};
+    items.forEach(function (it) {
+      var t = effective(it);
+      if (t === "off") return;
+      var cur = by[it.key];
+      if (cur === undefined || TIERS.indexOf(t) < TIERS.indexOf(cur)) by[it.key] = t;
+    });
+    return by;
+  }
+
+  function renderSummary(byId) {
+    var ch = {}, ids = {};
+    TIERS.forEach(function (t) { ch[t] = 0; ids[t] = 0; });
+    items.forEach(function (it) { ch[effective(it)]++; });
+    Object.keys(byId).forEach(function (k) { ids[byId[k]]++; });
+    $("summary").innerHTML = TIERS.map(function (t) {
+      return '<div class="tier" style="--c:' + color(t) + '"><span>' + LABEL[t] + "</span><b>" +
+        ch[t].toLocaleString() + "</b><span>" + (t === "off" ? HINT[t] : ids[t].toLocaleString() +
+        " identifier" + (ids[t] === 1 ? "" : "s") + " · " + HINT[t]) + "</span></div>";
+    }).join("");
+  }
+
+  function renderPresetBar() {
+    $("preset").innerHTML = presets.map(function (p) {
+      return '<option value="' + esc(p.name) + '"' + (edit && p.name === edit.name ? " selected" : "") + ">" +
+        esc(p.name) + (p.name === activeName ? " (active)" : "") + "</option>";
+    }).join("") || "<option>(none yet)</option>";
+    $("rest").value = edit.rest;
+    var isActive = edit.name && edit.name === activeName, dirty = isDirty();
+    $("activeBadge").classList.toggle("hide", !isActive);
+    $("dirtyBadge").classList.toggle("hide", !dirty);
+    $("save").disabled = !dirty || !edit.name;
+    $("revert").disabled = !dirty;
+    $("activate").disabled = !edit.name || isActive;
+    $("del").disabled = !edit.name || isActive;
+    $("rename").disabled = !edit.name;
+  }
+
+  function filter() {
+    var q = $("q").value.trim().toLowerCase(), mod = $("mod").value, ans = $("ans").value,
+      tf = $("tierf").value;
+    matches = items.filter(function (it) {
+      if (mod && it.module !== mod) return false;
+      if (ans === "yes" && !it.ok && !edit.tiers[it.name]) return false;
+      if (ans === "no" && it.ok) return false;
+      if (tf === "set" && !edit.tiers[it.name]) return false;
+      if (tf && tf !== "set" && effective(it) !== tf) return false;
+      if (q && it.hay.indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+
+  function options(current, inherited) {
+    var out = '<option value="">Default (' + LABEL[inherited] + ")</option>";
+    TIERS.forEach(function (t) {
+      out += '<option value="' + t + '"' + (current === t ? " selected" : "") + ">" + LABEL[t] + "</option>";
+    });
+    return out;
+  }
+
+  function renderRows(byId) {
+    var html = [];
+    matches.slice(0, shown).forEach(function (it) {
+      var set = edit.tiers[it.name] || "", eff = effective(it), inh = it.ok ? edit.rest : "off";
+      var read = byId[it.key], readNote = read && read !== eff ? "<small>read " + LABEL[read].toLowerCase() + "</small>" : "";
+      html.push('<tr data-i="' + it.i + '"' + (sel.has(it.i) ? ' class="sel"' : "") + ">" +
+        '<td><input type="checkbox" class="pick"' + (sel.has(it.i) ? " checked" : "") + ' aria-label="Select"></td>' +
+        '<td class="name"><div>' + esc(it.name) + '</div><div class="info">' + esc(it.info) + "</div></td>" +
+        '<td class="mod">' + esc(it.modName) + "</td>" +
+        '<td class="id">' + esc(it.did) + "<small>" + esc(it.group) + "</small>" + readNote + "</td>" +
+        '<td class="unit">' + esc(it.unit) + "</td>" +
+        '<td><span class="dot ' + (it.ok ? "ok" : "no") + '" title="' + esc(it.status || "not checked") + '"></span></td>' +
+        '<td><select class="t' + (set ? "" : " inherited") + '" style="--c:' + color(eff) + '">' + options(set, inh) + "</select></td></tr>");
+    });
+    $("rows").innerHTML = html.join("");
+    $("count").textContent = matches.length.toLocaleString() + " channel" + (matches.length === 1 ? "" : "s") +
+      " match" + (matches.length > shown ? "; showing " + shown.toLocaleString() : "");
+    $("more").classList.toggle("hide", matches.length <= shown);
+    $("allText").textContent = "Select all " + matches.length.toLocaleString() + " matching";
+    $("all").checked = matches.length > 0 && matches.every(function (it) { return sel.has(it.i); });
+    $("selText").textContent = sel.size ? sel.size.toLocaleString() + " selected" : "";
+    $("apply").disabled = !sel.size;
+    $("clearSel").disabled = !sel.size;
+  }
+
+  function render(refilter) {
+    if (!cat || !edit) return;
+    if (refilter) { filter(); }
+    var byId = readTiers();
+    renderSummary(byId);
+    renderPresetBar();
+    renderRows(byId);
+  }
+
+  function setTier(names, tier) {
+    names.forEach(function (n) { if (tier) edit.tiers[n] = tier; else delete edit.tiers[n]; });
+  }
+
+  function renderLogger() {
+    api("GET", "/api/logger?hours=1").then(function (s) {
+      var last = s.last;
+      if (!last) { $("logger").textContent = "The logger hasn't checked in yet."; return; }
+      var ago = s.seen_s_ago, when = ago < 90 ? ago + " s" : ago < 5400 ? Math.round(ago / 60) + " min" :
+        ago < 172800 ? Math.round(ago / 3600) + " h" : Math.round(ago / 86400) + " days";
+      var has = last.channels || "", text = "Logger " + (s.online ? "online" : "last seen " + when + " ago");
+      if (!has) text += "; running a channel file from before downloads (needs the new firmware)";
+      else if (file && has === file.etag) text += "; running the active preset ✓";
+      else text += "; running " + has.slice(0, 8) + ", gets the active preset on its next Wi-Fi check";
+      $("logger").textContent = text;
+    }).catch(function () { $("logger").textContent = ""; });
+  }
+
+  function afterPresets(j, keep) {
+    presets = j.presets || []; activeName = j.active; file = j.file;
+    loadPreset(keep || activeName || (presets[0] && presets[0].name));
+    render(true);
+    renderLogger();
+  }
+
+  function savePreset(name, extra) {
+    var change = { name: name, rest: edit.rest, tiers: edit.tiers };
+    var body = Object.assign({ changes: [change] }, extra || {});
+    return api("PUT", "/api/logger/presets", body).then(function (j) {
+      afterPresets(j, name);
+      say("Saved " + name + (name === activeName ? ": the logger gets it on its next Wi-Fi check." : "."), true);
+    });
+  }
+
+  function askName(title, start) {
+    var n = window.prompt(title, start || "");
+    if (n === null) return null;
+    n = n.trim();
+    if (!n) return null;
+    if (presets.some(function (p) { return p.name === n; }) && !window.confirm(n + " exists. Replace it?")) return null;
+    return n;
+  }
+
+  function wire() {
+    $("q").addEventListener("input", function () { shown = PAGE; render(true); });
+    ["mod", "ans", "tierf"].forEach(function (id) {
+      $(id).addEventListener("change", function () { shown = PAGE; render(true); }); });
+    $("more").addEventListener("click", function () { shown += PAGE; render(false); });
+    $("rest").addEventListener("change", function () { edit.rest = this.value; render(true); });
+    $("rows").addEventListener("change", function (e) {
+      var tr = e.target.closest("tr"); if (!tr) return;
+      var it = items[+tr.dataset.i];
+      if (e.target.classList.contains("pick")) {
+        if (e.target.checked) sel.add(it.i); else sel.delete(it.i);
+        render(false); return;
+      }
+      if (e.target.tagName === "SELECT") {
+        var names = sel.has(it.i) && sel.size > 1 ? [] : [it.name];
+        if (names.length === 0) sel.forEach(function (i) { names.push(items[i].name); });
+        setTier(names, e.target.value);
+        render(false);
+      }
+    });
+    $("all").addEventListener("change", function () {
+      var on = this.checked;
+      matches.forEach(function (it) { if (on) sel.add(it.i); else sel.delete(it.i); });
+      render(false);
+    });
+    $("bulkTier").innerHTML = '<option value="">Default</option>' + TIERS.map(function (t) {
+      return '<option value="' + t + '">' + LABEL[t] + "</option>"; }).join("");
+    $("apply").addEventListener("click", function () {
+      var names = []; sel.forEach(function (i) { names.push(items[i].name); });
+      setTier(names, $("bulkTier").value);
+      say("Set " + names.length.toLocaleString() + " channel" + (names.length === 1 ? "" : "s") + " to " +
+        ($("bulkTier").value ? LABEL[$("bulkTier").value] : "the default") + ". Save to keep it.", true);
+      render(true);
+    });
+    $("clearSel").addEventListener("click", function () { sel.clear(); render(false); });
+    $("preset").addEventListener("change", function () {
+      if (isDirty() && !window.confirm("Drop the unsaved changes to " + edit.name + "?")) { renderPresetBar(); return; }
+      loadPreset(this.value); sel.clear(); say(""); render(true);
+    });
+    $("save").addEventListener("click", function () { savePreset(edit.name).catch(function (e) { say(e.message); }); });
+    $("saveAs").addEventListener("click", function () {
+      var n = askName("Save this preset as", edit.name ? edit.name + " copy" : "My preset");
+      if (n) savePreset(n).catch(function (e) { say(e.message); });
+    });
+    $("rename").addEventListener("click", function () {
+      var old = edit.name, n = askName("Rename " + old + " to", old);
+      if (!n || n === old) return;
+      var body = { changes: [{ name: n, rest: edit.rest, tiers: edit.tiers }, { name: old, deleted: true }] };
+      if (old === activeName) body.active = n;
+      api("PUT", "/api/logger/presets", body).then(function (j) { afterPresets(j, n); say("Renamed to " + n + ".", true); })
+        .catch(function (e) { say(e.message); });
+    });
+    $("del").addEventListener("click", function () {
+      if (!window.confirm("Delete the preset " + edit.name + "?")) return;
+      api("PUT", "/api/logger/presets", { changes: [{ name: edit.name, deleted: true }] })
+        .then(function (j) { afterPresets(j); say("Deleted.", true); }).catch(function (e) { say(e.message); });
+    });
+    $("activate").addEventListener("click", function () {
+      var go = isDirty() ? savePreset(edit.name, { active: edit.name })
+        : api("PUT", "/api/logger/presets", { active: edit.name }).then(function (j) { afterPresets(j, edit.name); });
+      go.then(function () { say(edit.name + " is active: the logger downloads it on its next Wi-Fi check and uses it from its next drive.", true); })
+        .catch(function (e) { say(e.message); });
+    });
+    $("revert").addEventListener("click", function () { loadPreset(edit.name); render(true); });
+    window.addEventListener("beforeunload", function (e) { if (isDirty()) { e.preventDefault(); e.returnValue = ""; } });
+  }
+
+  function start() {
+    wire();
+    Promise.all([api("GET", "/api/logger/catalog"), api("GET", "/api/logger/presets")]).then(function (r) {
+      cat = r[0];
+      var c = {};
+      cat.columns.forEach(function (n, i) { c[n] = i; });
+      var mods = {};
+      items = cat.rows.map(function (row, i) {
+        var key = row[c.module] + ":" + row[c.did], status = cat.answers[key];
+        mods[row[c.module]] = true;
+        var it = { i: i, name: row[c.name], module: row[c.module], did: row[c.did], key: key,
+          unit: row[c.unit] || "", info: row[c.info] || "", group: row[c.group] || "",
+          status: status, ok: status === "ok", modName: cat.modules[row[c.module]] || row[c.module] };
+        it.hay = (it.name + " " + it.info + " " + it.group + " " + it.did).toLowerCase();
+        return it;
+      });
+      $("mod").innerHTML += Object.keys(mods).sort().map(function (m) {
+        return '<option value="' + esc(m) + '">' + esc((cat.modules[m] || "Module") + " (" + m + ")") + "</option>"; }).join("");
+      $("tierf").innerHTML += TIERS.map(function (t) { return '<option value="' + t + '">' + LABEL[t] + "</option>"; }).join("");
+      var answering = items.filter(function (it) { return it.ok; }).length;
+      $("catinfo").textContent = items.length.toLocaleString() + " channels the logger can decode; the car answers " +
+        answering.toLocaleString() + ". Catalog from " + new Date(cat.updated).toLocaleString() + ".";
+      afterPresets(r[1]);
+    }).catch(function (e) {
+      $("catinfo").textContent = "";
+      say("Couldn't load: " + e.message + ". The app sends the catalog: Answers > Logger channels.");
+    });
+  }
+  start();
+})();
+</script>
+</body>
+</html>
+`;
