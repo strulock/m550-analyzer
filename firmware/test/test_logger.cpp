@@ -150,17 +150,21 @@ static void test_plan_batches() {
   CHECK(p.batchFor(0x40) == MAX_BATCH);
   p.smallerBatches(0x40, MAX_BATCH);
   CHECK(p.batchFor(0x40) == MAX_BATCH / 2);
-  p.smallerBatches(0x40, 3);                          // a smaller batch failing says nothing new
-  CHECK(p.batchFor(0x40) == MAX_BATCH / 2);
   p.smallerBatches(0x40, 12);
   p.smallerBatches(0x40, 6);
   CHECK(p.batchFor(0x40) == 3);
   at = p.tierStart(SLOW);
   CHECK(p.next(SLOW, at, 0).size() == 3);
-  p.smallerBatches(0x40, 3);
+  p.smallerBatches(0x40, 2);                          // a smaller batch too big: half of it
   CHECK(p.batchFor(0x40) == 1);
   at = p.tierStart(SLOW);
   CHECK(p.next(SLOW, at, 0).size() == 1);
+  p.smallerBatches(0x40, 1);
+  CHECK(p.batchFor(0x40) == 1);
+  // Timeouts in a row per module, until it answers.
+  CHECK(p.timedOut(0x63) == 1 && p.timedOut(0x63) == 2);
+  p.moduleAnswered(0x63);
+  CHECK(p.timedOut(0x63) == 1);
 }
 
 static void test_plan_rests_failing_reads() {
@@ -176,6 +180,11 @@ static void test_plan_rests_failing_reads() {
   CHECK(p.next(FAST, at, 1000 + REST_MS + 1).size() == 2); // tried again later
   p.answered(first);
   CHECK(p.reads[first].restUntil == 0);
+  p.rest(first, 1000, OUT_OF_RANGE_REST_MS);                // refused: rested at once
+  at = 0;
+  CHECK(p.next(FAST, at, 1000 + REST_MS + 1).size() == 1);
+  at = 0;
+  CHECK(p.next(FAST, at, 1000 + OUT_OF_RANGE_REST_MS + 1).size() == 2);
 }
 
 // One request per module per cycle: fast, then medium and slow in rotation.
@@ -249,6 +258,69 @@ static void test_scheduler() {
   c = s.cycle(p, 0);
   CHECK((modules(c)[0] == 0x12 && modules(c)[1] == 0x12));
   CHECK(c[0].size() == 1 && c[1].size() == 1);
+}
+
+// Modules still answering are skipped; a module without fast reads sends a
+// retry instead of its usual request; at one identifier a request, medium
+// and slow take turns; several slow-only modules a cycle.
+static void test_scheduler_async() {
+  Table m;
+  m.line("name,module,did,did_size,offset,type,order,mul,div,add,no_value,unit,tier");
+  m.line("F,0x12,0x0001,2,0,u16,big,1,1,0,,,fast");
+  m.line("HU_M,0x63,0x0100,2,0,u16,big,1,1,0,,,medium");
+  for (int k = 0; k < 4; k++) {
+    char line[96];
+    snprintf(line, sizeof(line), "HU_S%d,0x63,0x%04X,2,0,u16,big,1,1,0,,,slow", k, 0x200 + k);
+    m.line(line);
+    snprintf(line, sizeof(line), "A%d,0x40,0x%04X,2,0,u16,big,1,1,0,,,slow", k, 0x300 + k);
+    m.line(line);
+    snprintf(line, sizeof(line), "B%d,0x30,0x%04X,2,0,u16,big,1,1,0,,,slow", k, 0x400 + k);
+    m.line(line);
+  }
+  Plan p;
+  p.build(m);
+  Scheduler s;
+  s.build(p);
+  auto modules = [&](const std::vector<std::vector<size_t>>& c) {
+    std::vector<uint8_t> v;
+    for (const auto& b : c) v.push_back(p.reads[b[0]].module);
+    return v;
+  };
+  CHECK(s.waits(0x12) && !s.waits(0x63) && !s.waits(0x40));
+  // Both slow-only modules in one cycle when allowed; 0x63 busy: skipped.
+  std::vector<std::vector<size_t>> c = s.cycle(p, 0, {0x63}, 2);
+  CHECK((modules(c) == std::vector<uint8_t>{0x12, 0x30, 0x40}));
+  CHECK(!s.slowPassDone());                                   // 0x63 never asked
+  c = s.cycle(p, 0, {0x40, 0x30}, 2);
+  CHECK((modules(c) == std::vector<uint8_t>{0x12, 0x63}));
+  CHECK(s.slowPassDone());
+  // A retry goes out on 0x63's next free turn, instead of its usual request.
+  std::vector<size_t> half = {c[1][1], c[1][2]};
+  s.retry(p, half);
+  c = s.cycle(p, 0, {0x63}, 0);
+  CHECK((modules(c) == std::vector<uint8_t>{0x12}));
+  c = s.cycle(p, 0, {}, 0);
+  CHECK((modules(c) == std::vector<uint8_t>{0x12, 0x63}) && c[1] == half);
+  c = s.cycle(p, 0, {}, 0);
+  CHECK(c.size() == 2 && c[1].size() == 5);                   // back to its usual one
+  // A rested read drops out of a retry; a retry of only rested reads is none.
+  p.rest(half[0], 0, REST_MS);
+  p.rest(half[1], 0, REST_MS);
+  s.retry(p, half);
+  c = s.cycle(p, 1, {}, 0);
+  CHECK(c.size() == 2 && c[1].size() == 3);
+  // One identifier a request: medium and slow take turns.
+  for (int k = 0; k < 5; k++) p.smallerBatches(0x63, p.batchFor(0x63));
+  CHECK(p.batchFor(0x63) == 1);
+  int medium = 0, slow = 0;
+  for (int k = 0; k < 6; k++) {
+    for (const auto& b : s.cycle(p, 1, {}, 0)) {
+      if (p.reads[b[0]].module != 0x63) continue;
+      CHECK(b.size() == 1);
+      (p.reads[b[0]].tier == MEDIUM ? medium : slow)++;
+    }
+  }
+  CHECK(medium == 3 && slow == 3);
 }
 
 static void test_split_reply() {
@@ -405,6 +477,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"plan_batches", test_plan_batches},
   {"plan_rests_failing_reads", test_plan_rests_failing_reads},
   {"scheduler", test_scheduler},
+  {"scheduler_async", test_scheduler_async},
   {"split_reply", test_split_reply},
   {"clock_and_names", test_clock_and_names},
   {"value_cells", test_value_cells},

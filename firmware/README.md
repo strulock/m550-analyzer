@@ -9,7 +9,7 @@ the Windows build.
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
 | `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, CSV layout and SHA-256. No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
-| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer) |
+| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
 | `logger/` | The logger: logs the car to the SD card, uploads each drive to the cloud Worker |
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
@@ -67,20 +67,35 @@ reports with the board's own, and only then deletes them. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).
 
 Each cycle sends one request to every module that has fast or medium reads
-(and to one slow-only module, in turn), all in flight together, both DMEs
-side by side on their own connections. A module's request carries all its
-fast identifiers, then the next medium and slow ones in rotation, up to 24
-identifiers; medium takes at most half of what's left so slow keeps moving.
-A module that can't take that many (refuses, times out or answers out of
-line) halves its batch, down to one; an identifier that keeps failing is
-rested for a minute. If the gateway won't take several requests on one
-connection at once, the board falls back to one at a time and notes it.
+(and to slow-only modules in turn), both DMEs side by side on their own
+connections. A module's request carries all its fast identifiers, then the
+next medium and slow ones in rotation, up to 24 identifiers; medium takes
+at most half of what's left so slow keeps moving (at one identifier a
+request they take turns). Only modules with fast channels (the DMEs, the
+gearbox) are waited for: the rest (head unit, body modules), which can take
+most of a second, are sent alongside and their answers collected in
+whichever cycle they come, up to six at once, given up after 3 s.
+
+The module's error code decides what happens to a batch it won't answer:
+
+- too long or badly formed (0x13, 0x14), or an answer out of line: the
+  module's batches halve, down to one, and the halves are asked again;
+- out of range (0x31): one identifier in it is one the module hasn't; the
+  halves are asked again until it's found, and only that one rests (10 min);
+- any other refusal: the batch's identifiers rest for a minute;
+- no answer: counts against the identifiers (three in a row rest them), and
+  two timeouts in a row halve the module's batches.
+
+If the requests waited for keep timing out (three in a row) while sharing a
+connection, the board falls back to one request at a time and notes it.
 
 The log's `note` column records the start, a stats line every minute (rate,
-read time, slow pass, resting reads, smaller batches), batch changes and the
-reset reason. On the bench (bench car with `--delay 30`, a 30 ms answer per
-request; 15 fast, 51 medium and 9,219 slow channels) it logs about 14 rows a
-second with a slow pass every 10 s.
+read time, slow pass, resting and refused reads, requests collected later
+and how many timed out, smaller batches), batch changes, refusals (once a
+minute per module) and the reset reason. On the bench (`--delay 30`, five
+modules answering in 0.5-0.9 s, three bad identifiers and two modules that
+take one identifier a request; 15 fast, 51 medium and 9,219 slow channels)
+it logs 12-16 rows a second with a slow pass every 10-11 s.
 
 From a minute into a drive the board also reads fault memory, one module
 at a time between cycles: every module n63read knows on this car once a
@@ -89,10 +104,10 @@ drive (`lib/logger/faults.h`, kept equal to `core.KNOWN_MODULES` by
 adds rows to `drives/<start>.faults.csv` in n63read's fault-list format (plus
 `time_s`), uploaded with the drive: a row per failed code, or one saying the
 module has none, refused or didn't answer. Codes only; the texts and stored
-details stay with the app and the Worker. A read holds up that cycle's row by
-the module's answer time, and a module that doesn't answer costs 3 s once a
-drive. Status (`s`) and the check-ins give the failed codes in the modules'
-last reads.
+details stay with the app and the Worker. A DME's fault list is waited for
+(milliseconds); any other module's is collected when it comes, like its
+reads, so a module that doesn't answer no longer holds up the log. Status
+(`s`) and the check-ins give the failed codes in the modules' last reads.
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
