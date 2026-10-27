@@ -666,6 +666,29 @@ test("stored logger drives can be worked out again from their files", async () =
   assert.match(nt.start, /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/);
 });
 
+test("firmware: publish a build, the board reads the manifest and the image", async () => {
+  assert.equal((await call("GET", "/api/logger/firmware")).status, 404);
+  const image = new Uint8Array([0xE9, 1, 2, 3, 4, 5]);
+  const put = (version, body = image) => call("PUT",
+    `/api/logger/firmware${version === undefined ? "" : "?version=" + version}`, { body });
+  assert.equal((await put(undefined)).status, 400);                  // no version
+  assert.equal((await put("dev")).status, 400);                      // the unversioned builds' name
+  assert.equal((await put("a b")).status, 400);
+  assert.equal((await put("v1", new Uint8Array([0x00, 1]))).status, 400);   // not an app image
+  const r = await (await put("20261027-0200-abc1234")).json();
+  assert.equal(r.version, "20261027-0200-abc1234");
+  assert.equal(r.size, 6);
+  assert.match(r.sha256, /^[0-9a-f]{64}$/);
+  const m = await (await call("GET", "/api/logger/firmware")).json();
+  assert.deepEqual([m.version, m.sha256, m.size], [r.version, r.sha256, 6]);
+  const bin = await call("GET", "/api/logger/firmware.bin");
+  assert.equal(bin.headers.get("content-length"), "6");
+  assert.deepEqual(new Uint8Array(await bin.arrayBuffer()), image);
+  // The status the page and logger_status read says what's published.
+  assert.equal((await (await call("GET", "/api/logger")).json()).firmware.version, r.version);
+  assert.equal((await call("GET", "/api/logger/firmware.bin", { auth: false })).status, 403);
+});
+
 // --- CSV
 
 test("CSV: quotes, semicolons, a BOM, CRLF", () => {

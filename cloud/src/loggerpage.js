@@ -402,6 +402,13 @@ ${perDrive.toString()}
       if (!has) text += "; running a channel file from before downloads (needs the new firmware)";
       else if (file && has === file.etag) text += "; running the active preset ✓";
       else text += "; running " + has.slice(0, 8) + ", gets the active preset on its next Wi-Fi check";
+      // Firmware: its own, what's published (over-the-air updates), what it's doing about it.
+      if (last.fw) {
+        text += "; firmware " + last.fw;
+        var pub = s.firmware && s.firmware.version;
+        if (last.ota) text += " (" + last.ota + ")";
+        else if (pub && pub !== last.fw && last.fw !== "dev") text += ", " + pub + " published";
+      }
       $("logger").textContent = text;
       renderLive(s, when);
     }).catch(function () { $("logger").textContent = ""; });
