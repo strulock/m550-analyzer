@@ -63,3 +63,19 @@ test("the page carries the estimator", () => {
   assert.match(LOGGER_PAGE, /function estimateRates\(mods, live\)/);
   assert.doesNotMatch(LOGGER_PAGE, /\$\{/);                          // nothing left uninterpolated
 });
+
+// Wrangler bundles with esbuild keeping names, which wraps the functions
+// inside the embedded ones in __name(fn, "name"); the page defines it, or
+// it stops with "__name is not defined" (seen live, 2026-10-27). Here the
+// first script runs with a function wrapped that way, as the bundle has it.
+test("the page's embedded functions run as the bundler leaves them", async () => {
+  const vm = await import("node:vm");
+  const first = LOGGER_PAGE.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const wrapped = first + "\nvar probe = /* @__PURE__ */ __name(function () { return 1; }, \"probe\");";
+  const ctx = { CAR };
+  vm.runInNewContext(wrapped + "\nthis.rows = estimateRates(CAR, { batches: {} }).rowsPerS;" +
+    "\nthis.probe = probe(); this.per = perDrive(\"IKTFS\");", ctx);
+  assert.ok(ctx.rows > 0);
+  assert.equal(ctx.probe, 1);
+  assert.equal(ctx.per, true);
+});
