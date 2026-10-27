@@ -1,7 +1,8 @@
 /**
  * The logger page (GET /logger): the board's last check-in (state, speed,
  * coolant and oil temperature with an overheating warning, the car on a
- * map), each tank of fuel since its fill-up (/api/logger/tanks), and every
+ * map), each tank of fuel since its fill-up (/api/logger/tanks), the full
+ * channel sweep (/api/logger/sweep, sweep.js), and every
  * channel the board can read, filtered to what the car answers, a tier for
  * each, saved as presets. It talks to /api/logger, /api/logger/catalog and
  * /api/logger/presets (logger.js) with the visitor's Access login, and
@@ -131,6 +132,20 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
     <p class="muted" style="font-size:12.5px;margin:8px 0 0">A tank starts when the level is up
     ${FILL_NOTE} between drives, as the trip meter is reset at a fill-up. Miles from the odometer;
     gallons from the engine's fuel flow (else the level's fall).</p>
+  </section>
+
+  <section class="card">
+    <h2>Full channel sweep</h2>
+    <div class="row">
+      <button id="sweepAsk">Sweep on the next drive…</button>
+      <button id="sweepCancel" class="hide">Cancel the sweep</button>
+      <span id="sweepState" class="muted">Loading…</span>
+    </div>
+    <div id="sweepWarn" class="msg hide" style="margin-top:8px"></div>
+    <p class="muted" style="font-size:12.5px;margin:8px 0 0">The logger asks the car for every
+    identifier in the catalog, whether it answered before or not, as the app's Answers &gt; Check car
+    now does (read-only). It starts a minute into the next drive, alongside the fast channels, and
+    a drive that ends first leaves the rest to the next. Whatever answers is logged from then on.</p>
   </section>
 
   <div id="msg" class="msg hide"></div>
@@ -411,7 +426,61 @@ ${perDrive.toString()}
       }
       $("logger").textContent = text;
       renderLive(s, when);
+      renderSweep(s.sweep);
     }).catch(function () { $("logger").textContent = ""; });
+  }
+
+  // The full channel sweep (sweep.js): the one waiting or under way, the last one done.
+  var sweep = null;
+  function moduleNames(list) {
+    return String(list || "").split(" ").filter(Boolean).map(function (m) {
+      var name = cat && cat.modules[m];
+      return name ? name + " (" + m + ")" : m;
+    }).join(", ");
+  }
+  function counted(c) {
+    c = c || {};
+    var parts = [];
+    if (c.ok) parts.push(c.ok.toLocaleString() + " answered");
+    if (c.size) parts.push(c.size.toLocaleString() + " the wrong size");
+    if (c.refused) parts.push(c.refused.toLocaleString() + " refused");
+    if (c["no answer"]) parts.push(c["no answer"].toLocaleString() + " no answer");
+    return parts.join(", ");
+  }
+  function renderSweep(sw) {
+    if (!sw) return;
+    sweep = sw;
+    var p = sw.pending, l = sw.last, text = "", warn = "";
+    if (p) {
+      var of = p.of || 0, next = p.next || 0;
+      if (next && of) {
+        text = "Under way: " + next.toLocaleString() + " of " + of.toLocaleString() + " identifiers (" +
+          Math.floor(next * 100 / of) + "%); it carries on next drive if this one ends first.";
+      } else if (p.seen) {
+        text = "The logger has it: it starts a minute into the next drive.";
+      } else {
+        text = "Asked for " + new Date(p.requested).toLocaleString() + "; the logger picks it up at its next check-in.";
+      }
+      if (counted(p.counts)) text += " So far: " + counted(p.counts) + ".";
+      if (p.silent) warn = "No answer during the sweep from " + moduleNames(p.silent) + ": skipped after 3 identifiers in a row.";
+    } else if (l) {
+      text = "Last full sweep finished " + new Date(l.done).toLocaleString() + (counted(l.counts) ? ": " + counted(l.counts) : "") +
+        (l.newly_ok ? "; " + l.newly_ok.toLocaleString() + " answer now that didn't before" : "") + ".";
+      if (l.silent) warn = "No answer during the last sweep from " + moduleNames(l.silent) + ": skipped after 3 identifiers in a row.";
+    } else {
+      text = "No full sweep yet.";
+    }
+    $("sweepState").textContent = text;
+    $("sweepWarn").textContent = warn;
+    $("sweepWarn").classList.toggle("hide", !warn);
+    $("sweepAsk").classList.toggle("hide", !!p);
+    $("sweepCancel").classList.toggle("hide", !p);
+  }
+  function identifierCount() {
+    if (!items.length) return null;
+    var seen = {};
+    items.forEach(function (it) { seen[it.key] = true; });
+    return Object.keys(seen).length;
   }
 
   // The car from the last check-in. Coolant and oil limits: the N63's
@@ -569,6 +638,27 @@ ${perDrive.toString()}
         .catch(function (e) { say(e.message); });
     });
     $("revert").addEventListener("click", function () { loadPreset(edit.name); render(true); });
+    $("sweepAsk").addEventListener("click", function () {
+      var n = identifierCount();
+      if (!window.confirm("Run a full channel sweep on the next drive?\n\n" +
+          "The logger asks the car for " + (n ? "all " + n.toLocaleString() : "every") +
+          " identifier" + (n === 1 ? "" : "s") + " in the catalog, starting a minute into the drive.\n\n" +
+          "Warning: logging is delayed while the sweep runs. The fast channels keep going at a lower " +
+          "rate, and the other channels wait their turn, for several minutes. A drive that ends " +
+          "first leaves the rest to the next drive.")) return;
+      api("POST", "/api/logger/sweep").then(function (j) {
+        renderSweep({ pending: j.pending, last: sweep && sweep.last });
+        say(j.created ? "Full channel sweep asked for: the logger picks it up at its next check-in and runs it on the next drive."
+          : "A full channel sweep is already waiting for the next drive.", true);
+      }).catch(function (e) { say(e.message); });
+    });
+    $("sweepCancel").addEventListener("click", function () {
+      if (!window.confirm("Cancel the full channel sweep? What it has asked so far stays.")) return;
+      api("DELETE", "/api/logger/sweep").then(function () {
+        renderSweep({ pending: null, last: sweep && sweep.last });
+        say("Full channel sweep cancelled: the logger stops at its next check-in.", true);
+      }).catch(function (e) { say(e.message); });
+    });
     window.addEventListener("beforeunload", function (e) { if (isDirty()) { e.preventDefault(); e.returnValue = ""; } });
   }
 

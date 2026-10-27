@@ -14,6 +14,9 @@
  *   channel catalog, the page at /logger picks each channel's tier in
  *   presets, and the board downloads the active one's channels.csv
  *   (GET /api/logger/channels) when it changes.
+ * - A full channel check (sweep.js), asked for on the page, goes to the
+ *   board in its check-ins' replies; its answers (<drive>.check.csv) go
+ *   into the catalog's.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with read-only tools over that copy: drive_history,
  *   fault_history, trend, list_files, read_log.
@@ -32,6 +35,8 @@ import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerEx
 import { channelFile, ConfigError, getCatalog, getPresets, LOGGER_SCHEMA, putCatalog, putPresets }
   from "./logger.js";
 import { LOGGER_PAGE } from "./loggerpage.js";
+import { beatSweep, cancelSweep, CHECK, checkList, getSweep, ingestCheck, requestSweep }
+  from "./sweep.js";
 import { tanks } from "./tanks.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
@@ -945,10 +950,12 @@ async function loggerStatus(env, hours, now = new Date()) {
      FROM heartbeats WHERE received >= ? GROUP BY boot ORDER BY first, boot`).bind(since).all())
     .results || [];
   const firmware = await firmwareManifest(env);
-  if (!last || !last.length) return { online: false, last: null, sessions, firmware };
+  const sweep = await getSweep(env);
+  if (!last || !last.length) return { online: false, last: null, sessions, firmware, sweep };
   const age = Math.round((now.getTime() - Date.parse(last[0].received)) / 1000);
   return { online: age <= ONLINE_S, seen_s_ago: age,
-    last: { received: last[0].received, ...JSON.parse(last[0].data) }, sessions, firmware };
+    last: { received: last[0].received, ...JSON.parse(last[0].data) }, sessions, firmware,
+    sweep };
 }
 
 // ------------------------------------------------------------------ firmware
@@ -1251,6 +1258,18 @@ async function loggerConfig(request, env, url) {
       return json({ ...presets, file: file && { preset: file.preset, etag: file.etag,
         counts: file.counts } });
     }
+    if (path === "sweep") {
+      await ensureSchema(env);
+      if (method === "GET") return json(await getSweep(env));
+      if (method === "POST") return json({ ok: true, ...(await requestSweep(env)) });
+      if (method === "DELETE") return json({ ok: true, ...(await cancelSweep(env)) });
+    }
+    if (path === "check-list" && method === "GET") {
+      const catalog = await getCatalog(env);
+      if (!catalog) return json({ error: "no catalog yet" }, 404);
+      return new Response(checkList(catalog), { headers: { "content-type": "text/csv",
+        "cache-control": "no-store" } });
+    }
     if (path === "channels" && method === "GET") {
       await ensureSchema(env);
       const file = await channelFile(env);
@@ -1368,7 +1387,8 @@ export async function handle(request, env, fetcher = fetch) {
       return json({ error: "body: JSON {boot, event, ...}" }, 400);
     }
     try {
-      return json({ ok: true, ...(await putBeat(env, body)) });
+      const stored = await putBeat(env, body);
+      return json({ ok: true, ...stored, ...(await beatSweep(env, body)) });
     } catch (e) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
@@ -1463,6 +1483,10 @@ export async function handle(request, env, fetcher = fetch) {
       try {
         if (key.endsWith(FAULTS)) {
           return json({ ...stored, ...(await ingestFaults(env, key,
+            new TextDecoder().decode(data))) });
+        }
+        if (key.endsWith(CHECK)) {
+          return json({ ...stored, ...(await ingestCheck(env, key,
             new TextDecoder().decode(data))) });
         }
         return json({ ...stored, ...(await ingestLog(env, key, new Uint8Array(data))) });

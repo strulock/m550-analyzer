@@ -59,6 +59,7 @@
 #include <string>
 #include <vector>
 
+#include "carcheck.h"
 #include "carclock.h"
 #include "channels.h"
 #include "csvlog.h"
@@ -642,6 +643,9 @@ static void recoverDrives() {
 static void resetRequests();
 static uint32_t duePeriodic();
 static void sweepRow(double secs);
+static void checkStart();
+static void checkEnd();
+static bool checkRunning();
 
 static void startDrive() {
   // With Wi-Fi up already, give the clock a moment; otherwise it fills in
@@ -687,7 +691,10 @@ static void startDrive() {
            !timeKnown() ? "; clock unknown" : clockFromCar ? "; clock from the car" : "");
   addNote(start);
   otaKeep("reached the car");
+  checkStart();
   dueTiers = duePeriodic();
+  // A full channel check reads every periodic tier too, due or not.
+  if (checkRunning()) dueTiers |= (1u << DRIVE) | (1u << DAILY) | (1u << WEEKLY) | (1u << MONTHLY);
   onceRowAt = 0;
   scheduler.build(plan, dueTiers);
   if (scheduler.onceCount()) {
@@ -709,6 +716,7 @@ static void startDrive() {
 }
 
 static void endDrive(const char* why) {
+  checkEnd();
   if (fastFile.open && !fastLayout.columns.empty()) {
     addNote(std::string("end: ") + why);
     fastFile.add(fastLayout.row(table, (millis() - driveStartMs) / 1000.0, clockNow(), values,
@@ -867,8 +875,9 @@ struct Pending {
   uint8_t target;
   uint8_t req[1 + 2 * MAX_BATCH];
   size_t n;
-  std::vector<size_t> batch;                      // empty: a fault read
+  std::vector<size_t> batch;                      // empty: a fault read or a check read
   uint32_t sentMs;
+  bool check = false;                             // a full channel check's read
 };
 static std::vector<Pending> pendingReqs;
 static float answerMs[256];                       // per module, collected-later answers, averaged
@@ -884,8 +893,10 @@ static bool waitingOn(uint8_t module) {
 }
 
 static void faultAnswer(uint8_t m, const hsfz::Reply& r);
+static void checkAnswer(const hsfz::Reply& r);
 
-static bool sendLater(uint8_t module, const uint8_t* req, size_t n, const std::vector<size_t>& batch) {
+static bool sendLater(uint8_t module, const uint8_t* req, size_t n, const std::vector<size_t>& batch,
+                      bool check = false) {
   hsfz::Client* cl = clientFor(module);
   if (!cl) return false;
   Pending p;
@@ -895,6 +906,7 @@ static bool sendLater(uint8_t module, const uint8_t* req, size_t n, const std::v
   p.n = n;
   p.batch = batch;
   p.sentMs = millis();
+  p.check = check;
   hsfz::Reply r;
   if (!cl->start(module, p.req, n, r)) {
     if (r.result == hsfz::CLOSED) connectionLost = true;
@@ -934,7 +946,8 @@ static void collect() {
     }
     Pending got = p;
     pendingReqs.erase(pendingReqs.begin() + k);
-    if (got.batch.empty()) faultAnswer(got.target, r);
+    if (got.check) checkAnswer(r);
+    else if (got.batch.empty()) faultAnswer(got.target, r);
     else process(got.batch, r);
   }
 }
@@ -1227,6 +1240,239 @@ static void faultAnswer(uint8_t m, const hsfz::Reply& r) {
   faultsNow = sum;
 }
 
+// ---- full channel check -----------------------------------------------------
+// lib/logger/carcheck.h. The Worker asks for one in a check-in's reply
+// ("sweep": its id, set from the logger page); the upload task (core 0)
+// keeps the request and downloads the list to the card (CHECK_LIST), and
+// the next drive asks the list from a minute in, a few identifiers a cycle
+// beside the fast reads (none in a burst), one collected later at a time
+// for a module the fast reads don't wait on. Its place is kept, so a drive
+// that ends first leaves the rest to the next. Keys in "logger": chkid (the
+// request), chklist (the id the card's list is for), chknext (where it got
+// to), chksilent (modules skipped), chkdone (finished, until the Worker
+// has it).
+static const char* CHECK_LIST = "/check.csv";
+static const char* CHECK_DOWNLOAD = "/check.dl";
+static const size_t CHECK_PER_CYCLE = 3;          // waited for (the DMEs) a cycle
+static const uint32_t CHECK_SAVE_EVERY = 25;      // answers between saves of the place
+static const uint32_t CHECK_LIST_RETRY_MS = 60000;
+static std::string checkWanted, checkDone, checkSilentText;   // under tagLock
+static std::atomic<bool> checkListReady{false};  // the card's list is the request's
+static std::atomic<bool> checkCancel{false};     // the request went (core 0 says)
+static std::atomic<uint32_t> checkNextNow{0}, checkTotal{0};  // for the check-ins
+// This drive's:
+static std::vector<CheckItem> checkItems;
+static std::string checkId;                      // "": none this drive
+static uint32_t checkNext = 0, checkSaved = 0, checkAsked = 0;
+static bool checkInFlight = false;
+static CheckSilence checkSilence;
+static DriveFile checkFile;
+
+static bool checkRunning() { return !checkId.empty(); }
+
+// At power-on: a request kept from before, and whether its list is on the card.
+static void checkBoot() {
+  Preferences prefs;
+  prefs.begin("logger", true);
+  std::string id = prefs.getString("chkid", "").c_str();
+  std::string list = prefs.getString("chklist", "").c_str();
+  std::string done = prefs.getString("chkdone", "").c_str();
+  std::string silent = prefs.getString("chksilent", "").c_str();
+  prefs.end();
+  checkListReady = !id.empty() && list == id && sdOk && SD.exists(CHECK_LIST);
+  std::lock_guard<std::mutex> g(tagLock);
+  checkWanted = id;
+  checkDone = done;
+  checkSilentText = silent;
+}
+
+// The modules skipped so far in this request, the earlier drives' with this one's.
+static std::string checkSilentAll() {
+  std::string all;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    all = checkSilentText;
+  }
+  std::string now = checkSilence.list();
+  size_t at = 0;
+  while (at < now.size()) {
+    size_t end = now.find(' ', at);
+    if (end == std::string::npos) end = now.size();
+    std::string m = now.substr(at, end - at);
+    if (all.find(m) == std::string::npos) all += (all.empty() ? "" : " ") + m;
+    at = end + 1;
+  }
+  return all;
+}
+
+static void checkSave() {
+  checkFile.flush();
+  if (checkCancel) return;                       // the request went: nothing to keep
+  std::string silent = checkSilentAll();
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.putUInt("chknext", checkNext);
+  prefs.putString("chksilent", silent.c_str());
+  prefs.end();
+  std::lock_guard<std::mutex> g(tagLock);
+  checkSilentText = silent;
+  checkSaved = checkNext;
+}
+
+static void checkStart() {
+  checkItems.clear();
+  checkId.clear();
+  checkInFlight = false;
+  checkSilence.reset();
+  checkCancel = false;
+  std::string want;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    want = checkWanted;
+  }
+  if (want.empty()) return;
+  if (!checkListReady) {
+    addNote("full channel check " + want + " waits for its list (Wi-Fi)");
+    return;
+  }
+  std::string text;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    File f = SD.open(CHECK_LIST);
+    if (f) {
+      text.reserve(f.size());
+      static uint8_t buf[1024];
+      for (int n; (n = f.read(buf, sizeof(buf))) > 0;) text.append((const char*)buf, n);
+      f.close();
+    }
+  }
+  checkItems = parseCheckList(text);
+  if (checkItems.empty()) { addNote("full channel check " + want + ": the list is empty"); return; }
+  Preferences prefs;
+  prefs.begin("logger", true);
+  checkNext = checkSaved = prefs.getUInt("chknext", 0);
+  prefs.end();
+  if (checkNext > checkItems.size()) checkNext = checkSaved = 0;
+  checkId = want;
+  checkAsked = 0;
+  checkNextNow = checkNext;
+  checkTotal = checkItems.size();
+  char note2[128];
+  int n = snprintf(note2, sizeof(note2), "full channel check %s: %u identifiers", checkId.c_str(),
+                   (unsigned)checkItems.size());
+  if (checkNext && n > 0 && (size_t)n < sizeof(note2)) {
+    snprintf(note2 + n, sizeof(note2) - n, " from %u", (unsigned)checkNext);
+  }
+  addNote(note2);
+  out.printf("[check] %s\n", note2);
+}
+
+// Every identifier asked: the file closed, the request done (the Worker
+// hears it in the next check-in).
+static void checkFinish() {
+  checkFile.finish();
+  std::string silent = checkSilentAll();
+  char text[160];
+  snprintf(text, sizeof(text), "full channel check %s done: %u identifiers%s%s", checkId.c_str(),
+           (unsigned)checkItems.size(), silent.empty() ? "" : "; no answer from ",
+           silent.c_str());
+  addNote(text);
+  out.printf("[check] %s\n", text);
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.remove("chkid");
+  prefs.remove("chknext");
+  prefs.putString("chkdone", checkId.c_str());
+  prefs.putString("chksilent", silent.c_str());
+  prefs.end();
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    if (checkWanted == checkId) checkWanted.clear();
+    checkDone = checkId;
+    checkSilentText = silent;
+  }
+  checkId.clear();
+  checkItems.clear();
+}
+
+// The drive ends: where the check got to, for the next.
+static void checkEnd() {
+  if (!checkRunning()) return;
+  checkSave();
+  char text[128];
+  snprintf(text, sizeof(text), "full channel check %s: %u of %u asked; continues next drive",
+           checkId.c_str(), (unsigned)checkNext, (unsigned)checkItems.size());
+  addNote(text);
+  out.printf("[check] %s\n", text);
+  checkFile.finish();
+  checkId.clear();
+  checkItems.clear();
+}
+
+static void checkAnswer(const hsfz::Reply& r) {
+  checkInFlight = false;
+  if (r.result == hsfz::CLOSED) { connectionLost = true; return; }   // asked again next drive
+  if (!checkRunning() || checkNext >= checkItems.size()) return;
+  const CheckItem& it = checkItems[checkNext];
+  // rx: 0x62, the identifier, its data.
+  bool answered = r.result == hsfz::OK && r.len >= 3 && ((rx[1] << 8) | rx[2]) == it.did;
+  size_t dataLen = answered ? r.len - 3 : 0;
+  CheckStatus st = checkStatus(answered, r.result == hsfz::NEGATIVE, dataLen, it);
+  if (st != CHECK_NO_ANSWER) lastOkMs = millis();
+  if (!checkFile.open) {
+    checkFile.begin(String(DRIVES) + "/" + driveName + ".check.csv", CHECK_HEADER);
+  }
+  checkFile.add(checkRow(it, "logger sweep " + checkId, st, r.nrc, dataLen));
+  checkNext++;
+  checkAsked++;
+  checkNextNow = checkNext;
+  if (checkSilence.answer(it.module, st)) {
+    char text[96];
+    snprintf(text, sizeof(text), "full channel check: module 0x%02X didn't answer %u in a row; "
+             "skipped", it.module, (unsigned)CHECK_SILENT_TO_SKIP);
+    addNote(text);
+    out.printf("[check] %s\n", text);
+  }
+  if (checkNext - checkSaved >= CHECK_SAVE_EVERY) checkSave();
+}
+
+// Between cycles: the next few identifiers of the check.
+static void readCheck() {
+  if (checkCancel.exchange(false) && checkRunning()) {
+    addNote("full channel check " + checkId + " cancelled");
+    checkFile.finish();
+    checkId.clear();
+    checkItems.clear();
+  }
+  if (!checkRunning() || connectionLost || burst.on() || checkInFlight) return;
+  if (millis() - driveStartMs < ONCE_AFTER_MS) return;
+  for (size_t asked = 0; asked < CHECK_PER_CYCLE && !connectionLost && !checkInFlight;) {
+    if (checkNext >= checkItems.size()) { checkFinish(); return; }
+    const CheckItem& it = checkItems[checkNext];
+    if (checkSilence.skipped(it.module)) {               // no row, as the app's check
+      checkNext++;
+      checkNextNow = checkNext;
+      continue;
+    }
+    if (waitingOn(it.module) || faultWanted == it.module) return;
+    hsfz::Client* cl = clientFor(it.module);
+    uint8_t req[3] = {0x22, (uint8_t)(it.did >> 8), (uint8_t)it.did};
+    if (!cl) {                                        // bank 2's connection was refused
+      checkAnswer(hsfz::Reply());
+      asked++;
+      continue;
+    }
+    if (fallback.sameConnection() && !scheduler.waits(it.module)) {
+      if (pendingReqs.size() >= MAX_LATER) return;
+      if (sendLater(it.module, req, sizeof(req), {}, true)) checkInFlight = true;
+      else if (!connectionLost) checkAnswer(hsfz::Reply());
+      return;
+    }
+    checkAnswer(cl->request(it.module, req, sizeof(req), rx, sizeof(rx), REQUEST_MS));
+    asked++;
+  }
+}
+
 // ---- uploads (core 0) --------------------------------------------------------
 static volatile bool uploadNow = false;
 static std::atomic<uint32_t> uploadedFiles{0};
@@ -1457,6 +1703,13 @@ static std::string beatJson(bool boot, bool buffered = false) {
     std::lock_guard<std::mutex> g(tagLock);
     jsonText(j, "channels", channelsTag.c_str());
     if (!otaStatus.empty()) jsonText(j, "ota", otaStatus.c_str());
+    if (!checkWanted.empty()) {
+      jsonText(j, "sweep", checkWanted.c_str());
+      jsonNumber(j, "sweep_next", checkNextNow, 0);
+      jsonNumber(j, "sweep_of", checkTotal ? (double)checkTotal : NAN, 0);
+    }
+    if (!checkDone.empty()) jsonText(j, "sweep_done", checkDone.c_str());
+    if (!checkSilentText.empty()) jsonText(j, "sweep_silent", checkSilentText.c_str());
     if (!liveBatches.empty()) jsonText(j, "batches", liveBatches.c_str());
     if (!liveAnswers.empty()) jsonText(j, "answer_ms", liveAnswers.c_str());
     jsonNumber(j, "slow_pass_s", liveSlowPassS, 0);
@@ -1465,7 +1718,8 @@ static std::string beatJson(bool boot, bool buffered = false) {
   return j + "}";
 }
 
-static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat") {
+static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat",
+                    std::string* reply = nullptr) {
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
   HTTPClient http;
@@ -1478,6 +1732,7 @@ static int postBeat(const std::string& body, const char* path = "/api/logger/hea
 #endif
   http.addHeader("Content-Type", "application/json");
   int code = http.POST((uint8_t*)body.data(), body.size());
+  if (reply && code == 200) *reply = http.getString().c_str();
   http.end();
   return code;
 }
@@ -1538,6 +1793,43 @@ static void sendKeptBeats() {
   }
 }
 
+// A check-in's reply: the full channel check the Worker wants ("sweep": its
+// id, or none). A new one is kept and its list fetched; none while one is
+// kept is a cancel; none once one has finished is the Worker having it.
+static void checkReply(const std::string& body) {
+  std::string want;
+  if (!jsonField(body, "sweep", want) || want == "null") want.clear();
+  for (char c : want) {
+    if (!isalnum((unsigned char)c) && c != '-' && c != '_' && c != '.') return;
+  }
+  if (want.size() > 40) return;
+  std::lock_guard<std::mutex> g(tagLock);
+  Preferences prefs;
+  prefs.begin("logger");
+  if (!checkDone.empty() && want != checkDone) {
+    prefs.remove("chkdone");
+    prefs.remove("chksilent");
+    checkDone.clear();
+    checkSilentText.clear();
+  }
+  if (want != checkWanted && want != checkDone) {
+    prefs.remove("chknext");
+    prefs.remove("chksilent");
+    checkSilentText.clear();
+    if (!checkWanted.empty()) checkCancel = true;
+    if (want.empty()) {
+      prefs.remove("chkid");
+      out.printf("[check] full channel check %s cancelled\n", checkWanted.c_str());
+    } else {
+      prefs.putString("chkid", want.c_str());
+      out.printf("[check] full channel check %s asked for: on the next drive\n", want.c_str());
+    }
+    checkWanted = want;
+    checkListReady = false;
+  }
+  prefs.end();
+}
+
 static void beatIfDue() {
   static uint32_t last = 0;
   static bool tried = false, booted = false, failing = false;
@@ -1549,9 +1841,11 @@ static void beatIfDue() {
   tried = true;
   last = millis();
   if (!WiFi.isConnected()) { keepBeat(); return; }
-  int code = postBeat(beatJson(!booted));
+  std::string reply;
+  int code = postBeat(beatJson(!booted), "/api/logger/heartbeat", &reply);
   if (code == 200) {
     beatsSent++;
+    checkReply(reply);
     otaKeep("checked in");
     if (!booted) out.printf("[beat] checked in (boot %u)\n", (unsigned)bootCount);
     else if (failing) out.println("[beat] checking in again");
@@ -1905,6 +2199,54 @@ static void otaCheckIfDue() {
              m.version.c_str());
 }
 
+// The full channel check's list, to the card, once a check is asked for.
+static void checkListIfDue() {
+  static uint32_t last = 0;
+  static bool tried = false;
+  if (checkListReady || !sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) return;
+  std::string want;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    want = checkWanted;
+  }
+  if (want.empty() || (tried && millis() - last < CHECK_LIST_RETRY_MS)) return;
+  tried = true;
+  last = millis();
+  NetworkClientSecure tls;
+  HTTPClient http;
+  int code = workerGet(http, tls, "/api/logger/check-list");
+  if (code != 200) {
+    out.printf("[check] list: %d %s\n", code, code < 0 ? HTTPClient::errorToString(code).c_str()
+                                                       : http.getString().substring(0, 120).c_str());
+    http.end();
+    return;
+  }
+  int expect = http.getSize();
+  File f;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    f = SD.open(CHECK_DOWNLOAD, FILE_WRITE);
+  }
+  if (!f) { http.end(); return; }
+  int got = http.writeToStream(&f);
+  f.close();
+  http.end();
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  if (got <= 0 || (expect >= 0 && got != expect)) {
+    SD.remove(CHECK_DOWNLOAD);
+    out.printf("[check] list incomplete (%d of %d bytes)\n", got, expect);
+    return;
+  }
+  SD.remove(CHECK_LIST);
+  SD.rename(CHECK_DOWNLOAD, CHECK_LIST);
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.putString("chklist", want.c_str());
+  prefs.end();
+  checkListReady = true;
+  out.printf("[check] list for %s on the card (%d bytes)\n", want.c_str(), got);
+}
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
@@ -1914,6 +2256,7 @@ static void uploadTask(void*) {
     beatIfDue();
     channelsIfDue();
     otaCheckIfDue();
+    checkListIfDue();
     if (!uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     uploadNow = false;
     last = millis();
@@ -2032,6 +2375,19 @@ static void status() {
   }
   out.printf("[status] firmware %s%s%s%s\n", FW_VERSION, ota.empty() ? "" : ": ", ota.c_str(),
              strcmp(FW_VERSION, "dev") ? "" : " (an IDE build: takes no updates)");
+  std::string want, done;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    want = checkWanted;
+    done = checkDone;
+  }
+  if (!want.empty()) {
+    out.printf("[status] full channel check %s: %s, %u of %u asked\n", want.c_str(),
+               checkListReady ? "list on the card" : "list not downloaded yet",
+               (unsigned)checkNextNow, (unsigned)checkTotal);
+  } else if (!done.empty()) {
+    out.printf("[status] full channel check %s done; the Worker hasn't heard yet\n", done.c_str());
+  }
 }
 
 static void listPending() {
@@ -2227,6 +2583,7 @@ void setup() {
   }
   otaBoot();
   if (otaReady) otaInstall();                // a new build on the card: in before the car
+  checkBoot();
   loadChannels();
   startWifi();
   xTaskCreatePinnedToCore(uploadTask, "upload", 12288, nullptr, 1, nullptr, 0);
@@ -2279,6 +2636,7 @@ void loop() {
     case LOGGING:
       cycle();
       readFaults();
+      readCheck();
       if (endRequested) { endDrive("ended from the terminal"); state = SEARCH; }
       else if (connectionLost) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }
