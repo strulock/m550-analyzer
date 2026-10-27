@@ -19,5 +19,8 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "n63read", "database_id": "<your D1 database id>" }
   ],
+  // The car's time zone: a drive log without a clock is dated in it, as the
+  // logs' own clocks are (default America/Chicago).
+  "vars": { "TIME_ZONE": "America/Chicago" },
   "observability": { "enabled": true }
 }

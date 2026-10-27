@@ -7,8 +7,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { buildSeries, CHUNK, clockEpoch, isDriveLog, processLog, pyRound, readColumns }
-  from "../src/drive.js";
+import { buildSeries, CHUNK, clockEpoch, isDriveLog, localStamp, loggerExtras, processLog, pyRound,
+  readColumns, readLog } from "../src/drive.js";
 
 const parity = new URL("./parity/", import.meta.url);
 const expected = JSON.parse(readFileSync(new URL("expected.json", parity), "utf8"));
@@ -55,7 +55,30 @@ test("a log without a Clock ends at the upload and is marked approximate", () =>
   assert.equal(series.start, 990);
   assert.equal(chunksOf(series)[0].t0, 990);
   assert.deepEqual(JSON.parse(chunksOf(series)[0].json)[0], [0, 700]);
-  assert.equal(drive.start, "1970-01-01 00:16:30");
+  // The start in the car's time zone, as the logs' own clocks give it.
+  assert.equal(drive.start, "1969-12-31 18:16:30");
+  const utc = processLog("Time,INMOT\n0,700\n1,710\n2,720\n3,730\n4,740\n10,750\n",
+    "logger/x.csv", 1000, "UTC");
+  assert.equal(utc.drive.start, "1970-01-01 00:16:30");
+});
+
+test("local stamps follow daylight saving", () => {
+  assert.equal(localStamp(Date.UTC(2026, 9, 26, 1, 35) / 1000), "2026-10-25 20:35:00");   // CDT
+  assert.equal(localStamp(Date.UTC(2026, 11, 1, 1, 35) / 1000), "2026-11-30 19:35:00");   // CST
+});
+
+test("logger extras: the tank level and odometer at each end, and whether the start is known", () => {
+  // The level in the first and last minute (medians: the sender sloshes),
+  // the odometer from a sweep file's first and last row.
+  const fast = "Time,Clock,IKTFS\n" + [0, 20, 40, 60, 600, 620, 640, 660].map((t, k) =>
+    `${t},2026-10-26 08:00:00.000-05:00,${[40, 41, 40, 39, 30, 31, 30, 30][k]}`).join("\n") + "\n";
+  const sweep = "Time,Clock,EGS_KILOMETERSTAND\n0,,111650\n300,,111655\n650,,111660\n";
+  const x = loggerExtras([readLog(fast), readLog(sweep)]);
+  assert.deepEqual(x, { start_approx: false, tank_start_l: 40, tank_end_l: 30,
+    odometer_start_km: 111650, odometer_end_km: 111660 });
+  const none = loggerExtras(readLog("Time,INMOT\n0,700\n1,710\n"));
+  assert.deepEqual(none, { start_approx: true, tank_start_l: null, tank_end_l: null,
+    odometer_start_km: null, odometer_end_km: null });
 });
 
 test("a clock that fills in later dates the drive from its first row", () => {

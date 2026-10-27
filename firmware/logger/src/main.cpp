@@ -10,10 +10,13 @@
 //      in, each module's fault list in turn, and the DMEs' every three
 //      minutes, to drives/<start>.faults.csv. Only modules with fast
 //      channels are waited for each cycle; the others' answers are
-//      collected when they come.
+//      collected when they come. Under full throttle or high boost, a burst:
+//      the fast tier alone for up to 10 s. Without the time from the
+//      internet, the car's own clock dates the drive.
 //   3. Meanwhile, on the other core: whenever Wi-Fi is up, upload finished
 //      files, compare the SHA-256 the Worker reports with the board's own,
-//      and delete a file only when they match.
+//      and delete a file only when they match; check in every 10 s (kept on
+//      the card while there's no Wi-Fi, and sent when there is).
 //
 // What to read comes from channels.csv on the card (n63read logger-channels),
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
@@ -40,6 +43,7 @@
 #include <WiFi.h>
 #include <errno.h>
 #include <esp_heap_caps.h>
+#include <esp_sntp.h>
 #include <lwip/sockets.h>
 #include <sys/time.h>
 #include <time.h>
@@ -50,6 +54,7 @@
 #include <string>
 #include <vector>
 
+#include "carclock.h"
 #include "channels.h"
 #include "csvlog.h"
 #include "faults.h"
@@ -202,6 +207,7 @@ static bool channelsFromCard = false;
 // before downloads) or "built-in". The upload task reads it.
 static std::mutex tagLock;
 static std::string channelsTag = "built-in";
+static std::string channelsPreset;           // the preset's name, for a downloaded file
 // From the last stats note, for the check-ins (the logger channel page's rate
 // estimates): the smaller batch sizes ("0x12:6 0x18:1"), each collected-later
 // module's answer time ("0x63:260"), the slow pass and the reads per cycle.
@@ -212,37 +218,51 @@ static std::atomic<bool> channelsDownloaded{false};   // a new file is on the ca
 
 // The few values the check-ins report, kept by the logging core as they are
 // read (the sweep's too) and read by the upload task. The first name the
-// table has wins: the DME's speed, else the head unit's GPS speed.
-enum Live { SPEED, RPM, BATTERY, LIVE_N };
+// table has wins: the DME's speed, else the head unit's GPS speed. Doubles:
+// a float's 24 bits put a coordinate a metre or two out.
+enum Live { SPEED, RPM, BATTERY, COOLANT, OIL, LAT, LON, LIVE_N };
 static const char* const LIVE_NAMES[LIVE_N][2] = {
     {"FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "HU_STATUS_SPEED.GPS_SPEED"},
     {"INMOT", nullptr},
     {"IUIBS", nullptr},                      // mV
+    {"ITKUA", nullptr},                      // °C
+    {"ITOEL", nullptr},                      // °C
+    {"HU_STATUS_GPS_POSITION.LATITUDE", nullptr},
+    {"HU_STATUS_GPS_POSITION.LONGITUDE", nullptr},
 };
-static int liveCh[LIVE_N] = {-1, -1, -1};
-static std::atomic<float> liveValue[LIVE_N];
+static int liveCh[LIVE_N];
+static std::atomic<double> liveValue[LIVE_N];
 static std::atomic<uint32_t> liveAt[LIVE_N];
 static const uint32_t LIVE_FRESH_MS = 30000;  // older: not reported
+// What starts a burst (lib/logger/plan.h): the pedal and the boost.
+static int pedalCh = -1, boostCh = -1;
+
+static int channelNamed(const char* want) {
+  for (size_t i = 0; i < table.channels.size(); i++) {
+    if (!strcmp(table.name(table.channels[i]), want)) return (int)i;
+  }
+  return -1;
+}
 
 static void findLive() {
   for (int k = 0; k < LIVE_N; k++) {
     liveCh[k] = -1;
     liveAt[k] = 0;
     for (const char* want : LIVE_NAMES[k]) {
-      for (size_t i = 0; want && liveCh[k] < 0 && i < table.channels.size(); i++) {
-        if (!strcmp(table.name(table.channels[i]), want)) liveCh[k] = (int)i;
-      }
+      if (want && liveCh[k] < 0) liveCh[k] = channelNamed(want);
     }
   }
+  pedalCh = channelNamed("BUS_FAHRPEDALWERT");
+  boostCh = channelNamed("IPLAD");
 }
 
 static void noteLive(uint32_t ch, double v, uint32_t now) {
   for (int k = 0; k < LIVE_N; k++) {
-    if (liveCh[k] == (int)ch) { liveValue[k] = (float)v; liveAt[k] = now ? now : 1; }
+    if (liveCh[k] == (int)ch) { liveValue[k] = v; liveAt[k] = now ? now : 1; }
   }
 }
 
-static float live(Live k) {
+static double live(Live k) {
   uint32_t at = liveAt[k];
   return at && millis() - at < LIVE_FRESH_MS ? liveValue[k].load() : NAN;
 }
@@ -298,16 +318,18 @@ static void loadChannelsInto() {
   }
   plan.build(table);
   findLive();
-  std::string tag = "built-in";
+  std::string tag = "built-in", preset;
   if (channelsFromCard) {
     Preferences prefs;
     prefs.begin("logger", true);
     tag = prefs.isKey("chsrc") ? prefs.getString("chsrc").c_str() : "card";
+    if (prefs.isKey("chname")) preset = prefs.getString("chname").c_str();
     prefs.end();
   }
   {
     std::lock_guard<std::mutex> g(tagLock);
     channelsTag = tag;
+    channelsPreset = preset;
   }
   out.printf("[chan] %u channels (%u fast, %u medium, %u slow, %u periodic) in %u reads, from %s "
              "(%s)%s\n",
@@ -433,6 +455,37 @@ static bool needBank2() {
   return false;
 }
 
+// The time from the car's clock (lib/logger/carclock.h), when the internet
+// hasn't given it: a drive that starts away from Wi-Fi is then still named
+// and dated by the time. The car's clock is local time and to the second;
+// the internet's replaces it whenever Wi-Fi comes up.
+static volatile bool clockFromCar = false;   // until the internet's (setup)
+
+static void setClockFromCar() {
+  const uint8_t req[] = {0x22, CLOCK_DID >> 8, CLOCK_DID & 0xFF};
+  hsfz::Reply r = mainClient->request(CLOCK_MODULE, req, sizeof(req), rx, sizeof(rx), REQUEST_MS);
+  CarTime t;
+  if (r.result != hsfz::OK || r.len < 3 || rx[0] != 0x62 || rx[1] != req[1] || rx[2] != req[2] ||
+      !carClock(rx + 3, r.len - 3, t)) {
+    out.printf("[time] the car's clock didn't answer (%d); the drive starts without the time\n",
+               (int)r.result);
+    return;
+  }
+  struct tm lt = {};
+  lt.tm_year = t.year - 1900;
+  lt.tm_mon = t.month - 1;
+  lt.tm_mday = t.day;
+  lt.tm_hour = t.hour;
+  lt.tm_min = t.minute;
+  lt.tm_sec = t.second;
+  lt.tm_isdst = -1;                          // the time zone (TZ_INFO) says
+  struct timeval tv = {mktime(&lt), 0};
+  if (timeKnown()) return;                   // the internet's came in meanwhile
+  settimeofday(&tv, nullptr);
+  clockFromCar = true;
+  out.printf("[time] from the car's clock: %s\n", clockNow().c_str());
+}
+
 // ---- a drive's files ---------------------------------------------------------
 struct DriveFile {
   File f;
@@ -495,6 +548,7 @@ static uint32_t sweepPassMs = 0, sweepPassStart = 0;
 static uint32_t dueTiers = 0;               // this drive's periodic tiers that are due, a bit each
 static uint32_t onceRowAt = 0;              // ms: the periodic reads' sweep row then (0: none)
 static Scheduler scheduler;                 // this drive's rotation through the tiers
+static Burst burst;                         // full throttle or high boost: the fast tier alone
 static std::vector<double> values;
 static LogFile fastLayout, sweepLayout;
 
@@ -579,6 +633,7 @@ static void startDrive() {
   // With Wi-Fi up already, give the clock a moment; otherwise it fills in
   // the Clock column once Wi-Fi joins.
   for (int i = 0; i < 20 && WiFi.isConnected() && !timeKnown(); i++) delay(100);
+  if (!timeKnown()) setClockFromCar();
   static uint32_t seq = 0;
   char base[40];
   if (timeKnown()) {
@@ -598,11 +653,23 @@ static void startDrive() {
   }
   driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = lastStatsNoteMs = millis();
   fastRows = sweepRows = cycles = 0;
+  burst.reset();
   note.clear();
-  char start[160];
-  snprintf(start, sizeof(start), "start VIN %s; boot %u after %s; up %.1f s; %u channels from %s",
+  // Which channel file, so the analysis knows what was meant to be logged:
+  // the preset and its ETag, "manual" (sent over the terminal), "card" or
+  // the built-in table.
+  std::string from = "the built-in table";
+  if (channelsFromCard) {
+    std::lock_guard<std::mutex> g(tagLock);
+    from = channelsPreset.empty() ? channelsTag : "preset " + channelsPreset + " " + channelsTag;
+  }
+  std::replace(from.begin(), from.end(), ',', ' ');       // the note is a CSV cell
+  std::replace(from.begin(), from.end(), ';', ' ');
+  char start[256];
+  snprintf(start, sizeof(start), "start VIN %s; boot %u after %s; up %.1f s; %u channels from %s%s",
            vin, (unsigned)bootCount, resetReason(), millis() / 1000.0f,
-           (unsigned)table.channels.size(), channelsFromCard ? "the card" : "the built-in table");
+           (unsigned)table.channels.size(), from.c_str(),
+           !timeKnown() ? "; clock unknown" : clockFromCar ? "; clock from the car" : "");
   addNote(start);
   dueTiers = duePeriodic();
   onceRowAt = 0;
@@ -972,6 +1039,16 @@ static void sweepRow(double secs) {
 // and collected when they come.
 static void cycle() {
   const uint32_t start = millis();
+  // A burst (lib/logger/plan.h) from the last cycle's pedal and boost.
+  const float pedal = pedalCh >= 0 ? values[pedalCh] : NAN;
+  const float boost = boostCh >= 0 ? values[boostCh] : NAN;
+  Burst::Change bc = burst.update(start, pedal, boost);
+  if (bc != Burst::NONE) {
+    char text[64];
+    if (bc == Burst::STARTED) snprintf(text, sizeof(text), "burst (pedal %.0f%% boost %.0f hPa)", pedal, boost);
+    else snprintf(text, sizeof(text), "burst over");
+    addNote(text);
+  }
   for (uint32_t i : fastLayout.columns) values[i] = NAN;     // fast and medium cells
   if (millis() - driveStartMs >= ONCE_AFTER_MS) scheduler.openOnce();
   collect();
@@ -983,7 +1060,8 @@ static void cycle() {
     slowOnly = pendingReqs.size() >= MAX_LATER ? 0 : MAX_LATER - pendingReqs.size();
     if (slowOnly > SLOW_ONLY_PER_CYCLE) slowOnly = SLOW_ONLY_PER_CYCLE;
   }
-  std::vector<std::vector<size_t>> requests = scheduler.cycle(plan, millis(), busy, slowOnly);
+  std::vector<std::vector<size_t>> requests =
+      scheduler.cycle(plan, millis(), busy, slowOnly, burst.on());
   std::vector<const std::vector<size_t>*> waited;
   for (const std::vector<size_t>& b : requests) {
     if (!sameConnection || scheduler.waits(moduleOf(b))) waited.push_back(&b);
@@ -1008,14 +1086,16 @@ static void cycle() {
           smallerList += m;
         }
       }
-      char text[260];
+      char text[300];
       snprintf(text, sizeof(text),
                "stats %.1f rows/s; reads %.0f ms; files %.0f ms; slow pass %.0f s; %u resting "
-               "(%u refused); collected later %u (%u timed out); %s; smaller batches: %s",
+               "(%u refused); collected later %u (%u timed out); %s; smaller batches: %s; "
+               "bursts %u (%.0f s)",
                cycleRate, msFast, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
                (unsigned)refusedReads, (unsigned)laterSent, (unsigned)laterTimeouts,
                sameConnection ? "overlapping requests" : "one request at a time per connection",
-               smallerList.empty() ? "none" : smallerList.c_str());
+               smallerList.empty() ? "none" : smallerList.c_str(), (unsigned)burst.count(),
+               burst.ms() / 1000.0f);
       addNote(text);
       laterSent = laterTimeouts = 0;
       std::string answers;
@@ -1079,7 +1159,7 @@ static uint16_t failedBy[256];               // failed codes per module, last re
 static std::atomic<int> faultsNow{-1};       // their sum; -1 until the first read
 
 static void readFaults() {
-  if (connectionLost) return;
+  if (connectionLost || burst.on()) return;
   if (faultWanted < 0) faultWanted = faultScan.next(millis());
   if (faultWanted < 0 || waitingOn((uint8_t)faultWanted)) return;
   const int m = faultWanted;
@@ -1276,9 +1356,17 @@ static void keepWifi() {
 // A small JSON report to the Worker (POST /api/logger/heartbeat) once at
 // power-on and every 10 s while Wi-Fi is up, so the cloud knows the board is
 // on, and what it's doing, between uploads. One that fails is skipped; a
-// long upload delays them.
+// long upload delays them. With no Wi-Fi (and the time known), each is kept
+// on the card instead (BEATS_FILE, "buffered": true) and sent at the next
+// connection, in batches (POST /api/logger/heartbeats), which the Worker
+// files under the time each was made.
 static const uint32_t BEAT_MS = 10000;
 static std::atomic<uint32_t> beatsSent{0};
+static const char* BEATS_FILE = "/beats.jsonl";
+static const uint32_t BEATS_MAX_BYTES = 3000000;   // about 12 hours offline; later ones dropped
+static const size_t BEATS_BATCH_BYTES = 48000;      // a request (the Worker takes 64 KB)
+static const int BEATS_BATCHES_PER_TURN = 4;        // then the drive uploads get a turn
+static uint32_t beatsKept = 0;
 
 static void jsonText(std::string& j, const char* key, const char* v) {
   j += ",\"";
@@ -1297,10 +1385,11 @@ static void jsonNumber(std::string& j, const char* key, double v, int decimals) 
   j += s;
 }
 
-static std::string beatJson(bool boot) {
+static std::string beatJson(bool boot, bool buffered = false) {
   static const char* const states[] = {"waiting for link", "searching", "logging"};
   std::string j = "{\"boot\":" + std::to_string(bootCount);
   jsonText(j, "event", boot ? "boot" : "beat");
+  if (buffered) j += ",\"buffered\":true";
   jsonText(j, "reset", resetReason());
   jsonNumber(j, "up_s", millis() / 1000.0, 0);
   State s = state;
@@ -1313,6 +1402,12 @@ static std::string beatJson(bool boot) {
   jsonNumber(j, "speed_kmh", live(SPEED), 1);
   jsonNumber(j, "rpm", live(RPM), 0);
   jsonNumber(j, "battery_v", live(BATTERY) / 1000.0, 2);
+  jsonNumber(j, "coolant_c", live(COOLANT), 1);
+  jsonNumber(j, "oil_c", live(OIL), 1);
+  double lat = live(LAT), lon = live(LON);
+  if (lat == 0 && lon == 0) lat = lon = NAN;   // the head unit before a fix
+  jsonNumber(j, "lat", lat, 6);
+  jsonNumber(j, "lon", lon, 6);
   int faults = faultsNow;
   jsonNumber(j, "faults", faults < 0 ? NAN : faults, 0);
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
@@ -1336,13 +1431,13 @@ static std::string beatJson(bool boot) {
   return j + "}";
 }
 
-static int postBeat(const std::string& body) {
+static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat") {
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
   HTTPClient http;
   http.setTimeout(8000);
   http.setConnectTimeout(5000);
-  if (!http.begin(tls, String("https://") + WORKER_HOST + "/api/logger/heartbeat")) return -1;
+  if (!http.begin(tls, String("https://") + WORKER_HOST + path)) return -1;
 #ifdef ACCESS_CLIENT_ID
   http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
   http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
@@ -1353,13 +1448,77 @@ static int postBeat(const std::string& body) {
   return code;
 }
 
+// A check-in made with no Wi-Fi, onto the card (only with the time known:
+// the Worker files it under its clock).
+static void keepBeat() {
+  if (!sdOk || !timeKnown()) return;
+  std::string line = beatJson(false, true) + "\n";
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  File f = SD.open(BEATS_FILE, FILE_APPEND);
+  if (!f) return;
+  if (f.size() + line.size() <= BEATS_MAX_BYTES) {
+    f.write((const uint8_t*)line.data(), line.size());
+    beatsKept++;
+  }
+  f.close();
+}
+
+// The kept check-ins, a few batches a turn; the file goes once all are in.
+// `sentTo`: how far this boot got, so a failed batch is tried again from
+// there (a reboot starts over; the Worker skips ones it has).
+static void sendKeptBeats() {
+  static uint32_t sentTo = 0;
+  static uint8_t buf[2048];
+  for (int n = 0; n < BEATS_BATCHES_PER_TURN && WiFi.isConnected(); n++) {
+    std::string body = "{\"beats\":[", line;
+    uint32_t end = sentTo, size = 0;
+    size_t count = 0;
+    {
+      std::lock_guard<std::recursive_mutex> g(sdLock);
+      File f = SD.open(BEATS_FILE);
+      if (!f) { sentTo = 0; return; }
+      size = f.size();
+      f.seek(sentTo);
+      bool full = false;
+      while (!full && f.available()) {
+        int k = f.read(buf, sizeof(buf));
+        for (int i = 0; i < k; i++) {
+          if (buf[i] != '\n') { line += (char)buf[i]; continue; }
+          if (body.size() + line.size() + 2 > BEATS_BATCH_BYTES && count) { full = true; break; }
+          if (count++) body += ',';
+          body += line;
+          end += line.size() + 1;
+          line.clear();
+        }
+      }
+      f.close();
+    }
+    if (!count) {                              // all sent (or only a torn last line)
+      std::lock_guard<std::recursive_mutex> g(sdLock);
+      SD.remove(BEATS_FILE);
+      if (beatsKept || sentTo) {
+        out.printf("[beat] sent the check-ins kept offline (%u bytes)\n", (unsigned)size);
+      }
+      sentTo = beatsKept = 0;
+      return;
+    }
+    int code = postBeat(body + "]}", "/api/logger/heartbeats");
+    if (code != 200) {
+      out.printf("[beat] kept check-ins: send failed (%d); trying again later\n", code);
+      return;
+    }
+    sentTo = end;
+  }
+}
+
 static void beatIfDue() {
   static uint32_t last = 0;
   static bool tried = false, booted = false, failing = false;
-  if (!WiFi.isConnected() || !strlen(WORKER_HOST)) return;
+  if (!strlen(WORKER_HOST)) return;
   if (tried && millis() - last < BEAT_MS) return;
   tried = true;
   last = millis();
+  if (!WiFi.isConnected()) { keepBeat(); return; }
   int code = postBeat(beatJson(!booted));
   if (code == 200) {
     beatsSent++;
@@ -1367,6 +1526,7 @@ static void beatIfDue() {
     else if (failing) out.println("[beat] checking in again");
     booted = true;
     failing = false;
+    if (sdOk) sendKeptBeats();
   } else if (!failing) {
     out.printf("[beat] check-in failed: %d %s\n", code,
                code < 0 ? HTTPClient::errorToString(code).c_str() : "");
@@ -1415,7 +1575,16 @@ static void fetchChannels() {
   }
   String etag = http.header("ETag");
   etag.replace("\"", "");
-  String preset = http.header("X-Preset");
+  String preset;                             // the Worker sends it URL-encoded
+  String sent = http.header("X-Preset");
+  for (unsigned i = 0; i < sent.length(); i++) {
+    if (sent[i] == '%' && i + 2 < sent.length()) {
+      preset += (char)strtol(sent.substring(i + 1, i + 3).c_str(), nullptr, 16);
+      i += 2;
+    } else {
+      preset += sent[i];
+    }
+  }
   int expect = http.getSize();
   File f;
   {
@@ -1446,6 +1615,7 @@ static void fetchChannels() {
   prefs.begin("logger");
   prefs.putString("cltag", etag);
   prefs.putString("chsrc", etag);
+  prefs.putString("chname", preset);
   prefs.end();
   channelsDownloaded = true;
   out.printf("[chan] downloaded preset %s (%s, %d bytes); used from the next drive\n",
@@ -1707,6 +1877,7 @@ static void receiveChannels() {
   Preferences prefs;                         // until the cloud's active preset changes
   prefs.begin("logger");
   prefs.putString("chsrc", "manual");
+  prefs.remove("chname");
   prefs.end();
   out.printf("[chan] %u lines saved\n", (unsigned)lines);
   reloadRequested = true;
@@ -1752,6 +1923,8 @@ void setup() {
   prefs.end();
   out.printf("\nm550 logger (read-only), boot %u after %s, PSRAM %u KB\n", (unsigned)bootCount,
              resetReason(), (unsigned)(ESP.getPsramSize() / 1024));
+
+  sntp_set_time_sync_notification_cb([](struct timeval*) { clockFromCar = false; });
 
   // Ethernet first: the link negotiates while the card and channels load.
   Network.onEvent(onEvent);

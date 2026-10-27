@@ -1,5 +1,5 @@
 // Host test of lib/logger: SHA-256, the channel file, decoding, the read
-// plan, the CSV layout and the fault reads.
+// plan, bursts, the CSV layout, the fault reads and the car's clock.
 //   cd firmware && g++ -std=c++17 -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 // Run one case by name: ./test_logger decode
 #include <cmath>
@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "carclock.h"
 #include "channels.h"
 #include "csvlog.h"
 #include "faults.h"
@@ -619,7 +620,74 @@ static void test_batch_recovery() {
   CHECK(reqs.size() == 1 && reqs[0].size() == MAX_BATCH);
 }
 
+// The ACSM's clock: this car's answer on 2026-10-18, and what's refused.
+static void test_car_clock() {
+  const uint8_t got[] = {0x16, 0x1f, 0x0a, 0x12, 0xa7, 0x07, 0xea, 0x01};
+  CarTime t;
+  CHECK(carClock(got, sizeof(got), t));
+  CHECK(t.year == 2026 && t.month == 10 && t.day == 18);
+  CHECK(t.hour == 22 && t.minute == 31 && t.second == 10);
+  uint8_t bad[8];
+  memcpy(bad, got, 8);
+  bad[7] = 0x00;                                             // the display's clock isn't set
+  CHECK(!carClock(bad, 8, t));
+  memcpy(bad, got, 8);
+  bad[0] = 0xFF;                                             // hour "invalid"
+  CHECK(!carClock(bad, 8, t));
+  memcpy(bad, got, 8);
+  bad[4] = 0x07;                                             // month 0
+  CHECK(!carClock(bad, 8, t));
+  memcpy(bad, got, 8);
+  bad[5] = 0x00; bad[6] = 0x00;                              // year 0
+  CHECK(!carClock(bad, 8, t));
+  CHECK(!carClock(got, 7, t));                               // short
+}
+
+// Bursts: start on the pedal or the boost, end when both drop for a second
+// or after ten, and wait five before the next.
+static void test_burst() {
+  Burst b;
+  CHECK(b.update(0, NAN, NAN) == Burst::NONE && !b.on());
+  CHECK(b.update(100, 50, 1200) == Burst::NONE);
+  CHECK(b.update(200, 85, 1200) == Burst::STARTED && b.on());
+  CHECK(b.update(900, 30, 1800) == Burst::NONE);             // boost keeps it going
+  CHECK(b.update(1800, 30, 1200) == Burst::NONE);            // 0.9 s clear
+  CHECK(b.update(1950, 30, 1200) == Burst::ENDED && !b.on());
+  CHECK(b.count() == 1 && b.ms() == 1750);
+  CHECK(b.update(3000, 95, 2000) == Burst::NONE);            // within the gap
+  CHECK(b.update(6950, 95, 2000) == Burst::STARTED);
+  for (uint32_t t = 7000; t < 16950; t += 50) CHECK(b.update(t, 95, 2000) == Burst::NONE);
+  CHECK(b.update(16950, 95, 2000) == Burst::ENDED);          // ten seconds at most
+  CHECK(b.update(17000, 95, 2000) == Burst::NONE);           // still held: the gap first
+  CHECK(b.update(21950, 95, 2000) == Burst::STARTED && b.count() == 3);
+  b.reset();
+  CHECK(!b.on() && b.count() == 0 && b.ms() == 0);
+}
+
+// In a burst only the fast reads go: no medium, slow, periodic or slow-only
+// requests, and the medium rotation picks up where it was afterwards.
+static void test_scheduler_fast_only() {
+  Table t = table();
+  Plan p;
+  p.build(t);
+  Scheduler s;
+  s.build(p);
+  s.openOnce();
+  std::vector<std::vector<size_t>> c = s.cycle(p, 0, {}, 4, true);
+  CHECK(c.size() == 2);                                      // 0x12 and 0x13
+  for (const auto& b : c) for (size_t i : b) CHECK(p.reads[i].tier == FAST);
+  c = s.cycle(p, 0, {0x13}, 4, true);                        // a busy module still skipped
+  CHECK(c.size() == 1 && p.reads[c[0][0]].module == 0x12);
+  c = s.cycle(p, 0);
+  bool medium = false;
+  for (const auto& b : c) for (size_t i : b) medium = medium || p.reads[i].tier == MEDIUM;
+  CHECK(medium);
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"car_clock", test_car_clock},
+  {"burst", test_burst},
+  {"scheduler_fast_only", test_scheduler_fast_only},
   {"batch_recovery", test_batch_recovery},
   {"periodic", test_periodic},
   {"sha256", test_sha256},

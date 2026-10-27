@@ -232,15 +232,34 @@ class Scheduler {
   }
 
   // This cycle's requests: one per module (more for a module whose fast
-  // reads or retries don't fit in one), none to a busy module.
+  // reads or retries don't fit in one), none to a busy module. `fastOnly`
+  // (a burst: full throttle or high boost): the fast reads alone, so each
+  // request carries nothing but them and nothing else is asked; the
+  // rotations carry on where they were afterwards.
   std::vector<std::vector<size_t>> cycle(const Plan& p, uint32_t now,
                                          const std::vector<uint8_t>& busy = {},
-                                         size_t slowOnlyMax = 1) {
+                                         size_t slowOnlyMax = 1, bool fastOnly = false) {
     std::vector<std::vector<size_t>> out;
     std::vector<uint8_t> asked;
     auto in = [](const std::vector<uint8_t>& v, uint8_t m) {
       return std::find(v.begin(), v.end(), m) != v.end();
     };
+    if (fastOnly) {
+      for (Queue& q : queues_) {
+        if (q.fast.empty() || in(busy, q.module)) continue;
+        std::vector<size_t> b;
+        size_t bytes = 0, room = p.batchFor(q.module);
+        for (size_t i : q.fast) {
+          if (add(p, i, now, b, bytes, room)) continue;
+          out.push_back(b);
+          b.clear();
+          bytes = 0;
+          add(p, i, now, b, bytes, room);
+        }
+        if (!b.empty()) out.push_back(b);
+      }
+      return out;
+    }
     for (Queue& q : queues_) {
       if (in(busy, q.module)) continue;
       // Retries: a module the logger waits for sends them alongside its
@@ -402,6 +421,52 @@ class Scheduler {
   size_t singleAt_ = 0, slowOnlyAt_ = 0;
   bool onceOpen_ = false, onceReported_ = false;
   size_t onceCount_ = 0;
+};
+
+// Burst mode: under full throttle or high boost (a pull), the fast tier alone,
+// as often as it goes, for the wastegate, boost and knock under load. A burst
+// starts when the pedal or the boost crosses its limit, ends once neither has
+// for BURST_CLEAR_MS or after BURST_MAX_MS, and another can't start until
+// BURST_GAP_MS later, so a long climb on the throttle still lets the medium
+// and slow tiers through. NAN (not read yet) counts as below.
+constexpr float BURST_PEDAL = 80.0f;          // %, BUS_FAHRPEDALWERT
+constexpr float BURST_BOOST = 1700.0f;        // hPa absolute, IPLAD (about 0.7 bar of boost)
+constexpr uint32_t BURST_MAX_MS = 10000;
+constexpr uint32_t BURST_CLEAR_MS = 1000;
+constexpr uint32_t BURST_GAP_MS = 5000;
+
+class Burst {
+ public:
+  enum Change { NONE, STARTED, ENDED };
+
+  // Each cycle, with the latest pedal and boost: what changed.
+  Change update(uint32_t now, float pedal, float boost) {
+    bool hot = pedal > BURST_PEDAL || boost > BURST_BOOST;
+    if (on_) {
+      if (hot) lastHot_ = now;
+      if (now - start_ >= BURST_MAX_MS || now - lastHot_ >= BURST_CLEAR_MS) {
+        on_ = false;
+        end_ = now;
+        ms_ += now - start_;
+        return ENDED;
+      }
+      return NONE;
+    }
+    if (!hot || (count_ && now - end_ < BURST_GAP_MS)) return NONE;
+    on_ = true;
+    start_ = lastHot_ = now;
+    count_++;
+    return STARTED;
+  }
+  bool on() const { return on_; }
+  // Bursts and their time (ms, finished ones) since the last reset.
+  uint32_t count() const { return count_; }
+  uint32_t ms() const { return ms_; }
+  void reset() { on_ = false; count_ = ms_ = 0; }
+
+ private:
+  bool on_ = false;
+  uint32_t start_ = 0, lastHot_ = 0, end_ = 0, count_ = 0, ms_ = 0;
 };
 
 // Whether a periodic tier is due this drive: `last` when it was last read

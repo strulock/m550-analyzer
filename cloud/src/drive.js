@@ -558,9 +558,31 @@ export function summarize(logs, file = "", start = "") {
   return out;
 }
 
-/** "YYYY-MM-DD HH:MM:SS" of UTC seconds. */
-function stamp(seconds) {
-  return new Date(seconds * 1000).toISOString().slice(0, 19).replace("T", " ");
+export const DEFAULT_TIME_ZONE = "America/Chicago";
+
+/** "YYYY-MM-DD HH:MM:SS" of UTC seconds in `timeZone` (an IANA name). */
+export function localStamp(seconds, timeZone = DEFAULT_TIME_ZONE) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone,
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+    second: "2-digit", hourCycle: "h23" }).formatToParts(new Date(seconds * 1000))
+    .map((p) => [p.type, p.value]));
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
+}
+
+// The odometers the board reads, any one will do (loggerExtras).
+const ODOMETERS_ANY = ODOMETERS.concat(["EGS_KILOMETERSTAND", "PMA_BUS_IN_KILOMETERSTAND_WERT"]);
+
+/** The first channel of `names` the logs have: the median of its values in
+ * the first and in the last `window` seconds ([null, null] if none). */
+function ends(logs, names, window) {
+  for (const name of names) {
+    const [t, v] = seriesOf(logs, name);
+    if (!t.length) continue;
+    const t0 = t[0], t1 = t[t.length - 1];
+    return [median(v.filter((_, k) => t[k] <= t0 + window)),
+      median(v.filter((_, k) => t[k] >= t1 - window))];
+  }
+  return [null, null];
 }
 
 /** A drive log (a string or the uploaded bytes) read into columns; throws
@@ -577,13 +599,14 @@ export function readLog(input) {
 /** A drive's row for History from its logs (one, or the fast file and its
  * sweep), as history.scan makes it: null when the first has too few rows
  * (MIN_ROWS). `uploaded`: UTC seconds, the stand-in for the end of a log
- * without a Clock. */
-export function summarizeDrive(logs, file, uploaded) {
+ * without a Clock; its start is then given in `timeZone`, the local time the
+ * logs' own clocks keep. */
+export function summarizeDrive(logs, file, uploaded, timeZone = DEFAULT_TIME_ZONE) {
   logs = [].concat(logs);
   const times = logs[0].logTime.filter(Number.isFinite);
   if (times.length < MIN_ROWS) return null;
   const start = logs[0].firstClock ||
-    stamp(uploaded - (times[times.length - 1] - times[0]));
+    localStamp(uploaded - (times[times.length - 1] - times[0]), timeZone);
   const drive = summarize(logs, file, start);
   if (drive.odometer_km === null) {
     drive.odometer_km = logs.map((l) => l.odometer).find((o) => o !== null) ?? null;
@@ -591,8 +614,21 @@ export function summarizeDrive(logs, file, uploaded) {
   return drive;
 }
 
+/** What the logger's drive rows carry beyond the app's (not in history.py):
+ * whether the start is only the upload time less the drive's length (no
+ * Clock), and for fill-ups (tanks.js) the tank level and the odometer as
+ * the drive started and ended. */
+export function loggerExtras(logs) {
+  logs = [].concat(logs);
+  const [tankStart, tankEnd] = ends(logs, [FUEL_TANK], TANK_WINDOW);
+  const [odoStart, odoEnd] = ends(logs, ODOMETERS_ANY, 0);
+  return { start_approx: !logs[0].firstClock, tank_start_l: tankStart, tank_end_l: tankEnd,
+    odometer_start_km: odoStart, odometer_end_km: odoEnd };
+}
+
 /** One drive log on its own: {series, drive}. */
-export function processLog(input, file, uploaded) {
+export function processLog(input, file, uploaded, timeZone = DEFAULT_TIME_ZONE) {
   const log = readLog(input);
-  return { series: buildSeries(log, uploaded), drive: summarizeDrive(log, file, uploaded) };
+  return { series: buildSeries(log, uploaded),
+    drive: summarizeDrive(log, file, uploaded, timeZone) };
 }
