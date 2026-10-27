@@ -35,19 +35,22 @@ TIERS = ("fast", "medium", "slow")
 TEMPLATE_FAST, TEMPLATE_MEDIUM = "Logger fast", "Logger medium"
 
 # The sampling-rate spec (2026-10-25): what wastegate, boost and knock
-# analysis needs every cycle, with both banks where each DME has its own.
+# analysis needs every cycle, with both banks where each DME has its own,
+# and the DME's own estimate of engine power (MOTORLEISTUNG_EFFEKTIV), for
+# pulls.
 FAST = (["INMOT", "IPLAD", "S_LADEDRUCK"]
         + [n + s for n in ("I_EWG_POS", "TV_EWG", "ILAG1", "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT")
            for s in ("", B2)]
-        + ["IWDKL", "BUS_FAHRPEDALWERT", "EGS_ISTGANG.ISTGANG",
+        + ["IWDKL", "BUS_FAHRPEDALWERT", "EGS_ISTGANG.ISTGANG", "MOTORLEISTUNG_EFFEKTIV",
            "FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP"])
 
 # The drive log, fuel economy and misfire templates (what the fast tier was
-# before, and what History needs), plus trims, intake air, oil pressure and
-# the wastegate position sensors.
+# before, and what History needs), plus trims, intake air, oil pressure,
+# the wastegate position sensors and the DME's battery voltage (IUADW, which
+# the board's check-ins report).
 MEDIUM_TEMPLATES = ("Drive log with GPS", "Fuel economy", "Misfire hunt")
 MEDIUM_EXTRA = ([n + s for n in ("IMUL1", "SPG_POS_SENS_EWG", "LADEDRUCK_REGELDIFFERENZ_BANKSPEZ")
-                 for s in ("", B2)] + ["RTANS", "OELDRUCK"])
+                 for s in ("", B2)] + ["RTANS", "OELDRUCK", "IUADW"])
 
 # Catalog data type -> the board's: width and signedness, or a float, or the
 # head unit's 5-byte coordinates. Anything else (strings, data[n], bitfields)

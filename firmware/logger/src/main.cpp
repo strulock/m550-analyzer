@@ -239,13 +239,14 @@ enum Live { SPEED, RPM, BATTERY, COOLANT, OIL, LAT, LON, LIVE_N };
 static const char* const LIVE_NAMES[LIVE_N][2] = {
     {"FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "HU_STATUS_SPEED.GPS_SPEED"},
     {"INMOT", nullptr},
-    {"IUIBS", nullptr},                      // mV
+    {"IUADW", "IUIBS"},                      // V (the DME's own), else mV (the IBS)
     {"ITKUA", nullptr},                      // °C
     {"ITOEL", nullptr},                      // °C
     {"HU_STATUS_GPS_POSITION.LATITUDE", nullptr},
     {"HU_STATUS_GPS_POSITION.LONGITUDE", nullptr},
 };
 static int liveCh[LIVE_N];
+static double liveScale[LIVE_N];          // to the check-in's unit (IUIBS: mV to V)
 static std::atomic<double> liveValue[LIVE_N];
 static std::atomic<uint32_t> liveAt[LIVE_N];
 static const uint32_t LIVE_FRESH_MS = 30000;  // older: not reported
@@ -263,8 +264,11 @@ static void findLive() {
   for (int k = 0; k < LIVE_N; k++) {
     liveCh[k] = -1;
     liveAt[k] = 0;
+    liveScale[k] = 1;
     for (const char* want : LIVE_NAMES[k]) {
-      if (want && liveCh[k] < 0) liveCh[k] = channelNamed(want);
+      if (!want || liveCh[k] >= 0) continue;
+      liveCh[k] = channelNamed(want);
+      if (liveCh[k] >= 0 && !strcmp(want, "IUIBS")) liveScale[k] = 0.001;
     }
   }
   pedalCh = channelNamed("BUS_FAHRPEDALWERT");
@@ -273,7 +277,7 @@ static void findLive() {
 
 static void noteLive(uint32_t ch, double v, uint32_t now) {
   for (int k = 0; k < LIVE_N; k++) {
-    if (liveCh[k] == (int)ch) { liveValue[k] = v; liveAt[k] = now ? now : 1; }
+    if (liveCh[k] == (int)ch) { liveValue[k] = v * liveScale[k]; liveAt[k] = now ? now : 1; }
   }
 }
 
@@ -1679,7 +1683,7 @@ static std::string beatJson(bool boot, bool buffered = false) {
   }
   jsonNumber(j, "speed_kmh", live(SPEED), 1);
   jsonNumber(j, "rpm", live(RPM), 0);
-  jsonNumber(j, "battery_v", live(BATTERY) / 1000.0, 2);
+  jsonNumber(j, "battery_v", live(BATTERY), 2);
   jsonNumber(j, "coolant_c", live(COOLANT), 1);
   jsonNumber(j, "oil_c", live(OIL), 1);
   double lat = live(LAT), lon = live(LON);

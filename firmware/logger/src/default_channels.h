@@ -8,6 +8,7 @@
 static const char* const DEFAULT_CHANNELS =
     "name,module,did,did_size,offset,type,order,mul,div,add,no_value,unit,tier\n"
     "IPLAD,0x12,0x4205,2,0,u16,big,20,256,0,,hPa,fast\n"
+    "MOTORLEISTUNG_EFFEKTIV,0x12,0x4520,2,0,u16,big,1000,65536,0,,,fast\n"
     "IWDKL,0x12,0x4600,2,0,s16,big,0.0078125,1,0,,%,fast\n"
     "INMOT,0x12,0x4807,2,0,s16,big,1,2,0,,1/min,fast\n"
     "S_LADEDRUCK,0x12,0x4AB0,2,0,u16,big,10,256,0,,hPa,fast\n"
@@ -25,6 +26,7 @@ static const char* const DEFAULT_CHANNELS =
     "ITOEL,0x12,0x4402,2,0,u16,big,0.75,1,-48,,°C,medium\n"
     "MASSENSTROM_KRAFTSTOFF,0x12,0x4521,2,0,u16,big,0.1,1,0,,kg/h,medium\n"
     "LADEDRUCK_REGELDIFFERENZ_BANKSPEZ,0x12,0x4536,2,0,s16,big,125,1000,0,,hPa,medium\n"
+    "IUADW,0x12,0x460C,2,0,u16,big,0.023481,1,0,,V,medium\n"
     "SPG_POS_SENS_EWG,0x12,0x4653,2,0,u16,big,80,65536,0,,V,medium\n"
     "ITKUA,0x12,0x4A21,2,0,s16,big,0.1,1,-273.14,,°C,medium\n"
     "ILUZ1,0x12,0x4A30,2,0,s16,big,1,16,0,,rad/s²,medium\n"
