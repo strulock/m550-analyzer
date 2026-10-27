@@ -115,7 +115,11 @@ no longer costs it the rest of the drive, and a module that only takes one
 identifier at a time is rarely asked for more.
 
 If the requests waited for keep timing out (three in a row) while sharing a
-connection, the board falls back to one request at a time and notes it.
+connection, the board falls back to one request at a time and notes it, for
+a minute, then overlaps them again; each further fall-back in the drive
+waits twice as long, up to 10 minutes. (On 26 Oct a few seconds of the bank
+1 DME not answering cost three drives two thirds of their rows for the rest
+of the drive: 10-13 rows a second before, 1-4 after.)
 
 Bursts: when the pedal passes 80% or the boost 1,700 hPa (`IPLAD`, about
 0.7 bar over the air outside), the board asks for the fast tier alone, as

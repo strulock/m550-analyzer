@@ -30,6 +30,22 @@ test("a rise in the level between drives starts a tank; the last is open", () =>
   assert.equal(b.l_per_100km, Number((8.1 / 78 * 100).toFixed(2)));
 });
 
+test("filled during a drive, the level catching up after: one fill-up", () => {
+  // 26 Oct: logging at the pump (2 -> 56 l in the drive), 65 l as the next began.
+  const t = tanks([
+    drive("2026-10-26 18:51:22", 3, 2, 111669, 111675, 5.87, 0.5),
+    drive("2026-10-26 20:30:00", 2, 56, 111676, 111676, 0.76, 0.1),
+    drive("2026-10-26 20:45:00", 65, 65, 111676, 111677, 1.5, 0.2),
+  ]);
+  assert.deepEqual(t.map((k) => [k.start, k.drives, k.filled_l, k.level_start_l, k.level_end_l, k.open]), [
+    ["2026-10-26 18:51:22", 2, null, 3, 2, false],
+    ["2026-10-26 20:45:00", 1, 63, 65, 65, true]]);
+  // Filled in the last drive, none since: an open tank with no drives yet.
+  const [, now] = tanks([drive("2026-10-26 18:51:22", 3, 2, 1, 2, 1, 0.1),
+    drive("2026-10-26 20:30:00", 2, 56, 2, 2, 0.5, 0.1)]);
+  assert.deepEqual([now.drives, now.filled_l, now.level_start_l, now.open, now.mpg], [0, 54, 56, true, null]);
+});
+
 test("no fuel flow: the level's fall; no odometer: the drives' km", () => {
   const [t] = tanks([
     drive("2026-10-25 08:00:00", 60, 50, null, null, 80, null),

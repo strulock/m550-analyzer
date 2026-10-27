@@ -837,10 +837,15 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
 // at a time), on both connections, several to different modules on one
 // connection while the gateway allows it. If the waited-for requests keep
 // timing out while they share a connection, one request at a time per
-// connection from then on.
+// connection for a while, then overlapping again: the bank 1 DME's few
+// seconds of timeouts (26 Oct, three drives) otherwise cost the rest of the
+// drive two thirds of its rows. The wait doubles each time it falls back
+// again, up to SEPARATE_MAX_MS.
 static bool sameConnection = true;
 static uint8_t sharedTimeouts = 0;                // in a row
 static const uint8_t SHARED_TIMEOUTS_TO_FALL_BACK = 3;
+static const uint32_t SEPARATE_MS = 60000, SEPARATE_MAX_MS = 600000;
+static uint32_t separateAt = 0, separateFor = 0;  // this drive's last fall-back, and its wait
 
 // ---- requests not waited for -------------------------------------------------
 // A module with no fast reads (the head unit, the body modules, ...) can take
@@ -931,6 +936,7 @@ static void resetRequests() {
   pendingReqs.clear();
   sameConnection = true;
   sharedTimeouts = 0;
+  separateFor = 0;
   refusedReads = laterSent = laterTimeouts = 0;
   memset(refusedNoteMs, 0, sizeof(refusedNoteMs));
   faultWanted = -1;
@@ -964,9 +970,23 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
   sharedTimeouts = timedOut ? sharedTimeouts + 1 : 0;
   if (sharedTimeouts >= SHARED_TIMEOUTS_TO_FALL_BACK) {
     sameConnection = false;
-    out.println("[plan] one request at a time per connection (shared requests kept timing out)");
-    addNote("one request at a time per connection (shared requests kept timing out)");
+    separateAt = millis();
+    separateFor = separateFor ? std::min(separateFor * 2, SEPARATE_MAX_MS) : SEPARATE_MS;
+    char text[128];
+    snprintf(text, sizeof(text), "one request at a time per connection for %u s (shared requests "
+             "kept timing out)", (unsigned)(separateFor / 1000));
+    out.printf("[plan] %s\n", text);
+    addNote(text);
   }
+}
+
+// After a fall-back's wait: overlapping requests again.
+static void overlapAgainIfDue() {
+  if (sameConnection || millis() - separateAt < separateFor) return;
+  sameConnection = true;
+  sharedTimeouts = 0;
+  out.println("[plan] overlapping requests again");
+  addNote("overlapping requests again");
 }
 
 // Send `batches` in waves: each wave takes the next batch of every module
@@ -1039,6 +1059,7 @@ static void sweepRow(double secs) {
 // and collected when they come.
 static void cycle() {
   const uint32_t start = millis();
+  overlapAgainIfDue();
   // A burst (lib/logger/plan.h) from the last cycle's pedal and boost.
   const float pedal = pedalCh >= 0 ? values[pedalCh] : NAN;
   const float boost = boostCh >= 0 ? values[boostCh] : NAN;
