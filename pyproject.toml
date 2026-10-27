@@ -34,7 +34,7 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py39"
-src = ["src", "tests", "tools"]
+src = ["src", "tests", "tools", "firmware/tools"]
 
 [tool.ruff.lint]
 # pyflakes, pycodestyle, and blind excepts (each one marked noqa: BLE001 says

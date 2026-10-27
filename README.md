@@ -560,7 +560,7 @@ py -m venv .venv
 .venv\Scripts\pip install -e .[dev,build]
 .venv\Scripts\pip install -r requirements-ci.txt   # the exact tool versions CI uses
 .venv\Scripts\pytest
-.venv\Scripts\ruff check src tests tools
+.venv\Scripts\ruff check src tests tools firmware/tools
 build.bat
 ```
 
