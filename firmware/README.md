@@ -7,7 +7,7 @@ the Windows build.
 | Path | What |
 | --- | --- |
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
-| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan and bursts, CSV layout, fault reads, the car's clock and SHA-256. No Arduino code |
+| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, bursts and the fall-back to one request at a time, CSV layout, fault reads, the car's clock, SHA-256, the firmware update decisions (`ota.h`) and the upload and kept check-in rules (`upload.h`). No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
 | `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |

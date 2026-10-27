@@ -1,6 +1,7 @@
 // Host test of lib/logger: SHA-256, the channel file, decoding, the read
-// plan, bursts, the CSV layout, the fault reads, the car's clock and the
-// firmware manifest.
+// plan, bursts, the fall-back to one request at a time, the CSV layout, the
+// fault reads, the car's clock, the firmware manifest and update start-up,
+// and the upload rules and kept check-ins.
 //   cd firmware && g++ -std=c++17 -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 // Run one case by name: ./test_logger decode
 #include <cmath>
@@ -16,6 +17,7 @@
 #include "ota.h"
 #include "plan.h"
 #include "sha256.h"
+#include "upload.h"
 
 using namespace logger;
 
@@ -708,8 +710,133 @@ static void test_ota() {
   CHECK(!wantUpdate("v1", "", ""));
 }
 
+// At power-on: a new build is on trial; the build before a new one that
+// didn't prove itself knows it went back; and the card's image is kept only
+// while it's still wanted.
+static void test_ota_start() {
+  CHECK(otaStart(true, "v2", "v2") == OTA_TRIAL);
+  CHECK(otaStart(true, "", "v2") == OTA_TRIAL);
+  CHECK(otaStart(false, "v2", "v1") == OTA_WENT_BACK);
+  CHECK(otaStart(false, "", "v1") == OTA_NORMAL);
+  CHECK(otaStart(false, "v1", "v1") == OTA_NORMAL);
+  CHECK(!trialOver(false, 0xFFFFFFFF));
+  CHECK(!trialOver(true, OTA_TRIAL_MS - 1));
+  CHECK(trialOver(true, OTA_TRIAL_MS));
+  CHECK(cardImageWanted(true, "v2", "v1", ""));
+  CHECK(!cardImageWanted(false, "v2", "v1", ""));            // gone from the card
+  CHECK(!cardImageWanted(true, "v2", "v1", "v2"));           // went back from it
+  CHECK(!cardImageWanted(true, "v1", "v1", ""));             // installed already
+  CHECK(!cardImageWanted(true, "v2", "dev", ""));
+}
+
+// Shared requests that keep timing out: one at a time per connection for a
+// minute, then overlapping again; each fall-back in a drive waits twice as
+// long, up to ten minutes.
+static void test_fallback() {
+  Fallback f;
+  CHECK(f.sameConnection() && f.waitMs() == 0);
+  CHECK(!f.sharedWave(true, 1000) && !f.sharedWave(true, 1100));
+  CHECK(!f.sharedWave(false, 1200));                         // one that answered: count again
+  CHECK(!f.sharedWave(true, 1300) && !f.sharedWave(true, 1400));
+  CHECK(f.sharedWave(true, 1500) && !f.sameConnection() && f.waitMs() == SEPARATE_MS);
+  CHECK(!f.sharedWave(true, 1600));                          // fallen back already
+  CHECK(!f.overlapAgain(1500 + SEPARATE_MS - 1) && !f.sameConnection());
+  CHECK(f.overlapAgain(1500 + SEPARATE_MS) && f.sameConnection());
+  CHECK(!f.overlapAgain(1500 + SEPARATE_MS + 1));
+  uint32_t now = 100000;
+  for (uint32_t want : {120000u, 240000u, 480000u, 600000u, 600000u}) {
+    for (int i = 0; i < 2; i++) CHECK(!f.sharedWave(true, now));
+    CHECK(f.sharedWave(true, now) && f.waitMs() == want);
+    CHECK(!f.overlapAgain(now + want - 1));
+    now += want;
+    CHECK(f.overlapAgain(now));
+  }
+  f.reset();                                                 // the next drive starts at a minute
+  for (int i = 0; i < 2; i++) CHECK(!f.sharedWave(true, now));
+  CHECK(f.sharedWave(true, now) && f.waitMs() == SEPARATE_MS);
+  f.reset();
+  CHECK(f.sameConnection());
+  uint32_t late = 0xFFFFFFFF - 1000;                         // millis() wraps after 49 days
+  for (int i = 0; i < 3; i++) f.sharedWave(true, late);
+  CHECK(!f.overlapAgain(late + 30000) && f.overlapAgain(late + SEPARATE_MS));
+}
+
+static void test_upload_rules() {
+  const std::string sha(64, 'c');
+  Done d;
+  CHECK(parseDone(sha + " 1234", d) && d.sha == sha && d.size == 1234);
+  CHECK(parseDone(sha + " 1234\r", d) && d.size == 1234);
+  CHECK(!parseDone("abc 12", d));
+  CHECK(!parseDone("", d));
+  CHECK(uploadStep(false, true, 100) == UPLOAD_BAD_DONE);
+  CHECK(uploadStep(true, false, 0) == UPLOAD_MISSING);
+  CHECK(uploadStep(true, true, 0) == UPLOAD_EMPTY);          // removed: sending one hung (26 Oct)
+  CHECK(uploadStep(true, true, 1) == UPLOAD_SEND);
+  std::string reply = "{\"name\":\"nt-00066-01.csv\",\"sha256\":\"" + sha + "\",\"processed\":true}";
+  CHECK(uploadAccepted(200, reply, sha));
+  CHECK(!uploadAccepted(200, reply, std::string(64, 'd')));  // the Worker got something else
+  CHECK(!uploadAccepted(500, reply, sha));
+  CHECK(!uploadAccepted(-1, "", sha));
+}
+
+static std::string batchOf(const std::string& file, size_t max, uint32_t& used, size_t& count,
+                           size_t piece = 7) {
+  BeatBatch b(max);
+  for (size_t i = 0; i < file.size(); i += piece) {
+    std::string p = file.substr(i, piece);
+    if (!b.feed((const uint8_t*)p.data(), p.size())) break;
+  }
+  used = b.used();
+  count = b.count();
+  return b.body();
+}
+
+// The check-ins kept offline: whole lines, as many as fit a request, and
+// every one sent once whatever the batch size.
+static void test_kept_beats() {
+  CHECK(beatFits(BEATS_MAX_BYTES - 10, 10));
+  CHECK(!beatFits(BEATS_MAX_BYTES - 10, 11));                // full: later ones dropped
+  uint32_t used;
+  size_t count;
+  CHECK(batchOf("{\"a\":1}\n{\"b\":2}\n", 1000, used, count) == "{\"beats\":[{\"a\":1},{\"b\":2}]}");
+  CHECK(used == 16 && count == 2);
+  CHECK(batchOf("{\"a\":1}\n{\"b\"", 1000, used, count) == "{\"beats\":[{\"a\":1}]}");
+  CHECK(used == 8 && count == 1);                            // a torn last line waits
+  CHECK(batchOf("", 1000, used, count) == "{\"beats\":[]}" && used == 0 && count == 0);
+  // 10 for {"beats":[, 2 for ]}: one 10-byte line fits in 30, two don't.
+  std::string two = "0123456789\nabcdefghij\n";
+  CHECK(batchOf(two, 30, used, count) == "{\"beats\":[0123456789]}" && used == 11 && count == 1);
+  CHECK(batchOf(two.substr(used), 30, used, count) == "{\"beats\":[abcdefghij]}");
+  CHECK(batchOf(two, 5, used, count, 100) == "{\"beats\":[0123456789]}");   // too long: alone
+  // A day of check-ins, batch after batch from where the last ended.
+  std::string file, sent;
+  for (int i = 0; i < 500; i++) file += "{\"boot\":" + std::to_string(i) + ",\"x\":\"" +
+                                        std::string(i % 37, 'y') + "\"}\n";
+  uint32_t sentTo = 0;
+  int batches = 0;
+  for (;;) {
+    std::string body = batchOf(file.substr(sentTo), 1000, used, count, 64);
+    if (!count) break;
+    CHECK(body.size() <= 1000);
+    std::string inner = body.substr(10, body.size() - 12);
+    sent += (sent.empty() ? "" : ",") + inner;
+    sentTo += used;
+    batches++;
+  }
+  std::string all;
+  for (size_t i = 0, j; i < file.size(); i = j + 1) {
+    j = file.find('\n', i);
+    all += (all.empty() ? "" : ",") + file.substr(i, j - i);
+  }
+  CHECK(sentTo == file.size() && sent == all && batches > 10);
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
   {"ota", test_ota},
+  {"ota_start", test_ota_start},
+  {"fallback", test_fallback},
+  {"upload_rules", test_upload_rules},
+  {"kept_beats", test_kept_beats},
   {"car_clock", test_car_clock},
   {"burst", test_burst},
   {"scheduler_fast_only", test_scheduler_fast_only},

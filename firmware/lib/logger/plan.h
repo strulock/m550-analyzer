@@ -469,6 +469,46 @@ class Burst {
   uint32_t start_ = 0, lastHot_ = 0, end_ = 0, count_ = 0, ms_ = 0;
 };
 
+// Requests in flight together on one connection, while the gateway allows
+// it. If the waited-for requests keep timing out while they share a
+// connection, one request at a time per connection for a while, then
+// overlapping again: the bank 1 DME's few seconds of timeouts (26 Oct, three
+// drives) otherwise cost the rest of the drive two thirds of its rows. The
+// wait doubles each time it falls back again in a drive, up to
+// SEPARATE_MAX_MS.
+static const uint8_t SHARED_TIMEOUTS_TO_FALL_BACK = 3;
+static const uint32_t SEPARATE_MS = 60000, SEPARATE_MAX_MS = 600000;
+
+class Fallback {
+ public:
+  // A wave of waited-for requests that shared a connection, and whether any
+  // timed out: true when that made it fall back (waitMs() says how long).
+  bool sharedWave(bool timedOut, uint32_t now) {
+    if (!same_) return false;
+    timeouts_ = timedOut ? timeouts_ + 1 : 0;
+    if (timeouts_ < SHARED_TIMEOUTS_TO_FALL_BACK) return false;
+    same_ = false;
+    at_ = now;
+    for_ = for_ ? std::min(for_ * 2, SEPARATE_MAX_MS) : SEPARATE_MS;
+    return true;
+  }
+  // True when the wait is over and requests overlap again.
+  bool overlapAgain(uint32_t now) {
+    if (same_ || now - at_ < for_) return false;
+    same_ = true;
+    timeouts_ = 0;
+    return true;
+  }
+  bool sameConnection() const { return same_; }
+  uint32_t waitMs() const { return for_; }
+  void reset() { same_ = true; timeouts_ = 0; for_ = 0; }   // a drive starts or ends
+
+ private:
+  bool same_ = true;
+  uint8_t timeouts_ = 0;                          // in a row
+  uint32_t at_ = 0, for_ = 0;                     // the last fall-back, and its wait
+};
+
 // Whether a periodic tier is due this drive: `last` when it was last read
 // and `now`, in epoch seconds (0: never, or the clock is unknown: due),
 // `offsetMin` the local time's offset from UTC (a day is a local day).

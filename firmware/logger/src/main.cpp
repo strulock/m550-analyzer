@@ -68,6 +68,7 @@
 #include "ota.h"
 #include "plan.h"
 #include "sha256.h"
+#include "upload.h"
 
 #if __has_include("logger_secrets.h")
 #include "logger_secrets.h"
@@ -850,17 +851,10 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
 
 // Requests in flight together: at most one per module (a module answers one
 // at a time), on both connections, several to different modules on one
-// connection while the gateway allows it. If the waited-for requests keep
-// timing out while they share a connection, one request at a time per
-// connection for a while, then overlapping again: the bank 1 DME's few
-// seconds of timeouts (26 Oct, three drives) otherwise cost the rest of the
-// drive two thirds of its rows. The wait doubles each time it falls back
-// again, up to SEPARATE_MAX_MS.
-static bool sameConnection = true;
-static uint8_t sharedTimeouts = 0;                // in a row
-static const uint8_t SHARED_TIMEOUTS_TO_FALL_BACK = 3;
-static const uint32_t SEPARATE_MS = 60000, SEPARATE_MAX_MS = 600000;
-static uint32_t separateAt = 0, separateFor = 0;  // this drive's last fall-back, and its wait
+// connection while the gateway allows it (lib/logger/plan.h, Fallback: one
+// request at a time per connection for a while after shared ones keep timing
+// out).
+static Fallback fallback;
 
 // ---- requests not waited for -------------------------------------------------
 // A module with no fast reads (the head unit, the body modules, ...) can take
@@ -949,9 +943,7 @@ static void collect() {
 // gateway.
 static void resetRequests() {
   pendingReqs.clear();
-  sameConnection = true;
-  sharedTimeouts = 0;
-  separateFor = 0;
+  fallback.reset();
   refusedReads = laterSent = laterTimeouts = 0;
   memset(refusedNoteMs, 0, sizeof(refusedNoteMs));
   faultWanted = -1;
@@ -981,15 +973,10 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
     timedOut = timedOut || r.result == hsfz::TIMEOUT;
     process(*wave[i], r);
   }
-  if (!shared || !sameConnection) return;
-  sharedTimeouts = timedOut ? sharedTimeouts + 1 : 0;
-  if (sharedTimeouts >= SHARED_TIMEOUTS_TO_FALL_BACK) {
-    sameConnection = false;
-    separateAt = millis();
-    separateFor = separateFor ? std::min(separateFor * 2, SEPARATE_MAX_MS) : SEPARATE_MS;
+  if (shared && fallback.sharedWave(timedOut, millis())) {
     char text[128];
     snprintf(text, sizeof(text), "one request at a time per connection for %u s (shared requests "
-             "kept timing out)", (unsigned)(separateFor / 1000));
+             "kept timing out)", (unsigned)(fallback.waitMs() / 1000));
     out.printf("[plan] %s\n", text);
     addNote(text);
   }
@@ -997,15 +984,13 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
 
 // After a fall-back's wait: overlapping requests again.
 static void overlapAgainIfDue() {
-  if (sameConnection || millis() - separateAt < separateFor) return;
-  sameConnection = true;
-  sharedTimeouts = 0;
+  if (!fallback.overlapAgain(millis())) return;
   out.println("[plan] overlapping requests again");
   addNote("overlapping requests again");
 }
 
 // Send `batches` in waves: each wave takes the next batch of every module
-// not yet in it (and, without sameConnection, of every connection).
+// not yet in it (and, when it has fallen back, of every connection).
 static void askAll(std::vector<const std::vector<size_t>*> batches) {
   while (!batches.empty() && !connectionLost) {
     std::vector<const std::vector<size_t>*> wave, rest;
@@ -1013,7 +998,8 @@ static void askAll(std::vector<const std::vector<size_t>*> batches) {
       bool clash = false;
       for (const std::vector<size_t>* w : wave) {
         clash = clash || moduleOf(*w) == moduleOf(*b) ||
-                (!sameConnection && clientFor(moduleOf(*w)) == clientFor(moduleOf(*b)));
+                (!fallback.sameConnection() &&
+                 clientFor(moduleOf(*w)) == clientFor(moduleOf(*b)));
       }
       (clash ? rest : wave).push_back(b);
     }
@@ -1092,7 +1078,7 @@ static void cycle() {
   for (const Pending& p : pendingReqs) busy.push_back(p.target);
   if (faultWanted >= 0) busy.push_back((uint8_t)faultWanted);
   size_t slowOnly = 1;                                       // one at a time: as before
-  if (sameConnection) {
+  if (fallback.sameConnection()) {
     slowOnly = pendingReqs.size() >= MAX_LATER ? 0 : MAX_LATER - pendingReqs.size();
     if (slowOnly > SLOW_ONLY_PER_CYCLE) slowOnly = SLOW_ONLY_PER_CYCLE;
   }
@@ -1100,7 +1086,7 @@ static void cycle() {
       scheduler.cycle(plan, millis(), busy, slowOnly, burst.on());
   std::vector<const std::vector<size_t>*> waited;
   for (const std::vector<size_t>& b : requests) {
-    if (!sameConnection || scheduler.waits(moduleOf(b))) waited.push_back(&b);
+    if (!fallback.sameConnection() || scheduler.waits(moduleOf(b))) waited.push_back(&b);
     else sendLater(b);
   }
   askAll(waited);
@@ -1129,7 +1115,8 @@ static void cycle() {
                "bursts %u (%.0f s)",
                cycleRate, msFast, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
                (unsigned)refusedReads, (unsigned)laterSent, (unsigned)laterTimeouts,
-               sameConnection ? "overlapping requests" : "one request at a time per connection",
+               fallback.sameConnection() ? "overlapping requests"
+                                         : "one request at a time per connection",
                smallerList.empty() ? "none" : smallerList.c_str(), (unsigned)burst.count(),
                burst.ms() / 1000.0f);
       addNote(text);
@@ -1202,7 +1189,7 @@ static void readFaults() {
   faultWanted = -1;
   hsfz::Client* cl = clientFor((uint8_t)m);
   if (!cl) return;
-  if (sameConnection && !scheduler.waits((uint8_t)m)) {
+  if (fallback.sameConnection() && !scheduler.waits((uint8_t)m)) {
     sendLater((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), {});
     return;
   }
@@ -1263,36 +1250,35 @@ static std::vector<String> pending() {
 
 static bool uploadOne(const String& name) {
   String path = String(DRIVES) + "/" + name;
-  char sha[65] = "";
-  unsigned size = 0;
+  Done done;
+  bool doneOk = false;
+  File f;
   {
     std::lock_guard<std::recursive_mutex> g(sdLock);
     File d = SD.open(path + ".done");
     if (d) {
-      String s = d.readStringUntil('\n');
+      doneOk = parseDone(d.readStringUntil('\n').c_str(), done);
       d.close();
-      sscanf(s.c_str(), "%64s %u", sha, &size);
     }
+    if (doneOk) f = SD.open(path);
   }
-  if (strlen(sha) != 64) { out.printf("[up] %s: bad .done file\n", name.c_str()); return false; }
-  File f;
-  {
-    std::lock_guard<std::recursive_mutex> g(sdLock);
-    f = SD.open(path);
-  }
-  if (!f) { out.printf("[up] %s: missing\n", name.c_str()); return false; }
-  // An empty file (one a power cut left before anything reached the card)
-  // has nothing to send, and can't be sent: HTTPClient sends a stream of
-  // size 0 without a length and waits for the file's available() to say
-  // -1, which it never does, so the upload task hung there (26-27 Oct) and
-  // everything behind it waited. Removed instead.
-  if (f.size() == 0) {
+  switch (uploadStep(doneOk, (bool)f, f ? f.size() : 0)) {   // lib/logger/upload.h
+  case UPLOAD_BAD_DONE:
+    out.printf("[up] %s: bad .done file\n", name.c_str());
+    return false;
+  case UPLOAD_MISSING:
+    out.printf("[up] %s: missing\n", name.c_str());
+    return false;
+  case UPLOAD_EMPTY: {
     f.close();
     std::lock_guard<std::recursive_mutex> g(sdLock);
     SD.remove(path);
     SD.remove(path + ".done");
     out.printf("[up] %s: empty, removed\n", name.c_str());
     return true;
+  }
+  case UPLOAD_SEND:
+    break;
   }
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
@@ -1311,11 +1297,10 @@ static bool uploadOne(const String& name) {
     int code = http.sendRequest("PUT", &f, f.size());
     String body = code > 0 ? http.getString() : String();
     http.end();
-    String want = String("\"sha256\":\"") + sha + "\"";
-    ok = code == 200 && body.indexOf(want) >= 0;
+    ok = uploadAccepted(code, body.c_str(), done.sha);
     if (ok) {
       int p = body.indexOf("\"processed\":");
-      out.printf("[up] %s: %u bytes in %.1f s, checked%s\n", name.c_str(), size,
+      out.printf("[up] %s: %u bytes in %.1f s, checked%s\n", name.c_str(), done.size,
                  (millis() - t0) / 1000.0f,
                  p < 0 ? "" : body.substring(p + 12, p + 17) == "false" ? ", not processed"
                                                                          : ", processed");
@@ -1412,8 +1397,6 @@ static void keepWifi() {
 static const uint32_t BEAT_MS = 10000;
 static std::atomic<uint32_t> beatsSent{0};
 static const char* BEATS_FILE = "/beats.jsonl";
-static const uint32_t BEATS_MAX_BYTES = 3000000;   // about 12 hours offline; later ones dropped
-static const size_t BEATS_BATCH_BYTES = 48000;      // a request (the Worker takes 64 KB)
 static const int BEATS_BATCHES_PER_TURN = 4;        // then the drive uploads get a turn
 static uint32_t beatsKept = 0;
 
@@ -1507,7 +1490,7 @@ static void keepBeat() {
   std::lock_guard<std::recursive_mutex> g(sdLock);
   File f = SD.open(BEATS_FILE, FILE_APPEND);
   if (!f) return;
-  if (f.size() + line.size() <= BEATS_MAX_BYTES) {
+  if (beatFits(f.size(), line.size())) {
     f.write((const uint8_t*)line.data(), line.size());
     beatsKept++;
   }
@@ -1521,30 +1504,23 @@ static void sendKeptBeats() {
   static uint32_t sentTo = 0;
   static uint8_t buf[2048];
   for (int n = 0; n < BEATS_BATCHES_PER_TURN && WiFi.isConnected(); n++) {
-    std::string body = "{\"beats\":[", line;
-    uint32_t end = sentTo, size = 0;
-    size_t count = 0;
+    BeatBatch batch;                           // lib/logger/upload.h
+    uint32_t size = 0;
     {
       std::lock_guard<std::recursive_mutex> g(sdLock);
       File f = SD.open(BEATS_FILE);
       if (!f) { sentTo = 0; return; }
       size = f.size();
       f.seek(sentTo);
-      bool full = false;
-      while (!full && f.available()) {
+      bool more = true;
+      while (more && f.available()) {
         int k = f.read(buf, sizeof(buf));
-        for (int i = 0; i < k; i++) {
-          if (buf[i] != '\n') { line += (char)buf[i]; continue; }
-          if (body.size() + line.size() + 2 > BEATS_BATCH_BYTES && count) { full = true; break; }
-          if (count++) body += ',';
-          body += line;
-          end += line.size() + 1;
-          line.clear();
-        }
+        if (k <= 0) break;
+        more = batch.feed(buf, k);
       }
       f.close();
     }
-    if (!count) {                              // all sent (or only a torn last line)
+    if (!batch.count()) {                      // all sent (or only a torn last line)
       std::lock_guard<std::recursive_mutex> g(sdLock);
       SD.remove(BEATS_FILE);
       if (beatsKept || sentTo) {
@@ -1553,12 +1529,12 @@ static void sendKeptBeats() {
       sentTo = beatsKept = 0;
       return;
     }
-    int code = postBeat(body + "]}", "/api/logger/heartbeats");
+    int code = postBeat(batch.body(), "/api/logger/heartbeats");
     if (code != 200) {
       out.printf("[beat] kept check-ins: send failed (%d); trying again later\n", code);
       return;
     }
-    sentTo = end;
+    sentTo += batch.used();
   }
 }
 
@@ -1705,7 +1681,6 @@ static void channelsIfDue() {
 static const char* FW_FILE = "/fw.bin";
 static const char* FW_DOWNLOAD = "/fw.dl";
 static const uint32_t OTA_CHECK_MS = 10 * 60 * 1000;
-static const uint32_t OTA_TRIAL_MS = 5 * 60 * 1000;
 static const uint32_t OTA_IDLE_MS = 60000;
 static std::atomic<bool> otaReady{false};     // a checked image on the card
 static std::atomic<bool> otaTrial{false};     // this build is new and not kept yet
@@ -1751,11 +1726,14 @@ static void otaBoot() {
   Preferences prefs;
   prefs.begin("logger");
   String to = prefs.getString("otato", "");
-  if (run && esp_ota_get_state_partition(run, &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY) {
+  bool pending = run && esp_ota_get_state_partition(run, &st) == ESP_OK &&
+                 st == ESP_OTA_IMG_PENDING_VERIFY;
+  OtaStart start = otaStart(pending, to.c_str(), FW_VERSION);   // lib/logger/ota.h
+  if (start == OTA_TRIAL) {
     otaTrial = true;
     setOta(std::string("trying ") + FW_VERSION);
     out.printf("[ota] firmware %s on trial: kept once it checks in or reaches the car\n", FW_VERSION);
-  } else if (to.length() && to != FW_VERSION) {  // installed, but this is the build before it
+  } else if (start == OTA_WENT_BACK) {
     prefs.putString("otabad", to);
     prefs.remove("otato");
     setOta(std::string("went back from ") + to.c_str());
@@ -1764,8 +1742,11 @@ static void otaBoot() {
   String sd = prefs.getString("otasd", ""), bad = prefs.getString("otabad", "");
   prefs.end();
   if (!sd.length()) return;
-  if (sdOk && SD.exists(FW_FILE) && wantUpdate(FW_VERSION, sd.c_str(), bad.c_str())) otaReady = true;
-  else otaForget();
+  if (cardImageWanted(sdOk && SD.exists(FW_FILE), sd.c_str(), FW_VERSION, bad.c_str())) {
+    otaReady = true;
+  } else {
+    otaForget();
+  }
 }
 
 // The card's image into the other app slot, checking its hash again on the
@@ -1824,7 +1805,7 @@ static void otaInstall() {
 
 // Back to the last build if this one hasn't proved itself in time.
 static void otaTrialCheck() {
-  if (!otaTrial || millis() < OTA_TRIAL_MS) return;
+  if (!trialOver(otaTrial, millis())) return;
   out.printf("[ota] firmware %s didn't check in or reach the car in %u min; going back\n", FW_VERSION,
              (unsigned)(OTA_TRIAL_MS / 60000));
   delay(300);
@@ -2005,7 +1986,8 @@ static void status() {
                (millis() - driveStartMs) / 60000.0f, (unsigned)fastRows, cycleRate,
                (unsigned)sweepRows, sweepPassMs / 1000.0f);
     out.printf("; per cycle: reads %.0f ms, rows and files %.0f ms; %s", msFast, msWrite,
-               sameConnection ? "overlapping requests" : "one request at a time per connection");
+               fallback.sameConnection() ? "overlapping requests"
+                                         : "one request at a time per connection");
   }
   out.println();
   size_t rested = 0;

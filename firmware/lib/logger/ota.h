@@ -2,6 +2,7 @@
 // whether to take the build it offers. No Arduino code, so the host test
 // covers it; the downloading and installing are in logger/src/main.cpp.
 #pragma once
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -64,6 +65,35 @@ inline bool parseManifest(const std::string& j, Manifest& m) {
 inline bool wantUpdate(const std::string& own, const std::string& offered,
                        const std::string& bad) {
   return own != "dev" && !offered.empty() && offered != own && offered != bad;
+}
+
+// A new build is on trial until it checks in with the Worker or reaches the
+// car; one that does neither this long after power-on goes back.
+static const uint32_t OTA_TRIAL_MS = 5 * 60 * 1000;
+
+enum OtaStart {
+  OTA_NORMAL,
+  OTA_TRIAL,       // a new build, not kept yet
+  OTA_WENT_BACK,   // the build installed didn't prove itself: this is the one before
+};
+
+// At power-on: `pendingVerify` the bootloader's mark on the running build
+// (new and not yet kept), `installed` the version last installed ("" once
+// kept), `own` this build's.
+inline OtaStart otaStart(bool pendingVerify, const std::string& installed,
+                         const std::string& own) {
+  if (pendingVerify) return OTA_TRIAL;
+  if (!installed.empty() && installed != own) return OTA_WENT_BACK;
+  return OTA_NORMAL;
+}
+
+inline bool trialOver(bool trial, uint32_t upMs) { return trial && upMs >= OTA_TRIAL_MS; }
+
+// Whether the image waiting on the card (version `card`) is still to be
+// installed; if not, it's removed.
+inline bool cardImageWanted(bool onCard, const std::string& card, const std::string& own,
+                            const std::string& bad) {
+  return onCard && wantUpdate(own, card, bad);
 }
 
 }  // namespace logger
