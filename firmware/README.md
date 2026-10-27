@@ -159,7 +159,7 @@ while Wi-Fi is up: a small JSON report with the boot number and why it
 booted (a brownout shows there), uptime, what it's doing, the speed, rpm,
 battery voltage, coolant and oil temperature (`ITKUA`, `ITOEL`) and the GPS
 position when the channel table has them and has read them in the last 30 s
-(null otherwise; battery is `IUIBS`, not in the built-in tiers), files
+(null otherwise; battery is the DME's `IUADW`, in the medium tier, else `IUIBS`), files
 waiting, Wi-Fi and memory, and which channel
 file it's running (`channels`: the active preset's ETag, `manual` for one
 sent over the terminal, `card` or `built-in`), which the logger channel page
