@@ -16,7 +16,10 @@
 //   3. Meanwhile, on the other core: whenever Wi-Fi is up, upload finished
 //      files, compare the SHA-256 the Worker reports with the board's own,
 //      and delete a file only when they match; check in every 10 s (kept on
-//      the card while there's no Wi-Fi, and sent when there is).
+//      the card while there's no Wi-Fi, and sent when there is); fetch a
+//      newer firmware the Worker offers to the card, installed at the next
+//      power-on (or after a minute idle), kept only once it checks in or
+//      reaches the car.
 //
 // What to read comes from channels.csv on the card (n63read logger-channels),
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
@@ -40,9 +43,11 @@
 #include <Preferences.h>
 #include <SD.h>
 #include <SPI.h>
+#include <Update.h>
 #include <WiFi.h>
 #include <errno.h>
 #include <esp_heap_caps.h>
+#include <esp_ota_ops.h>
 #include <esp_sntp.h>
 #include <lwip/sockets.h>
 #include <sys/time.h>
@@ -60,6 +65,7 @@
 #include "faults.h"
 #include "default_channels.h"
 #include "hsfz.h"
+#include "ota.h"
 #include "plan.h"
 #include "sha256.h"
 
@@ -74,6 +80,11 @@
 #endif
 #ifndef TZ_INFO
 #define TZ_INFO "UTC0"
+#endif
+// This build's version: firmware/tools/publish_firmware.py sets it; an IDE
+// build is "dev", which never takes an update (lib/logger/ota.h).
+#ifndef FW_VERSION
+#define FW_VERSION "dev"
 #endif
 
 using namespace logger;
@@ -208,6 +219,8 @@ static bool channelsFromCard = false;
 static std::mutex tagLock;
 static std::string channelsTag = "built-in";
 static std::string channelsPreset;           // the preset's name, for a downloaded file
+static std::string otaStatus;                // the firmware updater's state, for the check-ins
+static void otaKeep(const char* why);        // a new firmware proved itself (below)
 // From the last stats note, for the check-ins (the logger channel page's rate
 // estimates): the smaller batch sizes ("0x12:6 0x18:1"), each collected-later
 // module's answer time ("0x63:260"), the slow pass and the reads per cycle.
@@ -666,11 +679,13 @@ static void startDrive() {
   std::replace(from.begin(), from.end(), ',', ' ');       // the note is a CSV cell
   std::replace(from.begin(), from.end(), ';', ' ');
   char start[256];
-  snprintf(start, sizeof(start), "start VIN %s; boot %u after %s; up %.1f s; %u channels from %s%s",
-           vin, (unsigned)bootCount, resetReason(), millis() / 1000.0f,
+  snprintf(start, sizeof(start),
+           "start VIN %s; boot %u after %s; up %.1f s; firmware %s; %u channels from %s%s", vin,
+           (unsigned)bootCount, resetReason(), millis() / 1000.0f, FW_VERSION,
            (unsigned)table.channels.size(), from.c_str(),
            !timeKnown() ? "; clock unknown" : clockFromCar ? "; clock from the car" : "");
   addNote(start);
+  otaKeep("reached the car");
   dueTiers = duePeriodic();
   onceRowAt = 0;
   scheduler.build(plan, dueTiers);
@@ -1446,6 +1461,7 @@ static std::string beatJson(bool boot, bool buffered = false) {
   jsonNumber(j, "faults", faults < 0 ? NAN : faults, 0);
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
   jsonText(j, "vin", vin);
+  jsonText(j, "fw", FW_VERSION);
   if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
   jsonText(j, "wifi", WiFi.SSID().c_str());
   jsonNumber(j, "rssi", WiFi.RSSI(), 0);
@@ -1457,6 +1473,7 @@ static std::string beatJson(bool boot, bool buffered = false) {
   {
     std::lock_guard<std::mutex> g(tagLock);
     jsonText(j, "channels", channelsTag.c_str());
+    if (!otaStatus.empty()) jsonText(j, "ota", otaStatus.c_str());
     if (!liveBatches.empty()) jsonText(j, "batches", liveBatches.c_str());
     if (!liveAnswers.empty()) jsonText(j, "answer_ms", liveAnswers.c_str());
     jsonNumber(j, "slow_pass_s", liveSlowPassS, 0);
@@ -1549,6 +1566,9 @@ static void beatIfDue() {
   static uint32_t last = 0;
   static bool tried = false, booted = false, failing = false;
   if (!strlen(WORKER_HOST)) return;
+#ifdef OTA_TEST_SILENT
+  return;                                  // a test build that never checks in: it must go back
+#endif
   if (tried && millis() - last < BEAT_MS) return;
   tried = true;
   last = millis();
@@ -1556,6 +1576,7 @@ static void beatIfDue() {
   int code = postBeat(beatJson(!booted));
   if (code == 200) {
     beatsSent++;
+    otaKeep("checked in");
     if (!booted) out.printf("[beat] checked in (boot %u)\n", (unsigned)bootCount);
     else if (failing) out.println("[beat] checking in again");
     booted = true;
@@ -1666,6 +1687,241 @@ static void channelsIfDue() {
   fetchChannels();
 }
 
+// ---- firmware updates over the air -------------------------------------------
+// The Worker offers one build (GET /api/logger/firmware: version, SHA-256,
+// size; firmware/tools/publish_firmware.py publishes it). The upload task
+// checks soon after Wi-Fi comes up and every 10 minutes and, for a version
+// it wants (lib/logger/ota.h), downloads the image to the card and checks
+// its hash: the card, not the flash, so a drive's logging isn't held up by
+// flash writes. It's installed into the other app slot at the next power-on,
+// before the car is looked for (about 10 s), or once the board has been idle
+// a minute (on the bench), and the board restarts into it.
+//
+// A new build is on trial until it checks in with the Worker or reaches the
+// car; if it does neither within OTA_TRIAL_MS, or crashes or hangs first, the
+// bootloader goes back to the last build, which then won't take that version
+// again. Keys in "logger": otasd/otasha (a checked image on the card), otato
+// (the version just installed), otabad (one that went back).
+static const char* FW_FILE = "/fw.bin";
+static const char* FW_DOWNLOAD = "/fw.dl";
+static const uint32_t OTA_CHECK_MS = 10 * 60 * 1000;
+static const uint32_t OTA_TRIAL_MS = 5 * 60 * 1000;
+static const uint32_t OTA_IDLE_MS = 60000;
+static std::atomic<bool> otaReady{false};     // a checked image on the card
+static std::atomic<bool> otaTrial{false};     // this build is new and not kept yet
+
+static void setOta(const std::string& s) {
+  std::lock_guard<std::mutex> g(tagLock);
+  otaStatus = s;
+}
+
+// The Arduino core marks a new build good as it starts unless this says it
+// will decide itself (otaKeep).
+bool verifyRollbackLater() { return true; }
+
+static void otaKeep(const char* why) {
+  if (!otaTrial.exchange(false)) return;
+  esp_ota_mark_app_valid_cancel_rollback();
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.remove("otato");
+  prefs.end();
+  setOta("");
+  out.printf("[ota] firmware %s kept (%s)\n", FW_VERSION, why);
+}
+
+static void otaForget() {                      // the card's image, gone or not wanted
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  SD.remove(FW_FILE);
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.remove("otasd");
+  prefs.remove("otasha");
+  prefs.end();
+  otaReady = false;
+}
+
+// At boot, before the car: whether this build is on trial, whether the last
+// one went back, and whether an image waits on the card.
+static void otaBoot() {
+  esp_ota_img_states_t st;
+  const esp_partition_t* run = esp_ota_get_running_partition();
+  Preferences prefs;
+  prefs.begin("logger");
+  String to = prefs.getString("otato", "");
+  if (run && esp_ota_get_state_partition(run, &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY) {
+    otaTrial = true;
+    setOta(std::string("trying ") + FW_VERSION);
+    out.printf("[ota] firmware %s on trial: kept once it checks in or reaches the car\n", FW_VERSION);
+  } else if (to.length() && to != FW_VERSION) {  // installed, but this is the build before it
+    prefs.putString("otabad", to);
+    prefs.remove("otato");
+    setOta(std::string("went back from ") + to.c_str());
+    out.printf("[ota] firmware %s didn't prove itself; back on %s\n", to.c_str(), FW_VERSION);
+  }
+  String sd = prefs.getString("otasd", ""), bad = prefs.getString("otabad", "");
+  prefs.end();
+  if (!sd.length()) return;
+  if (sdOk && SD.exists(FW_FILE) && wantUpdate(FW_VERSION, sd.c_str(), bad.c_str())) otaReady = true;
+  else otaForget();
+}
+
+// The card's image into the other app slot, checking its hash again on the
+// way, then a restart into it. A failure marks the version bad.
+static void otaInstall() {
+  Preferences prefs;
+  prefs.begin("logger", true);
+  std::string version = prefs.getString("otasd", "").c_str();
+  std::string want = prefs.getString("otasha", "").c_str();
+  prefs.end();
+  setOta("installing " + version);
+  out.printf("[ota] installing firmware %s (running %s)\n", version.c_str(), FW_VERSION);
+  static uint8_t buf[4096];
+  bool ok = false;
+  std::string why;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    File f = SD.open(FW_FILE);
+    ok = f && f.size() > 0 && Update.begin(f.size());
+    if (!ok) why = f ? Update.errorString() : "no image on the card";
+    Sha256 sha;
+    while (ok && f.available()) {
+      int k = f.read(buf, sizeof(buf));
+      if (k <= 0) break;
+      sha.update(buf, k);
+      ok = Update.write(buf, k) == (size_t)k;
+      if (!ok) why = Update.errorString();
+    }
+    if (f) f.close();
+    char hex[65];
+    sha.finishHex(hex);
+    if (ok && want != hex) { ok = false; why = "the card's copy changed"; }
+    if (ok) {
+      ok = Update.end();                       // checks the image, and boots it next
+      if (!ok) why = Update.errorString();
+    } else if (Update.isRunning()) {
+      Update.abort();
+    }
+  }
+  otaForget();
+  prefs.begin("logger");
+  if (!ok) {
+    prefs.putString("otabad", version.c_str());
+    prefs.end();
+    setOta("install of " + version + " failed: " + why);
+    out.printf("[ota] install of %s failed (%s); staying on %s\n", version.c_str(), why.c_str(),
+               FW_VERSION);
+    return;
+  }
+  prefs.putString("otato", version.c_str());
+  prefs.end();
+  out.printf("[ota] installed %s; restarting into it\n", version.c_str());
+  delay(300);
+  ESP.restart();
+}
+
+// Back to the last build if this one hasn't proved itself in time.
+static void otaTrialCheck() {
+  if (!otaTrial || millis() < OTA_TRIAL_MS) return;
+  out.printf("[ota] firmware %s didn't check in or reach the car in %u min; going back\n", FW_VERSION,
+             (unsigned)(OTA_TRIAL_MS / 60000));
+  delay(300);
+  esp_ota_mark_app_invalid_rollback_and_reboot();
+}
+
+static int workerGet(HTTPClient& http, NetworkClientSecure& tls, const char* path) {
+  tls.useBuiltinCACertBundle();
+  http.setTimeout(30000);
+  http.setConnectTimeout(10000);
+  if (!http.begin(tls, String("https://") + WORKER_HOST + path)) return -1;
+#ifdef ACCESS_CLIENT_ID
+  http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
+  http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
+#endif
+  return http.GET();
+}
+
+// The image to the card, hashed as it comes; kept only if size and hash match.
+static bool otaDownload(const Manifest& m) {
+  NetworkClientSecure tls;
+  HTTPClient http;
+  int code = workerGet(http, tls, "/api/logger/firmware.bin");
+  if (code != 200) { http.end(); out.printf("[ota] download: %d\n", code); return false; }
+  File f;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    SD.remove(FW_DOWNLOAD);
+    f = SD.open(FW_DOWNLOAD, FILE_WRITE);
+  }
+  if (!f) { http.end(); return false; }
+  NetworkClient* s = http.getStreamPtr();
+  static uint8_t buf[4096];
+  Sha256 sha;
+  size_t got = 0;
+  uint32_t lastData = millis();
+  while (got < m.size && (http.connected() || s->available()) && millis() - lastData < 30000) {
+    size_t a = s->available();
+    if (!a) { delay(5); continue; }
+    size_t want = std::min(std::min(a, sizeof(buf)), m.size - got);
+    int k = s->readBytes(buf, want);
+    if (k <= 0) continue;
+    if (f.write(buf, k) != (size_t)k) break;
+    sha.update(buf, k);
+    got += k;
+    lastData = millis();
+  }
+  f.close();
+  http.end();
+  char hex[65];
+  sha.finishHex(hex);
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  if (got != m.size || m.sha256 != hex) {
+    SD.remove(FW_DOWNLOAD);
+    out.printf("[ota] download of %s: %u of %u bytes, hash %s\n", m.version.c_str(), (unsigned)got,
+               (unsigned)m.size, m.sha256 == hex ? "ok" : "differs");
+    return false;
+  }
+  SD.remove(FW_FILE);
+  SD.rename(FW_DOWNLOAD, FW_FILE);
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.putString("otasd", m.version.c_str());
+  prefs.putString("otasha", m.sha256.c_str());
+  prefs.end();
+  return true;
+}
+
+static void otaCheckIfDue() {
+  static uint32_t last = 0;
+  static bool tried = false;
+  if (!strcmp(FW_VERSION, "dev") || otaReady || otaTrial || !sdOk || !WiFi.isConnected() ||
+      !strlen(WORKER_HOST)) {
+    return;
+  }
+  if (tried && millis() - last < OTA_CHECK_MS) return;
+  tried = true;
+  last = millis();
+  NetworkClientSecure tls;
+  HTTPClient http;
+  int code = workerGet(http, tls, "/api/logger/firmware");
+  std::string body = code == 200 ? http.getString().c_str() : "";
+  http.end();
+  Manifest m;
+  if (code != 200 || !parseManifest(body, m)) return;   // 404: nothing published
+  Preferences prefs;
+  prefs.begin("logger", true);
+  std::string bad = prefs.getString("otabad", "").c_str();
+  prefs.end();
+  if (!wantUpdate(FW_VERSION, m.version, bad)) return;
+  out.printf("[ota] firmware %s offered (running %s); downloading\n", m.version.c_str(), FW_VERSION);
+  setOta("downloading " + m.version);
+  if (!otaDownload(m)) { setOta("download of " + m.version + " failed"); return; }
+  otaReady = true;
+  setOta("downloaded " + m.version + "; installs at the next power-on");
+  out.printf("[ota] %s on the card; installs at the next power-on or after a minute idle\n",
+             m.version.c_str());
+}
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
@@ -1674,6 +1930,7 @@ static void uploadTask(void*) {
     keepWifi();
     beatIfDue();
     channelsIfDue();
+    otaCheckIfDue();
     if (!uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     uploadNow = false;
     last = millis();
@@ -1784,6 +2041,13 @@ static void status() {
              sdOk ? SD.totalBytes() / 1e6 : 0.0, (unsigned)(ESP.getFreePsram() / 1024),
              (unsigned)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024),
              (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024));
+  std::string ota;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    ota = otaStatus;
+  }
+  out.printf("[status] firmware %s%s%s%s\n", FW_VERSION, ota.empty() ? "" : ": ", ota.c_str(),
+             strcmp(FW_VERSION, "dev") ? "" : " (an IDE build: takes no updates)");
 }
 
 static void listPending() {
@@ -1955,8 +2219,8 @@ void setup() {
   bootCount = prefs.getUInt("boots", 0) + 1;
   prefs.putUInt("boots", bootCount);
   prefs.end();
-  out.printf("\nm550 logger (read-only), boot %u after %s, PSRAM %u KB\n", (unsigned)bootCount,
-             resetReason(), (unsigned)(ESP.getPsramSize() / 1024));
+  out.printf("\nm550 logger (read-only), firmware %s, boot %u after %s, PSRAM %u KB\n", FW_VERSION,
+             (unsigned)bootCount, resetReason(), (unsigned)(ESP.getPsramSize() / 1024));
 
   sntp_set_time_sync_notification_cb([](struct timeval*) { clockFromCar = false; });
 
@@ -1977,6 +2241,8 @@ void setup() {
   } else {
     out.println("[sd] NO CARD (or not FAT): logging needs one");
   }
+  otaBoot();
+  if (otaReady) otaInstall();                // a new build on the card: in before the car
   loadChannels();
   startWifi();
   xTaskCreatePinnedToCore(uploadTask, "upload", 12288, nullptr, 1, nullptr, 0);
@@ -1986,6 +2252,12 @@ void setup() {
 
 void loop() {
   serviceTerminal();
+  // Firmware: a build on trial goes back if it hasn't proved itself in time;
+  // one waiting on the card goes in once the board has been idle a minute.
+  static uint32_t idleSince = 0;
+  otaTrialCheck();
+  if (state == LOGGING) idleSince = millis();
+  else if (otaReady && millis() - idleSince >= OTA_IDLE_MS) otaInstall();
   switch (state) {
     case WAIT_LINK:
       if (linkUp) state = SEARCH;

@@ -11,6 +11,7 @@ the Windows build.
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
 | `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
+| `tools/publish_firmware.py` | Build the logger with a version and publish it for updates over the air, or flash it by USB |
 | `logger/` | The logger: logs the car to the SD card, uploads each drive to the cloud Worker |
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
 
@@ -61,7 +62,10 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    `python firmware/tools/send_channels.py <address> channels.csv`. A file sent
    that way stays until the active preset changes. Without a file the board
    reads its built-in fast and medium tiers.
-3. **Flash.** Open `firmware/logger` in PlatformIO and Upload.
+3. **Flash.** `python firmware/tools/publish_firmware.py --usb COM4` (the
+   board's port) builds it with a version and flashes it by USB; from then
+   on, updates come over the air (below). Uploading from the PlatformIO IDE
+   works too, but makes a "dev" build, which takes no updates.
 
 Each boot it closes a drive a power cut left open, then looks for the car
 (the address it had last time first, then discovery) and logs while it
@@ -177,6 +181,38 @@ status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end
 the drive, `v` the newest files' first and last lines, `C` take a channel
 file (`send_channels.py` does this), `X` delete waiting files (after bench
 runs; asks first), `h` help.
+
+### Updates over the air
+
+    python firmware/tools/publish_firmware.py
+
+builds the logger with a version (the UTC time and the commit, e.g.
+`20261027-0215-706ddb6`; uncommitted changes are refused unless
+`--allow-dirty`) and publishes it to the Worker (`PUT /api/logger/firmware`,
+with the Access token from `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`,
+else the board's own from `logger_secrets.h`). The Worker keeps one build.
+
+The board asks for it soon after Wi-Fi comes up and every 10 minutes. For a
+version other than its own (an older one too: publishing the old build is
+how to go back), it downloads the image to the card, during a drive as well,
+and checks its size and SHA-256. It installs it into the other app slot at
+the next power-on, before it looks for the car (about 10 s, once), or after
+a minute idle on the bench, and restarts into it.
+
+A new build is on trial until it checks in with the Worker or reaches the
+car. If it does neither within 5 minutes, or crashes or hangs before that,
+the bootloader goes back to the build before, which then won't take that
+version again (publish another). An image that won't install is refused the
+same way. The check-ins carry `fw` (the version) and `ota` (what the updater
+is doing: downloading, downloaded, trying, went back, failed), and the
+logger page shows them with the published version. A "dev" build (from the
+IDE) takes no updates, so bench work isn't replaced under you.
+
+Tested on the bench: `--usb COM4` once; then publish (it updates and keeps
+the new build); publish with `--flag OTA_TEST_SILENT` (a build that never
+checks in: after 5 minutes it goes back); publish a build with bytes changed
+in its middle (it downloads, its hash being the one published, but the
+install's image check refuses it and it stays on its build).
 
 ## Spike
 

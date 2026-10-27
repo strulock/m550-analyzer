@@ -1,5 +1,6 @@
 // Host test of lib/logger: SHA-256, the channel file, decoding, the read
-// plan, bursts, the CSV layout, the fault reads and the car's clock.
+// plan, bursts, the CSV layout, the fault reads, the car's clock and the
+// firmware manifest.
 //   cd firmware && g++ -std=c++17 -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 // Run one case by name: ./test_logger decode
 #include <cmath>
@@ -12,6 +13,7 @@
 #include "channels.h"
 #include "csvlog.h"
 #include "faults.h"
+#include "ota.h"
 #include "plan.h"
 #include "sha256.h"
 
@@ -684,7 +686,30 @@ static void test_scheduler_fast_only() {
   CHECK(medium);
 }
 
+// The Worker's firmware manifest, and which builds the board takes.
+static void test_ota() {
+  const std::string sha(64, 'a');
+  Manifest m;
+  CHECK(parseManifest("{\"version\":\"20261027-0200-abc1234\",\"sha256\":\"" + sha +
+                      "\",\"size\":1395456,\"uploaded\":\"2026-10-27T02:00:00.000Z\"}", m));
+  CHECK(m.version == "20261027-0200-abc1234" && m.sha256 == sha && m.size == 1395456);
+  CHECK(parseManifest("{ \"size\" : 12 , \"sha256\" : \"" + sha + "\", \"version\" : \"v2\" }", m));
+  CHECK(m.size == 12 && m.version == "v2");
+  CHECK(!parseManifest("{\"error\":\"no firmware published\"}", m));
+  CHECK(!parseManifest("{\"version\":\"v\",\"sha256\":\"abc\",\"size\":1}", m));           // short hash
+  CHECK(!parseManifest("{\"version\":\"v\",\"sha256\":\"" + std::string(64, 'G') + "\",\"size\":1}", m));
+  CHECK(!parseManifest("{\"version\":\"v\",\"sha256\":\"" + sha + "\",\"size\":0}", m));
+  CHECK(!parseManifest("{\"version\":\"v\",\"sha256\":\"" + sha + "\",\"size\":\"x\"}", m));
+  CHECK(wantUpdate("v1", "v2", ""));
+  CHECK(wantUpdate("v2", "v1", ""));                         // going back is publishing the old one
+  CHECK(!wantUpdate("v1", "v1", ""));
+  CHECK(!wantUpdate("v1", "v2", "v2"));                      // rolled back once: not again
+  CHECK(!wantUpdate("dev", "v2", ""));                       // bench builds stay put
+  CHECK(!wantUpdate("v1", "", ""));
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"ota", test_ota},
   {"car_clock", test_car_clock},
   {"burst", test_burst},
   {"scheduler_fast_only", test_scheduler_fast_only},

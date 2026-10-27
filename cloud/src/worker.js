@@ -944,10 +944,48 @@ async function loggerStatus(env, hours, now = new Date()) {
        SUM(COALESCE(json_extract(data, '$.buffered'), 0)) AS buffered
      FROM heartbeats WHERE received >= ? GROUP BY boot ORDER BY first, boot`).bind(since).all())
     .results || [];
-  if (!last || !last.length) return { online: false, last: null, sessions };
+  const firmware = await firmwareManifest(env);
+  if (!last || !last.length) return { online: false, last: null, sessions, firmware };
   const age = Math.round((now.getTime() - Date.parse(last[0].received)) / 1000);
   return { online: age <= ONLINE_S, seen_s_ago: age,
-    last: { received: last[0].received, ...JSON.parse(last[0].data) }, sessions };
+    last: { received: last[0].received, ...JSON.parse(last[0].data) }, sessions, firmware };
+}
+
+// ------------------------------------------------------------------ firmware
+// The logger's firmware for over-the-air updates: one published build at a
+// time (firmware/tools/publish_firmware.py sends it), the image in R2 and a
+// manifest beside it. The board compares the manifest's version with its
+// own, downloads the image to its card and checks the SHA-256 (firmware/
+// README.md has the rest).
+
+const FIRMWARE_BIN = "firmware/logger.bin";
+const FIRMWARE_MANIFEST = "firmware/logger.json";
+const MAX_FIRMWARE = 6 * 1024 * 1024;        // the board's app partition is 6.25 MB
+const VERSION_RE = /^[\w.-]{1,40}$/;
+
+/** {version, sha256, size, uploaded}, or null when nothing is published. */
+async function firmwareManifest(env) {
+  const obj = await env.FILES.get(FIRMWARE_MANIFEST);
+  return obj ? JSON.parse(await obj.text()) : null;
+}
+
+/** Publish a build: the image (an ESP32 app image starts 0xE9) and its
+ * version, which mustn't be "dev" (the board's unversioned builds). */
+async function putFirmware(env, version, data, now = new Date()) {
+  if (!VERSION_RE.test(version || "") || version === "dev") {
+    throw new ToolError("version: letters, digits, dot, dash or underscore, not \"dev\"");
+  }
+  const bytes = new Uint8Array(data);
+  if (!bytes.length || bytes[0] !== 0xE9) throw new ToolError("not an ESP32 app image");
+  if (bytes.length > MAX_FIRMWARE) throw new ToolError("too large for the app partition");
+  const manifest = { version, sha256: await sha256Hex(data), size: bytes.length,
+    uploaded: now.toISOString() };
+  await env.FILES.put(FIRMWARE_BIN, data, {
+    httpMetadata: { contentType: "application/octet-stream" },
+    customMetadata: { version, sha256: manifest.sha256 } });
+  await env.FILES.put(FIRMWARE_MANIFEST, new TextEncoder().encode(JSON.stringify(manifest)),
+    { httpMetadata: { contentType: "application/json" } });
+  return manifest;
 }
 
 // ------------------------------------------------------------------ MCP tools
@@ -1047,8 +1085,9 @@ export const TOOLS = [
       "while it has Wi-Fi, and once at power-on; with no Wi-Fi it keeps them and sends them " +
       "later), its last check-in (state, the drive being logged, speed, rpm, battery " +
       "voltage, coolant and oil temperature, GPS position, files waiting to upload, Wi-Fi, " +
-      "memory) and each power-on in the last `hours` (first and last check-in, why it " +
-      "booted, top speed, hottest coolant and oil). Times in UTC.",
+      "memory, its firmware version and update state) and each power-on in the last " +
+      "`hours` (first and last check-in, why it booted, top speed, hottest coolant and " +
+      "oil), and the firmware published for it. Times in UTC.",
     inputSchema: { type: "object", properties: {
       hours: { type: "number", description: "Power-ons this far back; default 24" } } },
   },
@@ -1350,6 +1389,31 @@ export async function handle(request, env, fetcher = fetch) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
     }
+  }
+  if (url.pathname === "/api/logger/firmware") {
+    if (request.method === "GET") {
+      const m = await firmwareManifest(env);
+      return m ? json(m) : json({ error: "no firmware published" }, 404);
+    }
+    if (request.method === "PUT") {
+      const len = Number(request.headers.get("content-length") || 0);
+      if (len > MAX_FIRMWARE) return json({ error: "too large" }, 413);
+      try {
+        return json({ ok: true, ...(await putFirmware(env, url.searchParams.get("version"),
+          await request.arrayBuffer())) });
+      } catch (e) {
+        if (e instanceof ToolError) return json({ error: e.message }, 400);
+        throw e;
+      }
+    }
+    return new Response(null, { status: 405 });
+  }
+  if (url.pathname === "/api/logger/firmware.bin" && request.method === "GET") {
+    const obj = await env.FILES.get(FIRMWARE_BIN);
+    if (!obj) return json({ error: "no firmware published" }, 404);
+    const data = await obj.arrayBuffer();
+    return new Response(data, { headers: { "content-type": "application/octet-stream",
+      "content-length": String(data.byteLength), "cache-control": "no-store" } });
   }
   if (url.pathname === "/api/logger/tanks" && request.method === "GET") {
     return json({ tanks: await tankHistory(env) });
