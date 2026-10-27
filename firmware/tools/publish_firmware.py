@@ -99,8 +99,10 @@ def publish(v, host):
     cid, secret = token()
     req = urllib.request.Request(
         "https://%s/api/logger/firmware?version=%s" % (host, v), data=data, method="PUT",
+        # Cloudflare turns away urllib's own User-Agent (error 1010).
         headers={"CF-Access-Client-Id": cid, "CF-Access-Client-Secret": secret,
-                 "Content-Type": "application/octet-stream"})
+                 "Content-Type": "application/octet-stream",
+                 "User-Agent": "n63read-publish-firmware/1"})
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
             reply = r.read().decode()

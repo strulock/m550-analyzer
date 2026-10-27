@@ -1716,8 +1716,10 @@ static void setOta(const std::string& s) {
 }
 
 // The Arduino core marks a new build good as it starts unless this says it
-// will decide itself (otaKeep).
-bool verifyRollbackLater() { return true; }
+// will decide itself (otaKeep). The core's default is a weak C function and
+// no header declares it, so this must be extern "C" to replace it: without,
+// a new build was kept at once and couldn't go back (found on the bench).
+extern "C" bool verifyRollbackLater() { return true; }
 
 static void otaKeep(const char* why) {
   if (!otaTrial.exchange(false)) return;
