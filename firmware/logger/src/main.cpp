@@ -1245,6 +1245,19 @@ static bool uploadOne(const String& name) {
     f = SD.open(path);
   }
   if (!f) { out.printf("[up] %s: missing\n", name.c_str()); return false; }
+  // An empty file (one a power cut left before anything reached the card)
+  // has nothing to send, and can't be sent: HTTPClient sends a stream of
+  // size 0 without a length and waits for the file's available() to say
+  // -1, which it never does, so the upload task hung there (26-27 Oct) and
+  // everything behind it waited. Removed instead.
+  if (f.size() == 0) {
+    f.close();
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    SD.remove(path);
+    SD.remove(path + ".done");
+    out.printf("[up] %s: empty, removed\n", name.c_str());
+    return true;
+  }
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
   HTTPClient http;
