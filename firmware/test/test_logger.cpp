@@ -1,7 +1,7 @@
 // Host test of lib/logger: SHA-256, the channel file, decoding, the read
 // plan, bursts, the fall-back to one request at a time, the CSV layout, the
 // fault reads, the car's clock, the firmware manifest and update start-up,
-// and the upload rules and kept check-ins.
+// the upload rules and kept check-ins, and the full channel check.
 //   cd firmware && g++ -std=c++17 -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 // Run one case by name: ./test_logger decode
 #include <cmath>
@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "carcheck.h"
 #include "carclock.h"
 #include "channels.h"
 #include "csvlog.h"
@@ -831,7 +832,47 @@ static void test_kept_beats() {
   CHECK(sentTo == file.size() && sent == all && batches > 10);
 }
 
+// The full channel check: the Worker's list, each answer judged as the
+// app's check does, its row in the app's check CSV, and a silent module
+// skipped after three in a row.
+static void test_car_check() {
+  std::vector<CheckItem> l = parseCheckList(
+      "module,did,size,exact\n0x12,0x4029,8,1\r\n0x63,0xd104,2,0\nbad line\n0x1FF,0x1,1,1\n0x40,0x1000,64,1");
+  CHECK(l.size() == 3);
+  CHECK(l[0].module == 0x12 && l[0].did == 0x4029 && l[0].size == 8 && l[0].exact);
+  CHECK(l[1].module == 0x63 && l[1].did == 0xD104 && l[1].size == 2 && !l[1].exact);
+  CHECK(l[2].module == 0x40 && l[2].size == 64);              // no newline at the end
+  CHECK(parseCheckList("").empty());
+  const CheckItem exact = {0x12, 0x4029, 8, true}, atLeast = {0x63, 0xD104, 2, false};
+  CHECK(checkStatus(true, false, 8, exact) == CHECK_OK);
+  CHECK(checkStatus(true, false, 9, exact) == CHECK_SIZE);
+  CHECK(checkStatus(true, false, 7, exact) == CHECK_SIZE);
+  CHECK(checkStatus(true, false, 30, atLeast) == CHECK_OK);
+  CHECK(checkStatus(true, false, 1, atLeast) == CHECK_SIZE);
+  CHECK(checkStatus(false, true, 0, exact) == CHECK_REFUSED);
+  CHECK(checkStatus(false, false, 0, exact) == CHECK_NO_ANSWER);
+  CHECK(std::string(CHECK_HEADER) == "module,did,job,status,detail,reply_bytes,raw\n");
+  CHECK(checkRow(exact, "logger sweep s1", CHECK_OK, 0, 8) ==
+        "0x12,0x4029,logger sweep s1,ok,8 bytes,8,\n");
+  CHECK(checkRow(exact, "j", CHECK_REFUSED, 0x31, 0) == "0x12,0x4029,j,refused,0x31,,\n");
+  CHECK(checkRow(atLeast, "j", CHECK_SIZE, 0, 1) ==
+        "0x63,0xD104,j,size,got 1 bytes; expected >=2,1,\n");
+  CHECK(checkRow(exact, "j", CHECK_NO_ANSWER, 0, 0) == "0x12,0x4029,j,no answer,,,\n");
+  CheckSilence s;
+  CHECK(!s.answer(0x40, CHECK_NO_ANSWER) && !s.answer(0x40, CHECK_NO_ANSWER));
+  CHECK(!s.answer(0x40, CHECK_REFUSED));                     // it answered: count again
+  CHECK(!s.answer(0x40, CHECK_NO_ANSWER) && !s.answer(0x40, CHECK_NO_ANSWER));
+  CHECK(!s.answer(0x63, CHECK_NO_ANSWER));                   // per module
+  CHECK(s.answer(0x40, CHECK_NO_ANSWER) && s.skipped(0x40) && !s.skipped(0x63));
+  CHECK(!s.answer(0x40, CHECK_NO_ANSWER));                   // told once
+  for (int i = 0; i < 3; i++) s.answer(0x01, CHECK_NO_ANSWER);
+  CHECK(s.list() == "0x01 0x40");
+  s.reset();
+  CHECK(!s.skipped(0x40) && s.list().empty());
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"car_check", test_car_check},
   {"ota", test_ota},
   {"ota_start", test_ota_start},
   {"fallback", test_fallback},

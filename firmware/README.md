@@ -7,7 +7,7 @@ the Windows build.
 | Path | What |
 | --- | --- |
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
-| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, bursts and the fall-back to one request at a time, CSV layout, fault reads, the car's clock, SHA-256, the firmware update decisions (`ota.h`) and the upload and kept check-in rules (`upload.h`). No Arduino code |
+| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, bursts and the fall-back to one request at a time, CSV layout, fault reads, the car's clock, SHA-256, the firmware update decisions (`ota.h`), the upload and kept check-in rules (`upload.h`) and the full channel check (`carcheck.h`). No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
 | `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
@@ -213,6 +213,28 @@ the new build); publish with `--flag OTA_TEST_SILENT` (a build that never
 checks in: after 5 minutes it goes back); publish a build with bytes changed
 in its middle (it downloads, its hash being the one published, but the
 install's image check refuses it and it stays on its build).
+
+### Full channel sweep
+
+"Sweep on the next drive" on the logger page asks the board to check every
+identifier in the cloud's catalog once, whether the car answered it before
+or not, as the app's Answers > Check car now does (0x22 only). The request
+comes in a check-in's reply (`sweep`: its id) and is kept in flash; the
+upload task downloads the list (`GET /api/logger/check-list`) to the card.
+The next drive starts it a minute in, with every periodic tier due as well:
+three identifiers a cycle on the DMEs, waited for beside the fast reads, and
+one at a time, collected later, for the other modules; none during a burst.
+The fast tier keeps going at a lower rate.
+
+The answers go into `<drive>.check.csv` (the app's check CSV), uploaded with
+the drive; the Worker merges them into the catalog's answers, so whatever
+answers now goes into the channel file. The place is saved every 25
+identifiers: a drive that ends first notes how far it got and the next one
+carries on. A module that leaves three identifiers in a row unanswered is
+skipped and noted in the drive log; the check-ins carry `sweep_next`,
+`sweep_of` and `sweep_silent`, and the page warns about it. Once all are
+asked, `sweep_done` tells the Worker, which clears the request and shows
+when it finished. `s` on the terminal says where a sweep is.
 
 ## Spike
 

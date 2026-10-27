@@ -833,3 +833,84 @@ test("the logger page is served, behind Access like the rest", async () => {
   for (const [, js] of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) new Function(js);
   assert.equal((await call("GET", "/logger", { auth: false })).status, 403);
 });
+
+// --- the full channel sweep (sweep.js)
+
+const beatReply = async (b) => (await call("POST", "/api/logger/heartbeat",
+  { body: JSON.stringify({ boot: 7, event: "beat", ...b }) })).json();
+const sweepState = async () => (await call("GET", "/api/logger/sweep")).json();
+const putCheck = async (name, rows, job) => (await call("PUT", `/api/files/logger/${name}`, {
+  body: "module,did,job,status,detail,reply_bytes,raw\n" +
+    rows.map(([m, d, s]) => `${m},${d},${job},${s},,,`).join("\n") + "\n" })).json();
+
+test("sweep: the board's list has each identifier once, with the size its layout needs", async () => {
+  assert.equal((await call("GET", "/api/logger/check-list")).status, 404);   // no catalog yet
+  await putCatalog();
+  const r = await call("GET", "/api/logger/check-list");
+  assert.equal(r.headers.get("content-type"), "text/csv");
+  assert.equal(await r.text(), "module,did,size,exact\n" +
+    "0x12,0x4402,2,1\n0x12,0x4807,2,1\n0x29,0xDC98,24,1\n" +
+    "0x63,0xD030,1,0\n");            // no fixed size: at least the furthest field's end
+});
+
+test("sweep: asked on the page, carried in check-in replies, answers merged, done", async () => {
+  await putCatalog();
+  assert.deepEqual(await sweepState(), { pending: null, last: null });
+  assert.equal((await beatReply({})).sweep, null);
+  const a = await (await call("POST", "/api/logger/sweep")).json();
+  assert.equal(a.created, true);
+  const id = a.pending.id;
+  assert.match(id, /^s\d{8}-\d{6}$/);
+  assert.equal((await (await call("POST", "/api/logger/sweep")).json()).pending.id, id);  // once
+  assert.equal((await beatReply({})).sweep, id);
+  assert.equal((await sweepState()).pending.seen, undefined);
+  // The board has it and is under way.
+  assert.equal((await beatReply({ sweep: id, sweep_next: 2, sweep_of: 4, sweep_silent: "0x40" })).sweep, id);
+  let p = (await sweepState()).pending;
+  assert.deepEqual([p.next, p.of, p.silent, typeof p.seen], [2, 4, "0x40", "string"]);
+  // Its answers come up with the drive: the wrong-size one answers now, a
+  // refusal doesn't undo an ok, one not in the catalog is left alone.
+  const job = `logger sweep ${id}`;
+  const up = await putCheck("nt-00080-01.check.csv",
+    [["0x63", "0xD030", "ok"], ["0x29", "0xDC98", "refused"], ["0x12", "0x4807", "ok"],
+      ["0x77", "0x0001", "ok"]], job);
+  assert.deepEqual([up.processed, up.identifiers, up.changed, up.newly_ok, up.sweep],
+    [true, 4, 1, 1, id]);
+  const c = await (await call("GET", "/api/logger/catalog")).json();
+  assert.equal(c.answers["0x63:0xD030"], "ok");
+  assert.equal(c.answers["0x29:0xDC98"], "ok");
+  const { rows } = await channelRows();
+  assert.ok(rows.some((x) => x.name === "HU_ODD, \"quoted\""));      // logged from now on
+  await putCheck("nt-00080-01.check.csv", [["0x63", "0xD030", "ok"]], job);   // sent again
+  p = (await sweepState()).pending;
+  assert.deepEqual([p.counts, p.newly_ok], [{ ok: 2, refused: 1 }, 1]);
+  // Done: the flag clears and the page shows when.
+  assert.equal((await beatReply({ sweep_done: id, sweep_silent: "0x40" })).sweep, null);
+  const s = await sweepState();
+  assert.equal(s.pending, null);
+  assert.deepEqual([s.last.id, s.last.silent, s.last.next, s.last.newly_ok], [id, "0x40", 4, 1]);
+  assert.ok(s.last.done >= s.last.requested);
+  assert.equal((await (await call("GET", "/api/logger")).json()).sweep.last.id, id);
+  // A drive's file that comes up after the board said done still counts.
+  await putCheck("nt-00081-01.check.csv", [["0x12", "0x4402", "no answer"]], job);
+  assert.deepEqual((await sweepState()).last.counts, { ok: 2, refused: 1, "no answer": 1 });
+  assert.equal((await beatReply({ sweep_done: id })).sweep, null);   // said again: no change
+});
+
+test("sweep: cancelled from the page, the next check-in says so", async () => {
+  await putCatalog();
+  const id = (await (await call("POST", "/api/logger/sweep")).json()).pending.id;
+  assert.equal((await beatReply({})).sweep, id);
+  assert.deepEqual(await (await call("DELETE", "/api/logger/sweep")).json(),
+    { ok: true, cancelled: id });
+  assert.equal((await beatReply({ sweep: id, sweep_next: 1 })).sweep, null);
+  assert.deepEqual(await sweepState(), { pending: null, last: null });
+  assert.equal((await (await call("DELETE", "/api/logger/sweep")).json()).cancelled, null);
+});
+
+test("sweep: a check file that isn't one is stored, not processed", async () => {
+  await putCatalog();
+  const r = await (await call("PUT", "/api/files/logger/x.check.csv", { body: "a,b\n1,2\n" })).json();
+  assert.deepEqual([r.ok, r.processed], [true, false]);
+  assert.match(r.reason, /not a check CSV/);
+});
