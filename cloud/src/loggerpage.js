@@ -205,6 +205,11 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
 </div>
 
 <script>
+// The functions below are the Worker's own, as text. Wrangler's bundler
+// (esbuild, keeping names) wraps the functions inside them in __name(fn,
+// "name"), which a browser hasn't got: without this the page stops with
+// "__name is not defined" and loads nothing.
+var __name = function (fn) { return fn; };
 ${estimateRates.toString()}
 var PER_DRIVE = ${JSON.stringify(PER_DRIVE)}, PER_DRIVE_RE = ${PER_DRIVE_RE.toString()};
 ${perDrive.toString()}
