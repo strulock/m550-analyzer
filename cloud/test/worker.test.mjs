@@ -605,6 +605,67 @@ test("logger check-ins: bad bodies refused, old ones dropped", async () => {
   assert.equal(n, 1);
 });
 
+test("check-ins kept offline: filed under their own clock, once each", async () => {
+  const at = (minAgo) => {
+    const d = new Date(Date.now() - minAgo * 60e3 - 5 * 3600e3);   // as the board's -05:00 clock
+    return d.toISOString().slice(0, 23).replace("T", " ") + "-05:00";
+  };
+  const kept = [
+    { boot: 9, event: "beat", buffered: true, clock: at(30), state: "logging", coolant_c: 96.5,
+      oil_c: 101, lat: 29.76, lon: -95.36 },
+    { boot: 9, event: "beat", buffered: true, clock: at(29), state: "logging", coolant_c: 104 },
+    { boot: 9, event: "beat", buffered: true },                        // no clock: skipped
+    { boot: 9, event: "beat", buffered: true, clock: "2020-01-01 00:00:00.000-05:00" },  // too old
+  ];
+  const send = (beats) => call("POST", "/api/logger/heartbeats", { body: JSON.stringify({ beats }) });
+  assert.deepEqual(await (await send(kept)).json(), { ok: true, stored: 2, skipped: 2 });
+  assert.deepEqual(await (await send(kept.slice(0, 2))).json(), { ok: true, stored: 2, skipped: 0 });
+  // The live one that follows is the newest; the kept ones count in its power-on.
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 9, event: "beat",
+    state: "searching", coolant_c: 90 }) });
+  const s = await (await call("GET", "/api/logger")).json();
+  assert.equal(s.online, true);
+  assert.equal(s.last.state, "searching");
+  assert.deepEqual(s.sessions.map((x) => [x.boot, x.beats, x.buffered, x.max_coolant_c, x.max_oil_c]),
+    [[9, 3, 2, 104, 101]]);
+  const first = env.DB.db.prepare("SELECT received FROM heartbeats ORDER BY received LIMIT 1").get();
+  assert.ok(Math.abs(Date.parse(first.received) - (Date.now() - 30 * 60e3)) < 2000);
+  assert.equal((await call("POST", "/api/logger/heartbeats", { body: "{}" })).status, 400);
+  assert.equal((await call("POST", "/api/logger/heartbeats",
+    { body: JSON.stringify({ beats: [], pad: "x".repeat(70000) }) })).status, 413);
+});
+
+test("logger drive rows carry the tank and odometer; tanks over HTTP and MCP", async () => {
+  const log = (start, level0, level1, odo) => "Time,Clock,IKTFS,EGS_KILOMETERSTAND,MASSENSTROM_KRAFTSTOFF\n" +
+    [0, 1, 2, 3, 4, 5].map((t) => `${t * 60},${start}:0${t}.000-05:00,${t < 3 ? level0 : level1},` +
+      `${odo + t},20`).join("\n") + "\n";
+  await call("PUT", "/api/files/logger/a.csv", { body: log("2026-10-25 07:00", 20, 15, 1000) });
+  await call("PUT", "/api/files/logger/b.csv", { body: log("2026-10-26 07:00", 65, 60, 1010) });
+  const [a, b] = (await toolData("drive_history")).drives;
+  assert.deepEqual([a.tank_start_l, a.tank_end_l, a.odometer_start_km, a.odometer_end_km,
+    a.start_approx], [20, 15, 1000, 1005, false]);
+  assert.equal(b.tank_start_l, 65);
+  const http = await (await call("GET", "/api/logger/tanks")).json();
+  assert.deepEqual(http.tanks.map((t) => [t.start, t.drives, t.filled_l, t.open]),
+    [["2026-10-25 07:00:00", 1, null, false], ["2026-10-26 07:00:00", 1, 50, true]]);
+  assert.deepEqual((await toolData("tank_history")).tanks, http.tanks);
+});
+
+test("stored logger drives can be worked out again from their files", async () => {
+  // A row from before the tank fields, and a log without a clock.
+  await call("PUT", "/api/files/logger/a.csv", { body: LOGGER_CSV });
+  await call("PUT", "/api/files/logger/nt-00001-01.csv",
+    { body: "Time,IKTFS\n0,40\n60,40\n120,40\n180,39\n240,39\n300,39\n" });
+  env.DB.db.prepare("UPDATE drives SET data = json_remove(data, '$.tank_start_l')").run();
+  const r = await (await call("POST", "/api/logger/resummarize")).json();
+  assert.deepEqual(r.done.map((d) => d.file), ["logger/a.csv", "logger/nt-00001-01.csv"]);
+  assert.equal(r.next, null);
+  const rows = (await toolData("drive_history")).drives;
+  const nt = rows.find((d) => d.file === "logger/nt-00001-01.csv");
+  assert.deepEqual([nt.tank_start_l, nt.start_approx], [40, true]);
+  assert.match(nt.start, /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/);
+});
+
 // --- CSV
 
 test("CSV: quotes, semicolons, a BOM, CRLF", () => {
@@ -693,9 +754,26 @@ test("presets: save, activate, and the board downloads only when it changed", as
   const { r, rows } = await channelRows({ "If-None-Match": etag });
   assert.equal(r.status, 200);
   assert.equal(decodeURIComponent(r.headers.get("x-preset")), "Tires");
+  // The tire temperature isn't named and rest is off: still once a drive
+  // (logger.js PER_DRIVE); ITOEL, named off, stays off.
   assert.deepEqual(rows.map((x) => [x.name, x.tier]), [["INMOT", "fast"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT", "drive"],
     ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT", "daily"], ["HU_ODD, \"quoted\"", "weekly"]]);
-  assert.equal(rows[2].did_size, "");                                // a name with a comma survives
+  assert.equal(rows[3].did_size, "");                                // a name with a comma survives
+});
+
+test("every preset reads the tires, tank level and odometer once a drive, unless named off", async () => {
+  await putCatalog();
+  await presets({ changes: [{ name: "Lean", rest: "off", tiers: { INMOT: "fast" } }], active: "Lean" });
+  let { rows } = await channelRows();
+  assert.deepEqual(rows.map((x) => [x.name, x.tier]), [["INMOT", "fast"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT", "drive"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT", "drive"]]);
+  await presets({ changes: [{ name: "Lean", rest: "off", tiers: { INMOT: "fast",
+    "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT": "off",
+    "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT": "off" } }] });
+  ({ rows } = await channelRows());
+  assert.deepEqual(rows.map((x) => x.name), ["INMOT"]);
 });
 
 test("presets refuse bad tiers, bad names and deleting the active one", async () => {
@@ -725,7 +803,10 @@ test("the logger page is served, behind Access like the rest", async () => {
   assert.equal(r.status, 200);
   assert.match(r.headers.get("content-type"), /text\/html/);
   const html = await r.text();
-  assert.match(html, /<title>Logger Channels<\/title>/);
+  assert.match(html, /<title>M550 Logger<\/title>/);
   assert.match(html, /\/api\/logger\/presets/);
+  assert.match(html, /\/api\/logger\/tanks/);
+  // The page's script parses (the embedded helpers included).
+  for (const [, js] of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) new Function(js);
   assert.equal((await call("GET", "/logger", { auth: false })).status, 403);
 });

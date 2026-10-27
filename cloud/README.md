@@ -9,7 +9,7 @@ serves it to Claude from anywhere:
   `drive_history`, `fault_history` (with each fault's stored details on
   request), `trend`, `list_files`, `read_log`, `compare_banks` and
   `find_events` (over one stored log), `list_channels`, `channel_series`,
-  `list_templates`.
+  `list_templates`, `logger_status` and `tank_history`.
 - **Templates:** the app's saved channel sets, merged both ways on every sync.
 - **Time series:** every value of every drive log with its UTC time, one row
   per channel per drive in D1 (`series`), so `list_channels` and
@@ -24,6 +24,14 @@ serves it to Claude from anywhere:
   `drive_history`, `trend` and the series tools without the PC. The app's
   history sync replaces only its own drives, and each PC's sync only its own
   drives and faults (the app sends its PC's name).
+  A drive whose log has no clock at all (the board had neither the internet
+  nor the car's clock) is dated by its upload less its length, in the car's
+  time zone (`TIME_ZONE`, default `America/Chicago`) like the logs' own
+  clocks, and marked `start_approx`. A logger drive's row also has the tank
+  level and the odometer at its start and end (`tank_start_l`, `tank_end_l`,
+  `odometer_start_km`, `odometer_end_km`), from which `src/tanks.js` works
+  out each tank of fuel: a new one wherever the level rises 8 litres or more
+  between drives (a fill-up), with its miles, gallons and mpg.
   Its fault reads during a drive (`<start>.faults.csv`) go into fault
   history under source `logger`, merged as the app's own reads are: first
   and last seen, reads listing it, present, stored or gone. The board sends
@@ -121,12 +129,15 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
-| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`, `speed_kmh`, `rpm`, `battery_v`, `pending`, ...) of at most 4 KB, kept 30 days |
-| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in, and each power-on in the last `?hours=` (default 24) |
-| `GET /logger` | the logger channel page: every channel the board can decode, what the car answers, a tier for each, presets, and the rates the selection should get (`estimate.js`: a model of the board's scheduler fitted to a real drive, using the batch sizes and answer times from its last check-in) |
+| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`, `speed_kmh`, `rpm`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `pending`, ...) of at most 4 KB, kept 30 days |
+| `POST /api/logger/heartbeats` | check-ins the board kept while it had no Wi-Fi: `{"beats": [...]}`, at most 200 and 64 KB. Each is filed under its own `clock`; one without a clock, older than 30 days or already stored is skipped. Replies `stored`, `skipped` |
+| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in, and each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline |
+| `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
+| `POST /api/logger/resummarize` | work the logger's drive rows out again from their stored files (after the summary learns something), five a request: `{"done": [{"file", "start"}], "next"}`; send `?after=<next>` until `next` is null |
+| `GET /logger` | the logger page: the car from the board's last check-in (state, speed, coolant and oil, warning above 115 and 140 °C, its position on a map; refreshed every 10 s), each tank since its fill-up, and every channel the board can decode, what the car answers, a tier for each, presets, and the rates the selection should get (`estimate.js`: a model of the board's scheduler fitted to a real drive, using the batch sizes and answer times from its last check-in) |
 | `PUT /api/logger/catalog` | the app's channel catalog (`n63read loggerchannels.catalog_payload`): `{"columns", "rows", "answers", "modules", "defaults"}`. Answers merge with the stored ones (an identifier that answered "ok" stays "ok"); the first one makes the preset "Default" (`defaults`, everything else slow) and makes it active |
 | `GET /api/logger/catalog` | the stored catalog |
-| `GET /api/logger/presets` | `{"active", "presets": [{"name", "rest", "tiers", "updated"}], "file": {"preset", "etag", "counts"}}`. `tiers` is `{channel: tier}` (fast, medium, slow, drive, daily, weekly, monthly, off); `rest` ("slow" or "off") is the tier of every channel not named that the car answers |
+| `GET /api/logger/presets` | `{"active", "presets": [{"name", "rest", "tiers", "updated"}], "file": {"preset", "etag", "counts"}}`. `tiers` is `{channel: tier}` (fast, medium, slow, drive, daily, weekly, monthly, off); `rest` ("slow" or "off") is the tier of every channel not named that the car answers, except that the tire blocks (`DSC_RDC_MESSDATENBLOCK_1`-`4`), tank level and odometer (`logger.js` `PER_DRIVE`) are read at least once a drive unless named off |
 | `PUT /api/logger/presets` | `{"changes": [{"name", "rest", "tiers"} or {"name", "deleted": true}], "active": name}`, both optional; the active preset can't be deleted |
 | `GET /api/logger/channels` | the board's `channels.csv` from the active preset, with an `ETag` (`If-None-Match` gets a 304) and `X-Preset` |
 | `POST /mcp` | MCP (JSON-RPC 2.0, streamable HTTP with JSON replies) |

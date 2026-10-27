@@ -27,10 +27,12 @@
  * No dependencies: plain JavaScript, deployed with `wrangler deploy`.
  */
 
-import { BANK2, buildSeries, isDriveLog, readLog, summarizeDrive } from "./drive.js";
+import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerExtras, readLog,
+  summarizeDrive } from "./drive.js";
 import { channelFile, ConfigError, getCatalog, getPresets, LOGGER_SCHEMA, putCatalog, putPresets }
   from "./logger.js";
 import { LOGGER_PAGE } from "./loggerpage.js";
+import { tanks } from "./tanks.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -625,14 +627,60 @@ async function ingestLog(env, key, bytes) {
       other = null;                     // that file says why when it's uploaded
     }
   }
-  const row = summarizeDrive((sweep ? [other, log] : [log, other]).filter(Boolean), drive, now);
+  const row = await storeDriveRow(env, drive, (sweep ? [other, log] : [log, other])
+    .filter(Boolean), now);
+  return { processed: true, drive_file: drive, channels, approx_time: series.approx,
+    with_other_file: !!other,
+    drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
+}
+
+/** A logger drive's row in History from its logs (the fast file first), or
+ * none when they're too short. `uploaded`: UTC seconds, the end of a log
+ * without a clock; its start is in TIME_ZONE (the car's). */
+async function storeDriveRow(env, drive, logs, uploaded) {
+  const row = summarizeDrive(logs, drive, uploaded, env.TIME_ZONE || DEFAULT_TIME_ZONE);
+  if (row) Object.assign(row, loggerExtras(logs));
   await env.DB.prepare(row
     ? "INSERT OR REPLACE INTO drives (source, file, start, data) VALUES ('logger', ?, ?, ?)"
     : "DELETE FROM drives WHERE source = 'logger' AND file = ?")
     .bind(...(row ? [drive, String(row.start), JSON.stringify(row)] : [drive])).run();
-  return { processed: true, drive_file: drive, channels, approx_time: series.approx,
-    with_other_file: !!other,
-    drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
+  return row;
+}
+
+const RESUMMARIZE_BATCH = 5;
+
+/** Work out stored logger drives' rows again from their files (after the
+ * summary learns something new), RESUMMARIZE_BATCH a request, by file name
+ * after `after`: {done: [{file, start}], next} (next: null when finished).
+ * A log without a clock keeps the upload time it was stored with. */
+async function resummarize(env, after) {
+  await ensureSchema(env);
+  const r = await env.DB.prepare(`SELECT file, data FROM drives WHERE source = 'logger'
+    AND file > ? ORDER BY file LIMIT ?`).bind(after || "", RESUMMARIZE_BATCH).all();
+  const done = [];
+  for (const { file, data } of r.results || []) {
+    const logs = [];
+    let uploaded = null;
+    for (const key of [file, file.slice(0, -".csv".length) + SWEEP]) {
+      const obj = await env.FILES.get(key);
+      if (!obj) continue;
+      try {
+        logs.push(readLog(new Uint8Array(await obj.arrayBuffer())));
+      } catch {
+        continue;
+      }
+      const t = obj.uploaded ? obj.uploaded.getTime() / 1000 : null;
+      if (t && (uploaded === null || t > uploaded)) uploaded = t;
+    }
+    if (!logs.length) {
+      done.push({ file, start: JSON.parse(data).start, skipped: "no file" });
+      continue;
+    }
+    const row = await storeDriveRow(env, file, logs, uploaded ?? Date.now() / 1000);
+    done.push({ file, start: row ? row.start : null });
+  }
+  const more = (r.results || []).length === RESUMMARIZE_BATCH;
+  return { done, next: more ? done[done.length - 1].file : null };
 }
 
 // ------------------------------------------------------------------ logger faults
@@ -789,6 +837,13 @@ async function drives(env, limit) {
   return (r.results || []).map((x) => JSON.parse(x.data)).reverse();
 }
 
+/** The tanks of fuel (tanks.js) from the logger's drives. */
+async function tankHistory(env) {
+  await ensureSchema(env);
+  const r = await env.DB.prepare("SELECT data FROM drives WHERE source = 'logger'").all();
+  return tanks((r.results || []).map((x) => JSON.parse(x.data)));
+}
+
 /** Each fault once: as the installation that saw it most recently has it,
  * with the earliest first sighting any of them has. "current": not gone. */
 async function faults(env, which) {
@@ -837,8 +892,44 @@ async function putBeat(env, body, now = new Date()) {
   return { received };
 }
 
+const MAX_BEATS_BODY = 65536;               // bytes in one batch of kept check-ins
+const MAX_BEATS = 200;
+const FUTURE_S = 300;                       // a board clock this far ahead is wrong
+
+/** Check-ins the board kept while it had no Wi-Fi ({beats: [...]}), each
+ * filed under its own clock: one without a clock, from the future or older
+ * than KEEP_BEATS_DAYS is skipped, as is one already stored (a batch sent
+ * again after a reboot). */
+async function putBeats(env, body, now = new Date()) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.beats) ||
+      body.beats.length > MAX_BEATS) {
+    throw new ToolError(`body: JSON {beats: [...]}, at most ${MAX_BEATS}`);
+  }
+  const cutoff = now.getTime() / 1000 - KEEP_BEATS_DAYS * 86400;
+  const stmts = [];
+  let skipped = 0;
+  for (const b of body.beats) {
+    const at = b && typeof b === "object" && !Array.isArray(b) ? clockEpoch(b.clock) : null;
+    if (at === null || at < cutoff || at > now.getTime() / 1000 + FUTURE_S) {
+      skipped++;
+      continue;
+    }
+    const received = new Date(Math.round(at * 1000)).toISOString();
+    const boot = Number.isInteger(b.boot) ? b.boot : null;
+    const event = b.event === "boot" ? "boot" : "beat";
+    stmts.push(env.DB.prepare(
+      `INSERT INTO heartbeats (received, boot, event, data) SELECT ?, ?, ?, ?
+       WHERE NOT EXISTS (SELECT 1 FROM heartbeats WHERE received = ? AND boot IS ?)`)
+      .bind(received, boot, event, JSON.stringify(b), received, boot));
+  }
+  await ensureSchema(env);
+  if (stmts.length) await env.DB.batch(stmts);
+  return { stored: stmts.length, skipped };
+}
+
 /** The newest check-in and how long ago, and each power-on in the last
- * `hours`: when it started and last checked in, why it booted, top speed. */
+ * `hours`: when it started and last checked in, why it booted, top speed,
+ * hottest coolant and oil, and how many check-ins were kept offline. */
 async function loggerStatus(env, hours, now = new Date()) {
   await ensureSchema(env);
   const last = (await env.DB.prepare(
@@ -847,7 +938,10 @@ async function loggerStatus(env, hours, now = new Date()) {
   const sessions = (await env.DB.prepare(
     `SELECT boot, MIN(received) AS first, MAX(received) AS last, COUNT(*) AS beats,
        MAX(json_extract(data, '$.reset')) AS reset,
-       MAX(json_extract(data, '$.speed_kmh')) AS max_speed_kmh
+       MAX(json_extract(data, '$.speed_kmh')) AS max_speed_kmh,
+       MAX(json_extract(data, '$.coolant_c')) AS max_coolant_c,
+       MAX(json_extract(data, '$.oil_c')) AS max_oil_c,
+       SUM(COALESCE(json_extract(data, '$.buffered'), 0)) AS buffered
      FROM heartbeats WHERE received >= ? GROUP BY boot ORDER BY first, boot`).bind(since).all())
     .results || [];
   if (!last || !last.length) return { online: false, last: null, sessions };
@@ -950,12 +1044,23 @@ export const TOOLS = [
   {
     name: "logger_status",
     description: "The logger board in the car: whether it is on now (it checks in every 10 s " +
-      "while it has Wi-Fi, and once at power-on), its last check-in (state, the drive being " +
-      "logged, speed, rpm, battery voltage when logged, files waiting to upload, Wi-Fi, " +
+      "while it has Wi-Fi, and once at power-on; with no Wi-Fi it keeps them and sends them " +
+      "later), its last check-in (state, the drive being logged, speed, rpm, battery " +
+      "voltage, coolant and oil temperature, GPS position, files waiting to upload, Wi-Fi, " +
       "memory) and each power-on in the last `hours` (first and last check-in, why it " +
-      "booted, top speed). Times in UTC.",
+      "booted, top speed, hottest coolant and oil). Times in UTC.",
     inputSchema: { type: "object", properties: {
       hours: { type: "number", description: "Power-ons this far back; default 24" } } },
+  },
+  {
+    name: "tank_history",
+    description: "Each tank of fuel, as the trip meter is reset at a fill-up: a fill-up is " +
+      "the logger's tank level rising between drives. Per tank: first and last drive's " +
+      "start (local time), drives, litres added, the level at its start and now, distance " +
+      "(km, miles; from the odometer), fuel used (litres, US gallons; from the engine's fuel " +
+      "flow, else the level's fall) and economy (mpg, l/100 km). The last is the tank in " +
+      "the car now (open); the first may have started before the logs (partial).",
+    inputSchema: { type: "object", properties: {} },
   },
 ];
 
@@ -1027,6 +1132,7 @@ async function callTool(env, name, a) {
   if (name === "logger_status") {
     return loggerStatus(env, Math.max(0.1, Math.min(24 * KEEP_BEATS_DAYS, Number(a.hours) || 24)));
   }
+  if (name === "tank_history") return { tanks: await tankHistory(env) };
   throw new ToolError(`unknown tool ${name}`);
 }
 
@@ -1036,7 +1142,8 @@ const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault 
   "look inside a drive, compare_banks and find_events analyse one; list_channels and " +
   "channel_series follow any channel across every " +
   "drive in UTC time; list_templates shows the app's saved channel sets; logger_status " +
-  "says whether the logger board in the car is on and what it last reported. Read-only.";
+  "says whether the logger board in the car is on and what it last reported; " +
+  "tank_history gives each tank of fuel's distance and economy. Read-only.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
 export async function rpc(env, msg) {
@@ -1227,6 +1334,28 @@ export async function handle(request, env, fetcher = fetch) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
     }
+  }
+  if (url.pathname === "/api/logger/heartbeats" && request.method === "POST") {
+    const text = await request.text();
+    if (text.length > MAX_BEATS_BODY) return json({ error: "too large" }, 413);
+    let body;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      return json({ error: "body: JSON {beats: [...]}" }, 400);
+    }
+    try {
+      return json({ ok: true, ...(await putBeats(env, body)) });
+    } catch (e) {
+      if (e instanceof ToolError) return json({ error: e.message }, 400);
+      throw e;
+    }
+  }
+  if (url.pathname === "/api/logger/tanks" && request.method === "GET") {
+    return json({ tanks: await tankHistory(env) });
+  }
+  if (url.pathname === "/api/logger/resummarize" && request.method === "POST") {
+    return json(await resummarize(env, url.searchParams.get("after")));
   }
   if (url.pathname === "/logger" && request.method === "GET") {
     return new Response(LOGGER_PAGE, { headers: { "content-type": "text/html; charset=utf-8",

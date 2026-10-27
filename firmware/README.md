@@ -7,7 +7,7 @@ the Windows build.
 | Path | What |
 | --- | --- |
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
-| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, CSV layout and SHA-256. No Arduino code |
+| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan and bursts, CSV layout, fault reads, the car's clock and SHA-256. No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
 | `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
@@ -52,7 +52,10 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    fast (boost, wastegates, lambda and knock per bank, RPM, throttle, pedal,
    gear, speed), medium (the drive log, fuel economy and misfire templates
    plus trims, uneven running, wastegate sensors and oil pressure), and slow,
-   everything else the car answers.
+   everything else the car answers. A preset whose other channels are off
+   still reads the tire blocks (`DSC_RDC_MESSDATENBLOCK_1`-`4`: pressure,
+   temperature, wheel), the tank level and the odometer once a drive, for
+   History's tire columns and the fill-ups, unless it names them off.
    Offline, `n63read logger-channels --out channels.csv` still writes a file
    (fast, medium and slow only) to copy to the card's root or send over Wi-Fi:
    `python firmware/tools/send_channels.py <address> channels.csv`. A file sent
@@ -71,8 +74,12 @@ answers:
   their own once all are read; and at the end, a row with whatever came in
   since the last.
 
-`<start>` is the local time when the clock is known (from the internet at
-boot), else `nt-<boot>-<n>`. A drive ends when the car stops answering for
+`<start>` is the local time. The clock comes from the internet when Wi-Fi
+is up; when it isn't (driving away from home and the hotspot), from the
+car's own clock, the airbag module's (`0x01`, identifier `0x4029`, the time
+the dashboard shows, to the second; `lib/logger/carclock.h`), read once
+before the drive starts. Only if neither answers is it `nt-<boot>-<n>`,
+dated by the Worker from its upload. A drive ends when the car stops answering for
 10 s, or when the power goes. Whenever Wi-Fi is up, the other core uploads
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The Worker turns
@@ -110,10 +117,19 @@ identifier at a time is rarely asked for more.
 If the requests waited for keep timing out (three in a row) while sharing a
 connection, the board falls back to one request at a time and notes it.
 
-The log's `note` column records the start, a stats line every minute (rate,
-read time, slow pass, resting and refused reads, requests collected later
-and how many timed out, smaller batches), batch changes, refusals (once a
-minute per module) and the reset reason. On the bench (`--delay 30`, five
+Bursts: when the pedal passes 80% or the boost 1,700 hPa (`IPLAD`, about
+0.7 bar over the air outside), the board asks for the fast tier alone, as
+fast as it answers (up to 20 rows a second), until both have been below for
+a second or for 10 s at most; the next can't start for 5 s, so the other
+tiers still get through on a long pull. No fault reads meanwhile. The notes
+mark each burst and its end, and the stats line counts them.
+
+The log's `note` column records the start (with the channel file: the
+preset and its ETag, `manual`, `card` or the built-in table, and where the
+clock came from), a stats line every minute (rate, read time, slow pass,
+resting and refused reads, requests collected later and how many timed out,
+smaller batches, bursts), batch changes, refusals (once a minute per
+module), bursts and the reset reason. On the bench (`--delay 30`, five
 modules answering in 0.5-0.9 s, three bad identifiers and two modules that
 take one identifier a request; 15 fast, 51 medium and 9,219 slow channels)
 it logs 12-16 rows a second with a slow pass every 10-11 s.
@@ -132,9 +148,11 @@ reads, so a module that doesn't answer no longer holds up the log. Status
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
-booted (a brownout shows there), uptime, what it's doing, the speed, rpm and
-battery voltage when the channel table has them (battery is `IUIBS`, not in
-the built-in fast tier), files waiting, Wi-Fi and memory, and which channel
+booted (a brownout shows there), uptime, what it's doing, the speed, rpm,
+battery voltage, coolant and oil temperature (`ITKUA`, `ITOEL`) and the GPS
+position when the channel table has them and has read them in the last 30 s
+(null otherwise; battery is `IUIBS`, not in the built-in tiers), files
+waiting, Wi-Fi and memory, and which channel
 file it's running (`channels`: the active preset's ETag, `manual` for one
 sent over the terminal, `card` or `built-in`), which the logger channel page
 compares with the active preset. From the last minute's stats it adds the
@@ -142,8 +160,13 @@ modules on smaller batches (`batches`, "0x12:6 0x18:1"), each collected-later
 module's answer time (`answer_ms`, "0x63:170"), the slow pass and the reads
 per cycle, which the page's rate estimates use. A long upload
 delays the check-ins; a failed one is skipped. Each is a new TLS connection,
-about 2 MB an hour on a phone hotspot. `logger_status` (MCP) and
-`GET /api/logger` show the last one and each power-on.
+about 2 MB an hour on a phone hotspot. With no Wi-Fi (and the time known),
+each check-in goes to `beats.jsonl` on the card instead, up to about 12
+hours' worth, and at the next connection they're sent 48 KB at a time
+(`POST /api/logger/heartbeats`), filed under the time each was made, and
+the file deleted. `logger_status` (MCP), `GET /api/logger` and the logger
+page (`/logger`: the car's state, temperatures and position) show the last
+one and each power-on.
 
 Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
 status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end

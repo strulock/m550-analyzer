@@ -1,20 +1,27 @@
 /**
- * The logger channel page (GET /logger): every channel the board can read,
- * filtered to what the car answers, a tier for each, saved as presets. It
- * talks to /api/logger/catalog and /api/logger/presets (logger.js) with the
- * visitor's Access login, and estimates the rates the selection gets
- * (estimate.js, its source embedded). No dependencies; the script avoids
- * backticks and template placeholders so it can sit in this template.
+ * The logger page (GET /logger): the board's last check-in (state, speed,
+ * coolant and oil temperature with an overheating warning, the car on a
+ * map), each tank of fuel since its fill-up (/api/logger/tanks), and every
+ * channel the board can read, filtered to what the car answers, a tier for
+ * each, saved as presets. It talks to /api/logger, /api/logger/catalog and
+ * /api/logger/presets (logger.js) with the visitor's Access login, and
+ * estimates the rates the selection gets (estimate.js, its source
+ * embedded). No dependencies; the map is OpenStreetMap's embed. The script
+ * avoids backticks and template placeholders so it can sit in this template.
  */
 
 import { estimateRates } from "./estimate.js";
+import { PER_DRIVE, PER_DRIVE_RE, perDrive } from "./logger.js";
+import { FILL_MIN_L } from "./tanks.js";
+
+const FILL_NOTE = `${FILL_MIN_L} litres (${(FILL_MIN_L / 3.785411784).toFixed(1)} gallons)`;
 
 export const LOGGER_PAGE = String.raw`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Logger Channels</title>
+<title>M550 Logger</title>
 <link rel="icon" href="data:,">
 <style>
 :root {
@@ -76,6 +83,15 @@ tr.sel td { background: var(--accent-bg); }
 .msg.ok { background: var(--accent-bg); color: var(--accent); }
 .hide { display: none !important; }
 label { display: inline-flex; gap: 6px; align-items: center; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+.alarm { padding: 10px 14px; border-radius: 8px; background: var(--bad); color: #fff; font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.stat span { display: block; font-size: 12px; color: var(--muted); }
+.stat b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.stat small { color: var(--muted); }
+.stat.warn b { color: var(--warn); } .stat.bad b { color: var(--bad); }
+.map { width: 100%; height: 280px; border: 1px solid var(--rule); border-radius: 6px; margin-top: 10px; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (max-width: 640px) {
   td.unit, th.unit, td.mod, th.mod, td.id, th.id { display: none; }
   input[type=search] { min-width: 0; flex-basis: 100%; }
@@ -90,11 +106,32 @@ label { display: inline-flex; gap: 6px; align-items: center; }
 <div class="wrap">
   <header class="row" style="justify-content:space-between">
     <div>
-      <h1>Logger channels</h1>
+      <h1>Logger</h1>
       <div class="muted" id="catinfo">Loading the catalog…</div>
     </div>
     <div class="muted" id="logger"></div>
   </header>
+
+  <div id="alarm" class="alarm hide" role="alert"></div>
+
+  <section class="card" id="live">
+    <h2 id="liveTitle">The car</h2>
+    <div class="stats" id="liveStats"><span class="muted">Waiting for the logger's check-in…</span></div>
+    <iframe id="map" class="map hide" title="The car's position" loading="lazy"></iframe>
+    <div class="muted" id="mapNote" style="font-size:12px;margin-top:4px"></div>
+  </section>
+
+  <section class="card">
+    <h2>Tanks</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Filled</th><th class="n">Drives</th><th class="n">Added</th><th class="n">Miles</th>
+        <th class="n">Gallons</th><th class="n">MPG</th><th class="n">Level</th></tr></thead>
+      <tbody id="tanks"><tr><td colspan="7" class="muted">Loading…</td></tr></tbody>
+    </table></div>
+    <p class="muted" style="font-size:12.5px;margin:8px 0 0">A tank starts when the level is up
+    ${FILL_NOTE} between drives, as the trip meter is reset at a fill-up. Miles from the odometer;
+    gallons from the engine's fuel flow (else the level's fall).</p>
+  </section>
 
   <div id="msg" class="msg hide"></div>
 
@@ -154,6 +191,8 @@ label { display: inline-flex; gap: 6px; align-items: center; }
 
 <script>
 ${estimateRates.toString()}
+var PER_DRIVE = ${JSON.stringify(PER_DRIVE)}, PER_DRIVE_RE = ${PER_DRIVE_RE.toString()};
+${perDrive.toString()}
 </script>
 <script>
 (function () {
@@ -183,8 +222,13 @@ ${estimateRates.toString()}
         if (!r.ok) throw new Error(j.error || ("HTTP " + r.status)); return j; }); });
   }
 
+  // A channel's tier when the preset doesn't name it (logger.js tiersFor).
+  function inherited(it) {
+    if (!it.ok) return "off";
+    return edit.rest === "off" && perDrive(it.name) ? "drive" : edit.rest;
+  }
   function effective(it) {
-    return edit.tiers[it.name] || (it.ok ? edit.rest : "off");
+    return edit.tiers[it.name] || inherited(it);
   }
   function isDirty() { return edit && JSON.stringify({ r: edit.rest, t: edit.tiers }) !== savedJson; }
 
@@ -299,7 +343,7 @@ ${estimateRates.toString()}
   function renderRows(byId) {
     var html = [];
     matches.slice(0, shown).forEach(function (it) {
-      var set = edit.tiers[it.name] || "", eff = effective(it), inh = it.ok ? edit.rest : "off";
+      var set = edit.tiers[it.name] || "", eff = effective(it), inh = inherited(it);
       var read = byId[it.key], readNote = read && read !== eff ? "<small>read " + LABEL[read].toLowerCase() + "</small>" : "";
       html.push('<tr data-i="' + it.i + '"' + (sel.has(it.i) ? ' class="sel"' : "") + ">" +
         '<td><input type="checkbox" class="pick"' + (sel.has(it.i) ? " checked" : "") + ' aria-label="Select"></td>' +
@@ -359,7 +403,73 @@ ${estimateRates.toString()}
       else if (file && has === file.etag) text += "; running the active preset ✓";
       else text += "; running " + has.slice(0, 8) + ", gets the active preset on its next Wi-Fi check";
       $("logger").textContent = text;
+      renderLive(s, when);
     }).catch(function () { $("logger").textContent = ""; });
+  }
+
+  // The car from the last check-in. Coolant and oil limits: the N63's
+  // thermostat runs the coolant up to about 105 °C under load.
+  var LIMITS = { coolant_c: [110, 115], oil_c: [130, 140] };
+  var mapAt = null;
+  function level(key, v) {
+    var l = LIMITS[key];
+    return v == null || !l ? "" : v >= l[1] ? "bad" : v >= l[0] ? "warn" : "";
+  }
+  function stat(label, value, unit, cls, small) {
+    return '<div class="stat ' + (cls || "") + '"><span>' + label + "</span><b>" +
+      (value == null ? "–" : esc(value)) + "</b>" + (value == null || !unit ? "" : " " + unit) +
+      (small ? " <small>" + esc(small) + "</small>" : "") + "</div>";
+  }
+  function num(v) { return typeof v === "number" && isFinite(v) ? v : null; }
+  function whole(v) { return v == null ? null : Math.round(v); }
+  function fahrenheit(v) { return v == null ? "" : Math.round(v * 9 / 5 + 32) + " °F"; }
+  function renderLive(s, when) {
+    var b = s.last, cool = num(b.coolant_c), oil = num(b.oil_c), kmh = num(b.speed_kmh),
+      volts = num(b.battery_v), rate = num(b.rows_per_s);
+    $("liveTitle").textContent = s.online ? "The car now" : "The car, last seen " + when + " ago";
+    $("liveStats").innerHTML = [
+      stat("State", b.state || "–"),
+      b.state === "logging" ? stat("Drive", num(b.drive_min), "min", "", rate == null ? "" : rate + " rows/s") : "",
+      stat("Speed", kmh == null ? null : Math.round(kmh / 1.609344), "mph"),
+      stat("RPM", whole(num(b.rpm))),
+      stat("Coolant", whole(cool), "°C", level("coolant_c", cool), fahrenheit(cool)),
+      stat("Oil", whole(oil), "°C", level("oil_c", oil), fahrenheit(oil)),
+      stat("Battery", volts == null ? null : volts.toFixed(1), "V"),
+      stat("Faults", num(b.faults)),
+    ].join("");
+    var hot = s.online && (level("coolant_c", cool) === "bad" || level("oil_c", oil) === "bad");
+    $("alarm").textContent = hot ? "Running hot: coolant " + whole(cool) + " °C, oil " + whole(oil) +
+      " °C (limits " + LIMITS.coolant_c[1] + " and " + LIMITS.oil_c[1] + " °C)." : "";
+    $("alarm").classList.toggle("hide", !hot);
+    document.title = (hot ? "⚠ " : "") + "M550 Logger";
+    var has = num(b.lat) !== null && num(b.lon) !== null;
+    $("map").classList.toggle("hide", !has);
+    $("mapNote").textContent = has ? (s.online ? "Position from the head unit's GPS, " : "Last known position, ") +
+      new Date(b.received).toLocaleString() + "." : "No position in the last check-in.";
+    // Moved more than about 20 m: the map again (a reload each check-in would flicker).
+    if (has && (!mapAt || Math.abs(mapAt[0] - b.lat) + Math.abs(mapAt[1] - b.lon) > 0.0002)) {
+      mapAt = [b.lat, b.lon];
+      var d = 0.006;
+      $("map").src = "https://www.openstreetmap.org/export/embed.html?layer=mapnik&bbox=" +
+        [b.lon - d * 1.6, b.lat - d, b.lon + d * 1.6, b.lat + d].map(function (x) { return x.toFixed(6); }).join(",") +
+        "&marker=" + b.lat.toFixed(6) + "," + b.lon.toFixed(6);
+    }
+  }
+
+  function renderTanks() {
+    api("GET", "/api/logger/tanks").then(function (j) {
+      var t = (j.tanks || []).slice().reverse();
+      var gal = function (l) { return l == null ? "–" : (l / 3.785411784).toFixed(1); };
+      $("tanks").innerHTML = t.length ? t.map(function (k) {
+        return "<tr><td>" + esc(k.start.slice(0, 16)) + (k.open ? ' <span class="badge">now</span>' : "") +
+          (k.partial ? ' <span class="badge warn" title="Filled before the logs began">partial</span>' : "") + "</td>" +
+          '<td class="n">' + k.drives + '</td><td class="n">' + (k.filled_l == null ? "–" : gal(k.filled_l) + " gal") + "</td>" +
+          '<td class="n">' + (k.miles == null ? "–" : Math.round(k.miles)) + "</td>" +
+          '<td class="n">' + (k.gallons == null ? "–" : k.gallons.toFixed(1)) + (k.fuel_from === "level" ? " <small>level</small>" : "") + "</td>" +
+          '<td class="n"><b>' + (k.mpg == null ? "–" : k.mpg.toFixed(1)) + "</b></td>" +
+          '<td class="n">' + gal(k.level_end_l) + " gal</td></tr>";
+      }).join("") : '<tr><td colspan="7" class="muted">No logger drives with the tank level yet.</td></tr>';
+    }).catch(function (e) { $("tanks").innerHTML = '<tr><td colspan="7" class="muted">' + esc(e.message) + "</td></tr>"; });
   }
 
   function afterPresets(j, keep) {
@@ -457,6 +567,10 @@ ${estimateRates.toString()}
 
   function start() {
     wire();
+    renderTanks();
+    renderLogger();
+    // The car while the page is open: the board checks in every 10 s.
+    setInterval(function () { if (!document.hidden) renderLogger(); }, 10000);
     Promise.all([api("GET", "/api/logger/catalog"), api("GET", "/api/logger/presets")]).then(function (r) {
       cat = r[0];
       var c = {};

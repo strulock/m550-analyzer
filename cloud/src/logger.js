@@ -8,7 +8,8 @@
  *   answered, and the built-in fast and medium lists. Answers merge with
  *   what was sent before: an identifier that answered "ok" once stays "ok".
  * - A preset is a name, a tier per channel, and `rest`: the tier of every
- *   channel it doesn't name that the car answers ("slow" or "off"); a
+ *   channel it doesn't name that the car answers ("slow" or "off"; the
+ *   tires, tank level and odometer, PER_DRIVE, at least once a drive); a
  *   channel that doesn't answer and isn't named is off. The first catalog
  *   makes "Default" (the built-in lists, everything else slow) and makes it
  *   active.
@@ -153,14 +154,27 @@ function csvCell(v) {
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+// Read in every drive whatever the preset leaves to `rest`: the tire
+// pressures, temperatures and wheel positions (History's tire columns), and
+// the tank level and odometer that tell a fill-up and the tank's distance
+// (tanks.js). A preset can still turn one off by name.
+export const PER_DRIVE = ["IKTFS", "FUELLST_TANKH_L", "FUELLST_TANKH_R",
+  "BDC_TANK_FUELLSTAND_LINKS", "BDC_TANK_FUELLSTAND_RECHTS", "EGS_KILOMETERSTAND"];
+export const PER_DRIVE_RE = /^DSC_RDC_MESSDATENBLOCK_[1-4]\./;
+
+export function perDrive(name) {
+  return PER_DRIVE_RE.test(name) || PER_DRIVE.includes(name);
+}
+
 /** Each catalog row's tier under a preset: named, else `rest` where the
- * car answers, else off. */
+ * car answers (at least once a drive for the PER_DRIVE channels), else off. */
 export function tiersFor(catalog, preset) {
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
   return catalog.rows.map((r) => {
     const named = preset.tiers[r[col.name]];
     if (named) return named;
-    return catalog.answers[`${r[col.module]}:${r[col.did]}`] === "ok" ? preset.rest : "off";
+    if (catalog.answers[`${r[col.module]}:${r[col.did]}`] !== "ok") return "off";
+    return preset.rest === "off" && perDrive(r[col.name]) ? "drive" : preset.rest;
   });
 }
 
