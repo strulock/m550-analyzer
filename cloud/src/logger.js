@@ -16,6 +16,10 @@
  * - The board asks for GET /api/logger/channels with the ETag it has; it
  *   downloads only when the active preset or the catalog changed.
  *
+ * - Every change to a preset (the page's or the MCP tools') keeps what it
+ *   replaced as a version (logger_preset_versions, the last MAX_VERSIONS a
+ *   preset), so any can be rolled back to.
+ *
  * Tiers: fast (every cycle), medium (a few times a second), slow (in
  * rotation), drive (once a drive), daily, weekly, monthly (once, in the
  * first drive they're due), off.
@@ -37,7 +41,11 @@ export const LOGGER_SCHEMA = [
   `CREATE TABLE IF NOT EXISTS logger_presets (name TEXT PRIMARY KEY, rest TEXT NOT NULL,
      tiers TEXT NOT NULL, updated TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS logger_settings (key TEXT PRIMARY KEY, value TEXT)`,
+  `CREATE TABLE IF NOT EXISTS logger_preset_versions (id INTEGER PRIMARY KEY AUTOINCREMENT,
+     name TEXT NOT NULL, rest TEXT NOT NULL, tiers TEXT NOT NULL, saved TEXT NOT NULL,
+     why TEXT)`,
 ];
+const MAX_VERSIONS = 50;                // kept a preset
 
 export class ConfigError extends Error {}
 
@@ -113,27 +121,47 @@ function checkTiers(name, tiers) {
   }
 }
 
-/** Apply {changes: [{name, rest, tiers} | {name, deleted: true}], active?}. */
-export async function putPresets(env, body, now = new Date()) {
+/** Apply {changes: [{name, rest, tiers} | {name, deleted: true}], active?}.
+ * Each preset changed or deleted keeps what it was as a version first
+ * (`why`, optional, says what replaced it). */
+export async function putPresets(env, body, now = new Date(), why = null) {
   if (!isObject(body)) throw new ConfigError("body: JSON {changes, active}");
   const changes = body.changes === undefined ? [] : body.changes;
   if (!Array.isArray(changes)) throw new ConfigError("changes: a list");
   const current = await getPresets(env);
   const names = new Set(current.presets.map((p) => p.name));
+  const before = new Map(current.presets.map((p) => [p.name, p]));
   let want = typeof body.active === "string" ? body.active : current.active;
   const stmts = [];
+  const keep = (name) => {              // the preset as it was, as a version
+    const old = before.get(name);
+    if (!old) return;
+    before.delete(name);                // once, however many changes name it
+    stmts.push(env.DB.prepare(`INSERT INTO logger_preset_versions (name, rest, tiers, saved, why)
+      VALUES (?, ?, ?, ?, ?)`).bind(name, old.rest, JSON.stringify(old.tiers), now.toISOString(),
+      why ? String(why).slice(0, 200) : null));
+    stmts.push(env.DB.prepare(`DELETE FROM logger_preset_versions WHERE name = ? AND id NOT IN
+      (SELECT id FROM logger_preset_versions WHERE name = ? ORDER BY id DESC LIMIT ?)`)
+      .bind(name, name, MAX_VERSIONS));
+  };
   for (const c of changes) {
     const name = isObject(c) && typeof c.name === "string" ? c.name.trim() : "";
     if (!name || name.length > MAX_NAME || /[\x00-\x1f]/.test(name)) {
       throw new ConfigError("bad preset name");
     }
     if (c.deleted) {
+      keep(name);
       names.delete(name);
       stmts.push(env.DB.prepare("DELETE FROM logger_presets WHERE name = ?").bind(name));
       continue;
     }
     if (!RESTS.includes(c.rest)) throw new ConfigError(`${name}: rest is "slow" or "off"`);
     checkTiers(name, c.tiers);
+    const old = before.get(name);
+    if (old && old.rest === c.rest && JSON.stringify(old.tiers) === JSON.stringify(c.tiers)) {
+      continue;                         // unchanged: no version, no write
+    }
+    keep(name);
     names.add(name);
     stmts.push(env.DB.prepare(
       "INSERT OR REPLACE INTO logger_presets (name, rest, tiers, updated) VALUES (?, ?, ?, ?)")
@@ -147,6 +175,110 @@ export async function putPresets(env, body, now = new Date()) {
     .bind(want || null));
   await env.DB.batch(stmts);
   return getPresets(env);
+}
+
+/** A preset's versions, newest first: [{id, saved, why, rest, counts}]. */
+export async function presetVersions(env, name) {
+  const r = (await env.DB.prepare(`SELECT id, rest, tiers, saved, why FROM logger_preset_versions
+    WHERE name = ? ORDER BY id DESC`).bind(name).all()).results || [];
+  return r.map((v) => {
+    const counts = {};
+    for (const t of Object.values(JSON.parse(v.tiers))) counts[t] = (counts[t] || 0) + 1;
+    return { id: v.id, saved: v.saved, why: v.why, rest: v.rest, counts };
+  });
+}
+
+/** A preset back as one of its versions was (itself kept as a version). */
+export async function rollbackPreset(env, name, id, now = new Date()) {
+  const r = (await env.DB.prepare(`SELECT rest, tiers FROM logger_preset_versions
+    WHERE name = ? AND id = ?`).bind(name, id).all()).results;
+  if (!r || !r.length) throw new ConfigError(`${name} has no version ${id}`);
+  return putPresets(env, { changes: [{ name, rest: r[0].rest, tiers: JSON.parse(r[0].tiers) }] },
+    now, `rolled back to version ${id}`);
+}
+
+/** Which catalog rows a selection names: `names` (exact), `module`
+ * ("0x12"), `did_from`/`did_to` (an identifier range, "0x4000"-"0x40FF"),
+ * `match` (part of a name, any case), all that are given. */
+export function selectRows(catalog, sel) {
+  const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
+  const num = (s) => (s === undefined || s === null || s === "" ? null : parseInt(String(s), 16));
+  const module = num(sel.module), from = num(sel.did_from), to = num(sel.did_to);
+  const names = Array.isArray(sel.names) ? new Set(sel.names.map(String)) : null;
+  const match = sel.match ? String(sel.match).toLowerCase() : null;
+  if (!names && module === null && from === null && to === null && !match) {
+    throw new ConfigError("select channels: names, module, did_from/did_to or match");
+  }
+  const out = [];
+  catalog.rows.forEach((r, i) => {
+    const did = parseInt(r[col.did], 16);
+    if (names && !names.has(r[col.name])) return;
+    if (module !== null && parseInt(r[col.module], 16) !== module) return;
+    if (from !== null && did < from) return;
+    if (to !== null && did > to) return;
+    if (match && !String(r[col.name]).toLowerCase().includes(match)) return;
+    out.push(i);
+  });
+  return out;
+}
+
+async function presetNamed(env, name) {
+  const all = await getPresets(env);
+  const want = name || all.active;
+  const p = all.presets.find((x) => x.name === want);
+  if (!p) throw new ConfigError(want ? `no preset named ${want}` : "no active preset");
+  return { preset: p, active: all.active };
+}
+
+/** Channels and their tier under a preset (the active one by default):
+ * {preset, total, channels: [{name, module, did, tier, named, answer, unit,
+ * info}]}, filtered as selectRows (all, without a selection) and by `tier`,
+ * at most `limit` (default 200, up to 2000). */
+export async function listTiers(env, a = {}) {
+  const catalog = await getCatalog(env);
+  if (!catalog) throw new ConfigError("no catalog yet: the app sends it");
+  const { preset } = await presetNamed(env, a.preset);
+  const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
+  const tiers = tiersFor(catalog, preset);
+  let idx = a.names || a.module || a.did_from || a.did_to || a.match
+    ? selectRows(catalog, a) : catalog.rows.map((_, i) => i);
+  if (a.tier) idx = idx.filter((i) => tiers[i] === a.tier);
+  const limit = Math.max(1, Math.min(2000, Number(a.limit) || 200));
+  return { preset: preset.name, total: idx.length, channels: idx.slice(0, limit).map((i) => {
+    const r = catalog.rows[i];
+    return { name: r[col.name], module: r[col.module], did: r[col.did], tier: tiers[i],
+      named: !!preset.tiers[r[col.name]],
+      answer: catalog.answers[`${r[col.module]}:${r[col.did]}`] || null,
+      unit: r[col.unit] || "", info: col.info === undefined ? "" : r[col.info] || "" };
+  }) };
+}
+
+/** Set the tier of the selected channels in a preset (the active one by
+ * default); "default" un-names them (back to the preset's rest). `dry_run`
+ * says what would change. {preset, tier, changed, channels (the first 50)}. */
+export async function setTiers(env, a, now = new Date()) {
+  const catalog = await getCatalog(env);
+  if (!catalog) throw new ConfigError("no catalog yet: the app sends it");
+  if (a.tier !== "default" && !TIERS.includes(a.tier)) {
+    throw new ConfigError(`tier: one of ${TIERS.join(", ")}, or default`);
+  }
+  const { preset } = await presetNamed(env, a.preset);
+  const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
+  const tiers = { ...preset.tiers };
+  const changed = [];
+  for (const i of selectRows(catalog, a)) {
+    const name = catalog.rows[i][col.name];
+    if (a.tier === "default" ? !(name in tiers) : tiers[name] === a.tier) continue;
+    if (a.tier === "default") delete tiers[name];
+    else tiers[name] = a.tier;
+    changed.push(name);
+  }
+  if (changed.length && !a.dry_run) {
+    await putPresets(env, { changes: [{ name: preset.name, rest: preset.rest, tiers }] }, now,
+      a.why || `${changed.length} channels to ${a.tier}`);
+  }
+  return { preset: preset.name, tier: a.tier, changed: changed.length, dry_run: !!a.dry_run,
+    channels: changed.slice(0, 50) };
 }
 
 function csvCell(v) {
