@@ -1244,6 +1244,9 @@ class ToolError extends Error {}
 
 async function callTool(env, name, a) {
   a = a || {};
+  // The tables first: the first request to a fresh isolate can be a tool
+  // (seen: the first preset change after a deploy, before the versions table).
+  await ensureSchema(env);
   if (name === "drive_history") {
     const limit = Math.max(1, Math.min(500, Number(a.limit) || 30));
     return { drives: await drives(env, limit) };
@@ -1413,7 +1416,7 @@ async function driveFaults(env, name) {
     if (!key.endsWith(FAULTS)) key = key.replace(/(\.sweep|\.check)?\.csv$/, "") + FAULTS;
   } else {
     const r = (await env.DB.prepare(`SELECT key FROM uploads WHERE key LIKE 'logger/%' AND
-      key LIKE '%' || ? ORDER BY key DESC LIMIT 1`).bind(FAULTS).all()).results;
+      key LIKE '%' || ? ORDER BY uploaded DESC LIMIT 1`).bind(FAULTS).all()).results;
     if (!r || !r.length) throw new ToolError("no logger fault reads uploaded yet");
     key = r[0].key;
   }
