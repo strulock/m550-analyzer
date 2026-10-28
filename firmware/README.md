@@ -9,7 +9,7 @@ the Windows build.
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
 | `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, bursts and a module's back-off when it stops answering, CSV layout, fault reads, the car's clock, SHA-256, the firmware update decisions (`ota.h`), the upload and kept check-in rules (`upload.h`) and the full channel check (`carcheck.h`). No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
-| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
+| `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules; `--park`, `--drive`, `--close`, `--quiet` for the drive's events: parked with the engine off, driving again, the gateway closing the connection, a module going quiet) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
 | `tools/publish_firmware.py` | Build the logger with a version and publish it for updates over the air, or flash it by USB |
 | `logger/` | The logger: logs the car to the SD card, uploads each drive to the cloud Worker |

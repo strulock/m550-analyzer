@@ -361,3 +361,85 @@ behind Cloudflare Access; uploads automatic whenever the PC is online.
       channel per drive; Claude's `list_channels` and `channel_series`
       (bucketed, or per drive) query it.
 - [x] Logs' Clock carries its UTC offset (0.6.2).
+
+## Phase 15 — The logger board
+
+The ESP32-S3 board in the car (`firmware/`), the cloud's side of it
+(`cloud/`) and the logger page. The logger's own history is in the git log
+and `firmware/README.md`; this records the notes reviewed on 2026-10-27
+after the first week of drives, and what's left.
+
+### Done (2026-10-28, PRs #87-#106)
+
+- [x] Coolant from the engine's sensor (`ITKUM`, DME 0x4300), not the
+      radiator outlet's (`ITKUA`, 52 °C with the oil at 97 °C) (#87).
+- [x] Battery from the battery sensor (`IUIBS`) first, the DME's `IUADW`
+      as the fallback; both medium (#88).
+- [x] The airbag module's `_IMU_WERTE` (0x4101) left out: its answer on this
+      car is an event record, not accelerations (#89).
+- [x] An identifier a module refuses with 0x31 rests the whole drive and is
+      "absent" in the cloud's catalog, off in every channel file (#91).
+- [x] Check-ins carry the failed fault codes; the Worker adds their texts
+      (#92).
+- [x] Check-ins on their own task, every 10 s by the clock; a memory check
+      before each TLS session (#93).
+- [x] The first check-in sooner (one scan picks the network); check-ins from
+      before the clock was known kept and dated later (#94).
+- [x] Uploads: the backlog at power-on, a drive's files as it ends, paced
+      while logging; no firmware install while files wait (#95).
+- [x] One name per drive: the board reconnects when the gateway closes the
+      connection, in the same files (#96).
+- [x] A module that times out is backed off on its own (2 s, doubling to
+      30 s); the rest keep overlapping (#97).
+- [x] The full channel check only while the car stands (#98).
+- [x] Odometer and tank (whole and halves) snapshots at the start, at Park
+      and at engine-off; the selector (P R N D M) in the medium tier and the
+      check-ins; what the board's logic reads at least medium in every
+      channel file (#99).
+- [x] A drive ends parked (P, engine off, 60 s), noted; the board waits
+      parked for the next; every way a drive ends documented (#100).
+- [x] The rate each tier got, noted each minute and averaged per drive;
+      the logger page shows the last drive's beside its estimates (#101).
+- [x] MCP tools for the channel catalog: list, set (one or in bulk), save,
+      publish, versions and rollback (#102, #106).
+- [x] MCP `drive_faults` and `channel_check` (#103).
+- [x] `/mcp` answers a refused token with a 401 naming Access's resource
+      metadata; Access's keys fetched again on an unknown key id (#104).
+- [x] The bank 2 duplicates (`MOTORLEISTUNG_EFFEKTIV`, `ZW_AUSGABE_BANK2`,
+      `LUFTMASSENFLUSS_GEF_BANK2` on 0x13) off the fast tier of the Default
+      preset (data, through `logger_set_tiers`; version 1 keeps the before).
+- [x] Checked, no change needed: TrulockIOT reaches Cloudflare (the board
+      uploaded and checked in over it on 27-28 Oct); the seven tiers keyed by
+      name (bank 2's carry `@0x13`) were already there; the damage counters
+      (ACSM 0x407F, 0x4080) were already "once a drive" in the preset.
+- [x] Tests: the cloud tests' fake Worker reads a body before refusing it
+      (a WinError 10053 flake on Windows) (#105).
+
+### Still to do
+
+- [ ] **On the car:** the first drives on this firmware should show one file
+      per drive (a "reconnected" note where the gateway closes the
+      connection), snapshots at Park and engine-off with the odometer
+      moving, "end: parked..." when the car is left in P with the ignition
+      on, "left alone" notes instead of minutes at a third of the rows when
+      the DME times out, the tier-rate notes, and the first check-in within
+      seconds on the hotspot. Check memory (`largest_kb` in the check-ins)
+      with an upload and a check-in at once.
+- [ ] **Power after the engine stops:** the board runs only while it has
+      power (ignition here). A supply that holds a minute or two after the
+      ignition (or constant power with a sleep) would let the last drive's
+      files go up before the car is left (note 1).
+- [ ] **MCP sign-in:** reconnect the TrulockMCP connector once and see the
+      one-day sign-in renew without a prompt. If it still doesn't, the cause
+      is in Access (the application's session duration, the MCP portal's
+      OAuth), not the Worker.
+- [ ] The burst (pedal or boost) needs `BUS_FAHRPEDALWERT` and `IPLAD`
+      read often, and the Default preset has neither on fast: add them to
+      `BOARD_NEEDS`, or to the preset.
+- [ ] The airbag module's 0x4101 layout on this car, if its accelerations
+      are wanted (a raw reply, compared with a known bump).
+- [ ] Park and engine-off in the same cycle make one snapshot (noted
+      "engine off"); fine for the odometer, but the note names only one.
+- [ ] The logger page has no versions or rollback yet (the MCP tools do).
+- [ ] The stray two-row drives from before #96 (e.g. 2026-10-27_19-49-56,
+      20-03-49) are still in R2 and History.

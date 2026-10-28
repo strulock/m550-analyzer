@@ -9,7 +9,18 @@ serves it to Claude from anywhere:
   `drive_history`, `fault_history` (with each fault's stored details on
   request), `trend`, `list_files`, `read_log`, `compare_banks` and
   `find_events` (over one stored log), `list_channels`, `channel_series`,
-  `list_templates`, `logger_status` and `tank_history`.
+  `list_templates`, `logger_status`, `tank_history`, `drive_faults` (one
+  logger drive's fault reads with their texts) and `channel_check` (the full
+  channel check, and what each module answers). The `logger_*` tools read
+  and change the logger's channel presets: `logger_channels` (each channel's
+  tier, filtered by module, identifier range, name or tier),
+  `logger_set_tiers` (one channel or a whole module or range at a time; a
+  dry run says what would change), `logger_presets` (the presets, the active
+  one and its channel file; a preset's versions), `logger_save_preset`,
+  `logger_publish` (make one active: the board takes it within 10 minutes)
+  and `logger_rollback`. Every change to a preset, from these or the page,
+  keeps what it replaced as a version (the last 50). Nothing writes to the
+  car.
 - **Templates:** the app's saved channel sets, merged both ways on every sync.
 - **Time series:** every value of every drive log with its UTC time, one row
   per channel per drive in D1 (`series`), so `list_channels` and
@@ -29,7 +40,11 @@ serves it to Claude from anywhere:
   time zone (`TIME_ZONE`, default `America/Chicago`) like the logs' own
   clocks, and marked `start_approx`. A logger drive's row also has the tank
   level and the odometer at its start and end (`tank_start_l`, `tank_end_l`,
-  `odometer_start_km`, `odometer_end_km`), from which `src/tanks.js` works
+  `odometer_start_km`, `odometer_end_km`; each tank half too,
+  `tank_left_start`...; the board reads them together at the start, at Park
+  and at engine-off), and the rate each channel tier got (`rate_fast`,
+  `rate_medium`: reads a second per identifier; `slow_pass_s`; from the
+  board's "tier rates" notes), from which `src/tanks.js` works
   out each tank of fuel: a new one wherever the level rises 8 litres or more
   between drives (a fill-up), with its miles, gallons and mpg.
   Its fault reads during a drive (`<start>.faults.csv`) go into fault
@@ -40,7 +55,12 @@ serves it to Claude from anywhere:
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
-  you and MCP portals sign in with your Access login.
+  you and MCP portals sign in with your Access login. A token the Worker
+  refuses on `/mcp` gets a 401 naming Access's resource metadata
+  (`WWW-Authenticate: Bearer ... resource_metadata=...`), so an MCP client
+  signs in again or refreshes; elsewhere a 403. A token signed with a key the
+  Worker hasn't cached fetches Access's keys again (at most every 5 minutes),
+  and expiry allows a minute's clock difference.
 
 Plain JavaScript, no packages: `src/worker.js` and `src/drive.js`. Tests run
 on Node 24: `node --test "cloud/test/*.test.mjs"` (from the repo root).
@@ -129,9 +149,9 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
-| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`, `speed_kmh`, `rpm`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `pending`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
+| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes`, `pending`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
 | `POST /api/logger/heartbeats` | check-ins the board kept while it had no Wi-Fi: `{"beats": [...]}`, at most 200 and 64 KB. Each is filed under its own `clock`; one without a clock, older than 30 days or already stored is skipped. Replies `stored`, `skipped` |
-| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in, and each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline |
+| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes` with each code's module and text), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline; and `last_drive`: the last logger drive's rate per tier |
 | `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
 | `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`): an ESP32 app image of at most 6 MB, `V` not "dev". One build is kept; replies with its manifest |
 | `GET /api/logger/firmware` | the manifest: `{"version", "sha256", "size", "uploaded"}` (404 when nothing is published); also in `GET /api/logger` as `firmware` |
@@ -145,7 +165,7 @@ All requests need an Access token (a login, or the service token headers
 | `PUT /api/logger/catalog` | the app's channel catalog (`n63read loggerchannels.catalog_payload`): `{"columns", "rows", "answers", "modules", "defaults"}`. Answers merge with the stored ones (an identifier that answered "ok" stays "ok"); the first one makes the preset "Default" (`defaults`, everything else slow) and makes it active |
 | `GET /api/logger/catalog` | the stored catalog |
 | `GET /api/logger/presets` | `{"active", "presets": [{"name", "rest", "tiers", "updated"}], "file": {"preset", "etag", "counts"}}`. `tiers` is `{channel: tier}` (fast, medium, slow, drive, daily, weekly, monthly, off); `rest` ("slow" or "off") is the tier of every channel not named that the car answers, except that the tire blocks (`DSC_RDC_MESSDATENBLOCK_1`-`4`), tank level and odometer (`logger.js` `PER_DRIVE`) are read at least once a drive unless named off |
-| `PUT /api/logger/presets` | `{"changes": [{"name", "rest", "tiers"} or {"name", "deleted": true}], "active": name}`, both optional; the active preset can't be deleted |
-| `GET /api/logger/channels` | the board's `channels.csv` from the active preset, with an `ETag` (`If-None-Match` gets a 304) and `X-Preset` |
+| `PUT /api/logger/presets` | `{"changes": [{"name", "rest", "tiers"} or {"name", "deleted": true}], "active": name}`, both optional; the active preset can't be deleted. Each preset changed or deleted keeps what it was as a version (MCP `logger_presets`, `logger_rollback`) |
+| `GET /api/logger/channels` | the board's `channels.csv` from the active preset, with an `ETag` (`If-None-Match` gets a 304) and `X-Preset`. Whatever the preset says: an identifier its module said it hasn't (refused with 0x31 in a check or a drive: `absent` in the catalog's answers) or one that misdecodes on this car (`logger.js` `UNDECODABLE`: the airbag module's `_IMU_WERTE`) is off, and what the board's own logic reads (`BOARD_NEEDS`: the selector, engine speed, speed, `ITKUM`, `IUIBS`) is at least medium |
 | `POST /mcp` | MCP (JSON-RPC 2.0, streamable HTTP with JSON replies) |
 | `GET /api/status` | who you're signed in as |
