@@ -109,6 +109,39 @@ test("wrong audience, expired, forged or unconfigured: refused", async () => {
   assert.equal((await call("GET", "/api/status")).status, 403);       // fails closed
 });
 
+test("Access rotated its keys: fetched again, not refused for an hour", async () => {
+  assert.equal((await call("GET", "/api/status")).status, 200);       // k1 cached
+  const old = jwk;
+  const was = keys;
+  try {
+    await newKey();
+    jwk = { ...jwk, kid: "k2" };
+    const fresh = await token({}, { kid: "k2" });
+    assert.equal((await call("GET", "/api/status", { auth: fresh })).status, 200);
+    // A made-up key id doesn't fetch the keys every request.
+    const forged = await token({}, { kid: "k9" });
+    assert.equal((await call("GET", "/api/status", { auth: forged })).status, 403);
+  } finally {
+    keys = was;
+    jwk = old;
+  }
+});
+
+test("a token a few seconds past its expiry still gets in; minutes past, not", async () => {
+  const now = Math.floor(Date.now() / 1000);
+  assert.equal((await call("GET", "/api/status", { auth: await token({ exp: now - 20 }) })).status, 200);
+  assert.equal((await call("GET", "/api/status", { auth: await token({ exp: now - 300 }) })).status, 403);
+});
+
+test("MCP: a refused token is a 401 that says where to sign in again", async () => {
+  const r = await call("POST", "/mcp", { auth: await token({ exp: 1 }),
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) });
+  assert.equal(r.status, 401);
+  assert.equal(r.headers.get("www-authenticate"), 'Bearer error="invalid_token", ' +
+    'resource_metadata="https://car.example.com/.well-known/cloudflare-access-protected-resource/mcp"');
+  assert.equal((await call("POST", "/mcp", { auth: false, body: "{}" })).status, 401);
+});
+
 test("the Access cookie works too", async () => {
   const r = await call("GET", "/api/status",
     { auth: false, headers: { Cookie: `x=1; CF_Authorization=${await token()}` } });

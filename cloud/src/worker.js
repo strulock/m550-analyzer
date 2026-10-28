@@ -55,6 +55,11 @@ const MAX_TEXT = 60000;
 
 let jwksCache = null;
 const JWKS_TTL_MS = 60 * 60 * 1000;
+// A token signed with a key the cache hasn't (Access rotated its keys): the
+// keys are fetched again, at most this often, rather than every request
+// refused for up to an hour.
+const JWKS_REFRESH_MS = 5 * 60 * 1000;
+const EXP_LEEWAY_S = 60;                  // the Worker's clock and Access's may differ
 
 function b64urlBytes(s) {
   s = s.replace(/-/g, "+").replace(/_/g, "/");
@@ -77,9 +82,13 @@ function audiences(env) {
   return (env.ACCESS_AUD || "").split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-async function jwks(env, fetcher = fetch) {
+let jwksForcedAt = 0;
+
+async function jwks(env, fetcher = fetch, fresh = false) {
   const now = Date.now();
-  if (jwksCache && now - jwksCache.at < JWKS_TTL_MS) return jwksCache.keys;
+  if (fresh && now - jwksForcedAt < JWKS_REFRESH_MS) fresh = false;
+  if (fresh) jwksForcedAt = now;
+  if (!fresh && jwksCache && now - jwksCache.at < JWKS_TTL_MS) return jwksCache.keys;
   const res = await fetcher(`${teamDomain(env)}/cdn-cgi/access/certs`);
   if (!res.ok) throw new Error(`JWKS fetch failed: ${res.status}`);
   const body = await res.json();
@@ -89,6 +98,7 @@ async function jwks(env, fetcher = fetch) {
 
 export function resetJwksCache() {
   jwksCache = null;
+  jwksForcedAt = 0;
 }
 
 function cookie(header, name) {
@@ -117,7 +127,8 @@ export async function verifyAccess(request, env, fetcher = fetch) {
     return { ok: false, reason: "undecodable token" };
   }
   if (header.alg !== "RS256" || !header.kid) return { ok: false, reason: "unexpected alg" };
-  const jwk = (await jwks(env, fetcher)).find((k) => k.kid === header.kid);
+  const jwk = (await jwks(env, fetcher)).find((k) => k.kid === header.kid) ||
+    (await jwks(env, fetcher, true)).find((k) => k.kid === header.kid);
   if (!jwk) return { ok: false, reason: "unknown key id" };
   const key = await crypto.subtle.importKey(
     "jwk", { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: "RS256", ext: true },
@@ -131,7 +142,9 @@ export async function verifyAccess(request, env, fetcher = fetch) {
   if (payload.iss && payload.iss.replace(/\/$/, "") !== teamDomain(env)) {
     return { ok: false, reason: "iss mismatch" };
   }
-  if (payload.exp && payload.exp * 1000 < Date.now()) return { ok: false, reason: "expired" };
+  if (payload.exp && (payload.exp + EXP_LEEWAY_S) * 1000 < Date.now()) {
+    return { ok: false, reason: "expired" };
+  }
   return { ok: true, who: payload.email || payload.common_name || "service" };
 }
 
@@ -1530,7 +1543,19 @@ async function loggerConfig(request, env, url) {
 export async function handle(request, env, fetcher = fetch) {
   const url = new URL(request.url);
   const auth = await verifyAccess(request, env, fetcher);
-  if (!auth.ok) return json({ error: "forbidden", reason: auth.reason }, 403);
+  if (!auth.ok) {
+    // An MCP client signs in again (or uses its refresh token) only on a 401
+    // that says where (RFC 9728): a 403 left it stuck once the day's Access
+    // token was refused here. Access's own metadata for this path, as Access
+    // gives it when it turns a request away itself.
+    if (url.pathname === "/mcp") {
+      const meta = `${url.origin}/.well-known/cloudflare-access-protected-resource${url.pathname}`;
+      return new Response(JSON.stringify({ error: "invalid_token", reason: auth.reason }), {
+        status: 401, headers: { "content-type": "application/json",
+          "www-authenticate": `Bearer error="invalid_token", resource_metadata="${meta}"` } });
+    }
+    return json({ error: "forbidden", reason: auth.reason }, 403);
+  }
 
   if (url.pathname === "/mcp") {
     if (request.method === "GET") return new Response(null, { status: 405 });  // no SSE stream
