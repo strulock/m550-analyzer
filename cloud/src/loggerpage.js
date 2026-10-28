@@ -12,7 +12,7 @@
  */
 
 import { estimateRates } from "./estimate.js";
-import { PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE } from "./logger.js";
+import { BOARD_NEEDS, PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE } from "./logger.js";
 import { FILL_MIN_L } from "./tanks.js";
 
 const FILL_NOTE = `${FILL_MIN_L} litres (${(FILL_MIN_L / 3.785411784).toFixed(1)} gallons)`;
@@ -213,7 +213,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
 var __name = function (fn) { return fn; };
 ${estimateRates.toString()}
 var PER_DRIVE = ${JSON.stringify(PER_DRIVE)}, PER_DRIVE_RE = ${PER_DRIVE_RE.toString()};
-var UNDECODABLE = ${JSON.stringify([...UNDECODABLE])};
+var UNDECODABLE = ${JSON.stringify([...UNDECODABLE])}, BOARD_NEEDS = ${JSON.stringify(BOARD_NEEDS)};
 ${perDrive.toString()}
 </script>
 <script>
@@ -250,10 +250,12 @@ ${perDrive.toString()}
     return edit.rest === "off" && perDrive(it.name) ? "drive" : edit.rest;
   }
   // Off whatever the preset says: one that misdecodes on this car, or one its
-  // module says it hasn't ("absent").
+  // module says it hasn't ("absent"); one the board's own logic reads at
+  // least its tier there (logger.js tiersFor).
   function effective(it) {
     if (it.status === "absent" || UNDECODABLE.indexOf(it.key) >= 0) return "off";
-    return edit.tiers[it.name] || inherited(it);
+    var tier = edit.tiers[it.name] || inherited(it), need = BOARD_NEEDS[it.name];
+    return need && TIERS.indexOf(need) < TIERS.indexOf(tier) ? need : tier;
   }
   function isDirty() { return edit && JSON.stringify({ r: edit.rest, t: edit.tiers }) !== savedJson; }
 

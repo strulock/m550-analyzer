@@ -86,7 +86,20 @@ before the drive starts. Only if neither answers is it `nt-<boot>-<n>`,
 dated by the Worker from its upload. A drive ends when the car stops answering for
 10 s, or when the power goes. If the gateway closes the connection, the board
 connects again and carries on in the same files (a note says so), so a drive
-keeps one name; only if that fails for 15 s does the drive end. Whenever Wi-Fi is up, the other core uploads
+keeps one name; only if that fails for 15 s does the drive end.
+
+Snapshots: the odometer and the fuel tank, the whole (`IKTFS`) and each
+half (`FUELLST_TANKH_L`/`_R`, `BDC_TANK_FUELLSTAND_LINKS`/`_RECHTS`), are
+read together 5 s into a drive, whenever the selector goes into P
+(`EGS_ISTGANG.FAHRSTUFE`), and when the engine stops (`INMOT` from 400 rpm
+to under 100), at most one every 10 s; each is noted ("snapshot: park") and
+gets a sweep row of its own. In a preset they're read once a drive or in the
+slow rotation, so a drive's first and last could be one reading (the 27 Oct
+7:50 drive's odometer didn't move). The Worker keeps each drive's first and
+last of them (`tank_start_l`, `tank_left_start`, `odometer_end_km`, ...),
+and whatever a preset says, it reads the selector, engine speed, speed,
+`ITKUM` and `IUIBS` at least medium (`logger.js` `BOARD_NEEDS`). The
+check-ins report the selector (`gear`: P R N D M). Whenever Wi-Fi is up, the other core uploads
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).

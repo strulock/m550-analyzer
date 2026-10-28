@@ -72,12 +72,17 @@ test("logger extras: the tank level and odometer at each end, and whether the st
   // the odometer from a sweep file's first and last row.
   const fast = "Time,Clock,IKTFS\n" + [0, 20, 40, 60, 600, 620, 640, 660].map((t, k) =>
     `${t},2026-10-26 08:00:00.000-05:00,${[40, 41, 40, 39, 30, 31, 30, 30][k]}`).join("\n") + "\n";
-  const sweep = "Time,Clock,EGS_KILOMETERSTAND\n0,,111650\n300,,111655\n650,,111660\n";
+  // Each half of the tank from whichever module's channel the log has (the
+  // board's snapshots at the start, Park and engine-off).
+  const sweep = "Time,Clock,EGS_KILOMETERSTAND,FUELLST_TANKH_L,BDC_TANK_FUELLSTAND_RECHTS\n" +
+    "0,,111650,20,21\n300,,111655,,\n650,,111660,15,16\n";
   const x = loggerExtras([readLog(fast), readLog(sweep)]);
   assert.deepEqual(x, { start_approx: false, tank_start_l: 40, tank_end_l: 30,
+    tank_left_start: 20, tank_left_end: 15, tank_right_start: 21, tank_right_end: 16,
     odometer_start_km: 111650, odometer_end_km: 111660 });
   const none = loggerExtras(readLog("Time,INMOT\n0,700\n1,710\n"));
   assert.deepEqual(none, { start_approx: true, tank_start_l: null, tank_end_l: null,
+    tank_left_start: null, tank_left_end: null, tank_right_start: null, tank_right_end: null,
     odometer_start_km: null, odometer_end_km: null });
 });
 

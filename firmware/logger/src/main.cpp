@@ -238,7 +238,7 @@ static std::atomic<bool> channelsDownloaded{false};   // a new file is on the ca
 // read (the sweep's too) and read by the upload task. The first name the
 // table has wins: the DME's speed, else the head unit's GPS speed. Doubles:
 // a float's 24 bits put a coordinate a metre or two out.
-enum Live { SPEED, RPM, BATTERY, COOLANT, OIL, LAT, LON, LIVE_N };
+enum Live { SPEED, RPM, BATTERY, COOLANT, OIL, LAT, LON, GEAR, LIVE_N };
 static const char* const LIVE_NAMES[LIVE_N][2] = {
     {"FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "HU_STATUS_SPEED.GPS_SPEED"},
     {"INMOT", nullptr},
@@ -247,6 +247,7 @@ static const char* const LIVE_NAMES[LIVE_N][2] = {
     {"ITOEL", nullptr},                      // °C
     {"HU_STATUS_GPS_POSITION.LATITUDE", nullptr},
     {"HU_STATUS_GPS_POSITION.LONGITUDE", nullptr},
+    {"EGS_ISTGANG.FAHRSTUFE", nullptr},      // the selector: 0 P, 1 R, 2 N, 3 D, 4 M (0xFF unknown)
 };
 static int liveCh[LIVE_N];
 static double liveScale[LIVE_N];          // to the check-in's unit (IUIBS: mV to V)
@@ -276,6 +277,28 @@ static void findLive() {
   }
   pedalCh = channelNamed("BUS_FAHRPEDALWERT");
   boostCh = channelNamed("IPLAD");
+}
+
+// The odometer and the tank (the whole and each half), read together a few
+// seconds into a drive, whenever the car goes into Park, and when the engine
+// stops (takeSnapshot). In a preset they're read once a drive or in the slow
+// rotation, so a drive's first and last reading could be one and the same
+// (27 Oct 7:50: the odometer didn't move, the tank was missing).
+static const char* const SNAPSHOT_NAMES[] = {
+    "EGS_KILOMETERSTAND", "LMV_DATEN_VERTEILERGETRIEBE.MILE_KM", "BDC_ZUSATZINFO_LICHT.KM_STAND_1",
+    "PMA_BUS_IN_KILOMETERSTAND_WERT", "IKTFS", "FUELLST_TANKH_L", "FUELLST_TANKH_R",
+    "BDC_TANK_FUELLSTAND_LINKS", "BDC_TANK_FUELLSTAND_RECHTS"};
+static std::vector<size_t> snapshotReads;    // indices into plan.reads
+
+static void findSnapshot() {
+  snapshotReads.clear();
+  for (size_t i = 0; i < plan.reads.size(); i++) {
+    bool want = false;
+    for (uint32_t ci : plan.reads[i].channels) {
+      for (const char* n : SNAPSHOT_NAMES) want = want || !strcmp(table.name(table.channels[ci]), n);
+    }
+    if (want) snapshotReads.push_back(i);
+  }
 }
 
 static void noteLive(uint32_t ch, double v, uint32_t now) {
@@ -340,6 +363,7 @@ static void loadChannelsInto() {
   }
   plan.build(table);
   findLive();
+  findSnapshot();
   std::string tag = "built-in", preset;
   if (channelsFromCard) {
     Preferences prefs;
@@ -658,6 +682,7 @@ static uint32_t duePeriodic();
 static void sweepRow(double secs);
 static void checkStart();
 static void checkEnd();
+static void resetSnapshots();
 static bool checkRunning();
 
 static void startDrive() {
@@ -685,6 +710,7 @@ static void startDrive() {
   driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = lastStatsNoteMs = millis();
   fastRows = sweepRows = cycles = reconnects = 0;
   burst.reset();
+  resetSnapshots();
   note.clear();
   // Which channel file, so the analysis knows what was meant to be logged:
   // the preset and its ETag, "manual" (sent over the terminal), "card" or
@@ -1070,6 +1096,74 @@ static void sweepRow(double secs) {
   for (uint32_t i : sweepLayout.columns) values[i] = NAN;
 }
 
+// ---- snapshots ---------------------------------------------------------------
+// The snapshot's reads (findSnapshot) when it's due: a few seconds into the
+// drive, the selector going into P, the engine stopping. Asked between the
+// cycle's reads and its row (whatever was collected later goes first, so no
+// module has two requests out), so the row and a sweep row of their own
+// carry them, noted ("snapshot: park").
+static const uint32_t SNAPSHOT_START_MS = 5000;
+static const uint32_t SNAPSHOT_GAP_MS = 10000;   // between two (a P, N, P shuffle)
+static const double RUNNING_RPM = 400, STOPPED_RPM = 100;
+static const int GEAR_P = 0, GEAR_UNKNOWN = 0xFF;
+static const char* snapshotWhy = nullptr;        // one due, and why
+static bool snapshotStartDone = false;
+static uint32_t lastSnapshotMs = 0;
+static int lastGear = -1;                        // the selector as last read (-1: not yet)
+static bool engineRan = false;                   // since the last stop
+
+static void resetSnapshots() {
+  snapshotWhy = nullptr;
+  snapshotStartDone = false;
+  lastSnapshotMs = 0;
+  lastGear = -1;
+  engineRan = false;
+}
+
+// After each cycle's reads: what the selector and the engine just did.
+static void watchCar() {
+  const double gear = live(GEAR), rpm = live(RPM);
+  if (!isnan(gear) && (int)gear != GEAR_UNKNOWN) {
+    if ((int)gear == GEAR_P && lastGear > GEAR_P) snapshotWhy = "park";
+    lastGear = (int)gear;
+  }
+  if (!isnan(rpm)) {
+    if (rpm >= RUNNING_RPM) engineRan = true;
+    else if (rpm < STOPPED_RPM && engineRan) { engineRan = false; snapshotWhy = "engine off"; }
+  }
+  if (!snapshotStartDone && millis() - driveStartMs >= SNAPSHOT_START_MS) {
+    snapshotStartDone = true;
+    if (!snapshotWhy) snapshotWhy = "start";
+  }
+}
+
+// True when one was taken (the caller writes a sweep row too).
+static bool takeSnapshot() {
+  const char* why = snapshotWhy;
+  if (!why || burst.on() || connectionLost) return false;
+  snapshotWhy = nullptr;
+  if (snapshotReads.empty() || (lastSnapshotMs && millis() - lastSnapshotMs < SNAPSHOT_GAP_MS)) {
+    return false;
+  }
+  lastSnapshotMs = millis() | 1;
+  for (uint32_t t0 = millis(); !pendingReqs.empty() && millis() - t0 < LATER_MS;) {
+    collect();
+    delay(5);
+  }
+  std::vector<std::vector<size_t>> singles;
+  for (size_t i : snapshotReads) {
+    if (!waitingOn(plan.reads[i].module) && !backoff.waiting(plan.reads[i].module, millis())) {
+      singles.push_back({i});
+    }
+  }
+  std::vector<const std::vector<size_t>*> batches;
+  for (const std::vector<size_t>& b : singles) batches.push_back(&b);
+  askAll(batches);
+  addNote(std::string("snapshot: ") + why);
+  out.printf("[drive] snapshot (%s): %u identifiers\n", why, (unsigned)singles.size());
+  return true;
+}
+
 // ---- the logging cycle -------------------------------------------------------
 // Each cycle: one request per module (the scheduler packs each module's fast
 // reads with the next medium and slow ones). The ones to modules with fast
@@ -1105,6 +1199,8 @@ static void cycle() {
   }
   askAll(waited);
   collect();
+  watchCar();
+  const bool snapshot = takeSnapshot();
   const uint32_t afterReads = millis();
   tFast += afterReads - start;
   const double secs = (afterReads - driveStartMs) / 1000.0;
@@ -1159,6 +1255,7 @@ static void cycle() {
   }
   // Every module's slow reads all come round: one row of the sweep file. The
   // periodic reads all asked: one more, once their answers are in.
+  if (snapshot) sweepRow(secs);                 // the snapshot's slow channels, if any
   if (scheduler.slowPassDone() && scheduler.hasSlow()) {
     sweepRow(secs);
     sweepPassMs = millis() - sweepPassStart;
@@ -1786,6 +1883,9 @@ static std::string beatJson(bool boot, bool buffered = false) {
   }
   jsonNumber(j, "speed_kmh", live(SPEED), 1);
   jsonNumber(j, "rpm", live(RPM), 0);
+  static const char* const gears[] = {"P", "R", "N", "D", "M"};
+  const double gear = live(GEAR);
+  if (!isnan(gear) && gear >= 0 && gear <= 4) jsonText(j, "gear", gears[(int)gear]);
   jsonNumber(j, "battery_v", live(BATTERY), 2);
   jsonNumber(j, "coolant_c", live(COOLANT), 1);
   jsonNumber(j, "oil_c", live(OIL), 1);

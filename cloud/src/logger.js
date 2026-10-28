@@ -168,6 +168,15 @@ export const PER_DRIVE_RE = /^DSC_RDC_MESSDATENBLOCK_[1-4]\./;
 // which read in the millions.
 export const UNDECODABLE = new Set(["0x01:0x4101"]);
 
+// What the board's own logic reads, at least this often whatever a preset
+// says (a faster tier stays): the selector and the engine speed for Park,
+// engine-off and the end of a drive, the speed for the full channel check's
+// standing still, and the check-ins' coolant and battery.
+export const BOARD_NEEDS = { INMOT: "medium", FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP: "medium",
+  "EGS_ISTGANG.FAHRSTUFE": "medium", ITKUM: "medium", IUIBS: "medium" };
+
+const faster = (a, b) => (TIERS.indexOf(a) <= TIERS.indexOf(b) ? a : b);
+
 export function perDrive(name) {
   return PER_DRIVE_RE.test(name) || PER_DRIVE.includes(name);
 }
@@ -175,16 +184,20 @@ export function perDrive(name) {
 /** Each catalog row's tier under a preset: named, else `rest` where the
  * car answers (at least once a drive for the PER_DRIVE channels), else off;
  * an UNDECODABLE identifier, or one its module says it hasn't ("absent",
- * sweep.js), always off. */
+ * sweep.js), always off; one the board's logic reads (BOARD_NEEDS) at least
+ * its tier there. */
 export function tiersFor(catalog, preset) {
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
   return catalog.rows.map((r) => {
     const key = `${r[col.module]}:${r[col.did]}`;
     if (UNDECODABLE.has(key) || catalog.answers[key] === "absent") return "off";
+    const need = BOARD_NEEDS[r[col.name]];
     const named = preset.tiers[r[col.name]];
-    if (named) return named;
-    if (catalog.answers[key] !== "ok") return "off";
-    return preset.rest === "off" && perDrive(r[col.name]) ? "drive" : preset.rest;
+    let tier;
+    if (named) tier = named;
+    else if (catalog.answers[key] !== "ok") tier = "off";
+    else tier = preset.rest === "off" && perDrive(r[col.name]) ? "drive" : preset.rest;
+    return need ? faster(tier, need) : tier;
   });
 }
 

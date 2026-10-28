@@ -823,6 +823,18 @@ test("an identifier that misdecodes on this car is off, whatever the preset says
   assert.ok(rows.some((x) => x.name === "INMOT"));
 });
 
+test("what the board's own logic reads is at least medium, whatever the preset says", async () => {
+  const gear = ["EGS_ISTGANG.FAHRSTUFE", "0x18", "0xDA2E", 2, 1, "u8", "big", "1", "1", "0", "",
+    "0-n", "", "ISTGANG"];
+  await putCatalog({ ...CATALOG, rows: [...CATALOG.rows, gear],
+    answers: { ...CATALOG.answers, "0x18:0xDA2E": "ok" } });
+  await presets({ changes: [{ name: "Default", rest: "off",
+    tiers: { INMOT: "fast", "EGS_ISTGANG.FAHRSTUFE": "off" } }] });
+  const tiers = Object.fromEntries((await channelRows()).rows.map((x) => [x.name, x.tier]));
+  assert.equal(tiers["EGS_ISTGANG.FAHRSTUFE"], "medium");   // named off: the board needs it
+  assert.equal(tiers.INMOT, "fast");                         // faster already: stays
+});
+
 test("presets refuse bad tiers, bad names and deleting the active one", async () => {
   await putCatalog();
   const put = (body) => call("PUT", "/api/logger/presets", { body: JSON.stringify(body) });
