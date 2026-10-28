@@ -157,7 +157,8 @@ reads, so a module that doesn't answer no longer holds up the log. Status
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
 booted (a brownout shows there), uptime, what it's doing, the speed, rpm,
-battery voltage, coolant and oil temperature (`ITKUA`, `ITOEL`) and the GPS
+battery voltage, coolant and oil temperature (`ITKUM`, the engine's coolant,
+else `ITKUA`, the radiator outlet's; `ITOEL`) and the GPS
 position when the channel table has them and has read them in the last 30 s
 (null otherwise; battery is the DME's `IUADW`, in the medium tier, else `IUIBS`), files
 waiting, Wi-Fi and memory, and which channel
