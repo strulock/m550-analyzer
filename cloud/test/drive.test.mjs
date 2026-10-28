@@ -79,11 +79,23 @@ test("logger extras: the tank level and odometer at each end, and whether the st
   const x = loggerExtras([readLog(fast), readLog(sweep)]);
   assert.deepEqual(x, { start_approx: false, tank_start_l: 40, tank_end_l: 30,
     tank_left_start: 20, tank_left_end: 15, tank_right_start: 21, tank_right_end: 16,
-    odometer_start_km: 111650, odometer_end_km: 111660 });
+    odometer_start_km: 111650, odometer_end_km: 111660,
+    rate_fast: null, rate_medium: null, slow_pass_s: null });
   const none = loggerExtras(readLog("Time,INMOT\n0,700\n1,710\n"));
   assert.deepEqual(none, { start_approx: true, tank_start_l: null, tank_end_l: null,
     tank_left_start: null, tank_left_end: null, tank_right_start: null, tank_right_end: null,
-    odometer_start_km: null, odometer_end_km: null });
+    odometer_start_km: null, odometer_end_km: null,
+    rate_fast: null, rate_medium: null, slow_pass_s: null });
+});
+
+test("logger extras: the rate each tier got, from the board's notes", () => {
+  const log = "Time,Clock,INMOT,Event\n" +
+    "0,2026-10-28 08:00:00.000-05:00,700,start\n" +
+    "60,2026-10-28 08:01:00.000-05:00,700,stats 14.1 rows/s; tier rates: fast 14.10/s medium 2.00/s slow pass 40 s\n" +
+    "120,2026-10-28 08:02:00.000-05:00,700,tier rates: fast 13.90/s medium 1.00/s slow pass 50 s\n" +
+    "180,2026-10-28 08:03:00.000-05:00,700,tier rates: fast 9.00/s\n";
+  const x = loggerExtras(readLog(log));
+  assert.deepEqual([x.rate_fast, x.rate_medium, x.slow_pass_s], [12.33, 1.5, 45]);
 });
 
 test("a clock that fills in later dates the drive from its first row", () => {

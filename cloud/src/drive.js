@@ -619,6 +619,28 @@ export function summarizeDrive(logs, file, uploaded, timeZone = DEFAULT_TIME_ZON
   return drive;
 }
 
+// The board's "tier rates" note, once a minute: fast and medium reads a
+// second per identifier, the slow pass's length.
+const TIER_RATES_RE = /tier rates:(?: fast ([\d.]+)\/s)?(?: medium ([\d.]+)\/s)?(?: slow pass (\d+) s)?/;
+
+/** The rates each tier got over a drive, from the board's notes: the means
+ * of fast and medium, the median slow pass (null without notes). */
+function tierRates(logs) {
+  const fast = [], medium = [], slow = [];
+  for (const log of logs) {
+    for (const n of log.notes || []) {
+      const m = TIER_RATES_RE.exec(n.text);
+      if (!m) continue;
+      if (m[1]) fast.push(Number(m[1]));
+      if (m[2]) medium.push(Number(m[2]));
+      if (m[3]) slow.push(Number(m[3]));
+    }
+  }
+  const mean = (v) => (v.length ? pyRound(v.reduce((a, b) => a + b, 0) / v.length, 2) : null);
+  return { rate_fast: mean(fast), rate_medium: mean(medium),
+    slow_pass_s: slow.length ? median(slow) : null };
+}
+
 // Each half of the saddle tank, the DME's and the body module's, any one.
 const TANK_LEFT = ["FUELLST_TANKH_L", "BDC_TANK_FUELLSTAND_LINKS"];
 const TANK_RIGHT = ["FUELLST_TANKH_R", "BDC_TANK_FUELLSTAND_RECHTS"];
@@ -628,7 +650,7 @@ const TANK_RIGHT = ["FUELLST_TANKH_R", "BDC_TANK_FUELLSTAND_RECHTS"];
  * Clock), and for fill-ups (tanks.js) the tank level and the odometer as
  * the drive started and ended, with each half of the tank (in its
  * channel's unit). The board reads them together at the start, at Park and
- * at engine-off (its snapshots). */
+ * at engine-off (its snapshots). And the rates each tier got (tierRates). */
 export function loggerExtras(logs) {
   logs = [].concat(logs);
   const [tankStart, tankEnd] = ends(logs, [FUEL_TANK], TANK_WINDOW);
@@ -637,7 +659,8 @@ export function loggerExtras(logs) {
   const [odoStart, odoEnd] = ends(logs, ODOMETERS_ANY, 0);
   return { start_approx: !logs[0].firstClock, tank_start_l: tankStart, tank_end_l: tankEnd,
     tank_left_start: leftStart, tank_left_end: leftEnd, tank_right_start: rightStart,
-    tank_right_end: rightEnd, odometer_start_km: odoStart, odometer_end_km: odoEnd };
+    tank_right_end: rightEnd, odometer_start_km: odoStart, odometer_end_km: odoEnd,
+    ...tierRates(logs) };
 }
 
 /** One drive log on its own: {series, drive}. */
