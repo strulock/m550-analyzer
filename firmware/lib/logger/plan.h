@@ -35,7 +35,8 @@ constexpr uint16_t RECOVER_AFTER = 50;    // whole answers before a shrunk batch
 constexpr uint16_t RECOVER_MAX = 3200;    // doubled each time the bigger size fails, to this
 constexpr uint8_t FAILURES_TO_REST = 3;
 constexpr uint32_t REST_MS = 60000;
-constexpr uint32_t OUT_OF_RANGE_REST_MS = 600000;   // an identifier the module says it hasn't
+constexpr uint32_t OUT_OF_RANGE_REST_MS = 600000;   // a lone identifier still too long (0x13, 0x14)
+constexpr uint32_t ABSENT_REST_MS = 0x40000000;     // one the module hasn't (0x31): the whole drive
 constexpr uint8_t TIMEOUTS_TO_SHRINK = 2;           // in a row, before a module's batches shrink
 
 class Plan {

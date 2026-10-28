@@ -18,12 +18,18 @@
  *   as the app's sends do), so the channel file picks up whatever answers
  *   now, and the app reads them too (cloud.check_files).
  * - The finished one moves to "sweep_last" with its counts, for the page.
+ * - An identifier its module refuses as out of range (0x31: it hasn't it),
+ *   in a check or in a drive's notes ("module 0x12 hasn't 0x4011 (0x31)"),
+ *   is "absent" in the catalog's answers, and off in every channel file
+ *   from then on (logger.js tiersFor), unless it answered ok before.
  */
 
 import { CATALOG_KEY, getCatalog } from "./logger.js";
 
 export const CHECK = ".check.csv";            // a logger drive's check answers
 export const STATUSES = ["ok", "size", "refused", "no answer"];
+export const ABSENT = "absent";               // refused out of range (0x31)
+const ABSENT_RE = /module (0x[0-9A-F]{2}) hasn't (0x[0-9A-F]{4}) \(0x31\)/g;
 const WIDTH = { u8: 1, s8: 1, u16: 2, s16: 2, u32: 4, s32: 4, f32: 4, gps: 5 };
 const JOB_RE = /^logger sweep ([\w.-]{1,40})$/;
 const MAX_FILES = 200;                        // check files remembered per request
@@ -142,8 +148,39 @@ export function checkRows(text) {
     module: parseInt(c[at.module], 16), did: parseInt(c[at.did], 16),
     job: at.job === undefined ? "" : (c[at.job] || "").trim(),
     status: (c[at.status] || "").trim(),
+    detail: at.detail === undefined ? "" : (c[at.detail] || "").trim(),
   })).filter((r) => Number.isInteger(r.module) && Number.isInteger(r.did) &&
     STATUSES.includes(r.status));
+}
+
+/** The identifiers a drive's notes say a module hasn't, as answers keys. */
+export function absentInNotes(notes) {
+  const out = new Set();
+  for (const n of notes || []) {
+    for (const m of n.text.matchAll(ABSENT_RE)) out.add(`${m[1]}:${m[2]}`);
+  }
+  return out;
+}
+
+/** Mark these answers keys absent in the catalog (an "ok" one stays ok, a
+ * key the catalog hasn't is skipped): how many changed. */
+export async function markAbsent(env, keys) {
+  if (!keys.size) return 0;
+  const catalog = await getCatalog(env);
+  if (!catalog) return 0;
+  const known = new Set(identifiers(catalog).map((x) => x.key));
+  const answers = { ...catalog.answers };
+  let changed = 0;
+  for (const k of keys) {
+    if (!known.has(k) || answers[k] === "ok" || answers[k] === ABSENT) continue;
+    answers[k] = ABSENT;
+    changed++;
+  }
+  if (changed) {
+    await env.FILES.put(CATALOG_KEY, new TextEncoder().encode(JSON.stringify({ ...catalog,
+      answers })), { httpMetadata: { contentType: "application/json" } });
+  }
+  return changed;
 }
 
 /** A logger drive's check answers just stored: into the catalog's answers,
@@ -162,9 +199,10 @@ export async function ingestCheck(env, key, text) {
     counts[r.status] = (counts[r.status] || 0) + 1;
     const m = JOB_RE.exec(r.job);
     if (m) id = m[1];
-    if (answers[k] === "ok" || answers[k] === r.status) continue;
-    if (r.status === "ok") newlyOk++;
-    answers[k] = r.status;
+    const status = r.status === "refused" && r.detail.toLowerCase() === "0x31" ? ABSENT : r.status;
+    if (answers[k] === "ok" || answers[k] === status) continue;
+    if (status === "ok") newlyOk++;
+    answers[k] = status;
     changed++;
   }
   if (changed) {
