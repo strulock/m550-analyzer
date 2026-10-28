@@ -1267,7 +1267,8 @@ static void faultAnswer(uint8_t m, const hsfz::Reply& r) {
 // lib/logger/carcheck.h. The Worker asks for one in a check-in's reply
 // ("sweep": its id, set from the logger page); the upload task (core 0)
 // keeps the request and downloads the list to the card (CHECK_LIST), and
-// the next drive asks the list from a minute in, a few identifiers a cycle
+// the next drive asks the list from a minute in, while the car stands
+// (parked or idling; standing()), a few identifiers a cycle
 // beside the fast reads (none in a burst), one collected later at a time
 // for a module the fast reads don't wait on. Its place is kept, so a drive
 // that ends first leaves the rest to the next. Keys in "logger": chkid (the
@@ -1459,6 +1460,18 @@ static void checkAnswer(const hsfz::Reply& r) {
   if (checkNext - checkSaved >= CHECK_SAVE_EVERY) checkSave();
 }
 
+// The check runs only while the car stands (parked or idling): on the move
+// it took the 27 Oct 7:50 drive from 3.3-4 rows a second to about 1.9.
+// Standing: the speed under STAND_KMH, or with no speed read, the engine
+// at idle or off.
+static const double STAND_KMH = 3, IDLE_RPM = 1000;
+static bool standing() {
+  double kmh = live(SPEED);
+  if (!isnan(kmh)) return kmh < STAND_KMH;
+  double rpm = live(RPM);
+  return !isnan(rpm) && rpm < IDLE_RPM;
+}
+
 // Between cycles: the next few identifiers of the check.
 static void readCheck() {
   if (checkCancel.exchange(false) && checkRunning()) {
@@ -1469,6 +1482,14 @@ static void readCheck() {
   }
   if (!checkRunning() || connectionLost || burst.on() || checkInFlight) return;
   if (millis() - driveStartMs < ONCE_AFTER_MS) return;
+  static bool wasStanding = true;
+  const bool now = standing();
+  if (now != wasStanding) {
+    addNote(now ? "full channel check: standing; carrying on"
+                : "full channel check: moving; paused");
+    wasStanding = now;
+  }
+  if (!now) return;
   for (size_t asked = 0; asked < CHECK_PER_CYCLE && !connectionLost && !checkInFlight;) {
     if (checkNext >= checkItems.size()) { checkFinish(); return; }
     const CheckItem& it = checkItems[checkNext];

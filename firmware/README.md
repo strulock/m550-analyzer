@@ -246,8 +246,11 @@ comes in a check-in's reply (`sweep`: its id) and is kept in flash; the
 upload task downloads the list (`GET /api/logger/check-list`) to the card.
 The next drive starts it a minute in, with every periodic tier due as well:
 three identifiers a cycle on the DMEs, waited for beside the fast reads, and
-one at a time, collected later, for the other modules; none during a burst.
-The fast tier keeps going at a lower rate.
+one at a time, collected later, for the other modules; none during a burst,
+and only while the car stands (under 3 km/h, or idling with no speed read):
+on the move it cut the 27 Oct 7:50 drive to about 1.9 rows a second against
+3.3-4. It pauses and carries on with a note each time. The fast tier keeps
+going at a lower rate meanwhile.
 
 The answers go into `<drive>.check.csv` (the app's check CSV), uploaded with
 the drive; the Worker merges them into the catalog's answers, so whatever
