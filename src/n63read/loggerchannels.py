@@ -60,6 +60,13 @@ TYPES = {"unsigned char": "u8", "signed char": "s8", "unsigned int": "u16",
          "signed int": "s16", "int": "s16", "unsigned long": "u32", "signed long": "s32",
          "motorola float": "f32", "intel float": "f32", core.GPS_DMS: "gps"}
 
+# Identifiers whose answer on this car doesn't fit the catalog's layout, so
+# every value would decode as nonsense: the airbag module's _IMU_WERTE
+# (ACSM 0x4101) answers its 30 bytes, but they hold an event record (fault
+# codes among them), not six accelerations and rates, which read in the
+# millions (27 Oct). The cloud leaves them out too (logger.js UNDECODABLE).
+UNDECODABLE = {(0x01, 0x4101)}
+
 HEADER = ["name", "module", "did", "did_size", "offset", "type", "order", "mul", "div",
           "add", "no_value", "unit", "tier"]
 
@@ -135,6 +142,8 @@ def _decodable(catalog, avail):
         if (meta.get("MODULE") or "").strip():
             module = int(meta["MODULE"], 16)
             key = (module, did)
+            if key in UNDECODABLE:
+                continue
             offset = offsets[key].get(name)
             if offset is None:
                 continue                        # after a field of unknown size

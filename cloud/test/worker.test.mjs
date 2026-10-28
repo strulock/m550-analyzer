@@ -799,6 +799,18 @@ test("every preset reads the tires, tank level and odometer once a drive, unless
   assert.deepEqual(rows.map((x) => x.name), ["INMOT"]);
 });
 
+test("an identifier that misdecodes on this car is off, whatever the preset says", async () => {
+  const imu = ["ACSM__IMU_WERTE.X_ACC_SCAL", "0x01", "0x4101", 30, 0, "u32", "big", "0.02", "1",
+    "-41", "", "m/s²", "", "_IMU_WERTE"];
+  await putCatalog({ ...CATALOG, rows: [...CATALOG.rows, imu],
+    answers: { ...CATALOG.answers, "0x01:0x4101": "ok" } });
+  await presets({ changes: [{ name: "Default", rest: "slow",
+    tiers: { INMOT: "fast", "ACSM__IMU_WERTE.X_ACC_SCAL": "fast" } }] });
+  const { rows } = await channelRows();
+  assert.ok(!rows.some((x) => x.did === "0x4101"));
+  assert.ok(rows.some((x) => x.name === "INMOT"));
+});
+
 test("presets refuse bad tiers, bad names and deleting the active one", async () => {
   await putCatalog();
   const put = (body) => call("PUT", "/api/logger/presets", { body: JSON.stringify(body) });
