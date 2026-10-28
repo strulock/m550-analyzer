@@ -162,15 +162,23 @@ export const PER_DRIVE = ["IKTFS", "FUELLST_TANKH_L", "FUELLST_TANKH_R",
   "BDC_TANK_FUELLSTAND_LINKS", "BDC_TANK_FUELLSTAND_RECHTS", "EGS_KILOMETERSTAND"];
 export const PER_DRIVE_RE = /^DSC_RDC_MESSDATENBLOCK_[1-4]\./;
 
+// Identifiers whose answer on this car doesn't fit the catalog's layout, off
+// whatever a preset says (as n63read's loggerchannels.UNDECODABLE): the
+// airbag module's _IMU_WERTE holds an event record here, not accelerations,
+// which read in the millions.
+export const UNDECODABLE = new Set(["0x01:0x4101"]);
+
 export function perDrive(name) {
   return PER_DRIVE_RE.test(name) || PER_DRIVE.includes(name);
 }
 
 /** Each catalog row's tier under a preset: named, else `rest` where the
- * car answers (at least once a drive for the PER_DRIVE channels), else off. */
+ * car answers (at least once a drive for the PER_DRIVE channels), else off;
+ * an UNDECODABLE identifier always off. */
 export function tiersFor(catalog, preset) {
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
   return catalog.rows.map((r) => {
+    if (UNDECODABLE.has(`${r[col.module]}:${r[col.did]}`)) return "off";
     const named = preset.tiers[r[col.name]];
     if (named) return named;
     if (catalog.answers[`${r[col.module]}:${r[col.did]}`] !== "ok") return "off";

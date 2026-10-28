@@ -75,6 +75,15 @@ def test_strings_private_and_calculated_channels_are_left_out():
             assert not names & set(after), key
 
 
+def test_an_identifier_that_misdecodes_on_this_car_is_left_out():
+    imu = "ACSM__IMU_WERTE.X_ACC_SCAL"
+    assert CAT[imu]["ID"] == "0x4101"
+    rows = _rows({(0x01, 0x4101): "ok", (0x01, 0x407F): "ok"}, fast=[imu])
+    assert imu not in rows and "ACSM__DD_STATUS_EVENT_CNT.EVENT_CNT_1" in rows
+    payload = loggerchannels.catalog_payload(CAT, {})
+    assert not any(r[2] == "0x4101" and r[1] == "0x01" for r in payload["rows"])
+
+
 def test_default_tiers():
     fast, medium = loggerchannels.tier_lists()
     assert {"INMOT", "I_EWG_POS", "I_EWG_POS@0x13", "TV_EWG@0x13", "ILAG1@0x13",
