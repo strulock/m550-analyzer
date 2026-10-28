@@ -57,6 +57,7 @@ static const char* const DEFAULT_CHANNELS =
     "DIAG_BRENNDAUER_ZUENDFUNKE_CYL4,0x12,0x5752,4,0,u32,big,0.001,1,0,,ms,medium\n"
     "RTANS,0x12,0x581E,1,0,u8,big,0.75,1,-48,,°C,medium\n"
     "IKTFS,0x12,0x583B,1,0,u8,big,1,1,0,,l,medium\n"
+    "IUIBS,0x12,0x586A,2,0,s16,big,1,0.05,0,,mV,medium\n"
     "OELDRUCK,0x12,0x586F,2,0,s16,big,1,1,0,,hPa,medium\n"
     "ZAEHLER_AUSSETZ_ABGASREL_SUM_ALLEZYL,0x12,0x58DB,2,0,u16,big,1,1,0,,,medium\n"
     "MASSENSTROM_KRAFTSTOFF@0x13,0x13,0x4521,2,0,u16,big,0.1,1,0,,kg/h,medium\n"
