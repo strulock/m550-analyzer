@@ -18,8 +18,11 @@
  *   board in its check-ins' replies; its answers (<drive>.check.csv) go
  *   into the catalog's.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
- *   replies) with read-only tools over that copy: drive_history,
- *   fault_history, trend, list_files, read_log.
+ *   replies) with tools over that copy: drive_history, fault_history,
+ *   trend, list_files, read_log, all read-only; and the logger's channel
+ *   presets, which the logger_* tools list and change (tiers, presets, the
+ *   one published to the board, versions and rollback). Nothing here writes
+ *   to the car.
  *
  * Cloudflare Access sits in front of the whole hostname; this Worker also
  * checks the Access token itself on every request (ACCESS_AUD,
@@ -32,8 +35,8 @@
 
 import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerExtras, readLog,
   summarizeDrive } from "./drive.js";
-import { channelFile, ConfigError, getCatalog, getPresets, LOGGER_SCHEMA, putCatalog, putPresets }
-  from "./logger.js";
+import { channelFile, ConfigError, getCatalog, getPresets, listTiers, LOGGER_SCHEMA, presetVersions,
+  putCatalog, putPresets, rollbackPreset, setTiers } from "./logger.js";
 import { LOGGER_PAGE } from "./loggerpage.js";
 import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, ingestCheck,
   markAbsent, requestSweep } from "./sweep.js";
@@ -1137,6 +1140,69 @@ export const TOOLS = [
       "the car now (open); the first may have started before the logs (partial).",
     inputSchema: { type: "object", properties: {} },
   },
+  {
+    name: "logger_channels",
+    description: "The logger board's channel catalog with each channel's tier under a " +
+      "preset (the active one by default): fast (every cycle), medium (a few times a second), " +
+      "slow (in rotation), drive (once a drive), daily, weekly, monthly, off. Filter by " +
+      "module (0x12), an identifier range (did_from, did_to), part of a name (match), exact " +
+      "names, or tier. Each: name, module, did, tier, whether the preset names it (else its " +
+      "rest applies), what the car answered, unit, description.",
+    inputSchema: { type: "object", properties: {
+      preset: { type: "string" }, module: { type: "string" }, did_from: { type: "string" },
+      did_to: { type: "string" }, match: { type: "string" },
+      names: { type: "array", items: { type: "string" } }, tier: { type: "string" },
+      limit: { type: "integer", description: "Default 200, up to 2000" } } },
+  },
+  {
+    name: "logger_set_tiers",
+    description: "Set a tier for channels in a preset (the active one by default), one at a " +
+      "time (names) or in bulk (module, did_from/did_to, match; all that are given). tier: " +
+      "fast, medium, slow, drive, daily, weekly, monthly, off, or default (back to the " +
+      "preset's rest). The preset's previous state is kept as a version (logger_rollback). " +
+      "If it's the active preset, the board takes the new channel file within 10 minutes " +
+      "(at power-on, then every 10 minutes on Wi-Fi), between drives. dry_run: true says " +
+      "what would change.",
+    inputSchema: { type: "object", properties: {
+      tier: { type: "string" }, preset: { type: "string" },
+      names: { type: "array", items: { type: "string" } }, module: { type: "string" },
+      did_from: { type: "string" }, did_to: { type: "string" }, match: { type: "string" },
+      dry_run: { type: "boolean" }, why: { type: "string", description: "Kept with the version" } },
+      required: ["tier"] },
+  },
+  {
+    name: "logger_presets",
+    description: "The logger's presets (name, rest: the tier of channels it doesn't name, " +
+      "how many channels it names per tier, last change), which one is active (published " +
+      "to the board), and the channel file the board gets from it (counts per tier, ETag). " +
+      "Pass name for that preset's saved versions (id, when, why, counts), newest first.",
+    inputSchema: { type: "object", properties: {
+      name: { type: "string", description: "List this preset's versions" } } },
+  },
+  {
+    name: "logger_save_preset",
+    description: "Save a preset: a copy of another (from, default the active one) under a new " +
+      "name, or an existing one's rest changed (slow or off). Doesn't publish it unless " +
+      "activate is true.",
+    inputSchema: { type: "object", properties: {
+      name: { type: "string" }, from: { type: "string" },
+      rest: { type: "string", description: "slow or off" }, activate: { type: "boolean" } },
+      required: ["name"] },
+  },
+  {
+    name: "logger_publish",
+    description: "Make a preset the active one: the board downloads its channel file within " +
+      "10 minutes on Wi-Fi (or at its next power-on) and uses it from the next drive.",
+    inputSchema: { type: "object", properties: { name: { type: "string" } },
+      required: ["name"] },
+  },
+  {
+    name: "logger_rollback",
+    description: "Put a preset back as one of its versions was (logger_presets with its name " +
+      "lists them); what it was before is kept as a version too.",
+    inputSchema: { type: "object", properties: {
+      name: { type: "string" }, version: { type: "integer" } }, required: ["name", "version"] },
+  },
 ];
 
 class ToolError extends Error {}
@@ -1208,6 +1274,45 @@ async function callTool(env, name, a) {
     return loggerStatus(env, Math.max(0.1, Math.min(24 * KEEP_BEATS_DAYS, Number(a.hours) || 24)));
   }
   if (name === "tank_history") return { tanks: await tankHistory(env) };
+  if (name === "logger_channels") return listTiers(env, a);
+  if (name === "logger_set_tiers") {
+    return setTiers(env, { ...a, tier: String(a.tier || ""), why: a.why ? String(a.why) : null });
+  }
+  if (name === "logger_presets") {
+    const all = await getPresets(env);
+    if (a.name) {
+      if (!all.presets.some((p) => p.name === a.name)) throw new ToolError(`no preset named ${a.name}`);
+      return { name: a.name, versions: await presetVersions(env, String(a.name)) };
+    }
+    const file = await channelFile(env);
+    return { active: all.active, file: file && { preset: file.preset, etag: file.etag,
+      counts: file.counts }, presets: all.presets.map((p) => {
+      const named = {};
+      for (const t of Object.values(p.tiers)) named[t] = (named[t] || 0) + 1;
+      return { name: p.name, rest: p.rest, named, updated: p.updated };
+    }) };
+  }
+  if (name === "logger_save_preset") {
+    const all = await getPresets(env);
+    const target = String(a.name || "").trim();
+    const have = all.presets.find((p) => p.name === target);
+    const from = have || all.presets.find((p) => p.name === (a.from || all.active));
+    if (!from) throw new ToolError(`no preset named ${a.from || all.active}`);
+    const rest = a.rest || from.rest;
+    const out = await putPresets(env, { changes: [{ name: target, rest, tiers: from.tiers }],
+      ...(a.activate ? { active: target } : {}) }, new Date(),
+    have ? `rest to ${rest}` : null);
+    return { saved: target, from: have ? null : from.name, active: out.active };
+  }
+  if (name === "logger_publish") {
+    const out = await putPresets(env, { active: String(a.name || "") });
+    const file = await channelFile(env);
+    return { active: out.active, file: file && { etag: file.etag, counts: file.counts } };
+  }
+  if (name === "logger_rollback") {
+    const out = await rollbackPreset(env, String(a.name || ""), Number(a.version));
+    return { name: a.name, rolled_back_to: Number(a.version), active: out.active };
+  }
   throw new ToolError(`unknown tool ${name}`);
 }
 
@@ -1218,7 +1323,11 @@ const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault 
   "channel_series follow any channel across every " +
   "drive in UTC time; list_templates shows the app's saved channel sets; logger_status " +
   "says whether the logger board in the car is on and what it last reported; " +
-  "tank_history gives each tank of fuel's distance and economy. Read-only.";
+  "tank_history gives each tank of fuel's distance and economy. " +
+  "The logger_* tools read and change what the logger board reads: logger_channels and " +
+  "logger_presets look, logger_set_tiers, logger_save_preset, logger_publish and " +
+  "logger_rollback change the presets in the cloud (every change kept as a version). " +
+  "Everything else is read-only, and nothing writes to the car.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
 export async function rpc(env, msg) {

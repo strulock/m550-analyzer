@@ -851,6 +851,49 @@ test("presets refuse bad tiers, bad names and deleting the active one", async ()
   assert.deepEqual([p.active, p.presets.map((x) => x.name)], ["Mine", ["Mine"]]);
 });
 
+test("MCP logger tools: list tiers, set them one or in bulk, versions, rollback, publish", async () => {
+  await putCatalog();
+  let c = await tool("logger_channels", { module: "0x29" });
+  assert.equal(c.data.preset, "Default");
+  assert.deepEqual(c.data.channels.map((x) => [x.name, x.tier, x.named, x.answer]), [
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT", "slow", false, "ok"],
+    ["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT", "slow", false, "ok"]]);
+  assert.equal((await tool("logger_channels", { tier: "fast" })).data.total, 1);
+  // A dry run changes nothing; then one by name, then a whole module.
+  let s = await tool("logger_set_tiers", { tier: "medium", module: "0x29", dry_run: true });
+  assert.deepEqual([s.data.changed, s.data.dry_run], [2, true]);
+  assert.equal((await tool("logger_channels", { tier: "medium" })).data.total, 0);
+  s = await tool("logger_set_tiers", { tier: "medium", names: ["ITOEL"], why: "oil" });
+  assert.deepEqual([s.data.changed, s.data.channels], [1, ["ITOEL"]]);
+  s = await tool("logger_set_tiers", { tier: "daily", module: "0x29", did_from: "0xDC00",
+    did_to: "0xDCFF" });
+  assert.equal(s.data.changed, 2);
+  assert.equal((await tool("logger_set_tiers", { tier: "daily", module: "0x29" })).data.changed, 0);
+  assert.match((await tool("logger_set_tiers", { tier: "hourly", module: "0x29" })).data, /tier/);
+  assert.match((await tool("logger_set_tiers", { tier: "fast" })).data, /select/);
+  const rows = Object.fromEntries((await channelRows()).rows.map((x) => [x.name, x.tier]));
+  assert.deepEqual([rows.ITOEL, rows["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT"]],
+    ["medium", "daily"]);
+  // Each change kept what it replaced.
+  let v = (await tool("logger_presets", { name: "Default" })).data.versions;
+  assert.deepEqual(v.map((x) => [x.why, x.counts]), [["2 channels to daily", { fast: 1, medium: 1 }],
+    ["oil", { fast: 1 }]]);
+  await tool("logger_rollback", { name: "Default", version: v[1].id });   // before the oil
+  assert.equal((await tool("logger_channels", { names: ["ITOEL"] })).data.channels[0].tier, "slow");
+  v = (await tool("logger_presets", { name: "Default" })).data.versions;
+  assert.equal(v[0].why, `rolled back to version ${v[2].id}`);
+  assert.match((await tool("logger_rollback", { name: "Default", version: 999 })).data, /no version/);
+  // A copy, then published: the board's file comes from it.
+  const saved = await tool("logger_save_preset", { name: "Lean", from: "Default", rest: "off" });
+  assert.deepEqual([saved.data.saved, saved.data.active], ["Lean", "Default"]);
+  const pub = await tool("logger_publish", { name: "Lean" });
+  assert.equal(pub.data.active, "Lean");
+  const list = (await tool("logger_presets", {})).data;
+  assert.deepEqual([list.active, list.file.preset, list.presets.map((x) => x.name)],
+    ["Lean", "Lean", ["Default", "Lean"]]);
+  assert.match((await tool("logger_publish", { name: "Nope" })).data, /no preset/);
+});
+
 test("the catalog must have the board's columns", async () => {
   const bad = { ...CATALOG, columns: COLS.filter((c) => c !== "offset") };
   assert.equal((await putCatalog(bad)).status, 400);
