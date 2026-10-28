@@ -930,6 +930,11 @@ test("MCP logger tools: list tiers, set them one or in bulk, versions, rollback,
 test("MCP drive_faults: one drive's reads with their codes and texts", async () => {
   await env.FILES.put("ref/BMW_fault_code_texts.csv", new TextEncoder().encode(
     "\ufeffcode,text_de,text_en,source_module\n480A14,Klopf,\"Knock, cylinder 1\",DME\n"));
+  // An older drive named before the clock was known ("nt-" sorts after a
+  // date): the newest is the last uploaded, not the last by name.
+  await call("PUT", "/api/files/logger/nt-00067-02.faults.csv", { body: FAULT_HEAD +
+    faultRow("", "0x29", "", "", "no faults", 60) });
+  await new Promise((r) => setTimeout(r, 5));
   await call("PUT", "/api/files/logger/2026-10-27_20-03-50.faults.csv", { body: FAULT_HEAD +
     faultRow("2026-10-27 20:05:08", "0x12", "480A14", "0x2F", "present, stored", 71.6) +
     faultRow("2026-10-27 20:05:08", "0x12", "1A400A", "0x20", "not present", 71.6) +
