@@ -84,6 +84,8 @@ def test_default_tiers():
     # The engine's coolant temperature, not the radiator outlet's (ITKUA, 52 °C
     # with the oil at 97 °C on 27 Oct), is the one the check-ins report.
     assert "ITKUM" in medium and CAT["ITKUM"]["ID"] == "0x4300"
+    # The battery: the sensor's first, the DME's as the check-ins' fallback.
+    assert {"IUIBS", "IUADW"} <= set(medium)
     assert not set(fast) & set(medium)                    # fast wins
     assert not any(n in core.DERIVED for n in fast + medium)
 

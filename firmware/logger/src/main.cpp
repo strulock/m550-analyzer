@@ -239,7 +239,7 @@ enum Live { SPEED, RPM, BATTERY, COOLANT, OIL, LAT, LON, LIVE_N };
 static const char* const LIVE_NAMES[LIVE_N][2] = {
     {"FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "HU_STATUS_SPEED.GPS_SPEED"},
     {"INMOT", nullptr},
-    {"IUADW", "IUIBS"},                      // V (the DME's own), else mV (the IBS)
+    {"IUIBS", "IUADW"},                      // mV (the battery sensor), else V (the DME's own)
     {"ITKUM", "ITKUA"},                      // °C: the engine's, else the radiator outlet's
     {"ITOEL", nullptr},                      // °C
     {"HU_STATUS_GPS_POSITION.LATITUDE", nullptr},
