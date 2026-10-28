@@ -35,8 +35,8 @@ import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerEx
 import { channelFile, ConfigError, getCatalog, getPresets, LOGGER_SCHEMA, putCatalog, putPresets }
   from "./logger.js";
 import { LOGGER_PAGE } from "./loggerpage.js";
-import { beatSweep, cancelSweep, CHECK, checkList, getSweep, ingestCheck, requestSweep }
-  from "./sweep.js";
+import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, ingestCheck,
+  markAbsent, requestSweep } from "./sweep.js";
 import { tanks } from "./tanks.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
@@ -634,8 +634,10 @@ async function ingestLog(env, key, bytes) {
   }
   const row = await storeDriveRow(env, drive, (sweep ? [other, log] : [log, other])
     .filter(Boolean), now);
+  // Identifiers the board found its modules haven't: off for good.
+  const absent = await markAbsent(env, absentInNotes(log.notes));
   return { processed: true, drive_file: drive, channels, approx_time: series.approx,
-    with_other_file: !!other,
+    with_other_file: !!other, absent,
     drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
 }
 

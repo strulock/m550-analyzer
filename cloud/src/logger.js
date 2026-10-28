@@ -174,14 +174,16 @@ export function perDrive(name) {
 
 /** Each catalog row's tier under a preset: named, else `rest` where the
  * car answers (at least once a drive for the PER_DRIVE channels), else off;
- * an UNDECODABLE identifier always off. */
+ * an UNDECODABLE identifier, or one its module says it hasn't ("absent",
+ * sweep.js), always off. */
 export function tiersFor(catalog, preset) {
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
   return catalog.rows.map((r) => {
-    if (UNDECODABLE.has(`${r[col.module]}:${r[col.did]}`)) return "off";
+    const key = `${r[col.module]}:${r[col.did]}`;
+    if (UNDECODABLE.has(key) || catalog.answers[key] === "absent") return "off";
     const named = preset.tiers[r[col.name]];
     if (named) return named;
-    if (catalog.answers[`${r[col.module]}:${r[col.did]}`] !== "ok") return "off";
+    if (catalog.answers[key] !== "ok") return "off";
     return preset.rest === "off" && perDrive(r[col.name]) ? "drive" : preset.rest;
   });
 }

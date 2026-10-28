@@ -12,7 +12,7 @@
  */
 
 import { estimateRates } from "./estimate.js";
-import { PER_DRIVE, PER_DRIVE_RE, perDrive } from "./logger.js";
+import { PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE } from "./logger.js";
 import { FILL_MIN_L } from "./tanks.js";
 
 const FILL_NOTE = `${FILL_MIN_L} litres (${(FILL_MIN_L / 3.785411784).toFixed(1)} gallons)`;
@@ -212,6 +212,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
 var __name = function (fn) { return fn; };
 ${estimateRates.toString()}
 var PER_DRIVE = ${JSON.stringify(PER_DRIVE)}, PER_DRIVE_RE = ${PER_DRIVE_RE.toString()};
+var UNDECODABLE = ${JSON.stringify([...UNDECODABLE])};
 ${perDrive.toString()}
 </script>
 <script>
@@ -247,7 +248,10 @@ ${perDrive.toString()}
     if (!it.ok) return "off";
     return edit.rest === "off" && perDrive(it.name) ? "drive" : edit.rest;
   }
+  // Off whatever the preset says: one that misdecodes on this car, or one its
+  // module says it hasn't ("absent").
   function effective(it) {
+    if (it.status === "absent" || UNDECODABLE.indexOf(it.key) >= 0) return "off";
     return edit.tiers[it.name] || inherited(it);
   }
   function isDirty() { return edit && JSON.stringify({ r: edit.rest, t: edit.tiers }) !== savedJson; }

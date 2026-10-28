@@ -920,6 +920,31 @@ test("sweep: cancelled from the page, the next check-in says so", async () => {
   assert.equal((await (await call("DELETE", "/api/logger/sweep")).json()).cancelled, null);
 });
 
+test("an identifier a module hasn't (0x31) is off for good, named or not; ok stays ok", async () => {
+  await putCatalog({ ...CATALOG, answers: { "0x12:0x4807": "ok", "0x29:0xDC98": "ok" } });
+  await presets({ changes: [{ name: "Default", rest: "slow",
+    tiers: { INMOT: "fast", ITOEL: "medium", "HU_ODD, \"quoted\"": "medium" } }] });
+  // From a check: refused with 0x31 is absent, unless it answered ok before.
+  await call("PUT", "/api/files/logger/nt-00090-01.check.csv", { body:
+    "module,did,job,status,detail,reply_bytes,raw\n" +
+    "0x29,0xDC98,logger sweep s1,refused,0x31,,\n0x63,0xD030,logger sweep s1,refused,0x31,,\n" });
+  let c = await (await call("GET", "/api/logger/catalog")).json();
+  assert.deepEqual([c.answers["0x29:0xDC98"], c.answers["0x63:0xD030"]], ["ok", "absent"]);
+  // From a drive's notes: the board rests it for the drive and says so.
+  const log = "Time,Clock,INMOT,Event\n0,2026-10-25 07:00:00.000-05:00,700,start\n" +
+    "1,2026-10-25 07:00:01.000-05:00,700,module 0x12 hasn't 0x4402 (0x31); " +
+    "module 0x12 hasn't 0x4807 (0x13)\n" +
+    [2, 3, 4, 5].map((t) => `${t},2026-10-25 07:00:0${t}.000-05:00,700,`).join("\n") + "\n";
+  const up = await (await call("PUT", "/api/files/logger/2026-10-25_07-00-00.csv", { body: log })).json();
+  assert.equal(up.absent, 1);                        // 0x13 is "too long", not absent
+  c = await (await call("GET", "/api/logger/catalog")).json();
+  assert.equal(c.answers["0x12:0x4402"], "absent");
+  const { rows } = await channelRows();              // named medium, but they aren't there
+  assert.deepEqual(rows.map((x) => x.name).filter((n) => n !== "DSC_RDC_MESSDATENBLOCK_1." +
+    "LETZTER_REIFENDRUCKWERT" && n !== "DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENTEMPERATURWERT"),
+  ["INMOT"]);
+});
+
 test("sweep: a check file that isn't one is stored, not processed", async () => {
   await putCatalog();
   const r = await (await call("PUT", "/api/files/logger/x.check.csv", { body: "a,b\n1,2\n" })).json();

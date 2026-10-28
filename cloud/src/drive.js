@@ -13,6 +13,7 @@
  */
 
 export const LOG_TIME = "Time", LOG_CLOCK = "Clock", LOG_EVENT = "Event";
+const MAX_NOTES = 10000;                      // a log's notes kept (readColumns)
 const LOG_META = [LOG_TIME, LOG_CLOCK, LOG_EVENT];
 export const BANK2 = "@0x13";
 export const CHUNK = 5000;
@@ -248,6 +249,7 @@ export function readColumns(input) {
   const seriesOnly = new Map();             // "col:row" -> value
   let hms = null, firstLog = null, seriesStart = null, firstSeries = null;
   let firstClock = null, odometer = null, lineNo = 0;
+  const notes = [];                         // the Event column's non-empty cells: {t, text}
   for (const line of it) {
     lineNo++;
     if (!line.length) continue;             // a blank line ends nothing, like csv.reader's []
@@ -279,6 +281,9 @@ export function readColumns(input) {
         ? shiftClock(clockText, tl - logTime.a[0]) : clockText.slice(0, 19);
     }
     if (tl === null && ts === null) continue;
+    if (eventCol >= 0 && eventCol < cells.length && cells[eventCol].trim() && notes.length < MAX_NOTES) {
+      notes.push({ t: tl, text: cells[eventCol].trim() });
+    }
     if (ts !== null) {
       if (firstSeries === null) firstSeries = ts;
       // series.build takes the first row's clock; a later one does as well
@@ -303,7 +308,7 @@ export function readColumns(input) {
   }
   return { header: trimmed, logCols, seriesCols, rows: logTime.n, logTime: logTime.values,
     seriesTime: seriesTime.values, values: new Map([...values].map(([i, g]) => [i, g.values])),
-    seriesOnly, firstSeries, seriesStart, firstClock, odometer };
+    seriesOnly, firstSeries, seriesStart, firstClock, odometer, notes };
 }
 
 /** True when a log's header says it's a drive log (history.kind == "drive"). */

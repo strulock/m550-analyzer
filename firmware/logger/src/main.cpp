@@ -788,9 +788,10 @@ static void retryHalves(const std::vector<size_t>& batch) {
 // says what to do: too long or badly formed (0x13, 0x14), or an answer out
 // of line, means the batch is too big for it; out of range (0x31) means one
 // identifier in it is one the module hasn't, found by asking the halves
-// again; anything else refuses the reads, which rest. No answer at all
-// counts against the reads, and against the batch size when it keeps
-// happening.
+// again, and rested for the rest of the drive (noted, so the Worker turns it
+// off in the channel file for good); anything else refuses the reads, which
+// rest. No answer at all counts against the reads, and against the batch
+// size when it keeps happening.
 static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
   const uint8_t module = moduleOf(batch);
   const uint32_t now = millis();
@@ -834,10 +835,14 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
   if (r.result == hsfz::OK) { plan.failed(batch[0], now); return; }   // one, out of line
   if (r.result == hsfz::NEGATIVE && (tooBig || r.nrc == 0x31)) {
     if (batch.size() > 1) { retryHalves(batch); return; }            // which one?
-    plan.rest(batch[0], now, OUT_OF_RANGE_REST_MS);
+    const bool absent = r.nrc == 0x31;
+    plan.rest(batch[0], now, absent ? ABSENT_REST_MS : OUT_OF_RANGE_REST_MS);
     refusedReads++;
-    out.printf("[plan] module 0x%02X hasn't 0x%04X (0x%02X): rested\n", module,
-               plan.reads[batch[0]].did, r.nrc);
+    char text[64];
+    snprintf(text, sizeof(text), "module 0x%02X hasn't 0x%04X (0x%02X)", module,
+             plan.reads[batch[0]].did, r.nrc);
+    out.printf("[plan] %s: rested\n", text);
+    if (absent) addNote(text);                            // the Worker's cue (sweep.js)
     return;
   }
   if (r.result == hsfz::NEGATIVE) {
