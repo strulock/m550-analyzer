@@ -170,8 +170,11 @@ sent over the terminal, `card` or `built-in`), which the logger channel page
 compares with the active preset. From the last minute's stats it adds the
 modules on smaller batches (`batches`, "0x12:6 0x18:1"), each collected-later
 module's answer time (`answer_ms`, "0x63:170"), the slow pass and the reads
-per cycle, which the page's rate estimates use. A long upload
-delays the check-ins; a failed one is skipped. Each is a new TLS connection,
+per cycle, which the page's rate estimates use. The check-ins (and keeping
+Wi-Fi up) have a task of their own on core 0, every 10 s by the clock, so an
+upload or a download doesn't hold one up; each waits for room for a TLS
+session (about 40 KB of internal RAM) when the other task has one open. A
+failed one is skipped. Each is a new TLS connection,
 about 2 MB an hour on a phone hotspot. With no Wi-Fi (and the time known),
 each check-in goes to `beats.jsonl` on the card instead, up to about 12
 hours' worth, and at the next connection they're sent 48 KB at a time
