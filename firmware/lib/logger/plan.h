@@ -470,44 +470,54 @@ class Burst {
   uint32_t start_ = 0, lastHot_ = 0, end_ = 0, count_ = 0, ms_ = 0;
 };
 
-// Requests in flight together on one connection, while the gateway allows
-// it. If the waited-for requests keep timing out while they share a
-// connection, one request at a time per connection for a while, then
-// overlapping again: the bank 1 DME's few seconds of timeouts (26 Oct, three
-// drives) otherwise cost the rest of the drive two thirds of its rows. The
-// wait doubles each time it falls back again in a drive, up to
-// SEPARATE_MAX_MS.
-static const uint8_t SHARED_TIMEOUTS_TO_FALL_BACK = 3;
-static const uint32_t SEPARATE_MS = 60000, SEPARATE_MAX_MS = 600000;
+// A module that keeps timing out is left alone for a while, its own back-off,
+// while every other module carries on as before. A timeout used to put every
+// connection on one request at a time for minutes, and the bank 1 DME's few
+// seconds of timeouts (27 Oct: engine speed gone, the drive at a third of its
+// rows for two minutes) cost all the fast channels with it. BACKOFF_TIMEOUTS
+// in a row start a back-off of BACKOFF_MS, doubled each time it times out
+// again after one, up to BACKOFF_MAX_MS; an answer ends it and starts over.
+static const uint8_t BACKOFF_TIMEOUTS = 2;
+static const uint32_t BACKOFF_MS = 2000, BACKOFF_MAX_MS = 30000;
 
-class Fallback {
+class Backoff {
  public:
-  // A wave of waited-for requests that shared a connection, and whether any
-  // timed out: true when that made it fall back (waitMs() says how long).
-  bool sharedWave(bool timedOut, uint32_t now) {
-    if (!same_) return false;
-    timeouts_ = timedOut ? timeouts_ + 1 : 0;
-    if (timeouts_ < SHARED_TIMEOUTS_TO_FALL_BACK) return false;
-    same_ = false;
-    at_ = now;
-    for_ = for_ ? std::min(for_ * 2, SEPARATE_MAX_MS) : SEPARATE_MS;
+  // A request to `module` went unanswered: true when that starts a back-off
+  // (waitMs(module) says how long).
+  bool timedOut(uint8_t module, uint32_t now) {
+    Entry& e = at_[module];
+    if (waiting(module, now)) return false;           // a late answer to one sent before
+    if (++e.timeouts < BACKOFF_TIMEOUTS) return false;
+    e.timeouts = 0;
+    e.wait = e.wait ? std::min(e.wait * 2, BACKOFF_MAX_MS) : BACKOFF_MS;
+    e.until = (now + e.wait) | 1;
     return true;
   }
-  // True when the wait is over and requests overlap again.
-  bool overlapAgain(uint32_t now) {
-    if (same_ || now - at_ < for_) return false;
-    same_ = true;
-    timeouts_ = 0;
-    return true;
+  // It answered (whatever it said): no back-off, and the next starts short.
+  void answered(uint8_t module) { at_.erase(module); }
+  // Whether to leave the module alone now.
+  bool waiting(uint8_t module, uint32_t now) const {
+    auto it = at_.find(module);
+    return it != at_.end() && it->second.until && (int32_t)(it->second.until - now) > 0;
   }
-  bool sameConnection() const { return same_; }
-  uint32_t waitMs() const { return for_; }
-  void reset() { same_ = true; timeouts_ = 0; for_ = 0; }   // a drive starts or ends
+  uint32_t waitMs(uint8_t module) const {
+    auto it = at_.find(module);
+    return it == at_.end() ? 0 : it->second.wait;
+  }
+  // The modules being left alone now.
+  std::vector<uint8_t> modules(uint32_t now) const {
+    std::vector<uint8_t> out;
+    for (const auto& [m, e] : at_) if (waiting(m, now)) out.push_back(m);
+    return out;
+  }
+  void reset() { at_.clear(); }                       // a drive starts or ends
 
  private:
-  bool same_ = true;
-  uint8_t timeouts_ = 0;                          // in a row
-  uint32_t at_ = 0, for_ = 0;                     // the last fall-back, and its wait
+  struct Entry {
+    uint8_t timeouts = 0;                             // in a row
+    uint32_t until = 0, wait = 0;                     // ms; the back-off's end, its length
+  };
+  std::map<uint8_t, Entry> at_;
 };
 
 // Whether a periodic tier is due this drive: `last` when it was last read

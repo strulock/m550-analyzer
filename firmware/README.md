@@ -7,7 +7,7 @@ the Windows build.
 | Path | What |
 | --- | --- |
 | `lib/hsfz/` | HSFZ client, discovery parsing, decoder. No Arduino code; same rules as `src/n63read/core.py` (`Hsfz`, `Tester`, `decode`, `split_reply`) |
-| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, bursts and the fall-back to one request at a time, CSV layout, fault reads, the car's clock, SHA-256, the firmware update decisions (`ota.h`), the upload and kept check-in rules (`upload.h`) and the full channel check (`carcheck.h`). No Arduino code |
+| `lib/logger/` | The logger's channel file, decoding (as `core.decode`), read plan, bursts and a module's back-off when it stops answering, CSV layout, fault reads, the car's clock, SHA-256, the firmware update decisions (`ota.h`), the upload and kept check-in rules (`upload.h`) and the full channel check (`carcheck.h`). No Arduino code |
 | `test/host_test.cpp`, `test/test_logger.cpp` | Run `lib/hsfz` against a scripted fake gateway, and `lib/logger`, on a PC (CI job `firmware`) |
 | `tools/bench_car.py` | Fake ENET gateway for bench tests over a real cable (discovery + reads, both DMEs; any module with `--channels`; `--delay MS` per answer; `--slow`, `--bad`, `--single` to act like the car's slower and pickier modules) |
 | `tools/send_channels.py` | Load a channel file into the logger over Wi-Fi |
@@ -129,12 +129,15 @@ size fails again, so one answer out of line (the bank 1 DME's, on 26 Oct)
 no longer costs it the rest of the drive, and a module that only takes one
 identifier at a time is rarely asked for more.
 
-If the requests waited for keep timing out (three in a row) while sharing a
-connection, the board falls back to one request at a time and notes it, for
-a minute, then overlaps them again; each further fall-back in the drive
-waits twice as long, up to 10 minutes. (On 26 Oct a few seconds of the bank
-1 DME not answering cost three drives two thirds of their rows for the rest
-of the drive: 10-13 rows a second before, 1-4 after.)
+A module that doesn't answer twice in a row is left alone for 2 s and
+noted ("module 0x12 not answering: left alone 2 s"); each further time it
+times out after one, twice as long, up to 30 s, and any answer starts it
+over. Its fault and channel-check reads wait too. Every other module carries
+on as before, overlapped: the board used to put every connection on one
+request at a time for minutes when the waited-for requests timed out, and a
+few seconds of the bank 1 DME not answering (26 and 27 Oct) cost the rest
+of the drive two thirds of its rows. The stats note lists the modules left
+alone.
 
 Bursts: when the pedal passes 80% or the boost 1,700 hPa (`IPLAD`, about
 0.7 bar over the air outside), the board asks for the fast tier alone, as

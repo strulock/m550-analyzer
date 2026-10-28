@@ -730,36 +730,33 @@ static void test_ota_start() {
   CHECK(!cardImageWanted(true, "v2", "dev", ""));
 }
 
-// Shared requests that keep timing out: one at a time per connection for a
-// minute, then overlapping again; each fall-back in a drive waits twice as
-// long, up to ten minutes.
-static void test_fallback() {
-  Fallback f;
-  CHECK(f.sameConnection() && f.waitMs() == 0);
-  CHECK(!f.sharedWave(true, 1000) && !f.sharedWave(true, 1100));
-  CHECK(!f.sharedWave(false, 1200));                         // one that answered: count again
-  CHECK(!f.sharedWave(true, 1300) && !f.sharedWave(true, 1400));
-  CHECK(f.sharedWave(true, 1500) && !f.sameConnection() && f.waitMs() == SEPARATE_MS);
-  CHECK(!f.sharedWave(true, 1600));                          // fallen back already
-  CHECK(!f.overlapAgain(1500 + SEPARATE_MS - 1) && !f.sameConnection());
-  CHECK(f.overlapAgain(1500 + SEPARATE_MS) && f.sameConnection());
-  CHECK(!f.overlapAgain(1500 + SEPARATE_MS + 1));
-  uint32_t now = 100000;
-  for (uint32_t want : {120000u, 240000u, 480000u, 600000u, 600000u}) {
-    for (int i = 0; i < 2; i++) CHECK(!f.sharedWave(true, now));
-    CHECK(f.sharedWave(true, now) && f.waitMs() == want);
-    CHECK(!f.overlapAgain(now + want - 1));
-    now += want;
-    CHECK(f.overlapAgain(now));
+// A module that keeps timing out is left alone a while, on its own: two in
+// a row start 2 s, each further back-off after one doubles to 30 s, an
+// answer starts over; other modules aren't touched.
+static void test_backoff() {
+  Backoff b;
+  CHECK(!b.waiting(0x12, 0) && b.modules(0).empty());
+  CHECK(!b.timedOut(0x12, 1000));
+  b.answered(0x12);                                          // one that answered: count again
+  CHECK(!b.timedOut(0x12, 1100));
+  CHECK(b.timedOut(0x12, 1200) && b.waitMs(0x12) == BACKOFF_MS);   // until 3201
+  CHECK(b.waiting(0x12, 1200 + BACKOFF_MS) && !b.waiting(0x12, 1201 + BACKOFF_MS));
+  CHECK(!b.waiting(0x13, 1300) && b.modules(1300) == std::vector<uint8_t>{0x12});
+  CHECK(!b.timedOut(0x12, 1300));                            // a late one from before: no change
+  uint32_t now = 10000;
+  for (uint32_t want : {4000u, 8000u, 16000u, 30000u, 30000u}) {
+    CHECK(!b.timedOut(0x12, now));
+    CHECK(b.timedOut(0x12, now) && b.waitMs(0x12) == want);
+    now += want + 1;                                         // "until" is odd (never 0)
   }
-  f.reset();                                                 // the next drive starts at a minute
-  for (int i = 0; i < 2; i++) CHECK(!f.sharedWave(true, now));
-  CHECK(f.sharedWave(true, now) && f.waitMs() == SEPARATE_MS);
-  f.reset();
-  CHECK(f.sameConnection());
+  b.answered(0x12);
+  CHECK(!b.waiting(0x12, now) && b.waitMs(0x12) == 0);
+  CHECK(!b.timedOut(0x12, now) && b.timedOut(0x12, now) && b.waitMs(0x12) == BACKOFF_MS);
+  b.reset();                                                 // a drive starts
+  CHECK(b.modules(now).empty());
   uint32_t late = 0xFFFFFFFF - 1000;                         // millis() wraps after 49 days
-  for (int i = 0; i < 3; i++) f.sharedWave(true, late);
-  CHECK(!f.overlapAgain(late + 30000) && f.overlapAgain(late + SEPARATE_MS));
+  b.timedOut(0x40, late);
+  CHECK(b.timedOut(0x40, late) && b.waiting(0x40, late + 1500) && !b.waiting(0x40, late + 2000));
 }
 
 static void test_upload_rules() {
@@ -875,7 +872,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"car_check", test_car_check},
   {"ota", test_ota},
   {"ota_start", test_ota_start},
-  {"fallback", test_fallback},
+  {"backoff", test_backoff},
   {"upload_rules", test_upload_rules},
   {"kept_beats", test_kept_beats},
   {"car_clock", test_car_clock},
