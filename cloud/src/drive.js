@@ -619,16 +619,25 @@ export function summarizeDrive(logs, file, uploaded, timeZone = DEFAULT_TIME_ZON
   return drive;
 }
 
+// Each half of the saddle tank, the DME's and the body module's, any one.
+const TANK_LEFT = ["FUELLST_TANKH_L", "BDC_TANK_FUELLSTAND_LINKS"];
+const TANK_RIGHT = ["FUELLST_TANKH_R", "BDC_TANK_FUELLSTAND_RECHTS"];
+
 /** What the logger's drive rows carry beyond the app's (not in history.py):
  * whether the start is only the upload time less the drive's length (no
  * Clock), and for fill-ups (tanks.js) the tank level and the odometer as
- * the drive started and ended. */
+ * the drive started and ended, with each half of the tank (in its
+ * channel's unit). The board reads them together at the start, at Park and
+ * at engine-off (its snapshots). */
 export function loggerExtras(logs) {
   logs = [].concat(logs);
   const [tankStart, tankEnd] = ends(logs, [FUEL_TANK], TANK_WINDOW);
+  const [leftStart, leftEnd] = ends(logs, TANK_LEFT, TANK_WINDOW);
+  const [rightStart, rightEnd] = ends(logs, TANK_RIGHT, TANK_WINDOW);
   const [odoStart, odoEnd] = ends(logs, ODOMETERS_ANY, 0);
   return { start_approx: !logs[0].firstClock, tank_start_l: tankStart, tank_end_l: tankEnd,
-    odometer_start_km: odoStart, odometer_end_km: odoEnd };
+    tank_left_start: leftStart, tank_left_end: leftEnd, tank_right_start: rightStart,
+    tank_right_end: rightEnd, odometer_start_km: odoStart, odometer_end_km: odoEnd };
 }
 
 /** One drive log on its own: {series, drive}. */

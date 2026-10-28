@@ -48,10 +48,12 @@ FAST = (["INMOT", "IPLAD", "S_LADEDRUCK"]
 # before, and what History needs), plus trims, intake air, oil pressure,
 # the wastegate position sensors and the battery voltage: the battery
 # sensor's (IUIBS, which the board's check-ins report and History's battery
-# columns use) and the DME's own (IUADW, the check-ins' fallback).
+# columns use) and the DME's own (IUADW, the check-ins' fallback), and the
+# selector (P R N D M), from which the board takes Park and the end of a drive.
 MEDIUM_TEMPLATES = ("Drive log with GPS", "Fuel economy", "Misfire hunt")
 MEDIUM_EXTRA = ([n + s for n in ("IMUL1", "SPG_POS_SENS_EWG", "LADEDRUCK_REGELDIFFERENZ_BANKSPEZ")
-                 for s in ("", B2)] + ["RTANS", "OELDRUCK", "IUIBS", "IUADW"])
+                 for s in ("", B2)] + ["RTANS", "OELDRUCK", "IUIBS", "IUADW",
+                                       "EGS_ISTGANG.FAHRSTUFE"])
 
 # Catalog data type -> the board's: width and signedness, or a float, or the
 # head unit's 5-byte coordinates. Anything else (strings, data[n], bitfields)
