@@ -14,8 +14,10 @@
 //      the fast tier alone for up to 10 s. Without the time from the
 //      internet, the car's own clock dates the drive.
 //   3. Meanwhile, on the other core: whenever Wi-Fi is up, upload finished
-//      files, compare the SHA-256 the Worker reports with the board's own,
-//      and delete a file only when they match; check in every 10 s (kept on
+//      files (the backlog at power-on, a drive's files as it ends, paced
+//      while one is logging), compare the SHA-256 the Worker reports with
+//      the board's own, and delete a file only when they match; check in
+//      every 10 s from a task of its own (kept on
 //      the card while there's no Wi-Fi, and sent when there is); fetch a
 //      newer firmware the Worker offers to the card, installed at the next
 //      power-on (or after a minute idle), kept only once it checks in or
@@ -571,6 +573,11 @@ static Scheduler scheduler;                 // this drive's rotation through the
 static Burst burst;                         // full throttle or high boost: the fast tier alone
 static std::vector<double> values;
 static LogFile fastLayout, sweepLayout;
+// Uploads (core 0): now, rather than at the next round (a drive just ended,
+// Wi-Fi just came up, or `u`); and how many files wait, which the firmware
+// updater doesn't restart under.
+static volatile bool uploadNow = false;
+static std::atomic<uint32_t> uploadsWaiting{0};
 
 // Notes for the next fast row's Event column: the board's own story (boot,
 // rates, plan changes, the end) kept in the log, since its terminal output
@@ -741,6 +748,8 @@ static void endDrive(const char* why) {
   out.printf("[drive] %s ended (%s): %u rows, %u sweep rows, %.1f min\n", driveName.c_str(), why,
              (unsigned)fastRows, (unsigned)sweepRows, (millis() - driveStartMs) / 60000.0f);
   driveName = "";
+  uploadNow = true;                          // while there's still power to send it
+
 }
 
 // ---- requests ----------------------------------------------------------------
@@ -1498,7 +1507,6 @@ static void readCheck() {
 }
 
 // ---- uploads (core 0) --------------------------------------------------------
-static volatile bool uploadNow = false;
 static std::atomic<uint32_t> uploadedFiles{0};
 static String lastUpload = "none yet";     // under sdLock: the upload task sets it
 
@@ -1516,6 +1524,31 @@ static bool tlsRoom(uint32_t ms) {
   }
   return true;
 }
+
+// A drive's file read out for its upload. While a drive is logging the
+// uploads are low priority: a few KB at a time with pauses (about 80 KB/s),
+// so the card, its SPI bus and core 0 stay mostly the logging's. Between
+// drives, as fast as it goes.
+static const size_t PACE_BYTES = 8192;
+static const uint32_t PACE_MS = 100;
+struct PacedFile : Stream {
+  File& f;
+  size_t sinceRest = 0;
+  explicit PacedFile(File& file) : f(file) {}
+  int available() override { return f.available(); }
+  int read() override { return f.read(); }
+  int peek() override { return f.peek(); }
+  size_t readBytes(char* b, size_t n) override {
+    if (state == LOGGING && sinceRest >= PACE_BYTES) {
+      vTaskDelay(pdMS_TO_TICKS(PACE_MS));
+      sinceRest = 0;
+    }
+    size_t got = f.read((uint8_t*)b, n);
+    sinceRest += got;
+    return got;
+  }
+  size_t write(uint8_t) override { return 0; }
+};
 
 // Finished files (those with a .done), oldest name first.
 static std::vector<String> pending() {
@@ -1584,7 +1617,8 @@ static bool uploadOne(const String& name) {
 #endif
     http.addHeader("Content-Type", "text/csv");
     uint32_t t0 = millis();
-    int code = http.sendRequest("PUT", &f, f.size());
+    PacedFile paced(f);
+    int code = http.sendRequest("PUT", &paced, f.size());
     String body = code > 0 ? http.getString() : String();
     http.end();
     ok = uploadAccepted(code, body.c_str(), done.sha);
@@ -2095,6 +2129,7 @@ static const char* FW_FILE = "/fw.bin";
 static const char* FW_DOWNLOAD = "/fw.dl";
 static const uint32_t OTA_CHECK_MS = 10 * 60 * 1000;
 static const uint32_t OTA_IDLE_MS = 60000;
+static const uint32_t OTA_IDLE_MAX_MS = 10 * 60000;
 static std::atomic<bool> otaReady{false};     // a checked image on the card
 static std::atomic<bool> otaTrial{false};     // this build is new and not kept yet
 
@@ -2380,18 +2415,22 @@ static void beatTask(void*) {
 
 static void uploadTask(void*) {
   uint32_t last = 0;
+  bool first = true;                       // the backlog at power-on, as soon as Wi-Fi is up
   if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(500));
     channelsIfDue();
     otaCheckIfDue();
     checkListIfDue();
-    if (!uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
-    uploadNow = false;
+    if (!first && !uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     last = millis();
     if (!sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) continue;
-    for (const String& name : pending()) {
+    first = uploadNow = false;
+    std::vector<String> names = pending();
+    uploadsWaiting = names.size();
+    for (const String& name : names) {
       if (!WiFi.isConnected() || !uploadOne(name)) break;
+      uploadsWaiting = uploadsWaiting - 1;
     }
   }
 }
@@ -2409,6 +2448,7 @@ static void onEvent(arduino_event_id_t e) {
       out.println("[eth] link down");
       break;
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+      uploadNow = true;
       // Wi-Fi is the default route (the clock and uploads need the internet);
       // the car is reached on its own subnet, 169.254.0.0/16, over Ethernet.
       configTzTime(TZ_INFO, "pool.ntp.org", "time.google.com");
@@ -2727,7 +2767,12 @@ void loop() {
   static uint32_t idleSince = 0;
   otaTrialCheck();
   if (state == LOGGING) idleSince = millis();
-  else if (otaReady && millis() - idleSince >= OTA_IDLE_MS) otaInstall();
+  // Not while files wait to go up, which may be the last minute of power
+  // after a drive (OTA_IDLE_MAX_MS: unless that's gone on and on).
+  else if (otaReady && millis() - idleSince >= OTA_IDLE_MS &&
+           (!uploadsWaiting || millis() - idleSince >= OTA_IDLE_MAX_MS)) {
+    otaInstall();
+  }
   switch (state) {
     case WAIT_LINK:
       if (linkUp) state = SEARCH;
