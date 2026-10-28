@@ -58,12 +58,15 @@ class FakeWorker:
             def do_PUT(self):
                 worker.requests.append((self.command, self.path,
                                         {k.lower(): v for k, v in self.headers.items()}))
+                # The body first, whatever the answer: replying to a request
+                # whose body is still unread makes Windows reset the
+                # connection (WinError 10053 in the client), a flaky failure.
+                body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
                 if (self.headers.get("CF-Access-Client-Id") != worker.client_id
                         or self.headers.get("CF-Access-Client-Secret") != worker.secret):
                     return self._reply(403, {"error": "forbidden"})
                 if worker.fail:
                     return self._reply(worker.fail, {"error": "boom"})
-                body = self.rfile.read(int(self.headers["Content-Length"]))
                 if self.path.startswith("/api/files/"):
                     key = urllib.parse.unquote(self.path[len("/api/files/"):])
                     worker.files[key] = body
