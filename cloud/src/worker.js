@@ -937,6 +937,23 @@ async function putBeats(env, body, now = new Date()) {
 /** The newest check-in and how long ago, and each power-on in the last
  * `hours`: when it started and last checked in, why it booted, top speed,
  * hottest coolant and oil, and how many check-ins were kept offline. */
+/** A check-in's fault_codes ("0x12:1A400A 0x40:804415") as [{module,
+ * module_name, code, text_en}], the texts from n63read's table; null when
+ * it has none. */
+async function beatFaults(env, text) {
+  if (typeof text !== "string" || !text.trim()) return null;
+  const list = [];
+  for (const one of text.trim().split(/\s+/).slice(0, 100)) {
+    const m = /^(0x[0-9A-Fa-f]{2}):([0-9A-Fa-f]{6})$/.exec(one);
+    if (m) list.push({ module: "0x" + m[1].slice(2).toUpperCase(), code: m[2].toUpperCase() });
+  }
+  const texts = await faultTexts(env, [...new Set(list.map((f) => f.code))]);
+  const names = Object.fromEntries((await env.DB.prepare(
+    "SELECT module, json_extract(data, '$.module_name') AS name FROM faults WHERE source = 'logger'")
+    .all()).results.map((r) => [r.module, r.name]));
+  return list.map((f) => ({ ...f, module_name: names[f.module] || "", text_en: texts[f.code] || "" }));
+}
+
 async function loggerStatus(env, hours, now = new Date()) {
   await ensureSchema(env);
   const last = (await env.DB.prepare(
@@ -955,9 +972,10 @@ async function loggerStatus(env, hours, now = new Date()) {
   const sweep = await getSweep(env);
   if (!last || !last.length) return { online: false, last: null, sessions, firmware, sweep };
   const age = Math.round((now.getTime() - Date.parse(last[0].received)) / 1000);
-  return { online: age <= ONLINE_S, seen_s_ago: age,
-    last: { received: last[0].received, ...JSON.parse(last[0].data) }, sessions, firmware,
-    sweep };
+  const beat = { received: last[0].received, ...JSON.parse(last[0].data) };
+  const faultList = await beatFaults(env, beat.fault_codes);
+  if (faultList) beat.fault_list = faultList;
+  return { online: age <= ONLINE_S, seen_s_ago: age, last: beat, sessions, firmware, sweep };
 }
 
 // ------------------------------------------------------------------ firmware
