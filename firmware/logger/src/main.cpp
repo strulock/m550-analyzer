@@ -579,7 +579,10 @@ struct DriveFile {
   }
 };
 
-enum State { WAIT_LINK, SEARCH, LOGGING };
+// PARKED: a drive ended in P with the engine off, the car still answering
+// (the ignition on, or the board's power outlasting it): no files, only the
+// selector and the engine speed every few seconds, for the next drive.
+enum State { WAIT_LINK, SEARCH, LOGGING, PARKED };
 static State state = WAIT_LINK;
 
 static DriveFile fastFile, sweepFile, faultFile;
@@ -754,7 +757,8 @@ static void startDrive() {
              ok ? "" : ": FILES COULD NOT BE OPENED");
 }
 
-static void endDrive(const char* why) {
+// `keepCar`: stay connected (the drive ended parked; PARKED watches for the next).
+static void endDrive(const char* why, bool keepCar = false) {
   checkEnd();
   if (fastFile.open && !fastLayout.columns.empty()) {
     addNote(std::string("end: ") + why);
@@ -771,12 +775,11 @@ static void endDrive(const char* why) {
   sweepFile.finish();
   faultFile.finish();
   resetRequests();
-  disconnectCar();
+  if (!keepCar) disconnectCar();
   out.printf("[drive] %s ended (%s): %u rows, %u sweep rows, %.1f min\n", driveName.c_str(), why,
              (unsigned)fastRows, (unsigned)sweepRows, (millis() - driveStartMs) / 60000.0f);
   driveName = "";
   uploadNow = true;                          // while there's still power to send it
-
 }
 
 // ---- requests ----------------------------------------------------------------
@@ -1111,6 +1114,7 @@ static bool snapshotStartDone = false;
 static uint32_t lastSnapshotMs = 0;
 static int lastGear = -1;                        // the selector as last read (-1: not yet)
 static bool engineRan = false;                   // since the last stop
+static uint32_t parkedOffSince = 0;              // in P with the engine off since (0: not)
 
 static void resetSnapshots() {
   snapshotWhy = nullptr;
@@ -1118,6 +1122,7 @@ static void resetSnapshots() {
   lastSnapshotMs = 0;
   lastGear = -1;
   engineRan = false;
+  parkedOffSince = 0;
 }
 
 // After each cycle's reads: what the selector and the engine just did.
@@ -1131,6 +1136,10 @@ static void watchCar() {
     if (rpm >= RUNNING_RPM) engineRan = true;
     else if (rpm < STOPPED_RPM && engineRan) { engineRan = false; snapshotWhy = "engine off"; }
   }
+  // The end of a drive: in P with the engine off (both read lately), held.
+  const bool parkedOff = lastGear == GEAR_P && !isnan(gear) && !isnan(rpm) && rpm < STOPPED_RPM;
+  if (!parkedOff) parkedOffSince = 0;
+  else if (!parkedOffSince) parkedOffSince = millis() | 1;
   if (!snapshotStartDone && millis() - driveStartMs >= SNAPSHOT_START_MS) {
     snapshotStartDone = true;
     if (!snapshotWhy) snapshotWhy = "start";
@@ -1868,7 +1877,7 @@ static void jsonNumber(std::string& j, const char* key, double v, int decimals) 
 }
 
 static std::string beatJson(bool boot, bool buffered = false) {
-  static const char* const states[] = {"waiting for link", "searching", "logging"};
+  static const char* const states[] = {"waiting for link", "searching", "logging", "parked"};
   std::string j = "{\"boot\":" + std::to_string(bootCount);
   jsonText(j, "event", boot ? "boot" : "beat");
   if (buffered) j += ",\"buffered\":true";
@@ -2603,7 +2612,8 @@ static void help() {
 }
 
 static void status() {
-  static const char* names[] = {"waiting for the Ethernet link", "looking for the car", "logging"};
+  static const char* names[] = {"waiting for the Ethernet link", "looking for the car", "logging",
+                                "parked (the engine off in P)"};
   out.printf("[status] %s", names[state]);
   if (state == LOGGING) {
     out.printf(" %s: %.1f min, %u rows (%.1f/s), %u sweep rows (pass %.1f s)", driveName.c_str(),
@@ -2860,6 +2870,62 @@ static bool reconnect() {
   return false;
 }
 
+// ---- the end of a drive, and parked -------------------------------------------
+// A drive ends (each noted "end: <why>" in its last row):
+//   - parked: the selector in P and the engine off (under 100 rpm), both
+//     read lately, for PARKED_END_MS. The board stays connected (PARKED);
+//   - the car stops answering for CAR_GONE_MS (the ignition went off, or the
+//     gateway is asleep), or the power goes (the drive is closed at the next
+//     boot);
+//   - the connection closes and doesn't come back in RECONNECT_MS, or the
+//     Ethernet link goes;
+//   - from the terminal (e), or new channels sent over it.
+// Parked, the selector and the engine speed are asked every PARKED_POLL_MS;
+// the engine starting or the selector leaving P starts a new drive, and the
+// car going quiet ends the wait (SEARCH).
+static const uint32_t PARKED_END_MS = 60000, PARKED_POLL_MS = 2000;
+
+static void pollParked(bool now = false) {
+  static uint32_t last = 0;
+  if (!now && millis() - last < PARKED_POLL_MS) { delay(20); return; }
+  last = millis();
+  std::vector<std::vector<size_t>> singles;
+  for (Live k : {RPM, GEAR}) {
+    if (liveCh[k] < 0) continue;
+    for (size_t i = 0; i < plan.reads.size(); i++) {
+      const std::vector<uint32_t>& chs = plan.reads[i].channels;
+      if (std::find(chs.begin(), chs.end(), (uint32_t)liveCh[k]) != chs.end()) singles.push_back({i});
+    }
+  }
+  std::vector<const std::vector<size_t>*> batches;
+  for (const std::vector<size_t>& b : singles) batches.push_back(&b);
+  values.assign(table.channels.size(), NAN);   // process() writes here; no file is open
+  askAll(batches);
+}
+
+// True when the car is being driven again.
+static bool unparked() {
+  const double gear = live(GEAR), rpm = live(RPM);
+  return (!isnan(rpm) && rpm >= RUNNING_RPM) ||
+         (!isnan(gear) && (int)gear != GEAR_P && (int)gear != GEAR_UNKNOWN);
+}
+
+// The car found: a drive, unless it's plainly parked with the engine off
+// (after a reboot or a firmware update in the driveway, which would
+// otherwise leave a minute's stub of a drive). Without the selector or the
+// engine speed to go by, a drive, as before.
+static State driveOrPark() {
+  pollParked(true);
+  const double gear = live(GEAR), rpm = live(RPM);
+  const bool parked = !isnan(gear) && (int)gear == GEAR_P && !isnan(rpm) && rpm < STOPPED_RPM;
+  if (!parked || connectionLost) {
+    startDrive();
+    return LOGGING;
+  }
+  out.println("[car] parked with the engine off: waiting for the engine or the selector");
+  return PARKED;
+}
+
 // ---- setup and loop ----------------------------------------------------------
 void setup() {
   Serial.begin(115200);
@@ -2949,8 +3015,7 @@ void loop() {
       rememberCar(true);
       connectionLost = false;
       endRequested = false;
-      startDrive();
-      state = LOGGING;
+      state = driveOrPark();
       break;
     }
     case LOGGING:
@@ -2961,6 +3026,26 @@ void loop() {
       else if (connectionLost && !reconnect()) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }
       else if (!linkUp) { endDrive("Ethernet link lost"); state = WAIT_LINK; }
+      else if (parkedOffSince && millis() - parkedOffSince >= PARKED_END_MS) {
+        endDrive("parked with the engine off for 60 s", true);
+        out.println("[car] parked: waiting for the engine or the selector");
+        state = PARKED;
+      }
+      break;
+    case PARKED:
+      pollParked();
+      if (!linkUp) { disconnectCar(); state = WAIT_LINK; }
+      else if ((connectionLost && !reconnect()) || millis() - lastOkMs > CAR_GONE_MS) {
+        out.println("[car] quiet while parked; looking for it again");
+        disconnectCar();
+        state = SEARCH;
+      } else if (unparked()) {
+        out.println("[car] moving again: a new drive");
+        connectionLost = false;
+        endRequested = false;
+        startDrive();
+        state = LOGGING;
+      }
       break;
   }
   if (reloadRequested) {

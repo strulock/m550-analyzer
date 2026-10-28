@@ -26,6 +26,13 @@ To act like the car did on a drive: --delay 30 (the DMEs' answer time),
 --single 0x18 (a module that refuses requests for several identifiers with
 0x13). Each can be given more than once.
 
+To try the drive's events: --park 90 (from 90 s, the engine off and the
+selector in P; the transmission, 0x18, answers its gear identifier 0xDA2E
+either way), --drive 200 (the engine running and in D again from then),
+--close 5 (the first connection closed 5 s after its first request, as the
+gateway did at the start of each drive on 27 Oct), --quiet 0x12=30-34 (a
+module that doesn't answer from 30 s to 34 s).
+
 Windows asks whether Python may use the network: allow it on Public networks
 too, because a direct cable is an "unidentified" (public) network.
 Standard library only; Ctrl+C to stop.
@@ -50,6 +57,15 @@ DELAY = 0.0                 # s before each answer (--delay): the car's DMEs tak
 SLOW = {}                   # module -> s before its answers (--slow)
 BAD = set()                 # (module, identifier) refused with the whole request (--bad)
 SINGLE = set()              # modules that take one identifier a request (--single)
+PARK_AT = DRIVE_AT = None   # s from the start: the engine off in P, then running in D
+CLOSE_AT = None             # s into the first connection: closed once (--close)
+QUIET = {}                  # module -> (from, to) s it doesn't answer (--quiet)
+GEAR = (0x18, 0xDA2E)       # the transmission's ISTGANG record: gear, then the selector
+
+
+def parked():
+    s = time.time() - T0
+    return PARK_AT is not None and s >= PARK_AT and (DRIVE_AT is None or s < DRIVE_AT)
 
 
 def u16(v):
@@ -58,7 +74,7 @@ def u16(v):
 
 def values(dme):
     """Raw values per identifier, in the catalog's scaling, for 0x12 or 0x13."""
-    rpm = 720 + 60 * math.sin((time.time() - T0) / 3)       # gentle idle hunt
+    rpm = 0 if parked() else 720 + 60 * math.sin((time.time() - T0) / 3)   # gentle idle hunt
     bank2 = dme == 0x13
     return {
         0x4807: u16(rpm * 2),                                  # 1/min, /2
@@ -92,8 +108,11 @@ def filler(module, did, size):
 
 
 def answer(dme, uds):
-    if dme not in DMES and dme not in EXTRA_MODULES:
+    if dme not in DMES and dme not in EXTRA_MODULES and dme != GEAR[0]:
         return None                                  # silent, like an empty address
+    quiet = QUIET.get(dme)
+    if quiet and quiet[0] <= time.time() - T0 < quiet[1]:
+        return None
     service = uds[0]
     if service == 0x3E:
         return b"\x7E" + uds[1:2]
@@ -110,7 +129,10 @@ def answer(dme, uds):
         return bytes([0x7F, 0x22, 0x31])             # one it hasn't spoils the request
     out = b""
     for did in dids:
-        if did in table:
+        if (dme, did) == GEAR:
+            # P, or the 5th gear in D
+            out += did.to_bytes(2, "big") + (b"\x00\x00" if parked() else b"\x07\x03")
+        elif did in table:
             out += did.to_bytes(2, "big") + table[did]
         elif (dme, did) in EXTRA:
             out += did.to_bytes(2, "big") + filler(dme, did, EXTRA[(dme, did)])
@@ -127,9 +149,13 @@ def send_later(conn, lock, data):
         pass
 
 
+CLOSED_ONCE = []
+
+
 def serve(conn, peer):
     print("[tcp] %s connected" % peer[0])
     count = 0
+    first_at = None
     buf = b""
     lock = threading.Lock()
     with conn:
@@ -149,7 +175,13 @@ def serve(conn, peer):
                 src, dst, uds = body[0], body[1], body[2:]
                 if count == 0:
                     print("[tcp] first request: tester 0x%02X -> 0x%02X" % (src, dst))
+                    first_at = time.time()
                 count += 1
+                if CLOSE_AT is not None and not CLOSED_ONCE and time.time() - first_at >= CLOSE_AT:
+                    CLOSED_ONCE.append(True)
+                    print("[tcp] closing the connection (--close)")
+                    conn.close()
+                    return
                 reply = answer(dst, uds)
                 try:
                     with lock:
@@ -208,7 +240,20 @@ if __name__ == "__main__":
                     help="a request naming this identifier is refused with 0x31")
     ap.add_argument("--single", action="append", default=[], metavar="MODULE",
                     help="this module refuses several identifiers a request (0x13)")
+    ap.add_argument("--park", type=float, metavar="S",
+                    help="from S seconds, the engine off and the selector in P")
+    ap.add_argument("--drive", type=float, metavar="S",
+                    help="from S seconds, the engine running in D again")
+    ap.add_argument("--close", type=float, metavar="S",
+                    help="close the first connection S seconds after its first request")
+    ap.add_argument("--quiet", action="append", default=[], metavar="MODULE=FROM-TO",
+                    help="this module doesn't answer from FROM to TO seconds (e.g. 0x12=30-34)")
     args = ap.parse_args()
+    PARK_AT, DRIVE_AT, CLOSE_AT = args.park, args.drive, args.close
+    for item in args.quiet:
+        module, span = item.split("=")
+        a, b = span.split("-")
+        QUIET[int(module, 16)] = (float(a), float(b))
     DELAY = args.delay / 1000.0
     for item in args.slow:
         module, ms = item.split("=")
