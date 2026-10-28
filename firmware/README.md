@@ -83,10 +83,25 @@ is up; when it isn't (driving away from home and the hotspot), from the
 car's own clock, the airbag module's (`0x01`, identifier `0x4029`, the time
 the dashboard shows, to the second; `lib/logger/carclock.h`), read once
 before the drive starts. Only if neither answers is it `nt-<boot>-<n>`,
-dated by the Worker from its upload. A drive ends when the car stops answering for
-10 s, or when the power goes. If the gateway closes the connection, the board
-connects again and carries on in the same files (a note says so), so a drive
-keeps one name; only if that fails for 15 s does the drive end.
+dated by the Worker from its upload.
+
+How a drive ends (each noted in its last row's Event column, "end: <why>"):
+
+- **Parked:** the selector in P (`EGS_ISTGANG.FAHRSTUFE`) and the engine
+  off (`INMOT` under 100 rpm), both read in the last 30 s, for 60 s: "end:
+  parked with the engine off for 60 s". The board stays connected and
+  *parked*, asking the selector and engine speed every 2 s; the engine
+  starting (400 rpm) or the selector leaving P starts a new drive. Found
+  parked at power-on (after a reboot or a firmware update in the driveway),
+  it waits the same way instead of starting a drive.
+- **The car stops answering** for 10 s (the ignition off, the gateway
+  asleep), or **the power goes** (the drive is closed and queued at the
+  next boot).
+- **The connection closes** and doesn't come back: the board connects
+  again and carries on in the same files ("connection closed; reconnected
+  in 0.6 s"), so a drive keeps one name; only if that fails for 15 s (or
+  20 times in a drive) does it end. Or the **Ethernet link** goes.
+- **From the terminal** (`e`), or new channels sent over it.
 
 Snapshots: the odometer and the fuel tank, the whole (`IKTFS`) and each
 half (`FUELLST_TANKH_L`/`_R`, `BDC_TANK_FUELLSTAND_LINKS`/`_RECHTS`), are
