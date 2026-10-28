@@ -19,10 +19,11 @@
  *   into the catalog's.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with tools over that copy: drive_history, fault_history,
- *   trend, list_files, read_log, all read-only; and the logger's channel
- *   presets, which the logger_* tools list and change (tiers, presets, the
- *   one published to the board, versions and rollback). Nothing here writes
- *   to the car.
+ *   trend, list_files, read_log, a drive's fault list (drive_faults) and
+ *   the full channel check's results (channel_check), all read-only; and
+ *   the logger's channel presets, which the logger_* tools list and change
+ *   (tiers, presets, the one published to the board, versions and
+ *   rollback). Nothing here writes to the car.
  *
  * Cloudflare Access sits in front of the whole hostname; this Worker also
  * checks the Access token itself on every request (ACCESS_AUD,
@@ -38,8 +39,8 @@ import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerEx
 import { channelFile, ConfigError, getCatalog, getPresets, listTiers, LOGGER_SCHEMA, presetVersions,
   putCatalog, putPresets, rollbackPreset, setTiers } from "./logger.js";
 import { LOGGER_PAGE } from "./loggerpage.js";
-import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, ingestCheck,
-  markAbsent, requestSweep } from "./sweep.js";
+import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, identifiers,
+  ingestCheck, markAbsent, requestSweep } from "./sweep.js";
 import { tanks } from "./tanks.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
@@ -1141,6 +1142,27 @@ export const TOOLS = [
     inputSchema: { type: "object", properties: {} },
   },
   {
+    name: "drive_faults",
+    description: "One logger drive's fault reads, from its .faults.csv: each module's read " +
+      "(when, how far into the drive, the module, and its state: no faults, refused, no " +
+      "reply) with every code it listed (status byte, state, English text). Pass a drive " +
+      "file from list_files (its .csv or .faults.csv); without one, the newest drive's.",
+    inputSchema: { type: "object", properties: {
+      name: { type: "string", description: "logger/<drive>.csv or .faults.csv" } } },
+  },
+  {
+    name: "channel_check",
+    description: "The logger's full channel check (the logger page's sweep): the one " +
+      "waiting or under way and the last one done (how far, counts, modules that didn't " +
+      "answer), and what the car answers per module from every check so far (ok, refused, " +
+      "absent: the module hasn't it, size: the wrong length, no answer, unchecked). Pass " +
+      "module for its identifiers one by one.",
+    inputSchema: { type: "object", properties: {
+      module: { type: "string", description: "e.g. 0x12: list its identifiers' answers" },
+      status: { type: "string", description: "with module: only these (ok, refused, absent...)" },
+      limit: { type: "integer", description: "Identifiers listed; default 300" } } },
+  },
+  {
     name: "logger_channels",
     description: "The logger board's channel catalog with each channel's tier under a " +
       "preset (the active one by default): fast (every cycle), medium (a few times a second), " +
@@ -1274,6 +1296,8 @@ async function callTool(env, name, a) {
     return loggerStatus(env, Math.max(0.1, Math.min(24 * KEEP_BEATS_DAYS, Number(a.hours) || 24)));
   }
   if (name === "tank_history") return { tanks: await tankHistory(env) };
+  if (name === "drive_faults") return driveFaults(env, a.name);
+  if (name === "channel_check") return channelCheck(env, a);
   if (name === "logger_channels") return listTiers(env, a);
   if (name === "logger_set_tiers") {
     return setTiers(env, { ...a, tier: String(a.tier || ""), why: a.why ? String(a.why) : null });
@@ -1323,7 +1347,8 @@ const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault 
   "channel_series follow any channel across every " +
   "drive in UTC time; list_templates shows the app's saved channel sets; logger_status " +
   "says whether the logger board in the car is on and what it last reported; " +
-  "tank_history gives each tank of fuel's distance and economy. " +
+  "tank_history gives each tank of fuel's distance and economy; drive_faults lists one " +
+  "logger drive's fault reads and channel_check the full channel check's results. " +
   "The logger_* tools read and change what the logger board reads: logger_channels and " +
   "logger_presets look, logger_set_tiers, logger_save_preset, logger_publish and " +
   "logger_rollback change the presets in the cloud (every change kept as a version). " +
@@ -1362,6 +1387,78 @@ export async function rpc(env, msg) {
     default:
       return error(-32601, `method not found: ${msg.method}`);
   }
+}
+
+/** One logger drive's fault reads (its .faults.csv), each module's read
+ * with the codes it listed and their texts; the newest drive's without a
+ * name. */
+async function driveFaults(env, name) {
+  let key;
+  if (name) {
+    key = safeKey(String(name));
+    if (!key) throw new ToolError("name: a drive file from list_files");
+    if (!key.endsWith(FAULTS)) key = key.replace(/(\.sweep|\.check)?\.csv$/, "") + FAULTS;
+  } else {
+    const r = (await env.DB.prepare(`SELECT key FROM uploads WHERE key LIKE 'logger/%' AND
+      key LIKE '%' || ? ORDER BY key DESC LIMIT 1`).bind(FAULTS).all()).results;
+    if (!r || !r.length) throw new ToolError("no logger fault reads uploaded yet");
+    key = r[0].key;
+  }
+  const obj = await env.FILES.get(key);
+  if (!obj) throw new ToolError(`no file ${key}; see list_files`);
+  const rows = parseCsv(await obj.text());
+  const head = (rows.shift() || []).map((h) => h.trim());
+  const col = (n) => head.indexOf(n);
+  if (col("module") < 0 || col("state") < 0) throw new ToolError(`${key} isn't a fault list`);
+  const get = (r, n) => (col(n) >= 0 && col(n) < r.length ? r[col(n)].trim() : "");
+  const reads = [], at = new Map();
+  for (const r of rows) {
+    const module = get(r, "module");
+    if (!module) continue;
+    const k = `${get(r, "read_at")}|${get(r, "time_s")}|${module}`;
+    if (!at.has(k)) {
+      at.set(k, { read_at: get(r, "read_at") || null, time_s: number(get(r, "time_s")), module,
+        module_name: get(r, "module_name"), state: get(r, "code") ? "listed codes" : get(r, "state"),
+        codes: [] });
+      reads.push(at.get(k));
+    }
+    if (get(r, "code")) {
+      at.get(k).codes.push({ code: get(r, "code").toUpperCase(), status: get(r, "status"),
+        state: get(r, "state") });
+    }
+  }
+  const texts = await faultTexts(env, [...new Set(reads.flatMap((x) => x.codes.map((c) => c.code)))]);
+  for (const x of reads) for (const c of x.codes) c.text_en = texts[c.code] || "";
+  return { file: key, reads, failed: reads.reduce((n, x) => n + x.codes.filter((c) =>
+    c.state.startsWith("present")).length, 0) };
+}
+
+const CHECK_STATUSES = ["ok", "refused", "absent", "size", "no answer"];
+
+/** The full channel check: the request waiting or under way, the last one,
+ * and the catalog's answers per module (or one module's identifiers). */
+async function channelCheck(env, a) {
+  const [sweep, catalog] = await Promise.all([getSweep(env), getCatalog(env)]);
+  if (!catalog) return { sweep, modules: [] };
+  const ids = identifiers(catalog);
+  if (a.module) {
+    const m = parseInt(String(a.module), 16);
+    const limit = Math.max(1, Math.min(5000, Number(a.limit) || 300));
+    const list = ids.filter((x) => x.module === m).map((x) => ({ did: x.key.split(":")[1],
+      size: x.size, answer: catalog.answers[x.key] || "unchecked" }))
+      .filter((x) => !a.status || x.answer === a.status);
+    return { sweep, module: a.module, name: catalog.modules[`0x${m.toString(16).toUpperCase()
+      .padStart(2, "0")}`] || "", total: list.length, identifiers: list.slice(0, limit) };
+  }
+  const by = new Map();
+  for (const x of ids) {
+    const m = x.key.split(":")[0];
+    if (!by.has(m)) by.set(m, Object.fromEntries([...CHECK_STATUSES, "unchecked"].map((s) => [s, 0])));
+    const s = catalog.answers[x.key];
+    by.get(m)[CHECK_STATUSES.includes(s) ? s : "unchecked"]++;
+  }
+  return { sweep, modules: [...by].map(([module, counts]) => ({ module,
+    name: catalog.modules[module] || "", ...counts })) };
 }
 
 // ------------------------------------------------------------------ logger config

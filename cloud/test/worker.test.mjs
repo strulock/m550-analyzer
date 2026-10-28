@@ -894,6 +894,38 @@ test("MCP logger tools: list tiers, set them one or in bulk, versions, rollback,
   assert.match((await tool("logger_publish", { name: "Nope" })).data, /no preset/);
 });
 
+test("MCP drive_faults: one drive's reads with their codes and texts", async () => {
+  await env.FILES.put("ref/BMW_fault_code_texts.csv", new TextEncoder().encode(
+    "\ufeffcode,text_de,text_en,source_module\n480A14,Klopf,\"Knock, cylinder 1\",DME\n"));
+  await call("PUT", "/api/files/logger/2026-10-27_20-03-50.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-27 20:05:08", "0x12", "480A14", "0x2F", "present, stored", 71.6) +
+    faultRow("2026-10-27 20:05:08", "0x12", "1A400A", "0x20", "not present", 71.6) +
+    faultRow("2026-10-27 20:05:17", "0x17", "", "", "no reply", 80.2) });
+  for (const name of [undefined, "logger/2026-10-27_20-03-50.csv"]) {
+    const f = await tool("drive_faults", name ? { name } : {});
+    assert.equal(f.data.file, "logger/2026-10-27_20-03-50.faults.csv");
+    assert.deepEqual(f.data.reads.map((x) => [x.module, x.state, x.codes.length]),
+      [["0x12", "listed codes", 2], ["0x17", "no reply", 0]]);
+    assert.equal(f.data.reads[0].codes[0].text_en, "Knock, cylinder 1");
+    assert.equal(f.data.failed, 1);
+  }
+  assert.match((await tool("drive_faults", { name: "logger/nope.csv" })).data, /no file/);
+});
+
+test("MCP channel_check: the sweep and what each module answers", async () => {
+  await putCatalog();
+  await call("PUT", "/api/files/logger/nt-00091-01.check.csv", { body:
+    "module,did,job,status,detail,reply_bytes,raw\n0x63,0xD030,logger sweep s1,refused,0x31,,\n" });
+  const all = (await tool("channel_check", {})).data;
+  assert.deepEqual(all.sweep, { pending: null, last: null });
+  const dme = all.modules.find((m) => m.module === "0x12");
+  assert.deepEqual([dme.ok, dme.unchecked], [2, 0]);
+  assert.equal(all.modules.find((m) => m.module === "0x63").absent, 1);
+  const one = (await tool("channel_check", { module: "0x12", status: "ok" })).data;
+  assert.deepEqual(one.identifiers.map((x) => x.did), ["0x4402", "0x4807"]);
+  assert.equal(one.name, "DME (bank 1)");
+});
+
 test("the catalog must have the board's columns", async () => {
   const bad = { ...CATALOG, columns: COLS.filter((c) => c !== "offset") };
   assert.equal((await putCatalog(bad)).status, 400);
