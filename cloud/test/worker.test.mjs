@@ -293,6 +293,38 @@ test("a logger log gets its series and drive row on upload", async () => {
   assert.deepEqual(s.points[0], ["2026-10-25T12:00:00.000Z", 705]);
 });
 
+test("each channel's newest value and range, kept up to date as drives come in", async () => {
+  const values = async () => (await (await call("GET", "/api/logger/values")).json()).values;
+  // Series stored before the table existed: built whole on the first ask.
+  env.DB.db.exec(`CREATE TABLE series (drive TEXT NOT NULL, channel TEXT NOT NULL, t0 REAL NOT NULL,
+    t1 REAL NOT NULL, n INTEGER NOT NULL, unit TEXT, min REAL, max REAL, mean REAL,
+    approx INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL, PRIMARY KEY (drive, channel, t0))`);
+  env.DB.db.prepare("INSERT INTO series VALUES ('old.csv', 'OELTEMP', 100, 110, 2, '', 80, 95, 87.5, 0, ?)")
+    .run("[[0,80],[10,95]]");
+  assert.deepEqual((await values()).OELTEMP, [110, 95, 2, 80, 95, 1]);
+
+  await call("PUT", "/api/files/logger/2026-10-25_07-00-00.csv", { body: LOGGER_CSV });
+  let v = await values();
+  assert.deepEqual(v.INMOT.slice(1), [705, 6, 700, 705, 1]);                    // the last row's
+  assert.deepEqual(v.IUIBS.slice(1), [14095, 6, 14095, 14100, 1]);
+  assert.equal(v.INMOT[0], Date.parse("2026-10-25T12:00:05Z") / 1000);
+  assert.ok(v.OELTEMP);                                                          // untouched
+
+  // The app's series for a drive replace what it sent before, and the newest wins.
+  const app = (chunks) => call("PUT", "/api/series/app.csv",
+    { body: JSON.stringify({ start: 0, approx: false, chunks }) });
+  await app([{ name: "INMOT", unit: "rpm", t0: 2e9, t1: 2e9 + 1, min: 650, max: 660,
+    mean: 655, data: [[0, 660], [1, 650]] }, { name: "GONE", t0: 0, t1: 1, data: [[0, 1]] }]);
+  v = await values();
+  assert.deepEqual(v.INMOT.slice(0, 2), [2e9 + 1, 650]);
+  assert.deepEqual(v.INMOT.slice(2), [8, 650, 705, 2]);
+  assert.ok(v.GONE);
+  await app([{ name: "INMOT", unit: "rpm", t0: 2e9, t1: 2e9 + 1, data: [[0, 640]] }]);
+  v = await values();
+  assert.equal(v.GONE, undefined);                                               // no series left
+  assert.equal(v.INMOT[1], 640);
+});
+
 test("the app's history sync leaves logger drives in place", async () => {
   await call("PUT", "/api/files/logger/a.csv", { body: LOGGER_CSV });
   await call("PUT", "/api/history", { body: JSON.stringify({

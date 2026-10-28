@@ -4,7 +4,9 @@
  * map), each tank of fuel since its fill-up (/api/logger/tanks), the full
  * channel sweep (/api/logger/sweep, sweep.js), and every
  * channel the board can read, filtered to what the car answers, a tier for
- * each, saved as presets. It talks to /api/logger, /api/logger/catalog and
+ * each, saved as presets, with each channel's newest stored value and a flag
+ * when it looks wrong (/api/logger/values; values.js, oddValue's source
+ * embedded). It talks to /api/logger, /api/logger/catalog and
  * /api/logger/presets (logger.js) with the visitor's Access login, and
  * estimates the rates the selection gets (estimate.js, its source
  * embedded). No dependencies; the map is OpenStreetMap's embed. The script
@@ -14,6 +16,7 @@
 import { estimateRates } from "./estimate.js";
 import { BOARD_NEEDS, PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE } from "./logger.js";
 import { FILL_MIN_L } from "./tanks.js";
+import { oddValue } from "./values.js";
 
 const FILL_NOTE = `${FILL_MIN_L} litres (${(FILL_MIN_L / 3.785411784).toFixed(1)} gallons)`;
 
@@ -94,8 +97,14 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 .stat.warn b { color: var(--warn); } .stat.bad b { color: var(--bad); }
 .map { width: 100%; height: 280px; border: 1px solid var(--rule); border-radius: 6px; margin-top: 10px; }
 td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.val { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.val small { display: block; color: var(--muted); font-size: 11px; white-space: normal; max-width: 220px; }
+td.val small.odd { color: var(--warn); font-weight: 600; }
+td.val.odd b { color: var(--warn); }
 @media (max-width: 640px) {
-  td.unit, th.unit, td.mod, th.mod, td.id, th.id { display: none; }
+  td.mod, th.mod, td.id, th.id, td.ans, th.ans { display: none; }
+  td.val { white-space: normal; } td.val small { max-width: 110px; }
+  td.name .info { overflow-wrap: anywhere; }
   input[type=search] { min-width: 0; flex-basis: 100%; }
   .card { padding: 10px; }
   td, th { padding: 6px 4px; }
@@ -110,6 +119,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
     <div>
       <h1>Logger</h1>
       <div class="muted" id="catinfo">Loading the catalog…</div>
+      <div class="muted" id="valinfo"></div>
     </div>
     <div class="muted" id="logger"></div>
   </header>
@@ -179,6 +189,12 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
       <option value="no">Doesn't answer / unknown</option>
     </select>
     <select id="tierf"><option value="">Any tier</option><option value="set">Set in this preset</option></select>
+    <select id="valf">
+      <option value="">Any value</option>
+      <option value="odd">Looks wrong</option>
+      <option value="has">Has a stored value</option>
+      <option value="none">No stored value</option>
+    </select>
   </section>
 
   <section class="card row" id="bulk">
@@ -193,7 +209,8 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
     <div class="muted" id="count" style="margin-bottom:6px"></div>
     <div class="scroll"><table>
       <thead><tr><th></th><th>Channel</th><th class="mod">Module</th><th class="id">Identifier</th>
-        <th class="unit">Unit</th><th title="The car answered this identifier">Ans.</th><th>Tier</th></tr></thead>
+        <th title="The newest value stored from any drive">Last value</th>
+        <th class="ans" title="The car answered this identifier">Ans.</th><th>Tier</th></tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
     <div class="row" style="justify-content:center;margin-top:10px"><button id="more" class="more hide">Show more</button></div>
@@ -215,6 +232,7 @@ ${estimateRates.toString()}
 var PER_DRIVE = ${JSON.stringify(PER_DRIVE)}, PER_DRIVE_RE = ${PER_DRIVE_RE.toString()};
 var UNDECODABLE = ${JSON.stringify([...UNDECODABLE])}, BOARD_NEEDS = ${JSON.stringify(BOARD_NEEDS)};
 ${perDrive.toString()}
+${oddValue.toString()}
 </script>
 <script>
 (function () {
@@ -230,6 +248,7 @@ ${perDrive.toString()}
   var edit = null, savedJson = "", sel = new Set(), shown = PAGE, matches = [];
   var live = {};                 // from the logger's last check-in: {batches, answers, from}
   var achieved = null;           // the last drive's rates per tier: {rate_fast, rate_medium, slow_pass_s}
+  var values = null;             // channel: [t, value, n, lo, hi, drives], once loaded
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -364,9 +383,12 @@ ${perDrive.toString()}
 
   function filter() {
     var q = $("q").value.trim().toLowerCase(), mod = $("mod").value, ans = $("ans").value,
-      tf = $("tierf").value;
+      tf = $("tierf").value, vf = $("valf").value;
     matches = items.filter(function (it) {
       if (mod && it.module !== mod) return false;
+      if (vf === "odd" && !it.odd) return false;
+      if (vf === "has" && !(values && values[it.name])) return false;
+      if (vf === "none" && values && values[it.name]) return false;
       if (ans === "yes" && !it.ok && !edit.tiers[it.name]) return false;
       if (ans === "no" && it.ok) return false;
       if (tf === "set" && !edit.tiers[it.name]) return false;
@@ -384,6 +406,38 @@ ${perDrive.toString()}
     return out;
   }
 
+  function fmt(v) {
+    if (v == null) return "–";
+    return Math.abs(v) >= 1000 ? Math.round(v).toLocaleString() : String(+v.toPrecision(5));
+  }
+  function ago(t) {
+    var s = Date.now() / 1000 - t;
+    return s < 120 ? "just now" : s < 7200 ? Math.round(s / 60) + " min ago"
+      : s < 172800 ? Math.round(s / 3600) + " h ago" : Math.round(s / 86400) + " days ago";
+  }
+  // Why the newest value looks wrong, else whether the drives' range ever did.
+  function markOdd() {
+    items.forEach(function (it) {
+      var s = values[it.name];
+      if (!s) { it.odd = null; return; }
+      var past = oddValue(s[3], it) || oddValue(s[4], it);
+      it.odd = oddValue(s[1], it) || (past ? "at times: " + past : null);
+    });
+  }
+  function valueCell(it) {
+    var unit = esc(it.unit);
+    var s = values && values[it.name];
+    if (!s) return '<td class="val"><span class="muted">' + (values ? "– " : "") + unit + "</span></td>";
+    var tip = "Recorded " + new Date(s[0] * 1000).toLocaleString() + ". " + s[2].toLocaleString() +
+      " values in " + s[5] + " drive" + (s[5] === 1 ? "" : "s") + ", " + fmt(s[3]) + " to " + fmt(s[4]) +
+      (it.unit ? " " + it.unit : "") + ".";
+    var note = it.odd ? '<small class="odd">' + esc(it.odd) + "</small>"
+      : s[2] >= 20 && s[5] >= 2 && s[3] === s[4] ? "<small>the same in all " + s[5] + " drives</small>"
+      : "<small>" + ago(s[0]) + (s[3] !== s[4] ? "; " + fmt(s[3]) + " to " + fmt(s[4]) : "") + "</small>";
+    return '<td class="val' + (it.odd ? " odd" : "") + '" title="' + esc(tip) + '"><b>' + fmt(s[1]) +
+      "</b> " + unit + note + "</td>";
+  }
+
   function renderRows(byId) {
     var html = [];
     matches.slice(0, shown).forEach(function (it) {
@@ -394,8 +448,8 @@ ${perDrive.toString()}
         '<td class="name"><div>' + esc(it.name) + '</div><div class="info">' + esc(it.info) + "</div></td>" +
         '<td class="mod">' + esc(it.modName) + "</td>" +
         '<td class="id">' + esc(it.did) + "<small>" + esc(it.group) + "</small>" + readNote + "</td>" +
-        '<td class="unit">' + esc(it.unit) + "</td>" +
-        '<td><span class="dot ' + (it.ok ? "ok" : "no") + '" title="' + esc(it.status || "not checked") + '"></span></td>' +
+        valueCell(it) +
+        '<td class="ans"><span class="dot ' + (it.ok ? "ok" : "no") + '" title="' + esc(it.status || "not checked") + '"></span></td>' +
         '<td><select class="t' + (set ? "" : " inherited") + '" style="--c:' + color(eff) + '">' + options(set, inh) + "</select></td></tr>");
     });
     $("rows").innerHTML = html.join("");
@@ -611,7 +665,7 @@ ${perDrive.toString()}
 
   function wire() {
     $("q").addEventListener("input", function () { shown = PAGE; render(true); });
-    ["mod", "ans", "tierf"].forEach(function (id) {
+    ["mod", "ans", "tierf", "valf"].forEach(function (id) {
       $(id).addEventListener("change", function () { shown = PAGE; render(true); }); });
     $("more").addEventListener("click", function () { shown += PAGE; render(false); });
     $("rest").addEventListener("change", function () { edit.rest = this.value; render(true); });
@@ -714,6 +768,7 @@ ${perDrive.toString()}
         mods[row[c.module]] = true;
         var it = { i: i, name: row[c.name], module: row[c.module], did: row[c.did], key: key,
           unit: row[c.unit] || "", info: row[c.info] || "", group: row[c.group] || "",
+          type: row[c.type], mul: row[c.mul], div: row[c.div], add: row[c.add],
           status: status, ok: status === "ok", modName: cat.modules[row[c.module]] || row[c.module] };
         it.hay = (it.name + " " + it.info + " " + it.group + " " + it.did).toLowerCase();
         return it;
@@ -725,6 +780,16 @@ ${perDrive.toString()}
       $("catinfo").textContent = items.length.toLocaleString() + " channels the logger can decode; the car answers " +
         answering.toLocaleString() + ". Catalog from " + new Date(cat.updated).toLocaleString() + ".";
       afterPresets(r[1]);
+      $("valinfo").textContent = "Loading the stored values…";
+      api("GET", "/api/logger/values").then(function (j) {
+        values = j.values || {};
+        markOdd();
+        var stored = items.filter(function (it) { return values[it.name]; }).length;
+        var odd = items.filter(function (it) { return it.odd; }).length;
+        $("valinfo").textContent = "Stored values for " + stored.toLocaleString() + " of them; " +
+          odd.toLocaleString() + " look wrong (the filter Looks wrong lists them).";
+        render(true);
+      }).catch(function (e) { $("valinfo").textContent = "Couldn't load the stored values: " + e.message; });
     }).catch(function (e) {
       $("catinfo").textContent = "";
       say("Couldn't load: " + e.message + ". The app sends the catalog: Answers > Logger channels.");

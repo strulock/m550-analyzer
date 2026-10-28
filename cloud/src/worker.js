@@ -42,6 +42,7 @@ import { LOGGER_PAGE } from "./loggerpage.js";
 import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, identifiers,
   ingestCheck, markAbsent, requestSweep } from "./sweep.js";
 import { tanks } from "./tanks.js";
+import { getValues, refreshValues, VALUES_SCHEMA } from "./values.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -348,6 +349,8 @@ export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS logger_fault_reads (module TEXT PRIMARY KEY, latest TEXT)`,
   // What the board reads: presets of channel tiers, and which is active.
   ...LOGGER_SCHEMA,
+  // Each channel's newest value and range, for the logger page (values.js).
+  ...VALUES_SCHEMA,
 ];
 
 const MAX_POINTS = 2000;
@@ -369,7 +372,11 @@ async function putSeries(env, drive, body) {
       { ...c, n: c.data.length, json: JSON.stringify(c.data) }));
   }
   await ensureSchema(env);
+  const old = await env.DB.prepare("SELECT DISTINCT channel FROM series WHERE drive = ?")
+    .bind(drive).all();
   await env.DB.batch(stmts);
+  await refreshValues(env, (old.results || []).map((x) => x.channel)
+    .concat(chunks.map((c) => c.name)));
   return { drive, channels: new Set(chunks.map((c) => c.name)).size, chunks: chunks.length };
 }
 
@@ -639,6 +646,7 @@ async function ingestLog(env, key, bytes) {
     channels++;
   }
   await send();
+  await refreshValues(env, series.names);
   // The summary from both files once both are here.
   const obj = await env.FILES.get(sweep ? drive : drive.slice(0, -".csv".length) + SWEEP);
   let other = null;
@@ -1514,6 +1522,10 @@ async function loggerConfig(request, env, url) {
       if (method === "GET") return json(await getSweep(env));
       if (method === "POST") return json({ ok: true, ...(await requestSweep(env)) });
       if (method === "DELETE") return json({ ok: true, ...(await cancelSweep(env)) });
+    }
+    if (path === "values" && method === "GET") {
+      await ensureSchema(env);
+      return json(await getValues(env));
     }
     if (path === "check-list" && method === "GET") {
       const catalog = await getCatalog(env);
