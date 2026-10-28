@@ -175,8 +175,10 @@ Wi-Fi up) have a task of their own on core 0, every 10 s by the clock, so an
 upload or a download doesn't hold one up; each waits for room for a TLS
 session (about 40 KB of internal RAM) when the other task has one open. A
 failed one is skipped. Each is a new TLS connection,
-about 2 MB an hour on a phone hotspot. With no Wi-Fi (and the time known),
-each check-in goes to `beats.jsonl` on the card instead, up to about 12
+about 2 MB an hour on a phone hotspot. With no Wi-Fi, each check-in goes to
+`beats.jsonl` on the card instead (made before the board knows the time,
+from the internet or the car, they're held in memory, up to 15 minutes'
+worth, and dated and written once it does), up to about 12
 hours' worth, and at the next connection they're sent 48 KB at a time
 (`POST /api/logger/heartbeats`), filed under the time each was made, and
 the file deleted. `logger_status` (MCP), `GET /api/logger` and the logger

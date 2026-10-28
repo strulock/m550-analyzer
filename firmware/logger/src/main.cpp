@@ -1618,7 +1618,7 @@ static bool uploadOne(const String& name) {
 // WIFI_SSID2 as a backup (a phone hotspot uses mobile data, so home wins
 // whenever it's in range).
 static bool wifiKnown = false;
-static const uint32_t WIFI_RETRY_MS = 30000;       // off both: try again
+static const uint32_t WIFI_RETRY_MS = 10000;       // off both: look again
 static const uint32_t WIFI_HOME_CHECK_MS = 120000; // on the backup: look for home
 
 static bool join(const char* ssid, const char* pass, uint32_t ms) {
@@ -1628,14 +1628,29 @@ static bool join(const char* ssid, const char* pass, uint32_t ms) {
   return WiFi.isConnected();
 }
 
+// One scan (about 2 s) says which known network is in range, and only that
+// one is joined: waiting 8 s on each in turn held the first check-in back
+// minutes at a power-on away from home. A scan that fails tries both.
 static bool joinPreferred() {
 #ifdef WIFI_SSID
-  if (join(WIFI_SSID, WIFI_PASS, 8000)) return true;
+  int n = WiFi.scanNetworks();
+  bool home = n < 0, backup = n < 0;
+  for (int i = 0; i < n; i++) {
+    home = home || WiFi.SSID(i) == WIFI_SSID;
 #ifdef WIFI_SSID2
-  WiFi.disconnect();
-  if (join(WIFI_SSID2, WIFI_PASS2, 8000)) return true;
+    backup = backup || WiFi.SSID(i) == WIFI_SSID2;
+#endif
+  }
+  WiFi.scanDelete();
+  if (home && join(WIFI_SSID, WIFI_PASS, 10000)) return true;
+#ifdef WIFI_SSID2
+  if (backup) {
+    WiFi.disconnect();
+    if (join(WIFI_SSID2, WIFI_PASS2, 10000)) return true;
+  }
 #endif
 #endif
+  (void)backup;
   return false;
 }
 
@@ -1803,11 +1818,18 @@ static int postBeat(const std::string& body, const char* path = "/api/logger/hea
   return code;
 }
 
-// A check-in made with no Wi-Fi, onto the card (only with the time known:
-// the Worker files it under its clock).
-static void keepBeat() {
-  if (!sdOk || !timeKnown()) return;
-  std::string line = beatJson(false, true) + "\n";
+// Check-ins made before the board knows the time (no Wi-Fi yet, and no car
+// to take the clock from): held here with when they were made, then dated
+// and kept on the card once the clock is known, so a power-on's first
+// minutes aren't lost. The oldest go first past MAX_HELD_BEATS.
+struct HeldBeat {
+  uint32_t ms;
+  std::string json;
+};
+static std::vector<HeldBeat> heldBeats;
+static const size_t MAX_HELD_BEATS = 90;            // 15 minutes
+
+static void appendBeat(const std::string& line) {
   std::lock_guard<std::recursive_mutex> g(sdLock);
   File f = SD.open(BEATS_FILE, FILE_APPEND);
   if (!f) return;
@@ -1816,6 +1838,33 @@ static void keepBeat() {
     beatsKept++;
   }
   f.close();
+}
+
+// The held check-ins, dated now that the clock is known, onto the card.
+static void keepHeldBeats() {
+  if (heldBeats.empty() || !sdOk || !timeKnown()) return;
+  for (const HeldBeat& h : heldBeats) {
+    int64_t ms = nowEpochMs() - (int64_t)(millis() - h.ms);
+    std::string clock = clockText(ms, offsetMinutes((time_t)(ms / 1000)));
+    std::string line = h.json.substr(0, h.json.size() - 1) + ",\"clock\":\"" + clock + "\"}\n";
+    appendBeat(line);
+  }
+  out.printf("[beat] %u check-ins from before the clock was known kept\n",
+             (unsigned)heldBeats.size());
+  heldBeats.clear();
+}
+
+// A check-in made with no Wi-Fi: onto the card (the Worker files it under
+// its clock), or held until the clock is known.
+static void keepBeat() {
+  if (!sdOk) return;
+  if (!timeKnown()) {
+    if (heldBeats.size() >= MAX_HELD_BEATS) heldBeats.erase(heldBeats.begin());
+    heldBeats.push_back({millis(), beatJson(false, true)});
+    return;
+  }
+  keepHeldBeats();
+  appendBeat(beatJson(false, true) + "\n");
 }
 
 // The kept check-ins, a few batches a turn; the file goes once all are in.
@@ -1910,6 +1959,7 @@ static void beatIfDue() {
   next = tried && millis() - next < BEAT_MS ? next + BEAT_MS : millis() + BEAT_MS;
   tried = true;
   if (!WiFi.isConnected()) { keepBeat(); return; }
+  keepHeldBeats();                         // sent with the kept ones below
   std::string reply;
   int code = postBeat(beatJson(!booted), "/api/logger/heartbeat", &reply);
   if (code == 200) {
