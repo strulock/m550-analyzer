@@ -55,6 +55,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <map>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -1202,6 +1203,8 @@ static void cycle() {
 static const uint32_t FAULT_MS = 3000;
 static uint16_t failedBy[256];               // failed codes per module, last read
 static std::atomic<int> faultsNow{-1};       // their sum; -1 until the first read
+static std::map<uint8_t, std::string> failedCodes;   // those codes by module, "1A400A 804415"
+                                                     // (under tagLock)
 
 static void readFaults() {
   if (connectionLost || burst.on()) return;
@@ -1236,7 +1239,19 @@ static void faultAnswer(uint8_t m, const hsfz::Reply& r) {
   faultFile.flush();
   if (result != 0) return;
   uint16_t failed = 0;
-  for (const Dtc& d : dtcs) failed += dtcFailed(d.status);
+  std::string codes;
+  for (const Dtc& d : dtcs) {
+    if (!dtcFailed(d.status)) continue;
+    failed++;
+    char c[8];
+    snprintf(c, sizeof(c), "%s%06X", codes.empty() ? "" : " ", (unsigned)(d.code & 0xFFFFFF));
+    codes += c;
+  }
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    if (codes.empty()) failedCodes.erase(m);
+    else failedCodes[m] = codes;
+  }
   if (failed != failedBy[m]) {
     char text[64];
     snprintf(text, sizeof(text), "faults 0x%02X: %u", m, (unsigned)failed);
@@ -1653,6 +1668,7 @@ static const uint32_t BEAT_MS = 10000;
 static std::atomic<uint32_t> beatsSent{0};
 static const char* BEATS_FILE = "/beats.jsonl";
 static const int BEATS_BATCHES_PER_TURN = 4;        // then the drive uploads get a turn
+static const size_t MAX_FAULT_CODES_TEXT = 400;      // a check-in's fault_codes, about 25 codes
 static uint32_t beatsKept = 0;
 
 static void jsonText(std::string& j, const char* key, const char* v) {
@@ -1697,6 +1713,26 @@ static std::string beatJson(bool boot, bool buffered = false) {
   jsonNumber(j, "lon", lon, 6);
   int faults = faultsNow;
   jsonNumber(j, "faults", faults < 0 ? NAN : faults, 0);
+  if (faults > 0) {                          // which: "0x12:1A400A 0x40:804415"
+    std::string codes;
+    {
+      std::lock_guard<std::mutex> g(tagLock);
+      for (const auto& [m, list] : failedCodes) {
+        if (codes.size() >= MAX_FAULT_CODES_TEXT) break;
+        size_t at = 0;
+        while (at < list.size()) {
+          size_t end = list.find(' ', at);
+          if (end == std::string::npos) end = list.size();
+          char one[20];
+          snprintf(one, sizeof(one), "%s0x%02X:%s", codes.empty() ? "" : " ", m,
+                   list.substr(at, end - at).c_str());
+          codes += one;
+          at = end + 1;
+        }
+      }
+    }
+    jsonText(j, "fault_codes", codes.c_str());
+  }
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
   jsonText(j, "vin", vin);
   jsonText(j, "fw", FW_VERSION);

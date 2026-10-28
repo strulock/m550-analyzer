@@ -152,7 +152,9 @@ module has none, refused or didn't answer. Codes only; the texts and stored
 details stay with the app and the Worker. A DME's fault list is waited for
 (milliseconds); any other module's is collected when it comes, like its
 reads, so a module that doesn't answer no longer holds up the log. Status
-(`s`) and the check-ins give the failed codes in the modules' last reads.
+(`s`) and the check-ins give how many codes failed in the modules' last reads,
+and which (`fault_codes`, "0x12:1A400A 0x40:804415"; the Worker adds their
+texts for the logger page and `logger_status`).
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it

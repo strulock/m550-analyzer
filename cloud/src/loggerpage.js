@@ -78,6 +78,7 @@ td.id small { display: block; color: var(--muted); font-size: 11px; }
 .dot.ok { background: var(--ok); } .dot.no { background: transparent; border: 1.5px solid var(--muted); }
 select.t { min-width: 140px; border-left: 4px solid var(--c); }
 select.t.inherited { color: var(--muted); }
+.faultlist { grid-column: 1 / -1; font-size: 0.85em; color: var(--muted); }
 tr.sel td { background: var(--accent-bg); }
 .more { justify-self: center; }
 .msg { padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
@@ -521,7 +522,10 @@ ${perDrive.toString()}
       stat("Oil", whole(oil), "°C", level("oil_c", oil), fahrenheit(oil)),
       stat("Battery", volts == null ? null : volts.toFixed(1), "V"),
       stat("Faults", num(b.faults)),
-    ].join("");
+    ].join("") + (b.fault_list && b.fault_list.length ? '<div class="faultlist">' +
+      b.fault_list.map(function (f) {
+        return "<div><b>" + esc(f.code) + "</b> " + esc(f.module_name || f.module) +
+          (f.text_en ? ": " + esc(f.text_en) : "") + "</div>"; }).join("") + "</div>" : "");
     var hot = s.online && (level("coolant_c", cool) === "bad" || level("oil_c", oil) === "bad");
     $("alarm").textContent = hot ? "Running hot: coolant " + whole(cool) + " °C, oil " + whole(oil) +
       " °C (limits " + LIMITS.coolant_c[1] + " and " + LIMITS.oil_c[1] + " °C)." : "";

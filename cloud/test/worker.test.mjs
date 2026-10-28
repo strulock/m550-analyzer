@@ -591,6 +591,18 @@ test("logger check-ins: stored, the newest says online, power-ons grouped", asyn
   assert.equal(t.data.sessions.length, 2);
 });
 
+test("logger check-ins: the failed codes come back with their texts", async () => {
+  await env.FILES.put("ref/BMW_fault_code_texts.csv", new TextEncoder().encode(
+    "﻿code,text_de,text_en,source_module\n1A400A,Lüfter,\"Electric fan, self-diagnosis\",DME\n"));
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 9, event: "beat",
+    faults: 2, fault_codes: "0x12:1A400A 0x40:804415 junk" }) });
+  const s = await (await call("GET", "/api/logger")).json();
+  assert.deepEqual(s.last.fault_list.map((f) => [f.module, f.code, f.text_en]),
+    [["0x12", "1A400A", "Electric fan, self-diagnosis"], ["0x40", "804415", ""]]);
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 9, faults: 0 }) });
+  assert.equal((await (await call("GET", "/api/logger")).json()).last.fault_list, undefined);
+});
+
 test("logger check-ins: bad bodies refused, old ones dropped", async () => {
   const post = (body) => call("POST", "/api/logger/heartbeat", { body });
   assert.equal((await post("not json")).status, 400);
