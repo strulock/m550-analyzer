@@ -1502,6 +1502,21 @@ static volatile bool uploadNow = false;
 static std::atomic<uint32_t> uploadedFiles{0};
 static String lastUpload = "none yet";     // under sdLock: the upload task sets it
 
+// Room for a TLS session: mbedTLS wants about 40 KB of internal RAM, its
+// 16 KB input record buffer in one piece (17 KB largest block failed, 45 KB
+// works), and the check-ins (their own task) and the uploads and downloads
+// (this one) can each want one at once. Waits up to `ms` for it.
+static const size_t TLS_BLOCK = 24 * 1024, TLS_FREE = 48 * 1024;
+static bool tlsRoom(uint32_t ms) {
+  uint32_t t0 = millis();
+  while (heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) < TLS_BLOCK ||
+         heap_caps_get_free_size(MALLOC_CAP_INTERNAL) < TLS_FREE) {
+    if (millis() - t0 >= ms) return false;
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+  return true;
+}
+
 // Finished files (those with a .done), oldest name first.
 static std::vector<String> pending() {
   std::vector<String> names;
@@ -1549,6 +1564,11 @@ static bool uploadOne(const String& name) {
   }
   case UPLOAD_SEND:
     break;
+  }
+  if (!tlsRoom(10000)) {
+    f.close();
+    out.printf("[up] %s: not enough memory for TLS; later\n", name.c_str());
+    return false;
   }
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
@@ -1765,6 +1785,7 @@ static std::string beatJson(bool boot, bool buffered = false) {
 
 static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat",
                     std::string* reply = nullptr) {
+  if (!tlsRoom(3000)) return -1;
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
   HTTPClient http;
@@ -1875,16 +1896,19 @@ static void checkReply(const std::string& body) {
   prefs.end();
 }
 
+// Every BEAT_MS by the clock: a check-in that takes a second or two (a TLS
+// handshake each) doesn't push the next one back, and one that took longer
+// than BEAT_MS isn't made up with a burst.
 static void beatIfDue() {
-  static uint32_t last = 0;
+  static uint32_t next = 0;
   static bool tried = false, booted = false, failing = false;
   if (!strlen(WORKER_HOST)) return;
 #ifdef OTA_TEST_SILENT
   return;                                  // a test build that never checks in: it must go back
 #endif
-  if (tried && millis() - last < BEAT_MS) return;
+  if (tried && (int32_t)(millis() - next) < 0) return;
+  next = tried && millis() - next < BEAT_MS ? next + BEAT_MS : millis() + BEAT_MS;
   tried = true;
-  last = millis();
   if (!WiFi.isConnected()) { keepBeat(); return; }
   std::string reply;
   int code = postBeat(beatJson(!booted), "/api/logger/heartbeat", &reply);
@@ -2152,6 +2176,7 @@ static void otaTrialCheck() {
 }
 
 static int workerGet(HTTPClient& http, NetworkClientSecure& tls, const char* path) {
+  if (!tlsRoom(10000)) return -1;
   tls.useBuiltinCACertBundle();
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
@@ -2292,13 +2317,22 @@ static void checkListIfDue() {
   out.printf("[check] list for %s on the card (%d bytes)\n", want.c_str(), got);
 }
 
+// Wi-Fi and the check-ins (core 0), on a task of their own so an upload,
+// a channel file or a firmware download never holds a check-in up (they
+// came 17 s apart under load on 27 Oct).
+static void beatTask(void*) {
+  for (;;) {
+    keepWifi();
+    beatIfDue();
+    vTaskDelay(pdMS_TO_TICKS(200));
+  }
+}
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
   for (;;) {
     vTaskDelay(pdMS_TO_TICKS(500));
-    keepWifi();
-    beatIfDue();
     channelsIfDue();
     otaCheckIfDue();
     checkListIfDue();
@@ -2308,7 +2342,6 @@ static void uploadTask(void*) {
     if (!sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) continue;
     for (const String& name : pending()) {
       if (!WiFi.isConnected() || !uploadOne(name)) break;
-      beatIfDue();
     }
   }
 }
@@ -2631,6 +2664,7 @@ void setup() {
   checkBoot();
   loadChannels();
   startWifi();
+  xTaskCreatePinnedToCore(beatTask, "beat", 10240, nullptr, 2, nullptr, 0);
   xTaskCreatePinnedToCore(uploadTask, "upload", 12288, nullptr, 1, nullptr, 0);
   out.printf("[boot] ready in %u ms\n", (unsigned)millis());
   help();
