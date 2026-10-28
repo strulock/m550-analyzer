@@ -229,6 +229,7 @@ ${perDrive.toString()}
   var cat = null, items = [], presets = [], activeName = null, file = null;
   var edit = null, savedJson = "", sel = new Set(), shown = PAGE, matches = [];
   var live = {};                 // from the logger's last check-in: {batches, answers, from}
+  var achieved = null;           // the last drive's rates per tier: {rate_fast, rate_medium, slow_pass_s}
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -297,7 +298,23 @@ ${perDrive.toString()}
       Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h";
   }
 
+  // What the last drive got, after the estimate: the check against reality.
+  function achievedText(t) {
+    var a = achieved;
+    if (!a) return "";
+    if (t === "fast" && a.rate_fast != null) return "; last drive " + rate(a.rate_fast) + "/s";
+    if (t === "medium" && a.rate_medium != null) return "; last drive " + rate(a.rate_medium) + "/s";
+    if (t === "slow" && a.slow_pass_s != null) return "; last drive " + duration(a.slow_pass_s);
+    return "";
+  }
+
   function estimateLine(t, e) {
+    var line = estimateFor(t, e);
+    if (line) line.text += achievedText(t);
+    return line;
+  }
+
+  function estimateFor(t, e) {
     var mod = function (m) { return esc(cat.modules[m] || m); };
     if (t === "fast") {
       return e.rowsPerS ? { text: "≈ " + rate(e.rowsPerS) + " rows/s", warn: e.rowsPerS < 8 } : null;
@@ -420,6 +437,10 @@ ${perDrive.toString()}
         });
         return out;
       };
+      if (s.last_drive && (s.last_drive.rate_fast != null || s.last_drive.slow_pass_s != null)) {
+        achieved = s.last_drive;
+        render(false);
+      }
       if (last.batches || last.answer_ms) {
         live = { batches: pairs(last.batches), answers: pairs(last.answer_ms),
           from: new Date(last.received).toLocaleString() };

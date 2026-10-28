@@ -973,9 +973,16 @@ async function loggerStatus(env, hours, now = new Date()) {
   if (!last || !last.length) return { online: false, last: null, sessions, firmware, sweep };
   const age = Math.round((now.getTime() - Date.parse(last[0].received)) / 1000);
   const beat = { received: last[0].received, ...JSON.parse(last[0].data) };
+  // The last drive's rates per tier, for the logger page's estimates.
+  const d = (await env.DB.prepare(
+    "SELECT file, start, data FROM drives WHERE source = 'logger' ORDER BY start DESC LIMIT 1")
+    .all()).results;
+  const lastDrive = d && d.length ? (({ rate_fast, rate_medium, slow_pass_s }) => ({ file: d[0].file,
+    start: d[0].start, rate_fast, rate_medium, slow_pass_s }))(JSON.parse(d[0].data)) : null;
   const faultList = await beatFaults(env, beat.fault_codes);
   if (faultList) beat.fault_list = faultList;
-  return { online: age <= ONLINE_S, seen_s_ago: age, last: beat, sessions, firmware, sweep };
+  return { online: age <= ONLINE_S, seen_s_ago: age, last: beat, sessions, firmware, sweep,
+    last_drive: lastDrive };
 }
 
 // ------------------------------------------------------------------ firmware
@@ -1024,7 +1031,9 @@ export const TOOLS = [
       "uneven running and spark burn time per cylinder, knock retard and fuel trims per bank, " +
       "temperatures, battery, tire pressures, distance, fuel used and economy (fuel_l, " +
       "l_per_100km, mpg, tank_used_l). From the logs the BMW Analyzer app " +
-      "uploaded (2018 BMW M550i, N63TU2 V8).",
+      "uploaded (2018 BMW M550i, N63TU2 V8). The logger board's drives add the rate each " +
+      "channel tier got (rate_fast, rate_medium: reads a second per identifier; slow_pass_s), " +
+      "the tank (whole and each half) and odometer at each end.",
     inputSchema: { type: "object", properties: {
       limit: { type: "integer", description: "Drives, newest; default 30" } } },
   },

@@ -167,6 +167,13 @@ few seconds of the bank 1 DME not answering (26 and 27 Oct) cost the rest
 of the drive two thirds of its rows. The stats note lists the modules left
 alone.
 
+Each minute a second note gives the rate each tier actually got ("tier
+rates: fast 14.10/s medium 2.00/s slow pass 40 s": reads a second per
+identifier, and the slow pass's length), so a change of preset can be
+checked against reality: the Worker averages them into the drive's row
+(`rate_fast`, `rate_medium`, `slow_pass_s`; MCP `drive_history`, `trend`),
+and the logger page shows the last drive's beside its estimates.
+
 Bursts: when the pedal passes 80% or the boost 1,700 hPa (`IPLAD`, about
 0.7 bar over the air outside), the board asks for the fast tier alone, as
 fast as it answers (up to 20 rows a second), until both have been below for

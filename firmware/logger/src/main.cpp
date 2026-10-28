@@ -591,6 +591,8 @@ static String driveName;
 static uint32_t driveStartMs = 0, lastOkMs = 0, lastFlushMs = 0, lastCycleMs = 0;
 static uint32_t fastRows = 0, sweepRows = 0, cycles = 0, cycleStatsMs = 0;
 static uint32_t reconnects = 0;             // this drive (reconnect())
+static uint32_t tierAnswers[TIER_N];        // reads answered per tier, this stats window
+static uint32_t tierWindowMs = 0;           // when the window started
 static float cycleRate = 0;
 static uint32_t tFast = 0, tWrite = 0;                 // ms spent per stats window
 static float msFast = 0, msWrite = 0;                  // per cycle, last window
@@ -712,6 +714,8 @@ static void startDrive() {
   }
   driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = lastStatsNoteMs = millis();
   fastRows = sweepRows = cycles = reconnects = 0;
+  memset(tierAnswers, 0, sizeof(tierAnswers));
+  tierWindowMs = millis();
   burst.reset();
   resetSnapshots();
   note.clear();
@@ -859,6 +863,7 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
     for (size_t k = 0; k < batch.size(); k++) {
       if (!data[k]) { plan.failed(batch[k], now); continue; }
       plan.answered(batch[k]);
+      tierAnswers[plan.reads[batch[k]].tier]++;
       for (uint32_t ci : plan.reads[batch[k]].channels) {
         double v;
         if (!decode(table.channels[ci], data[k], len[k], v)) continue;
@@ -1245,6 +1250,26 @@ static void cycle() {
                burst.ms() / 1000.0f);
       addNote(text);
       laterSent = laterTimeouts = 0;
+      // What each tier got, per identifier, as the logger page estimates it:
+      // fast and medium reads a second, the slow pass's length. The Worker
+      // averages these into the drive's row (rate_fast, rate_medium,
+      // slow_pass_s).
+      const float window = (millis() - tierWindowMs) / 1000.0f;
+      size_t inTier[TIER_N] = {};
+      for (const Read& rd : plan.reads) inTier[rd.tier]++;
+      char rates[96];
+      int w = snprintf(rates, sizeof(rates), "tier rates:");
+      for (Tier tr : {FAST, MEDIUM}) {
+        if (!inTier[tr] || window <= 0 || w <= 0 || (size_t)w >= sizeof(rates)) continue;
+        w += snprintf(rates + w, sizeof(rates) - w, " %s %.2f/s", tierName(tr),
+                      tierAnswers[tr] / (float)inTier[tr] / window);
+      }
+      if (inTier[SLOW] && sweepPassMs && w > 0 && (size_t)w < sizeof(rates)) {
+        snprintf(rates + w, sizeof(rates) - w, " slow pass %.0f s", sweepPassMs / 1000.0f);
+      }
+      addNote(rates);
+      memset(tierAnswers, 0, sizeof(tierAnswers));
+      tierWindowMs = millis();
       std::string answers;
       for (int m = 0; m < 256; m++) {
         if (answerMs[m] <= 0) continue;
