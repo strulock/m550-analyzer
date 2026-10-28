@@ -88,6 +88,15 @@ dated by the Worker from its upload. A drive ends when the car stops answering f
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).
+The backlog goes first thing at power-on (as soon as Wi-Fi is up, before
+a drive needs the board), and a drive's files the moment it ends, while
+there's still power; while a drive is logging, uploads are paced (about
+80 KB/s) so the card and core 0 stay mostly the logging's. A firmware update
+waiting on the card isn't installed while files wait to go up (for up to 10
+minutes idle). The board never sleeps: how long it has after the engine
+stops is down to its power, which comes with the ignition here; a supply
+that stays on a minute or two after (or constant power) lets the last
+drive go up before the car is left.
 
 Each cycle sends one request to every module that has fast or medium reads
 (and to slow-only modules in turn), both DMEs side by side on their own
