@@ -755,6 +755,11 @@ static void endDrive(const char* why) {
 
 // ---- requests ----------------------------------------------------------------
 static bool connectionLost = false;
+// Requests in flight together: at most one per module (a module answers one
+// at a time), on both connections, several to different modules on one
+// connection. A module that keeps timing out is left alone for a while
+// (lib/logger/plan.h, Backoff); the rest carry on.
+static Backoff backoff;
 
 // The slave DME is on its own connection (tester 0xF5); everything else on
 // the main one. Requests on the two can be in flight together.
@@ -810,6 +815,7 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
   if (r.result == hsfz::OK || r.result == hsfz::NEGATIVE) {
     lastOkMs = now;                                       // it answered, whatever it said
     plan.moduleAnswered(module);
+    backoff.answered(module);
   }
   std::vector<const uint8_t*> data;
   std::vector<size_t> len;
@@ -870,19 +876,19 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
     return;
   }
   for (size_t i : batch) plan.failed(i, now);           // no answer
+  if (r.result == hsfz::TIMEOUT && backoff.timedOut(module, now)) {
+    char text[80];
+    snprintf(text, sizeof(text), "module 0x%02X not answering: left alone %.0f s", module,
+             backoff.waitMs(module) / 1000.0f);
+    out.printf("[plan] %s\n", text);
+    addNote(text);
+  }
   if (r.result == hsfz::TIMEOUT && plan.timedOut(module) >= TIMEOUTS_TO_SHRINK &&
       batch.size() > 1) {
     smaller(module, batch.size(), "timeouts");
     plan.moduleAnswered(module);                          // count again at the new size
   }
 }
-
-// Requests in flight together: at most one per module (a module answers one
-// at a time), on both connections, several to different modules on one
-// connection while the gateway allows it (lib/logger/plan.h, Fallback: one
-// request at a time per connection for a while after shared ones keep timing
-// out).
-static Fallback fallback;
 
 // ---- requests not waited for -------------------------------------------------
 // A module with no fast reads (the head unit, the body modules, ...) can take
@@ -976,7 +982,7 @@ static void collect() {
 // gateway.
 static void resetRequests() {
   pendingReqs.clear();
-  fallback.reset();
+  backoff.reset();
   refusedReads = laterSent = laterTimeouts = 0;
   memset(refusedNoteMs, 0, sizeof(refusedNoteMs));
   faultWanted = -1;
@@ -995,44 +1001,22 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
     s.ok = s.cl && s.cl->start(s.target, s.req, s.n, s.r);
     if (!s.cl) s.r.result = hsfz::TIMEOUT;
   }
-  bool shared = false, timedOut = false;
-  for (size_t i = 0; i < wave.size(); i++) {
-    for (size_t j = 0; j < i; j++) shared = shared || sent[j].cl == sent[i].cl;
-    for (const Pending& p : pendingReqs) shared = shared || p.cl == sent[i].cl;
-  }
   for (size_t i = 0; i < wave.size() && !connectionLost; i++) {
     Sent& s = sent[i];
     hsfz::Reply r = s.ok ? s.cl->finish(s.target, s.req, s.n, rx, sizeof(rx), REQUEST_MS) : s.r;
-    timedOut = timedOut || r.result == hsfz::TIMEOUT;
     process(*wave[i], r);
   }
-  if (shared && fallback.sharedWave(timedOut, millis())) {
-    char text[128];
-    snprintf(text, sizeof(text), "one request at a time per connection for %u s (shared requests "
-             "kept timing out)", (unsigned)(fallback.waitMs() / 1000));
-    out.printf("[plan] %s\n", text);
-    addNote(text);
-  }
-}
-
-// After a fall-back's wait: overlapping requests again.
-static void overlapAgainIfDue() {
-  if (!fallback.overlapAgain(millis())) return;
-  out.println("[plan] overlapping requests again");
-  addNote("overlapping requests again");
 }
 
 // Send `batches` in waves: each wave takes the next batch of every module
-// not yet in it (and, when it has fallen back, of every connection).
+// not yet in it.
 static void askAll(std::vector<const std::vector<size_t>*> batches) {
   while (!batches.empty() && !connectionLost) {
     std::vector<const std::vector<size_t>*> wave, rest;
     for (const std::vector<size_t>* b : batches) {
       bool clash = false;
       for (const std::vector<size_t>* w : wave) {
-        clash = clash || moduleOf(*w) == moduleOf(*b) ||
-                (!fallback.sameConnection() &&
-                 clientFor(moduleOf(*w)) == clientFor(moduleOf(*b)));
+        clash = clash || moduleOf(*w) == moduleOf(*b);
       }
       (clash ? rest : wave).push_back(b);
     }
@@ -1093,7 +1077,6 @@ static void sweepRow(double secs) {
 // and collected when they come.
 static void cycle() {
   const uint32_t start = millis();
-  overlapAgainIfDue();
   // A burst (lib/logger/plan.h) from the last cycle's pedal and boost.
   const float pedal = pedalCh >= 0 ? values[pedalCh] : NAN;
   const float boost = boostCh >= 0 ? values[boostCh] : NAN;
@@ -1110,16 +1093,14 @@ static void cycle() {
   std::vector<uint8_t> busy;
   for (const Pending& p : pendingReqs) busy.push_back(p.target);
   if (faultWanted >= 0) busy.push_back((uint8_t)faultWanted);
-  size_t slowOnly = 1;                                       // one at a time: as before
-  if (fallback.sameConnection()) {
-    slowOnly = pendingReqs.size() >= MAX_LATER ? 0 : MAX_LATER - pendingReqs.size();
-    if (slowOnly > SLOW_ONLY_PER_CYCLE) slowOnly = SLOW_ONLY_PER_CYCLE;
-  }
+  for (uint8_t m : backoff.modules(millis())) busy.push_back(m);   // left alone a while
+  size_t slowOnly = pendingReqs.size() >= MAX_LATER ? 0 : MAX_LATER - pendingReqs.size();
+  if (slowOnly > SLOW_ONLY_PER_CYCLE) slowOnly = SLOW_ONLY_PER_CYCLE;
   std::vector<std::vector<size_t>> requests =
       scheduler.cycle(plan, millis(), busy, slowOnly, burst.on());
   std::vector<const std::vector<size_t>*> waited;
   for (const std::vector<size_t>& b : requests) {
-    if (!fallback.sameConnection() || scheduler.waits(moduleOf(b))) waited.push_back(&b);
+    if (scheduler.waits(moduleOf(b))) waited.push_back(&b);
     else sendLater(b);
   }
   askAll(waited);
@@ -1141,15 +1122,20 @@ static void cycle() {
           smallerList += m;
         }
       }
+      std::string alone;
+      for (uint8_t m : backoff.modules(millis())) {
+        char a[8];
+        snprintf(a, sizeof(a), "%s0x%02X", alone.empty() ? "" : " ", m);
+        alone += a;
+      }
       char text[300];
       snprintf(text, sizeof(text),
                "stats %.1f rows/s; reads %.0f ms; files %.0f ms; slow pass %.0f s; %u resting "
-               "(%u refused); collected later %u (%u timed out); %s; smaller batches: %s; "
-               "bursts %u (%.0f s)",
+               "(%u refused); collected later %u (%u timed out); left alone: %s; smaller "
+               "batches: %s; bursts %u (%.0f s)",
                cycleRate, msFast, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
                (unsigned)refusedReads, (unsigned)laterSent, (unsigned)laterTimeouts,
-               fallback.sameConnection() ? "overlapping requests"
-                                         : "one request at a time per connection",
+               alone.empty() ? "none" : alone.c_str(),
                smallerList.empty() ? "none" : smallerList.c_str(), (unsigned)burst.count(),
                burst.ms() / 1000.0f);
       addNote(text);
@@ -1219,12 +1205,15 @@ static std::map<uint8_t, std::string> failedCodes;   // those codes by module, "
 static void readFaults() {
   if (connectionLost || burst.on()) return;
   if (faultWanted < 0) faultWanted = faultScan.next(millis());
-  if (faultWanted < 0 || waitingOn((uint8_t)faultWanted)) return;
+  if (faultWanted < 0 || waitingOn((uint8_t)faultWanted) ||
+      backoff.waiting((uint8_t)faultWanted, millis())) {
+    return;
+  }
   const int m = faultWanted;
   faultWanted = -1;
   hsfz::Client* cl = clientFor((uint8_t)m);
   if (!cl) return;
-  if (fallback.sameConnection() && !scheduler.waits((uint8_t)m)) {
+  if (!scheduler.waits((uint8_t)m)) {
     sendLater((uint8_t)m, DTC_REQUEST, sizeof(DTC_REQUEST), {});
     return;
   }
@@ -1488,7 +1477,9 @@ static void readCheck() {
       checkNextNow = checkNext;
       continue;
     }
-    if (waitingOn(it.module) || faultWanted == it.module) return;
+    if (waitingOn(it.module) || faultWanted == it.module || backoff.waiting(it.module, millis())) {
+      return;
+    }
     hsfz::Client* cl = clientFor(it.module);
     uint8_t req[3] = {0x22, (uint8_t)(it.did >> 8), (uint8_t)it.did};
     if (!cl) {                                        // bank 2's connection was refused
@@ -1496,7 +1487,7 @@ static void readCheck() {
       asked++;
       continue;
     }
-    if (fallback.sameConnection() && !scheduler.waits(it.module)) {
+    if (!scheduler.waits(it.module)) {
       if (pendingReqs.size() >= MAX_LATER) return;
       if (sendLater(it.module, req, sizeof(req), {}, true)) checkInFlight = true;
       else if (!connectionLost) checkAnswer(hsfz::Reply());
@@ -2497,9 +2488,8 @@ static void status() {
     out.printf(" %s: %.1f min, %u rows (%.1f/s), %u sweep rows (pass %.1f s)", driveName.c_str(),
                (millis() - driveStartMs) / 60000.0f, (unsigned)fastRows, cycleRate,
                (unsigned)sweepRows, sweepPassMs / 1000.0f);
-    out.printf("; per cycle: reads %.0f ms, rows and files %.0f ms; %s", msFast, msWrite,
-               fallback.sameConnection() ? "overlapping requests"
-                                         : "one request at a time per connection");
+    out.printf("; per cycle: reads %.0f ms, rows and files %.0f ms; %u modules left alone",
+               msFast, msWrite, (unsigned)backoff.modules(millis()).size());
   }
   out.println();
   size_t rested = 0;
