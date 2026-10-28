@@ -84,7 +84,9 @@ car's own clock, the airbag module's (`0x01`, identifier `0x4029`, the time
 the dashboard shows, to the second; `lib/logger/carclock.h`), read once
 before the drive starts. Only if neither answers is it `nt-<boot>-<n>`,
 dated by the Worker from its upload. A drive ends when the car stops answering for
-10 s, or when the power goes. Whenever Wi-Fi is up, the other core uploads
+10 s, or when the power goes. If the gateway closes the connection, the board
+connects again and carries on in the same files (a note says so), so a drive
+keeps one name; only if that fails for 15 s does the drive end. Whenever Wi-Fi is up, the other core uploads
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).

@@ -563,6 +563,7 @@ static FaultScan faultScan;
 static String driveName;
 static uint32_t driveStartMs = 0, lastOkMs = 0, lastFlushMs = 0, lastCycleMs = 0;
 static uint32_t fastRows = 0, sweepRows = 0, cycles = 0, cycleStatsMs = 0;
+static uint32_t reconnects = 0;             // this drive (reconnect())
 static float cycleRate = 0;
 static uint32_t tFast = 0, tWrite = 0;                 // ms spent per stats window
 static float msFast = 0, msWrite = 0;                  // per cycle, last window
@@ -682,7 +683,7 @@ static void startDrive() {
     ok = sweepFile.begin(dir + driveName + ".sweep.csv", sweepLayout.header(table));
   }
   driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = lastStatsNoteMs = millis();
-  fastRows = sweepRows = cycles = 0;
+  fastRows = sweepRows = cycles = reconnects = 0;
   burst.reset();
   note.clear();
   // Which channel file, so the analysis knows what was meant to be logged:
@@ -2714,6 +2715,40 @@ static void serviceTerminal() {
   }
 }
 
+// ---- the connection closed mid-drive -------------------------------------------
+// The gateway closed a connection (27 Oct: 0.2 s into each drive, then fine
+// a second later, which left a stray two-row drive under one name and the
+// real one under the next second's). Connect again and carry on in the same
+// files, so a drive keeps one name; only if that fails for RECONNECT_MS (or
+// the link goes) does the drive end.
+static const uint32_t RECONNECT_MS = 15000;
+static const uint32_t MAX_RECONNECTS = 20;   // a drive; past that it ends and starts again
+
+static bool reconnect() {
+  const uint32_t t0 = millis();
+  if (++reconnects > MAX_RECONNECTS) return false;
+  disconnectCar();
+  resetRequests();                           // whatever was in flight went with it
+  checkInFlight = false;
+  while (millis() - t0 < RECONNECT_MS && linkUp) {
+    if (connectOne(tMain, mainClient, hsfz::TESTER, 2000)) {
+      if (needBank2() && !connectOne(tBank2, bank2Client, hsfz::TESTER_BANK2, 2000)) {
+        out.println("[car] second connection refused on reconnecting; bank 2 skipped");
+      }
+      connectionLost = false;
+      lastOkMs = millis();
+      char text[64];
+      snprintf(text, sizeof(text), "connection closed; reconnected in %.1f s",
+               (millis() - t0) / 1000.0f);
+      addNote(text);
+      out.printf("[car] %s\n", text);
+      return true;
+    }
+    delay(500);
+  }
+  return false;
+}
+
 // ---- setup and loop ----------------------------------------------------------
 void setup() {
   Serial.begin(115200);
@@ -2812,7 +2847,7 @@ void loop() {
       readFaults();
       readCheck();
       if (endRequested) { endDrive("ended from the terminal"); state = SEARCH; }
-      else if (connectionLost) { endDrive("connection closed"); state = SEARCH; }
+      else if (connectionLost && !reconnect()) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }
       else if (!linkUp) { endDrive("Ethernet link lost"); state = WAIT_LINK; }
       break;
