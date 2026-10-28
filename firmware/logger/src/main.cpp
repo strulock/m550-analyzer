@@ -240,7 +240,7 @@ static const char* const LIVE_NAMES[LIVE_N][2] = {
     {"FZG_GESCHWINDIGKEIT_VA_HA_FASCHWERP", "HU_STATUS_SPEED.GPS_SPEED"},
     {"INMOT", nullptr},
     {"IUADW", "IUIBS"},                      // V (the DME's own), else mV (the IBS)
-    {"ITKUA", nullptr},                      // °C
+    {"ITKUM", "ITKUA"},                      // °C: the engine's, else the radiator outlet's
     {"ITOEL", nullptr},                      // °C
     {"HU_STATUS_GPS_POSITION.LATITUDE", nullptr},
     {"HU_STATUS_GPS_POSITION.LONGITUDE", nullptr},

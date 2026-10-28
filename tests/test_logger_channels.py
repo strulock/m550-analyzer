@@ -81,6 +81,9 @@ def test_default_tiers():
             "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT@0x13", "IWDKL"} <= set(fast)
     assert {"MASSENSTROM_KRAFTSTOFF@0x13", "HU_STATUS_GPS_POSITION.LATITUDE", "IMUL1@0x13",
             "SPG_POS_SENS_EWG", "ZAEHLER_AUSSETZERK_ZYL5"} <= set(medium)
+    # The engine's coolant temperature, not the radiator outlet's (ITKUA, 52 °C
+    # with the oil at 97 °C on 27 Oct), is the one the check-ins report.
+    assert "ITKUM" in medium and CAT["ITKUM"]["ID"] == "0x4300"
     assert not set(fast) & set(medium)                    # fast wins
     assert not any(n in core.DERIVED for n in fast + medium)
 

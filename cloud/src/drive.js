@@ -45,7 +45,7 @@ export const METRICS = [
   ["rpm_max", "max", ["INMOT", "MITTL_MOTORDREHZAHL_PRO_ZYLSEGM"]],
   ["speed_max", "max", SPEEDS],
   ["boost_max", "max", ["IPLAD", "S_LADEDRUCK"]],
-  ["coolant_max", "max", ["ITKUA", "S_TEMP_KUEHLMITTEL"]],
+  ["coolant_max", "max", ["ITKUM", "ITKUA", "S_TEMP_KUEHLMITTEL"]],
   ["oil_temp_max", "max", ["ITOEL"]],
   ["oil_pressure_min", "min", ["OELDRUCK"]],
   ["gearbox_oil_max", "max", ["EGS_GETRIEBEOELTMEPERATUR"]],

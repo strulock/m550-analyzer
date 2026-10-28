@@ -23,6 +23,7 @@ static const char* const DEFAULT_CHANNELS =
     "I_EWG_POS@0x13,0x13,0x5927,1,0,u8,big,100,256,0,,%,fast\n"
     "TV_EWG@0x13,0x13,0x59E1,2,0,s16,big,0.00305176,1,0,,%,fast\n"
     "EGS_ISTGANG.ISTGANG,0x18,0xDA2E,2,0,u8,big,1,1,0,,0-n,fast\n"
+    "ITKUM,0x12,0x4300,2,0,s16,big,0.1,1,-273.14,,°C,medium\n"
     "ITOEL,0x12,0x4402,2,0,u16,big,0.75,1,-48,,°C,medium\n"
     "MASSENSTROM_KRAFTSTOFF,0x12,0x4521,2,0,u16,big,0.1,1,0,,kg/h,medium\n"
     "LADEDRUCK_REGELDIFFERENZ_BANKSPEZ,0x12,0x4536,2,0,s16,big,125,1000,0,,hPa,medium\n"
