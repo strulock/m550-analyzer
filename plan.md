@@ -446,6 +446,16 @@ after the first week of drives, and what's left.
 - [ ] The logger page has no versions or rollback yet (the MCP tools do).
 - [ ] The stray two-row drives from before #96 (e.g. 2026-10-27_19-49-56,
       20-03-49) are still in R2 and History.
+- [ ] **A drive the power cuts loses most of its rows.** 2026-10-28_19-51-00
+      ran 17 minutes (the board unplugged at 20:08) and its files end at
+      125 s (fast) and 70 s (sweep); 11-47-20 ends at 342 s. Its `.done`,
+      written by the recovery at the next boot, said 787,590 bytes for the
+      fast file; the card had 405,571 when it went up, so the file shrank
+      after the recovery read it (11-47-20: 1,030,910, then 655,776). Look
+      at what the card's directory holds after a cut (does `flush()` reach
+      FatFS's sync), and at what touches a recovered file afterwards; try
+      it on the bench with a reset mid-drive. Uploads of such a file stuck
+      on the hash until #112.
 - [ ] 38 of the app's logs from 14-20 Oct are in R2 twice: under `logs/`
       (an upload on 21 Oct, 02:38 UTC) and at the top, where the app's
       sync puts them (16:35 the same day), byte for byte the same size. MCP
