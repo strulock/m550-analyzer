@@ -73,6 +73,8 @@ static const char* const DEFAULT_CHANNELS =
     "DIAG_BRENNDAUER_ZUENDFUNKE_CYL3@0x13,0x13,0x5751,4,0,u32,big,0.001,1,0,,ms,medium\n"
     "DIAG_BRENNDAUER_ZUENDFUNKE_CYL4@0x13,0x13,0x5752,4,0,u32,big,0.001,1,0,,ms,medium\n"
     "EGS_ISTGANG.FAHRSTUFE,0x18,0xDA2E,2,1,u8,big,1,1,0,,0-n,medium\n"
+    "EGS_EINAUSGANG_DREHZAHL.EINGANGSDREHZAHL,0x18,0xDA2A,4,0,s16,big,1,1,0,,1/min,medium\n"
+    "EGS_EINAUSGANG_DREHZAHL.AUSGANGSDREHZAHL,0x18,0xDA2A,4,2,s16,big,1,1,0,,1/min,medium\n"
     "HU_STATUS_SPEED.GPS_SPEED,0x63,0xD030,14,10,s16,big,3.6,1,0,,km/h,medium\n"
     "HU_STATUS_GPS,0x63,0xD038,1,0,u8,big,1,1,0,,0-n,medium\n"
     "HU_STATUS_GPS_POSITION.LATITUDE,0x63,0xD039,13,1,gps,big,1,1,0,,deg,medium\n"

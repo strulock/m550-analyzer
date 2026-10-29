@@ -50,10 +50,15 @@ FAST = (["INMOT", "IPLAD", "S_LADEDRUCK"]
 # sensor's (IUIBS, which the board's check-ins report and History's battery
 # columns use) and the DME's own (IUADW, the check-ins' fallback), and the
 # selector (P R N D M), from which the board takes Park and the end of a drive.
+# And the transmission's own input and output speeds (EGS 0xDA2A; the DME's
+# DREHZ_GETRIEBEEINGANG reads 0 on this car), from which the cloud works out
+# the converter's slip and the gear ratio.
 MEDIUM_TEMPLATES = ("Drive log with GPS", "Fuel economy", "Misfire hunt")
 MEDIUM_EXTRA = ([n + s for n in ("IMUL1", "SPG_POS_SENS_EWG", "LADEDRUCK_REGELDIFFERENZ_BANKSPEZ")
                  for s in ("", B2)] + ["RTANS", "OELDRUCK", "IUIBS", "IUADW",
-                                       "EGS_ISTGANG.FAHRSTUFE"])
+                                       "EGS_ISTGANG.FAHRSTUFE",
+                                       "EGS_EINAUSGANG_DREHZAHL.EINGANGSDREHZAHL",
+                                       "EGS_EINAUSGANG_DREHZAHL.AUSGANGSDREHZAHL"])
 
 # Catalog data type -> the board's: width and signedness, or a float, or the
 # head unit's 5-byte coordinates. Anything else (strings, data[n], bitfields)

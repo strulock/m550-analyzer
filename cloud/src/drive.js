@@ -218,6 +218,46 @@ class Growable {
   get values() { return this.a.subarray(0, this.n); }
 }
 
+// Columns worked out from others in the same row, added as if logged. The
+// transmission's own input and output speeds (the EGS's 0xDA2A; the DME's
+// DREHZ_GETRIEBEEINGANG reads 0 on this car): TC_SLIP, the torque converter's
+// slip (engine speed less input speed, rpm), and GEAR_RATIO (input over
+// output, while the output turns at least 100 rpm).
+const EGS_IN = "EGS_EINAUSGANG_DREHZAHL.EINGANGSDREHZAHL";
+const EGS_OUT = "EGS_EINAUSGANG_DREHZAHL.AUSGANGSDREHZAHL";
+const ENGINE_SPEEDS = ["INMOT", "EGS_MOTORDREHZAHL"];
+
+function derived(header, logCols, seriesCols, values) {
+  const col = (name) => header.indexOf(name);
+  const add = (name, xs) => {
+    const i = header.length;
+    header.push(name);
+    logCols.push(i);
+    seriesCols.push(i);
+    values.set(i, xs);
+  };
+  const inI = col(EGS_IN), outI = col(EGS_OUT);
+  if (inI < 0 || !values.has(inI)) return;
+  const input = values.get(inI).values;
+  const engineI = ENGINE_SPEEDS.map(col).find((i) => i >= 0 && values.has(i));
+  if (engineI !== undefined) {
+    const engine = values.get(engineI).values;
+    const g = new Growable();
+    for (let r = 0; r < input.length; r++) {
+      g.push(isNaN(engine[r]) || isNaN(input[r]) ? NaN : engine[r] - input[r]);
+    }
+    add("TC_SLIP", g);
+  }
+  if (outI >= 0 && values.has(outI)) {
+    const output = values.get(outI).values;
+    const g = new Growable();
+    for (let r = 0; r < input.length; r++) {
+      g.push(isNaN(input[r]) || !(output[r] >= 100) ? NaN : Math.round(input[r] / output[r] * 1000) / 1000);
+    }
+    add("GEAR_RATIO", g);
+  }
+}
+
 /**
  * A log read once into columns. For every data line kept by either reader:
  * logTime (playback.read_log's time, NaN if it skips the line), seriesTime
@@ -306,6 +346,7 @@ export function readColumns(input) {
       }
     }
   }
+  derived(trimmed, logCols, seriesCols, values);
   return { header: trimmed, logCols, seriesCols, rows: logTime.n, logTime: logTime.values,
     seriesTime: seriesTime.values, values: new Map([...values].map(([i, g]) => [i, g.values])),
     seriesOnly, firstSeries, seriesStart, firstClock, odometer, notes };

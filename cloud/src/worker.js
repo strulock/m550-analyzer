@@ -48,6 +48,7 @@ export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 const MAX_UPLOAD = 50 * 1024 * 1024;
 export const LOGGER = "logger/";          // where the logger board's drive logs go
+const APP_LOGS = "logs/";                 // appKey
 export const SWEEP = ".sweep.csv";        // a logger drive's second file
 const MAX_ROWS = 500;
 const MAX_TEXT = 60000;
@@ -173,6 +174,14 @@ export function safeKey(path) {
     return null;
   }
   return parts.join("/");
+}
+
+/** An app's name for a log, as every installation has it: one whose logs
+ * sit in a "logs" folder of the logs folder sends "logs/<name>" for what the
+ * others send as "<name>", and each drive was stored, listed and counted
+ * twice (14-20 Oct). */
+export function appKey(key) {
+  return key && key.startsWith(APP_LOGS) ? key.slice(APP_LOGS.length) : key;
 }
 
 async function sha256Hex(buffer) {
@@ -565,9 +574,10 @@ async function putHistory(env, body) {
     env.DB.prepare("DELETE FROM faults WHERE source = ?").bind(source)];
   for (const d of drives) {
     if (!d || typeof d.file !== "string" || d.file.startsWith(LOGGER)) continue;
+    const file = appKey(d.file.replace(/\\/g, "/"));
     stmts.push(env.DB.prepare(
       "INSERT OR REPLACE INTO drives (source, file, start, data) VALUES (?, ?, ?, ?)")
-      .bind(source, d.file, String(d.start || ""), JSON.stringify(d)));
+      .bind(source, file, String(d.start || ""), JSON.stringify({ ...d, file })));
   }
   for (const f of faults) {
     if (!f || typeof f.code !== "string" || typeof f.module !== "string") continue;
@@ -1004,6 +1014,15 @@ async function loggerStatus(env, hours, now = new Date()) {
     .all()).results;
   const lastDrive = d && d.length ? (({ rate_fast, rate_medium, slow_pass_s }) => ({ file: d[0].file,
     start: d[0].start, rate_fast, rate_medium, slow_pass_s }))(JSON.parse(d[0].data)) : null;
+  // The board sends its fault codes only when they change (and every few
+  // minutes): a check-in with faults but no codes has its power-on's newest.
+  if (beat.faults > 0 && beat.fault_codes === undefined && beat.boot !== undefined) {
+    const prev = (await env.DB.prepare(
+      `SELECT json_extract(data, '$.fault_codes') AS codes FROM heartbeats
+       WHERE boot = ? AND json_extract(data, '$.fault_codes') IS NOT NULL
+       ORDER BY received DESC, rowid DESC LIMIT 1`).bind(beat.boot).all()).results;
+    if (prev && prev.length) beat.fault_codes = prev[0].codes;
+  }
   const faultList = await beatFaults(env, beat.fault_codes);
   if (faultList) beat.fault_list = faultList;
   return { online: age <= ONLINE_S, seen_s_ago: age, last: beat, sessions, firmware, sweep,
@@ -1283,7 +1302,7 @@ async function callTool(env, name, a) {
     return { files };
   }
   if (name === "compare_banks" || name === "find_events") {
-    const key = safeKey(String(a.name || ""));
+    const key = appKey(safeKey(String(a.name || "")));
     if (!key) throw new ToolError("name: a file from list_files");
     const obj = await env.FILES.get(key);
     if (!obj) throw new ToolError(`no file ${key}; see list_files`);
@@ -1307,7 +1326,7 @@ async function callTool(env, name, a) {
       .map((t) => ({ name: t.name, channels: t.channels, updated: t.updated })) };
   }
   if (name === "read_log") {
-    const key = safeKey(String(a.name || ""));
+    const key = appKey(safeKey(String(a.name || "")));
     if (!key) throw new ToolError("name: a file from list_files");
     const obj = await env.FILES.get(key);
     if (!obj) throw new ToolError(`no file ${key}; see list_files`);
@@ -1419,7 +1438,7 @@ export async function rpc(env, msg) {
 async function driveFaults(env, name) {
   let key;
   if (name) {
-    key = safeKey(String(name));
+    key = appKey(safeKey(String(name)));
     if (!key) throw new ToolError("name: a drive file from list_files");
     if (!key.endsWith(FAULTS)) key = key.replace(/(\.sweep|\.check)?\.csv$/, "") + FAULTS;
   } else {
@@ -1591,7 +1610,7 @@ export async function handle(request, env, fetcher = fetch) {
   }
 
   if (url.pathname.startsWith("/api/series/") && request.method === "PUT") {
-    const drive = safeKey(url.pathname.slice("/api/series/".length));
+    const drive = appKey(safeKey(url.pathname.slice("/api/series/".length)));
     if (!drive) return json({ error: "bad drive name" }, 400);
     let body;
     try {
@@ -1737,7 +1756,7 @@ export async function handle(request, env, fetcher = fetch) {
   }
 
   if (url.pathname.startsWith("/api/files/")) {
-    const key = safeKey(url.pathname.slice("/api/files/".length));
+    const key = appKey(safeKey(url.pathname.slice("/api/files/".length)));
     if (!key) return json({ error: "bad file name" }, 400);
     if (request.method === "PUT") {
       const len = Number(request.headers.get("content-length") || 0);

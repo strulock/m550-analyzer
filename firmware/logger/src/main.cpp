@@ -1758,6 +1758,19 @@ static void readCheck() {
 // ---- uploads (core 0) --------------------------------------------------------
 static std::atomic<uint32_t> uploadedFiles{0};
 static String lastUpload = "none yet";     // under sdLock: the upload task sets it
+// Each upload tried and failed, and the last failure (under sdLock), for the
+// check-ins: up_tries, up_failed, up_error and how long ago.
+static std::atomic<uint32_t> uploadTries{0}, uploadFails{0};
+static String lastUploadError;
+static uint32_t lastUploadErrorMs = 0;
+
+static void uploadFailed(const String& name, const String& why) {
+  uploadFails++;
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  lastUploadError = name + ": " + why;
+  if (lastUploadError.length() > 120) lastUploadError = lastUploadError.substring(0, 120);
+  lastUploadErrorMs = millis();
+}
 
 // Room for a TLS session: mbedTLS wants about 40 KB of internal RAM, its
 // 16 KB input record buffer in one piece (17 KB largest block failed, 45 KB
@@ -1829,6 +1842,7 @@ static std::vector<String> pending() {
 enum UpResult { UP_SENT, UP_SKIP, UP_STOP };
 
 static UpResult uploadOne(const String& name) {
+  uploadTries++;
   String path = String(DRIVES) + "/" + name;
   Done done;
   bool doneOk = false;
@@ -1845,9 +1859,11 @@ static UpResult uploadOne(const String& name) {
   switch (uploadStep(doneOk, (bool)f, f ? f.size() : 0)) {   // lib/logger/upload.h
   case UPLOAD_BAD_DONE:
     out.printf("[up] %s: bad .done file\n", name.c_str());
+    uploadFailed(name, "bad .done file");
     return UP_SKIP;
   case UPLOAD_MISSING:
     out.printf("[up] %s: missing\n", name.c_str());
+    uploadFailed(name, "missing");
     return UP_SKIP;
   case UPLOAD_EMPTY: {
     f.close();
@@ -1863,6 +1879,7 @@ static UpResult uploadOne(const String& name) {
   if (!tlsRoom(10000)) {
     f.close();
     out.printf("[up] %s: not enough memory for TLS; later\n", name.c_str());
+    uploadFailed(name, "not enough memory for TLS");
     return UP_STOP;
   }
   NetworkClientSecure tls;
@@ -1910,7 +1927,14 @@ static UpResult uploadOne(const String& name) {
                  code, code < 0 ? HTTPClient::errorToString(code).c_str()
                                 : body.substring(0, 160).c_str(),
                  tlsErr[0] ? "; TLS: " : "", tlsErr);
+      String why = code == 200 ? String("hash differs")
+                   : code < 0 ? String(code) + " " + HTTPClient::errorToString(code)
+                              : String(code) + " " + body.substring(0, 60);
+      if (tlsErr[0]) why += String("; TLS: ") + tlsErr;
+      uploadFailed(name, why);
     }
+  } else {
+    uploadFailed(name, "can't start the request");
   }
   f.close();
   if (ok) {
@@ -2032,9 +2056,36 @@ static void jsonNumber(std::string& j, const char* key, double v, int decimals) 
   j += s;
 }
 
-static std::string beatJson(bool boot, bool buffered = false) {
+// The fault codes the Worker has (the last check-in it took with them): a
+// check-in carries them only when they've changed, at boot, kept offline, or
+// every FAULT_CODES_EVERY check-ins; the Worker uses the power-on's newest.
+static std::string faultCodesSent, faultCodesInBeat;
+static uint32_t beatsSinceCodes = 0;
+static const uint32_t FAULT_CODES_EVERY = 30;           // 5 minutes
+
+// The age of a waiting file, from its name (the drive's start, local time),
+// in minutes; NAN for one named before the clock was known.
+static double ageMinutes(const String& name) {
+  struct tm t = {};
+  if (!timeKnown() || sscanf(name.c_str(), "%4d-%2d-%2d_%2d-%2d-%2d", &t.tm_year, &t.tm_mon,
+                             &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec) != 6) {
+    return NAN;
+  }
+  t.tm_year -= 1900;
+  t.tm_mon -= 1;
+  t.tm_isdst = -1;
+  return difftime(time(nullptr), mktime(&t)) / 60.0;
+}
+
+// One check-in's JSON, into a buffer kept between them (the check-in task's
+// alone), so a check-in doesn't grow and free a string each time.
+static const std::string& beatJson(bool boot, bool buffered = false) {
   static const char* const states[] = {"waiting for link", "searching", "logging", "parked"};
-  std::string j = "{\"boot\":" + std::to_string(bootCount);
+  static std::string j, codes;
+  if (j.capacity() < 2048) j.reserve(2048);
+  if (codes.capacity() < MAX_FAULT_CODES_TEXT + 32) codes.reserve(MAX_FAULT_CODES_TEXT + 32);
+  j = "{\"boot\":";
+  j += std::to_string(bootCount);
   jsonText(j, "event", boot ? "boot" : "beat");
   if (buffered) j += ",\"buffered\":true";
   jsonText(j, "reset", resetReason());
@@ -2060,8 +2111,9 @@ static std::string beatJson(bool boot, bool buffered = false) {
   jsonNumber(j, "lon", lon, 6);
   int faults = faultsNow;
   jsonNumber(j, "faults", faults < 0 ? NAN : faults, 0);
+  faultCodesInBeat.clear();
   if (faults > 0) {                          // which: "0x12:1A400A 0x40:804415"
-    std::string codes;
+    codes.clear();
     {
       std::lock_guard<std::mutex> g(tagLock);
       for (const auto& [m, list] : failedCodes) {
@@ -2078,7 +2130,10 @@ static std::string beatJson(bool boot, bool buffered = false) {
         }
       }
     }
-    jsonText(j, "fault_codes", codes.c_str());
+    if (boot || buffered || codes != faultCodesSent || beatsSinceCodes >= FAULT_CODES_EVERY) {
+      jsonText(j, "fault_codes", codes.c_str());
+      faultCodesInBeat = codes;
+    }
   }
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
   jsonText(j, "vin", vin);
@@ -2086,8 +2141,22 @@ static std::string beatJson(bool boot, bool buffered = false) {
   if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
   jsonText(j, "wifi", WiFi.SSID().c_str());
   jsonNumber(j, "rssi", WiFi.RSSI(), 0);
-  jsonNumber(j, "pending", sdOk ? pending().size() : 0, 0);
+  {
+    std::vector<String> waiting;
+    if (sdOk) waiting = pending();
+    jsonNumber(j, "pending", waiting.size(), 0);
+    if (!waiting.empty()) jsonNumber(j, "oldest_pending_min", ageMinutes(waiting.front()), 0);
+  }
   jsonNumber(j, "uploaded", uploadedFiles, 0);
+  jsonNumber(j, "up_tries", uploadTries, 0);
+  jsonNumber(j, "up_failed", uploadFails, 0);
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    if (lastUploadErrorMs) {
+      jsonText(j, "up_error", lastUploadError.c_str());
+      jsonNumber(j, "up_error_min", (millis() - lastUploadErrorMs) / 60000.0, 1);
+    }
+  }
   jsonNumber(j, "sd_free_mb", sdOk ? (SD.totalBytes() - SD.usedBytes()) / 1e6 : NAN, 0);
   jsonNumber(j, "card_errors", cardErrors, 0);
   jsonNumber(j, "heap_kb", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024, 0);
@@ -2108,7 +2177,8 @@ static std::string beatJson(bool boot, bool buffered = false) {
     jsonNumber(j, "slow_pass_s", liveSlowPassS, 0);
     jsonNumber(j, "reads_ms", liveReadsMs, 0);
   }
-  return j + "}";
+  j += "}";
+  return j;
 }
 
 static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat",
@@ -2277,6 +2347,12 @@ static void beatIfDue() {
   int code = postBeat(beatJson(!booted), "/api/logger/heartbeat", &reply);
   if (code == 200) {
     beatsSent++;
+    if (!faultCodesInBeat.empty() || faultsNow <= 0) {
+      faultCodesSent = faultCodesInBeat;
+      beatsSinceCodes = 0;
+    } else {
+      beatsSinceCodes++;
+    }
     checkReply(reply);
     otaKeep("checked in");
     if (!booted) out.printf("[beat] checked in (boot %u)\n", (unsigned)bootCount);

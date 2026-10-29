@@ -154,6 +154,17 @@ test("series skip Event and Clock, keep numbers, drop text; quotes and CRLF", ()
   assert.equal(s.approx, false);
 });
 
+test("the converter's slip and the gear ratio from the EGS's input and output speeds", () => {
+  const s = buildSeries(readColumns("Time,Clock,INMOT,EGS_EINAUSGANG_DREHZAHL.EINGANGSDREHZAHL," +
+    "EGS_EINAUSGANG_DREHZAHL.AUSGANGSDREHZAHL\n" +
+    "0,2026-10-19 07:42:50+00:00,1627,908,909\n1,,1255,1254,585\n2,,812,,\n3,,700,0,0\n"), 0);
+  const series = (name) => JSON.parse(chunksOf(s).find((c) => c.name === name).json).map((p) => p[1]);
+  assert.deepEqual(series("TC_SLIP"), [719, 1, 700]);
+  assert.deepEqual(series("GEAR_RATIO"), [0.999, 2.144]);
+  const plain = readColumns("Time,INMOT\n0,700\n");
+  assert.deepEqual(plain.header, ["Time", "INMOT"]);
+});
+
 test("drive logs are told from other CSVs by the header", () => {
   assert.equal(isDriveLog("Time,INMOT\n0,1\n"), true);
   assert.equal(isDriveLog(new TextEncoder().encode("﻿Time;INMOT\n")), true);
