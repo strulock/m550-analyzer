@@ -83,7 +83,6 @@ td.id small { display: block; color: var(--muted); font-size: 11px; }
 .dot.ok { background: var(--ok); } .dot.no { background: transparent; border: 1.5px solid var(--muted); }
 select.t { min-width: 140px; border-left: 4px solid var(--c); }
 select.t.inherited { color: var(--muted); }
-.faultlist { grid-column: 1 / -1; font-size: 0.85em; color: var(--muted); }
 .setgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px 14px; margin: 10px 0; }
 .setgrid label { display: flex; flex-direction: column; align-items: stretch; gap: 3px; font-size: 13px; }
 tr.sel td { background: var(--accent-bg); }
@@ -144,6 +143,14 @@ td.val.odd b { color: var(--warn); }
     <iframe id="map" class="map hide" title="The car's position" loading="lazy"></iframe>
     <div class="muted" id="mapNote" style="font-size:12px;margin-top:4px"></div>
   </section>
+
+  <details class="card fold" id="foldFaults">
+    <summary><h2>Faults</h2><span class="foldstate" id="faultsState"></span></summary>
+    <div class="scroll"><table>
+      <thead><tr><th>Code</th><th>Module</th><th>Text</th></tr></thead>
+      <tbody id="faults"><tr><td colspan="3" class="muted">Waiting for the logger's check-in…</td></tr></tbody>
+    </table></div>
+  </details>
 
   <details class="card fold" id="foldTanks">
     <summary><h2>Tanks</h2><span class="foldstate" id="tanksState"></span></summary>
@@ -671,10 +678,8 @@ ${oddValue.toString()}
       stat("Oil", whole(oil), "°C", level("oil_c", oil), fahrenheit(oil)),
       stat("Battery", volts == null ? null : volts.toFixed(1), "V"),
       stat("Faults", num(b.faults)),
-    ].join("") + (b.fault_list && b.fault_list.length ? '<div class="faultlist">' +
-      b.fault_list.map(function (f) {
-        return "<div><b>" + esc(f.code) + "</b> " + esc(f.module_name || f.module) +
-          (f.text_en ? ": " + esc(f.text_en) : "") + "</div>"; }).join("") + "</div>" : "");
+    ].join("");
+    renderFaults(b);
     var hot = s.online && (level("coolant_c", cool) === "bad" || level("oil_c", oil) === "bad");
     $("alarm").textContent = hot ? "Running hot: coolant " + whole(cool) + " °C, oil " + whole(oil) +
       " °C (limits " + LIMITS.coolant_c[1] + " and " + LIMITS.oil_c[1] + " °C)." : "";
@@ -694,10 +699,20 @@ ${oddValue.toString()}
     }
   }
 
+  function renderFaults(b) {
+    var list = b.fault_list || [], n = num(b.faults), count = n == null ? list.length : n;
+    $("faults").innerHTML = list.length ? list.map(function (f) {
+      return '<tr><td class="id">' + esc(f.code) + "</td><td>" + esc(f.module_name || f.module) +
+        "</td><td>" + esc(f.text_en || "") + "</td></tr>";
+    }).join("") : '<tr><td colspan="3" class="muted">' +
+      (count ? "The check-in has the count, not the list." : "None in the last check-in.") + "</td></tr>";
+    foldState("faultsState", count ? count + (count === 1 ? " fault" : " faults") : "None", count > 0);
+  }
+
   // The folding cards: collapsed unless opened here before (this browser
   // remembers each), the state beside each heading meanwhile.
   function folds() {
-    ["foldTanks", "foldSweep", "foldSettings"].forEach(function (id) {
+    ["foldFaults", "foldTanks", "foldSweep", "foldSettings"].forEach(function (id) {
       var d = $(id), key = "logger.fold." + id;
       try { d.open = window.localStorage.getItem(key) === "open"; } catch (e) { d.open = false; }
       d.addEventListener("toggle", function () {
