@@ -793,6 +793,49 @@ test("board settings: a check-in's answer doesn't drop a change saved after it",
   assert.equal((await beat({ settings_version: 1 })).settings_version, 2);
 });
 
+const DETAIL_HEAD = "read_at,module,module_name,code,first_km,last_km,occurrences,snapshots," +
+  "extended,time_s\n";
+
+test("fault details: each code's odometer, dated from the drives, on the page and in MCP", async () => {
+  await history("pc", [
+    { file: "a.csv", start: "2026-10-01 08:00:00", odometer_km: 12000 },
+    { file: "b.csv", start: "2026-10-10 08:00:00", odometer_km: 12400 },
+    { file: "c.csv", start: "2026-10-20 08:00:00", odometer_start_km: 12500, odometer_end_km: 12560 },
+  ], [{ module: "0x40", code: "804415", now: "present", last_seen: "2026-10-19", first_km: 11800 }]);
+  let r = await (await call("PUT", "/api/files/logger/2026-10-29_08-15-00.details.csv", {
+    body: DETAIL_HEAD +
+      '2026-10-29 08:15:01,0x29,"Stability control (DSC)",480A14,12345,12546,7,"5904",' +
+      '"5906480A142F0207",0.0\n' +
+      '2026-10-29 08:15:02,0x12,"Engine, master DME",1A400A,,,,"refused (nrc 0x31)","no reply",0.0\n' +
+      "junk,row\n" })).json();
+  assert.equal(r.processed, true);
+  assert.equal(r.details, 2);
+  assert.equal(r.with_km, 1);
+  // A later read that got nothing keeps the odometer; a lower first one wins.
+  await call("PUT", "/api/files/logger/2026-10-30_08-00-00.details.csv", { body: DETAIL_HEAD +
+    '2026-10-30 08:00:01,0x29,"Stability control (DSC)",480A14,,,,"no reply","no reply",0.0\n' });
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 3, faults: 3,
+    fault_codes: "0x29:480A14 0x12:1A400A 0x40:804415" }) });
+  const list = (await (await call("GET", "/api/logger")).json()).last.fault_list;
+  const dsc = list.find((f) => f.code === "480A14");
+  assert.equal(dsc.first_km, 12345);
+  assert.equal(dsc.last_km, 12546);
+  assert.equal(dsc.occurrences, 7);
+  // 12,345 km: after the 1 Oct drive (12,000), by the 10 Oct one (12,400)
+  assert.deepEqual(dsc.first_date, { after: "2026-10-01", by: "2026-10-10" });
+  assert.deepEqual(dsc.last_date, { after: "2026-10-20", by: "2026-10-20" });   // during it
+  const dme = list.find((f) => f.code === "1A400A");
+  assert.equal(dme.first_km, null);                          // refused: nothing known
+  assert.equal(dme.first_date, null);
+  const fob = list.find((f) => f.code === "804415");         // the app's own read
+  assert.equal(fob.first_km, 11800);
+  assert.deepEqual(fob.first_date, { after: null, by: "2026-10-01" });   // before the drives
+  const h = await toolData("fault_history", { which: "all" });
+  assert.equal(h.faults.find((f) => f.code === "804415").first_km, 11800);
+  // Not a drive log: no drive row from it.
+  assert.equal((await toolData("drive_history")).drives.length, 3);
+});
+
 test("logger check-ins: bad bodies refused, old ones dropped", async () => {
   const post = (body) => call("POST", "/api/logger/heartbeat", { body });
   assert.equal((await post("not json")).status, 400);

@@ -99,11 +99,13 @@ static void test_writes_refused() {
   Fake f; hsfz::Client c(f, 0xF4);
   const uint8_t clear[] = {0x14, 0xFF, 0xFF, 0xFF};
   const uint8_t write[] = {0x2E, 0x48, 0x07, 0};
-  const uint8_t snapshot[] = {0x19, 0x04, 0x48, 0x0A, 0x14, 0xFF};
+  const uint8_t noRecord[] = {0x19, 0x04, 0x48, 0x0A, 0x14};
+  const uint8_t otherSub[] = {0x19, 0x0A, 0x48, 0x0A, 0x14, 0xFF};
   const uint8_t noMask[] = {0x19, 0x02};
   CHECK(c.request(0x12, clear, 4, out, sizeof(out)).result == hsfz::REFUSED);
   CHECK(c.request(0x12, write, 4, out, sizeof(out)).result == hsfz::REFUSED);
-  CHECK(c.request(0x12, snapshot, 6, out, sizeof(out)).result == hsfz::REFUSED);
+  CHECK(c.request(0x12, noRecord, 5, out, sizeof(out)).result == hsfz::REFUSED);
+  CHECK(c.request(0x12, otherSub, 6, out, sizeof(out)).result == hsfz::REFUSED);
   CHECK(c.request(0x12, noMask, 2, out, sizeof(out)).result == hsfz::REFUSED);
   CHECK(f.sent.empty());
 }
@@ -117,6 +119,20 @@ static void test_fault_list() {
   auto r = c.request(0x12, dtc, 3, out, sizeof(out));
   CHECK(r.result == hsfz::OK && r.len == 7 && out[0] == 0x59 && out[6] == 0x2F);
   CHECK(f.sent.size() == 1 && f.sent[0] == frame(hsfz::CTRL_DIAG, 0xF4, 0x12, {0x19, 0x02, 0xFF}));
+}
+
+// a fault's snapshots and counters: 19 04 / 19 06 <code> FF, echoing the sub-function
+static void test_fault_details() {
+  Fake f; hsfz::Client c(f, 0xF4);
+  const uint8_t snap[] = {0x19, 0x04, 0x48, 0x0A, 0x14, 0xFF};
+  const uint8_t ext[] = {0x19, 0x06, 0x48, 0x0A, 0x14, 0xFF};
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x59, 0x04, 0x48, 0x0A, 0x14, 0x2F, 0x01, 0x01, 0x17, 0x00, 0x00, 0x30, 0x39}));
+  auto r = c.request(0x12, snap, 6, out, sizeof(out));
+  CHECK(r.result == hsfz::OK && r.len == 13 && out[1] == 0x04);
+  f.push(frame(hsfz::CTRL_DIAG, 0x12, 0xF4, {0x59, 0x06, 0x48, 0x0A, 0x14, 0x2F, 0x02, 0x05}));
+  r = c.request(0x12, ext, 6, out, sizeof(out));
+  CHECK(r.result == hsfz::OK && r.len == 8 && out[7] == 0x05);
+  CHECK(f.sent.size() == 2 && f.sent[1] == frame(hsfz::CTRL_DIAG, 0xF4, 0x12, {0x19, 0x06, 0x48, 0x0A, 0x14, 0xFF}));
 }
 
 static void test_oversized_frame() {
@@ -261,6 +277,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"timeout_and_closed", test_timeout_and_closed},
   {"writes_refused", test_writes_refused},
   {"fault_list", test_fault_list},
+  {"fault_details", test_fault_details},
   {"oversized_frame", test_oversized_frame},
   {"split_reply", test_split_reply},
   {"batch_without_first", test_batch_without_first},

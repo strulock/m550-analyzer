@@ -84,8 +84,8 @@ class Client {
   uint8_t source() const { return src_; }
 
   // Send one UDS request and wait for its positive answer. Only 0x22, 0x3E
-  // and 0x19 02 (the fault list) leave this client: the logger never writes
-  // to the car or clears its faults.
+  // and 0x19 02, 04 and 06 (the fault list and one fault's details) leave
+  // this client: the logger never writes to the car or clears its faults.
   Reply request(uint8_t target, const uint8_t* req, size_t reqLen,
                 uint8_t* out, size_t outCap, uint32_t timeout_ms = 6000) {
     Reply r;
@@ -154,11 +154,13 @@ class Client {
     for (Stashed& s : stash_) if (s.src == src) s.used = false;
   }
 
-  // Reads only: values (0x22), presence (0x3E) and the fault list (0x19 02).
+  // Reads only: values (0x22), presence (0x3E), the fault list (19 02 mask)
+  // and one code's snapshots or counters (19 04 / 19 06 <code> <record>).
   static bool allowed(const uint8_t* req, size_t reqLen) {
     if (reqLen == 0) return false;
     if (req[0] == 0x22 || req[0] == 0x3E) return true;
-    return req[0] == 0x19 && reqLen == 3 && req[1] == 0x02;
+    if (req[0] != 0x19 || reqLen < 2) return false;
+    return (reqLen == 3 && req[1] == 0x02) || (reqLen == 6 && (req[1] == 0x04 || req[1] == 0x06));
   }
 
   // Whether any module but `except` has answered this tester since `since`
