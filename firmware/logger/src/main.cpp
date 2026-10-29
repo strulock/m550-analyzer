@@ -533,18 +533,33 @@ static void setClockFromCar() {
 }
 
 // ---- a drive's files ---------------------------------------------------------
+// What the drive files had to do about the card since the last look, for the
+// drive's notes (the logging loop adds it).
+static std::string cardNote;
+static std::atomic<uint32_t> cardErrors{0};   // this boot: in the check-ins
+
+// A drive's file. Each flush is checked on the card: on 28 Oct the card
+// failed for a moment in the car (a check-in found no space and no files),
+// and FatFS's open file failed every write after that while new opens
+// worked, so two drives logged 15 minutes into nothing and the board didn't
+// know. A flush that didn't land closes the file, opens it again, takes what
+// the card has (its hash read back) and writes the rest again; while the card
+// won't open it, the rows wait in memory (up to PENDING_MAX).
+static const size_t PENDING_MAX = 1024 * 1024;
 struct DriveFile {
   File f;
   String path;
   Sha256 sha;
-  uint32_t size = 0;
+  uint32_t size = 0;            // on the card, checked, and hashed
   std::string pending;
-  bool open = false;
+  bool open = false, dropping = false;
+  uint32_t failures = 0;
 
   bool begin(const String& p, const std::string& header) {
     path = p;
     sha.reset();
     size = 0;
+    failures = 0;
     pending = header;
     {
       std::lock_guard<std::recursive_mutex> g(sdLock);
@@ -553,15 +568,68 @@ struct DriveFile {
     open = (bool)f;
     return open && flush();
   }
-  void add(const std::string& text) { if (open) pending += text; }
-  bool flush() {
-    if (!open || pending.empty()) return open;
-    size_t n = f.write((const uint8_t*)pending.data(), pending.size());
-    sha.update(pending.data(), n);
-    size += n;
-    bool ok = n == pending.size();
-    pending.clear();
+  void add(const std::string& text) {
+    if (!open) return;
+    if (pending.size() + text.size() > PENDING_MAX) {
+      if (!dropping) cardNote += "card: rows dropped (it won't take them); ";
+      dropping = true;
+      return;
+    }
+    dropping = false;
+    pending += text;
+  }
+  size_t lastWrote = 0, lastOnCard = 0;      // the last write's, for the terminal
+  bool write() {
+    lastWrote = f.write((const uint8_t*)pending.data(), pending.size());
     f.flush();
+    lastOnCard = f.size();
+    if (lastWrote != pending.size() || lastOnCard != size + lastWrote) return false;
+    sha.update(pending.data(), lastWrote);
+    size += lastWrote;
+    pending.clear();
+    return true;
+  }
+  // Open again after a failure and carry on from what was checked. Only if
+  // the card has lost some of that is its hash read back from the card.
+  bool reopen() {
+    if (f) f.close();
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    f = SD.open(path, "r+");
+    if (!f) return false;
+    if (f.size() < size) {
+      static uint8_t buf[4096];
+      Sha256 again;
+      uint32_t got = 0, keep = f.size();
+      while (got < keep) {
+        int n = f.read(buf, std::min<uint32_t>(sizeof(buf), keep - got));
+        if (n <= 0) break;
+        again.update(buf, n);
+        got += n;
+      }
+      char text[96];
+      snprintf(text, sizeof(text), "card: %s lost %u bytes; ",
+               path.substring(path.lastIndexOf('/') + 1).c_str(), (unsigned)(size - got));
+      cardNote += text;
+      sha = again;
+      size = got;
+    }
+    return f.seek(size);
+  }
+  bool flush() {
+    if (!open) return false;
+    if (pending.empty()) return true;
+    if (f && write()) return true;
+    failures++;
+    cardErrors++;
+    out.printf("[sd] %s: wrote %u of %u; the card has %u of %u\n", path.c_str(),
+               (unsigned)lastWrote, (unsigned)pending.size(), (unsigned)lastOnCard,
+               (unsigned)(size + lastWrote));
+    bool ok = reopen() && write();
+    char text[96];
+    snprintf(text, sizeof(text), "card: %s %s; ", path.substring(path.lastIndexOf('/') + 1).c_str(),
+             ok ? "write failed so opened again" : "write failed so rows held");
+    if (failures <= 20) cardNote += text;
+    out.printf("[sd] %s\n", text);
     return ok;
   }
   // Close and mark finished: <file>.done holds "<sha256> <bytes>", which is
@@ -1339,6 +1407,12 @@ static void cycle() {
     sweepFile.flush();
     lastFlushMs = millis();
   }
+  if (!cardNote.empty()) {
+    cardNote.pop_back();                     // "; " between them, not after the last
+    cardNote.pop_back();
+    addNote(cardNote);
+    cardNote.clear();
+  }
   tWrite += millis() - afterReads;
   cycles++;
   if (millis() - cycleStatsMs >= 5000) {
@@ -2015,6 +2089,7 @@ static std::string beatJson(bool boot, bool buffered = false) {
   jsonNumber(j, "pending", sdOk ? pending().size() : 0, 0);
   jsonNumber(j, "uploaded", uploadedFiles, 0);
   jsonNumber(j, "sd_free_mb", sdOk ? (SD.totalBytes() - SD.usedBytes()) / 1e6 : NAN, 0);
+  jsonNumber(j, "card_errors", cardErrors, 0);
   jsonNumber(j, "heap_kb", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024, 0);
   jsonNumber(j, "largest_kb", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024, 0);
   {
@@ -2617,6 +2692,62 @@ static void beatTask(void*) {
   }
 }
 
+#ifdef LOGGER_SD_STRESS
+// Bench only: the card work the car's evening of 28 Oct had on core 0, without
+// the network: a check-in's free space and file list every 10 s, and the
+// finished files read through again and again (as a stuck upload did).
+static void stressTask(void*) {
+  static uint8_t buf[4096];
+  uint32_t lastBeat = 0, reads = 0;
+  for (;;) {
+    if (millis() - lastBeat >= 10000) {
+      lastBeat = millis();
+      uint64_t total = SD.totalBytes(), used = SD.usedBytes();
+      size_t n = pending().size();
+      out.printf("[stress] card %s: %llu of %llu MB, %u finished, %u reads\n",
+                 total && used <= total ? "ok" : "FAILED", used >> 20, total >> 20,
+                 (unsigned)n, (unsigned)reads);
+    }
+    static size_t next = 0;
+    std::vector<String> names = pending();
+    if (!names.empty()) {
+      const String name = names[next++ % names.size()];
+      File f;
+      {
+        std::lock_guard<std::recursive_mutex> g(sdLock);
+        f = SD.open(String(DRIVES) + "/" + name);
+      }
+      if (!f) { out.printf("[stress] can't open %s\n", name.c_str()); vTaskDelay(pdMS_TO_TICKS(1000)); continue; }
+      size_t got = 0;
+      Sha256 sha;
+      for (int k; (k = f.read(buf, sizeof(buf))) > 0;) {
+        got += k;
+        sha.update(buf, k);
+        vTaskDelay(pdMS_TO_TICKS(state == LOGGING ? 5 : 1));
+      }
+      f.close();
+      char hex[65];
+      sha.finishHex(hex);
+      Done done;
+      {
+        std::lock_guard<std::recursive_mutex> g(sdLock);
+        File d = SD.open(String(DRIVES) + "/" + name + ".done");
+        if (d) { parseDone(d.readStringUntil('\n').c_str(), done); d.close(); }
+      }
+      static std::map<String, bool> told;
+      bool match = done.sha == hex && done.size == got;
+      if (!told.count(name) || told[name] != match) {
+        told[name] = match;
+        out.printf("[stress] %s: %u bytes, .done %s\n", name.c_str(), (unsigned)got,
+                   match ? "matches" : "DIFFERS");
+      }
+      reads++;
+    }
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+}
+#endif
+
 static void uploadTask(void*) {
   uint32_t last = 0;
   bool first = true;                       // the backlog at power-on, as soon as Wi-Fi is up
@@ -2916,6 +3047,12 @@ static void serviceTerminal() {
     case 'X': discardPending(); break;
     case 'T': uploadTest(); break;
     case 'h': help(); break;
+#ifdef LOGGER_SD_STRESS
+    case 'K':                              // the drive file's handle broken, as a card error leaves it
+      fastFile.f.close();
+      out.println("[stress] the drive file's handle closed under it");
+      break;
+#endif
     default: break;
   }
 }
@@ -3052,6 +3189,9 @@ void setup() {
   startWifi();
   xTaskCreatePinnedToCore(beatTask, "beat", 10240, nullptr, 2, nullptr, 0);
   xTaskCreatePinnedToCore(uploadTask, "upload", 12288, nullptr, 1, nullptr, 0);
+#ifdef LOGGER_SD_STRESS
+  xTaskCreatePinnedToCore(stressTask, "stress", 8192, nullptr, 1, nullptr, 0);
+#endif
   out.printf("[boot] ready in %u ms\n", (unsigned)millis());
   help();
 }
