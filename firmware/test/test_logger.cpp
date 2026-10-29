@@ -17,6 +17,7 @@
 #include "faults.h"
 #include "ota.h"
 #include "plan.h"
+#include "settings.h"
 #include "sha256.h"
 #include "upload.h"
 
@@ -923,7 +924,52 @@ static void test_car_check() {
   CHECK(!s.skipped(0x40) && s.list().empty());
 }
 
+static std::string hex(const std::string& s) {
+  std::string h;
+  char b[3];
+  for (unsigned char c : s) { snprintf(b, sizeof(b), "%02x", c); h += b; }
+  return h;
+}
+
+static void test_settings() {
+  Settings s;
+  CHECK(settingsEmpty(s));
+  std::string key;
+  CHECK(settingLine(s, "wifi_ssid=Home Net\r", key) && key == "wifi_ssid" && s.ssid1 == "Home Net");
+  CHECK(settingLine(s, "wifi_pass=pa=ss \"word\\", key) && s.pass1 == "pa=ss \"word\\");
+  CHECK(!settingLine(s, "wifi_pass=short", key));                      // WPA wants 8-63
+  CHECK(settingLine(s, "wifi2_pass=", key) && s.pass2.empty());         // an open network
+  CHECK(!settingLine(s, "host=", key));                                 // can't be cleared
+  CHECK(!settingLine(s, "host=bad host", key));
+  CHECK(settingLine(s, "host=m550.example.com", key));
+  CHECK(!settingLine(s, "access_id=abc", key));
+  CHECK(settingLine(s, "access_id=0123456789abcdef.access", key));
+  CHECK(!settingLine(s, "access_secret=tooshort", key));
+  CHECK(!settingLine(s, "colour=blue", key) && !settingLine(s, "no equals", key));
+  CHECK(!settingsEmpty(s));
+  CHECK(settingField("access_secret")->secret && !settingField("access_id")->secret);
+
+  // A change from the logger page: only newer than the board's, values in hex.
+  s.version = 3;
+  SettingsChange c;
+  CHECK(!settingsChange("{\"ok\":true}", s, c));
+  CHECK(!settingsChange("{\"settings_version\":3}", s, c));
+  std::string reply = "{\"ok\":true,\"settings_version\":4,\"set_wifi2_ssid\":\"" + hex("Phone") +
+                      "\",\"set_wifi2_pass\":\"" + hex("p\"ss,word}") + "\"}";
+  CHECK(settingsChange(reply, s, c) && c.bad.empty() && !c.token && c.version == 4);
+  CHECK(c.next.ssid2 == "Phone" && c.next.pass2 == "p\"ss,word}" && c.next.ssid1 == "Home Net");
+  CHECK(c.next.version == 4);
+  reply = "{\"settings_version\":5,\"set_access_id\":\"" + hex("fedcba9876543210.access") +
+          "\",\"set_access_secret\":\"" + hex("0123456789abcdef0123") + "\"}";
+  CHECK(settingsChange(reply, s, c) && c.token && c.next.clientId == "fedcba9876543210.access");
+  reply = "{\"settings_version\":6,\"set_wifi_pass\":\"" + hex("short") + "\"}";
+  CHECK(settingsChange(reply, s, c) && c.bad == "wifi_pass");
+  reply = "{\"settings_version\":6,\"set_wifi_pass\":\"zz\"}";
+  CHECK(settingsChange(reply, s, c) && c.bad == "wifi_pass");
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"settings", test_settings},
   {"car_check", test_car_check},
   {"ota", test_ota},
   {"ota_start", test_ota_start},

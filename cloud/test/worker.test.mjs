@@ -693,6 +693,59 @@ test("logger check-ins: the failed codes come back with their texts", async () =
   assert.equal((await (await call("GET", "/api/logger")).json()).last.fault_list, undefined);
 });
 
+test("board settings: a person's change goes to the board in a check-in's reply, then is dropped",
+  async () => {
+    const beat = async (extra) => (await call("POST", "/api/logger/heartbeat",
+      { body: JSON.stringify({ boot: 20, event: "beat", ...extra }) })).json();
+    await beat({ settings_version: 2, networks: "Home", token_id: "abcd1234" });
+    // The board's own token (no email) can't ask for one.
+    const board = await token({ email: undefined, common_name: "abcd1234.access" });
+    let r = await call("PUT", "/api/logger/settings",
+      { body: JSON.stringify({ wifi2_ssid: "Phone" }), auth: board });
+    assert.equal(r.status, 400);
+    assert.match((await r.json()).error, /only a person/);
+    assert.equal((await call("PUT", "/api/logger/settings",
+      { body: JSON.stringify({ wifi_pass: "short" }) })).status, 400);
+    assert.equal((await call("PUT", "/api/logger/settings",
+      { body: JSON.stringify({ access_id: "x.access" }) })).status, 400);   // and its secret
+    assert.equal((await call("PUT", "/api/logger/settings",
+      { body: JSON.stringify({ host: "elsewhere.example.com" }) })).status, 400);
+    r = await call("PUT", "/api/logger/settings",
+      { body: JSON.stringify({ wifi2_ssid: "Phone", wifi2_pass: "p\"ss word" }) });
+    let s = await r.json();
+    assert.equal(s.version, 3);                              // after the board's 2
+    assert.deepEqual(s.pending.keys, ["wifi2_ssid", "wifi2_pass"]);
+    assert.equal(s.pending.by, "owner@example.com");
+    assert.equal(JSON.stringify(s).includes("p\"ss"), false);  // never shown back
+    assert.equal(s.board.networks, "Home");
+    // The next check-in's reply carries it, in hex.
+    const reply = await beat({ settings_version: 2 });
+    assert.equal(reply.settings_version, 3);
+    assert.equal(Buffer.from(reply.set_wifi2_ssid, "hex").toString(), "Phone");
+    assert.equal(Buffer.from(reply.set_wifi2_pass, "hex").toString(), "p\"ss word");
+    // The board has it: dropped, with how it went.
+    assert.equal((await beat({ settings_version: 3 })).settings_version, undefined);
+    s = await (await call("GET", "/api/logger/settings")).json();
+    assert.equal(s.pending, null);
+    assert.equal(s.last.result, "taken");
+    assert.equal(env.DB.db.prepare("SELECT pending FROM board_settings").get().pending, null);
+    // A token the Worker refuses on the board's try: refused, with why.
+    await call("PUT", "/api/logger/settings", { body: JSON.stringify({
+      access_id: "fedcba9876543210.access", access_secret: "0123456789abcdef0123" }) });
+    assert.equal((await beat({ settings_version: 3 })).settings_version, 4);
+    await beat({ settings_version: 3, settings_failed: 4, settings_error: "refused (403)" });
+    s = await (await call("GET", "/api/logger/settings")).json();
+    assert.equal(s.last.result, "refused: refused (403)");
+    // One taken back before the board had it.
+    await call("PUT", "/api/logger/settings", { body: JSON.stringify({ tz: "UTC0" }) });
+    s = await (await call("DELETE", "/api/logger/settings")).json();
+    assert.equal(s.pending, null);
+    assert.equal(s.last.result, "cancelled");
+    // A board from before settings gets nothing.
+    await call("PUT", "/api/logger/settings", { body: JSON.stringify({ tz: "UTC0" }) });
+    assert.equal((await beat({})).settings_version, undefined);
+  });
+
 test("logger check-ins: bad bodies refused, old ones dropped", async () => {
   const post = (body) => call("POST", "/api/logger/heartbeat", { body });
   assert.equal((await post("not json")).status, 400);

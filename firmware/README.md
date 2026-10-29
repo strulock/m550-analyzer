@@ -35,10 +35,33 @@ One function per case; `./host_test busy_retry` runs just that one.
 Waveshare ESP32-S3-ETH (16 MB flash, 8 MB PSRAM), a FAT-formatted microSD
 card, the car's ENET cable, and USB power that comes on with the ignition.
 
-1. **Secrets.** Copy `logger/src/logger_secrets.example.h` to
-   `logger_secrets.h` (gitignored): Wi-Fi, the Worker's host
+1. **Settings.** The board keeps its Wi-Fi networks (a second as a backup),
+   the setup access point's password, the Worker's host
    (`m550.trulock.com`), an Access service token made for the board, and the
-   time zone. With `WORKER_HOST` empty it only logs.
+   time zone in its flash (`lib/logger/settings.h`), not in the firmware: a
+   release builds without them, the image in R2 holds none, and updates
+   keep them. Set them once (after step 3, or whenever the flash is
+   erased), either way:
+   - **USB:** copy `logger/src/logger_secrets.example.h` to
+     `logger_secrets.h` (gitignored), fill it in, and
+     `python firmware/tools/provision.py --usb COM4` sends it (the terminal's
+     `S`: `key=value` lines, then a dot; USB only, and the board echoes only
+     the keys). `--set wifi2_ssid=Phone --set wifi2_pass=...` sends just
+     those. The board saves them and restarts.
+   - **Phone:** a board with no settings opens the access point
+     `m550-logger` (password `m550-setup`) from boot, and a board with
+     settings opens it, with its own password, when no known network is in
+     range. `http://192.168.4.1/` there is a form for every setting
+     (passwords never shown; blank keeps), saved, then a restart.
+
+   After that, the logger page's **Board settings** changes the networks,
+   the token, the access point's password and the time zone (not the
+   host): the Worker hands the change to the board in its next check-in's
+   reply and drops it once the board says it has it. A new token is tried
+   with a check-in before the board keeps it, so a wrong one can't lock it
+   out; make the new one, wait for "taken", then revoke the old. A build
+   made on a PC with `logger_secrets.h` (the IDE's, or a bench build) starts
+   a board with empty settings from it.
 2. **Channels.** Pick them on the logger channel page, `https://<worker>/logger`
    (the app opens it: Answers > Logger channels, or Settings > Cloud): every
    channel the board can decode, filtered to what the car answers, a tier for
@@ -286,7 +309,9 @@ builds the logger with a version (the UTC time and the commit, e.g.
 `20261027-0215-706ddb6`; uncommitted changes are refused unless
 `--allow-dirty`) and publishes it to the Worker (`PUT /api/logger/firmware`,
 with the Access token from `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`,
-else the board's own from `logger_secrets.h`). The Worker keeps one build.
+else the board's own from `logger_secrets.h`; the host from `--host`,
+`N63_WORKER_HOST` or `WORKER_HOST` there). The build never includes
+`logger_secrets.h` (`LOGGER_NO_SECRETS`). The Worker keeps one build.
 
 The board asks for it soon after Wi-Fi comes up and every 10 minutes. For a
 version other than its own (an older one too: publishing the old build is

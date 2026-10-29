@@ -11,8 +11,13 @@ version it hasn't got to its card, and installs it at the next power-on (or
 after a minute idle). A build flashed from the IDE is "dev" and takes no
 updates, so flash once with --usb to put the board on the published track.
 
+The build never holds logger_secrets.h (LOGGER_NO_SECRETS): the board keeps
+its Wi-Fi, Worker and token in its flash, set once with provision.py, so the
+image in R2 has no secrets and a PC without the file can build one.
+
 Publishing uses an Access service token: CF_ACCESS_CLIENT_ID and
-CF_ACCESS_CLIENT_SECRET, else the board's own from logger_secrets.h. Test
+CF_ACCESS_CLIENT_SECRET, else the board's own from logger_secrets.h; the
+Worker is --host, else N63_WORKER_HOST, else WORKER_HOST there. Test
 builds: --flag OTA_TEST_SILENT (never checks in, so the board must go back
 to the build before), --version to pick the name. Standard library only.
 """
@@ -62,7 +67,7 @@ def pio():
 
 def build(v, flags, port):
     env = dict(os.environ)
-    env["PLATFORMIO_BUILD_FLAGS"] = " ".join(['-DFW_VERSION=\\"%s\\"' % v] +
+    env["PLATFORMIO_BUILD_FLAGS"] = " ".join(['-DFW_VERSION=\\"%s\\"' % v, "-DLOGGER_NO_SECRETS"] +
                                              ["-D" + f for f in flags])
     # PlatformIO can't print esptool's progress bar to a redirected Windows
     # console and the upload then hangs; UTF-8 output avoids it.
@@ -89,6 +94,8 @@ def token():
 
 
 def worker_host():
+    if os.environ.get("N63_WORKER_HOST"):
+        return os.environ["N63_WORKER_HOST"]
     text = SECRETS.read_text(encoding="utf-8") if SECRETS.exists() else ""
     m = re.search(r'^#define WORKER_HOST "([^"]+)"', text, re.M)
     return m.group(1) if m else None
@@ -120,14 +127,15 @@ def main():
                     help="an extra define for a test build, e.g. OTA_TEST_SILENT")
     ap.add_argument("--allow-dirty", action="store_true",
                     help="build uncommitted firmware changes")
-    ap.add_argument("--host", help="the Worker's host (default: WORKER_HOST in logger_secrets.h)")
+    ap.add_argument("--host", help="the Worker's host (default: N63_WORKER_HOST, else "
+                    "WORKER_HOST in logger_secrets.h)")
     a = ap.parse_args()
     v = a.version or version(a.allow_dirty)
     if not re.fullmatch(r"[\w.-]{1,40}", v) or v == "dev":
         sys.exit("version: letters, digits, dot, dash or underscore, not \"dev\"")
     host = a.host or worker_host()
     if not a.usb and not host:
-        sys.exit("no Worker host: --host, or WORKER_HOST in logger_secrets.h")
+        sys.exit("no Worker host: --host, N63_WORKER_HOST, or WORKER_HOST in logger_secrets.h")
     build(v, a.flag, a.usb)
     if not a.usb:
         publish(v, host)
