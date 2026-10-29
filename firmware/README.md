@@ -67,6 +67,14 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    on, updates come over the air (below). Uploading from the PlatformIO IDE
    works too, but makes a "dev" build, which takes no updates.
 
+Each flush of a drive's file (every 2 s) is checked on the card: a card
+error leaves FatFS's open file failing every write after it (28 Oct, two
+drives logged minutes into nothing), so a flush that didn't land opens the
+file again and writes the rest from what the card has, noted in the drive
+("card: ... write failed so opened again"); the check-ins count them
+(`card_errors`, this boot). While the card won't open it, the rows wait in
+memory (up to 1 MB).
+
 Each boot it closes a drive a power cut left open, then looks for the car
 (the address it had last time first, then discovery) and logs while it
 answers:
@@ -355,6 +363,14 @@ press `s` for status or `a` to run everything again.
 
 The bench rate is not the car's: the car's DMEs take a few milliseconds per
 answer, the bench car none.
+
+For the card, build with `-DLOGGER_NO_UPLOAD -DLOGGER_SD_STRESS`
+(`PLATFORMIO_BUILD_FLAGS`): another task on core 0 does a check-in's card
+work every 10 s and reads the finished files through again and again,
+checking each against its `.done` ("matches" or "DIFFERS"), and `K` breaks
+the drive file's handle under it as a card error does. Delete the bench
+files afterwards (`X`, then `y`), with the bench car stopped, before a real
+build goes on.
 
 ### In the car
 
