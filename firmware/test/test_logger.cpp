@@ -532,6 +532,67 @@ static void test_fault_scan() {
   CHECK(std::string(moduleName(0x40)) == "Body domain controller (BDC)" && !*moduleName(0x99));
 }
 
+// A fault's details: the requests, the odometer from the snapshots (past a
+// module's own values), the count, the row, and each code once.
+static void test_fault_details() {
+  uint8_t req[6];
+  CHECK(detailRequest(SNAPSHOTS, 0x480A14, req) == 6);
+  CHECK(req[0] == 0x19 && req[1] == 0x04 && req[2] == 0x48 && req[3] == 0x0A && req[4] == 0x14 &&
+        req[5] == 0xFF);
+  // Two records: 1700 odometer, 1701 time, then a module's own 0x4A01 the
+  // board can't size, so the second record is found by its header.
+  const uint8_t snap[] = {0x59, 0x04, 0x48, 0x0A, 0x14, 0x2F,
+                          0x01, 0x03, 0x17, 0x00, 0x00, 0x30, 0x39,     // 12,345 km
+                          0x17, 0x01, 0x00, 0x00, 0x10, 0x00,
+                          0x4A, 0x01, 0xAA, 0xBB,
+                          0x02, 0x03, 0x17, 0x00, 0x00, 0x31, 0x02,     // 12,546 km
+                          0x17, 0x01, 0x00, 0x00, 0x20, 0x00,
+                          0x4A, 0x01, 0xCC, 0xDD};
+  uint32_t first = 0, last = 0;
+  CHECK(snapshotKm(snap, sizeof(snap), 0x12, first, last));
+  CHECK(first == 12345 && last == 12546);
+  const uint8_t one[] = {0x59, 0x04, 0x48, 0x0A, 0x14, 0x2F, 0x01, 0x02,
+                         0x17, 0x31, 0x01, 0x17, 0x00, 0x01, 0x00, 0x00};   // class, then 65,536
+  CHECK(snapshotKm(one, sizeof(one), 0x40, first, last) && first == 65536 && last == 65536);
+  const uint8_t none[] = {0x59, 0x04, 0x48, 0x0A, 0x14, 0x2F};
+  CHECK(!snapshotKm(none, sizeof(none), 0x12, first, last));
+  const uint8_t unset[] = {0x59, 0x04, 0x48, 0x0A, 0x14, 0x2F, 0x01, 0x01, 0x17, 0x00, 0xFF, 0xFF, 0xFF};
+  CHECK(!snapshotKm(unset, sizeof(unset), 0x12, first, last));
+  const uint8_t cut[] = {0x59, 0x04, 0x48, 0x0A, 0x14, 0x2F, 0x01, 0x02, 0x17, 0x00, 0x00, 0x30};
+  CHECK(!snapshotKm(cut, sizeof(cut), 0x12, first, last));
+  CHECK(!snapshotKm(req, sizeof(req), 0x12, first, last));
+  const uint8_t ext[] = {0x59, 0x06, 0x48, 0x0A, 0x14, 0x2F, 0x01, 0x40, 0x02, 0x07, 0x03, 0x28};
+  CHECK(occurrences(ext, sizeof(ext)) == 7);
+  const uint8_t noCount[] = {0x59, 0x06, 0x48, 0x0A, 0x14, 0x2F, 0x01, 0x40};
+  CHECK(occurrences(noCount, sizeof(noCount)) == -1);
+  CHECK(occurrences(snap, sizeof(snap)) == -1);
+  CHECK(detailCell(0, ext, 4) == "5906480A" && detailCell(0x31, ext, 0) == "refused (nrc 0x31)" &&
+        detailCell(-1, ext, 0) == "no reply");
+  std::string row = detailRow("2026-10-29 08:15:02", 512.5, 0x29, 0x480A14, true, 12345, 12546, 7,
+                              "5904", "no reply");
+  CHECK(row == "2026-10-29 08:15:02,0x29,\"Stability control (DSC)\",480A14,12345,12546,7,"
+               "\"5904\",\"no reply\",512.5\n");
+  CHECK(detailRow("", 1, 0x12, 0x1A, false, 0, 0, -1, "", "") ==
+        ",0x12,\"Engine, master DME\",00001A,,,,\"\",\"\",1.0\n");
+  auto commas = [](const std::string& s) {
+    size_t n = 0; bool q = false;
+    for (char c : s) { if (c == '"') q = !q; else if (c == ',' && !q) n++; }
+    return n;
+  };
+  CHECK(commas(row) == commas(DETAIL_HEADER));
+  DetailQueue q;
+  q.add(0x29, 0x480A14);
+  q.add(0x12, 0x1A400A);
+  q.add(0x29, 0x480A14);                       // named again: once a power-on
+  CHECK(q.size() == 2 && q.next()->module == 0x29);
+  CHECK(q.next({0x29})->module == 0x12 && !q.next({0x29, 0x12}));
+  q.done(0x29, 0x480A14);
+  q.add(0x29, 0x480A14);                       // read already: not again
+  CHECK(q.size() == 1 && q.next()->code == 0x1A400A);
+  q.done(0x12, 0x1A400A);
+  CHECK(q.empty() && !q.next());
+}
+
 // The periodic tiers: parsed by name, logged in the sweep file, asked once
 // each (due tiers only, after openOnce), and when each is due.
 static void test_periodic() {
@@ -1005,6 +1066,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"fault_status", test_fault_status},
   {"fault_rows", test_fault_rows},
   {"fault_scan", test_fault_scan},
+  {"fault_details", test_fault_details},
 };
 
 int main(int argc, char** argv) {

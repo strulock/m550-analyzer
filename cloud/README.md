@@ -58,7 +58,14 @@ serves it to Claude from anywhere:
   history under source `logger`, merged as the app's own reads are: first
   and last seen, reads listing it, present, stored or gone. The board sends
   codes only; the texts come from n63read's table, which the app uploads once
-  to `ref/BMW_fault_code_texts.csv` (again when it changes).
+  to `ref/BMW_fault_code_texts.csv` (again when it changes). Each failed
+  code's details, read while the car is in P (`<stamp>.details.csv`: the
+  odometer the module stored when it first and last set, how often it
+  occurred, both replies in hex), go into `fault_details`
+  (`faultdetails.js`); with the app's own `first_km`/`last_km` they give
+  each fault on the page and in `fault_history` its `first_km`, `last_km`,
+  `occurrences`, and `first_date`/`last_date` (`{after, by}`): the drive
+  in which the car's odometer passed that reading, or the drives either side.
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
@@ -148,7 +155,7 @@ All requests need an Access token (a login, or the service token headers
 
 | Request | Does |
 |---|---|
-| `PUT /api/files/<path>` | store a log (CSV body); replies with its size and SHA-256. Under `logger/`, a drive log also gets its series and drive row, and the reply says so: `processed`, `channels`, `approx_time` (no Clock), `drive` (start, minutes, km), or `processed: false` and a `reason`. A `logger/…faults.csv` goes into fault history instead: `fault_reads` applied, `modules`, `present`, `stored` |
+| `PUT /api/files/<path>` | store a log (CSV body); replies with its size and SHA-256. Under `logger/`, a drive log also gets its series and drive row, and the reply says so: `processed`, `channels`, `approx_time` (no Clock), `drive` (start, minutes, km), or `processed: false` and a `reason`. A `logger/…faults.csv` goes into fault history instead: `fault_reads` applied, `modules`, `present`, `stored`; a `logger/…details.csv` into fault details: `details`, `with_km` |
 | `GET /api/files` | list stored files: key, size, SHA-256, upload time |
 | `GET /api/files/<path>` | the file back |
 | `PUT /api/history` | replace one installation's summaries: `{"source": "<PC name>", "drives": [...], "faults": [...]}`. Only that source's drives and faults are replaced; other PCs', the board's (`logger/`) and those from apps that send no source (kept as `legacy`) stay. History lists a log once and each fault as the installation that saw it last has it |
@@ -159,7 +166,7 @@ All requests need an Access token (a login, or the service token headers
 | `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes` (when they change), `pending`, `oldest_pending_min`, `up_tries`, `up_failed`, `up_error`, `card_errors`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
 | `POST /api/logger/heartbeats` | check-ins the board kept while it had no Wi-Fi: `{"beats": [...]}`, at most 200 and 64 KB. Each is filed under its own `clock`; one without a clock, older than 30 days or already stored is skipped. Replies `stored`, `skipped` |
 | `GET`, `PUT`, `DELETE /api/logger/settings` | the logger board's settings (boardsettings.js): GET what its last check-in says it has (networks, the start of its token's id, `settings_version`), the change waiting or how the last went; PUT `{key: value}` (`wifi_ssid`, `wifi_pass`, `wifi2_ssid`, `wifi2_pass`, `ap_pass`, `access_id` with `access_secret`, `tz`; "" clears) for its next check-in, a person's Access login only; DELETE takes it back. The check-in's reply carries it (`settings_version`, `set_<key>` in hex) until the board says it has it (`settings_version`) or refused it (`settings_failed`, `settings_error`); then the values are dropped. None is ever returned |
-| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes`, or its power-on's newest, with each code's module and text), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline; and `last_drive`: the last logger drive's rate per tier |
+| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes`, or its power-on's newest, with each code's module and text, and where known `first_km`, `last_km`, `occurrences`, `first_date`, `last_date`), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline; and `last_drive`: the last logger drive's rate per tier |
 | `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
 | `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`): an ESP32 app image of at most 6 MB, `V` not "dev". One build is kept; replies with its manifest |
 | `GET /api/logger/firmware` | the manifest: `{"version", "sha256", "size", "uploaded"}` (404 when nothing is published); also in `GET /api/logger` as `firmware` |

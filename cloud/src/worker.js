@@ -8,7 +8,9 @@
  *   out their time series and drive summary itself (drive.js), and the
  *   app's history leaves those drives alone.
  * - Its fault reads (<drive>.faults.csv) go into fault history as source
- *   "logger", with texts from n63read's table the app sends (FAULT_TEXTS). It also checks in (POST
+ *   "logger", with texts from n63read's table the app sends (FAULT_TEXTS);
+ *   each failed code's odometer and count, read in P (<stamp>.details.csv),
+ *   into fault_details (faultdetails.js). It also checks in (POST
  *   /api/logger/heartbeat) at power-on and every 10 s while it has Wi-Fi.
  * - What the board reads comes from here too (logger.js): the app sends the
  *   channel catalog, the page at /logger picks each channel's tier in
@@ -45,6 +47,7 @@ import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, iden
   ingestCheck, markAbsent, requestSweep } from "./sweep.js";
 import { tanks } from "./tanks.js";
 import { getValues, refreshValues, VALUES_SCHEMA } from "./values.js";
+import { DETAILS, DETAILS_SCHEMA, ingestDetails, withDetails } from "./faultdetails.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -362,6 +365,7 @@ export const SCHEMA = [
   ...LOGGER_SCHEMA,
   // Each channel's newest value and range, for the logger page (values.js).
   ...VALUES_SCHEMA,
+  ...DETAILS_SCHEMA,
   // A change to the board's settings from the logger page (boardsettings.js).
   ...BOARD_SETTINGS_SCHEMA,
 ];
@@ -909,7 +913,8 @@ async function faults(env, which) {
     }
     by.set(key, merged);
   }
-  const all = [...by.values()].filter((f) => which === "all" || f.now !== "gone");
+  const all = await withDetails(env,
+    [...by.values()].filter((f) => which === "all" || f.now !== "gone"));
   const k = (f) => `${f.now || ""} ${f.module} ${f.code}`;
   return all.sort((a, b) => (k(a) < k(b) ? -1 : k(a) > k(b) ? 1 : 0));
 }
@@ -990,7 +995,8 @@ async function beatFaults(env, text) {
   const names = Object.fromEntries((await env.DB.prepare(
     "SELECT module, json_extract(data, '$.module_name') AS name FROM faults WHERE source = 'logger'")
     .all()).results.map((r) => [r.module, r.name]));
-  return list.map((f) => ({ ...f, module_name: names[f.module] || "", text_en: texts[f.code] || "" }));
+  return withDetails(env, list.map((f) => ({ ...f, module_name: names[f.module] || "",
+    text_en: texts[f.code] || "" })));
 }
 
 async function loggerStatus(env, hours, now = new Date()) {
@@ -1089,10 +1095,12 @@ export const TOOLS = [
   {
     name: "fault_history",
     description: "Every fault read from the car's modules: first and last seen, how many reads " +
-      "listed it, whether it is present, stored or gone now, the odometer when it set and how " +
-      "often it occurred. From the app's fault scans and the logger board's reads during " +
-      "drives (every module a drive, the engine every few minutes). Pass code for the full " +
-      "stored details of one fault (the app's scans only).",
+      "listed it, whether it is present, stored or gone now, the odometer when it first and " +
+      "last set (first_km, last_km) with the dates the drives' odometers put them at " +
+      "(first_date, last_date: {after, by}) and how often it occurred. From the app's fault " +
+      "scans and the logger board's reads during drives (every module a drive, the engine " +
+      "every few minutes; each code's odometer and count while parked). Pass code for the " +
+      "full stored details of one fault (the app's scans only).",
     inputSchema: { type: "object", properties: {
       which: { type: "string", description: "current (default) or all" },
       code: { type: "string", description: "One fault code, e.g. 4806DA: returns it with " +
@@ -1815,6 +1823,10 @@ export async function handle(request, env, fetcher = fetch) {
         if (key.endsWith(FAULTS)) {
           return json({ ...stored, ...(await ingestFaults(env, key,
             new TextDecoder().decode(data))) });
+        }
+        if (key.endsWith(DETAILS)) {
+          return json({ ...stored, ...(await ingestDetails(env,
+            parseCsv(new TextDecoder().decode(data)))) });
         }
         if (key.endsWith(CHECK)) {
           return json({ ...stored, ...(await ingestCheck(env, key,

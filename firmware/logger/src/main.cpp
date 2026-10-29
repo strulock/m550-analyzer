@@ -25,7 +25,8 @@
 //
 // What to read comes from channels.csv on the card (n63read logger-channels),
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
-// but UDS 0x22, 0x3E and 0x19 02 (the fault list; never a clear).
+// but UDS 0x22, 0x3E and 0x19 02, 04 and 06 (the fault list and a fault's
+// details, read only in P; never a clear).
 //
 // Terminal: USB serial at 115200, and TCP 23 over Wi-Fi:
 //   s status   l files waiting to upload   u upload now   e end this drive
@@ -764,7 +765,7 @@ struct DriveFile {
 enum State { WAIT_LINK, SEARCH, LOGGING, PARKED };
 static State state = WAIT_LINK;
 
-static DriveFile fastFile, sweepFile, faultFile;
+static DriveFile fastFile, sweepFile, faultFile, detailFile;
 static FaultScan faultScan;
 static String driveName;
 static uint32_t driveStartMs = 0, lastOkMs = 0, lastFlushMs = 0, lastCycleMs = 0;
@@ -866,6 +867,8 @@ static void recoverDrives() {
 }
 
 static void resetRequests();
+static void findGearRead();
+static void finishDetails();
 static uint32_t duePeriodic();
 static void sweepRow(double secs);
 static void checkStart();
@@ -938,6 +941,7 @@ static void startDrive() {
     addNote(text);
   }
   resetRequests();
+  findGearRead();
   faultScan.start(millis());
   sweepPassStart = millis();
   out.printf("[drive] %s started%s%s\n", driveName.c_str(), timeKnown() ? "" : " (clock unknown)",
@@ -961,6 +965,7 @@ static void endDrive(const char* why, bool keepCar = false) {
   fastFile.finish();
   sweepFile.finish();
   faultFile.finish();
+  finishDetails();
   resetRequests();
   if (!keepCar) disconnectCar();
   out.printf("[drive] %s ended (%s): %u rows, %u sweep rows, %.1f min\n", driveName.c_str(), why,
@@ -1137,7 +1142,7 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r, uint
 // most of a second to answer, and the fast row shouldn't wait for it: its
 // request is sent with the cycle's and its answer collected in whichever
 // cycle it comes (the hsfz client keeps it meanwhile). A fault read to such
-// a module goes the same way.
+// a module goes the same way, and so do a fault's details, to any module.
 struct Pending {
   hsfz::Client* cl;
   uint8_t target;
@@ -1146,6 +1151,8 @@ struct Pending {
   std::vector<size_t> batch;                      // empty: a fault read or a check read
   uint32_t sentMs;
   bool check = false;                             // a full channel check's read
+  uint8_t detail = 0;                             // a fault's details: SNAPSHOTS or EXTENDED
+  uint32_t waitMs = 0;                            // given up on after this (LATER_MS)
 };
 static std::vector<Pending> pendingReqs;
 static float answerMs[256];                       // per module, collected-later answers, averaged
@@ -1154,6 +1161,18 @@ static const size_t MAX_LATER = 6;                // in flight at once (hsfz kee
 static const size_t SLOW_ONLY_PER_CYCLE = 4;
 static uint32_t laterSent = 0, laterTimeouts = 0; // this stats window
 static int faultWanted = -1;                      // held from reads until its fault list goes
+// The failed codes whose details to read (readDetails), and the one being
+// read: its snapshots, then its counters, one request at a time.
+static DetailQueue detailQueue;
+static struct {
+  bool busy = false;                              // a code chosen
+  bool inFlight = false;                          // its request out
+  uint8_t module = 0, next = SNAPSHOTS;
+  uint32_t code = 0;
+  std::string snapshots;                          // the first reply, as detailCell
+  bool haveKm = false;
+  uint32_t firstKm = 0, lastKm = 0;
+} detailNow;
 
 static bool waitingOn(uint8_t module) {
   for (const Pending& p : pendingReqs) if (p.target == module) return true;
@@ -1162,9 +1181,10 @@ static bool waitingOn(uint8_t module) {
 
 static void faultAnswer(uint8_t m, const hsfz::Reply& r);
 static void checkAnswer(const hsfz::Reply& r);
+static void detailAnswer(uint8_t m, uint8_t sub, const hsfz::Reply& r);
 
 static bool sendLater(uint8_t module, const uint8_t* req, size_t n, const std::vector<size_t>& batch,
-                      bool check = false) {
+                      bool check = false, uint8_t detail = 0, uint32_t waitMs = LATER_MS) {
   hsfz::Client* cl = clientFor(module);
   if (!cl) return false;
   Pending p;
@@ -1175,6 +1195,8 @@ static bool sendLater(uint8_t module, const uint8_t* req, size_t n, const std::v
   p.batch = batch;
   p.sentMs = millis();
   p.check = check;
+  p.detail = detail;
+  p.waitMs = waitMs;
   hsfz::Reply r;
   if (!cl->start(module, p.req, n, r)) {
     if (r.result == hsfz::CLOSED) connectionLost = true;
@@ -1199,7 +1221,7 @@ static void collect() {
     Pending& p = pendingReqs[k];
     hsfz::Reply r;
     bool done = p.cl->poll(p.target, p.req, p.n, rx, sizeof(rx), r);
-    if (!done && millis() - p.sentMs >= LATER_MS) {
+    if (!done && millis() - p.sentMs >= p.waitMs) {
       p.cl->forget(p.target);
       r = hsfz::Reply();
       r.result = hsfz::TIMEOUT;
@@ -1215,6 +1237,7 @@ static void collect() {
     Pending got = p;
     pendingReqs.erase(pendingReqs.begin() + k);
     if (got.check) checkAnswer(r);
+    else if (got.detail) detailAnswer(got.target, got.detail, r);
     else if (got.batch.empty()) faultAnswer(got.target, r);
     else process(got.batch, r, got.sentMs);
   }
@@ -1229,6 +1252,7 @@ static void resetRequests() {
   for (std::vector<size_t>& l : late) l.clear();
   memset(refusedNoteMs, 0, sizeof(refusedNoteMs));
   faultWanted = -1;
+  detailNow.inFlight = false;                // asked again when it can be
 }
 
 // ---- requests waited for -----------------------------------------------------
@@ -1589,6 +1613,7 @@ static void faultAnswer(uint8_t m, const hsfz::Reply& r) {
   for (const Dtc& d : dtcs) {
     if (!dtcFailed(d.status)) continue;
     failed++;
+    detailQueue.add(m, d.code);
     char c[8];
     snprintf(c, sizeof(c), "%s%06X", codes.empty() ? "" : " ", (unsigned)(d.code & 0xFFFFFF));
     codes += c;
@@ -3517,6 +3542,7 @@ static void pollParked(bool now = false) {
     if (liveCh[k] < 0) continue;
     for (size_t i = 0; i < plan.reads.size(); i++) {
       const std::vector<uint32_t>& chs = plan.reads[i].channels;
+      if (waitingOn(plan.reads[i].module)) continue;     // a fault's details, out to it
       if (std::find(chs.begin(), chs.end(), (uint32_t)liveCh[k]) != chs.end()) singles.push_back({i});
     }
   }
@@ -3599,6 +3625,140 @@ void setup() {
   help();
 }
 
+// ---- a fault's details ---------------------------------------------------------
+// Each failed code's snapshots (19 04: the odometer when it set, and when it
+// last did) and counters (19 06: how often), once a power-on, only while the
+// car isn't being driven: in P during a drive (the gearbox says so, the speed
+// under 2 km/h), or parked after one. With the engine running, only modules
+// the logger doesn't wait for are asked (a DME's details would hold up its
+// fast reads); with it off, any. One request at a time, collected when it
+// comes; a row a code in drives/<stamp>.details.csv, closed once the codes
+// are all read (or the drive ends, or the car goes) and uploaded as the
+// drives are.
+static const uint32_t DETAIL_MS = 6000;      // the DME takes over 2 s to say it has no snapshot
+static const uint32_t DETAIL_GAP_MS = 300;
+
+static void finishDetails() {
+  if (!detailFile.open) return;
+  detailFile.finish();
+  uploadNow = true;
+}
+
+static void writeDetail(const std::string& extended, int count) {
+  if (!detailFile.open) {
+    std::string stamp;
+    if (timeKnown()) {
+      int64_t ms = nowEpochMs();
+      stamp = fileStamp(ms, offsetMinutes((time_t)(ms / 1000)));
+    } else {
+      static uint32_t seq = 0;
+      char nt[32];
+      snprintf(nt, sizeof(nt), "nt-%05u-d%02u", (unsigned)bootCount, (unsigned)++seq);
+      stamp = nt;
+    }
+    detailFile.begin(String(DRIVES) + "/" + stamp.c_str() + ".details.csv", DETAIL_HEADER);
+  }
+  std::string at = timeKnown() ? clockNow().substr(0, 19) : "";
+  double t = state == LOGGING ? (millis() - driveStartMs) / 1000.0 : 0;
+  detailFile.add(detailRow(at, t, detailNow.module, detailNow.code, detailNow.haveKm,
+                           detailNow.firstKm, detailNow.lastKm, count, detailNow.snapshots,
+                           extended));
+  detailFile.flush();
+}
+
+// Whether details may be asked now, and of modules the logger waits for too.
+static bool detailsNow(bool parked, bool& waited) {
+  if (parked) { waited = true; return true; }
+  const double gear = live(GEAR), speed = live(SPEED), rpm = live(RPM);
+  if (isnan(gear) || (int)gear != GEAR_P || (!isnan(speed) && speed >= 2)) return false;
+  waited = !isnan(rpm) && rpm < STOPPED_RPM;
+  return true;
+}
+
+static void readDetails(bool parked) {
+  if (connectionLost || burst.on() || detailNow.inFlight) return;
+  if (!detailNow.busy && detailQueue.empty()) return;
+  static uint32_t lastMs = 0;
+  bool waited = false;
+  if (millis() - lastMs < DETAIL_GAP_MS || !detailsNow(parked, waited)) return;
+  auto unfit = [&](uint8_t m) {
+    return waitingOn(m) || faultWanted == m || backoff.waiting(m, millis()) || !clientFor(m) ||
+           (!waited && scheduler.waits(m));
+  };
+  if (!detailNow.busy) {
+    std::vector<uint8_t> skip;
+    for (int m = 0; m < 256; m++) if (unfit((uint8_t)m)) skip.push_back((uint8_t)m);
+    const DetailQueue::Item* it = detailQueue.next(skip);
+    if (!it) return;
+    detailNow.busy = true;
+    detailNow.module = it->module;
+    detailNow.code = it->code;
+    detailNow.next = SNAPSHOTS;
+    detailNow.snapshots.clear();
+    detailNow.haveKm = false;
+  } else if (unfit(detailNow.module)) {
+    return;
+  }
+  uint8_t req[6];
+  size_t n = detailRequest(detailNow.next, detailNow.code, req);
+  lastMs = millis();
+  if (sendLater(detailNow.module, req, n, {}, false, detailNow.next, DETAIL_MS)) {
+    detailNow.inFlight = true;
+  }
+}
+
+// A details reply (in rx): the snapshots, then the counters and the row.
+static void detailAnswer(uint8_t m, uint8_t sub, const hsfz::Reply& r) {
+  detailNow.inFlight = false;
+  if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
+  if (!detailNow.busy || m != detailNow.module || sub != detailNow.next) return;
+  int result = r.result == hsfz::OK ? 0 : r.result == hsfz::NEGATIVE ? r.nrc : -1;
+  if (result >= 0) lastOkMs = millis();
+  std::string cell = detailCell(result, rx, result == 0 ? r.len : 0);
+  if (sub == SNAPSHOTS) {
+    detailNow.snapshots = cell;
+    detailNow.haveKm = result == 0 && snapshotKm(rx, r.len, m, detailNow.firstKm, detailNow.lastKm);
+    detailNow.next = EXTENDED;
+    return;
+  }
+  writeDetail(cell, result == 0 ? occurrences(rx, r.len) : -1);
+  detailQueue.done(m, detailNow.code);
+  detailNow.busy = false;
+  if (detailQueue.empty()) finishDetails();
+}
+
+// ---- the selector while stopped ---------------------------------------------
+// The gearbox can take most of a second to answer and shares its turns with
+// its slow reads, so during a drive its selector may go unread for longer
+// than the check-ins and the end of a drive trust a value (LIVE_FRESH_MS):
+// 29 Oct, stopped and then parked, it read nothing for 2.5 minutes, then P
+// for 40 s, then nothing again, and the drive ended with the link instead of
+// parked. Stopped (under 2 km/h, or the engine off without a speed), it's
+// asked on its own every GEAR_POLL_MS, collected when it comes.
+static const uint32_t GEAR_POLL_MS = 2000;
+static int gearRead = -1;                    // the plan's read with the selector (-1: none)
+
+static void findGearRead() {
+  gearRead = -1;
+  if (liveCh[GEAR] < 0) return;
+  for (size_t i = 0; i < plan.reads.size() && gearRead < 0; i++) {
+    const std::vector<uint32_t>& chs = plan.reads[i].channels;
+    if (std::find(chs.begin(), chs.end(), (uint32_t)liveCh[GEAR]) != chs.end()) gearRead = (int)i;
+  }
+}
+
+static void pollGear() {
+  static uint32_t lastMs = 0;
+  if (gearRead < 0 || connectionLost || burst.on() || millis() - lastMs < GEAR_POLL_MS) return;
+  const double speed = live(SPEED), rpm = live(RPM);
+  const bool stopped = isnan(speed) ? !isnan(rpm) && rpm < STOPPED_RPM : speed < 2;
+  if (!stopped || millis() - liveAt[GEAR] < GEAR_POLL_MS) return;
+  const uint8_t m = plan.reads[gearRead].module;
+  if (scheduler.waits(m) || waitingOn(m) || faultWanted == m || backoff.waiting(m, millis())) return;
+  lastMs = millis();
+  sendLater({(size_t)gearRead});
+}
+
 void loop() {
   serviceTerminal();
   // Firmware: a build on trial goes back if it hasn't proved itself in time;
@@ -3649,6 +3809,8 @@ void loop() {
       cycle();
       readFaults();
       readCheck();
+      pollGear();
+      readDetails(false);
       if (endRequested) { endDrive("ended from the terminal"); state = SEARCH; }
       else if (connectionLost && !reconnect()) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }
@@ -3661,9 +3823,12 @@ void loop() {
       break;
     case PARKED:
       pollParked();
-      if (!linkUp) { disconnectCar(); state = WAIT_LINK; }
+      collect();
+      readDetails(true);
+      if (!linkUp) { finishDetails(); disconnectCar(); state = WAIT_LINK; }
       else if ((connectionLost && !reconnect()) || millis() - lastOkMs > CAR_GONE_MS) {
         out.println("[car] quiet while parked; looking for it again");
+        finishDetails();
         disconnectCar();
         state = SEARCH;
       } else if (unparked()) {

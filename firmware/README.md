@@ -16,8 +16,9 @@ the Windows build.
 | `spike/` | Phase 0 bench tool: can a W5500 on an ESP32-S3 talk HSFZ to both DMEs, and how fast |
 
 Read-only, as n63read: the client refuses anything but UDS 0x22, 0x3E and
-0x19 02 (the fault list; never 0x14, which clears faults), and the host test
-checks that nothing else is ever sent.
+0x19 02, 04 and 06 (the fault list and one fault's snapshots and counters;
+never 0x14, which clears faults), and the host test checks that nothing else
+is ever sent.
 
 When `core.py` changes how it frames, routes or decodes, change `lib/hsfz` in
 the same PR.
@@ -132,7 +133,14 @@ How a drive ends (each noted in its last row's Event column, "end: <why>"):
   *parked*, asking the selector and engine speed every 2 s; the engine
   starting (400 rpm) or the selector leaving P starts a new drive. Found
   parked at power-on (after a reboot or a firmware update in the driveway),
-  it waits the same way instead of starting a drive.
+  it waits the same way instead of starting a drive. While the car is
+  stopped (under 2 km/h, or the engine off with no speed read) the selector
+  is also asked on its own every 2 s: the gearbox can take most of a second
+  to answer and shares its turns with its slow reads, and on 29 Oct went
+  unread for 2.5 minutes before parking, so neither the check-ins nor this
+  end saw P in time. P is the gearbox saying P; it never answered "unknown"
+  (0xFF) in the logs so far, and a blank selector means only that it wasn't
+  read lately.
 - **The car stops answering** for 10 s (the ignition off, the gateway
   asleep), or **the power goes** (the drive is closed and queued at the
   next boot).
@@ -261,10 +269,24 @@ drive (`lib/logger/faults.h`, kept equal to `core.KNOWN_MODULES` by
 `tests/test_logger_faults.py`), then both DMEs every three minutes. Each read
 adds rows to `drives/<start>.faults.csv` in n63read's fault-list format (plus
 `time_s`), uploaded with the drive: a row per failed code, or one saying the
-module has none, refused or didn't answer. Codes only; the texts and stored
-details stay with the app and the Worker. A DME's fault list is waited for
-(milliseconds); any other module's is collected when it comes, like its
-reads, so a module that doesn't answer no longer holds up the log. Status
+module has none, refused or didn't answer. Codes only (their details are
+read in P, below; the texts stay with the Worker). A DME's fault list is
+waited for (milliseconds); any other module's is collected when it comes, like its
+reads, so a module that doesn't answer no longer holds up the log.
+
+Each failed code's details are read once a power-on, and only while the car
+isn't being driven: in P during a drive (the selector read as P, the speed
+under 2 km/h) or parked after one. They're 0x19 04 (the snapshots: BMW's
+standard fields, the odometer among them, from when the code first set and
+when it last did) and 0x19 06 (the counters: how often it occurred), one
+request at a time, collected when they come. With the engine running only
+modules the logger doesn't wait for are asked (a DME's would hold up its
+fast reads); with it off, any. A row a code goes to
+`drives/<stamp>.details.csv` (`read_at, module, module_name, code,
+first_km, last_km, occurrences, snapshots, extended, time_s`: the odometer
+and the count as the board reads them, both replies whole in hex for the
+Worker, or "refused (nrc 0x31)" / "no reply"), closed once the codes are all
+read, the drive ends or the car goes, and uploaded as the drives are. Status
 (`s`) and the check-ins give how many codes failed in the modules' last reads,
 and which (`fault_codes`, "0x12:1A400A 0x40:804415"; the Worker adds their
 texts for the logger page and `logger_status`). The codes go only when they

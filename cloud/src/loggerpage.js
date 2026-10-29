@@ -112,6 +112,9 @@ td.val { font-variant-numeric: tabular-nums; white-space: nowrap; }
 td.val small { display: block; color: var(--muted); font-size: 11px; white-space: normal; max-width: 220px; }
 td.val small.odd { color: var(--warn); font-weight: 600; }
 td.val.odd b { color: var(--warn); }
+td.code { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+td.when { white-space: nowrap; }
+td.when small { display: block; color: var(--muted); font-size: 11px; }
 @media (max-width: 640px) {
   td.mod, th.mod, td.id, th.id, td.ans, th.ans { display: none; }
   td.val { white-space: normal; } td.val small { max-width: 110px; }
@@ -147,9 +150,13 @@ td.val.odd b { color: var(--warn); }
   <details class="card fold" id="foldFaults">
     <summary><h2>Faults</h2><span class="foldstate" id="faultsState"></span></summary>
     <div class="scroll"><table>
-      <thead><tr><th>Code</th><th>Module</th><th>Text</th></tr></thead>
-      <tbody id="faults"><tr><td colspan="3" class="muted">Waiting for the logger's check-in…</td></tr></tbody>
+      <thead><tr><th>Code</th><th class="mod">Module</th><th>Text</th><th>First set</th>
+        <th>Last set</th><th class="n">Times</th></tr></thead>
+      <tbody id="faults"><tr><td colspan="6" class="muted">Waiting for the logger's check-in…</td></tr></tbody>
     </table></div>
+    <p class="muted" style="font-size:12.5px;margin:8px 0 0">First and last set: the odometer the
+    module stored with the fault (read while the car is in P), and the date the drives' odometer
+    readings put it at. A blank: not read yet, or the module keeps no snapshot.</p>
   </details>
 
   <details class="card fold" id="foldTanks">
@@ -699,12 +706,30 @@ ${oddValue.toString()}
     }
   }
 
+  // "2026-10-20" as "Oct 20" (local, so it isn't a day out).
+  function day(iso) {
+    var p = String(iso).split("-");
+    return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  // When the odometer said so, from the drives: {after, by}.
+  function when(d) {
+    if (!d) return "";
+    if (d.after && d.by) return d.after === d.by ? day(d.by) : day(d.after) + " – " + day(d.by);
+    return d.by ? "before " + day(d.by) : "after " + day(d.after);
+  }
+  function setAt(km, d) {
+    if (km == null) return '<td class="when muted">–</td>';
+    return '<td class="when">' + Math.round(km / 1.609344).toLocaleString() + " mi" +
+      (d ? "<small>" + esc(when(d)) + "</small>" : "") + "</td>";
+  }
   function renderFaults(b) {
     var list = b.fault_list || [], n = num(b.faults), count = n == null ? list.length : n;
     $("faults").innerHTML = list.length ? list.map(function (f) {
-      return '<tr><td class="id">' + esc(f.code) + "</td><td>" + esc(f.module_name || f.module) +
-        "</td><td>" + esc(f.text_en || "") + "</td></tr>";
-    }).join("") : '<tr><td colspan="3" class="muted">' +
+      return '<tr><td class="code">' + esc(f.code) + '</td><td class="mod">' + esc(f.module_name || f.module) +
+        "</td><td>" + esc(f.text_en || "") + "</td>" + setAt(f.first_km, f.first_date) +
+        setAt(f.last_km, f.last_date) +
+        '<td class="n">' + (f.occurrences == null ? "–" : esc(f.occurrences)) + "</td></tr>";
+    }).join("") : '<tr><td colspan="6" class="muted">' +
       (count ? "The check-in has the count, not the list." : "None in the last check-in.") + "</td></tr>";
     foldState("faultsState", count ? count + (count === 1 ? " fault" : " faults") : "None", count > 0);
   }
