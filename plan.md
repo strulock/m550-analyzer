@@ -473,6 +473,17 @@ after the first week of drives, and what's left.
       a second to 4.5 a minute into each drive of 28 Oct, on 0.10.0: the DMEs'
       batches shrinking after timeouts, which #110 (0.10.1) stops. Check the
       next drive's stats notes on 0.10.3 or later.
+- [x] The board's settings out of the firmware (#119): Wi-Fi, the setup
+      access point, the Worker, the Access token and the time zone in its
+      flash (`lib/logger/settings.h`), set once over USB
+      (`firmware/tools/provision.py`) or from the access point's page, and
+      changed from the logger page's Board settings through the check-ins (a
+      new token tried before it's kept). Published builds never include
+      `logger_secrets.h`, so a release builds without it and the image in R2
+      holds no secrets.
+- [ ] Try a change from the logger page's Board settings (a person's login
+      only): a backup network, then a new Access token (make it, wait for
+      "taken", then revoke the old).
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
       one in 4 minutes would point at the card or its power (a new card, or
       the supply) rather than the firmware.

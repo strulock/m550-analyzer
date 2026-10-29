@@ -27,11 +27,19 @@
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
 // but UDS 0x22, 0x3E and 0x19 02 (the fault list; never a clear).
 //
-// Terminal: USB serial at 115200, and TCP 23 over Wi-Fi (logger_secrets.h):
+// Terminal: USB serial at 115200, and TCP 23 over Wi-Fi:
 //   s status   l files waiting to upload   u upload now   e end this drive
 //   v view the newest files   C load a channels.csv sent over the terminal
 //   X delete the files waiting to upload (asks first)
 //   T queue a small test file (not a drive) to try uploads   h help
+//   S the board's settings, key=value lines then a dot (USB only;
+//     firmware/tools/provision.py sends them)
+//
+// Settings (Wi-Fi, the Worker and the board's Access token, the setup access
+// point, the time zone) live in the board's flash, not in the firmware
+// (lib/logger/settings.h): set once over USB, or from the page the access
+// point serves when the board knows no network, and changed afterwards from
+// the logger page.
 
 #include <Arduino.h>
 #include <ESPmDNS.h>
@@ -46,6 +54,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Update.h>
+#include <WebServer.h>
 #include <WiFi.h>
 #include <errno.h>
 #include <esp_heap_caps.h>
@@ -71,17 +80,16 @@
 #include "hsfz.h"
 #include "ota.h"
 #include "plan.h"
+#include "settings.h"
 #include "sha256.h"
 #include "upload.h"
 
-#if __has_include("logger_secrets.h")
+// What a board whose flash has no settings starts from: logger_secrets.h's,
+// in a build made on a PC that has one; nothing in a published build
+// (publish_firmware.py builds with LOGGER_NO_SECRETS), so the image in R2
+// holds no secrets and the board is set up over USB or its access point.
+#if __has_include("logger_secrets.h") && !defined(LOGGER_NO_SECRETS)
 #include "logger_secrets.h"
-#endif
-#if !defined(WORKER_HOST) || defined(LOGGER_NO_UPLOAD)
-// No Worker, or a bench build (PLATFORMIO_BUILD_FLAGS=-DLOGGER_NO_UPLOAD):
-// log only, so bench drives never reach the cloud.
-#undef WORKER_HOST
-#define WORKER_HOST ""
 #endif
 #ifndef TZ_INFO
 #define TZ_INFO "UTC0"
@@ -177,9 +185,11 @@ struct Console : Print {
     ssize_t r = recv(fd, &b, 1, MSG_PEEK | MSG_DONTWAIT);
     if (r == 0 || (r < 0 && errno != EAGAIN && errno != EWOULDBLOCK)) remote.stop();
   }
+  bool fromUsb = false;                    // where the last key read came from
   int read() {
     std::lock_guard<std::recursive_mutex> g(lock);
-    if (Serial.available()) return Serial.read();
+    fromUsb = Serial.available();
+    if (fromUsb) return Serial.read();
     if (remote.connected() && remote.available()) return remote.read();
     return -1;
   }
@@ -213,6 +223,94 @@ static std::recursive_mutex sdLock;          // directory changes: logging vs up
 static bool sdOk = false;
 static volatile bool linkUp = false;
 static uint32_t bootCount = 0;
+
+// ---- settings (lib/logger/settings.h) ------------------------------------------
+// In the flash's "settings" namespace, a key a field. The check-in task changes
+// them (a change from the logger page); everything else reads a copy.
+static Settings cfg;
+static std::mutex cfgLock;
+static const char* SETUP_AP_PASS = "m550-setup";   // a board not set up: firmware/README.md
+static std::string settingsError;                  // the last change refused, for the check-ins
+static uint32_t settingsFailed = 0;                // its version (under cfgLock)
+
+static Settings settingsNow() {
+  std::lock_guard<std::mutex> g(cfgLock);
+  return cfg;
+}
+
+// The Worker; none in a bench build (PLATFORMIO_BUILD_FLAGS=-DLOGGER_NO_UPLOAD),
+// so bench drives never reach the cloud.
+static String workerHost() {
+#ifdef LOGGER_NO_UPLOAD
+  return String();
+#else
+  std::lock_guard<std::mutex> g(cfgLock);
+  return String(cfg.host.c_str());
+#endif
+}
+static bool hasWorker() { return workerHost().length() > 0; }
+
+// The board's Access token on a request to the Worker (`use`: one being tried).
+static void addAccess(HTTPClient& http, const Settings* use = nullptr) {
+  Settings s = use ? *use : settingsNow();
+  if (s.clientId.empty()) return;
+  http.addHeader("CF-Access-Client-Id", s.clientId.c_str());
+  http.addHeader("CF-Access-Client-Secret", s.clientSecret.c_str());
+}
+
+static void saveSettings(const Settings& s) {
+  Preferences p;
+  p.begin("settings");
+  for (const SettingField& f : SETTING_FIELDS) p.putString(f.key, (s.*(f.member)).c_str());
+  p.putUInt("version", s.version);
+  p.end();
+  std::lock_guard<std::mutex> g(cfgLock);
+  cfg = s;
+}
+
+static void loadSettings() {
+  Preferences p;
+  Settings s;
+  bool have = false;
+  if (p.begin("settings", true)) {
+    have = p.isKey("host") || p.isKey("wifi_ssid");
+    for (const SettingField& f : SETTING_FIELDS) s.*(f.member) = p.getString(f.key, "").c_str();
+    s.version = p.getUInt("version", 0);
+    p.end();
+  }
+  if (!have) {
+    Settings seed;
+#ifdef WIFI_SSID
+    seed.ssid1 = WIFI_SSID;
+    seed.pass1 = WIFI_PASS;
+#endif
+#ifdef WIFI_SSID2
+    seed.ssid2 = WIFI_SSID2;
+    seed.pass2 = WIFI_PASS2;
+#endif
+#ifdef AP_PASS
+    seed.apPass = AP_PASS;
+#endif
+#ifdef WORKER_HOST
+    seed.host = WORKER_HOST;
+#endif
+#ifdef ACCESS_CLIENT_ID
+    seed.clientId = ACCESS_CLIENT_ID;
+    seed.clientSecret = ACCESS_CLIENT_SECRET;
+#endif
+    seed.tz = TZ_INFO;
+    if (!settingsEmpty(seed)) {
+      saveSettings(seed);
+      out.println("[set] settings taken from this build's logger_secrets.h");
+      return;
+    }
+    out.println("[set] NOT SET UP: no network, no Worker; S over USB (provision.py), or the "
+                "access point m550-logger's page");
+  }
+  if (s.tz.empty()) s.tz = TZ_INFO;
+  std::lock_guard<std::mutex> g(cfgLock);
+  cfg = s;
+}
 
 // ---- channels and plan -------------------------------------------------------
 static Table table;
@@ -524,7 +622,7 @@ static void setClockFromCar() {
   lt.tm_hour = t.hour;
   lt.tm_min = t.minute;
   lt.tm_sec = t.second;
-  lt.tm_isdst = -1;                          // the time zone (TZ_INFO) says
+  lt.tm_isdst = -1;                          // the time zone (the settings' tz) says
   struct timeval tv = {mktime(&lt), 0};
   if (timeKnown()) return;                   // the internet's came in meanwhile
   settimeofday(&tv, nullptr);
@@ -1889,12 +1987,9 @@ static UpResult uploadOne(const String& name) {
   http.setConnectTimeout(10000);
   bool ok = false;
   UpResult result = UP_STOP;
-  String url = String("https://") + WORKER_HOST + "/api/files/logger/" + name;
+  String url = String("https://") + workerHost() + "/api/files/logger/" + name;
   if (http.begin(tls, url)) {
-#ifdef ACCESS_CLIENT_ID
-    http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
-    http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
-#endif
+    addAccess(http);
     http.addHeader("Content-Type", "text/csv");
     uint32_t t0 = millis();
     PacedFile paced(f);
@@ -1947,9 +2042,9 @@ static UpResult uploadOne(const String& name) {
   return result;
 }
 
-// The networks the board knows (logger_secrets.h): WIFI_SSID first, and
-// WIFI_SSID2 as a backup (a phone hotspot uses mobile data, so home wins
-// whenever it's in range).
+// The networks the board knows (its settings): the first, and the second as a
+// backup (a phone hotspot uses mobile data, so home wins whenever it's in
+// range).
 static bool wifiKnown = false;
 static const uint32_t WIFI_RETRY_MS = 10000;       // off both: look again
 static const uint32_t WIFI_HOME_CHECK_MS = 120000; // on the backup: look for home
@@ -1965,26 +2060,97 @@ static bool join(const char* ssid, const char* pass, uint32_t ms) {
 // one is joined: waiting 8 s on each in turn held the first check-in back
 // minutes at a power-on away from home. A scan that fails tries both.
 static bool joinPreferred() {
-#ifdef WIFI_SSID
+  Settings s = settingsNow();
+  if (s.ssid1.empty() && s.ssid2.empty()) return false;
   int n = WiFi.scanNetworks();
-  bool home = n < 0, backup = n < 0;
+  bool home = n < 0 && !s.ssid1.empty(), backup = n < 0 && !s.ssid2.empty();
   for (int i = 0; i < n; i++) {
-    home = home || WiFi.SSID(i) == WIFI_SSID;
-#ifdef WIFI_SSID2
-    backup = backup || WiFi.SSID(i) == WIFI_SSID2;
-#endif
+    home = home || (!s.ssid1.empty() && WiFi.SSID(i) == s.ssid1.c_str());
+    backup = backup || (!s.ssid2.empty() && WiFi.SSID(i) == s.ssid2.c_str());
   }
   WiFi.scanDelete();
-  if (home && join(WIFI_SSID, WIFI_PASS, 10000)) return true;
-#ifdef WIFI_SSID2
+  if (home && join(s.ssid1.c_str(), s.pass1.c_str(), 10000)) return true;
   if (backup) {
     WiFi.disconnect();
-    if (join(WIFI_SSID2, WIFI_PASS2, 10000)) return true;
+    if (join(s.ssid2.c_str(), s.pass2.c_str(), 10000)) return true;
   }
-#endif
-  (void)backup;
-#endif
   return false;
+}
+
+// The setup page, while the access point is up: the settings as a form (what's
+// set shown, never a password), saved to the flash, then a restart.
+static WebServer setupPage(80);
+static bool setupPageOn = false;
+
+static String htmlEscape(const std::string& v) {
+  String o;
+  for (char c : v) {
+    if (c == '&') o += "&amp;";
+    else if (c == '<') o += "&lt;";
+    else if (c == '"') o += "&quot;";
+    else o += c;
+  }
+  return o;
+}
+
+static void setupForm() {
+  Settings s = settingsNow();
+  String h = "<!doctype html><meta name=viewport content='width=device-width'>"
+             "<title>m550 logger setup</title><body style='font-family:sans-serif;max-width:30em'>"
+             "<h2>m550 logger setup</h2><p>Blank fields keep what the board has.</p>"
+             "<form method=post action=/save>";
+  for (const SettingField& f : SETTING_FIELDS) {
+    h += "<p><label>";
+    h += f.key;
+    h += "<br><input name='";
+    h += f.key;
+    h += f.secret ? "' type=password placeholder='" : "' placeholder='";
+    std::string have = s.*(f.member);
+    h += f.secret ? (have.empty() ? "" : "(set)") : htmlEscape(have);
+    h += "' style='width:100%'></label>";
+  }
+  h += "<p><button>Save and restart</button></form>";
+  setupPage.send(200, "text/html", h);
+}
+
+static void setupSave() {
+  Settings s = settingsNow();
+  String changed;
+  for (const SettingField& f : SETTING_FIELDS) {
+    String v = setupPage.arg(f.key);
+    if (!v.length()) continue;
+    std::string key;
+    if (!settingLine(s, std::string(f.key) + "=" + v.c_str(), key)) {
+      setupPage.send(400, "text/plain", String("not a usable ") + f.key + "; nothing saved");
+      return;
+    }
+    changed += changed.length() ? ", " : "";
+    changed += f.key;
+  }
+  if (!changed.length()) { setupPage.send(400, "text/plain", "nothing to save"); return; }
+  saveSettings(s);
+  out.printf("[set] saved from the setup page: %s; restarting\n", changed.c_str());
+  setupPage.send(200, "text/plain", "saved: " + changed + ". The board restarts now.");
+  delay(1000);
+  ESP.restart();
+}
+
+// The access point: the terminal and the setup page while no known network is
+// in range. A board with no settings has one from boot, with SETUP_AP_PASS.
+static void startAccessPoint(bool alone) {
+  std::string pass = settingsNow().apPass;
+  if (pass.empty()) pass = SETUP_AP_PASS;
+  WiFi.mode(alone ? WIFI_AP : WIFI_AP_STA);
+  WiFi.softAP(HOSTNAME, pass.c_str());
+  if (!setupPageOn) {
+    setupPage.on("/", HTTP_GET, setupForm);
+    setupPage.on("/save", HTTP_POST, setupSave);
+    setupPage.begin();
+    setupPageOn = true;
+  }
+  out.printf("[wifi] access point %s: terminal on %s:%u, setup page http://%s/\n", HOSTNAME,
+             WiFi.softAPIP().toString().c_str(), TERMINAL_PORT,
+             WiFi.softAPIP().toString().c_str());
 }
 
 // Keep a network up, home first (from this task, between uploads, so the
@@ -1998,30 +2164,28 @@ static void keepWifi() {
     lastTry = millis();
     bool joined = joinPreferred();
     if (joined && !mdns) mdns = MDNS.begin(HOSTNAME);
-#ifdef AP_PASS
-    if (!joined && !tried) {
-      WiFi.mode(WIFI_AP_STA);                // the terminal, while the networks are away
-      WiFi.softAP(HOSTNAME, AP_PASS);
-      out.printf("[wifi] no known network in range; access point %s, terminal on %s:%u\n",
-                 HOSTNAME, WiFi.softAPIP().toString().c_str(), TERMINAL_PORT);
+    if (!joined && !tried && !settingsNow().apPass.empty()) {
+      out.println("[wifi] no known network in range");
+      startAccessPoint(false);               // the terminal, while the networks are away
     }
-#endif
     tried = true;
     return;
   }
-#if defined(WIFI_SSID) && defined(WIFI_SSID2)
-  if (WiFi.SSID() != WIFI_SSID2 || millis() - lastHomeCheck < WIFI_HOME_CHECK_MS) return;
+  Settings s = settingsNow();
+  if (s.ssid1.empty() || s.ssid2.empty() || WiFi.SSID() != s.ssid2.c_str() ||
+      millis() - lastHomeCheck < WIFI_HOME_CHECK_MS) {
+    return;
+  }
   lastHomeCheck = millis();
   int n = WiFi.scanNetworks();             // the connection stays up meanwhile
   bool home = false;
-  for (int i = 0; i < n; i++) home = home || WiFi.SSID(i) == WIFI_SSID;
+  for (int i = 0; i < n; i++) home = home || WiFi.SSID(i) == s.ssid1.c_str();
   WiFi.scanDelete();
   if (home) {
-    out.printf("[wifi] %s in range again; moving off the backup\n", WIFI_SSID);
+    out.printf("[wifi] %s in range again; moving off the backup\n", s.ssid1.c_str());
     WiFi.disconnect();
     joinPreferred();
   }
-#endif
 }
 
 // ---- check-ins (core 0) ------------------------------------------------------
@@ -2138,6 +2302,18 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
   jsonText(j, "vin", vin);
   jsonText(j, "fw", FW_VERSION);
+  {
+    Settings s = settingsNow();
+    jsonNumber(j, "settings_version", s.version, 0);
+    std::string nets = s.ssid1 + (s.ssid2.empty() ? "" : "," + s.ssid2);
+    jsonText(j, "networks", nets.c_str());
+    jsonText(j, "token_id", s.clientId.substr(0, 8).c_str());
+    std::lock_guard<std::mutex> g(cfgLock);
+    if (settingsFailed) {
+      jsonNumber(j, "settings_failed", settingsFailed, 0);
+      jsonText(j, "settings_error", settingsError.c_str());
+    }
+  }
   if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
   jsonText(j, "wifi", WiFi.SSID().c_str());
   jsonNumber(j, "rssi", WiFi.RSSI(), 0);
@@ -2182,18 +2358,15 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
 }
 
 static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat",
-                    std::string* reply = nullptr) {
+                    std::string* reply = nullptr, const Settings* use = nullptr) {
   if (!tlsRoom(3000)) return -1;
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
   HTTPClient http;
   http.setTimeout(8000);
   http.setConnectTimeout(5000);
-  if (!http.begin(tls, String("https://") + WORKER_HOST + path)) return -1;
-#ifdef ACCESS_CLIENT_ID
-  http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
-  http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
-#endif
+  if (!http.begin(tls, String("https://") + workerHost() + path)) return -1;
+  addAccess(http, use);
   http.addHeader("Content-Type", "application/json");
   int code = http.POST((uint8_t*)body.data(), body.size());
   if (reply && code == 200) *reply = http.getString().c_str();
@@ -2328,13 +2501,48 @@ static void checkReply(const std::string& body) {
   prefs.end();
 }
 
+// A change to the settings from the logger page (lib/logger/settings.h): a
+// new Access token is tried with a check-in first and kept only if the
+// Worker takes it, so a wrong one can't lock the board out; Wi-Fi changes
+// are kept (the other network is still there if one is wrong). The next
+// check-ins say which version the board has, or which it refused and why.
+static void applySettings(const std::string& reply) {
+  Settings now = settingsNow();
+  SettingsChange c;
+  if (!settingsChange(reply, now, c)) return;
+  {
+    std::lock_guard<std::mutex> g(cfgLock);
+    if (c.version <= settingsFailed) return;   // refused already
+  }
+  std::string why;
+  if (!c.bad.empty()) why = "not a usable " + c.bad;
+  if (why.empty() && c.token) {
+    int code = postBeat(beatJson(false), "/api/logger/heartbeat", nullptr, &c.next);
+    if (code != 200) why = "the new Access token was refused (" + std::to_string(code) + ")";
+  }
+  if (!why.empty()) {
+    out.printf("[set] change %u from the logger page refused: %s\n", (unsigned)c.version,
+               why.c_str());
+    std::lock_guard<std::mutex> g(cfgLock);
+    settingsFailed = c.version;
+    settingsError = why;
+    return;
+  }
+  bool wifi = c.next.ssid1 != now.ssid1 || c.next.pass1 != now.pass1 ||
+              c.next.ssid2 != now.ssid2 || c.next.pass2 != now.pass2;
+  saveSettings(c.next);
+  out.printf("[set] change %u from the logger page saved%s\n", (unsigned)c.version,
+             wifi ? "; Wi-Fi takes it at its next join" : "");
+  if (wifi) wifiKnown = !c.next.ssid1.empty() || !c.next.ssid2.empty();
+}
+
 // Every BEAT_MS by the clock: a check-in that takes a second or two (a TLS
 // handshake each) doesn't push the next one back, and one that took longer
 // than BEAT_MS isn't made up with a burst.
 static void beatIfDue() {
   static uint32_t next = 0;
   static bool tried = false, booted = false, failing = false;
-  if (!strlen(WORKER_HOST)) return;
+  if (!hasWorker()) return;
 #ifdef OTA_TEST_SILENT
   return;                                  // a test build that never checks in: it must go back
 #endif
@@ -2347,6 +2555,7 @@ static void beatIfDue() {
   int code = postBeat(beatJson(!booted), "/api/logger/heartbeat", &reply);
   if (code == 200) {
     beatsSent++;
+    applySettings(reply);
     if (!faultCodesInBeat.empty() || faultsNow <= 0) {
       faultCodesSent = faultCodesInBeat;
       beatsSinceCodes = 0;
@@ -2383,11 +2592,8 @@ static void fetchChannels() {
   HTTPClient http;
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
-  if (!http.begin(tls, String("https://") + WORKER_HOST + "/api/logger/channels")) return;
-#ifdef ACCESS_CLIENT_ID
-  http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
-  http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
-#endif
+  if (!http.begin(tls, String("https://") + workerHost() + "/api/logger/channels")) return;
+  addAccess(http);
   String have;
   {
     Preferences prefs;
@@ -2458,7 +2664,7 @@ static void fetchChannels() {
 static void channelsIfDue() {
   static uint32_t last = 0;
   static bool tried = false;
-  if (!sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) return;
+  if (!sdOk || !WiFi.isConnected() || !hasWorker()) return;
   if (tried && millis() - last < CHANNELS_CHECK_MS) return;
   tried = true;
   last = millis();
@@ -2620,11 +2826,8 @@ static int workerGet(HTTPClient& http, NetworkClientSecure& tls, const char* pat
   tls.useBuiltinCACertBundle();
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
-  if (!http.begin(tls, String("https://") + WORKER_HOST + path)) return -1;
-#ifdef ACCESS_CLIENT_ID
-  http.addHeader("CF-Access-Client-Id", ACCESS_CLIENT_ID);
-  http.addHeader("CF-Access-Client-Secret", ACCESS_CLIENT_SECRET);
-#endif
+  if (!http.begin(tls, String("https://") + workerHost() + path)) return -1;
+  addAccess(http);
   return http.GET();
 }
 
@@ -2682,7 +2885,7 @@ static void otaCheckIfDue() {
   static uint32_t last = 0;
   static bool tried = false;
   if (!strcmp(FW_VERSION, "dev") || otaReady || otaTrial || !sdOk || !WiFi.isConnected() ||
-      !strlen(WORKER_HOST)) {
+      !hasWorker()) {
     return;
   }
   if (tried && millis() - last < OTA_CHECK_MS) return;
@@ -2713,7 +2916,7 @@ static void otaCheckIfDue() {
 static void checkListIfDue() {
   static uint32_t last = 0;
   static bool tried = false;
-  if (checkListReady || !sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) return;
+  if (checkListReady || !sdOk || !WiFi.isConnected() || !hasWorker()) return;
   std::string want;
   {
     std::lock_guard<std::mutex> g(tagLock);
@@ -2764,6 +2967,7 @@ static void beatTask(void*) {
   for (;;) {
     keepWifi();
     beatIfDue();
+    if (setupPageOn) setupPage.handleClient();
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -2835,7 +3039,7 @@ static void uploadTask(void*) {
     checkListIfDue();
     if (!first && !uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     last = millis();
-    if (!sdOk || !WiFi.isConnected() || !strlen(WORKER_HOST)) continue;
+    if (!sdOk || !WiFi.isConnected() || !hasWorker()) continue;
     first = uploadNow = false;
     std::vector<String> names = pending();
     uploadsWaiting = names.size();
@@ -2864,7 +3068,10 @@ static void onEvent(arduino_event_id_t e) {
       uploadNow = true;
       // Wi-Fi is the default route (the clock and uploads need the internet);
       // the car is reached on its own subnet, 169.254.0.0/16, over Ethernet.
-      configTzTime(TZ_INFO, "pool.ntp.org", "time.google.com");
+      {
+        std::string tz = settingsNow().tz;
+        configTzTime(tz.c_str(), "pool.ntp.org", "time.google.com");
+      }
       out.printf("[wifi] %s, terminal on %s:%u\n", WiFi.SSID().c_str(),
                  WiFi.localIP().toString().c_str(), TERMINAL_PORT);
       break;
@@ -2875,22 +3082,20 @@ static void onEvent(arduino_event_id_t e) {
 // Set Wi-Fi up; the upload task joins in the background (keepWifi), so a
 // boot logs within seconds instead of waiting for a network.
 static void startWifi() {
-  setenv("TZ", TZ_INFO, 1);
+  setenv("TZ", settingsNow().tz.c_str(), 1);
   tzset();
-#if defined(WIFI_SSID) || defined(AP_PASS)
   terminal.begin();                          // answers on whichever network comes up
   terminal.setNoDelay(true);
-#endif
-#ifdef WIFI_SSID
+  Settings s = settingsNow();
+  if (s.ssid1.empty() && s.ssid2.empty()) {
+    startAccessPoint(true);                  // no network to join: set up from a phone
+    return;
+  }
   WiFi.setHostname(HOSTNAME);
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
   WiFi.setAutoReconnect(false);              // keepWifi decides which network
   wifiKnown = true;
-#elif defined(AP_PASS)
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(HOSTNAME, AP_PASS);
-#endif
 }
 
 // ---- terminal commands -------------------------------------------------------
@@ -2899,7 +3104,7 @@ static bool endRequested = false;
 static void help() {
   out.println("s status  l files waiting to upload  u upload now  e end this drive  v view the files");
   out.println("C load channels.csv (send it, then a line with a dot)  X delete waiting files");
-  out.println("T queue an upload test file  h help");
+  out.println("T queue an upload test file  S settings (USB; provision.py)  h help");
 }
 
 static void status() {
@@ -2941,8 +3146,15 @@ static void status() {
              timeKnown() ? clockNow().c_str() : "unknown",
              WiFi.isConnected() ? WiFi.SSID().c_str() : "off",
              WiFi.isConnected() ? WiFi.localIP().toString().c_str() : "",
-             strlen(WORKER_HOST) ? WORKER_HOST : "(none set)", (unsigned)uploadedFiles,
+             hasWorker() ? workerHost().c_str() : "(none set)", (unsigned)uploadedFiles,
              last.c_str(), (unsigned)beatsSent);
+  {
+    Settings s = settingsNow();              // never a password or the token's secret
+    out.printf("[status] settings: networks %s%s%s; token %s; time zone %s; change %u\n",
+               s.ssid1.empty() ? "(none)" : s.ssid1.c_str(), s.ssid2.empty() ? "" : ", ",
+               s.ssid2.c_str(), s.clientId.empty() ? "(none)" : (s.clientId.substr(0, 8) + "...").c_str(),
+               s.tz.c_str(), (unsigned)s.version);
+  }
   out.printf("[status] SD %s, %.1f of %.1f MB used; PSRAM %u KB free; internal %u KB free, "
              "largest block %u KB\n",
              sdOk ? "ok" : "MISSING", sdOk ? SD.usedBytes() / 1e6 : 0.0,
@@ -3102,6 +3314,38 @@ static void receiveChannels() {
   reloadRequested = true;
 }
 
+// Take settings over USB: key=value lines (lib/logger/settings.h), then one
+// with only a dot; firmware/tools/provision.py sends them. Not over the Wi-Fi
+// terminal, whose output also goes to anyone on it: only the keys are
+// echoed, never a value. Saved, then a restart to use them.
+static void receiveSettings() {
+  if (!out.fromUsb) { out.println("[set] settings only over USB"); return; }
+  out.println("[set] send key=value lines, then a line with only a dot");
+  Settings s = settingsNow();
+  std::string line, keys, bad;
+  uint32_t last = millis();
+  bool done = false;
+  while (!done && millis() - last < 30000) {
+    int k = Serial.read();
+    if (k < 0) { delay(1); continue; }
+    last = millis();
+    if (k == '\r') continue;
+    if (k != '\n') { if (line.size() < 200) line += (char)k; continue; }
+    if (line == ".") { done = true; break; }
+    std::string key;
+    if (settingLine(s, line, key)) keys += (keys.empty() ? "" : ", ") + key;
+    else bad += (bad.empty() ? "" : ", ") + line.substr(0, line.find('='));
+    line.clear();
+  }
+  if (!done) { out.println("[set] timed out; nothing saved"); return; }
+  if (!bad.empty()) { out.printf("[set] not usable: %s; nothing saved\n", bad.c_str()); return; }
+  if (keys.empty()) { out.println("[set] nothing to save"); return; }
+  saveSettings(s);
+  out.printf("[set] saved: %s; restarting\n", keys.c_str());
+  delay(500);
+  ESP.restart();
+}
+
 static void serviceTerminal() {
   out.checkRemote();
   NetworkClient c = terminal.accept();
@@ -3122,6 +3366,7 @@ static void serviceTerminal() {
     case 'C': receiveChannels(); break;
     case 'X': discardPending(); break;
     case 'T': uploadTest(); break;
+    case 'S': receiveSettings(); break;
     case 'h': help(); break;
 #ifdef LOGGER_SD_STRESS
     case 'K':                              // the drive file's handle broken, as a card error leaves it
@@ -3262,6 +3507,7 @@ void setup() {
   if (otaReady) otaInstall();                // a new build on the card: in before the car
   checkBoot();
   loadChannels();
+  loadSettings();
   startWifi();
   xTaskCreatePinnedToCore(beatTask, "beat", 10240, nullptr, 2, nullptr, 0);
   xTaskCreatePinnedToCore(uploadTask, "upload", 12288, nullptr, 1, nullptr, 0);

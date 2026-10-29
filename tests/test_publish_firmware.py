@@ -29,6 +29,7 @@ def secrets(tmp_path, monkeypatch):
     monkeypatch.setattr(pf, "SECRETS", path)
     monkeypatch.delenv("CF_ACCESS_CLIENT_ID", raising=False)
     monkeypatch.delenv("CF_ACCESS_CLIENT_SECRET", raising=False)
+    monkeypatch.delenv("N63_WORKER_HOST", raising=False)
     return path
 
 
@@ -66,8 +67,9 @@ def test_the_build_gets_the_version_and_test_flags(monkeypatch):
     pf.build("v2", [], "COM4")
     (cmd, env), (usb, _) = runs
     assert cmd == ["pio", "run", "-d", str(pf.PROJECT)]
+    # Never the secrets: the board keeps its own (provision.py).
     assert env["PLATFORMIO_BUILD_FLAGS"] == ('-DFW_VERSION=\\"20261027-0250-66c0b5f\\" '
-                                             '-DOTA_TEST_SILENT')
+                                             '-DLOGGER_NO_SECRETS -DOTA_TEST_SILENT')
     # Without these an upload hangs when pio's output is redirected.
     assert env["PYTHONIOENCODING"] == "utf-8" and env["PYTHONUTF8"] == "1"
     assert usb[-4:] == ["-t", "upload", "--upload-port", "COM4"]
@@ -85,6 +87,8 @@ def test_the_token_comes_from_the_environment_first(secrets, monkeypatch):
     secrets.write_text(SECRETS)
     assert pf.token() == ("board-id.access", "board-secret")
     assert pf.worker_host() == "m550.example.com"
+    monkeypatch.setenv("N63_WORKER_HOST", "ci.example.com")
+    assert pf.worker_host() == "ci.example.com"
     monkeypatch.setenv("CF_ACCESS_CLIENT_ID", "ci-id")
     monkeypatch.setenv("CF_ACCESS_CLIENT_SECRET", "ci-secret")
     assert pf.token() == ("ci-id", "ci-secret")
@@ -184,3 +188,15 @@ def test_main_needs_a_host_to_publish(steps, secrets, monkeypatch):
         run_main(monkeypatch, "--version", "v2")
     run_main(monkeypatch, "--version", "v2", "--host", "other.example.com")
     assert steps[-1] == ("publish", "v2", "other.example.com")
+
+
+def test_provision_takes_the_settings_from_a_secrets_file(tmp_path):
+    import provision
+    path = tmp_path / "logger_secrets.h"
+    path.write_text('// a comment\n#define WIFI_SSID "Home Net"\n#define WIFI_PASS "pa=ss word"\n'
+                    '// #define WIFI_SSID2 "off"\n#define WORKER_HOST "m550.example.com"\n'
+                    '#define ACCESS_CLIENT_ID "id.access"\n#define ACCESS_CLIENT_SECRET "s3cret"\n'
+                    '#define TZ_INFO "CST6CDT,M3.2.0,M11.1.0"\n#define OTHER "x"\n')
+    assert provision.from_secrets(path) == {
+        "wifi_ssid": "Home Net", "wifi_pass": "pa=ss word", "host": "m550.example.com",
+        "access_id": "id.access", "access_secret": "s3cret", "tz": "CST6CDT,M3.2.0,M11.1.0"}

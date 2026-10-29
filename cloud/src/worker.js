@@ -34,6 +34,8 @@
  * No dependencies: plain JavaScript, deployed with `wrangler deploy`.
  */
 
+import { beatSettings, BOARD_SETTINGS_SCHEMA, cancelBoardSettings, getBoardSettings,
+  putBoardSettings, SettingsError } from "./boardsettings.js";
 import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerExtras, readLog,
   summarizeDrive } from "./drive.js";
 import { channelFile, ConfigError, getCatalog, getPresets, listTiers, LOGGER_SCHEMA, presetVersions,
@@ -360,6 +362,8 @@ export const SCHEMA = [
   ...LOGGER_SCHEMA,
   // Each channel's newest value and range, for the logger page (values.js).
   ...VALUES_SCHEMA,
+  // A change to the board's settings from the logger page (boardsettings.js).
+  ...BOARD_SETTINGS_SCHEMA,
 ];
 
 const MAX_POINTS = 2000;
@@ -1682,11 +1686,32 @@ export async function handle(request, env, fetcher = fetch) {
     }
     try {
       const stored = await putBeat(env, body);
-      return json({ ok: true, ...stored, ...(await beatSweep(env, body)) });
+      return json({ ok: true, ...stored, ...(await beatSweep(env, body)),
+        ...(await beatSettings(env, body)) });
     } catch (e) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
     }
+  }
+  if (url.pathname === "/api/logger/settings") {
+    await ensureSchema(env);
+    try {
+      if (request.method === "GET") return json(await getBoardSettings(env));
+      if (request.method === "PUT") {
+        let body;
+        try {
+          body = await request.json();
+        } catch {
+          return json({ error: "body: JSON {key: value}" }, 400);
+        }
+        return json(await putBoardSettings(env, body, auth.who));
+      }
+      if (request.method === "DELETE") return json(await cancelBoardSettings(env, auth.who));
+    } catch (e) {
+      if (e instanceof SettingsError) return json({ error: e.message }, 400);
+      throw e;
+    }
+    return new Response(null, { status: 405 });
   }
   if (url.pathname === "/api/logger/heartbeats" && request.method === "POST") {
     const text = await request.text();

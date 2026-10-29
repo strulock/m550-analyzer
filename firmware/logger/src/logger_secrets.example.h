@@ -1,4 +1,7 @@
-// Copy to logger_secrets.h (gitignored) and fill in.
+// Copy to logger_secrets.h (gitignored) and fill in. The board keeps these in
+// its flash: firmware/tools/provision.py sends them over USB once (published
+// builds never include this file). A build from the IDE takes them for a
+// board whose flash has none.
 //
 // Wi-Fi: a network that reaches the car where it's parked. The board logs
 // without it and uploads the next time it's in range.
