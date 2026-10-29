@@ -20,12 +20,33 @@ export class SettingsError extends Error {}
 export const BOARD_SETTINGS_SCHEMA = [
   `CREATE TABLE IF NOT EXISTS board_settings (id INTEGER PRIMARY KEY CHECK (id = 1),
      version INTEGER NOT NULL, pending TEXT, requested TEXT, by TEXT, result TEXT, done TEXT)`,
+  // The board's own Access identity (its token's client id): what checks in.
+  `CREATE TABLE IF NOT EXISTS board_identity (id INTEGER PRIMARY KEY CHECK (id = 1), who TEXT)`,
 ];
+
+// The board is whatever service token checks in (only the board does); a
+// person's login (an email) never counts. Written when it changes, so not on
+// every check-in.
+const boardSeen = new WeakMap();             // per D1 binding
+export async function noteBoard(env, who) {
+  if (!who || who.includes("@") || boardSeen.get(env.DB) === who) return;
+  await env.DB.prepare("INSERT OR REPLACE INTO board_identity (id, who) VALUES (1, ?)").bind(who).run();
+  boardSeen.set(env.DB, who);
+}
+
+/** True for the board's own token: it may check in and upload its drives,
+ * never publish firmware (an extracted token mustn't be able to put code on
+ * the board). */
+export async function isBoard(env, who) {
+  if (!who || who.includes("@")) return false;
+  const r = (await env.DB.prepare("SELECT who FROM board_identity WHERE id = 1").all()).results;
+  return !!(r && r.length && r[0].who === who);
+}
 
 // The board's keys (settings.h SETTING_FIELDS), with its rules for a value.
 const PASS = (v) => v === "" || (v.length >= 8 && v.length <= 63);
 export const FIELDS = {
-  wifi_ssid: (v) => v.length <= 32,
+  wifi_ssid: (v) => v.length >= 1 && v.length <= 32,
   wifi_pass: PASS,
   wifi2_ssid: (v) => v.length <= 32,
   wifi2_pass: PASS,
@@ -108,7 +129,7 @@ export async function cancelBoardSettings(env, who, now = new Date()) {
   const r = await row(env);
   if (r && r.pending) {
     await env.DB.prepare(`UPDATE board_settings SET pending = NULL, result = 'cancelled',
-      done = ?, by = ? WHERE id = 1`).bind(now.toISOString(), who).run();
+      done = ?, by = ? WHERE id = 1 AND version = ?`).bind(now.toISOString(), who, r.version).run();
   }
   return getBoardSettings(env);
 }
@@ -123,9 +144,9 @@ export async function beatSettings(env, beat, now = new Date()) {
   if (has >= r.version || failed >= r.version) {
     const result = has >= r.version ? "taken"
       : `refused: ${String(beat.settings_error || "").slice(0, 200)}`;
-    await env.DB.prepare(
-      "UPDATE board_settings SET pending = NULL, result = ?, done = ? WHERE id = 1")
-      .bind(result, now.toISOString()).run();
+    // Only the change this check-in answered: one saved meanwhile stays.
+    await env.DB.prepare(`UPDATE board_settings SET pending = NULL, result = ?, done = ?
+      WHERE id = 1 AND version = ?`).bind(result, now.toISOString(), r.version).run();
     return {};
   }
   if (beat.settings_version === undefined) return {};   // a firmware from before settings

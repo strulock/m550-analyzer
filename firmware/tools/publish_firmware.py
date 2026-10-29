@@ -16,10 +16,13 @@ its Wi-Fi, Worker and token in its flash, set once with provision.py, so the
 image in R2 has no secrets and a PC without the file can build one.
 
 Publishing uses an Access service token: CF_ACCESS_CLIENT_ID and
-CF_ACCESS_CLIENT_SECRET, else the board's own from logger_secrets.h; the
-Worker is --host, else N63_WORKER_HOST, else WORKER_HOST there. Test
+CF_ACCESS_CLIENT_SECRET, else the n63read app's (Settings > Cloud), never the
+board's own: the Worker refuses firmware from the token that checks in, so a
+token taken from a board can't put code on it. The Worker is --host, else
+N63_WORKER_HOST, else the app's, else WORKER_HOST in logger_secrets.h. Test
 builds: --flag OTA_TEST_SILENT (never checks in, so the board must go back
-to the build before), --version to pick the name. Standard library only.
+to the build before), --version to pick the name. Standard library and the
+app's own settings code only.
 """
 
 import argparse
@@ -81,21 +84,34 @@ def build(v, flags, port):
         sys.exit("build failed")
 
 
+def app_cloud():
+    """(url, client id, client secret) from the n63read app's settings on this
+    PC, or empty strings."""
+    try:
+        sys.path.insert(0, str(ROOT / "src"))
+        from n63read import cloud, core
+        return cloud.config(core.load_settings())
+    except (ImportError, OSError, ValueError):      # no app or no settings here
+        return "", "", ""
+
+
 def token():
     cid, secret = os.environ.get("CF_ACCESS_CLIENT_ID"), os.environ.get("CF_ACCESS_CLIENT_SECRET")
     if cid and secret:
         return cid, secret
-    text = SECRETS.read_text(encoding="utf-8") if SECRETS.exists() else ""
-    found = dict(re.findall(r'^#define (ACCESS_CLIENT_ID|ACCESS_CLIENT_SECRET) "([^"]+)"', text,
-                            re.M))
-    if len(found) != 2:
-        sys.exit("no Access token: set CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET")
-    return found["ACCESS_CLIENT_ID"], found["ACCESS_CLIENT_SECRET"]
+    _, cid, secret = app_cloud()
+    if cid and secret:
+        return cid, secret
+    sys.exit("no Access token: the app's (Settings > Cloud), or set CF_ACCESS_CLIENT_ID and "
+             "CF_ACCESS_CLIENT_SECRET (not the board's: the Worker refuses it)")
 
 
 def worker_host():
     if os.environ.get("N63_WORKER_HOST"):
         return os.environ["N63_WORKER_HOST"]
+    url = app_cloud()[0]
+    if url:
+        return re.sub(r"^https?://", "", url).split("/")[0]
     text = SECRETS.read_text(encoding="utf-8") if SECRETS.exists() else ""
     m = re.search(r'^#define WORKER_HOST "([^"]+)"', text, re.M)
     return m.group(1) if m else None
@@ -127,8 +143,8 @@ def main():
                     help="an extra define for a test build, e.g. OTA_TEST_SILENT")
     ap.add_argument("--allow-dirty", action="store_true",
                     help="build uncommitted firmware changes")
-    ap.add_argument("--host", help="the Worker's host (default: N63_WORKER_HOST, else "
-                    "WORKER_HOST in logger_secrets.h)")
+    ap.add_argument("--host", help="the Worker's host (default: N63_WORKER_HOST, else the "
+                    "app's, else WORKER_HOST in logger_secrets.h)")
     a = ap.parse_args()
     v = a.version or version(a.allow_dirty)
     if not re.fullmatch(r"[\w.-]{1,40}", v) or v == "dev":
