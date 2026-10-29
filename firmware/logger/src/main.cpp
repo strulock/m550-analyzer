@@ -668,6 +668,10 @@ static void recoverDrives() {
       std::lock_guard<std::recursive_mutex> g(sdLock);
       f = SD.open(path);
     }
+    if (!f) {                                // no .done from a file not read: next boot
+      out.printf("[sd] %s was left open; can't open it to close it\n", name.c_str());
+      continue;
+    }
     Sha256 sha;
     uint32_t size = 0;
     for (int n; (n = f.read(buf, sizeof(buf))) > 0;) { sha.update(buf, n); size += n; }
@@ -1699,15 +1703,22 @@ static bool tlsRoom(uint32_t ms) {
 // A drive's file read out for its upload. While a drive is logging the
 // uploads are low priority: a few KB at a time with pauses (about 80 KB/s),
 // so the card, its SPI bus and core 0 stay mostly the logging's. Between
-// drives, as fast as it goes.
+// drives, as fast as it goes. It hashes what it reads, so the Worker's
+// answer can be checked against what was sent as well as against the .done.
 static const size_t PACE_BYTES = 8192;
 static const uint32_t PACE_MS = 100;
 struct PacedFile : Stream {
   File& f;
   size_t sinceRest = 0;
+  Sha256 sha;
+  uint32_t sent = 0;
   explicit PacedFile(File& file) : f(file) {}
   int available() override { return f.available(); }
-  int read() override { return f.read(); }
+  int read() override {
+    int c = f.read();
+    if (c >= 0) { uint8_t b = c; sha.update(&b, 1); sent++; }
+    return c;
+  }
   int peek() override { return f.peek(); }
   size_t readBytes(char* b, size_t n) override {
     if (state == LOGGING && sinceRest >= PACE_BYTES) {
@@ -1715,6 +1726,8 @@ struct PacedFile : Stream {
       sinceRest = 0;
     }
     size_t got = f.read((uint8_t*)b, n);
+    sha.update(b, got);
+    sent += got;
     sinceRest += got;
     return got;
   }
@@ -1737,7 +1750,11 @@ static std::vector<String> pending() {
   return names;
 }
 
-static bool uploadOne(const String& name) {
+// One file's upload: sent, or a problem with this file (the next is tried),
+// or with the way there (the rest wait for the next round).
+enum UpResult { UP_SENT, UP_SKIP, UP_STOP };
+
+static UpResult uploadOne(const String& name) {
   String path = String(DRIVES) + "/" + name;
   Done done;
   bool doneOk = false;
@@ -1754,17 +1771,17 @@ static bool uploadOne(const String& name) {
   switch (uploadStep(doneOk, (bool)f, f ? f.size() : 0)) {   // lib/logger/upload.h
   case UPLOAD_BAD_DONE:
     out.printf("[up] %s: bad .done file\n", name.c_str());
-    return false;
+    return UP_SKIP;
   case UPLOAD_MISSING:
     out.printf("[up] %s: missing\n", name.c_str());
-    return false;
+    return UP_SKIP;
   case UPLOAD_EMPTY: {
     f.close();
     std::lock_guard<std::recursive_mutex> g(sdLock);
     SD.remove(path);
     SD.remove(path + ".done");
     out.printf("[up] %s: empty, removed\n", name.c_str());
-    return true;
+    return UP_SENT;
   }
   case UPLOAD_SEND:
     break;
@@ -1772,7 +1789,7 @@ static bool uploadOne(const String& name) {
   if (!tlsRoom(10000)) {
     f.close();
     out.printf("[up] %s: not enough memory for TLS; later\n", name.c_str());
-    return false;
+    return UP_STOP;
   }
   NetworkClientSecure tls;
   tls.useBuiltinCACertBundle();
@@ -1780,6 +1797,7 @@ static bool uploadOne(const String& name) {
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
   bool ok = false;
+  UpResult result = UP_STOP;
   String url = String("https://") + WORKER_HOST + "/api/files/logger/" + name;
   if (http.begin(tls, url)) {
 #ifdef ACCESS_CLIENT_ID
@@ -1793,6 +1811,18 @@ static bool uploadOne(const String& name) {
     String body = code > 0 ? http.getString() : String();
     http.end();
     ok = uploadAccepted(code, body.c_str(), done.sha);
+    // The .done's hash can be wrong where the file's bytes aren't (one from
+    // the power-cut recovery, 28 Oct, sent every 15 s all evening and the
+    // rest of the card waiting behind it): the Worker has what the card
+    // has if its hash is that of what was sent, all of the file.
+    char sentHex[65];
+    paced.sha.finishHex(sentHex);
+    if (!ok && paced.sent == f.size() && uploadAccepted(code, body.c_str(), sentHex)) {
+      out.printf("[up] %s: the .done's hash (%.12s) isn't the file's; the Worker has the file\n",
+                 name.c_str(), done.sha.c_str());
+      ok = true;
+    }
+    if (ok || code == 200) result = ok ? UP_SENT : UP_SKIP;
     if (ok) {
       int p = body.indexOf("\"processed\":");
       out.printf("[up] %s: %u bytes in %.1f s, checked%s\n", name.c_str(), done.size,
@@ -1816,7 +1846,7 @@ static bool uploadOne(const String& name) {
     uploadedFiles++;
     lastUpload = name;
   }
-  return ok;
+  return result;
 }
 
 // The networks the board knows (logger_secrets.h): WIFI_SSID first, and
@@ -2602,9 +2632,11 @@ static void uploadTask(void*) {
     first = uploadNow = false;
     std::vector<String> names = pending();
     uploadsWaiting = names.size();
-    for (const String& name : names) {
-      if (!WiFi.isConnected() || !uploadOne(name)) break;
-      uploadsWaiting = uploadsWaiting - 1;
+    for (const String& name : names) {   // a file that fails doesn't hold up the rest
+      if (!WiFi.isConnected()) break;
+      UpResult r = uploadOne(name);
+      if (r == UP_STOP) break;
+      if (r == UP_SENT) uploadsWaiting = uploadsWaiting - 1;
     }
   }
 }
