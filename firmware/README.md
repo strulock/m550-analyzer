@@ -52,7 +52,12 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
      `m550-logger` (password `m550-setup`) from boot, and a board with
      settings opens it, with its own password, when no known network is in
      range. `http://192.168.4.1/` there is a form for every setting
-     (passwords never shown; blank keeps), saved, then a restart.
+     (passwords never shown; blank keeps), saved, then a restart. It
+     answers only over the access point, and once the board is set up it
+     no longer offers the host or the token (a page that could change the
+     host would hand the token to whatever host it named): those change
+     over USB, or the token from the logger page. The fixed `m550-setup`
+     opens only a board with no settings, which has nothing to give away.
 
    After that, the logger page's **Board settings** changes the networks,
    the token, the access point's password and the time zone (not the
