@@ -234,6 +234,21 @@ test("a log two installations have counts once; faults merge", async () => {
   assert.equal((await toolData("fault_history")).faults.length, 1);   // current: present
 });
 
+test("an installation whose logs sit in a logs folder names them as the others do", async () => {
+  await history("desk-pc", DRIVES, []);
+  await history("laptop", DRIVES.map((d) => ({ ...d, file: "logs/" + d.file })), []);
+  assert.deepEqual((await toolData("drive_history")).drives.map((d) => d.file), ["a.csv", "b.csv"]);
+  const put = await (await call("PUT", "/api/files/logs/a.csv", { body: "Time,INMOT\n0,700\n" })).json();
+  assert.equal(put.key, "a.csv");
+  assert.equal(await (await call("GET", "/api/files/a.csv")).text(), "Time,INMOT\n0,700\n");
+  const series = { start: 0, approx: false,
+    chunks: [{ name: "INMOT", t0: 0, t1: 1, data: [[0, 700], [1, 710]] }] };
+  await call("PUT", "/api/series/a.csv", { body: JSON.stringify(series) });
+  await call("PUT", "/api/series/logs/a.csv", { body: JSON.stringify(series) });
+  assert.deepEqual(env.DB.db.prepare("SELECT DISTINCT drive FROM series").all().map((x) => x.drive),
+    ["a.csv"]);
+});
+
 test("tables from before sources are converted, rows kept", async () => {
   const db = env.DB.db;
   db.exec(`CREATE TABLE drives (file TEXT PRIMARY KEY, start TEXT, data TEXT NOT NULL);
@@ -432,7 +447,7 @@ test("series: stored per drive, one channel across drives, resampled", async () 
     { body: JSON.stringify({ start: chunks[0].t0, approx: false, chunks }) });
   let r = await put("logs/a.csv", [chunk("ITKUA", day1, [80, 90, 100], "°C"),
     chunk("ILUZ5", day1, [1, -2, 3])]);
-  assert.deepEqual(await r.json(), { ok: true, drive: "logs/a.csv", channels: 2, chunks: 2 });
+  assert.deepEqual(await r.json(), { ok: true, drive: "a.csv", channels: 2, chunks: 2 });
   await put("logs/b.csv", [chunk("ITKUA", day2, [85, 95], "°C")]);
   await put("logs/a.csv", [chunk("ITKUA", day1, [81, 91, 101], "°C"),    // replaced, not added
     chunk("ILUZ5", day1, [1, -2, 3])]);
@@ -446,7 +461,7 @@ test("series: stored per drive, one channel across drives, resampled", async () 
   assert.equal(s.count, 5);
   assert.deepEqual(s.points.map((p) => p[1]), [81, 91, 101, 85, 95]);
   assert.equal(s.points[3][0], "2026-10-19T12:35:34.000Z");
-  assert.deepEqual(s.drives, ["logs/a.csv", "logs/b.csv"]);
+  assert.deepEqual(s.drives, ["a.csv", "b.csv"]);
 
   const win = (await tool("channel_series",
     { channel: "ITKUA", start: "2026-10-19T00:00:00Z" })).data;
@@ -454,7 +469,7 @@ test("series: stored per drive, one channel across drives, resampled", async () 
 
   const by = (await tool("channel_series", { channel: "ITKUA", by_drive: true })).data.drives;
   assert.deepEqual(by.map((d) => [d.drive, d.min, d.max]),
-    [["logs/a.csv", 81, 101], ["logs/b.csv", 85, 95]]);
+    [["a.csv", 81, 101], ["b.csv", 85, 95]]);
 
   await put("logs/c.csv", [chunk("INMOT", day2, Array.from({ length: 300 }, (_, i) => i))]);
   const many = (await tool("channel_series", { channel: "INMOT", points: 10 })).data;
@@ -664,6 +679,16 @@ test("logger check-ins: the failed codes come back with their texts", async () =
   const s = await (await call("GET", "/api/logger")).json();
   assert.deepEqual(s.last.fault_list.map((f) => [f.module, f.code, f.text_en]),
     [["0x12", "1A400A", "Electric fan, self-diagnosis"], ["0x40", "804415", ""]]);
+  // The board sends the codes only when they change: the power-on's newest.
+  await new Promise((r) => setTimeout(r, 5));
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 9, faults: 2 }) });
+  const k = (await (await call("GET", "/api/logger")).json()).last;
+  assert.equal(k.fault_codes, "0x12:1A400A 0x40:804415 junk");
+  assert.equal(k.fault_list.length, 2);
+  await new Promise((r) => setTimeout(r, 5));
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 10, faults: 1 }) });
+  assert.equal((await (await call("GET", "/api/logger")).json()).last.fault_list, undefined);
+  await new Promise((r) => setTimeout(r, 5));
   await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 9, faults: 0 }) });
   assert.equal((await (await call("GET", "/api/logger")).json()).last.fault_list, undefined);
 });

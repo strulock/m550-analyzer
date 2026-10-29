@@ -25,7 +25,14 @@ serves it to Claude from anywhere:
 - **Time series:** every value of every drive log with its UTC time, one row
   per channel per drive in D1 (`series`), so `list_channels` and
   `channel_series` can follow a channel across every drive, averaged into
-  time buckets when long, or as per-drive min, mean and max.
+  time buckets when long, or as per-drive min, mean and max. Two series are
+  worked out where a log has the transmission's own speeds (EGS 0xDA2A):
+  `TC_SLIP`, the torque converter's slip (engine speed less input speed,
+  rpm), and `GEAR_RATIO` (input over output speed).
+- **One name per log:** an installation whose logs sit in a `logs` folder
+  sends `logs/<name>` for what the others send as `<name>`; the Worker drops
+  the `logs/` from uploads, series and drive history (`appKey`), so a drive
+  two installations have is stored and counted once.
 - **The logger board** (`firmware/`) uploads its drive logs under `logger/`,
   two files a drive: `<start>.csv` (the fast and medium channels, every
   cycle) and `<start>.sweep.csv` (the slow channels, one row a pass).
@@ -149,9 +156,9 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
-| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes`, `pending`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
+| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes` (when they change), `pending`, `oldest_pending_min`, `up_tries`, `up_failed`, `up_error`, `card_errors`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
 | `POST /api/logger/heartbeats` | check-ins the board kept while it had no Wi-Fi: `{"beats": [...]}`, at most 200 and 64 KB. Each is filed under its own `clock`; one without a clock, older than 30 days or already stored is skipped. Replies `stored`, `skipped` |
-| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes` with each code's module and text), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline; and `last_drive`: the last logger drive's rate per tier |
+| `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes`, or its power-on's newest, with each code's module and text), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline; and `last_drive`: the last logger drive's rate per tier |
 | `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
 | `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`): an ESP32 app image of at most 6 MB, `V` not "dev". One build is kept; replies with its manifest |
 | `GET /api/logger/firmware` | the manifest: `{"version", "sha256", "size", "uploaded"}` (404 when nothing is published); also in `GET /api/logger` as `firmware` |

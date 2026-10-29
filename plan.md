@@ -459,10 +459,24 @@ after the first week of drives, and what's left.
       and constant reads on the other core, a flush failed about every 4
       minutes at 20 MHz and at 10 MHz alike; every file's hash matched its
       `.done` after.
+- [x] The list of 29 Oct (#116): the check-ins report uploads tried and
+      failed, the last failure and the oldest waiting file's age; the
+      check-in built in a kept buffer and its fault codes sent only when
+      they change; the transmission's input and output speeds (EGS 0xDA2A)
+      medium, with the converter's slip (`TC_SLIP`) and the gear ratio
+      (`GEAR_RATIO`) worked out in the cloud; app logs named once
+      (`appKey`), the `logs/` copies removed.
+- [x] Module 0x40 "answering in 550 ms" (29 Oct): every module's
+      `answer_ms` is the cycle's time as the cycles see it (0x40's 81 ms when
+      the reads took 75, 213 when they took 211), so 0x40 wasn't the slow one
+      and asking it less wouldn't raise the rows. The rows fell from about 11
+      a second to 4.5 a minute into each drive of 28 Oct, on 0.10.0: the DMEs'
+      batches shrinking after timeouts, which #110 (0.10.1) stops. Check the
+      next drive's stats notes on 0.10.3 or later.
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
       one in 4 minutes would point at the card or its power (a new card, or
       the supply) rather than the firmware.
-- [ ] 38 of the app's logs from 14-20 Oct are in R2 twice: under `logs/`
+- [x] 38 of the app's logs from 14-20 Oct are in R2 twice: under `logs/`
       (an upload on 21 Oct, 02:38 UTC) and at the top, where the app's
       sync puts them (16:35 the same day), byte for byte the same size. MCP
       `channel_series` and anything else that walks every file counts each

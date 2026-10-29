@@ -234,7 +234,9 @@ details stay with the app and the Worker. A DME's fault list is waited for
 reads, so a module that doesn't answer no longer holds up the log. Status
 (`s`) and the check-ins give how many codes failed in the modules' last reads,
 and which (`fault_codes`, "0x12:1A400A 0x40:804415"; the Worker adds their
-texts for the logger page and `logger_status`).
+texts for the logger page and `logger_status`). The codes go only when they
+change, at boot, in a check-in kept offline, and every 5 minutes; the Worker
+takes the power-on's newest for a check-in without them.
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
@@ -244,12 +246,17 @@ else `ITKUA`, the radiator outlet's; `ITOEL`) and the GPS
 position when the channel table has them and has read them in the last 30 s
 (null otherwise; battery is the battery sensor's `IUIBS`, in the medium tier, else the
 DME's `IUADW`), files
-waiting, Wi-Fi and memory, and which channel
+waiting and the oldest's age (`oldest_pending_min`, from its name), the
+uploads tried and failed this boot and the last failure with how long ago
+(`up_tries`, `up_failed`, `up_error`, `up_error_min`), card write failures
+(`card_errors`), Wi-Fi and memory, and which channel
 file it's running (`channels`: the active preset's ETag, `manual` for one
 sent over the terminal, `card` or `built-in`), which the logger channel page
 compares with the active preset. From the last minute's stats it adds the
 modules on smaller batches (`batches`, "0x12:6 0x18:1"), each collected-later
-module's answer time (`answer_ms`, "0x63:170"), the slow pass and the reads
+module's answer time (`answer_ms`, "0x63:170": as the cycles see it, so
+never much under the reads per cycle, and every module's rises with them),
+the slow pass and the reads
 per cycle, which the page's rate estimates use. The check-ins (and keeping
 Wi-Fi up) have a task of their own on core 0, every 10 s by the clock, so an
 upload or a download doesn't hold one up; each waits for room for a TLS
