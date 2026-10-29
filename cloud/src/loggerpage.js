@@ -93,6 +93,14 @@ tr.sel td { background: var(--accent-bg); }
 .hide { display: none !important; }
 label { display: inline-flex; gap: 6px; align-items: center; }
 h2 { font-size: 15px; margin: 0 0 8px; }
+details.card > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::before { content: "\25B8"; color: var(--muted); width: 1em; }
+details.card[open] > summary::before { content: "\25BE"; }
+details.card > summary h2 { display: inline; margin: 0; }
+details.card[open] > summary { margin-bottom: 8px; }
+.foldstate { font-size: 12.5px; color: var(--muted); }
+.foldstate.warn { color: var(--warn); }
 .alarm { padding: 10px 14px; border-radius: 8px; background: var(--bad); color: #fff; font-weight: 600; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 .stat span { display: block; font-size: 12px; color: var(--muted); }
@@ -137,8 +145,8 @@ td.val.odd b { color: var(--warn); }
     <div class="muted" id="mapNote" style="font-size:12px;margin-top:4px"></div>
   </section>
 
-  <section class="card">
-    <h2>Tanks</h2>
+  <details class="card fold" id="foldTanks">
+    <summary><h2>Tanks</h2><span class="foldstate" id="tanksState"></span></summary>
     <div class="scroll"><table>
       <thead><tr><th>Filled</th><th class="n">Drives</th><th class="n">Added</th><th class="n">Miles</th>
         <th class="n">Gallons</th><th class="n">MPG</th><th class="n">Level</th></tr></thead>
@@ -147,10 +155,10 @@ td.val.odd b { color: var(--warn); }
     <p class="muted" style="font-size:12.5px;margin:8px 0 0">A tank starts when the level is up
     ${FILL_NOTE} between drives, as the trip meter is reset at a fill-up. Miles from the odometer;
     gallons from the engine's fuel flow (else the level's fall).</p>
-  </section>
+  </details>
 
-  <section class="card">
-    <h2>Full channel sweep</h2>
+  <details class="card fold" id="foldSweep">
+    <summary><h2>Full channel sweep</h2><span class="foldstate" id="sweepFold"></span></summary>
     <div class="row">
       <button id="sweepAsk">Sweep on the next drive…</button>
       <button id="sweepCancel" class="hide">Cancel the sweep</button>
@@ -161,33 +169,8 @@ td.val.odd b { color: var(--warn); }
     identifier in the catalog, whether it answered before or not, as the app's Answers &gt; Check car
     now does (read-only). It starts a minute into the next drive, alongside the fast channels, and
     a drive that ends first leaves the rest to the next. Whatever answers is logged from then on.</p>
-  </section>
+  </details>
 
-  <section class="card">
-    <h2>Board settings</h2>
-    <div id="setState" class="muted">Loading…</div>
-    <div class="setgrid">
-      <label>Wi-Fi network <input id="set_wifi_ssid" autocomplete="off"></label>
-      <label>Its password <input id="set_wifi_pass" type="password" autocomplete="new-password"></label>
-      <label>Backup network <input id="set_wifi2_ssid" autocomplete="off"></label>
-      <label>Its password <input id="set_wifi2_pass" type="password" autocomplete="new-password"></label>
-      <label>Access token's client ID <input id="set_access_id" autocomplete="off" placeholder="….access"></label>
-      <label>Its client secret <input id="set_access_secret" type="password" autocomplete="new-password"></label>
-      <label>Setup access point's password <input id="set_ap_pass" type="password" autocomplete="new-password"></label>
-      <label>Time zone (POSIX) <input id="set_tz" autocomplete="off" placeholder="CST6CDT,M3.2.0,M11.1.0"></label>
-    </div>
-    <div class="row">
-      <button id="setSave">Send to the board…</button>
-      <button id="setCancel" class="hide">Take the change back</button>
-      <label><input type="checkbox" id="setClear2"> Remove the backup network</label>
-    </div>
-    <p class="muted" style="font-size:12.5px;margin:8px 0 0">Blank fields keep what the board has.
-    The board takes a change at its next check-in, and then the passwords are dropped here; none is
-    ever shown. A new token is tried before the board keeps it, so make the new one in Zero Trust
-    (Access &gt; Service credentials, added to the application's Service Auth policy), wait for
-    "taken", and only then revoke the old. A board that can't check in is set up over USB
-    (firmware/tools/provision.py) or from its access point's page.</p>
-  </section>
 
   <div id="msg" class="msg hide"></div>
 
@@ -250,6 +233,31 @@ td.val.odd b { color: var(--warn); }
   each pass. Once a drive, daily, weekly, monthly: read once, in the first drive they're due, into that
   drive's sweep file. Channels of one identifier are read together, at the fastest tier any of them has.
   The logger downloads the active preset on its next Wi-Fi check and uses it from its next drive.</p>
+  <details class="card fold" id="foldSettings">
+    <summary><h2>Board settings</h2><span class="foldstate" id="setFold"></span></summary>
+    <div id="setState" class="muted">Loading…</div>
+    <div class="setgrid">
+      <label>Wi-Fi network <input id="set_wifi_ssid" autocomplete="off"></label>
+      <label>Its password <input id="set_wifi_pass" type="password" autocomplete="new-password"></label>
+      <label>Backup network <input id="set_wifi2_ssid" autocomplete="off"></label>
+      <label>Its password <input id="set_wifi2_pass" type="password" autocomplete="new-password"></label>
+      <label>Access token's client ID <input id="set_access_id" autocomplete="off" placeholder="….access"></label>
+      <label>Its client secret <input id="set_access_secret" type="password" autocomplete="new-password"></label>
+      <label>Setup access point's password <input id="set_ap_pass" type="password" autocomplete="new-password"></label>
+      <label>Time zone (POSIX) <input id="set_tz" autocomplete="off" placeholder="CST6CDT,M3.2.0,M11.1.0"></label>
+    </div>
+    <div class="row">
+      <button id="setSave">Send to the board…</button>
+      <button id="setCancel" class="hide">Take the change back</button>
+      <label><input type="checkbox" id="setClear2"> Remove the backup network</label>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin:8px 0 0">Blank fields keep what the board has.
+    The board takes a change at its next check-in, and then the passwords are dropped here; none is
+    ever shown. A new token is tried before the board keeps it, so make the new one in Zero Trust
+    (Access &gt; Service credentials, added to the application's Service Auth policy), wait for
+    "taken", and only then revoke the old. A board that can't check in is set up over USB
+    (firmware/tools/provision.py) or from its access point's page.</p>
+  </details>
 </div>
 
 <script>
@@ -586,6 +594,9 @@ ${oddValue.toString()}
       parts.push("Last change: " + esc(j.last.result) + ", " + esc(new Date(j.last.done).toLocaleString()) + ".");
     }
     $("setState").innerHTML = parts.join(" ");
+    var refused = j.last && /^refused/.test(j.last.result);
+    foldState("setFold", j.pending ? "A change is waiting for the board" :
+      refused ? "Last change refused" : b && b.networks ? b.networks.replace(",", ", ") : "", !!(j.pending || refused));
     $("setCancel").className = j.pending ? "" : "hide";
   }
   function loadSettings() {
@@ -617,6 +628,8 @@ ${oddValue.toString()}
       text = "No full sweep yet.";
     }
     $("sweepState").textContent = text;
+    foldState("sweepFold", p ? (p.next && p.of ? "Under way, " + Math.floor(p.next * 100 / p.of) + "%" :
+      "Waiting for the next drive") : l ? "Last finished " + new Date(l.done).toLocaleDateString() : "None yet", !!warn);
     $("sweepWarn").textContent = warn;
     $("sweepWarn").classList.toggle("hide", !warn);
     $("sweepAsk").classList.toggle("hide", !!p);
@@ -681,6 +694,22 @@ ${oddValue.toString()}
     }
   }
 
+  // The folding cards: collapsed unless opened here before (this browser
+  // remembers each), the state beside each heading meanwhile.
+  function folds() {
+    ["foldTanks", "foldSweep", "foldSettings"].forEach(function (id) {
+      var d = $(id), key = "logger.fold." + id;
+      try { d.open = window.localStorage.getItem(key) === "open"; } catch (e) { d.open = false; }
+      d.addEventListener("toggle", function () {
+        try { window.localStorage.setItem(key, d.open ? "open" : "closed"); } catch (e) { /* not kept */ }
+      });
+    });
+  }
+  function foldState(id, text, warn) {
+    $(id).textContent = text || "";
+    $(id).className = "foldstate" + (warn ? " warn" : "");
+  }
+
   function renderTanks() {
     api("GET", "/api/logger/tanks").then(function (j) {
       var t = (j.tanks || []).slice().reverse();
@@ -694,6 +723,10 @@ ${oddValue.toString()}
           '<td class="n"><b>' + (k.mpg == null ? "–" : k.mpg.toFixed(1)) + "</b></td>" +
           '<td class="n">' + gal(k.level_end_l) + " gal</td></tr>";
       }).join("") : '<tr><td colspan="7" class="muted">No logger drives with the tank level yet.</td></tr>';
+      var now = t[0];
+      foldState("tanksState", !now ? "None yet" : (now.open ? "This tank" : "Last tank") + ": " +
+        (now.mpg == null ? "–" : now.mpg.toFixed(1)) + " MPG over " +
+        (now.miles == null ? "–" : Math.round(now.miles)) + " miles, " + gal(now.level_end_l) + " gal left");
     }).catch(function (e) { $("tanks").innerHTML = '<tr><td colspan="7" class="muted">' + esc(e.message) + "</td></tr>"; });
   }
 
@@ -831,6 +864,7 @@ ${oddValue.toString()}
   }
 
   function start() {
+    folds();
     wire();
     renderTanks();
     renderLogger();
