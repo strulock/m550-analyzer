@@ -432,7 +432,10 @@ after the first week of drives, and what's left.
 - [ ] **MCP sign-in:** reconnect the TrulockMCP connector once and see the
       one-day sign-in renew without a prompt. If it still doesn't, the cause
       is in Access (the application's session duration, the MCP portal's
-      OAuth), not the Worker.
+      OAuth), not the Worker. On 28 Oct, the evening after #104, the
+      portal (mcp.trulock.com) still asked to sign in again too often:
+      look at the Access application's session duration and the portal's
+      token lifetime and refresh.
 - [ ] The burst (pedal or boost) needs `BUS_FAHRPEDALWERT` and `IPLAD`
       read often, and the Default preset has neither on fast: add them to
       `BOARD_NEEDS`, or to the preset.
@@ -443,3 +446,10 @@ after the first week of drives, and what's left.
 - [ ] The logger page has no versions or rollback yet (the MCP tools do).
 - [ ] The stray two-row drives from before #96 (e.g. 2026-10-27_19-49-56,
       20-03-49) are still in R2 and History.
+- [ ] 38 of the app's logs from 14-20 Oct are in R2 twice: under `logs/`
+      (an upload on 21 Oct, 02:38 UTC) and at the top, where the app's
+      sync puts them (16:35 the same day), byte for byte the same size. MCP
+      `channel_series` and anything else that walks every file counts each
+      of those drives twice. Delete the `logs/` copies (and their rows in
+      D1), and have the Worker skip a file whose name it already has
+      without the prefix.
