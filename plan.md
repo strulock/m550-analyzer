@@ -481,6 +481,22 @@ after the first week of drives, and what's left.
       new token tried before it's kept). Published builds never include
       `logger_secrets.h`, so a release builds without it and the image in R2
       holds no secrets.
+- [x] The review of 29 Oct, items 1-5 (#123): firmware can't be published
+      with the board's own token (the one that checks in) nor written to its
+      R2 keys, and publish_firmware.py uses the app's token; an upload the
+      Worker refuses or fails on skips that file instead of stopping the
+      queue, spaced out after three failures; a drive file's retry writes
+      from the checked end and cuts off a torn tail; a Wi-Fi change to the
+      network the board is on is tried before it's kept; a check-in's answer
+      settles only the change it saw. Also: a malformed `S` line is no
+      longer echoed whole.
+- [ ] Still open from that review: an Ed25519 signature on the firmware
+      image, checked by the board; `logger_publish` with no name; a
+      malformed identifier range in `logger_set_tiers`; the TLS memory race
+      between tasks; a trial firmware never proved while parked without
+      Wi-Fi; the snapshot drain spinning after the connection drops;
+      provision.py and C escapes; `logs/logger/` names; the Wi-Fi terminal
+      without a password.
 - [ ] Try a change from the logger page's Board settings (a person's login
       only): a backup network, then a new Access token (make it, wait for
       "taken", then revoke the old).

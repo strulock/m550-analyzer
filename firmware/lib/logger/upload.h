@@ -45,6 +45,23 @@ inline UploadStep uploadStep(bool doneOk, bool fileThere, size_t fileSize) {
   return fileSize == 0 ? UPLOAD_EMPTY : UPLOAD_SEND;
 }
 
+// A failed upload and the rest of the queue: one that says the way there is
+// shut (no connection or reply, the token refused, too many requests) ends
+// the round; anything about this file (too large, refused, the Worker failing
+// on it) skips just it, so the files behind it still go. A 200 with another
+// hash is this file's too.
+inline bool uploadStopsRound(int code) {
+  return code <= 0 || code == 401 || code == 403 || code == 408 || code == 429;
+}
+
+// A file that keeps failing is tried every round at first, then every
+// UPLOAD_RETRY_EVERY rounds (about 2 minutes), so it doesn't cost a full
+// upload every 15 s for ever.
+static const unsigned UPLOAD_FAILS_BEFORE_SPACING = 3, UPLOAD_RETRY_EVERY = 8;
+inline bool uploadTryNow(unsigned failures, unsigned round) {
+  return failures < UPLOAD_FAILS_BEFORE_SPACING || round % UPLOAD_RETRY_EVERY == 0;
+}
+
 // The Worker took the file whole: a 200 whose reply has the file's hash.
 inline bool uploadAccepted(int code, const std::string& body, const std::string& sha) {
   return code == 200 && body.find("\"sha256\":\"" + sha + "\"") != std::string::npos;

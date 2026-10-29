@@ -30,6 +30,7 @@ def secrets(tmp_path, monkeypatch):
     monkeypatch.delenv("CF_ACCESS_CLIENT_ID", raising=False)
     monkeypatch.delenv("CF_ACCESS_CLIENT_SECRET", raising=False)
     monkeypatch.delenv("N63_WORKER_HOST", raising=False)
+    monkeypatch.setattr(pf, "app_cloud", lambda: ("", "", ""))
     return path
 
 
@@ -83,10 +84,16 @@ def test_a_failed_build_stops(monkeypatch):
         pf.build("v2", [], None)
 
 
-def test_the_token_comes_from_the_environment_first(secrets, monkeypatch):
+def test_the_token_is_the_environments_else_the_apps_never_the_boards(secrets, monkeypatch):
     secrets.write_text(SECRETS)
-    assert pf.token() == ("board-id.access", "board-secret")
+    # The board's token in logger_secrets.h is never used: the Worker refuses it.
+    with pytest.raises(SystemExit, match="no Access token"):
+        pf.token()
     assert pf.worker_host() == "m550.example.com"
+    monkeypatch.setattr(pf, "app_cloud",
+                        lambda: ("https://app.example.com/", "app-id.access", "app-secret"))
+    assert pf.token() == ("app-id.access", "app-secret")
+    assert pf.worker_host() == "app.example.com"
     monkeypatch.setenv("N63_WORKER_HOST", "ci.example.com")
     assert pf.worker_host() == "ci.example.com"
     monkeypatch.setenv("CF_ACCESS_CLIENT_ID", "ci-id")
@@ -98,9 +105,6 @@ def test_no_token_and_no_host(secrets):
     with pytest.raises(SystemExit, match="no Access token"):
         pf.token()
     assert pf.worker_host() is None
-    secrets.write_text('#define ACCESS_CLIENT_ID "only-the-id"\n')
-    with pytest.raises(SystemExit, match="no Access token"):
-        pf.token()
 
 
 class Reply(io.BytesIO):
@@ -112,7 +116,8 @@ class Reply(io.BytesIO):
 
 
 def test_publish_puts_the_image_with_the_token(secrets, tmp_path, monkeypatch):
-    secrets.write_text(SECRETS)
+    monkeypatch.setattr(pf, "app_cloud", lambda: ("https://m550.example.com", "app-id.access",
+                                                  "app-secret"))
     image = tmp_path / "firmware.bin"
     image.write_bytes(b"\xe9 an app image")
     monkeypatch.setattr(pf, "IMAGE", image)
@@ -127,14 +132,15 @@ def test_publish_puts_the_image_with_the_token(secrets, tmp_path, monkeypatch):
     assert req.get_method() == "PUT"
     assert req.full_url == "https://m550.example.com/api/logger/firmware?version=v2"
     assert req.data == b"\xe9 an app image"
-    assert req.get_header("Cf-access-client-id") == "board-id.access"
-    assert req.get_header("Cf-access-client-secret") == "board-secret"
+    assert req.get_header("Cf-access-client-id") == "app-id.access"
+    assert req.get_header("Cf-access-client-secret") == "app-secret"
     # Cloudflare turns away urllib's own User-Agent (error 1010).
     assert not req.get_header("User-agent").startswith("Python-urllib")
 
 
 def test_a_refused_publish_says_why(secrets, tmp_path, monkeypatch):
-    secrets.write_text(SECRETS)
+    monkeypatch.setenv("CF_ACCESS_CLIENT_ID", "ci-id")
+    monkeypatch.setenv("CF_ACCESS_CLIENT_SECRET", "ci-secret")
     image = tmp_path / "firmware.bin"
     image.write_bytes(b"\x00 not an image")
     monkeypatch.setattr(pf, "IMAGE", image)

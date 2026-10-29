@@ -751,6 +751,48 @@ test("board settings: a person's change goes to the board in a check-in's reply,
     assert.equal((await beat({})).settings_version, undefined);
   });
 
+test("firmware: the board's own token can't publish it, nor can anyone write its keys", async () => {
+  const board = await token({ email: undefined, common_name: "board0000000000.access" });
+  const app = await token({ email: undefined, common_name: "app00000000000000.access" });
+  const image = new Uint8Array(4096).fill(7);
+  image[0] = 0xE9;                                      // an ESP32 app image
+  // Before the board has checked in, it isn't known: any token publishes.
+  assert.equal((await call("PUT", "/api/logger/firmware?version=v1", { body: image, auth: board })).status,
+    200);
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 1, event: "beat" }),
+    auth: board });
+  let r = await call("PUT", "/api/logger/firmware?version=v2", { body: image, auth: board });
+  assert.equal(r.status, 403);
+  assert.match((await r.json()).error, /board's own token/);
+  assert.equal((await (await call("GET", "/api/logger/firmware")).json()).version, "v1");
+  // The app's service token and a person still publish.
+  assert.equal((await call("PUT", "/api/logger/firmware?version=v3", { body: image, auth: app })).status,
+    200);
+  assert.equal((await call("PUT", "/api/logger/firmware?version=v4", { body: image })).status, 200);
+  // Straight into the firmware's R2 keys: refused for everyone.
+  for (const key of ["firmware/logger.bin", "firmware/logger.json"]) {
+    assert.equal((await call("PUT", "/api/files/" + key, { body: "x", auth: app })).status, 403);
+  }
+  assert.equal((await (await call("GET", "/api/logger/firmware")).json()).version, "v4");
+});
+
+test("board settings: a check-in's answer doesn't drop a change saved after it", async () => {
+  const beat = async (extra) => (await call("POST", "/api/logger/heartbeat",
+    { body: JSON.stringify({ boot: 30, event: "beat", ...extra }) })).json();
+  await beat({ settings_version: 0 });
+  assert.equal((await call("PUT", "/api/logger/settings",
+    { body: JSON.stringify({ wifi_ssid: "" }) })).status, 400);       // the first network can't go
+  await call("PUT", "/api/logger/settings", { body: JSON.stringify({ tz: "UTC0" }) });
+  assert.equal((await beat({ settings_version: 0 })).settings_version, 1);
+  // A newer change arrives before the board's answer to the first.
+  await call("PUT", "/api/logger/settings", { body: JSON.stringify({ wifi2_ssid: "Phone" }) });
+  await beat({ settings_version: 1 });
+  const s = await (await call("GET", "/api/logger/settings")).json();
+  assert.equal(s.version, 2);
+  assert.deepEqual(s.pending.keys, ["tz", "wifi2_ssid"]);
+  assert.equal((await beat({ settings_version: 1 })).settings_version, 2);
+});
+
 test("logger check-ins: bad bodies refused, old ones dropped", async () => {
   const post = (body) => call("POST", "/api/logger/heartbeat", { body });
   assert.equal((await post("not json")).status, 400);

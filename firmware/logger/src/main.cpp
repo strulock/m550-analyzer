@@ -63,6 +63,7 @@
 #include <lwip/sockets.h>
 #include <sys/time.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <atomic>
@@ -106,6 +107,7 @@ using namespace logger;
 static const int ETH_MISO = 12, ETH_MOSI = 11, ETH_SCLK = 13;
 static const int ETH_CS = 14, ETH_INT = 10, ETH_RST = 9;
 static const int SD_CS = 4, SD_MOSI = 6, SD_MISO = 5, SD_SCK = 7;   // Waveshare wiki
+static const char* SD_MOUNT = "/sd";         // SD.begin's mount point, for POSIX calls
 
 static const IPAddress MY_IP(169, 254, 100, 100);
 static const IPAddress MASK(255, 255, 0, 0);
@@ -678,6 +680,9 @@ struct DriveFile {
   }
   size_t lastWrote = 0, lastOnCard = 0;      // the last write's, for the terminal
   bool write() {
+    // From the end of what's checked, wherever a failed write left the
+    // position.
+    if (!f.seek(size)) { lastWrote = 0; lastOnCard = f.size(); return false; }
     lastWrote = f.write((const uint8_t*)pending.data(), pending.size());
     f.flush();
     lastOnCard = f.size();
@@ -688,10 +693,18 @@ struct DriveFile {
     return true;
   }
   // Open again after a failure and carry on from what was checked. Only if
-  // the card has lost some of that is its hash read back from the card.
+  // the card has lost some of that is its hash read back from the card; a
+  // tail past it (a write that half landed) is cut off, else every later
+  // check would see the file longer than it should be.
   bool reopen() {
     if (f) f.close();
     std::lock_guard<std::recursive_mutex> g(sdLock);
+    {
+      File probe = SD.open(path);
+      size_t have = probe ? probe.size() : 0;
+      if (probe) probe.close();
+      if (have > size && truncate((String(SD_MOUNT) + path).c_str(), size) != 0) return false;
+    }
     f = SD.open(path, "r+");
     if (!f) return false;
     if (f.size() < size) {
@@ -1938,6 +1951,8 @@ static std::vector<String> pending() {
 // One file's upload: sent, or a problem with this file (the next is tried),
 // or with the way there (the rest wait for the next round).
 enum UpResult { UP_SENT, UP_SKIP, UP_STOP };
+static int lastUploadCode = 0;               // the last request's HTTP code (or HTTPClient's)
+static std::map<String, unsigned> uploadFailures;   // per file, this boot (the upload task's)
 
 static UpResult uploadOne(const String& name) {
   uploadTries++;
@@ -2008,7 +2023,8 @@ static UpResult uploadOne(const String& name) {
                  name.c_str(), done.sha.c_str());
       ok = true;
     }
-    if (ok || code == 200) result = ok ? UP_SENT : UP_SKIP;
+    lastUploadCode = code;
+    result = ok ? UP_SENT : uploadStopsRound(code) ? UP_STOP : UP_SKIP;  // lib/logger/upload.h
     if (ok) {
       int p = body.indexOf("\"processed\":");
       out.printf("[up] %s: %u bytes in %.1f s, checked%s\n", name.c_str(), done.size,
@@ -2059,8 +2075,10 @@ static bool join(const char* ssid, const char* pass, uint32_t ms) {
 // One scan (about 2 s) says which known network is in range, and only that
 // one is joined: waiting 8 s on each in turn held the first check-in back
 // minutes at a power-on away from home. A scan that fails tries both.
-static bool joinPreferred() {
-  Settings s = settingsNow();
+static bool joinWith(const Settings& s);
+static bool joinPreferred() { return joinWith(settingsNow()); }
+
+static bool joinWith(const Settings& s) {
   if (s.ssid1.empty() && s.ssid2.empty()) return false;
   int n = WiFi.scanNetworks();
   bool home = n < 0 && !s.ssid1.empty(), backup = n < 0 && !s.ssid2.empty();
@@ -2557,6 +2575,27 @@ static void applySettings(const std::string& reply) {
   }
   bool wifi = c.next.ssid1 != now.ssid1 || c.next.pass1 != now.pass1 ||
               c.next.ssid2 != now.ssid2 || c.next.pass2 != now.pass2;
+  // A change to the network the board is on is tried now, the old one back
+  // if it fails: a wrong password would otherwise strand a board whose only
+  // way back is USB. (One for a network out of range can't be tried; the
+  // board keeps the network it's on meanwhile.)
+  String on = WiFi.SSID();
+  bool first = c.next.ssid1 != now.ssid1 || c.next.pass1 != now.pass1;
+  bool second = c.next.ssid2 != now.ssid2 || c.next.pass2 != now.pass2;
+  bool onChanged = (on == now.ssid1.c_str() && first) || (on == now.ssid2.c_str() && second);
+  if (onChanged) {
+    WiFi.disconnect();
+    bool joined = joinWith(c.next);
+    if (!joined) {
+      joinWith(now);
+      out.printf("[set] change %u from the logger page refused: no network joined with it\n",
+                 (unsigned)c.version);
+      std::lock_guard<std::mutex> g(cfgLock);
+      settingsFailed = c.version;
+      settingsError = "couldn't join a network with the new Wi-Fi settings; the old ones kept";
+      return;
+    }
+  }
   saveSettings(c.next);
   out.printf("[set] change %u from the logger page saved%s\n", (unsigned)c.version,
              wifi ? "; Wi-Fi takes it at its next join" : "");
@@ -3070,11 +3109,24 @@ static void uploadTask(void*) {
     first = uploadNow = false;
     std::vector<String> names = pending();
     uploadsWaiting = names.size();
+    static unsigned round = 0;
+    round++;
+    unsigned serverErrors = 0;
     for (const String& name : names) {   // a file that fails doesn't hold up the rest
       if (!WiFi.isConnected()) break;
+      if (!uploadTryNow(uploadFailures[name], round)) continue;
+      lastUploadCode = 0;
       UpResult r = uploadOne(name);
+      if (r == UP_SENT) {
+        uploadsWaiting = uploadsWaiting - 1;
+        uploadFailures.erase(name);
+        serverErrors = 0;
+        continue;
+      }
+      uploadFailures[name]++;
       if (r == UP_STOP) break;
-      if (r == UP_SENT) uploadsWaiting = uploadsWaiting - 1;
+      // The Worker failing twice running is the Worker, not the files.
+      if (lastUploadCode >= 500 && ++serverErrors >= 2) break;
     }
   }
 }
@@ -3361,7 +3413,9 @@ static void receiveSettings() {
     if (line == ".") { done = true; break; }
     std::string key;
     if (settingLine(s, line, key)) keys += (keys.empty() ? "" : ", ") + key;
-    else bad += (bad.empty() ? "" : ", ") + line.substr(0, line.find('='));
+    else bad += (bad.empty() ? "" : ", ") +   // the key only: a line without one could be a password
+                (line.find('=') == std::string::npos ? std::string("(a line without =)")
+                                                     : line.substr(0, line.find('=')));
     line.clear();
   }
   if (!done) { out.println("[set] timed out; nothing saved"); return; }

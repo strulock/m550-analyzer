@@ -64,7 +64,10 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    host): the Worker hands the change to the board in its next check-in's
    reply and drops it once the board says it has it. A new token is tried
    with a check-in before the board keeps it, so a wrong one can't lock it
-   out; make the new one, wait for "taken", then revoke the old. A build
+   out; make the new one, wait for "taken", then revoke the old. A change
+   to the network the board is on is tried at once, and the old settings
+   kept if no network joins with the new (a change to one out of range
+   can't be tried; the board stays on the one it has). A build
    made on a PC with `logger_secrets.h` (the IDE's, or a bench build) starts
    a board with empty settings from it.
 2. **Channels.** Pick them on the logger channel page, `https://<worker>/logger`
@@ -155,10 +158,12 @@ finished files to `logger/` on the Worker, compares the SHA-256 the Worker
 reports with the board's own, and only then deletes them. The board's own
 is the `.done`'s, written as the file closed, or else that of the bytes it
 just sent, all of the file (a `.done` from the power-cut recovery was once
-wrong where the file wasn't). A file that fails is tried again at the next
-round, and the files after it still go; a failure on the way there (no
-memory for TLS, no connection, a refusal) leaves them all for the next
-round. The Worker turns
+wrong where the file wasn't). A file that fails (a 200 with another hash, or the
+Worker refusing or failing on it: 400, 413, 5xx) is tried again at the next
+round, and the files after it still go; after three failures it's tried
+every eighth round (about 2 minutes). A failure on the way there (no memory
+for TLS, no connection, the token refused: 401, 403, 408, 429), or the Worker
+failing on two files running, leaves the rest for the next round. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).
 The backlog goes first thing at power-on (as soon as Wi-Fi is up, before
 a drive needs the board), and a drive's files the moment it ends, while
@@ -314,8 +319,11 @@ builds the logger with a version (the UTC time and the commit, e.g.
 `20261027-0215-706ddb6`; uncommitted changes are refused unless
 `--allow-dirty`) and publishes it to the Worker (`PUT /api/logger/firmware`,
 with the Access token from `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`,
-else the board's own from `logger_secrets.h`; the host from `--host`,
-`N63_WORKER_HOST` or `WORKER_HOST` there). The build never includes
+else the n63read app's (Settings > Cloud); the host from `--host`,
+`N63_WORKER_HOST`, the app's, or `WORKER_HOST` in `logger_secrets.h`). The
+Worker refuses firmware from the board's own token (the one that checks in),
+so a token taken from a board can't put code on it, and refuses writes to
+the firmware's R2 keys through `/api/files/`. The build never includes
 `logger_secrets.h` (`LOGGER_NO_SECRETS`). The Worker keeps one build.
 
 The board asks for it soon after Wi-Fi comes up and every 10 minutes. For a

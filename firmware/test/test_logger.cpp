@@ -816,6 +816,14 @@ static void test_backoff() {
 }
 
 static void test_upload_rules() {
+  // The way there shut ends the round; this file's trouble skips just it.
+  CHECK(uploadStopsRound(-1) && uploadStopsRound(0) && uploadStopsRound(401) &&
+        uploadStopsRound(403) && uploadStopsRound(429));
+  CHECK(!uploadStopsRound(200) && !uploadStopsRound(400) && !uploadStopsRound(413) &&
+        !uploadStopsRound(500) && !uploadStopsRound(503));
+  // A file that keeps failing is spaced out after three.
+  CHECK(uploadTryNow(0, 5) && uploadTryNow(2, 5));
+  CHECK(!uploadTryNow(3, 5) && uploadTryNow(3, 8) && uploadTryNow(9, 16));
   const std::string sha(64, 'c');
   Done d;
   CHECK(parseDone(sha + " 1234", d) && d.sha == sha && d.size == 1234);

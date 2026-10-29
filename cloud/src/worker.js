@@ -34,8 +34,8 @@
  * No dependencies: plain JavaScript, deployed with `wrangler deploy`.
  */
 
-import { beatSettings, BOARD_SETTINGS_SCHEMA, cancelBoardSettings, getBoardSettings,
-  putBoardSettings, SettingsError } from "./boardsettings.js";
+import { beatSettings, BOARD_SETTINGS_SCHEMA, cancelBoardSettings, getBoardSettings, isBoard,
+  noteBoard, putBoardSettings, SettingsError } from "./boardsettings.js";
 import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerExtras, readLog,
   summarizeDrive } from "./drive.js";
 import { channelFile, ConfigError, getCatalog, getPresets, listTiers, LOGGER_SCHEMA, presetVersions,
@@ -1040,6 +1040,7 @@ async function loggerStatus(env, hours, now = new Date()) {
 // own, downloads the image to its card and checks the SHA-256 (firmware/
 // README.md has the rest).
 
+const FIRMWARE_PREFIX = "firmware/";
 const FIRMWARE_BIN = "firmware/logger.bin";
 const FIRMWARE_MANIFEST = "firmware/logger.json";
 const MAX_FIRMWARE = 6 * 1024 * 1024;        // the board's app partition is 6.25 MB
@@ -1685,6 +1686,8 @@ export async function handle(request, env, fetcher = fetch) {
       return json({ error: "body: JSON {boot, event, ...}" }, 400);
     }
     try {
+      await ensureSchema(env);
+      await noteBoard(env, auth.who);
       const stored = await putBeat(env, body);
       return json({ ok: true, ...stored, ...(await beatSweep(env, body)),
         ...(await beatSettings(env, body)) });
@@ -1735,6 +1738,10 @@ export async function handle(request, env, fetcher = fetch) {
       return m ? json(m) : json({ error: "no firmware published" }, 404);
     }
     if (request.method === "PUT") {
+      await ensureSchema(env);
+      if (await isBoard(env, auth.who)) {
+        return json({ error: "the board's own token can't publish firmware" }, 403);
+      }
       const len = Number(request.headers.get("content-length") || 0);
       if (len > MAX_FIRMWARE) return json({ error: "too large" }, 413);
       try {
@@ -1784,6 +1791,11 @@ export async function handle(request, env, fetcher = fetch) {
     const key = appKey(safeKey(url.pathname.slice("/api/files/".length)));
     if (!key) return json({ error: "bad file name" }, 400);
     if (request.method === "PUT") {
+      // The firmware goes only through PUT /api/logger/firmware (whose token
+      // is checked), never straight into its R2 keys.
+      if (key.startsWith(FIRMWARE_PREFIX)) {
+        return json({ error: "firmware is published with PUT /api/logger/firmware" }, 403);
+      }
       const len = Number(request.headers.get("content-length") || 0);
       if (len > MAX_UPLOAD) return json({ error: "too large" }, 413);
       const data = await request.arrayBuffer();
