@@ -2078,28 +2078,49 @@ static bool joinPreferred() {
 }
 
 // The setup page, while the access point is up: the settings as a form (what's
-// set shown, never a password), saved to the flash, then a restart.
+// set shown, never a password), saved to the flash, then a restart. Only over
+// the access point (the server listens on every interface, and the home
+// network mustn't reach it), and once the board is set up, never the host or
+// the token: a page that could point the board at another host would hand
+// that host the token with the next check-in. Those change over USB, or the
+// token from the logger page.
 static WebServer setupPage(80);
 static bool setupPageOn = false;
+
+static bool lockedOnSetupPage(const SettingField& f, const Settings& s) {
+  return !settingsEmpty(s) &&
+         (f.member == &Settings::host || f.member == &Settings::clientId ||
+          f.member == &Settings::clientSecret);
+}
+
+static bool overAccessPoint() {
+  if (setupPage.client().localIP() == WiFi.softAPIP()) return true;
+  setupPage.send(403, "text/plain", "only over the board's access point");
+  return false;
+}
 
 static String htmlEscape(const std::string& v) {
   String o;
   for (char c : v) {
     if (c == '&') o += "&amp;";
     else if (c == '<') o += "&lt;";
+    else if (c == '>') o += "&gt;";
     else if (c == '"') o += "&quot;";
+    else if (c == '\'') o += "&#39;";
     else o += c;
   }
   return o;
 }
 
 static void setupForm() {
+  if (!overAccessPoint()) return;
   Settings s = settingsNow();
   String h = "<!doctype html><meta name=viewport content='width=device-width'>"
              "<title>m550 logger setup</title><body style='font-family:sans-serif;max-width:30em'>"
              "<h2>m550 logger setup</h2><p>Blank fields keep what the board has.</p>"
              "<form method=post action=/save>";
   for (const SettingField& f : SETTING_FIELDS) {
+    if (lockedOnSetupPage(f, s)) continue;
     h += "<p><label>";
     h += f.key;
     h += "<br><input name='";
@@ -2114,11 +2135,17 @@ static void setupForm() {
 }
 
 static void setupSave() {
+  if (!overAccessPoint()) return;
   Settings s = settingsNow();
+  const Settings was = s;
   String changed;
   for (const SettingField& f : SETTING_FIELDS) {
     String v = setupPage.arg(f.key);
     if (!v.length()) continue;
+    if (lockedOnSetupPage(f, was)) {
+      setupPage.send(403, "text/plain", String(f.key) + " changes over USB once the board is set up");
+      return;
+    }
     std::string key;
     if (!settingLine(s, std::string(f.key) + "=" + v.c_str(), key)) {
       setupPage.send(400, "text/plain", String("not a usable ") + f.key + "; nothing saved");
