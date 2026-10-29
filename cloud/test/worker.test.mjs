@@ -736,6 +736,11 @@ test("board settings: a person's change goes to the board in a check-in's reply,
     await beat({ settings_version: 3, settings_failed: 4, settings_error: "refused (403)" });
     s = await (await call("GET", "/api/logger/settings")).json();
     assert.equal(s.last.result, "refused: refused (403)");
+    // The next is numbered past the refused one, even with the table emptied.
+    env.DB.db.exec("DELETE FROM board_settings");
+    s = await (await call("PUT", "/api/logger/settings", { body: JSON.stringify({ tz: "UTC0" }) }))
+      .json();
+    assert.equal(s.version, 5);
     // One taken back before the board had it.
     await call("PUT", "/api/logger/settings", { body: JSON.stringify({ tz: "UTC0" }) });
     s = await (await call("DELETE", "/api/logger/settings")).json();

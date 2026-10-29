@@ -91,7 +91,10 @@ export async function putBoardSettings(env, body, who, now = new Date()) {
   const r = await row(env);
   const beat = await lastBeat(env);
   const pending = r && r.pending ? { ...JSON.parse(r.pending), ...change } : change;
-  const version = Math.max(r ? r.version : 0, (beat && beat.settings_version) || 0) + 1;
+  // Past the board's, and past one it refused (it ignores that number again
+  // until it restarts).
+  const version = Math.max(r ? r.version : 0, (beat && beat.settings_version) || 0,
+    (beat && beat.settings_failed) || 0) + 1;
   await env.DB.prepare(
     `INSERT OR REPLACE INTO board_settings (id, version, pending, requested, by, result, done)
      VALUES (1, ?, ?, ?, ?, NULL, NULL)`)
