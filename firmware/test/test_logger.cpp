@@ -266,6 +266,45 @@ static void test_scheduler() {
   CHECK(c[0].size() == 1 && c[1].size() == 1);
 }
 
+// The airbag module's temperature and voltage (ALONE) never share a request,
+// with each other or anything else; its other reads still batch.
+static void test_alone_reads() {
+  Table m;
+  m.line("name,module,did,did_size,offset,type,order,mul,div,add,no_value,unit,tier");
+  m.line("ACSM_SG_INNENTEMPERATUR,0x01,0x4003,2,0,s16,big,1,10,0,,\xC2\xB0" "C,slow");
+  m.line("ACSM_SG_SPANNUNG,0x01,0x4007,2,0,u16,big,1,1,0,,mV,slow");
+  m.line("ACSM_A,0x01,0x4020,4,0,u32,big,1,1,0,,,slow");
+  m.line("ACSM_B,0x01,0x4021,4,0,u32,big,1,1,0,,,slow");
+  m.line("ACSM_ONCE,0x01,0x4007,2,0,u16,big,1,1,0,,,slow");
+  Plan p;
+  p.build(m);
+  int alone = 0;
+  for (const Read& r : p.reads) alone += r.alone;
+  CHECK(alone == 2 && p.reads.size() == 4);
+  size_t at = p.tierStart(SLOW);
+  std::vector<std::vector<size_t>> got;
+  for (std::vector<size_t> b; !(b = p.next(SLOW, at, 0)).empty();) got.push_back(b);
+  CHECK(got.size() == 3 && got[0].size() == 1 && got[1].size() == 1 && got[2].size() == 2);
+  Scheduler s;
+  s.build(p);
+  std::vector<uint16_t> seen;
+  int together = 0;
+  for (int k = 0; k < 6; k++) {
+    std::vector<std::vector<size_t>> c = s.cycle(p, 0);
+    CHECK(c.size() == 1);                                   // one request to the module a cycle
+    for (const std::vector<size_t>& b : c) {
+      bool hasAlone = false;
+      for (size_t i : b) hasAlone = hasAlone || p.reads[i].alone;
+      CHECK(!hasAlone || b.size() == 1);
+      if (hasAlone) seen.push_back(p.reads[b[0]].did);
+      together += b.size() == 2;
+    }
+  }
+  CHECK(seen.size() == 3 && together == 3);                 // every other turn
+  CHECK(std::find(seen.begin(), seen.end(), 0x4003) != seen.end());
+  CHECK(std::find(seen.begin(), seen.end(), 0x4007) != seen.end());
+}
+
 // Modules still answering are skipped; a module without fast reads sends a
 // retry instead of its usual request; at one identifier a request, medium
 // and slow take turns; several slow-only modules a cycle.
@@ -349,6 +388,22 @@ static void test_split_reply() {
   CHECK(splitReply(text, sizeof(text), p.reads, one, data, len) && len[0] == 4);
   double v;
   CHECK(decode(find(t, "BDC_TEXT_AFTER"), data[0], len[0], v) && v == 7);
+
+  // A late answer: bank 1's last request (oil temperature and engine speed)
+  // timed out, and its answer comes while the next one (oil temperature and
+  // the trim) waits. Same first identifier, so the client takes it; it lines
+  // up with the late request, not this one.
+  at = 0;
+  std::vector<size_t> last = p.next(FAST, at, 0);         // 4402, 4807
+  at = p.tierStart(MEDIUM);
+  std::vector<size_t> now = {last[0], p.next(MEDIUM, at, 0)[0]};   // 4402, 4A85
+  const uint8_t old[] = {0x44, 0x02, 0, 100, 0x48, 0x07, 0x05, 0xDC};
+  const uint8_t fresh[] = {0x44, 0x02, 0, 101, 0x4A, 0x85, 0x80, 0x00};
+  CHECK(fitReply(old, sizeof(old), p.reads, now, last, data, len) == Fit::LATE);
+  CHECK(fitReply(old, sizeof(old), p.reads, now, {}, data, len) == Fit::OUT_OF_LINE);
+  CHECK(fitReply(fresh, sizeof(fresh), p.reads, now, last, data, len) == Fit::LINED);
+  CHECK(data[1] == fresh + 6);
+  CHECK(fitReply(stranger, sizeof(stranger), p.reads, now, last, data, len) == Fit::OUT_OF_LINE);
 }
 
 static void test_clock_and_names() {
@@ -879,6 +934,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"burst", test_burst},
   {"scheduler_fast_only", test_scheduler_fast_only},
   {"batch_recovery", test_batch_recovery},
+  {"alone_reads", test_alone_reads},
   {"periodic", test_periodic},
   {"sha256", test_sha256},
   {"channel_file", test_channel_file},

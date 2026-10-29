@@ -4,10 +4,10 @@
 // n63read's rate; MAX_BATCH asks for more). No Arduino code.
 //
 // A module that can't take a batch (says it's too long or badly formed,
-// answers out of line, or keeps timing out) halves its batch size, down to
-// one identifier a request; a read that keeps failing, or that the module
-// refuses, is rested and tried again now and then, so one dead identifier
-// doesn't cost a request every cycle.
+// answers out of line, or keeps timing out while its connection works)
+// halves its batch size, down to one identifier a request; a read that keeps
+// failing, or that the module refuses, is rested and tried again now and
+// then, so one dead identifier doesn't cost a request every cycle.
 #pragma once
 #include <stdint.h>
 
@@ -27,7 +27,20 @@ struct Read {
   std::vector<uint32_t> channels;   // indices into Table::channels
   uint8_t failures = 0;        // in a row
   uint32_t restUntil = 0;      // ms; skipped until then
+  bool alone = false;          // asked in a request of its own (ALONE)
 };
+
+// Identifiers a module answers wrongly when asked alongside others, so they
+// go alone, as reads of unknown size do. The airbag module's internal
+// temperature and supply voltage, asked in one request, both came back with
+// one of the two values (28 Oct: 1,424 "°C" at 14.2 V, 185 "mV" at 18.5 °C).
+struct AloneRead { uint8_t module; uint16_t did; };
+constexpr AloneRead ALONE[] = {{0x01, 0x4003}, {0x01, 0x4007}};
+
+inline bool asksAlone(uint8_t module, uint16_t did) {
+  for (const AloneRead& a : ALONE) if (a.module == module && a.did == did) return true;
+  return false;
+}
 
 constexpr size_t MAX_BATCH = 24;         // identifiers per request, to start (HSFZ fits 31)
 constexpr size_t MAX_REPLY = 3000;       // bytes a batch may expect back (hsfz buffer 4096)
@@ -57,6 +70,7 @@ class Plan {
       if (it == at.end()) {
         Read r;
         r.module = c.module; r.did = c.did; r.size = c.didSize; r.tier = c.tier;
+        r.alone = asksAlone(c.module, c.did);
         at[key] = reads.size();
         reads.push_back(r);
         it = at.find(key);
@@ -122,14 +136,14 @@ class Plan {
       if (r.restUntil && (int32_t)(r.restUntil - now) > 0) continue;
       if (!out.empty()) {
         const Read& first = reads[out[0]];
-        if (r.module != first.module || first.size == 0 || r.size == 0 ||
+        if (r.module != first.module || first.size == 0 || r.size == 0 || first.alone || r.alone ||
             out.size() >= batchFor(first.module) || bytes + 2 + r.size > MAX_REPLY) {
           break;
         }
       }
       out.push_back(from);
       bytes += 2 + r.size;
-      if (r.size == 0) { from++; break; }
+      if (r.size == 0 || r.alone) { from++; break; }
     }
     return out;
   }
@@ -170,7 +184,8 @@ class Plan {
 // medium ones and the next slow ones in rotation, up to its batch size.
 // Modules with only slow reads take turns, `slowOnlyMax` a cycle. Reads of
 // unknown reply size go alone, one a cycle, when their module isn't asked
-// otherwise. A module still answering an earlier request (`busy`) is
+// otherwise; ALONE reads take every other turn of their own module, one a
+// request. A module still answering an earlier request (`busy`) is
 // skipped; batches to ask again (halves of one the module couldn't take)
 // go out on its next turn.
 //
@@ -192,10 +207,11 @@ class Scheduler {
       if (periodic(r.tier)) {
         if (!(due & (1u << r.tier))) continue;
         onceCount_++;
-        if (r.size == 0) onceSingles_.push_back(i);
+        if (r.size == 0 || r.alone) onceSingles_.push_back(i);
         else queue(r.module).once.push_back(i);
         continue;
       }
+      if (r.alone) { queue(r.module).alone.push_back(i); continue; }
       if (r.size == 0) { singles_.push_back(i); continue; }
       Queue& q = queue(r.module);
       (r.tier == FAST ? q.fast : r.tier == MEDIUM ? q.medium : q.slow).push_back(i);
@@ -276,6 +292,16 @@ class Scheduler {
       }
       if (q.fast.empty() && in(asked, q.module)) continue;
       if (q.fast.empty() && q.medium.empty()) continue;   // slow and periodic only: below
+      // ALONE reads every other turn: an extra request to a module the
+      // logger waits for, any other's request instead of its usual one.
+      if (aloneTurn(q)) {
+        long i = nextAlone(p, q, now);
+        if (i >= 0) {
+          out.push_back({(size_t)i});
+          asked.push_back(q.module);
+          if (q.fast.empty()) continue;
+        }
+      }
       std::vector<size_t> b;
       size_t bytes = 0, room = p.batchFor(q.module);
       for (size_t i : q.fast) {                    // all of them: more requests if need be
@@ -333,8 +359,14 @@ class Scheduler {
     for (size_t n = 0; n < queues_.size() && picked < slowOnlyMax; n++) {
       Queue& q = queues_[slowOnlyAt_++ % queues_.size()];
       bool once = onceOpen_ && !q.once.empty();
-      if (!q.fast.empty() || !q.medium.empty() || (q.slow.empty() && !once)) continue;
+      if (!q.fast.empty() || !q.medium.empty() || (q.slow.empty() && !once && q.alone.empty())) {
+        continue;
+      }
       if (in(busy, q.module) || in(asked, q.module)) continue;
+      if ((aloneTurn(q) || (q.slow.empty() && !once))) {
+        long i = nextAlone(p, q, now);
+        if (i >= 0) { out.push_back({(size_t)i}); asked.push_back(q.module); picked++; continue; }
+      }
       std::vector<size_t> b;
       size_t bytes = 0, room = p.batchFor(q.module);
       if (once) takeOnce(p, q.once, now, b, bytes, room);
@@ -365,10 +397,23 @@ class Scheduler {
     std::vector<size_t> fast, medium, slow;
     std::vector<size_t> once;            // periodic reads still to ask this drive
     std::vector<std::vector<size_t>> retries;
-    size_t mediumAt = 0, slowAt = 0;
+    std::vector<size_t> alone;           // ALONE reads, one a request
+    size_t mediumAt = 0, slowAt = 0, aloneAt = 0;
     bool slowRound = false;              // every slow read taken since the last pass
-    bool slowTurn = false, extraTurn = false;
+    bool slowTurn = false, extraTurn = false, aloneFlip = false;
   };
+
+  // Whether this turn of the module's goes to one of its ALONE reads.
+  static bool aloneTurn(Queue& q) { return !q.alone.empty() && (q.aloneFlip = !q.aloneFlip); }
+
+  // The next of a module's ALONE reads, in rotation; -1 if all are resting.
+  static long nextAlone(const Plan& p, Queue& q, uint32_t now) {
+    for (size_t n = 0; n < q.alone.size(); n++) {
+      size_t i = q.alone[q.aloneAt++ % q.alone.size()];
+      if (!resting(p.reads[i], now)) return (long)i;
+    }
+    return -1;
+  }
 
   Queue& queue(uint8_t module) {
     for (Queue& q : queues_) if (q.module == module) return q;
@@ -561,6 +606,19 @@ inline bool splitReply(const uint8_t* body, size_t n, const std::vector<Read>& r
     i += 2 + size;
   }
   return true;
+}
+
+// How a positive answer lines up: with the request it came for (LINED), with
+// the module's earlier request whose answer was still to come (LATE: that
+// one timed out and its answer turned up while this one waited), or neither
+// (OUT_OF_LINE). data/len as splitReply's, for the request it lined up with.
+enum class Fit { LINED, LATE, OUT_OF_LINE };
+inline Fit fitReply(const uint8_t* body, size_t n, const std::vector<Read>& reads,
+                    const std::vector<size_t>& asked, const std::vector<size_t>& late,
+                    std::vector<const uint8_t*>& data, std::vector<size_t>& len) {
+  if (splitReply(body, n, reads, asked, data, len)) return Fit::LINED;
+  if (!late.empty() && splitReply(body, n, reads, late, data, len)) return Fit::LATE;
+  return Fit::OUT_OF_LINE;
 }
 
 }  // namespace logger

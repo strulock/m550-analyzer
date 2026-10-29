@@ -161,6 +161,16 @@ class Client {
     return req[0] == 0x19 && reqLen == 3 && req[1] == 0x02;
   }
 
+  // Whether any module but `except` has answered this tester since `since`
+  // (ms). A module that didn't answer while others did is silent itself; if
+  // none did, the connection stalled and it isn't that module's doing.
+  bool heardOther(uint8_t except, uint32_t since) const {
+    for (int m = 0; m < 256; m++) {
+      if (m != except && heard_[m] && (int32_t)(heard_[m] - since) >= 0) return true;
+    }
+    return false;
+  }
+
   // Forget every kept answer (a new connection).
   void clearStash() {
     for (Stashed& s : stash_) s.used = false;
@@ -199,6 +209,7 @@ class Client {
     if (fr != OK) return fr;
     if (control >= 0x0040 && control <= 0x0044) { nack_ = control; return OK; }
     if (control != CTRL_DIAG || length < 3 || buf_[1] != src_) return OK;
+    heard_[buf_[0]] = t_.now_ms() | 1;
     keep(buf_[0], buf_ + 2, length - 2);
     return OK;
   }
@@ -246,6 +257,7 @@ class Client {
     uint8_t data[STASH_BYTES];
   };
   Stashed stash_[STASH];
+  uint32_t heard_[256] = {};                       // ms each module last answered (0: never)
   uint32_t seq_ = 0;
   uint16_t nack_ = 0;
   // Whether a positive reply starting at `p` answers this request: 0x3E echoes

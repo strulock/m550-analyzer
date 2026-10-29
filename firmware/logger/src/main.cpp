@@ -840,8 +840,21 @@ static void retryHalves(const std::vector<size_t>& batch) {
 // again, and rested for the rest of the drive (noted, so the Worker turns it
 // off in the channel file for good); anything else refuses the reads, which
 // rest. No answer at all counts against the reads, and against the batch
-// size when it keeps happening.
-static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
+// size when it keeps happening, but only while other modules on the
+// connection answer: when none has since the request went (`sentMs`), the
+// connection stalled (28 Oct: bank 1 down to one identifier a request, a
+// third of the rows, from timeouts the gearbox and head unit had at the same
+// moment), and the request's size had nothing to do with it.
+//
+// The answer to a request that timed out can still come, while the module's
+// next request waits, and lines up with the one it answered, not this one:
+// a late answer, dropped without counting against the batch size (it was
+// halving bank 1's batches every few seconds). `late[m]`: the module's
+// request whose answer may still come.
+static std::vector<size_t> late[256];
+static uint32_t stalls = 0, lateAnswers = 0;      // this stats window
+
+static void process(const std::vector<size_t>& batch, const hsfz::Reply& r, uint32_t sentMs) {
   const uint8_t module = moduleOf(batch);
   const uint32_t now = millis();
   if (r.result == hsfz::CLOSED) { connectionLost = true; return; }
@@ -852,7 +865,15 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
   }
   std::vector<const uint8_t*> data;
   std::vector<size_t> len;
-  if (r.result == hsfz::OK && splitReply(rx + 1, r.len - 1, plan.reads, batch, data, len)) {
+  const Fit fit = r.result != hsfz::OK ? Fit::OUT_OF_LINE
+                  : fitReply(rx + 1, r.len - 1, plan.reads, batch, late[module], data, len);
+  if (fit == Fit::LATE) {
+    late[module] = batch;                                 // this one's answer is the late one now
+    lateAnswers++;
+    return;
+  }
+  if (r.result == hsfz::OK) late[module].clear();
+  if (fit == Fit::LINED) {
     if (plan.goodBatch(module, batch.size())) {
       char text[96];
       snprintf(text, sizeof(text), "module 0x%02X %u identifiers per request again", module,
@@ -909,7 +930,11 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
     }
     return;
   }
-  for (size_t i : batch) plan.failed(i, now);           // no answer
+  if (r.result == hsfz::TIMEOUT) late[module] = batch;
+  hsfz::Client* cl = clientFor(module);
+  const bool stalled = r.result == hsfz::TIMEOUT && cl && !cl->heardOther(module, sentMs);
+  if (stalled) stalls++;
+  if (!stalled) for (size_t i : batch) plan.failed(i, now);   // no answer
   if (r.result == hsfz::TIMEOUT && backoff.timedOut(module, now)) {
     char text[80];
     snprintf(text, sizeof(text), "module 0x%02X not answering: left alone %.0f s", module,
@@ -917,7 +942,7 @@ static void process(const std::vector<size_t>& batch, const hsfz::Reply& r) {
     out.printf("[plan] %s\n", text);
     addNote(text);
   }
-  if (r.result == hsfz::TIMEOUT && plan.timedOut(module) >= TIMEOUTS_TO_SHRINK &&
+  if (r.result == hsfz::TIMEOUT && !stalled && plan.timedOut(module) >= TIMEOUTS_TO_SHRINK &&
       batch.size() > 1) {
     smaller(module, batch.size(), "timeouts");
     plan.moduleAnswered(module);                          // count again at the new size
@@ -1008,7 +1033,7 @@ static void collect() {
     pendingReqs.erase(pendingReqs.begin() + k);
     if (got.check) checkAnswer(r);
     else if (got.batch.empty()) faultAnswer(got.target, r);
-    else process(got.batch, r);
+    else process(got.batch, r, got.sentMs);
   }
 }
 
@@ -1017,7 +1042,8 @@ static void collect() {
 static void resetRequests() {
   pendingReqs.clear();
   backoff.reset();
-  refusedReads = laterSent = laterTimeouts = 0;
+  refusedReads = laterSent = laterTimeouts = stalls = lateAnswers = 0;
+  for (std::vector<size_t>& l : late) l.clear();
   memset(refusedNoteMs, 0, sizeof(refusedNoteMs));
   faultWanted = -1;
 }
@@ -1027,6 +1053,7 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
   struct Sent { hsfz::Client* cl; uint8_t req[1 + 2 * MAX_BATCH]; size_t n; uint8_t target;
                 hsfz::Reply r; bool ok; };
   std::vector<Sent> sent(wave.size());
+  const uint32_t sentMs = millis();
   for (size_t i = 0; i < wave.size(); i++) {
     Sent& s = sent[i];
     s.target = moduleOf(*wave[i]);
@@ -1038,7 +1065,7 @@ static void askWave(const std::vector<const std::vector<size_t>*>& wave) {
   for (size_t i = 0; i < wave.size() && !connectionLost; i++) {
     Sent& s = sent[i];
     hsfz::Reply r = s.ok ? s.cl->finish(s.target, s.req, s.n, rx, sizeof(rx), REQUEST_MS) : s.r;
-    process(*wave[i], r);
+    process(*wave[i], r, sentMs);
   }
 }
 
@@ -1238,18 +1265,18 @@ static void cycle() {
         snprintf(a, sizeof(a), "%s0x%02X", alone.empty() ? "" : " ", m);
         alone += a;
       }
-      char text[300];
+      char text[360];
       snprintf(text, sizeof(text),
                "stats %.1f rows/s; reads %.0f ms; files %.0f ms; slow pass %.0f s; %u resting "
-               "(%u refused); collected later %u (%u timed out); left alone: %s; smaller "
-               "batches: %s; bursts %u (%.0f s)",
+               "(%u refused); collected later %u (%u timed out); stalls %u; late answers %u; "
+               "left alone: %s; smaller batches: %s; bursts %u (%.0f s)",
                cycleRate, msFast, msWrite, sweepPassMs / 1000.0f, (unsigned)rested,
                (unsigned)refusedReads, (unsigned)laterSent, (unsigned)laterTimeouts,
-               alone.empty() ? "none" : alone.c_str(),
+               (unsigned)stalls, (unsigned)lateAnswers, alone.empty() ? "none" : alone.c_str(),
                smallerList.empty() ? "none" : smallerList.c_str(), (unsigned)burst.count(),
                burst.ms() / 1000.0f);
       addNote(text);
-      laterSent = laterTimeouts = 0;
+      laterSent = laterTimeouts = stalls = lateAnswers = 0;
       // What each tier got, per identifier, as the logger page estimates it:
       // fast and medium reads a second, the slow pass's length. The Worker
       // averages these into the drive's row (rate_fast, rate_medium,
@@ -1827,8 +1854,8 @@ static bool joinPreferred() {
     if (join(WIFI_SSID2, WIFI_PASS2, 10000)) return true;
   }
 #endif
-#endif
   (void)backup;
+#endif
   return false;
 }
 
