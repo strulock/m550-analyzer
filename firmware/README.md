@@ -116,7 +116,13 @@ and whatever a preset says, it reads the selector, engine speed, speed,
 `ITKUM` and `IUIBS` at least medium (`logger.js` `BOARD_NEEDS`). The
 check-ins report the selector (`gear`: P R N D M). Whenever Wi-Fi is up, the other core uploads
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
-reports with the board's own, and only then deletes them. The Worker turns
+reports with the board's own, and only then deletes them. The board's own
+is the `.done`'s, written as the file closed, or else that of the bytes it
+just sent, all of the file (a `.done` from the power-cut recovery was once
+wrong where the file wasn't). A file that fails is tried again at the next
+round, and the files after it still go; a failure on the way there (no
+memory for TLS, no connection, a refusal) leaves them all for the next
+round. The Worker turns
 each pair into one drive in History and the time series (cloud/README.md).
 The backlog goes first thing at power-on (as soon as Wi-Fi is up, before
 a drive needs the board), and a drive's files the moment it ends, while
