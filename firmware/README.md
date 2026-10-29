@@ -149,7 +149,24 @@ The module's error code decides what happens to a batch it won't answer:
   halves are asked again until it's found, and only that one rests (10 min);
 - any other refusal: the batch's identifiers rest for a minute;
 - no answer: counts against the identifiers (three in a row rest them), and
-  two timeouts in a row halve the module's batches.
+  two timeouts in a row halve the module's batches, but only while other
+  modules on the connection answer. When none has answered since the
+  request went, the connection stalled: nothing counts against the module
+  (the stats note counts these as `stalls`). On 28 Oct stalls that hit the
+  bank 1 DME, the gearbox and the head unit at the same moment took bank 1
+  down to one identifier a request and the drive to a third of its rows.
+- an answer that lines up with the module's previous request, the one that
+  timed out, is that request's answer come late, not a sign the batch is
+  too big: it's dropped and counted (`late answers`), and the batch size
+  stays. Bank 1's requests all start with the same fast identifiers, so
+  such an answer gets past the client, and it was halving bank 1's batches
+  every few seconds after each stall.
+
+A few identifiers go in requests of their own, every other turn of their
+module (`ALONE` in `lib/logger/plan.h`): the airbag module's internal
+temperature (0x4003) and supply voltage (0x4007), asked in one request,
+both came back with one of the two values (1,424 "°C" while the voltage was
+14.24 V).
 
 A module whose batches halved tries twice the size again after 50 whole
 answers at its current size, and needs twice as many each time the bigger

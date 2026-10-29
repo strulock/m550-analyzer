@@ -190,6 +190,25 @@ static void test_two_modules_one_connection() {
   CHECK(c.finish(0x18, gear, 3, out, sizeof(out), 500).result == hsfz::TIMEOUT);
 }
 
+// whether other modules answered while one didn't: a silent module, or a
+// stalled connection
+static void test_heard_other() {
+  Fake f; hsfz::Client c(f, 0xF4);
+  const uint8_t gear[] = {0x22, 0xDA, 0x2E};
+  hsfz::Reply r;
+  f.t = 1000;
+  CHECK(!c.heardOther(0x12, 0));                                // nothing yet
+  CHECK(c.start(0x12, rpm, 3, r) && c.start(0x18, gear, 3, r));
+  f.push(frame(hsfz::CTRL_DIAG, 0x18, 0xF4, {0x62, 0xDA, 0x2E, 0x04, 0x00}));
+  CHECK(c.finish(0x12, rpm, 3, out, sizeof(out), 500).result == hsfz::TIMEOUT);
+  CHECK(c.heardOther(0x12, 1000));                              // the gearbox answered
+  CHECK(!c.heardOther(0x18, 1000));                             // and only it
+  uint32_t later = f.t + 1;
+  CHECK(c.start(0x12, rpm, 3, r));
+  CHECK(c.finish(0x12, rpm, 3, out, sizeof(out), 500).result == hsfz::TIMEOUT);
+  CHECK(!c.heardOther(0x12, later));                            // nobody since: a stall
+}
+
 // a slow module's answer collected later: poll() says not yet, the answer
 // comes in while another module's finish() reads, and the next poll() has
 // it; a busy answer is asked again; forget() drops one given up on
@@ -248,6 +267,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"start_then_finish", test_start_then_finish},
   {"two_modules_one_connection", test_two_modules_one_connection},
   {"poll_later", test_poll_later},
+  {"heard_other", test_heard_other},
   {"discovery_reply", test_discovery_reply},
 };
 
