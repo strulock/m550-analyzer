@@ -194,7 +194,7 @@ class TileCache:
                 tmp = path + ".tmp"
                 with open(tmp, "wb") as f:
                     f.write(data)
-                os.replace(tmp, path)
+                core.replace_file(tmp, path)
                 self.arrived.put(key)
             except Exception:                                       # noqa: BLE001
                 self.failed_at = time.time()        # offline: rest a while

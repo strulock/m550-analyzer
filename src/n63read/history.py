@@ -498,7 +498,7 @@ def scan(logs=None, progress=None):
     tmp = index_path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump({"version": INDEX_VERSION, "files": new}, f)
-    os.replace(tmp, index_path)
+    core.replace_file(tmp, index_path)
 
     drives = sorted((e["drive"] for e in new.values() if e.get("drive")),
                     key=lambda d: d["start"])
@@ -515,7 +515,7 @@ def _write(path, fields, rows):
         w.writeheader()
         for row in rows:
             w.writerow({k: "" if row.get(k) is None else row.get(k) for k in fields})
-    os.replace(tmp, path)
+    core.replace_file(tmp, path)
 
 
 def label(key):

@@ -341,7 +341,8 @@ off, all look the same from the board), or seen with its signal and channel
 and why the join failed (the station's disconnect reason, with "wrong
 password?" for an authentication failure or an expired one, as the bench's
 wrong password gave), and how many networks the scan
-found. `logger_status` gives each power-on's last one. The terminal prints
+found. `logger_status` gives each power-on's last one, and the logger page's
+status line the last check-in's. The terminal prints
 it when it says something new (not when only the count changes).
 
 Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
