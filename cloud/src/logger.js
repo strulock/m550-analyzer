@@ -25,6 +25,8 @@
  * first drive they're due), off.
  */
 
+import { getValues } from "./values.js";
+
 export const CATALOG_KEY = "config/logger-catalog.json";
 export const TIERS = ["fast", "medium", "slow", "drive", "daily", "weekly", "monthly", "off"];
 export const RESTS = ["slow", "off"];
@@ -48,6 +50,20 @@ export const LOGGER_SCHEMA = [
 const MAX_VERSIONS = 50;                // kept a preset
 
 export class ConfigError extends Error {}
+
+// `values`: channels by what their stored drives show (values.js): "same",
+// never changed (two values or more, min = max), or "rises", only ever up
+// (an odometer, a counter). A test of a channel name, and its stats.
+const VALUE_KINDS = ["same", "rises"];
+async function valueTest(env, kind) {
+  if (!VALUE_KINDS.includes(kind)) {
+    throw new ConfigError('values: "same" (never changed) or "rises" (only goes up)');
+  }
+  const v = (await getValues(env)).values;
+  const ok = kind === "same" ? (s) => s[2] >= 2 && s[3] === s[4] : (s) => !!s[6];
+  return { test: (name) => !!v[name] && ok(v[name]), stats: (name) => v[name] };
+}
+const selects = (a) => a.names || a.module || a.did_from || a.did_to || a.match;
 
 const isObject = (v) => v && typeof v === "object" && !Array.isArray(v);
 
@@ -249,16 +265,22 @@ export async function listTiers(env, a = {}) {
   const { preset } = await presetNamed(env, a.preset);
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
   const tiers = tiersFor(catalog, preset);
-  let idx = a.names || a.module || a.did_from || a.did_to || a.match
-    ? selectRows(catalog, a) : catalog.rows.map((_, i) => i);
+  let idx = selects(a) ? selectRows(catalog, a) : catalog.rows.map((_, i) => i);
   if (a.tier) idx = idx.filter((i) => tiers[i] === a.tier);
+  const vt = a.values ? await valueTest(env, a.values) : null;
+  if (vt) idx = idx.filter((i) => vt.test(catalog.rows[i][col.name]));
   const limit = Math.max(1, Math.min(2000, Number(a.limit) || 200));
   return { preset: preset.name, total: idx.length, channels: idx.slice(0, limit).map((i) => {
     const r = catalog.rows[i];
-    return { name: r[col.name], module: r[col.module], did: r[col.did], tier: tiers[i],
+    const out = { name: r[col.name], module: r[col.module], did: r[col.did], tier: tiers[i],
       named: !!preset.tiers[r[col.name]],
       answer: catalog.answers[`${r[col.module]}:${r[col.did]}`] || null,
       unit: r[col.unit] || "", info: col.info === undefined ? "" : r[col.info] || "" };
+    if (vt) {
+      const s = vt.stats(r[col.name]);
+      Object.assign(out, { lo: s[3], hi: s[4], drives: s[5] });
+    }
+    return out;
   }) };
 }
 
@@ -275,7 +297,11 @@ export async function setTiers(env, a, now = new Date()) {
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
   const tiers = { ...preset.tiers };
   const changed = [];
-  for (const i of selectRows(catalog, a)) {
+  // `values` alone selects too: every channel whose stored drives show it.
+  const vt = a.values ? await valueTest(env, a.values) : null;
+  let idx = vt && !selects(a) ? catalog.rows.map((_, i) => i) : selectRows(catalog, a);
+  if (vt) idx = idx.filter((i) => vt.test(catalog.rows[i][col.name]));
+  for (const i of idx) {
     const name = catalog.rows[i][col.name];
     if (a.tier === "default" ? !(name in tiers) : tiers[name] === a.tier) continue;
     if (a.tier === "default") delete tiers[name];

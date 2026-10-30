@@ -1230,18 +1230,22 @@ export const TOOLS = [
       "preset (the active one by default): fast (every cycle), medium (a few times a second), " +
       "slow (in rotation), drive (once a drive), daily, weekly, monthly, off. Filter by " +
       "module (0x12), an identifier range (did_from, did_to), part of a name (match), exact " +
-      "names, or tier. Each: name, module, did, tier, whether the preset names it (else its " +
-      "rest applies), what the car answered, unit, description.",
+      "names, tier, or values: \"same\" (never changed across the stored drives) or " +
+      "\"rises\" (only ever goes up: an odometer, a counter). Each: name, module, did, tier, " +
+      "whether the preset names it (else its rest applies), what the car answered, unit, " +
+      "description; with values, also lo, hi and drives.",
     inputSchema: { type: "object", properties: {
       preset: { type: "string" }, module: { type: "string" }, did_from: { type: "string" },
       did_to: { type: "string" }, match: { type: "string" },
       names: { type: "array", items: { type: "string" } }, tier: { type: "string" },
+      values: { type: "string", enum: ["same", "rises"] },
       limit: { type: "integer", description: "Default 200, up to 2000" } } },
   },
   {
     name: "logger_set_tiers",
     description: "Set a tier for channels in a preset (the active one by default), one at a " +
-      "time (names) or in bulk (module, did_from/did_to, match; all that are given). tier: " +
+      "time (names) or in bulk (module, did_from/did_to, match, values: \"same\" never " +
+      "changed, \"rises\" only goes up; all that are given). tier: " +
       "fast, medium, slow, drive, daily, weekly, monthly, off, or default (back to the " +
       "preset's rest). The preset's previous state is kept as a version (logger_rollback). " +
       "If it's the active preset, the board takes the new channel file within 10 minutes " +
@@ -1251,6 +1255,7 @@ export const TOOLS = [
       tier: { type: "string" }, preset: { type: "string" },
       names: { type: "array", items: { type: "string" } }, module: { type: "string" },
       did_from: { type: "string" }, did_to: { type: "string" }, match: { type: "string" },
+      values: { type: "string", enum: ["same", "rises"] },
       dry_run: { type: "boolean" }, why: { type: "string", description: "Kept with the version" } },
       required: ["tier"] },
   },
