@@ -48,7 +48,9 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
      `python firmware/tools/provision.py --usb COM4` sends it (the terminal's
      `S`: `key=value` lines, then a dot; USB only, and the board echoes only
      the keys). `--set wifi2_ssid=Phone --set wifi2_pass=...` sends just
-     those. The board saves them and restarts.
+     those. The board saves them and restarts. It sends a line at a time:
+     the whole file at once overran the board's USB input, which then never
+     saw the closing dot (no answer).
    - **Phone:** a board with no settings opens the access point
      `m550-logger` (password `m550-setup`) from boot, and a board with
      settings opens it, with its own password, when no known network is in
@@ -337,8 +339,10 @@ only: out of range, not advertising, as an iPhone hotspot with nothing
 joined and its settings screen closed, or 5 GHz only, Maximize Compatibility
 off, all look the same from the board), or seen with its signal and channel
 and why the join failed (the station's disconnect reason, with "wrong
-password?" for an authentication failure), and how many networks the scan
-found. `logger_status` gives each power-on's last one.
+password?" for an authentication failure or an expired one, as the bench's
+wrong password gave), and how many networks the scan
+found. `logger_status` gives each power-on's last one. The terminal prints
+it when it says something new (not when only the count changes).
 
 Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
 status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end

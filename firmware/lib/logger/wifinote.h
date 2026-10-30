@@ -18,7 +18,7 @@ inline std::string wifiJoinWhy(int reason, const char* name) {
   if (reason == 0) return "no answer";
   const char* gloss = nullptr;
   switch (reason) {
-    case 15: case 202: case 204: gloss = "wrong password?"; break;   // handshake, auth
+    case 2: case 15: case 202: case 204: gloss = "wrong password?"; break;   // auth, handshake
     case 201: gloss = "gone"; break;                                   // no AP found
     case 210: case 211: gloss = "its security isn't one the board accepts"; break;
     case 200: case 212: gloss = "signal too weak"; break;              // beacon timeout, RSSI

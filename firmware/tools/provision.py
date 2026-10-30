@@ -46,8 +46,12 @@ def send(port, settings):
         out += s.read(4096)
         if time.time() - t0 > 10:
             sys.exit("the board didn't take S: %s" % out.decode(errors="replace")[-300:])
+    # A line at a time: all at once overran the board's USB input and it
+    # never saw the dot.
     for k, v in settings.items():
         s.write(("%s=%s\n" % (k, v)).encode())
+        s.flush()
+        time.sleep(0.1)
     s.write(b".\n")
     out = b""
     t0 = time.time()
