@@ -308,6 +308,27 @@ test("a logger log gets its series and drive row on upload", async () => {
   assert.deepEqual(s.points[0], ["2026-10-25T12:00:00.000Z", 705]);
 });
 
+test("channels that only go up across drives, and the table from before that", async () => {
+  // A channel_values without rises (from before it): dropped and built again.
+  env.DB.db.exec(`CREATE TABLE channel_values (channel TEXT PRIMARY KEY, t REAL, value REAL,
+     n INTEGER, lo REAL, hi REAL, drives INTEGER)`);
+  env.DB.db.prepare("INSERT INTO channel_values VALUES ('OLD', 0, 1, 1, 1, 1, 1)").run();
+  const drive = (name, t0, chunks) => call("PUT", `/api/series/${name}`, { body: JSON.stringify({
+    start: 0, approx: false, chunks: chunks.map(([ch, data]) => ({ name: ch, t0, t1: t0 + 1,
+      min: Math.min(...data.map((d) => d[1])), max: Math.max(...data.map((d) => d[1])),
+      mean: 0, data })) }) });
+  await drive("a.csv", 1000, [["KM", [[0, 100], [1, 101]]], ["DROPS", [[0, 5], [1, 6]]],
+    ["SAME", [[0, 7], [1, 7]]], ["WOBBLE", [[0, 1], [1, 3]]], ["ONCE", [[0, 1], [1, 2]]]]);
+  await drive("b.csv", 2000, [["KM", [[0, 101], [1, 101], [2, 105]]], ["DROPS", [[0, 4]]],
+    ["SAME", [[0, 7]]], ["WOBBLE", [[0, 3], [1, 2], [2, 4]]]]);
+  await drive("c.csv", 3000, [["KM", [[0, 105]]]]);
+  const v = (await (await call("GET", "/api/logger/values")).json()).values;
+  const rises = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, x[6]]));
+  // ONCE: one drive only; WOBBLE: down within a drive; SAME: never changed.
+  assert.deepEqual(rises, { KM: 1, DROPS: 0, SAME: 0, WOBBLE: 0, ONCE: 0 });
+  assert.deepEqual(v.SAME.slice(2, 5), [3, 7, 7]);
+});
+
 test("each channel's newest value and range, kept up to date as drives come in", async () => {
   const values = async () => (await (await call("GET", "/api/logger/values")).json()).values;
   // Series stored before the table existed: built whole on the first ask.
@@ -316,12 +337,12 @@ test("each channel's newest value and range, kept up to date as drives come in",
     approx INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL, PRIMARY KEY (drive, channel, t0))`);
   env.DB.db.prepare("INSERT INTO series VALUES ('old.csv', 'OELTEMP', 100, 110, 2, '', 80, 95, 87.5, 0, ?)")
     .run("[[0,80],[10,95]]");
-  assert.deepEqual((await values()).OELTEMP, [110, 95, 2, 80, 95, 1]);
+  assert.deepEqual((await values()).OELTEMP, [110, 95, 2, 80, 95, 1, 0]);
 
   await call("PUT", "/api/files/logger/2026-10-25_07-00-00.csv", { body: LOGGER_CSV });
   let v = await values();
-  assert.deepEqual(v.INMOT.slice(1), [705, 6, 700, 705, 1]);                    // the last row's
-  assert.deepEqual(v.IUIBS.slice(1), [14095, 6, 14095, 14100, 1]);
+  assert.deepEqual(v.INMOT.slice(1), [705, 6, 700, 705, 1, 0]);                    // the last row's
+  assert.deepEqual(v.IUIBS.slice(1), [14095, 6, 14095, 14100, 1, 0]);
   assert.equal(v.INMOT[0], Date.parse("2026-10-25T12:00:05Z") / 1000);
   assert.ok(v.OELTEMP);                                                          // untouched
 
@@ -332,7 +353,7 @@ test("each channel's newest value and range, kept up to date as drives come in",
     mean: 655, data: [[0, 660], [1, 650]] }, { name: "GONE", t0: 0, t1: 1, data: [[0, 1]] }]);
   v = await values();
   assert.deepEqual(v.INMOT.slice(0, 2), [2e9 + 1, 650]);
-  assert.deepEqual(v.INMOT.slice(2), [8, 650, 705, 2]);
+  assert.deepEqual(v.INMOT.slice(2), [8, 650, 705, 2, 0]);
   assert.ok(v.GONE);
   await app([{ name: "INMOT", unit: "rpm", t0: 2e9, t1: 2e9 + 1, data: [[0, 640]] }]);
   v = await values();

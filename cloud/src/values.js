@@ -4,22 +4,39 @@
  * source is embedded in the page, as estimateRates' is).
  *
  * channel_values keeps a row a channel: when its newest value was recorded,
- * that value, and its count, min and max over every stored drive. A drive's
+ * that value, its count, min and max over every stored drive, and whether
+ * it only ever goes up (`rises`: an odometer, a counter). A drive's
  * channels are brought up to date when its series are stored; the whole
  * table is built the first time it's asked for and found empty.
  */
 
 export const VALUES_SCHEMA = [
   `CREATE TABLE IF NOT EXISTS channel_values (channel TEXT PRIMARY KEY, t REAL, value REAL,
-     n INTEGER, lo REAL, hi REAL, drives INTEGER)`,
+     n INTEGER, lo REAL, hi REAL, drives INTEGER, rises INTEGER)`,
 ];
 
-// The newest value is the last point of the channel's newest piece.
-const refresh = (where) => `INSERT OR REPLACE INTO channel_values
-  (channel, t, value, n, lo, hi, drives)
-  SELECT s.channel, MAX(s.t1), (SELECT json_extract(x.data, '$[#-1][1]') FROM series x
-    WHERE x.channel = s.channel ORDER BY x.t1 DESC LIMIT 1), SUM(s.n), MIN(s.min), MAX(s.max),
-    COUNT(DISTINCT s.drive) FROM series s WHERE ${where} GROUP BY s.channel`;
+/** The table from before `rises` goes (it's all derived; getValues builds it again). */
+export async function migrateValues(env) {
+  const cols = await env.DB.prepare("SELECT name FROM pragma_table_info('channel_values')").all();
+  if ((cols.results || []).some((c) => c.name === "rises")) return;
+  await env.DB.batch([env.DB.prepare("DROP TABLE IF EXISTS channel_values"),
+    env.DB.prepare(VALUES_SCHEMA[0])]);
+}
+
+// The newest value is the last point of the channel's newest piece. A
+// channel rises if it's in two drives or more, went up, and each piece (in
+// time order) starts at its lowest, ends at its highest, and starts no lower
+// than the one before ended.
+const refresh = (where) => `WITH p AS (SELECT s.channel, s.drive, s.t1, s.n, s.min, s.max,
+    json_extract(s.data, '$[0][1]') AS a, json_extract(s.data, '$[#-1][1]') AS b,
+    LAG(json_extract(s.data, '$[#-1][1]')) OVER (PARTITION BY s.channel ORDER BY s.t0) AS prev
+    FROM series s WHERE ${where})
+  INSERT OR REPLACE INTO channel_values (channel, t, value, n, lo, hi, drives, rises)
+  SELECT p.channel, MAX(p.t1), (SELECT json_extract(x.data, '$[#-1][1]') FROM series x
+    WHERE x.channel = p.channel ORDER BY x.t1 DESC LIMIT 1), SUM(p.n), MIN(p.min), MAX(p.max),
+    COUNT(DISTINCT p.drive), COUNT(DISTINCT p.drive) > 1 AND MAX(p.max) > MIN(p.min) AND
+    COALESCE(MIN(p.a <= p.min AND p.b >= p.max AND (p.prev IS NULL OR p.a >= p.prev)), 0)
+  FROM p GROUP BY p.channel`;
 
 /** Bring these channels' rows up to date (a channel with no series left loses its row). */
 export async function refreshValues(env, names) {
@@ -31,13 +48,13 @@ export async function refreshValues(env, names) {
   ]);
 }
 
-const COLUMNS = ["t", "value", "n", "lo", "hi", "drives"];
+const COLUMNS = ["t", "value", "n", "lo", "hi", "drives", "rises"];
 const short = (v) => (typeof v === "number" && Number.isFinite(v) ? +v.toPrecision(9) : null);
 
-/** {columns, values: {channel: [t (UTC seconds), value, n, lo, hi, drives]}}. */
+/** {columns, values: {channel: [t (UTC seconds), value, n, lo, hi, drives, rises (0/1)]}}. */
 export async function getValues(env) {
   const read = () => env.DB.prepare(
-    "SELECT channel, t, value, n, lo, hi, drives FROM channel_values").all();
+    "SELECT channel, t, value, n, lo, hi, drives, rises FROM channel_values").all();
   let rows = (await read()).results || [];
   if (!rows.length) {
     await env.DB.prepare(refresh("1")).run();
@@ -45,7 +62,8 @@ export async function getValues(env) {
   }
   const values = {};
   for (const x of rows) {
-    values[x.channel] = [Math.round(x.t), short(x.value), x.n, short(x.lo), short(x.hi), x.drives];
+    values[x.channel] = [Math.round(x.t), short(x.value), x.n, short(x.lo), short(x.hi), x.drives,
+      x.rises ? 1 : 0];
   }
   return { columns: COLUMNS, values };
 }

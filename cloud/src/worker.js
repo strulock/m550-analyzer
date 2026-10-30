@@ -46,7 +46,7 @@ import { LOGGER_PAGE } from "./loggerpage.js";
 import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, identifiers,
   ingestCheck, markAbsent, requestSweep } from "./sweep.js";
 import { tanks } from "./tanks.js";
-import { getValues, refreshValues, VALUES_SCHEMA } from "./values.js";
+import { getValues, migrateValues, refreshValues, VALUES_SCHEMA } from "./values.js";
 import { DETAILS, DETAILS_SCHEMA, ingestDetails, withDetails } from "./faultdetails.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
@@ -552,6 +552,7 @@ async function ensureSchema(env) {
   if (!(cols.results || []).some((c) => c.name === "source")) {
     await env.DB.batch(MIGRATE.map((s) => env.DB.prepare(s)));
   }
+  await migrateValues(env);
   schemaReady.add(env.DB);
 }
 
