@@ -815,7 +815,8 @@ test("check-ins kept offline: filed under their own clock, once each", async () 
   const kept = [
     { boot: 9, event: "beat", buffered: true, clock: at(30), state: "logging", coolant_c: 96.5,
       oil_c: 101, lat: 29.76, lon: -95.36 },
-    { boot: 9, event: "beat", buffered: true, clock: at(29), state: "logging", coolant_c: 104 },
+    { boot: 9, event: "beat", buffered: true, clock: at(29), state: "logging", coolant_c: 104,
+      wifi_note: "Phone: not seen (6 networks in range)" },
     { boot: 9, event: "beat", buffered: true },                        // no clock: skipped
     { boot: 9, event: "beat", buffered: true, clock: "2020-01-01 00:00:00.000-05:00" },  // too old
   ];
@@ -830,6 +831,7 @@ test("check-ins kept offline: filed under their own clock, once each", async () 
   assert.equal(s.last.state, "searching");
   assert.deepEqual(s.sessions.map((x) => [x.boot, x.beats, x.buffered, x.max_coolant_c, x.max_oil_c]),
     [[9, 3, 2, 104, 101]]);
+  assert.equal(s.sessions[0].wifi_note, "Phone: not seen (6 networks in range)");
   const first = env.DB.db.prepare("SELECT received FROM heartbeats ORDER BY received LIMIT 1").get();
   assert.ok(Math.abs(Date.parse(first.received) - (Date.now() - 30 * 60e3)) < 2000);
   assert.equal((await call("POST", "/api/logger/heartbeats", { body: "{}" })).status, 400);
@@ -1061,6 +1063,11 @@ test("MCP logger tools: list tiers, set them one or in bulk, versions, rollback,
   assert.equal((await tool("logger_set_tiers", { tier: "daily", module: "0x29" })).data.changed, 0);
   assert.match((await tool("logger_set_tiers", { tier: "hourly", module: "0x29" })).data, /tier/);
   assert.match((await tool("logger_set_tiers", { tier: "fast" })).data, /select/);
+  // A range that isn't hex is refused, not read as no bound (every channel).
+  for (const bad of [{ did_from: "0xZZ" }, { did_to: "end" }, { module: "DME" }]) {
+    const r = await tool("logger_set_tiers", { tier: "off", dry_run: true, ...bad });
+    assert.match(String(r.data), /hex/, JSON.stringify(bad));
+  }
   const rows = Object.fromEntries((await channelRows()).rows.map((x) => [x.name, x.tier]));
   assert.deepEqual([rows.ITOEL, rows["DSC_RDC_MESSDATENBLOCK_1.LETZTER_REIFENDRUCKWERT"]],
     ["medium", "daily"]);
@@ -1082,6 +1089,11 @@ test("MCP logger tools: list tiers, set them one or in bulk, versions, rollback,
   assert.deepEqual([list.active, list.file.preset, list.presets.map((x) => x.name)],
     ["Lean", "Lean", ["Default", "Lean"]]);
   assert.match((await tool("logger_publish", { name: "Nope" })).data, /no preset/);
+  // No name leaves the active one as it was, not none.
+  for (const name of [undefined, "", "  "]) {
+    assert.match(String((await tool("logger_publish", { name })).data), /active/);
+  }
+  assert.equal((await tool("logger_presets", {})).data.active, "Lean");
 });
 
 test("MCP drive_faults: one drive's reads with their codes and texts", async () => {

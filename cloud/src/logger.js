@@ -131,7 +131,10 @@ export async function putPresets(env, body, now = new Date(), why = null) {
   const current = await getPresets(env);
   const names = new Set(current.presets.map((p) => p.name));
   const before = new Map(current.presets.map((p) => [p.name, p]));
-  let want = typeof body.active === "string" ? body.active : current.active;
+  let want = typeof body.active === "string" ? body.active.trim() : current.active;
+  if (typeof body.active === "string" && !want) {
+    throw new ConfigError("active: a preset's name");   // "" would leave none active
+  }
   const stmts = [];
   const keep = (name) => {              // the preset as it was, as a version
     const old = before.get(name);
@@ -202,8 +205,14 @@ export async function rollbackPreset(env, name, id, now = new Date()) {
  * `match` (part of a name, any case), all that are given. */
 export function selectRows(catalog, sel) {
   const col = Object.fromEntries(catalog.columns.map((c, i) => [c, i]));
-  const num = (s) => (s === undefined || s === null || s === "" ? null : parseInt(String(s), 16));
-  const module = num(sel.module), from = num(sel.did_from), to = num(sel.did_to);
+  const num = (s, what) => {          // hex, "0x" or not; anything else is refused, not ignored
+    if (s === undefined || s === null || s === "") return null;
+    const v = String(s).trim();
+    if (!/^(0x)?[0-9a-f]+$/i.test(v)) throw new ConfigError(`${what}: hex, like 0x4000`);
+    return parseInt(v, 16);
+  };
+  const module = num(sel.module, "module"), from = num(sel.did_from, "did_from"),
+    to = num(sel.did_to, "did_to");
   const names = Array.isArray(sel.names) ? new Set(sel.names.map(String)) : null;
   const match = sel.match ? String(sel.match).toLowerCase() : null;
   if (!names && module === null && from === null && to === null && !match) {
