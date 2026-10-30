@@ -499,6 +499,13 @@ after the first week of drives, and what's left.
       the snapshot stops waiting once the car's connection closes. Check-ins
       kept offline carry the fault codes only when they change (every one
       did), and say why Wi-Fi wouldn't join (`wifi_note`).
+- [x] Bench checks of 30 Oct: the Wi-Fi note against the live Worker (a
+      missing network, a wrong password, kept check-ins sent on return);
+      provision.py now sends a line at a time (the whole file at once was
+      lost); AUTH_EXPIRE reads "wrong password?"; saves of the app's JSON
+      and CSV files are tried again while Windows holds the file (a flaky
+      test, and the same could fail a sync); the logger page shows the
+      Wi-Fi note.
 - [ ] Still open from that review: an Ed25519 signature on the firmware
       image, checked by the board; provision.py and C escapes;
       `logs/logger/` names; the Wi-Fi terminal without a password.

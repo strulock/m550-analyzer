@@ -127,7 +127,7 @@ def save_state(state, path=None):
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(state, f)
-    os.replace(tmp, path)
+    core.replace_file(tmp, path)
 
 
 # ------------------------------------------------------------ requests

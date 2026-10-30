@@ -134,3 +134,25 @@ def test_chart_names_follow_the_language_and_stay_short(app):
     finally:
         app.lang = "en"
     assert app._chart_name("EGS_Y.FIELD", {}) == "FIELD"
+
+
+def test_a_save_is_tried_again_while_windows_holds_the_file(tmp_path, monkeypatch):
+    # A scanner or the indexer opening the file just then: "Access is denied"
+    # (the test suite saw it on cloud_state.json), gone a moment later.
+    real, calls = core.os.replace, []
+
+    def flaky(src, dst):
+        calls.append(dst)
+        if len(calls) < 3:
+            raise PermissionError(5, "Access is denied")
+        real(src, dst)
+
+    monkeypatch.setattr(core.os, "replace", flaky)
+    monkeypatch.setattr(core.time, "sleep", lambda s: None)
+    path = str(tmp_path / "settings.json")
+    core.save_settings({"lang": "de"}, path)
+    assert len(calls) == 3 and core.load_settings(path)["lang"] == "de"
+    calls.clear()
+    monkeypatch.setattr(core.os, "replace", lambda s, d: (_ for _ in ()).throw(PermissionError()))
+    with pytest.raises(PermissionError):
+        core.save_settings({"lang": "en"}, path)

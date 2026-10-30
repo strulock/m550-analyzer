@@ -568,6 +568,12 @@ ${oddValue.toString()}
         if (last.ota) text += " (" + last.ota + ")";
         else if (pub && pub !== last.fw && last.fw !== "dev") text += ", " + pub + " published";
       }
+      // Why it last couldn't join Wi-Fi (sent while off it and 10 minutes after).
+      if (last.wifi_note) {
+        var mins = Math.round(last.wifi_note_min || 0);
+        text += "; Wi-Fi wouldn't join " + (mins < 1 ? "just before this check-in" :
+          mins + " min before this check-in") + ": " + last.wifi_note;
+      }
       $("logger").textContent = text;
       renderLive(s, when);
       renderSweep(s.sweep);

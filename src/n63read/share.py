@@ -61,7 +61,7 @@ class Host:
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"port": port, "token": self.token, "ip": self.ip,
                        "pid": os.getpid()}, f)
-        os.replace(tmp, path)
+        core.replace_file(tmp, path)
         return self
 
     def stop(self):

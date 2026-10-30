@@ -107,6 +107,20 @@ DATA_FILES = (DEFAULT_CSV, FAULT_CSV, STATUS_CSV, ENUM_CSV, FREEZE_CSV, FREEZE_E
               MODULE_MAP_CSV)
 
 
+def replace_file(tmp, path, tries=10):
+    """os.replace(tmp, path), tried again for a moment while Windows says the
+    file is in use (a virus scanner or the search indexer opening it just
+    then: "Access is denied", seen in the test suite)."""
+    for i in range(tries):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if i == tries - 1:
+                raise
+            time.sleep(0.05)
+
+
 def resource_path(name):
     """Locate a bundled data file.
 
@@ -2276,7 +2290,7 @@ def save_settings(settings, path=None):
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=1)
-    os.replace(tmp, path)
+    replace_file(tmp, path)
 
 
 # ---------------------------------------------------------------- templates
@@ -2345,7 +2359,7 @@ def save_availability(avail, path=None):
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=0)
-    os.replace(tmp, path)
+    replace_file(tmp, path)
 
 
 # A check's results, as `n63read check --out` and the app's Check car now
