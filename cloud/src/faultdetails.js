@@ -27,6 +27,70 @@ const km = (v) => {
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
 
+/** The bytes of a snapshot identifier the walk can step over (the firmware's
+ * standardFieldBytes): BMW's standard ones, and the gateway's and head unit's
+ * control-unit address ahead of their odometer. 0: unknown. */
+function fieldBytes(module, id) {
+  switch (id) {
+    case 0x1700: case 0x1702: case 0x1751: case 0xFFFF: return 3;
+    case 0x1701: case 0x1768: return 4;
+    case 0x1731: case 0x1750: return 1;
+    case 0x1707: return module === 0x10 || module === 0x63 ? 1 : 0;
+    case 0x1769: return module === 0x29 ? 4 : 6;
+    default: return 0;
+  }
+}
+
+/** The lowest and highest odometer (0x1700) in a 59 04 reply, as hex, or null.
+ * A record that runs into a module's own value the walk can't size carries on
+ * at the next record (its number, the same count and first identifier), as
+ * the board does; so an older board's details, which missed some, still get
+ * their odometer here. */
+export function snapshotKm(hex, module) {
+  if (typeof hex !== "string" || !/^([0-9A-Fa-f]{2})+$/.test(hex)) return null;
+  const p = hex.match(/../g).map((b) => parseInt(b, 16));
+  const m = typeof module === "string" ? parseInt(module, 16) : module;
+  if (p.length < 6 || p[0] !== 0x59 || p[1] !== 0x04) return null;
+  let lo = null, hi = null;
+  let i = 6;
+  walk: while (i + 2 <= p.length) {
+    const number = p[i], count = p[i + 1], start = i + 2;
+    i = start;
+    for (let k = 0; k < count; k++) {
+      if (i + 2 > p.length) break walk;
+      const id = (p[i] << 8) | p[i + 1];
+      const size = fieldBytes(m, id);
+      if (!size || i + 2 + size > p.length) {
+        let next = 0;
+        for (let j = i; j + 4 <= p.length; j++) {
+          if (p[j] === ((number + 1) & 0xFF) && p[j + 1] === count && p[j + 2] === p[start] &&
+              p[j + 3] === p[start + 1]) { next = j; break; }
+        }
+        if (!next) break walk;
+        i = next;
+        continue walk;
+      }
+      if (id === 0x1700) {
+        const v = (p[i + 2] << 16) | (p[i + 3] << 8) | p[i + 4];
+        if (v !== 0xFFFFFF) {
+          lo = lo === null ? v : Math.min(lo, v);
+          hi = hi === null ? v : Math.max(hi, v);
+        }
+      }
+      i += 2 + size;
+    }
+  }
+  return lo === null ? null : { first_km: lo, last_km: hi };
+}
+
+/** A stored details row with its odometer from its own snapshots where the
+ * board's read gave none. */
+function withSnapshotKm(d) {
+  if (!d || (d.first_km !== null && d.first_km !== undefined)) return d;
+  const got = snapshotKm(d.snapshots, d.module);
+  return got ? { ...d, ...got } : d;
+}
+
 /** One details file's rows (parsed CSV, header first) into fault_details. */
 export async function ingestDetails(env, rows) {
   const head = (rows.shift() || []).map((h) => h.trim());
@@ -39,10 +103,10 @@ export async function ingestDetails(env, rows) {
   for (const r of rows) {
     const module = get(r, "module").toUpperCase().replace(/^0X/, "0x"), code = get(r, "code").toUpperCase();
     if (!/^0x[0-9A-F]{2}$/.test(module) || !/^[0-9A-F]{6}$/.test(code)) continue;
-    found.set(`${module} ${code}`, { module, code, read_at: get(r, "read_at") || null,
+    found.set(`${module} ${code}`, withSnapshotKm({ module, code, read_at: get(r, "read_at") || null,
       first_km: km(get(r, "first_km")), last_km: km(get(r, "last_km")),
       occurrences: km(get(r, "occurrences")), snapshots: get(r, "snapshots"),
-      extended: get(r, "extended") });
+      extended: get(r, "extended") }));
   }
   if (!found.size) return { processed: true, details: 0 };
   const have = new Map((await env.DB.prepare(
@@ -68,6 +132,32 @@ export async function ingestDetails(env, rows) {
     with_km: [...found.values()].filter((d) => d.first_km !== null).length };
 }
 
+// A drive's odometer that can't be right next to the drive after it: higher
+// than it (the odometer never goes back; 2 km of slack for readings taken a
+// moment apart), or further behind it than the car
+// could go in the time between them, at this speed plus this slack.
+const MAX_KMH = 250, SLACK_KM = 50;
+
+/** Readings ({start, lo, hi}, oldest first) without those the later ones
+ * rule out. Read newest first, each against the last one kept, so one bad
+ * reading (seen: an app log's 48,554 km six minutes before 111,610) is
+ * dropped and the good ones around it stay. */
+export function plausibleOdometers(readings) {
+  const kept = [];
+  for (let i = readings.length - 1; i >= 0; i--) {
+    const r = readings[i], next = kept[kept.length - 1];
+    if (next) {
+      const hours = Math.max(0, (Date.parse(next.start.replace(" ", "T")) -
+        Date.parse(r.start.replace(" ", "T"))) / 3600000);
+      if (r.hi > next.lo + 2 || (Number.isFinite(hours) && next.lo - r.hi > MAX_KMH * hours + SLACK_KM)) {
+        continue;
+      }
+    }
+    kept.push(r);
+  }
+  return kept.reverse();
+}
+
 /** The drives' odometer readings, oldest first: [{date, lo, hi}]. */
 async function odometers(env) {
   const r = await env.DB.prepare(
@@ -77,9 +167,9 @@ async function odometers(env) {
     const d = JSON.parse(x.data);
     const lo = km(d.odometer_start_km) ?? km(d.odometer_km) ?? km(d.odometer_end_km);
     const hi = km(d.odometer_end_km) ?? km(d.odometer_km) ?? lo;
-    if (lo !== null) out.push({ date: String(x.start).slice(0, 10), lo, hi: Math.max(lo, hi) });
+    if (lo !== null) out.push({ start: String(x.start), lo, hi: Math.max(lo, hi) });
   }
-  return out;
+  return plausibleOdometers(out).map((o) => ({ date: o.start.slice(0, 10), lo: o.lo, hi: o.hi }));
 }
 
 /** When the odometer read `at` km: {after, by}, dates (YYYY-MM-DD) or null.
@@ -101,7 +191,7 @@ export async function withDetails(env, list) {
   const mine = new Map((await env.DB.prepare(
     `SELECT module, code, data FROM fault_details WHERE module || ' ' || code IN
        (SELECT value FROM json_each(?))`).bind(JSON.stringify(keys)).all())
-    .results.map((x) => [`${x.module} ${x.code}`, JSON.parse(x.data)]));
+    .results.map((x) => [`${x.module} ${x.code}`, withSnapshotKm(JSON.parse(x.data))]));
   // The app's reads of the same codes, where the board hasn't any.
   const theirs = new Map();
   const rows = (await env.DB.prepare(
