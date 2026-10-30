@@ -985,12 +985,28 @@ async function putBeats(env, body, now = new Date()) {
 /** A check-in's fault_codes ("0x12:1A400A 0x40:804415") as [{module,
  * module_name, code, text_en}], the texts from n63read's table; null when
  * it has none. */
-async function beatFaults(env, text) {
+async function beatFaults(env, text, count) {
   if (typeof text !== "string" || !text.trim()) return null;
   const list = [];
   for (const one of text.trim().split(/\s+/).slice(0, 100)) {
     const m = /^(0x[0-9A-Fa-f]{2}):([0-9A-Fa-f]{6})$/.exec(one);
     if (m) list.push({ module: "0x" + m[1].slice(2).toUpperCase(), code: m[2].toUpperCase() });
+  }
+  // The board's fault_codes stop at about 400 characters, between modules in
+  // address order (main.cpp, MAX_FAULT_CODES_TEXT): a check-in counting more
+  // faults than it lists left out every module after its last. Those come
+  // from each module's newest uploaded read (fault history), marked so.
+  if (list.length && Number.isFinite(count) && count > list.length) {
+    const lastModule = list.reduce((a, f) => (f.module > a ? f.module : a), "0x00");
+    const listed = new Set(list.map((f) => `${f.module} ${f.code}`));
+    const rest = (await env.DB.prepare(
+      `SELECT module, code FROM faults WHERE source = 'logger' AND now != 'gone'
+         AND upper(module) > upper(?) ORDER BY module, code`).bind(lastModule).all()).results || [];
+    for (const r of rest) {
+      const module = "0x" + String(r.module).slice(2).toUpperCase();
+      if (list.length >= count || listed.has(`${module} ${r.code}`)) continue;
+      list.push({ module, code: String(r.code).toUpperCase(), from_history: true });
+    }
   }
   const texts = await faultTexts(env, [...new Set(list.map((f) => f.code))]);
   const names = Object.fromEntries((await env.DB.prepare(
@@ -1038,7 +1054,7 @@ async function loggerStatus(env, hours, now = new Date()) {
        ORDER BY received DESC, rowid DESC LIMIT 1`).bind(beat.boot).all()).results;
     if (prev && prev.length) beat.fault_codes = prev[0].codes;
   }
-  const faultList = await beatFaults(env, beat.fault_codes);
+  const faultList = await beatFaults(env, beat.fault_codes, Number(beat.faults));
   if (faultList) beat.fault_list = faultList;
   return { online: age <= ONLINE_S, seen_s_ago: age, last: beat, sessions, firmware, sweep,
     last_drive: lastDrive };

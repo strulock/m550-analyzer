@@ -635,6 +635,29 @@ test("logger fault reads go into fault history, gone once a later read drops the
   assert.equal(f[0].now, "gone");
 });
 
+test("logger check-ins: modules past the board's cut-off come from fault history", async () => {
+  await call("PUT", "/api/files/logger/2026-10-29_08-00-00.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-29 08:01:00", "0x10", "CD0600", "0x2C", "not present, stored") +
+    faultRow("2026-10-29 08:01:01", "0x29", "480710", "0x2C", "not present, stored") +
+    faultRow("2026-10-29 08:01:02", "0x2C", "80320D", "0x2C", "not present, stored") +
+    faultRow("2026-10-29 08:01:03", "0x40", "804415", "0x2F", "present, stored") +
+    faultRow("2026-10-29 08:01:04", "0x63", "E1C447", "0x2C", "not present, stored") });
+  // Gone from its module's newer read: not filled in.
+  await call("PUT", "/api/files/logger/2026-10-29_09-00-00.faults.csv", { body: FAULT_HEAD +
+    faultRow("2026-10-29 09:01:04", "0x63", "", "", "no faults") });
+  // The board cut off after the DSC: three counted, one listed.
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 11, faults: 3,
+    fault_codes: "0x29:480710" }) });
+  const list = (await (await call("GET", "/api/logger")).json()).last.fault_list;
+  assert.deepEqual(list.map((f) => [f.module, f.code, !!f.from_history]),
+    [["0x29", "480710", false], ["0x2C", "80320D", true], ["0x40", "804415", true]]);
+  // Listing them all fills nothing in.
+  await new Promise((r) => setTimeout(r, 5));
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 11, faults: 1,
+    fault_codes: "0x29:480710" }) });
+  assert.equal((await (await call("GET", "/api/logger")).json()).last.fault_list.length, 1);
+});
+
 test("logger fault reads: a refused or silent module isn't a read; no clock uses the drive", async () => {
   await call("PUT", "/api/files/logger/x.faults.csv", { body: FAULT_HEAD +
     faultRow("2026-10-25 12:43:10", "0x12", "480A14", "0x2F", "present, stored") });
