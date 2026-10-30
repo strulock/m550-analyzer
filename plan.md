@@ -258,9 +258,10 @@ the file and line it starts from, as of 0.3.8.
       (0x2C, 0x40, 0x56, 0x61, 0x63 — most of the dated ones) went unlisted.
       The Worker now fills modules past the last listed one from fault
       history (`from_history`) when the check-in counts more than it lists.
-- [ ] Deploy #132: the Worker (`npx wrangler deploy` in `cloud/`) dates the
-      stored head-unit details at once; the firmware (`publish_firmware.py`)
-      only matters for codes the gateway or head unit set from now on.
+- [x] Deploy #132 and #133 (30 Oct): the Worker (`npx wrangler deploy` in
+      `cloud/`) dates the stored head-unit details at once; firmware
+      `20261030-1836-a0ef298` (`publish_firmware.py`) covers codes the gateway
+      or head unit set from now on. App 0.10.8.
 - [x] Reconnect after the PC slept: the car answered HSFZ control `0x0040`
       (incorrect tester address) for minutes. Now reported in plain words
       and handled as a lost connection; reconnecting carries on.
