@@ -332,7 +332,7 @@ a { color: var(--accent); }
     var pair = c.pair && data.scores[c.pair] ? chan(c.pair) : null;
     var idx = view.idx.filter(function (i) { return data.scores[c.key][i] || (pair && data.scores[pair.key][i]); });
     if (!idx.length) { $("trend").innerHTML = '<p class="muted">No drives with this channel.</p>'; return; }
-    var W = 900, H = 230, L = 58, R = 12, T = 12, B = 34;
+    var W = width("trend"), H = 250, L = 72, R = 30, T = 12, B = 50;
     var vals = [];
     idx.forEach(function (i) {
       [data.scores[c.key][i], pair ? data.scores[pair.key][i] : null].forEach(function (s) {
@@ -346,6 +346,7 @@ a { color: var(--accent); }
     var x = function (j) { return L + (idx.length === 1 ? (W - L - R) / 2 : j * (W - L - R) / (idx.length - 1)); };
     var y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
     var o = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(c.label) + ' across drives">'];
+    o.push(yUnit(c.unit, T, H - B));
     for (var g = 0; g <= 4; g++) {
       var v = lo + (hi - lo) * g / 4;
       o.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--rule)"/>');
@@ -390,18 +391,55 @@ a { color: var(--accent); }
     };
     if (pair) line(pair.key, "var(--line2)", true);
     line(c.key, "var(--line)", false);
-    var step = Math.max(1, Math.ceil(idx.length / 8));
+    // The drive axis: a minor tick at every drive (its time, where there's
+    // room), a major tick and a dashed line where a new day starts (its date).
+    var gap = idx.length > 1 ? (W - L - R) / (idx.length - 1) : W, base = H - B;
+    var times = gap >= 52, lastDay = null, lastDateX = -Infinity;
+    o.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + base + '" y2="' + base + '" stroke="var(--muted)"/>');
     idx.forEach(function (i, j) {
-      if (j % step) return;
-      o.push('<text x="' + x(j) + '" y="' + (H - 12) + '" text-anchor="middle">' +
-        esc(new Date(data.drives[i].start).toLocaleDateString(undefined, { month: "short", day: "numeric" })) + "</text>");
+      var t = new Date(data.drives[i].start), day = t.toDateString(), px = x(j);
+      var major = day !== lastDay;
+      lastDay = day;
+      if (major && j) {
+        o.push('<line x1="' + px + '" x2="' + px + '" y1="' + T + '" y2="' + base +
+          '" stroke="var(--muted)" stroke-dasharray="2 4" opacity="0.6"/>');
+      }
+      o.push('<line x1="' + px + '" x2="' + px + '" y1="' + base + '" y2="' + (base + (major ? 8 : 5)) +
+        '" stroke="var(--muted)"' + (major ? ' stroke-width="2"' : "") + "/>");
+      if (times) {
+        o.push('<text x="' + px + '" y="' + (base + 17) + '" text-anchor="middle">' +
+          esc(t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })) + "</text>");
+      }
+      if (major && px - lastDateX >= 56) {
+        o.push('<text x="' + (px + 4) + '" y="' + (base + 40) + '" style="font-weight:600">' +
+          esc(t.toLocaleDateString(undefined, { month: "short", day: "numeric" })) + "</text>");
+        lastDateX = px;
+      }
     });
     o.push("</svg>");
     $("trend").innerHTML = o.join("");
-    $("trendNote").innerHTML = "Each drive's value over the cells it shares with the baseline " +
-      "(sample-weighted), and the shaded normal band: the baseline ± " + group(c.group).watch +
-      " spreads." + (pair ? ' <span style="color:var(--line)">━ ' + esc(c.label) +
+    $("trendNote").innerHTML = "Each drive's value" + (c.unit ? " (" + esc(c.unit) + ")" : "") +
+      " over the cells it shares with the baseline (sample-weighted), and the shaded normal band: " +
+      "the baseline ± " + group(c.group).watch + " spreads. Drives are evenly spaced; a tick each, " +
+      "and a dashed line where a new day starts." + (pair ? ' <span style="color:var(--line)">━ ' + esc(c.label) +
       '</span> &nbsp; <span style="color:var(--line2)">┅ ' + esc(pair.label) + "</span>" : "");
+  }
+
+  // A chart's width in its box's own pixels, so text stays its size on a phone.
+  function width(id) { return Math.max(320, Math.round($(id).clientWidth || 900)); }
+  var resized = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resized);
+    resized = setTimeout(function () {
+      if (sel.key && !$("drill").classList.contains("hide")) drawTrend(chan(sel.key));
+    }, 200);
+  });
+
+  // The y-axis's unit, written up its side.
+  function yUnit(unit, top, bottom) {
+    if (!unit) return "";
+    return '<text transform="translate(14 ' + (top + bottom) / 2 + ') rotate(-90)" text-anchor="middle">' +
+      esc(unit) + "</text>";
   }
 
   function drawGrid(c, d) {
@@ -470,7 +508,7 @@ a { color: var(--accent); }
   function drawRaw(s, cell, c) {
     var pts = (s.points || []).map(function (p) { return [new Date(p[0]).getTime(), p[1]]; });
     if (pts.length < 2) { $("rawChart").innerHTML = ""; return; }
-    var W = 900, H = 170, L = 58, R = 12, T = 10, B = 26;
+    var W = width("rawChart"), H = 170, L = 72, R = 30, T = 10, B = 26;
     var t0 = pts[0][0], t1 = pts[pts.length - 1][0];
     var vs = pts.map(function (p) { return p[1]; });
     var lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
@@ -478,6 +516,7 @@ a { color: var(--accent); }
     var x = function (t) { return L + (t - t0) / (t1 - t0 || 1) * (W - L - R); };
     var y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
     var o = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(c.label) + ' through the drive">'];
+    o.push(yUnit(c.unit, T, H - B));
     cell.visits.forEach(function (v) {
       var a = x(new Date(v[0]).getTime()), b = x(new Date(v[1]).getTime());
       o.push('<rect x="' + a + '" y="' + T + '" width="' + Math.max(2, b - a) + '" height="' + (H - T - B) +
