@@ -896,6 +896,13 @@ test("snapshot odometer walk and odometer plausibility", async () => {
   // Backwards: the higher, earlier one goes.
   assert.deepEqual(plausibleOdometers([r("2026-10-01 08:00:00", 999999), r("2026-10-02 08:00:00", 1000),
     r("2026-10-03 08:00:00", 1010)]).map((x) => x.lo), [1000, 1010]);
+  // The newest one bad: it goes, not everything before it.
+  assert.deepEqual(plausibleOdometers([r("2026-10-01 08:00:00", 111000), r("2026-10-02 08:00:00", 111100),
+    r("2026-10-03 08:00:00", 48554)]).map((x) => x.lo), [111000, 111100]);
+  // One bad between good ones.
+  assert.deepEqual(plausibleOdometers([r("2026-10-01 08:00:00", 111000), r("2026-10-01 09:00:00", 5),
+    r("2026-10-02 08:00:00", 111100)]).map((x) => x.lo), [111000, 111100]);
+  assert.deepEqual(plausibleOdometers([]), []);
   // A long gap over days is fine.
   assert.equal(plausibleOdometers([r("2026-09-01 08:00:00", 100000), r("2026-10-01 08:00:00", 104000)]).length, 2);
 });

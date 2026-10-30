@@ -138,23 +138,33 @@ export async function ingestDetails(env, rows) {
 // could go in the time between them, at this speed plus this slack.
 const MAX_KMH = 250, SLACK_KM = 50;
 
-/** Readings ({start, lo, hi}, oldest first) without those the later ones
- * rule out. Read newest first, each against the last one kept, so one bad
- * reading (seen: an app log's 48,554 km six minutes before 111,610) is
- * dropped and the good ones around it stay. */
+/** Whether reading `b` can follow reading `a` (both {start, lo, hi}). */
+function canFollow(a, b) {
+  const hours = (Date.parse(b.start.replace(" ", "T")) - Date.parse(a.start.replace(" ", "T"))) / 3600000;
+  if (a.hi > b.lo + 2) return false;
+  return !Number.isFinite(hours) || b.lo - a.hi <= MAX_KMH * Math.max(0, hours) + SLACK_KM;
+}
+
+/** Readings ({start, lo, hi}, oldest first) without the ones that don't fit:
+ * the longest run in which each can follow the one before, so a bad reading
+ * (seen: an app log's 48,554 km six minutes before 111,610) is dropped
+ * wherever it falls, first, last or between, and no single reading is taken
+ * on trust. On a tie, the run ending latest. */
 export function plausibleOdometers(readings) {
-  const kept = [];
-  for (let i = readings.length - 1; i >= 0; i--) {
-    const r = readings[i], next = kept[kept.length - 1];
-    if (next) {
-      const hours = Math.max(0, (Date.parse(next.start.replace(" ", "T")) -
-        Date.parse(r.start.replace(" ", "T"))) / 3600000);
-      if (r.hi > next.lo + 2 || (Number.isFinite(hours) && next.lo - r.hi > MAX_KMH * hours + SLACK_KM)) {
-        continue;
+  const n = readings.length;
+  const len = new Array(n).fill(1), prev = new Array(n).fill(-1);
+  let end = -1;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < i; j++) {
+      if (len[j] + 1 > len[i] && canFollow(readings[j], readings[i])) {
+        len[i] = len[j] + 1;
+        prev[i] = j;
       }
     }
-    kept.push(r);
+    if (end < 0 || len[i] >= len[end]) end = i;
   }
+  const kept = [];
+  for (let i = end; i >= 0; i = prev[i]) kept.push(readings[i]);
   return kept.reverse();
 }
 
