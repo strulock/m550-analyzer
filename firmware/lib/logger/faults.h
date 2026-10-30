@@ -163,6 +163,9 @@ inline size_t standardFieldBytes(uint8_t module, uint16_t id) {
     case 0x1700: return 3;                          // odometer, km
     case 0x1701: return 4;                          // vehicle time, s
     case 0x1702: return 3;                          // SAE code
+    // The gateway's and head unit's own, ahead of their odometer (seen: the
+    // head unit's E1C447 records start 1707 37 1700 ...).
+    case 0x1707: return module == 0x10 || module == 0x63 ? 1 : 0;   // control-unit address
     case 0x1731: return 1;                          // fault class
     case 0x1750: return 1;                          // power state, base network
     case 0x1751: return 3;                          // power state, sub-networks

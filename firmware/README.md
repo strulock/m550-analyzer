@@ -286,7 +286,10 @@ modules the logger doesn't wait for are asked (a DME's would hold up its
 fast reads); with it off, any. A row a code goes to
 `drives/<stamp>.details.csv` (`read_at, module, module_name, code,
 first_km, last_km, occurrences, snapshots, extended, time_s`: the odometer
-and the count as the board reads them, both replies whole in hex for the
+and the count as the board reads them (the walk sizes BMW's standard fields,
+and the gateway's and head unit's leading control-unit address `0x1707`;
+a record that runs into anything else carries on at the next record), both
+replies whole in hex for the
 Worker, or "refused (nrc 0x31)" / "no reply"), closed once the codes are all
 read, the drive ends or the car goes, and uploaded as the drives are. Status
 (`s`) and the check-ins give how many codes failed in the modules' last reads,

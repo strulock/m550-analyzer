@@ -67,7 +67,16 @@ serves it to Claude from anywhere:
   (`faultdetails.js`); with the app's own `first_km`/`last_km` they give
   each fault on the page and in `fault_history` its `first_km`, `last_km`,
   `occurrences`, and `first_date`/`last_date` (`{after, by}`): the drive
-  in which the car's odometer passed that reading, or the drives either side.
+  in which the car's odometer passed that reading, or the drives either side
+  (`after` null: before the first drive). Where a row has no odometer the
+  Worker walks the stored snapshot reply itself (`snapshotKm`, the board's
+  walk), so details saved by older firmware still get one. Drive odometers
+  that don't fit are left out of the dating (`plausibleOdometers`: the
+  longest run in which none goes backwards or further than 250 km/h allows,
+  so one misread anywhere can't move every date). A fault with no date has
+  no odometer to give: on this car the DSC keeps no snapshot for nearly all
+  its codes, a code never confirmed (status `0x20`) has none, and the xDrive
+  stores power state but no odometer.
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;

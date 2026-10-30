@@ -242,6 +242,19 @@ the file and line it starts from, as of 0.3.8.
       Read it twice in a row to see whether it's the car or the read.
 - [x] The DME keeps no snapshot for `1A400A` (status 0x20, not confirmed),
       but takes over 2 s to say so: fault details now wait up to 6 s.
+- [x] Fault dates: the head unit's (and gateway's) snapshots start with their
+      control-unit address (`0x1707`, 1 byte), which stopped the board's walk
+      before the odometer; sized now, and the cloud walks stored snapshots
+      itself so older details get theirs. Most other codes without a date have
+      none to give: the DSC kept no snapshot for 44 of its 45, and the xDrive
+      stores no odometer. Drive odometers that can't be right (an app log's
+      48,554 km six minutes before 111,610) are left out of the dating (the
+      longest run that fits, so a misread first, last or between is the one
+      dropped), and a fault older than the drives reads "by" the first one,
+      not "on" it.
+- [ ] Deploy #132: the Worker (`npx wrangler deploy` in `cloud/`) dates the
+      stored head-unit details at once; the firmware (`publish_firmware.py`)
+      only matters for codes the gateway or head unit set from now on.
 - [x] Reconnect after the PC slept: the car answered HSFZ control `0x0040`
       (incorrect tester address) for minutes. Now reported in plain words
       and handled as a lost connection; reconnecting carries on.

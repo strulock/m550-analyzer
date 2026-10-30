@@ -165,7 +165,12 @@ vehicle time (4, s), `0x1702` SAE code (3), `0x1731` fault class (1, BMW's
 `FEHLERKLASSE` table), `0x1750`/`0x1751` power state (1 and 3; `0x1750` read
 with the `UWB_TAB_PWF` table), `0x1768`/`0x1769` extended odometer and time
 (4 and 6; the DSC stores `0x1769` in 4). A module's own environment values
-may follow. The DME's are in the same file (its `FUMWELTTEXTE`: engine
+may follow, and some come first: the gateway (0x10) and head unit (0x63)
+start each record with their control-unit address, `0x1707` (1 byte), ahead
+of the odometer (seen: `00 06 1707 37 1700 01A2E7 ...` for the head unit's
+`E1C447`). A module that kept no snapshot answers the header alone,
+`59 04 DTC[3] status[1]`: on this car the DSC does so for nearly every code,
+and a code never confirmed (status `0x20`) has none anywhere. The DME's are in the same file (its `FUMWELTTEXTE`: engine
 temperature, pressures, air mass... with their scaling and value tables);
 for other modules, nothing after the first own value can be split without
 its size, so the rest is shown raw.

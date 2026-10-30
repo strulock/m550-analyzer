@@ -857,6 +857,56 @@ test("fault details: each code's odometer, dated from the drives, on the page an
   assert.equal((await toolData("drive_history")).drives.length, 3);
 });
 
+test("fault details: the odometer from the snapshots the board couldn't walk, bad drive odometers left out", async () => {
+  await history("pc", [
+    { file: "bad.csv", start: "2026-10-25 12:18:29", odometer_km: 48554 },     // misread
+    { file: "d.csv", start: "2026-10-25 12:24:40", odometer_km: 111610 },
+    { file: "e.csv", start: "2026-10-27 08:06:39", odometer_start_km: 111680, odometer_end_km: 111685 },
+  ], []);
+  // The head unit's E1C447 as an older board saved it: no odometer of its own.
+  const nbt = "5904E1C447680006170737170001A2E717010F1EA5A34252291750AA17510112020106170737170001A2E8" +
+    "17010F1EA83A4252341750AA17510112030206170737170001A2E917010F1EA85A4252351750AA1751011203";
+  await call("PUT", "/api/files/logger/2026-10-30_07-14-00.details.csv", { body: DETAIL_HEAD +
+    `2026-10-30 07:14:05,0x63,"Head unit (NBT Evo)",E1C447,,,133,"${nbt}","5906E1C4476801000285",0.0\n` +
+    '2026-10-30 07:14:02,0x40,"Body domain controller (BDC)",804415,107031,107031,1,' +
+    '"59048044152F0102170001A21717010F128F72","",0.0\n' });
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 4, faults: 2,
+    fault_codes: "0x63:E1C447 0x40:804415" }) });
+  const list = (await (await call("GET", "/api/logger")).json()).last.fault_list;
+  const head = list.find((f) => f.code === "E1C447");
+  assert.equal(head.first_km, 107239);
+  assert.equal(head.last_km, 107241);
+  assert.equal(head.occurrences, 133);
+  // Before the first believable drive: not "on 25 Oct".
+  assert.deepEqual(head.first_date, { after: null, by: "2026-10-25" });
+  assert.deepEqual(list.find((f) => f.code === "804415").first_date, { after: null, by: "2026-10-25" });
+});
+
+test("snapshot odometer walk and odometer plausibility", async () => {
+  const { snapshotKm, plausibleOdometers } = await import("../src/faultdetails.js");
+  assert.equal(snapshotKm("59044806DA40", "0x29"), null);                       // nothing stored
+  assert.equal(snapshotKm("590402192448010417505517510102004015334016AC", "0x19"), null);  // no odometer
+  assert.deepEqual(snapshotKm("5904D42C6C280102170001B48417010FEF30D3", "0x2C"),
+    { first_km: 111748, last_km: 111748 });
+  assert.equal(snapshotKm("5904E1C447680006170737170001A2E7", "0x12"), null);  // 0x1707 isn't the DME's
+  assert.equal(snapshotKm("no reply", "0x12"), null);
+  const r = (start, lo, hi = lo) => ({ start, lo, hi });
+  assert.deepEqual(plausibleOdometers([r("2026-10-25 12:18:29", 48554), r("2026-10-25 12:24:40", 111610),
+    r("2026-10-26 08:00:00", 111656, 111660)]).map((x) => x.lo), [111610, 111656]);
+  // Backwards: the higher, earlier one goes.
+  assert.deepEqual(plausibleOdometers([r("2026-10-01 08:00:00", 999999), r("2026-10-02 08:00:00", 1000),
+    r("2026-10-03 08:00:00", 1010)]).map((x) => x.lo), [1000, 1010]);
+  // The newest one bad: it goes, not everything before it.
+  assert.deepEqual(plausibleOdometers([r("2026-10-01 08:00:00", 111000), r("2026-10-02 08:00:00", 111100),
+    r("2026-10-03 08:00:00", 48554)]).map((x) => x.lo), [111000, 111100]);
+  // One bad between good ones.
+  assert.deepEqual(plausibleOdometers([r("2026-10-01 08:00:00", 111000), r("2026-10-01 09:00:00", 5),
+    r("2026-10-02 08:00:00", 111100)]).map((x) => x.lo), [111000, 111100]);
+  assert.deepEqual(plausibleOdometers([]), []);
+  // A long gap over days is fine.
+  assert.equal(plausibleOdometers([r("2026-09-01 08:00:00", 100000), r("2026-10-01 08:00:00", 104000)]).length, 2);
+});
+
 test("logger check-ins: bad bodies refused, old ones dropped", async () => {
   const post = (body) => call("POST", "/api/logger/heartbeat", { body });
   assert.equal((await post("not json")).status, 400);
