@@ -13,9 +13,11 @@ serves it to Claude from anywhere:
   logger drive's fault reads with their texts) and `channel_check` (the full
   channel check, and what each module answers). The `logger_*` tools read
   and change the logger's channel presets: `logger_channels` (each channel's
-  tier, filtered by module, identifier range, name or tier),
-  `logger_set_tiers` (one channel or a whole module or range at a time; a
-  dry run says what would change), `logger_presets` (the presets, the active
+  tier, filtered by module, identifier range, name, tier, or `values`:
+  "same", never changed across the stored drives, or "rises", only goes up),
+  `logger_set_tiers` (one channel or a whole module, range or `values` set
+  at a time, e.g. every never-changing channel to monthly; a dry run says
+  what would change), `logger_presets` (the presets, the active
   one and its channel file; a preset's versions), `logger_save_preset`,
   `logger_publish` (make one active: the board takes it within 10 minutes)
   and `logger_rollback`. Every change to a preset, from these or the page,

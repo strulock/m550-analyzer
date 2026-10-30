@@ -506,6 +506,9 @@ after the first week of drives, and what's left.
       and CSV files are tried again while Windows holds the file (a flaky
       test, and the same could fail a sync); the logger page shows the
       Wi-Fi note.
+- [x] The page's "Never changed" and "Only goes up" filters for the MCP too:
+      `logger_channels` and `logger_set_tiers` take `values` ("same",
+      "rises"), so a chat can list them or move them all to a slower tier.
 - [ ] Still open from that review: an Ed25519 signature on the firmware
       image, checked by the board; provision.py and C escapes;
       `logs/logger/` names; the Wi-Fi terminal without a password.

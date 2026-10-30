@@ -1321,3 +1321,22 @@ test("sweep: a check file that isn't one is stored, not processed", async () => 
   assert.deepEqual([r.ok, r.processed], [true, false]);
   assert.match(r.reason, /not a check CSV/);
 });
+
+test("MCP logger tools by values: never changed, only goes up", async () => {
+  await putCatalog();
+  const drive = (name, t0, chunks) => call("PUT", `/api/series/${name}`, { body: JSON.stringify({
+    start: 0, approx: false, chunks: chunks.map(([ch, data]) => ({ name: ch, t0, t1: t0 + 1,
+      min: Math.min(...data.map((d) => d[1])), max: Math.max(...data.map((d) => d[1])),
+      mean: 0, data })) }) });
+  await drive("a.csv", 1000, [["ITOEL", [[0, 90], [1, 90]]], ["INMOT", [[0, 700], [1, 800]]]]);
+  await drive("b.csv", 2000, [["ITOEL", [[0, 90]]], ["INMOT", [[0, 800], [1, 900]]]]);
+  let c = await tool("logger_channels", { values: "same" });
+  assert.deepEqual(c.data.channels.map((x) => [x.name, x.lo, x.hi, x.drives]), [["ITOEL", 90, 90, 2]]);
+  c = await tool("logger_channels", { values: "rises", module: "0x12" });
+  assert.deepEqual(c.data.channels.map((x) => x.name), ["INMOT"]);
+  assert.equal((await tool("logger_channels", { values: "rises", module: "0x29" })).data.total, 0);
+  // values alone selects for a bulk change.
+  const s = await tool("logger_set_tiers", { tier: "monthly", values: "same", dry_run: true });
+  assert.deepEqual([s.data.changed, s.data.channels], [1, ["ITOEL"]]);
+  assert.match(String((await tool("logger_channels", { values: "odd" })).data), /values/);
+});
