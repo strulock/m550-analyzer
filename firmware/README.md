@@ -290,8 +290,9 @@ read, the drive ends or the car goes, and uploaded as the drives are. Status
 (`s`) and the check-ins give how many codes failed in the modules' last reads,
 and which (`fault_codes`, "0x12:1A400A 0x40:804415"; the Worker adds their
 texts for the logger page and `logger_status`). The codes go only when they
-change, at boot, in a check-in kept offline, and every 5 minutes; the Worker
-takes the power-on's newest for a check-in without them.
+change, at boot, and every 5 minutes, the check-ins kept offline (below)
+counted apart from the live ones; the Worker takes the power-on's newest for
+a check-in without them.
 
 The same task checks in with the Worker once at power-on and every 10 s
 while Wi-Fi is up: a small JSON report with the boot number and why it
@@ -304,7 +305,8 @@ DME's `IUADW`), files
 waiting and the oldest's age (`oldest_pending_min`, from its name), the
 uploads tried and failed this boot and the last failure with how long ago
 (`up_tries`, `up_failed`, `up_error`, `up_error_min`), card write failures
-(`card_errors`), Wi-Fi and memory, and which channel
+(`card_errors`), Wi-Fi and memory, why it last couldn't join Wi-Fi while
+it's off and for 10 minutes after (`wifi_note`, `wifi_note_min`; below), and which channel
 file it's running (`channels`: the active preset's ETag, `manual` for one
 sent over the terminal, `card` or `built-in`), which the logger channel page
 compares with the active preset. From the last minute's stats it adds the
@@ -315,7 +317,9 @@ the slow pass and the reads
 per cycle, which the page's rate estimates use. The check-ins (and keeping
 Wi-Fi up) have a task of their own on core 0, every 10 s by the clock, so an
 upload or a download doesn't hold one up; each waits for room for a TLS
-session (about 40 KB of internal RAM) when the other task has one open. A
+session (about 40 KB of internal RAM) when the other task has one open,
+checking for it and making the handshake as one step under a lock, so two
+tasks can't both see room for one session and both start. A
 failed one is skipped. Each is a new TLS connection,
 about 2 MB an hour on a phone hotspot. With no Wi-Fi, each check-in goes to
 `beats.jsonl` on the card instead (made before the board knows the time,
@@ -326,6 +330,15 @@ hours' worth, and at the next connection they're sent 48 KB at a time
 the file deleted. `logger_status` (MCP), `GET /api/logger` and the logger
 page (`/logger`: the car's state, temperatures and position) show the last
 one and each power-on.
+
+`wifi_note` (`lib/logger/wifinote.h`) is each known network as the last
+failed try found it: "not seen" (not in the board's scan, which is 2.4 GHz
+only: out of range, not advertising, as an iPhone hotspot with nothing
+joined and its settings screen closed, or 5 GHz only, Maximize Compatibility
+off, all look the same from the board), or seen with its signal and channel
+and why the join failed (the station's disconnect reason, with "wrong
+password?" for an authentication failure), and how many networks the scan
+found. `logger_status` gives each power-on's last one.
 
 Terminal: USB at 115200, or TCP 23 over Wi-Fi as the spike's. Keys: `s`
 status (rates and time per cycle), `l` files waiting, `u` upload now, `e` end
@@ -356,8 +369,11 @@ the next power-on, before it looks for the car (about 10 s, once), or after
 a minute idle on the bench, and restarts into it.
 
 A new build is on trial until it checks in with the Worker or reaches the
-car. If it does neither within 5 minutes, or crashes or hangs before that,
-the bootloader goes back to the build before, which then won't take that
+car. If it does neither in 5 minutes with Wi-Fi or the car's link up, or
+crashes, hangs or restarts before that, the bootloader goes back to the
+build before (parked with neither, the trial waits: a good build isn't
+thrown away for want of a network, and a broken one goes back at the next
+power-off), which then won't take that
 version again (publish another). An image that won't install is refused the
 same way. The check-ins carry `fw` (the version) and `ota` (what the updater
 is doing: downloading, downloaded, trying, went back, failed), and the

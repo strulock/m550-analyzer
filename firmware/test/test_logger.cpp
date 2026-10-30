@@ -15,6 +15,7 @@
 #include "channels.h"
 #include "csvlog.h"
 #include "faults.h"
+#include "wifinote.h"
 #include "ota.h"
 #include "plan.h"
 #include "settings.h"
@@ -840,6 +841,13 @@ static void test_ota_start() {
   CHECK(!trialOver(false, 0xFFFFFFFF));
   CHECK(!trialOver(true, OTA_TRIAL_MS - 1));
   CHECK(trialOver(true, OTA_TRIAL_MS));
+  // Parked without Wi-Fi or the car the trial waits; only time with a chance counts.
+  TrialClock tc;
+  CHECK(tc.tick(1000, false) == 0);
+  CHECK(tc.tick(OTA_TRIAL_MS * 3, false) == 0);
+  CHECK(tc.tick(OTA_TRIAL_MS * 3 + 60000, true) == 60000);
+  CHECK(tc.tick(OTA_TRIAL_MS * 3 + 90000, false) == 60000);
+  CHECK(tc.tick(OTA_TRIAL_MS * 3 + 90000 + OTA_TRIAL_MS - 60000, true) == OTA_TRIAL_MS);
   CHECK(cardImageWanted(true, "v2", "v1", ""));
   CHECK(!cardImageWanted(false, "v2", "v1", ""));            // gone from the card
   CHECK(!cardImageWanted(true, "v2", "v1", "v2"));           // went back from it
@@ -1037,7 +1045,30 @@ static void test_settings() {
   CHECK(settingsChange(reply, s, c) && c.bad == "wifi_pass");
 }
 
+// Why the board isn't on Wi-Fi: not in the scan, or seen and refused.
+static void test_wifi_note() {
+  CHECK(wifiJoinWhy(0, "") == "no answer");
+  CHECK(wifiJoinWhy(202, "AUTH_FAIL") == "wrong password?, AUTH_FAIL (202)");
+  CHECK(wifiJoinWhy(15, "4WAY_HANDSHAKE_TIMEOUT") == "wrong password?, 4WAY_HANDSHAKE_TIMEOUT (15)");
+  CHECK(wifiJoinWhy(205, "CONNECTION_FAIL") == "CONNECTION_FAIL (205)");
+  WifiTry home, phone, none;
+  home.ssid = "Home";
+  phone.ssid = "Phone";
+  CHECK(wifiNote(9, {home, phone}) == "Home: not seen; Phone: not seen (9 networks in range)");
+  phone.seen = phone.tried = true;
+  phone.rssi = -71;
+  phone.channel = 6;
+  phone.why = wifiJoinWhy(202, "AUTH_FAIL");
+  CHECK(wifiNote(1, {home, phone}) ==
+        "Home: not seen; Phone: seen -71 dBm ch 6, join failed: wrong password?, AUTH_FAIL (202)"
+        " (1 network in range)");
+  home.tried = true;                          // the scan failed: both tried blind
+  home.why = "no answer";
+  CHECK(wifiNote(-1, {home, none}) == "Home: join failed: no answer (the scan failed)");
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"wifi_note", test_wifi_note},
   {"settings", test_settings},
   {"car_check", test_car_check},
   {"ota", test_ota},

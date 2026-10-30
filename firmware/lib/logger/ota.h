@@ -68,7 +68,10 @@ inline bool wantUpdate(const std::string& own, const std::string& offered,
 }
 
 // A new build is on trial until it checks in with the Worker or reaches the
-// car; one that does neither this long after power-on goes back.
+// car; one that does neither in this long with the chance to (Wi-Fi up or the
+// car's link up) goes back. Parked with neither it waits: a restart on trial
+// goes back anyway (the bootloader's rule), so a build that broke both goes
+// back at the next power-off.
 static const uint32_t OTA_TRIAL_MS = 5 * 60 * 1000;
 
 enum OtaStart {
@@ -87,7 +90,20 @@ inline OtaStart otaStart(bool pendingVerify, const std::string& installed,
   return OTA_NORMAL;
 }
 
-inline bool trialOver(bool trial, uint32_t upMs) { return trial && upMs >= OTA_TRIAL_MS; }
+inline bool trialOver(bool trial, uint32_t chanceMs) { return trial && chanceMs >= OTA_TRIAL_MS; }
+
+// The time a build on trial has had the chance to prove itself: tick() it
+// often with whether it has one now.
+struct TrialClock {
+  uint32_t last = 0, chance = 0;
+  bool started = false;
+  uint32_t tick(uint32_t nowMs, bool canProve) {
+    if (started && canProve) chance += nowMs - last;
+    last = nowMs;
+    started = true;
+    return chance;
+  }
+};
 
 // Whether the image waiting on the card (version `card`) is still to be
 // installed; if not, it's removed.

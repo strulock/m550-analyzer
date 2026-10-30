@@ -490,13 +490,21 @@ after the first week of drives, and what's left.
       network the board is on is tried before it's kept; a check-in's answer
       settles only the change it saw. Also: a malformed `S` line is no
       longer echoed whole.
+- [x] From that review (and the evening of 29 Oct): `logger_publish` with
+      no name is refused (it cleared the active preset); a `logger_set_tiers`
+      range or module that isn't hex is refused (it selected every channel);
+      the TLS room check and handshake are one step under a lock, so the
+      check-in and upload tasks can't both start one on room for one; a
+      trial firmware's 5 minutes count only with Wi-Fi or the car's link up;
+      the snapshot stops waiting once the car's connection closes. Check-ins
+      kept offline carry the fault codes only when they change (every one
+      did), and say why Wi-Fi wouldn't join (`wifi_note`).
 - [ ] Still open from that review: an Ed25519 signature on the firmware
-      image, checked by the board; `logger_publish` with no name; a
-      malformed identifier range in `logger_set_tiers`; the TLS memory race
-      between tasks; a trial firmware never proved while parked without
-      Wi-Fi; the snapshot drain spinning after the connection drops;
-      provision.py and C escapes; `logs/logger/` names; the Wi-Fi terminal
-      without a password.
+      image, checked by the board; provision.py and C escapes;
+      `logs/logger/` names; the Wi-Fi terminal without a password.
+- [ ] On 29 Oct the board lost power three times while driving (power-on
+      resets at 37 and 50 km/h, 8:41-8:49 pm): the USB cable or the car's
+      port, if it wasn't unplugged by hand.
 - [ ] Try a change from the logger page's Board settings (a person's login
       only): a backup network, then a new Access token (make it, wait for
       "taken", then revoke the old).

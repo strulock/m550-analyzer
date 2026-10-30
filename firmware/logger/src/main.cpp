@@ -69,6 +69,7 @@
 #include <algorithm>
 #include <atomic>
 #include <map>
+#include <chrono>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -85,6 +86,7 @@
 #include "settings.h"
 #include "sha256.h"
 #include "upload.h"
+#include "wifinote.h"
 
 // What a board whose flash has no settings starts from: logger_secrets.h's,
 // in a build made on a PC that has one; nothing in a published build
@@ -1394,10 +1396,13 @@ static bool takeSnapshot() {
     return false;
   }
   lastSnapshotMs = millis() | 1;
-  for (uint32_t t0 = millis(); !pendingReqs.empty() && millis() - t0 < LATER_MS;) {
+  // What's out first, but not after the connection closes: its answers
+  // won't come, and the drive's end (or a reconnect) shouldn't wait LATER_MS.
+  for (uint32_t t0 = millis(); !pendingReqs.empty() && !connectionLost && millis() - t0 < LATER_MS;) {
     collect();
     delay(5);
   }
+  if (connectionLost) return false;
   std::vector<std::vector<size_t>> singles;
   for (size_t i : snapshotReads) {
     if (!waitingOn(plan.reads[i].module) && !backoff.waiting(plan.reads[i].module, millis())) {
@@ -1923,6 +1928,33 @@ static bool tlsRoom(uint32_t ms) {
   return true;
 }
 
+// A connection to the Worker, made before HTTPClient's begin (which reuses
+// it). The room check and the handshake are one step under tlsLock: two
+// tasks checking at once both saw room for one session and both started a
+// handshake. The second now checks after the first has taken its buffers.
+// `readMs`: the connection's read timeout (HTTPClient's setTimeout, which it
+// skips for a connection it reuses).
+enum TlsOpen { TLS_OK, TLS_NO_ROOM, TLS_NO_CONNECT };
+static std::timed_mutex tlsLock;
+static TlsOpen tlsConnect(NetworkClientSecure& tls, uint32_t roomMs, int32_t connectMs,
+                          uint32_t readMs) {
+  std::unique_lock<std::timed_mutex> g(tlsLock, std::defer_lock);
+  if (!g.try_lock_for(std::chrono::milliseconds(roomMs)) || !tlsRoom(roomMs)) return TLS_NO_ROOM;
+  tls.useBuiltinCACertBundle();
+  tls.setHandshakeTimeout(connectMs / 1000 + 5);   // seconds; 120 by default, all that time locked
+  if (!tls.connect(workerHost().c_str(), 443, connectMs)) return TLS_NO_CONNECT;
+  tls.setTimeout(readMs);
+  return TLS_OK;
+}
+
+// What the last failed tlsConnect said, for a failure's report.
+static String tlsWhy(NetworkClientSecure& tls, TlsOpen r) {
+  if (r == TLS_NO_ROOM) return "not enough memory for TLS";
+  char err[100] = "";
+  tls.lastError(err, sizeof(err));
+  return err[0] ? String("can't connect; TLS: ") + err : String("can't connect");
+}
+
 // A drive's file read out for its upload. While a drive is logging the
 // uploads are low priority: a few KB at a time with pauses (about 80 KB/s),
 // so the card, its SPI bus and core 0 stay mostly the logging's. Between
@@ -2014,14 +2046,15 @@ static UpResult uploadOne(const String& name) {
   case UPLOAD_SEND:
     break;
   }
-  if (!tlsRoom(10000)) {
+  NetworkClientSecure tls;
+  TlsOpen open = tlsConnect(tls, 10000, 10000, 30000);
+  if (open != TLS_OK) {
     f.close();
-    out.printf("[up] %s: not enough memory for TLS; later\n", name.c_str());
-    uploadFailed(name, "not enough memory for TLS");
+    String why = tlsWhy(tls, open);
+    out.printf("[up] %s: %s; later\n", name.c_str(), why.c_str());
+    uploadFailed(name, why);
     return UP_STOP;
   }
-  NetworkClientSecure tls;
-  tls.useBuiltinCACertBundle();
   HTTPClient http;
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
@@ -2090,11 +2123,32 @@ static bool wifiKnown = false;
 static const uint32_t WIFI_RETRY_MS = 10000;       // off both: look again
 static const uint32_t WIFI_HOME_CHECK_MS = 120000; // on the backup: look for home
 
-static bool join(const char* ssid, const char* pass, uint32_t ms) {
+// The last failed try's wifi_note (lib/logger/wifinote.h) and when, under
+// tagLock: check-ins carry it while Wi-Fi is down and WIFI_NOTE_MS after.
+static std::string wifiNoteText;
+static uint32_t wifiNoteMs = 0;
+static const uint32_t WIFI_NOTE_MS = 10 * 60000;
+
+// Why the station last left (or never got on), from its events; leaving
+// on purpose (a disconnect before the next try) isn't a reason.
+static std::atomic<int> staLeftWhy{0};
+static std::once_flag staHooked;
+
+static bool join(const char* ssid, const char* pass, uint32_t ms, std::string* why = nullptr) {
+  std::call_once(staHooked, [] {
+    WiFi.onEvent([](arduino_event_id_t, arduino_event_info_t info) {
+      int r = info.wifi_sta_disconnected.reason;
+      if (r != WIFI_REASON_ASSOC_LEAVE) staLeftWhy = r;
+    }, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+  });
+  staLeftWhy = 0;
   WiFi.begin(ssid, pass);
   uint32_t t0 = millis();
   while (!WiFi.isConnected() && millis() - t0 < ms) delay(100);
-  return WiFi.isConnected();
+  if (WiFi.isConnected()) return true;
+  int r = staLeftWhy;
+  if (why) *why = wifiJoinWhy(r, r ? WiFi.disconnectReasonName((wifi_err_reason_t)r) : "");
+  return false;
 }
 
 // One scan (about 2 s) says which known network is in range, and only that
@@ -2106,17 +2160,35 @@ static bool joinPreferred() { return joinWith(settingsNow()); }
 static bool joinWith(const Settings& s) {
   if (s.ssid1.empty() && s.ssid2.empty()) return false;
   int n = WiFi.scanNetworks();
-  bool home = n < 0 && !s.ssid1.empty(), backup = n < 0 && !s.ssid2.empty();
+  WifiTry home, backup;                      // lib/logger/wifinote.h
+  home.ssid = s.ssid1;
+  backup.ssid = s.ssid2;
   for (int i = 0; i < n; i++) {
-    home = home || (!s.ssid1.empty() && WiFi.SSID(i) == s.ssid1.c_str());
-    backup = backup || (!s.ssid2.empty() && WiFi.SSID(i) == s.ssid2.c_str());
+    for (WifiTry* t : {&home, &backup}) {    // the strongest of each name
+      if (t->ssid.empty() || WiFi.SSID(i) != t->ssid.c_str()) continue;
+      if (t->seen && WiFi.RSSI(i) <= t->rssi) continue;
+      t->seen = true;
+      t->rssi = WiFi.RSSI(i);
+      t->channel = WiFi.channel(i);
+    }
   }
   WiFi.scanDelete();
-  if (home && join(s.ssid1.c_str(), s.pass1.c_str(), 10000)) return true;
-  if (backup) {
+  home.tried = !home.ssid.empty() && (home.seen || n < 0);
+  backup.tried = !backup.ssid.empty() && (backup.seen || n < 0);
+  if (home.tried && join(s.ssid1.c_str(), s.pass1.c_str(), 10000, &home.why)) return true;
+  if (backup.tried) {
     WiFi.disconnect();
-    if (join(s.ssid2.c_str(), s.pass2.c_str(), 10000)) return true;
+    if (join(s.ssid2.c_str(), s.pass2.c_str(), 10000, &backup.why)) return true;
   }
+  std::string note = wifiNote(n, {home, backup});
+  bool changed;
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    changed = note != wifiNoteText;
+    wifiNoteText = note;
+    wifiNoteMs = millis() | 1;
+  }
+  if (changed) out.printf("[wifi] %s\n", note.c_str());
   return false;
 }
 
@@ -2291,10 +2363,14 @@ static void jsonNumber(std::string& j, const char* key, double v, int decimals) 
 }
 
 // The fault codes the Worker has (the last check-in it took with them): a
-// check-in carries them only when they've changed, at boot, kept offline, or
-// every FAULT_CODES_EVERY check-ins; the Worker uses the power-on's newest.
+// check-in carries them only when they've changed, at boot, or every
+// FAULT_CODES_EVERY check-ins; the Worker uses the power-on's newest.
 static std::string faultCodesSent, faultCodesInBeat;
 static uint32_t beatsSinceCodes = 0;
+// The same for the check-ins kept offline, which reach the Worker in their
+// own order: one kept counts as sent (all of a power-on's go together).
+static std::string keptCodesSent;
+static uint32_t keptSinceCodes = 0;
 static const uint32_t FAULT_CODES_EVERY = 30;           // 5 minutes
 
 // The age of a waiting file, from its name (the drive's start, local time),
@@ -2364,9 +2440,26 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
         }
       }
     }
-    if (boot || buffered || codes != faultCodesSent || beatsSinceCodes >= FAULT_CODES_EVERY) {
+    const std::string& sent = buffered ? keptCodesSent : faultCodesSent;
+    uint32_t since = buffered ? keptSinceCodes : beatsSinceCodes;
+    bool with = boot || codes != sent || since >= FAULT_CODES_EVERY;
+    if (with) {
       jsonText(j, "fault_codes", codes.c_str());
       faultCodesInBeat = codes;
+    }
+    if (buffered) {
+      if (with) keptCodesSent = codes;
+      keptSinceCodes = with ? 0 : keptSinceCodes + 1;
+    }
+  } else if (buffered) {
+    keptCodesSent.clear();
+    keptSinceCodes = 0;
+  }
+  {
+    std::lock_guard<std::mutex> g(tagLock);
+    if (wifiNoteMs && (!WiFi.isConnected() || millis() - wifiNoteMs < WIFI_NOTE_MS)) {
+      jsonText(j, "wifi_note", wifiNoteText.c_str());
+      jsonNumber(j, "wifi_note_min", (millis() - wifiNoteMs) / 60000.0, 1);
     }
   }
   j += linkUp ? ",\"link\":true" : ",\"link\":false";
@@ -2429,9 +2522,8 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
 
 static int postBeat(const std::string& body, const char* path = "/api/logger/heartbeat",
                     std::string* reply = nullptr, const Settings* use = nullptr) {
-  if (!tlsRoom(3000)) return -1;
   NetworkClientSecure tls;
-  tls.useBuiltinCACertBundle();
+  if (tlsConnect(tls, 3000, 5000, 8000) != TLS_OK) return -1;
   HTTPClient http;
   http.setTimeout(8000);
   http.setConnectTimeout(5000);
@@ -2679,7 +2771,7 @@ static const char* CHANNELS_DOWNLOAD = "/channels.dl";
 
 static void fetchChannels() {
   NetworkClientSecure tls;
-  tls.useBuiltinCACertBundle();
+  if (tlsConnect(tls, 10000, 10000, 30000) != TLS_OK) return;
   HTTPClient http;
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
@@ -2773,7 +2865,8 @@ static void channelsIfDue() {
 // a minute (on the bench), and the board restarts into it.
 //
 // A new build is on trial until it checks in with the Worker or reaches the
-// car; if it does neither within OTA_TRIAL_MS, or crashes or hangs first, the
+// car; if it does neither in OTA_TRIAL_MS on Wi-Fi or the car's link (parked
+// with neither, it waits), or crashes, hangs or restarts first, the
 // bootloader goes back to the last build, which then won't take that version
 // again. Keys in "logger": otasd/otasha (a checked image on the card), otato
 // (the version just installed), otabad (one that went back).
@@ -2903,18 +2996,20 @@ static void otaInstall() {
   ESP.restart();
 }
 
-// Back to the last build if this one hasn't proved itself in time.
+// Back to the last build if this one hasn't proved itself in time: time
+// with Wi-Fi or the car's link up (lib/logger/ota.h).
 static void otaTrialCheck() {
-  if (!trialOver(otaTrial, millis())) return;
-  out.printf("[ota] firmware %s didn't check in or reach the car in %u min; going back\n", FW_VERSION,
-             (unsigned)(OTA_TRIAL_MS / 60000));
+  static TrialClock clock;
+  if (!otaTrial) return;
+  if (!trialOver(true, clock.tick(millis(), WiFi.isConnected() || linkUp))) return;
+  out.printf("[ota] firmware %s didn't check in or reach the car in %u min on Wi-Fi or the car; "
+             "going back\n", FW_VERSION, (unsigned)(OTA_TRIAL_MS / 60000));
   delay(300);
   esp_ota_mark_app_invalid_rollback_and_reboot();
 }
 
 static int workerGet(HTTPClient& http, NetworkClientSecure& tls, const char* path) {
-  if (!tlsRoom(10000)) return -1;
-  tls.useBuiltinCACertBundle();
+  if (tlsConnect(tls, 10000, 10000, 30000) != TLS_OK) return -1;
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
   if (!http.begin(tls, String("https://") + workerHost() + path)) return -1;

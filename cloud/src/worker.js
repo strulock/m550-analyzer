@@ -1010,8 +1010,12 @@ async function loggerStatus(env, hours, now = new Date()) {
        MAX(json_extract(data, '$.speed_kmh')) AS max_speed_kmh,
        MAX(json_extract(data, '$.coolant_c')) AS max_coolant_c,
        MAX(json_extract(data, '$.oil_c')) AS max_oil_c,
-       SUM(COALESCE(json_extract(data, '$.buffered'), 0)) AS buffered
-     FROM heartbeats WHERE received >= ? GROUP BY boot ORDER BY first, boot`).bind(since).all())
+       SUM(COALESCE(json_extract(data, '$.buffered'), 0)) AS buffered,
+       (SELECT json_extract(w.data, '$.wifi_note') FROM heartbeats w
+         WHERE w.boot = heartbeats.boot AND w.received >= ?
+           AND json_extract(w.data, '$.wifi_note') IS NOT NULL
+         ORDER BY w.received DESC LIMIT 1) AS wifi_note
+     FROM heartbeats WHERE received >= ? GROUP BY boot ORDER BY first, boot`).bind(since, since).all())
     .results || [];
   const firmware = await firmwareManifest(env);
   const sweep = await getSweep(env);
@@ -1180,7 +1184,11 @@ export const TOOLS = [
       "voltage, coolant and oil temperature, GPS position, files waiting to upload, Wi-Fi, " +
       "memory, its firmware version and update state) and each power-on in the last " +
       "`hours` (first and last check-in, why it booted, top speed, hottest coolant and " +
-      "oil), and the firmware published for it. Times in UTC.",
+      "oil, and wifi_note: its last word on why it couldn't join Wi-Fi), and the firmware " +
+      "published for it. wifi_note names each known network as \"not seen\" (not in the " +
+      "board's 2.4 GHz scan: out of range, not advertising, or 5 GHz only) or seen with its " +
+      "signal and why the join failed (\"wrong password?\" for an authentication failure). " +
+      "Times in UTC.",
     inputSchema: { type: "object", properties: {
       hours: { type: "number", description: "Power-ons this far back; default 24" } } },
   },
