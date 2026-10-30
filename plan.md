@@ -252,6 +252,12 @@ the file and line it starts from, as of 0.3.8.
       longest run that fits, so a misread first, last or between is the one
       dropped), and a fault older than the drives reads "by" the first one,
       not "on" it.
+- [x] The logger page lost the dates of every fault past the DSC: the board's
+      check-in lists codes only up to about 400 characters, whole modules in
+      address order, so once the DSC held ~70 codes everything after it
+      (0x2C, 0x40, 0x56, 0x61, 0x63 — most of the dated ones) went unlisted.
+      The Worker now fills modules past the last listed one from fault
+      history (`from_history`) when the check-in counts more than it lists.
 - [ ] Deploy #132: the Worker (`npx wrangler deploy` in `cloud/`) dates the
       stored head-unit details at once; the firmware (`publish_firmware.py`)
       only matters for codes the gateway or head unit set from now on.
