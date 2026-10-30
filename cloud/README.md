@@ -10,8 +10,10 @@ serves it to Claude from anywhere:
   request), `trend`, `list_files`, `read_log`, `compare_banks` and
   `find_events` (over one stored log), `list_channels`, `channel_series`,
   `list_templates`, `logger_status`, `tank_history`, `drive_faults` (one
-  logger drive's fault reads with their texts) and `channel_check` (the full
-  channel check, and what each module answers). The `logger_*` tools read
+  logger drive's fault reads with their texts), `channel_check` (the full
+  channel check, and what each module answers) and `drive_health` (each
+  drive's health scores, or one drive and channel's RPM x load cells). The
+  `logger_*` tools read
   and change the logger's channel presets: `logger_channels` (each channel's
   tier, filtered by module, identifier range, name, tier, or `values`:
   "same", never changed across the stored drives, or "rises", only goes up),
@@ -77,6 +79,32 @@ serves it to Claude from anywhere:
   no odometer to give: on this car the DSC keeps no snapshot for nearly all
   its codes, a code never confirmed (status `0x20`) has none, and the xDrive
   stores power state but no odometer.
+- **Drive health** (`health.js`, the logger page's Health tab at
+  `/logger/health`, `healthpage.js`): each drive boiled down per channel
+  and compared with that channel's own recent drives, so drift stands out.
+  Only samples with the engine fully warm count (coolant `ITKUM` at least
+  95 °C and, where it was read, oil `TEMP_OEL`, else `ITOEL`, at least
+  90 °C; the setpoint `S_TEMP_KUEHLMITTEL` is never used), and not overrun
+  fuel cut (either bank's lambda at 1.5 or more). Each goes into an RPM x
+  load cell (RPM 400, 900, 1,500, 2,000, 2,500, 3,000, 4,000, 8,000; load 0,
+  20, 35, 50, 70, 100, 400 %). Load is the SAE J1979 calculated load, what
+  `ILMAR` reports, worked out from the throttle air flow
+  (`MASSENSTROM_DK_BANK1`, both banks) and RPM, because `ILMAR` is read
+  only every half minute or so; `ILMAR` where there's no air flow. Per
+  channel and cell (`health_summaries`): count, mean, median, p95, min,
+  max; the misfire counters as increases and revolutions, compared as a rate
+  per 1,000 revolutions. The baseline per channel and cell is the median and
+  MAD of the last 10 healthy drives' values (healthy: not left out by hand
+  in `health_excluded`, and that channel not alerting in them); each cell
+  gets a robust z-score (the spread at least a per-channel floor, so a
+  channel that never moves doesn't alert on a hair), and the channel's score
+  is the cells' sample-weighted mean (`health_scores`): watch from 2,
+  alert from 3, per group in `GROUPS`. A cell needs 10 samples (a counter
+  1,000 revolutions) and 3 baseline drives, and a drive a minute of warm
+  running. Channels and groups (fueling, ignition and knock, temperatures
+  and oil, boost, misfires, electrical) are `CHANNELS` in `health.js`.
+  Worked out as each drive's series arrive (a failure there never fails the
+  upload); `POST /api/health/rebuild` does every stored drive again.
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
@@ -87,7 +115,7 @@ serves it to Claude from anywhere:
   Worker hasn't cached fetches Access's keys again (at most every 5 minutes),
   and expiry allows a minute's clock difference.
 
-Plain JavaScript, no packages: `src/worker.js` and `src/drive.js`. Tests run
+Plain JavaScript, no packages: `src/worker.js`, `src/drive.js` and the modules beside them. Tests run
 on Node 24: `node --test "cloud/test/*.test.mjs"` (from the repo root).
 `cloud/test/parity` holds two logs and what the Python code makes of them;
 both test suites check against it, so the port can't drift. After changing
@@ -194,5 +222,10 @@ All requests need an Access token (a login, or the service token headers
 | `PUT /api/logger/presets` | `{"changes": [{"name", "rest", "tiers"} or {"name", "deleted": true}], "active": name}`, both optional; the active preset can't be deleted. Each preset changed or deleted keeps what it was as a version (MCP `logger_presets`, `logger_rollback`) |
 | `GET /api/logger/channels` | the board's `channels.csv` from the active preset, with an `ETag` (`If-None-Match` gets a 304) and `X-Preset`. Whatever the preset says: an identifier its module said it hasn't (refused with 0x31 in a check or a drive: `absent` in the catalog's answers) or one that misdecodes on this car (`logger.js` `UNDECODABLE`: the airbag module's `_IMU_WERTE`) is off, and what the board's own logic reads (`BOARD_NEEDS`: the selector, engine speed, speed, `ITKUM`, `IUIBS`) is at least medium |
 | `GET /api/logger/values` | each channel's newest stored value: `{"columns": ["t", "value", "n", "lo", "hi", "drives", "rises"], "values": {channel: [...]}}`, when (UTC seconds), the value, its count, min and max over every stored drive, how many drives, and `rises` (1: in two drives or more, it went up and never down, within a drive or from one to the next: an odometer, a counter). The logger page filters on it ("Only goes up") and on min = max ("Never changed"). Kept in `channel_values`, brought up to date as a drive's series are stored |
+| `GET /logger/health` | the Health tab: a heatmap of every drive's health scores (channels by group down the side, drives along the bottom; filters by group, dates and flagged channels), and for a channel and drive its value across drives with the normal band and the other bank's (or matching cylinder's) beside it, the drive's RPM x load cells against the baseline, and the drive's raw values at its longest time in a cell; a drive can be left out of the baselines |
+| `GET /api/health` | the scores: `groups` (with `watch` and `alert`), `channels`, `drives` (oldest first: `start`, `warm_min`, `overall`, `level` 0-2, `excluded`), `scores` (`{channel: [[score, cells, value, low, high] or null per drive]}`) and `settings`; `?from=`, `?to=` (dates) narrow the drives |
+| `GET /api/health/cell?drive=&channel=` | one drive and channel: each RPM x load cell's seconds, revolutions, longest visits (UTC), value, baseline median, spread, z and samples (and the cell's mean, median, p95, min and max) |
+| `POST /api/health/exclude` | `{"drive", "excluded"}`: leave a drive out of the baselines (or let it back in) and score every drive again; a person's login only |
+| `POST /api/health/rebuild` | summarize stored drives again from their series, three a request, then score them all: `{"done", "next"}`; send `?after=<next>` until `next` is null; a person's login only |
 | `POST /mcp` | MCP (JSON-RPC 2.0, streamable HTTP with JSON replies) |
 | `GET /api/status` | who you're signed in as |

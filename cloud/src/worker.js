@@ -19,10 +19,15 @@
  * - A full channel check (sweep.js), asked for on the page, goes to the
  *   board in its check-ins' replies; its answers (<drive>.check.csv) go
  *   into the catalog's.
+ * - Drive health (health.js): every drive's warm samples summarized per
+ *   channel and RPM x load cell, scored against each channel's recent past
+ *   whenever a drive's series arrive; the Health tab (/logger/health,
+ *   healthpage.js) and the drive_health tool show them.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with tools over that copy: drive_history, fault_history,
- *   trend, list_files, read_log, a drive's fault list (drive_faults) and
- *   the full channel check's results (channel_check), all read-only; and
+ *   trend, list_files, read_log, a drive's fault list (drive_faults), the
+ *   full channel check's results (channel_check) and drive health
+ *   (drive_health), all read-only; and
  *   the logger's channel presets, which the logger_* tools list and change
  *   (tiers, presets, the one published to the board, versions and
  *   rollback). Nothing here writes to the car.
@@ -48,6 +53,9 @@ import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, iden
 import { tanks } from "./tanks.js";
 import { getValues, migrateValues, refreshValues, VALUES_SCHEMA } from "./values.js";
 import { DETAILS, DETAILS_SCHEMA, ingestDetails, withDetails } from "./faultdetails.js";
+import { excludeDrive, HEALTH_SCHEMA, healthDetail, healthOverview, levelOf, rebuildHealth,
+  updateHealth } from "./health.js";
+import { HEALTH_PAGE } from "./healthpage.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -368,6 +376,8 @@ export const SCHEMA = [
   ...DETAILS_SCHEMA,
   // A change to the board's settings from the logger page (boardsettings.js).
   ...BOARD_SETTINGS_SCHEMA,
+  // Each drive's health summary and scores (health.js).
+  ...HEALTH_SCHEMA,
 ];
 
 const MAX_POINTS = 2000;
@@ -394,7 +404,20 @@ async function putSeries(env, drive, body) {
   await env.DB.batch(stmts);
   await refreshValues(env, (old.results || []).map((x) => x.channel)
     .concat(chunks.map((c) => c.name)));
-  return { drive, channels: new Set(chunks.map((c) => c.name)).size, chunks: chunks.length };
+  return { drive, channels: new Set(chunks.map((c) => c.name)).size, chunks: chunks.length,
+    health: await healthAfter(env, drive) };
+}
+
+/** A drive's health once its series are in; a failure there never fails
+ * the upload (the Health tab's rebuild catches it up). */
+async function healthAfter(env, drive) {
+  try {
+    const h = await updateHealth(env, drive);
+    return { warm_min: +(h.warm_s / 60).toFixed(1), scored: h.kept };
+  } catch (e) {
+    console.error(e);
+    return { error: String(e.message || e) };
+  }
 }
 
 /** The statement storing one chunk whose data is already JSON (`json`). */
@@ -680,8 +703,9 @@ async function ingestLog(env, key, bytes) {
     .filter(Boolean), now);
   // Identifiers the board found its modules haven't: off for good.
   const absent = await markAbsent(env, absentInNotes(log.notes));
+  const health = await healthAfter(env, drive);
   return { processed: true, drive_file: drive, channels, approx_time: series.approx,
-    with_other_file: !!other, absent,
+    with_other_file: !!other, absent, health,
     drive: row ? { start: row.start, minutes: row.minutes, km: row.km } : null };
 }
 
@@ -1220,6 +1244,28 @@ export const TOOLS = [
     inputSchema: { type: "object", properties: {} },
   },
   {
+    name: "drive_health",
+    description: "Drive health: each drive's channels (fuel trims and lambda per bank, knock " +
+      "retard, spark burn time and misfires per cylinder, coolant, oil temperature and " +
+      "pressure, intake air, gearbox oil, after-catalyst temperatures, boost, battery) " +
+      "with the engine fully warm (coolant ITKUM >= 95 °C, oil >= 90 °C), compared in " +
+      "RPM x load cells against the same channel's last 10 healthy drives: a robust " +
+      "z-score per channel (0 normal; |score| >= 2 watch, >= 3 alert), the drive's value " +
+      "and the normal band (both sample-weighted over the cells scored). Without drive: " +
+      "every drive's scores (newest last; narrow with from, to, group, flagged_only). With " +
+      "drive and channel: that drive's RPM x load cells (value, baseline median, spread, " +
+      "z, samples, and the longest time in each cell, for the raw log).",
+    inputSchema: { type: "object", properties: {
+      drive: { type: "string", description: "A drive, as the overview lists it" },
+      channel: { type: "string", description: "A channel key, as the overview lists it" },
+      group: { type: "string", description: "fueling, ignition, temps, boost, misfires or " +
+        "electrical" },
+      from: { type: "string", description: "ISO date: drives from" },
+      to: { type: "string", description: "ISO date: drives up to" },
+      flagged_only: { type: "boolean", description: "Only channels at watch or alert in " +
+        "some drive shown" } } },
+  },
+  {
     name: "drive_faults",
     description: "One logger drive's fault reads, from its .faults.csv: each module's read " +
       "(when, how far into the drive, the module, and its state: no faults, refused, no " +
@@ -1329,6 +1375,14 @@ async function callTool(env, name, a) {
     }
     // The stored details are long; ask for one code to see them.
     return { faults: all.map(({ details, ...f }) => ({ ...f, has_details: !!details })) };
+  }
+  if (name === "drive_health") {
+    if (a.drive && a.channel) {
+      const d = await healthDetail(env, String(a.drive), String(a.channel));
+      if (!d) throw new ToolError("no health for that drive and channel");
+      return d;
+    }
+    return healthTool(await healthOverview(env, { from: a.from, to: a.to }), a);
   }
   if (name === "trend") {
     if (!/^[a-z0-9_]+$/.test(String(a.key || ""))) throw new ToolError("key: a statistic name");
@@ -1475,6 +1529,23 @@ export async function rpc(env, msg) {
   }
 }
 
+/** The overview as drive_health gives it: per drive, each channel's score
+ * and level with its value and band, narrowed as asked. */
+function healthTool(o, a) {
+  const keep = o.channels.filter((c) => !a.group || c.group === a.group).filter((c) =>
+    !a.flagged_only || o.scores[c.key].some((s) => s && levelOf(c.group, s[0]) >= 1));
+  return {
+    settings: o.settings, groups: o.groups,
+    channels: keep.map(({ key, label, group, unit }) => ({ key, label, group, unit })),
+    drives: o.drives.map((d, i) => ({ ...d, channels: Object.fromEntries(keep
+      .filter((c) => o.scores[c.key][i])
+      .map((c) => {
+        const [score, cells, value, low, high] = o.scores[c.key][i];
+        return [c.key, { score, level: levelOf(c.group, score), cells, value, low, high }];
+      })) })),
+  };
+}
+
 /** One logger drive's fault reads (its .faults.csv), each module's read
  * with the codes it listed and their texts; the newest drive's without a
  * name. */
@@ -1616,6 +1687,38 @@ async function loggerConfig(request, env, url) {
 }
 
 // ------------------------------------------------------------------ routes
+
+/** /api/health: the overview (GET), one drive and channel (GET /cell),
+ * a drive kept out of the baselines (POST /exclude {drive, excluded}) and
+ * every summary worked out again (POST /rebuild?after=), the last two for
+ * people only, not the board. */
+async function healthApi(request, env, url, who) {
+  await ensureSchema(env);
+  const q = Object.fromEntries(url.searchParams);
+  if (url.pathname === "/api/health" && request.method === "GET") {
+    return json(await healthOverview(env, q));
+  }
+  if (url.pathname === "/api/health/cell" && request.method === "GET") {
+    const d = await healthDetail(env, String(q.drive || ""), String(q.channel || ""));
+    return d ? json(d) : json({ error: "no health for that drive and channel" }, 404);
+  }
+  if (request.method !== "POST") return null;
+  if (await isBoard(env, who)) return json({ error: "a person's login only" }, 403);
+  if (url.pathname === "/api/health/rebuild") return json(await rebuildHealth(env, q.after));
+  if (url.pathname === "/api/health/exclude") {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "body: JSON {drive, excluded}" }, 400);
+    }
+    if (!body || typeof body.drive !== "string" || !body.drive) {
+      return json({ error: "body: JSON {drive, excluded}" }, 400);
+    }
+    return json(await excludeDrive(env, body.drive, !!body.excluded, who));
+  }
+  return null;
+}
 
 export async function handle(request, env, fetcher = fetch) {
   const url = new URL(request.url);
@@ -1804,6 +1907,14 @@ export async function handle(request, env, fetcher = fetch) {
   }
   if (url.pathname === "/api/logger/resummarize" && request.method === "POST") {
     return json(await resummarize(env, url.searchParams.get("after")));
+  }
+  if (url.pathname === "/logger/health" && request.method === "GET") {
+    return new Response(HEALTH_PAGE, { headers: { "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store" } });
+  }
+  if (url.pathname.startsWith("/api/health")) {
+    const reply = await healthApi(request, env, url, auth.who);
+    if (reply) return reply;
   }
   if (url.pathname === "/logger" && request.method === "GET") {
     return new Response(LOGGER_PAGE, { headers: { "content-type": "text/html; charset=utf-8",

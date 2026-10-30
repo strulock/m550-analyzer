@@ -468,7 +468,8 @@ test("series: stored per drive, one channel across drives, resampled", async () 
     { body: JSON.stringify({ start: chunks[0].t0, approx: false, chunks }) });
   let r = await put("logs/a.csv", [chunk("ITKUA", day1, [80, 90, 100], "°C"),
     chunk("ILUZ5", day1, [1, -2, 3])]);
-  assert.deepEqual(await r.json(), { ok: true, drive: "a.csv", channels: 2, chunks: 2 });
+  assert.deepEqual(await r.json(), { ok: true, drive: "a.csv", channels: 2, chunks: 2,
+    health: { warm_min: 0, scored: false } });              // never warm
   await put("logs/b.csv", [chunk("ITKUA", day2, [85, 95], "°C")]);
   await put("logs/a.csv", [chunk("ITKUA", day1, [81, 91, 101], "°C"),    // replaced, not added
     chunk("ILUZ5", day1, [1, -2, 3])]);
@@ -1412,4 +1413,80 @@ test("MCP logger tools by values: never changed, only goes up", async () => {
   const s = await tool("logger_set_tiers", { tier: "monthly", values: "same", dry_run: true });
   assert.deepEqual([s.data.changed, s.data.channels], [1, ["ITOEL"]]);
   assert.match(String((await tool("logger_channels", { values: "odd" })).data), /values/);
+});
+
+// --- drive health
+
+test("drive health: scored as series arrive, a cell's detail, left out by hand, rebuilt", async () => {
+  // Five warm drives at 1,500 rpm and ~40 % load, the fifth's bank 1 trim 8 % rich.
+  const put = (name, t0, trim) => {
+    const ch = { INMOT: 1500, MASSENSTROM_DK_BANK1: 47, "MASSENSTROM_DK_BANK1@0x13": 47,
+      ITKUM: 100, TEMP_OEL: 100, IMUL1: trim };
+    const data = Array.from({ length: 240 }, (_, i) => [i * 0.5, 0]);
+    return call("PUT", `/api/series/${name}`, { body: JSON.stringify({ start: t0, approx: false,
+      chunks: Object.entries(ch).map(([n, v]) => ({ name: n, unit: n === "INMOT" ? "1/min" : "",
+        t0, t1: t0 + 119.5, n: data.length, min: v, max: v, mean: v,
+        data: data.map(([dt]) => [dt, v]) })) }) });
+  };
+  const days = [1, 2, 3, 4, 5].map((d) => Date.UTC(2026, 9, d) / 1000);
+  for (const [i, t0] of days.entries()) {
+    const r = await (await put(`h${i}.csv`, t0, i === 4 ? 1.08 : 1)).json();
+    assert.equal(r.health.scored, true);
+  }
+  const o = await (await call("GET", "/api/health")).json();
+  assert.deepEqual(o.drives.map((d) => d.drive), ["h0.csv", "h1.csv", "h2.csv", "h3.csv", "h4.csv"]);
+  assert.deepEqual(o.channels.map((c) => c.key), ["IMUL1", "ITKUM", "TEMP_OEL"]);
+  assert.equal(o.scores.IMUL1[2][0], null);                  // two drives before it
+  assert.equal(o.scores.IMUL1[3][0], 0);
+  assert.ok(o.scores.IMUL1[4][0] > 3);                       // 0.08 over the 0.01 floor
+  assert.equal(o.drives[4].level, 2);
+  // Narrowed by date.
+  const some = await (await call("GET", "/api/health?from=2026-10-04")).json();
+  assert.deepEqual(some.drives.map((d) => d.drive), ["h3.csv", "h4.csv"]);
+
+  const cell = await (await call("GET", "/api/health/cell?drive=h4.csv&channel=IMUL1")).json();
+  assert.equal(cell.name, "IMUL1");
+  const c = cell.cells["2.2"];
+  assert.equal(c.value, 1.08);
+  assert.equal(c.baseline, 1);
+  assert.equal(c.visits.length, 1);
+  assert.equal((await call("GET", "/api/health/cell?drive=h4.csv&channel=NOPE")).status, 404);
+
+  // The MCP's view: flagged channels only.
+  const t = await toolData("drive_health", { flagged_only: true });
+  assert.deepEqual(t.channels.map((x) => x.key), ["IMUL1"]);
+  assert.equal(t.drives[4].channels.IMUL1.level, 2);
+  assert.equal((await toolData("drive_health", { drive: "h4.csv", channel: "IMUL1" }))
+    .cells["2.2"].z > 3, true);
+
+  // h1-h3 left out: h4 has one baseline drive, so no score.
+  for (const d of ["h1.csv", "h2.csv", "h3.csv"]) {
+    const r = await call("POST", "/api/health/exclude",
+      { body: JSON.stringify({ drive: d, excluded: true }) });
+    assert.equal(r.status, 200);
+  }
+  let again = await (await call("GET", "/api/health")).json();
+  assert.equal(again.scores.IMUL1[4][0], null);
+  assert.equal(again.drives[1].excluded, true);
+  await call("POST", "/api/health/exclude", { body: JSON.stringify({ drive: "h1.csv" }) });
+  assert.equal((await call("POST", "/api/health/exclude", { body: "{}" })).status, 400);
+
+  // Rebuilt from the series, a few drives a request.
+  env.DB.db.exec("DELETE FROM health_summaries; DELETE FROM health_scores");
+  let after = null, n = 0;
+  do {
+    const r = await (await call("POST", `/api/health/rebuild${after ? `?after=${after}` : ""}`))
+      .json();
+    n += r.done.length;
+    after = r.next;
+  } while (after);
+  assert.equal(n, 5);
+  again = await (await call("GET", "/api/health")).json();
+  assert.equal(again.drives.length, 5);
+  assert.equal(again.drives[1].excluded, false);
+
+  // The page.
+  const page = await call("GET", "/logger/health");
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /Drive health/);
 });
