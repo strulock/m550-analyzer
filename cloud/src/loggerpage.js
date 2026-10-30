@@ -221,6 +221,8 @@ td.when small { display: block; color: var(--muted); font-size: 11px; }
       <option value="odd">Looks wrong</option>
       <option value="has">Has a stored value</option>
       <option value="none">No stored value</option>
+      <option value="same">Never changed (every stored drive)</option>
+      <option value="rises">Only goes up (odometer, counters)</option>
     </select>
   </section>
 
@@ -441,6 +443,9 @@ ${oddValue.toString()}
       if (vf === "odd" && !it.odd) return false;
       if (vf === "has" && !(values && values[it.name])) return false;
       if (vf === "none" && values && values[it.name]) return false;
+      var sv = values && values[it.name];
+      if (vf === "same" && !(sv && sv[2] >= 2 && sv[3] === sv[4])) return false;
+      if (vf === "rises" && !(sv && sv[6])) return false;
       if (ans === "yes" && !it.ok && !edit.tiers[it.name]) return false;
       if (ans === "no" && it.ok) return false;
       if (tf === "set" && !edit.tiers[it.name]) return false;
