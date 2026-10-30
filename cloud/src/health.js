@@ -66,51 +66,53 @@ export const GROUPS = [
 ];
 
 const B2 = "@0x13";
-const ch = (key, group, label, names, floor, extra = {}) =>
-  ({ key, group, label, names, floor, kind: "level", rel: 0, ...extra });
+const ch = (key, group, label, names, unit, floor, extra = {}) =>
+  ({ key, group, label, names, unit, floor, kind: "level", rel: 0, ...extra });
 
 /** The channels scored: key (the first name), its group and label, the
- * channels to read it from in order, and `floor`, the least spread a
+ * channels to read it from in order, its unit (several are stored without
+ * one), and `floor`, the least spread a
  * baseline is given (so a channel that never moves doesn't alert on a
  * hair's change; `rel` adds a share of the baseline's median). `pair`: the
  * other bank's (or matching cylinder's) key. */
 export const CHANNELS = [
-  ch("IMUL1", "fueling", "Fuel trim, bank 1", ["IMUL1"], 0.01, { pair: "IMUL1" + B2 }),
-  ch("IMUL1" + B2, "fueling", "Fuel trim, bank 2", ["IMUL1" + B2], 0.01, { pair: "IMUL1" }),
-  ch("ILAG1", "fueling", "Lambda, bank 1", ["ILAG1"], 0.01, { pair: "ILAG1" + B2 }),
-  ch("ILAG1" + B2, "fueling", "Lambda, bank 2", ["ILAG1" + B2, "ILAG2"], 0.01,
+  ch("IMUL1", "fueling", "Fuel trim, bank 1", ["IMUL1"], "factor", 0.01, { pair: "IMUL1" + B2 }),
+  ch("IMUL1" + B2, "fueling", "Fuel trim, bank 2", ["IMUL1" + B2], "factor", 0.01,
+    { pair: "IMUL1" }),
+  ch("ILAG1", "fueling", "Lambda, bank 1", ["ILAG1"], "λ", 0.01, { pair: "ILAG1" + B2 }),
+  ch("ILAG1" + B2, "fueling", "Lambda, bank 2", ["ILAG1" + B2, "ILAG2"], "λ", 0.01,
     { pair: "ILAG1" }),
   ch("MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT", "ignition", "Knock retard, bank 1",
-    ["MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT"], 0.3,
+    ["MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT"], "° crank", 0.3,
     { pair: "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT" + B2 }),
   ch("MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT" + B2, "ignition", "Knock retard, bank 2",
-    ["MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT" + B2], 0.3,
+    ["MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT" + B2], "° crank", 0.3,
     { pair: "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT" }),
 ];
 const spark = (n) => `DIAG_BRENNDAUER_ZUENDFUNKE_CYL${n <= 4 ? n : n - 4}${n <= 4 ? "" : B2}`;
 for (let n = 1; n <= 8; n++) {
-  CHANNELS.push(ch(spark(n), "ignition", `Spark burn, cyl ${n}`, [spark(n)], 0.01,
+  CHANNELS.push(ch(spark(n), "ignition", `Spark burn, cyl ${n}`, [spark(n)], "ms", 0.01,
     { rel: 0.03, pair: spark(n <= 4 ? n + 4 : n - 4) }));
 }
 CHANNELS.push(
-  ch("ITKUM", "temps", "Coolant", ["ITKUM"], 1),
-  ch("TEMP_OEL", "temps", "Oil temperature", OILS, 1),
-  ch("OELDRUCK", "temps", "Oil pressure", ["OELDRUCK"], 100, { rel: 0.03 }),
-  ch("RTANS", "temps", "Intake air", ["RTANS"], 2),
-  ch("EGS_GETRIEBEOELTMEPERATUR", "temps", "Gearbox oil", ["EGS_GETRIEBEOELTMEPERATUR"], 1),
+  ch("ITKUM", "temps", "Coolant", ["ITKUM"], "°C", 1),
+  ch("TEMP_OEL", "temps", "Oil temperature", OILS, "°C", 1),
+  ch("OELDRUCK", "temps", "Oil pressure", ["OELDRUCK"], "hPa", 100, { rel: 0.03 }),
+  ch("RTANS", "temps", "Intake air", ["RTANS"], "°C", 2),
+  ch("EGS_GETRIEBEOELTMEPERATUR", "temps", "Gearbox oil", ["EGS_GETRIEBEOELTMEPERATUR"], "°C", 1),
   ch("TEMP_NACH_KAT_MODELL", "temps", "After cat, bank 1", ["TEMP_NACH_KAT_MODELL"],
-    10, { pair: "TEMP_NACH_KAT_MODELL" + B2 }),
+    "°C", 10, { pair: "TEMP_NACH_KAT_MODELL" + B2 }),
   ch("TEMP_NACH_KAT_MODELL" + B2, "temps", "After cat, bank 2",
-    ["TEMP_NACH_KAT_MODELL" + B2], 10, { pair: "TEMP_NACH_KAT_MODELL" }),
-  ch("IPLAD", "boost", "Boost pressure", ["IPLAD"], 20, { rel: 0.01 }),
+    ["TEMP_NACH_KAT_MODELL" + B2], "°C", 10, { pair: "TEMP_NACH_KAT_MODELL" }),
+  ch("IPLAD", "boost", "Boost pressure", ["IPLAD"], "hPa", 20, { rel: 0.01 }),
 );
 const misfire = (n) => `ZAEHLER_AUSSETZERK_ZYL${n}`;
 for (let n = 1; n <= 8; n++) {
   CHANNELS.push(ch(misfire(n), "misfires", `Misfires, cyl ${n}`,
-    [misfire(n)].concat(n > 4 ? [misfire(n) + B2] : []), 0.5,
+    [misfire(n)].concat(n > 4 ? [misfire(n) + B2] : []), "per 1,000 rev", 0.5,
     { kind: "count", pair: misfire(n <= 4 ? n + 4 : n - 4) }));
 }
-CHANNELS.push(ch("IUIBS", "electrical", "Battery voltage", ["IUIBS"], 100));
+CHANNELS.push(ch("IUIBS", "electrical", "Battery voltage", ["IUIBS"], "mV", 100));
 
 const BY_KEY = new Map(CHANNELS.map((c) => [c.key, c]));
 const GROUP = new Map(GROUPS.map((g) => [g.key, g]));
@@ -457,7 +459,7 @@ export async function healthOverview(env, { from = null, to = null } = {}) {
     groups: GROUPS,
     channels: CHANNELS.filter((c) => scores[c.key]).map((c) => ({ key: c.key, label: c.label,
       group: c.group, kind: c.kind, pair: c.pair || null,
-      unit: c.kind === "count" ? "per 1,000 rev" : units[c.names[0]] || "" })),
+      unit: c.unit || units[c.names[0]] || "" })),
     drives: rows.map((x) => ({ drive: x.drive, start: iso(x.start),
       warm_min: +(x.warm_s / 60).toFixed(1), overall: x.overall, level: x.level,
       excluded: !!x.excluded })),
@@ -500,7 +502,8 @@ export async function healthDetail(env, drive, key) {
     }
   }
   return { drive, channel: key, label: spec.label, group: spec.group, kind: spec.kind,
-    name: ch ? ch.name : null, unit: ch ? ch.unit : "", start: iso(summary.start),
+    name: ch ? ch.name : null, unit: spec.unit || (ch ? ch.unit : ""),
+    start: iso(summary.start),
     end: iso(summary.end), warm_min: +(summary.warm_s / 60).toFixed(1),
     rpm_edges: RPM_EDGES, load_edges: LOAD_EDGES, cells: grid };
 }
