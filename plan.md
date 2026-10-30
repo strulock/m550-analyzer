@@ -548,3 +548,17 @@ after the first week of drives, and what's left.
       of those drives twice. Delete the `logs/` copies (and their rows in
       D1), and have the Worker skip a file whose name it already has
       without the prefix.
+- [x] Drive health (Health tab, `/logger/health`; MCP `drive_health`): each
+      drive's channels with the engine fully warm (ITKUM >= 95 °C, oil >= 90
+      °C), overrun fuel cut left out, summarized per RPM x load cell and
+      scored (robust z) against the same channel's last 10 healthy drives;
+      a heatmap, and per channel its trend with the normal band, the other
+      bank beside it, the drive's cells and its raw log. On the 14 warm
+      drives so far: lambda read as air in fuel cut until that was left out;
+      after, the flags are spark burn time (cylinder 3 at idle 1.87 ms
+      against 1.62 on 30 Oct) and intake air (a hot-soaked afternoon).
+- [ ] Health: decide which drives make the first healthy baseline (all
+      warm drives so far, unless some are left out by hand), and whether the
+      bins (RPM 400-900-1,500-2,000-2,500-3,000-4,000-8,000; load 0-20-35-
+      50-70-100 %) suit the drives logged; misfire rates need longer drives
+      (1,000 revolutions a cell) before they score. Then more channels.

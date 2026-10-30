@@ -1,8 +1,9 @@
 /**
- * The logger page (GET /logger): the board's last check-in (state, speed,
- * coolant and oil temperature with an overheating warning, the car on a
- * map), each tank of fuel since its fill-up (/api/logger/tanks), the full
- * channel sweep (/api/logger/sweep, sweep.js), the board's settings (its
+ * The logger page (GET /logger; its Health tab is healthpage.js): the
+ * board's last check-in (state, speed, coolant and oil temperature with an
+ * overheating warning, the car on a map), each tank of fuel since its
+ * fill-up (/api/logger/tanks), the full channel sweep (/api/logger/sweep,
+ * sweep.js), the board's settings (its
  * Wi-Fi, Access token, access point and time zone: /api/logger/settings,
  * boardsettings.js; sent to it, never shown back), and every
  * channel the board can read, filtered to what the car answers, a tier for
@@ -90,6 +91,9 @@ tr.sel td { background: var(--accent-bg); }
 .msg { padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
 .msg.ok { background: var(--accent-bg); color: var(--accent); }
 .hide { display: none !important; }
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule); }
+nav.tabs a { padding: 8px 14px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+nav.tabs a[aria-current] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
 label { display: inline-flex; gap: 6px; align-items: center; }
 h2 { font-size: 15px; margin: 0 0 8px; }
 details.card > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
@@ -137,6 +141,7 @@ td.when small { display: block; color: var(--muted); font-size: 11px; }
     </div>
     <div class="muted" id="logger"></div>
   </header>
+  <nav class="tabs"><a href="/logger" aria-current="page">Logger</a><a href="/logger/health">Health</a></nav>
 
   <div id="alarm" class="alarm hide" role="alert"></div>
 
