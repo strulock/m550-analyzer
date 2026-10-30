@@ -1050,6 +1050,7 @@ static void test_wifi_note() {
   CHECK(wifiJoinWhy(0, "") == "no answer");
   CHECK(wifiJoinWhy(202, "AUTH_FAIL") == "wrong password?, AUTH_FAIL (202)");
   CHECK(wifiJoinWhy(15, "4WAY_HANDSHAKE_TIMEOUT") == "wrong password?, 4WAY_HANDSHAKE_TIMEOUT (15)");
+  CHECK(wifiJoinWhy(2, "AUTH_EXPIRE") == "wrong password?, AUTH_EXPIRE (2)");   // seen on the bench
   CHECK(wifiJoinWhy(205, "CONNECTION_FAIL") == "CONNECTION_FAIL (205)");
   WifiTry home, phone, none;
   home.ssid = "Home";

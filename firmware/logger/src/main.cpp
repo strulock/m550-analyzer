@@ -2181,10 +2181,12 @@ static bool joinWith(const Settings& s) {
     if (join(s.ssid2.c_str(), s.pass2.c_str(), 10000, &backup.why)) return true;
   }
   std::string note = wifiNote(n, {home, backup});
+  // Printed when it says something new, not each time the count in range moves.
+  auto gist = [](const std::string& s) { return s.substr(0, s.rfind(" (")); };
   bool changed;
   {
     std::lock_guard<std::mutex> g(tagLock);
-    changed = note != wifiNoteText;
+    changed = gist(note) != gist(wifiNoteText);
     wifiNoteText = note;
     wifiNoteMs = millis() | 1;
   }
@@ -2307,7 +2309,7 @@ static void keepWifi() {
     bool joined = joinPreferred();
     if (joined && !mdns) mdns = MDNS.begin(HOSTNAME);
     if (!joined && !tried && !settingsNow().apPass.empty()) {
-      out.println("[wifi] no known network in range");
+      out.println("[wifi] no known network joined");
       startAccessPoint(false);               // the terminal, while the networks are away
     }
     tried = true;
