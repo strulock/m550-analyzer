@@ -319,6 +319,63 @@ def test_autosync_runs_when_triggered(worker, tmp_path):
         a.stop()
 
 
+def _wait_for(check, seconds=10):
+    end = __import__("time").time() + seconds
+    while not check() and __import__("time").time() < end:
+        __import__("time").sleep(0.05)
+    return check()
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="DPAPI")
+def test_a_secret_saved_on_another_pc_says_so_instead_of_breaking(worker, tmp_path):
+    # A settings.json copied from another PC or Windows user: DPAPI can't
+    # read its secret. It raised, so Settings didn't open and sync stopped.
+    s = dict(settings_for(worker), cloud_client_secret="dpapi:" + "QUJD" * 8)
+    assert cloud.unprotect(s["cloud_client_secret"]) == ""
+    assert cloud.config(s)[2] == "" and not cloud.configured(s) and cloud.secret_lost(s)
+    a = cloud.AutoSync(s, logs=str(tmp_path), first=0)
+    assert "can't be read on this PC" in a.status
+    assert a.run_once() is None and "Settings > Cloud" in a.status
+    assert cloud.unprotect("dpapi:not base64!") == ""
+    assert not cloud.secret_lost({}) and not cloud.secret_lost(settings_for(worker))
+
+
+def test_an_unexpected_error_is_said_and_the_sync_thread_goes_on(worker, tmp_path, monkeypatch):
+    # Anything but CloudError or OSError ended the thread, the status left
+    # at "syncing..." and no sync again until the app restarted.
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    real, calls = cloud.sync, []
+
+    def flaky(settings, logs_dir):
+        calls.append(1)
+        if len(calls) == 1:
+            raise RuntimeError("something unexpected")
+        return real(settings, logs_dir)
+    monkeypatch.setattr(cloud, "sync", flaky)
+    a = cloud.AutoSync(settings_for(worker), logs=logs, every=3600, first=3600).start()
+    try:
+        a.trigger()
+        assert _wait_for(lambda: "RuntimeError" in a.status), a.status
+        assert "not synced: RuntimeError: something unexpected" == a.status
+        a.trigger()                                  # the thread is still there
+        assert _wait_for(lambda: "synced" in a.status and "not" not in a.status), a.status
+    finally:
+        a.stop()
+
+
+def test_a_log_csv_cant_read_is_noted_and_the_rest_still_go_up(worker, tmp_path):
+    # csv.Error (here a field past csv's limit) from the time series ended the sync.
+    logs = str(tmp_path / "logs")
+    drive(os.path.join(logs, "n63_1.csv"))
+    drive(os.path.join(logs, "n63_2.csv"))
+    with open(os.path.join(logs, "n63_2.csv"), "a", encoding="utf-8") as f:
+        f.write('99,"%s"\n' % ("x" * 200000))
+    r = cloud.sync(settings_for(worker), logs)
+    assert list(worker.series) == ["n63_1.csv"]
+    assert any("n63_2.csv (time series)" in e for e in r.errors)
+
+
 def test_cli_sync_saves_settings_and_uploads(worker, capsys):
     drive(os.path.join(core.logs_dir(), "n63_1.csv"))
     saved = {}

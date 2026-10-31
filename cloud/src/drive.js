@@ -400,16 +400,20 @@ export function buildSeries(log, fallbackEnd) {
     for (const i of log.seriesCols) {
       const name = log.header[i], chunks = [];
       let part = [], t0 = 0, t1 = 0, min = Infinity, max = -Infinity, sum = 0, n = 0;
+      let v0 = null, v1 = null, falls = false;   // values.js: first, last, ever down
       const flush = () => {
         chunks.push({ name, unit: "", t0, t1, n, min, max, mean: pyRound(sum / n, 6),
-          json: `[${part.join(",")}]` });
+          v0, v1, falls, json: `[${part.join(",")}]` });
         part = []; min = Infinity; max = -Infinity; sum = 0; n = 0;
+        v0 = v1 = null; falls = false;
       };
       for (let r = 0; r < log.rows; r++) {
         if (!Number.isFinite(utc[r])) continue;
         const v = seriesValue(log, i, r);
         if (v === null) continue;
-        if (n === 0) t0 = utc[r];
+        if (n === 0) { t0 = utc[r]; v0 = v || 0; }      // -0 is 0, as JSON has it
+        if (v1 !== null && v < v1) falls = true;
+        v1 = v || 0;
         t1 = utc[r];
         part.push(`[${pyRound(utc[r] - t0, 3)},${v}]`);
         if (v < min) min = v;

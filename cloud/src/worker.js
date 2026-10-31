@@ -51,7 +51,8 @@ import { LOGGER_PAGE } from "./loggerpage.js";
 import { absentInNotes, beatSweep, cancelSweep, CHECK, checkList, getSweep, identifiers,
   ingestCheck, markAbsent, requestSweep } from "./sweep.js";
 import { tanks } from "./tanks.js";
-import { getValues, migrateValues, refreshValues, VALUES_SCHEMA } from "./values.js";
+import { backfillPieces, getValues, migrateValues, pieceStats, refreshValues, VALUES_SCHEMA }
+  from "./values.js";
 import { DETAILS, DETAILS_SCHEMA, ingestDetails, withDetails } from "./faultdetails.js";
 import { excludeDrive, HEALTH_SCHEMA, healthDetail, healthOverview, levelOf, rebuildHealth,
   updateHealth } from "./health.js";
@@ -356,17 +357,22 @@ export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS templates (name TEXT PRIMARY KEY, channels TEXT,
      updated TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0)`,
   // One channel's values from one drive (in pieces when long): t0/t1 in UTC
-  // seconds, data = [[seconds after t0, value], ...].
+  // seconds, data = [[seconds after t0, value], ...]; v0, v1 its first and
+  // last value and falls whether it ever goes down (values.js pieceStats;
+  // NULL in pieces from before them until backfillPieces).
   `CREATE TABLE IF NOT EXISTS series (drive TEXT NOT NULL, channel TEXT NOT NULL,
      t0 REAL NOT NULL, t1 REAL NOT NULL, n INTEGER NOT NULL, unit TEXT, min REAL,
      max REAL, mean REAL, approx INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL,
-     PRIMARY KEY (drive, channel, t0))`,
+     v0 REAL, v1 REAL, falls INTEGER, PRIMARY KEY (drive, channel, t0))`,
   `CREATE INDEX IF NOT EXISTS series_channel ON series (channel, t0)`,
   // The logger board's check-ins: one at power-on (event "boot"), then one
   // every 10 s while it has Wi-Fi; data is what it sent.
   `CREATE TABLE IF NOT EXISTS heartbeats (received TEXT NOT NULL, boot INTEGER,
      event TEXT, data TEXT NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS heartbeats_received ON heartbeats (received)`,
+  // A power-on's check-ins, newest first: its last fault codes and Wi-Fi
+  // note on every poll of the logger page (they scanned every check-in).
+  `CREATE INDEX IF NOT EXISTS heartbeats_boot ON heartbeats (boot, received)`,
   // The newest logger fault read applied per module (ingestFaults).
   `CREATE TABLE IF NOT EXISTS logger_fault_reads (module TEXT PRIMARY KEY, latest TEXT)`,
   // What the board reads: presets of channel tiers, and which is active.
@@ -422,11 +428,12 @@ async function healthAfter(env, drive) {
 
 /** The statement storing one chunk whose data is already JSON (`json`). */
 function insertChunk(env, drive, approx, c) {
+  const p = pieceStats(c.data);
   return env.DB.prepare(
     `INSERT OR REPLACE INTO series (drive, channel, t0, t1, n, unit, min, max, mean, approx,
-     data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
+     data, v0, v1, falls) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
     drive, c.name, c.t0, c.t1, c.n, String(c.unit || ""), number(c.min),
-    number(c.max), number(c.mean), approx ? 1 : 0, c.json);
+    number(c.max), number(c.mean), approx ? 1 : 0, c.json, p.v0, p.v1, p.falls ? 1 : 0);
 }
 
 async function listChannels(env, match) {
@@ -575,6 +582,14 @@ async function ensureSchema(env) {
   if (!(cols.results || []).some((c) => c.name === "source")) {
     await env.DB.batch(MIGRATE.map((s) => env.DB.prepare(s)));
   }
+  // A series table from before each piece's v0, v1 and falls: added, NULL
+  // until POST /api/logger/values/backfill fills them (values.js reads the
+  // JSON for those meanwhile).
+  const scols = await env.DB.prepare("SELECT name FROM pragma_table_info('series')").all();
+  if (!(scols.results || []).some((c) => c.name === "falls")) {
+    await env.DB.batch(["v0 REAL", "v1 REAL", "falls INTEGER"].map((c) =>
+      env.DB.prepare(`ALTER TABLE series ADD COLUMN ${c}`)));
+  }
   await migrateValues(env);
   schemaReady.add(env.DB);
 }
@@ -642,8 +657,9 @@ const INSERT_BYTES = 400000;
 function insertMany(env, drive, approx, json) {
   return env.DB.prepare(
     `INSERT OR REPLACE INTO series (drive, channel, t0, t1, n, unit, min, max, mean, approx,
-     data) SELECT ?, value->>'name', value->>'t0', value->>'t1', value->>'n', value->>'unit',
-     value->>'min', value->>'max', value->>'mean', ?, value->>'data' FROM json_each(?)`)
+     data, v0, v1, falls) SELECT ?, value->>'name', value->>'t0', value->>'t1', value->>'n',
+     value->>'unit', value->>'min', value->>'max', value->>'mean', ?, value->>'data',
+     value->>'v0', value->>'v1', value->>'falls' FROM json_each(?)`)
     .bind(drive, approx ? 1 : 0, json);
 }
 
@@ -680,7 +696,8 @@ async function ingestLog(env, key, bytes) {
     for (const c of chunks) {
       const one = `{"name":${JSON.stringify(c.name)},"t0":${c.t0},"t1":${c.t1},"n":${c.n},` +
         `"unit":${JSON.stringify(units[c.name] || "")},"min":${c.min},"max":${c.max},` +
-        `"mean":${c.mean},"data":${c.json}}`;
+        `"mean":${c.mean},"v0":${c.v0},"v1":${c.v1},"falls":${c.falls ? 1 : 0},` +
+        `"data":${c.json}}`;
       if (partBytes + one.length > INSERT_BYTES) await send();
       part.push(one);
       partBytes += one.length;
@@ -1965,6 +1982,10 @@ export async function handle(request, env, fetcher = fetch) {
   }
   if (url.pathname === "/api/logger/resummarize" && request.method === "POST") {
     return json(await resummarize(env, url.searchParams.get("after")));
+  }
+  if (url.pathname === "/api/logger/values/backfill" && request.method === "POST") {
+    await ensureSchema(env);
+    return json(await backfillPieces(env, url.searchParams.get("after")));
   }
   if (url.pathname === "/logger/health" && request.method === "GET") {
     return new Response(HEALTH_PAGE, { headers: { "content-type": "text/html; charset=utf-8",

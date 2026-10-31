@@ -240,6 +240,23 @@ def test_a_dme_that_wont_batch_is_read_one_at_a_time(car):
     assert len(car.sources) == 2                         # no batch tried again
 
 
+def test_a_batch_that_times_out_rests_then_is_tried_again(car):
+    # One unanswered batch used to turn batching off for the session.
+    car.silent_batches = 1
+    names = chans("ILAG1", "ILAG2")
+    with core.Tester("127.0.0.1", timeout=0.3) as t:
+        r = core.ChannelReader({}, 0x12, batch=True)
+        r.read(t, names, now=1000.0)
+        assert r.batch_off == {} and r.batch_rest[0x12] == 1000.0 + core.BATCH_REST
+        car.sources.clear()
+        r.read(t, names, now=1001.0)                     # resting: one at a time
+        assert len(car.sources) == 2 and r.batched == 0
+        car.sources.clear()
+        got = r.read(t, names, now=1000.0 + core.BATCH_REST + 1)    # after the rest
+    assert len(car.sources) == 1 and r.batched == 2      # batched again
+    assert got["ILAG2"][0] == 1.0 and r.batch_off == {}
+
+
 def test_cli_speed_compares_both_ways(car, capsys):
     cli.main(["speed", "--ip", "127.0.0.1", "--timeout", "1", "--seconds", "0.3",
               "ILAG1", "ILAG2"])

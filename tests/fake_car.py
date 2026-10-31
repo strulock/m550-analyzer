@@ -57,6 +57,7 @@ class FakeCar:
         self._stop = False
         self.live = []              # open connections, for drop()
         self.multi = True           # answers several identifiers in one 0x22
+        self.silent_batches = 0     # requests of several identifiers left unanswered
         threading.Thread(target=self._accept, daemon=True).start()
 
     def drop(self):
@@ -147,6 +148,9 @@ class FakeCar:
         dids = [(uds[i] << 8) | uds[i + 1] for i in range(1, len(uds) - 1, 2)]
         if len(dids) > 1 and not self.multi:
             return bytes([0x7F, 0x22, 0x13])        # one identifier per request only
+        if len(dids) > 1 and self.silent_batches:
+            self.silent_batches -= 1                 # a slow moment: no answer
+            return None
         out = b""
         for did in dids:
             raw = DIDS.get((addr, did))

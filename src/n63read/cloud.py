@@ -32,7 +32,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from n63read import __version__, core, history, series
+from n63read import __version__, core, diag, history, series
 
 STATE_FILE = "cloud_state.json"
 TIMEOUT = 60
@@ -79,11 +79,31 @@ def protect(secret):
 
 
 def unprotect(stored):
+    """The secret back, or "" when it can't be read here: one encrypted for
+    another Windows user or PC (a settings.json copied or restored) raised,
+    which kept Settings from opening and stopped the background sync."""
     if not stored:
         return ""
     if stored.startswith("dpapi:"):
-        return _dpapi(base64.b64decode(stored[6:]), False).decode()
+        try:
+            return _dpapi(base64.b64decode(stored[6:]), False).decode()
+        except (OSError, ValueError, AttributeError) as e:   # binascii.Error, UnicodeDecodeError
+            diag.record("cloud_secret_unreadable", error=repr(e))
+            return ""
     return stored[6:] if stored.startswith("plain:") else stored
+
+
+def secret_lost(settings):
+    """True when a secret is saved but can't be read on this PC or user."""
+    stored = settings.get("cloud_client_secret") or ""
+    return bool(stored) and not unprotect(stored)
+
+
+def unset_status(settings):
+    """Why the cloud isn't set up, for the status line."""
+    if secret_lost(settings):
+        return "the saved secret can't be read on this PC: enter it again in Settings > Cloud"
+    return "not set up"
 
 
 # ------------------------------------------------------------ settings
@@ -260,7 +280,9 @@ def sync_series(settings, state, logs, result):
             body = json.dumps({"start": built["start"], "approx": built["approx"],
                                "chunks": chunks}, separators=(",", ":")).encode()
             request(settings, "PUT", "/api/series/" + _key(rel), body, "application/json")
-        except (CloudError, OSError, ValueError) as e:
+        except (CloudError, OSError, ValueError, csv.Error) as e:
+            # csv.Error (a NUL byte, a field too long): that file noted, the
+            # rest still sent; it ended the whole sync before.
             result.errors.append("%s (time series): %s" % (rel, e))
             continue
         sent[rel] = entry["sha256"]
@@ -401,7 +423,7 @@ class AutoSync:
 
     def __init__(self, settings, logs=None, every=EVERY, first=FIRST_DELAY):
         self.settings, self.logs, self.every = settings, logs, every
-        self.status = "not set up" if not configured(settings) else "waiting"
+        self.status = unset_status(settings) if not configured(settings) else "waiting"
         self._wake = threading.Event()
         self._stop = threading.Event()
         self._busy = threading.Lock()
@@ -424,7 +446,7 @@ class AutoSync:
 
     def run_once(self):
         if not configured(self.settings):
-            self.status = "not set up"
+            self.status = unset_status(self.settings)
             return None
         with self._busy:
             self.status = "syncing..."
@@ -432,6 +454,11 @@ class AutoSync:
                 result = sync(self.settings, self.logs)
             except (CloudError, OSError) as e:
                 self.status = "not synced: %s" % e
+                return None
+            except Exception as e:                                  # noqa: BLE001
+                # A bad CSV in the logs, say: said, and tried again next time.
+                diag.record("cloud_sync_failed", error=repr(e))
+                self.status = "not synced: %s: %s" % (type(e).__name__, e)
                 return None
             self.status = "synced %s: %s" % (time.strftime("%H:%M"), result.text())
             return result
@@ -448,6 +475,14 @@ class AutoSync:
         self._wake.wait(self._first)
         while not self._stop.is_set():
             self._wake.clear()
-            if self.enabled():
-                self.run_once()
+            # Nothing here may end the thread: it used to stop for good on an
+            # error it didn't expect, the status left at "syncing...".
+            try:
+                if self.enabled():
+                    self.run_once()
+                elif not configured(self.settings):
+                    self.status = unset_status(self.settings)
+            except Exception as e:                                  # noqa: BLE001
+                diag.record("cloud_sync_failed", error=repr(e))
+                self.status = "not synced: %s: %s" % (type(e).__name__, e)
             self._wake.wait(self.every)

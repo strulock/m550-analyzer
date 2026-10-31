@@ -1660,3 +1660,113 @@ test("drive health: scored as series arrive, a cell's detail, left out by hand, 
   assert.equal(page.status, 200);
   assert.match(await page.text(), /Drive health/);
 });
+
+// --- what each upload and poll reads
+
+const putDrive = (name, t0, chunks) => call("PUT", `/api/series/${name}`, { body: JSON.stringify({
+  start: 0, approx: false, chunks: chunks.map(([ch, data]) => ({ name: ch, t0, t1: t0 + 1,
+    min: Math.min(...data.map((d) => d[1])), max: Math.max(...data.map((d) => d[1])),
+    mean: 0, data })) }) });
+
+test("values: pieces keep their first, last and falls; older ones read their JSON until backfilled", async () => {
+  await putDrive("a.csv", 1000, [["KM", [[0, 100], [1, 101]]], ["ZIGZAG", [[0, 1], [1, 5], [2, 2], [3, 5]]]]);
+  await putDrive("b.csv", 2000, [["KM", [[0, 101], [1, 105]]], ["ZIGZAG", [[0, 5], [1, 6]]]]);
+  await putDrive("c.csv", 3000, [["KM", [[0, 105]]], ["ZIGZAG", [[0, 6], [1, 7]]]]);
+  const rows = env.DB.db.prepare("SELECT channel, drive, v0, v1, falls FROM series ORDER BY channel, t0")
+    .all().map((r) => [r.channel, r.drive, r.v0, r.v1, r.falls]);
+  assert.deepEqual(rows.slice(3), [["ZIGZAG", "a.csv", 1, 5, 1], ["ZIGZAG", "b.csv", 5, 6, 0],
+    ["ZIGZAG", "c.csv", 6, 7, 0]]);
+  const values = async () => (await (await call("GET", "/api/logger/values")).json()).values;
+  const before = await values();
+  assert.deepEqual([before.KM[6], before.ZIGZAG[6], before.KM[1]], [1, 0, 105]);
+  // Pieces from before the columns: the same answer from their JSON.
+  env.DB.db.exec("UPDATE series SET v0 = NULL, v1 = NULL, falls = NULL; DELETE FROM channel_values");
+  assert.deepEqual(await values(), before);
+  // Filled in a batch at a time.
+  let r = await (await call("POST", "/api/logger/values/backfill", { body: "" })).json();
+  assert.deepEqual(r, { done: 6, next: null });
+  assert.deepEqual(env.DB.db.prepare("SELECT channel, drive, v0, v1, falls FROM series ORDER BY channel, t0")
+    .all().map((x) => [x.channel, x.drive, x.v0, x.v1, x.falls]), rows);
+  r = await (await call("POST", "/api/logger/values/backfill", { body: "" })).json();
+  assert.deepEqual(r, { done: 0, next: null });
+  env.DB.db.exec("DELETE FROM channel_values");
+  assert.deepEqual(await values(), before);
+});
+
+test("values: a series table from before the columns gets them", async () => {
+  env.DB.db.exec(`CREATE TABLE series (drive TEXT NOT NULL, channel TEXT NOT NULL,
+     t0 REAL NOT NULL, t1 REAL NOT NULL, n INTEGER NOT NULL, unit TEXT, min REAL,
+     max REAL, mean REAL, approx INTEGER NOT NULL DEFAULT 0, data TEXT NOT NULL,
+     PRIMARY KEY (drive, channel, t0))`);
+  env.DB.db.exec(`INSERT INTO series VALUES ('old.csv', 'X', 0, 1, 2, '', 3, 4, 3.5, 0,
+     '[[0,3],[1,4]]')`);
+  await putDrive("new.csv", 1000, [["X", [[0, 4], [1, 2]]]]);
+  const got = env.DB.db.prepare("SELECT drive, v0, v1, falls FROM series ORDER BY drive").all()
+    .map((x) => [x.drive, x.v0, x.v1, x.falls]);
+  assert.deepEqual(got, [["new.csv", 4, 2, 1], ["old.csv", null, null, null]]);
+  assert.equal((await (await call("GET", "/api/logger/values")).json()).values.X[1], 2);
+});
+
+test("drive health: scored from the changed drive on, the same as scoring them all", async () => {
+  const put = (name, t0, trim) => {
+    const ch = { INMOT: 1500, MASSENSTROM_DK_BANK1: 47, "MASSENSTROM_DK_BANK1@0x13": 47,
+      ITKUM: 100, TEMP_OEL: 100, IMUL1: trim };
+    const data = Array.from({ length: 240 }, (_, i) => [i * 0.5, 0]);
+    return call("PUT", `/api/series/${name}`, { body: JSON.stringify({ start: t0, approx: false,
+      chunks: Object.entries(ch).map(([n, v]) => ({ name: n, unit: n === "INMOT" ? "1/min" : "",
+        t0, t1: t0 + 119.5, n: data.length, min: v, max: v, mean: v,
+        data: data.map(([dt]) => [dt, v]) })) }) });
+  };
+  const day = (d) => Date.UTC(2026, 9, d) / 1000;
+  // Out of order: the 3rd uploaded last, so the drives after it change too.
+  for (const [name, d, trim] of [["h1", 1, 1], ["h2", 2, 1.01], ["h4", 4, 1], ["h5", 5, 1.08],
+    ["h6", 6, 0.99], ["h3", 3, 1.02]]) {
+    await put(`${name}.csv`, day(d), trim);
+  }
+  // Left out by hand, then back.
+  await call("POST", "/api/health/exclude", { body: JSON.stringify({ drive: "h2.csv", excluded: true }) });
+  await call("POST", "/api/health/exclude", { body: JSON.stringify({ drive: "h2.csv", excluded: false }) });
+  const scores = () => env.DB.db.prepare("SELECT drive, overall, level, scores, cells FROM health_scores ORDER BY drive").all()
+    .map((x) => ({ ...x }));
+  const incremental = scores();
+  assert.equal(incremental.length, 6);
+  assert.equal(incremental.find((x) => x.drive === "h5.csv").level, 2);
+  let after = null;
+  do {
+    after = (await (await call("POST", `/api/health/rebuild${after ? `?after=${after}` : ""}`)).json()).next;
+  } while (after);
+  assert.deepEqual(scores(), incremental);
+  // A drive that's no longer warm: its summary and scores go.
+  await call("PUT", "/api/series/h6.csv", { body: JSON.stringify({ start: day(6), approx: false,
+    chunks: [{ name: "ITKUM", t0: day(6), t1: day(6) + 1, n: 1, min: 40, max: 40, mean: 40,
+      data: [[0, 40]] }] }) });
+  assert.deepEqual(scores().map((x) => x.drive), ["h1.csv", "h2.csv", "h3.csv", "h4.csv", "h5.csv"]);
+});
+
+test("fault dates: the odometers made again when the drives change, not on every poll", async () => {
+  await history("pc", [{ file: "a.csv", start: "2026-10-01 08:00:00", odometer_km: 12000 },
+    { file: "b.csv", start: "2026-10-10 08:00:00", odometer_km: 12400 }],
+  [{ module: "0x40", code: "804415", now: "present", last_seen: "2026-10-19", first_km: 12200 }]);
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 3, faults: 1,
+    fault_codes: "0x40:804415" }) });
+  const date = async () => (await (await call("GET", "/api/logger")).json()).last.fault_list[0]
+    .first_date;
+  assert.deepEqual(await date(), { after: "2026-10-01", by: "2026-10-10" });
+  let reads = 0;
+  const prepare = env.DB.prepare.bind(env.DB);
+  env.DB.prepare = (sql) => { if (/FROM drives WHERE start IS NOT NULL/.test(sql)) reads++; return prepare(sql); };
+  await date();
+  assert.equal(reads, 0);                              // from the cache
+  await history("pc", [{ file: "a.csv", start: "2026-10-01 08:00:00", odometer_km: 12000 },
+    { file: "c.csv", start: "2026-10-05 08:00:00", odometer_km: 12250 },
+    { file: "b.csv", start: "2026-10-10 08:00:00", odometer_km: 12400 }],
+  [{ module: "0x40", code: "804415", now: "present", last_seen: "2026-10-19", first_km: 12200 }]);
+  assert.deepEqual(await date(), { after: "2026-10-01", by: "2026-10-05" });
+  assert.equal(reads, 1);
+  env.DB.prepare = prepare;
+  // The power-on's fault codes by its index, not a scan.
+  const plan = env.DB.db.prepare(`EXPLAIN QUERY PLAN SELECT json_extract(data, '$.fault_codes')
+    FROM heartbeats WHERE boot = 3 AND json_extract(data, '$.fault_codes') IS NOT NULL
+    ORDER BY received DESC, rowid DESC LIMIT 1`).all().map((x) => x.detail).join(" ");
+  assert.match(plan, /heartbeats_boot/);
+});
