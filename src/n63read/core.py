@@ -1877,6 +1877,7 @@ def channel_target(meta, default):
 
 
 MULTI_MAX = 8                   # identifiers per request when batching
+BATCH_REST = 30.0               # s a DME's batches rest after one went unanswered
 
 
 def split_reply(body, sizes):
@@ -1926,9 +1927,14 @@ class ChannelReader:
     def __init__(self, layouts, target, batch=False):
         self.layouts, self.target = layouts, target
         # Batching: DME values read up to MULTI_MAX to a request. Off unless
-        # asked for; any sign a DME won't do it turns it off for that DME.
+        # asked for; a sign a DME won't do it (it refuses, or the reply
+        # doesn't line up) turns it off for that DME. A batch that only went
+        # unanswered (a slow moment, bank 2's connection gone) rests it
+        # BATCH_REST, then it's tried again: one timeout used to turn it off
+        # for the session, from about 6 cycles a second to 1.2.
         self.batch = batch
         self.batch_off = {}     # DME address -> why batching stopped there
+        self.batch_rest = {}    # DME address -> time; batches tried again after
         self.batched = 0        # values that came in batches
         self.cache = {}         # (module, did) -> {ARG: (value, unit, note)}
         self.last = {}          # (module, did) -> time of last read
@@ -1992,6 +1998,7 @@ class ChannelReader:
             target = channel_target(meta, self.target)
             key = (target, did)
             if (target in self.batch_off or key in self.refused
+                    or now < self.batch_rest.get(target, 0)
                     or now < self.value_quiet.get(target, 0)
                     or now < self.value_quiet.get(key, 0)):
                 continue
@@ -2012,8 +2019,11 @@ class ChannelReader:
                                         {d: by_did[d] for d in chunk})
                 except (ConnectionLost, ConnectionError):
                     raise
-                except (HsfzError, ValueError) as e:
+                except (NegativeResponse, ValueError) as e:
                     self.batch_off[target] = str(e)[:80]
+                    break
+                except HsfzError:
+                    self.batch_rest[target] = now + BATCH_REST
                     break
                 for did, raw in parts.items():
                     got[(target, did)] = raw

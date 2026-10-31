@@ -605,21 +605,25 @@ after the first week of drives, and what's left.
       were listed oldest first). Now newest first, the last `limit` (10 by
       default, up to 50), the oldest shown dropped until the reply fits, with
       `total`, `shown` and how to reach older ones (`to`).
+- [x] **What each upload and poll reads (31 Oct).** By 31 Oct `series` held
+      245,747 pieces, 110 MB of JSON, and each upload parsed every stored
+      piece of its channels again (`refreshValues`), then read every Health
+      summary and rewrote every score (`rescore`, one statement a drive, past
+      D1's limit in time, the error swallowed). Now each piece keeps its
+      first and last value and whether it falls (`series` v0, v1, falls,
+      filled at upload; older pieces read their JSON until `POST
+      /api/logger/values/backfill` fills them), and a drive's change
+      rescores from that drive on, the 50 before it seeding the baselines at
+      their stored levels, in one statement (the same scores as a full
+      rescore in the tests; `rebuild` still does all). The logger page's
+      poll: an index on `heartbeats (boot, received)` for the power-on's
+      fault codes and Wi-Fi note (it scanned every check-in), and the
+      odometers behind the fault dates kept until the drives change.
+- [ ] After deploying that: run `POST /api/logger/values/backfill` until
+      `next` is null (about 60 requests).
 - [ ] **Open from the review of 31 Oct: the Worker.**
       - Other tools' replies over `MAX_TEXT` are still cut mid-JSON
         (`rpc`); a valid "cut" reply, or limits like `drive_health`'s.
-      - Each upload works out `channel_values` over every stored chunk of
-        the file's channels (`refreshValues`), and `rescore` reads every
-        summary and rewrites every score; both grow with history and will
-        reach D1's limits (Health then goes stale without a word, as
-        `healthAfter` swallows the error). Two rescores at once can leave a
-        drive unscored. Store each piece's first and last value; rescore
-        from the changed drive on, writing only what changed.
-      - The logger page's 10 s poll: `loggerStatus` looks up `boot = ?` with
-        `json_extract` over every heartbeat (no index, 30 days kept), and
-        `withDetails` parses every drive and runs the O(n²)
-        `plausibleOdometers` each time. An index on `(boot, received)`, a
-        `fault_codes` column, the odometers cached per drive change.
       - `list_files` sorts only R2's first 1,000 keys, so the newest
         `logger/` files drop out first; use D1 `uploads`.
       - `channel_series` with no start or end reads every chunk of the
@@ -654,17 +658,18 @@ after the first week of drives, and what's left.
       - Tests: `DriveFile`, `recoverDrives`, the upload's delete order and
         the update trial's wiring live in `main.cpp` with no host tests; a
         small file interface in `lib/logger` would let them in.
+- [x] **The app, from the review of 31 Oct.** One unanswered batch turned a
+      DME's batched reads off for the session (about 6 cycles a second to
+      1.2); now only a refusal or a reply that doesn't line up does, and a
+      timeout, an HSFZ refusal or bank 2's connection going rests it 30 s
+      (`BATCH_REST`). A cloud secret saved on another PC or Windows user
+      made `unprotect` raise (Settings wouldn't open, sync stopped); now
+      it's "" and the status says to enter it again. An error sync didn't
+      expect ended its thread at "syncing..."; now it's said and recorded,
+      and the thread goes on. A log CSV that can't be read (`csv.Error`) is
+      noted and the rest still go up. History's scan shows any error
+      instead of staying at "reading the logs folder...".
 - [ ] **Open from the review of 31 Oct: the app.**
-      - One timeout from a DME turns its batched reads off for the session
-        (`_prefetch`'s `batch_off`, never cleared), from about 6 to 1.2
-        cycles a second. Off for good only on a misaligned reply or a
-        refusal; back off and try again after a timeout.
-      - A saved cloud secret from another PC or Windows user makes
-        `cloud.unprotect` raise: Settings won't open and `AutoSync` dies;
-        `run_once` catches only `CloudError`/`OSError`, so a `csv.Error`
-        from `series.build` ends the sync thread at "syncing..."; History's
-        scan catches only `OSError` and stays at "reading the logs
-        folder...". Catch broadly and record it; `unprotect` returns "".
       - `_read_record` doesn't catch an HSFZ NACK (0x0045 "not ready" after
         ignition-on), so a module read ends the session or reconnects.
       - Two scans at once share one `.tmp` (`history.scan` runs from sync,

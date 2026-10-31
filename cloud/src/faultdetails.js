@@ -168,8 +168,24 @@ export function plausibleOdometers(readings) {
   return kept.reverse();
 }
 
-/** The drives' odometer readings, oldest first: [{date, lo, hi}]. */
+// The odometer list by D1 binding (an isolate's), with what the drives were
+// when it was made: the logger page polls every 10 s, and each poll with
+// faults parsed every drive row and ran plausibleOdometers (O(n²)) again.
+const odoCache = new WeakMap();
+
+/** The drives' odometer readings, oldest first: [{date, lo, hi}]; made
+ * again only when the drives change (their count, newest row or size). */
 async function odometers(env) {
+  const sig = JSON.stringify(((await env.DB.prepare(`SELECT COUNT(*) AS n, MAX(rowid) AS r,
+    SUM(length(data)) AS b, MAX(start) AS s FROM drives`).all()).results || [])[0] || null);
+  const hit = odoCache.get(env.DB);
+  if (hit && hit.sig === sig) return hit.list;
+  const list = await readOdometers(env);
+  odoCache.set(env.DB, { sig, list });
+  return list;
+}
+
+async function readOdometers(env) {
   const r = await env.DB.prepare(
     "SELECT start, data FROM drives WHERE start IS NOT NULL ORDER BY start").all();
   const out = [];

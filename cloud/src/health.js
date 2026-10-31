@@ -300,10 +300,29 @@ export function levelOf(group, score) {
 
 /** Scores for every drive from their summaries, oldest first: rows =
  * [{drive, start, summary}], excluded = Set of drives kept out of the
- * baselines. [{drive, start, overall, level, scores, cells}]. */
-export function scoreDrives(rows, excluded = new Set()) {
+ * baselines. [{drive, start, overall, level, scores, cells}]. `seed`: drives
+ * before them, already scored ([{drive, summary, scores}], oldest first),
+ * for the baselines only: each goes into a channel's history as it did when
+ * it was scored (its stored score's level), and isn't scored again. */
+export function scoreDrives(rows, excluded = new Set(), seed = []) {
   const sorted = rows.slice().sort((a, b) => a.start - b.start);
   const history = new Map();          // key -> [{cells: {cell: value}}] healthy only
+  for (const row of seed) {
+    if (excluded.has(row.drive)) continue;
+    for (const spec of CHANNELS) {
+      const ch = row.summary.channels[spec.key];
+      if (!ch) continue;
+      const mine = {};
+      for (const [k, cell] of Object.entries(ch.cells)) {
+        const cv = cellValue(spec, cell);
+        if (cv) mine[k] = cv[0];
+      }
+      const s = row.scores[spec.key];
+      if (!Object.keys(mine).length || levelOf(spec.group, s ? s[0] : null) === 2) continue;
+      if (!history.has(spec.key)) history.set(spec.key, []);
+      history.get(spec.key).push(mine);
+    }
+  }
   const out = [];
   for (const row of sorted) {
     const scores = {}, cells = {};
@@ -360,8 +379,12 @@ export function scoreDrives(rows, excluded = new Set()) {
 // ------------------------------------------------------------------ D1
 
 /** Summarize one stored drive from its series and keep it (or drop it when
- * it has no warm time). */
+ * it has no warm time, its scores with it). `from`: the earliest start
+ * whose scores this can change (its old start, if it had one, or its new),
+ * null if neither. */
 export async function summarizeStored(env, drive) {
+  const was = ((await env.DB.prepare("SELECT start FROM health_summaries WHERE drive = ?")
+    .bind(drive).all()).results || [])[0];
   const r = await env.DB.prepare(
     `SELECT channel, t0, unit, data FROM series WHERE drive = ? AND channel IN
      (SELECT value FROM json_each(?)) ORDER BY channel, t0`)
@@ -377,37 +400,60 @@ export async function summarizeStored(env, drive) {
   }
   const tracks = new Map([...pts].map(([k, list]) => [k, track(list)]));
   const s = summarize(tracks, units);
+  const earliest = (a, b) => (a === null || a === undefined ? b ?? null
+    : b === null || b === undefined ? a : Math.min(a, b));
   if (!s || s.warm_s < WARM_MIN_S) {
-    await env.DB.prepare("DELETE FROM health_summaries WHERE drive = ?").bind(drive).run();
-    return { drive, warm_s: s ? s.warm_s : 0, kept: false };
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM health_summaries WHERE drive = ?").bind(drive),
+      env.DB.prepare("DELETE FROM health_scores WHERE drive = ?").bind(drive)]);
+    return { drive, warm_s: s ? s.warm_s : 0, kept: false, from: was ? was.start : null };
   }
   await env.DB.prepare(`INSERT OR REPLACE INTO health_summaries (drive, start, warm_s,
     version, data) VALUES (?, ?, ?, ?, ?)`)
     .bind(drive, s.start, s.warm_s, SUMMARY_VERSION, JSON.stringify(s)).run();
-  return { drive, warm_s: s.warm_s, kept: true, channels: Object.keys(s.channels).length };
+  return { drive, warm_s: s.warm_s, kept: true, channels: Object.keys(s.channels).length,
+    from: earliest(was && was.start, s.start) };
 }
 
-/** Work out every drive's scores again from the stored summaries. */
-export async function rescore(env) {
-  const r = await env.DB.prepare("SELECT drive, start, data FROM health_summaries").all();
+// A drive's scores need the BASELINE_DRIVES healthy drives before it, per
+// channel. Rescoring from a changed drive on reads this many before it for
+// those, at their stored levels: a channel that alerted in most of them
+// gets a shorter baseline, which a full rescore (rebuild) puts right.
+const SEED_DRIVES = 5 * BASELINE_DRIVES;
+
+/** Work out the scores again from the stored summaries: every drive's, or
+ * (`from`, a start in UTC seconds) only those from it on, the drives before
+ * it seeding the baselines. A drive's series changing used to rescore every
+ * drive, reading every summary and rewriting every score on each upload
+ * (past D1's statements a request, Health would go stale without a word). */
+export async function rescore(env, from = null) {
   const ex = await env.DB.prepare("SELECT drive FROM health_excluded").all();
   const excluded = new Set((ex.results || []).map((x) => x.drive));
+  const all = from === null || from === undefined;
+  const r = await env.DB.prepare(all ? "SELECT drive, start, data FROM health_summaries"
+    : "SELECT drive, start, data FROM health_summaries WHERE start >= ?")
+    .bind(...(all ? [] : [from])).all();
+  const seed = all ? [] : ((await env.DB.prepare(`SELECT h.drive, h.data, s.scores FROM
+    health_summaries h LEFT JOIN health_scores s ON s.drive = h.drive WHERE h.start < ?
+    ORDER BY h.start DESC LIMIT ?`).bind(from, SEED_DRIVES).all()).results || []).reverse()
+    .map((x) => ({ drive: x.drive, summary: JSON.parse(x.data),
+      scores: x.scores ? JSON.parse(x.scores) : {} }));
   const scored = scoreDrives((r.results || []).map((x) =>
-    ({ drive: x.drive, start: x.start, summary: JSON.parse(x.data) })), excluded);
-  const stmts = [env.DB.prepare("DELETE FROM health_scores")];
-  for (const s of scored) {
-    stmts.push(env.DB.prepare(`INSERT INTO health_scores (drive, start, overall, level,
-      scores, cells) VALUES (?, ?, ?, ?, ?, ?)`).bind(s.drive, s.start, s.overall, s.level,
-      JSON.stringify(s.scores), JSON.stringify(s.cells)));
-  }
-  await env.DB.batch(stmts);
+    ({ drive: x.drive, start: x.start, summary: JSON.parse(x.data) })), excluded, seed);
+  // One statement whatever the count (D1 allows 1,000 a request).
+  const rows = JSON.stringify(scored.map((s) => [s.drive, s.start, s.overall, s.level,
+    JSON.stringify(s.scores), JSON.stringify(s.cells)]));
+  const write = env.DB.prepare(`INSERT OR REPLACE INTO health_scores (drive, start, overall,
+    level, scores, cells) SELECT value->>0, value->>1, value->>2, value->>3, value->>4,
+    value->>5 FROM json_each(?)`).bind(rows);
+  await env.DB.batch(all ? [env.DB.prepare("DELETE FROM health_scores"), write] : [write]);
   return { drives: scored.length };
 }
 
-/** A drive's series just changed: its summary, then everyone's scores. */
+/** A drive's series just changed: its summary, then the scores from it on. */
 export async function updateHealth(env, drive) {
   const s = await summarizeStored(env, drive);
-  await rescore(env);
+  if (s.from !== null) await rescore(env, s.from);
   return s;
 }
 
@@ -431,7 +477,9 @@ export async function excludeDrive(env, drive, excluded, who) {
     ? "INSERT OR REPLACE INTO health_excluded (drive, at, who) VALUES (?, ?, ?)"
     : "DELETE FROM health_excluded WHERE drive = ?")
     .bind(...(excluded ? [drive, new Date().toISOString(), who || ""] : [drive])).run();
-  await rescore(env);
+  const at = ((await env.DB.prepare("SELECT start FROM health_summaries WHERE drive = ?")
+    .bind(drive).all()).results || [])[0];
+  if (at) await rescore(env, at.start);           // only the drives after it can change
   return { drive, excluded: !!excluded };
 }
 

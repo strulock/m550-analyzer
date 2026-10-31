@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 
 import { buildSeries, CHUNK, clockEpoch, isDriveLog, localStamp, loggerExtras, processLog, pyRound,
   readColumns, readLog } from "../src/drive.js";
+import { pieceStats } from "../src/values.js";
 
 const parity = new URL("./parity/", import.meta.url);
 const expected = JSON.parse(readFileSync(new URL("expected.json", parity), "utf8"));
@@ -33,8 +34,24 @@ function close(actual, wanted, path = "") {
 /** Every chunk of a series, channel after channel. */
 const chunksOf = (s) => [...s.channels()].flat();
 
-/** Chunks as Python writes them: data as a list, no unit. */
-const asPython = (chunks) => chunks.map(({ unit, json, ...c }) => ({ ...c, data: JSON.parse(json) }));
+/** Chunks as Python writes them: data as a list, no unit, and not the
+ * Worker's own v0, v1 and falls (checked against pieceStats below). */
+const asPython = (chunks) => chunks.map(({ unit, json, v0, v1, falls, ...c }) =>
+  ({ ...c, data: JSON.parse(json) }));
+
+test("each piece's first and last value and whether it falls match its data", () => {
+  for (const name of Object.keys(expected)) {
+    const bytes = new Uint8Array(readFileSync(new URL(name, parity)));
+    for (const c of chunksOf(processLog(bytes, `logger/${name}`, 0).series)) {
+      const p = pieceStats(JSON.parse(c.json));
+      assert.deepEqual([c.v0, c.v1, c.falls], [p.v0, p.v1, p.falls], `${name} ${c.name}`);
+    }
+  }
+  assert.deepEqual(pieceStats([[0, 1], [1, 5], [2, null], [3, 4]]),
+    { v0: 1, v1: 4, falls: false });                 // not compared across the gap
+  assert.deepEqual(pieceStats([[0, 1], [1, 5], [2, 2], [3, 5]]), { v0: 1, v1: 5, falls: true });
+  assert.deepEqual(pieceStats([[0, null]]), { v0: null, v1: null, falls: false });
+});
 
 for (const name of Object.keys(expected)) {
   test(`parity with Python: ${name}`, () => {

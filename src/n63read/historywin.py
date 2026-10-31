@@ -108,12 +108,16 @@ class HistoryWindow(tk.Toplevel):
         box = self._result = {}
 
         def work():
+            # Anything that goes wrong is shown: only OSError was, and
+            # anything else left the window at "reading the logs folder..."
+            # with no way to scan again.
             try:
                 box["summary"] = history.scan(
                     self.logs, progress=lambda i, n: box.__setitem__("progress", (i, n)))
-            except OSError as e:
+            except Exception as e:                                  # noqa: BLE001
                 box["error"] = e
-            box["done"] = True
+            finally:
+                box["done"] = True
         threading.Thread(target=work, daemon=True).start()
         self.after(100, self._poll)
 

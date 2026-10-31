@@ -41,20 +41,59 @@ export async function migrateValues(env) {
 // starts lowest and ends highest, but isn't a counter). That last walks
 // every point, so only for a channel that passed the rest (CASE: SQLite
 // doesn't evaluate the branch not taken).
+//
+// Each piece's first and last value and whether it ever falls are kept with
+// it (series v0, v1, falls; pieceStats), so this reads no JSON: it parsed
+// every stored piece of each channel on every upload, 110 MB of it by 31
+// Oct. A piece stored before those columns (falls NULL until
+// backfillPieces fills them) is read from its JSON as before.
+const V0 = "COALESCE(s.v0, json_extract(s.data, '$[0][1]'))";
+const V1 = (s) => `COALESCE(${s}.v1, json_extract(${s}.data, '$[#-1][1]'))`;
+const WALK = (x) => `EXISTS (SELECT 1 FROM (SELECT json_extract(j.value, '$[1]') -
+  LAG(json_extract(j.value, '$[1]')) OVER (ORDER BY j.key) AS d FROM json_each(${x}.data) j)
+  WHERE d < 0)`;
 const refresh = (where) => `WITH p AS (SELECT s.channel, s.drive, s.t1, s.n, s.min, s.max,
-    json_extract(s.data, '$[0][1]') AS a, json_extract(s.data, '$[#-1][1]') AS b,
-    LAG(json_extract(s.data, '$[#-1][1]')) OVER (PARTITION BY s.channel ORDER BY s.t0) AS prev
+    ${V0} AS a, ${V1("s")} AS b,
+    LAG(${V1("s")}) OVER (PARTITION BY s.channel ORDER BY s.t0) AS prev
     FROM series s WHERE ${where})
   INSERT OR REPLACE INTO channel_values (channel, t, value, n, lo, hi, drives, rises)
-  SELECT p.channel, MAX(p.t1), (SELECT json_extract(x.data, '$[#-1][1]') FROM series x
+  SELECT p.channel, MAX(p.t1), (SELECT ${V1("x")} FROM series x
     WHERE x.channel = p.channel ORDER BY x.t1 DESC LIMIT 1), SUM(p.n), MIN(p.min), MAX(p.max),
     COUNT(DISTINCT p.drive), CASE WHEN COUNT(DISTINCT p.drive) > 2 AND MAX(p.max) > MIN(p.min)
     AND COALESCE(MIN(p.a <= p.min AND p.b >= p.max AND (p.prev IS NULL OR p.a >= p.prev)), 0)
-    THEN NOT EXISTS (SELECT 1 FROM series x WHERE x.channel = p.channel AND EXISTS (
-      SELECT 1 FROM (SELECT json_extract(j.value, '$[1]') - LAG(json_extract(j.value, '$[1]'))
-        OVER (ORDER BY j.key) AS d FROM json_each(x.data) j) WHERE d < 0))
+    THEN NOT EXISTS (SELECT 1 FROM series x WHERE x.channel = p.channel AND
+      (x.falls = 1 OR (x.falls IS NULL AND ${WALK("x")})))
     ELSE 0 END
   FROM p GROUP BY p.channel`;
+
+/** A piece's first and last value and whether any value is below the one
+ * before it ([t, v] points; a gap, null, is skipped over without comparing
+ * across it, as the SQL above does). */
+export function pieceStats(data) {
+  let v0 = null, v1 = null, falls = false, prev = null;
+  for (let i = 0; i < data.length; i++) {
+    const v = Array.isArray(data[i]) ? data[i][1] : null;
+    if (i === 0) v0 = typeof v === "number" ? v : null;
+    if (i === data.length - 1) v1 = typeof v === "number" ? v : null;
+    if (typeof v === "number" && typeof prev === "number" && v < prev) falls = true;
+    prev = v;
+  }
+  return { v0, v1, falls };
+}
+
+/** Pieces stored before v0, v1 and falls: filled in BACKFILL at a time,
+ * oldest rowid first; {done, next} (send ?after=<next> until it's null). */
+export const BACKFILL = 4000;
+export async function backfillPieces(env, after = 0) {
+  const r = (await env.DB.prepare(`SELECT rowid FROM series WHERE falls IS NULL AND rowid > ?
+    ORDER BY rowid LIMIT ?`).bind(Number(after) || 0, BACKFILL).all()).results || [];
+  if (!r.length) return { done: 0, next: null };
+  const lo = r[0].rowid, hi = r[r.length - 1].rowid;
+  await env.DB.prepare(`UPDATE series AS s SET v0 = json_extract(s.data, '$[0][1]'),
+    v1 = json_extract(s.data, '$[#-1][1]'), falls = ${WALK("s")}
+    WHERE s.falls IS NULL AND s.rowid BETWEEN ? AND ?`).bind(lo, hi).run();
+  return { done: r.length, next: r.length === BACKFILL ? hi : null };
+}
 
 /** Bring these channels' rows up to date (a channel with no series left loses its row). */
 export async function refreshValues(env, names) {
