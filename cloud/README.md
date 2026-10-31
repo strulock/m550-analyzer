@@ -19,7 +19,8 @@ serves it to Claude from anywhere:
   "same", never changed across the stored drives, or "rises", only goes up),
   `logger_set_tiers` (one channel or a whole module, range or `values` set
   at a time, e.g. every never-changing channel to monthly; a dry run says
-  what would change), `logger_presets` (the presets, the active
+  what would change; `values` never picks what the board, the tanks, fault
+  dates or Health read, `logger.js` `valueKept`), `logger_presets` (the presets, the active
   one and its channel file; a preset's versions), `logger_save_preset`,
   `logger_publish` (make one active: the board takes it within 10 minutes)
   and `logger_rollback`. Every change to a preset, from these or the page,
@@ -114,6 +115,19 @@ serves it to Claude from anywhere:
   signs in again or refreshes; elsewhere a 403. A token signed with a key the
   Worker hasn't cached fetches Access's keys again (at most every 5 minutes),
   and expiry allows a minute's clock difference.
+- **The logger board's token** (`boardsettings.js` `boardRole`) is pinned:
+  the first service token to check in when none is known becomes the board's
+  (D1 `board_identity`), and only the board checks in. It may do the board's
+  work and nothing else: check in, `PUT /api/files/logger/<name>`, and `GET`
+  its channels, check list and firmware; anything else is a 403, so a token
+  taken from the board can't read the drives, change presets, overwrite the
+  app's files or publish firmware. A new token from the page becomes the
+  board's only when the board checks in with it and says it has the change;
+  the old one is then refused everywhere (`board_tokens`). Revoke a leaked
+  token in Access too: the change that replaces it reaches the board over
+  that token, so whoever holds it sees the new one.
+- **Firmware** is published by a person's login, or by a service token named
+  in `FIRMWARE_PUBLISHERS` (the app's, which `publish_firmware.py` uses).
 
 Plain JavaScript, no packages: `src/worker.js`, `src/drive.js` and the modules beside them. Tests run
 on Node 24: `node --test "cloud/test/*.test.mjs"` (from the repo root).
@@ -170,6 +184,11 @@ Run these in `cloud/`; nothing here is created until you run it.
    npx wrangler secret put ACCESS_TEAM_DOMAIN   # https://<team>.cloudflareaccess.com
    ```
 
+   For the logger board's firmware, name the app's service token as one that
+   may publish it (`vars` in `wrangler.jsonc`, comma-separated client IDs):
+   `"FIRMWARE_PUBLISHERS": "<app client ID>.access"`. The board needs a
+   service token of its own, never the app's.
+
 4. **The app.** *Settings > Cloud*: the Worker URL, the service token's
    client ID and secret, *Save*, then *Sync now*. Or from the CLI:
 
@@ -202,12 +221,12 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
-| `POST /api/logger/heartbeat` | the logger board's check-in, at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes` (when they change), `pending`, `oldest_pending_min`, `up_tries`, `up_failed`, `up_error`, `card_errors`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
+| `POST /api/logger/heartbeat` | the logger board's check-in (its token only), at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes` (when they change), `pending`, `oldest_pending_min`, `up_tries`, `up_failed`, `up_error`, `card_errors`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
 | `POST /api/logger/heartbeats` | check-ins the board kept while it had no Wi-Fi: `{"beats": [...]}`, at most 200 and 64 KB. Each is filed under its own `clock`; one without a clock, older than 30 days or already stored is skipped. Replies `stored`, `skipped` |
 | `GET`, `PUT`, `DELETE /api/logger/settings` | the logger board's settings (boardsettings.js): GET what its last check-in says it has (networks, the start of its token's id, `settings_version`), the change waiting or how the last went; PUT `{key: value}` (`wifi_ssid`, `wifi_pass`, `wifi2_ssid`, `wifi2_pass`, `ap_pass`, `access_id` with `access_secret`, `tz`; "" clears) for its next check-in, a person's Access login only; DELETE takes it back. The check-in's reply carries it (`settings_version`, `set_<key>` in hex) until the board says it has it (`settings_version`) or refused it (`settings_failed`, `settings_error`); then the values are dropped. None is ever returned |
 | `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes`, or its power-on's newest, with each code's module and text, and where known `first_km`, `last_km`, `occurrences`, `first_date`, `last_date`), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline, and `wifi_note`, the board's last word on why Wi-Fi wouldn't join (the logger page shows the last check-in's); and `last_drive`: the last logger drive's rate per tier |
 | `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
-| `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`): an ESP32 app image of at most 6 MB, `V` not "dev". One build is kept; replies with its manifest |
+| `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`): an ESP32 app image of at most 6 MB, `V` not "dev"; a person's login or a token in `FIRMWARE_PUBLISHERS` only. One build is kept; replies with its manifest |
 | `GET /api/logger/firmware` | the manifest: `{"version", "sha256", "size", "uploaded"}` (404 when nothing is published); also in `GET /api/logger` as `firmware` |
 | `GET /api/logger/firmware.bin` | the published image |
 | `POST /api/logger/sweep` | ask for a full channel sweep on the next drive (`sweep.js`): the board asks every catalog identifier once, as the app's Check car now does. Replies `{"pending": {"id", "requested", ...}, "created"}`; one already waiting is kept |
@@ -221,7 +240,7 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/logger/presets` | `{"active", "presets": [{"name", "rest", "tiers", "updated"}], "file": {"preset", "etag", "counts"}}`. `tiers` is `{channel: tier}` (fast, medium, slow, drive, daily, weekly, monthly, off); `rest` ("slow" or "off") is the tier of every channel not named that the car answers, except that the tire blocks (`DSC_RDC_MESSDATENBLOCK_1`-`4`), tank level and odometer (`logger.js` `PER_DRIVE`) are read at least once a drive unless named off |
 | `PUT /api/logger/presets` | `{"changes": [{"name", "rest", "tiers"} or {"name", "deleted": true}], "active": name}`, both optional; the active preset can't be deleted. Each preset changed or deleted keeps what it was as a version (MCP `logger_presets`, `logger_rollback`) |
 | `GET /api/logger/channels` | the board's `channels.csv` from the active preset, with an `ETag` (`If-None-Match` gets a 304) and `X-Preset`. Whatever the preset says: an identifier its module said it hasn't (refused with 0x31 in a check or a drive: `absent` in the catalog's answers) or one that misdecodes on this car (`logger.js` `UNDECODABLE`: the airbag module's `_IMU_WERTE`) is off, and what the board's own logic reads (`BOARD_NEEDS`: the selector, engine speed, speed, `ITKUM`, `IUIBS`) is at least medium |
-| `GET /api/logger/values` | each channel's newest stored value: `{"columns": ["t", "value", "n", "lo", "hi", "drives", "rises"], "values": {channel: [...]}}`, when (UTC seconds), the value, its count, min and max over every stored drive, how many drives, and `rises` (1: in two drives or more, it went up and never down, within a drive or from one to the next: an odometer, a counter). The logger page filters on it ("Only goes up") and on min = max ("Never changed"). Kept in `channel_values`, brought up to date as a drive's series are stored |
+| `GET /api/logger/values` | each channel's newest stored value: `{"columns": ["t", "value", "n", "lo", "hi", "drives", "rises"], "values": {channel: [...]}}`, when (UTC seconds), the value, its count, min and max over every stored drive, how many drives, and `rises` (1: in three drives or more, it went up and never down, point to point within a drive or from one drive to the next: an odometer, a counter). The logger page filters on it ("Only goes up") and on min = max in two drives or more ("Never changed"), leaving out what the board, the tanks, fault dates and Health read (`logger.js` `valueKept`: `PER_DRIVE`, `BOARD_NEEDS`, health.js `NEEDED`, the odometers). Rows are worked out again when the rule changes (`values_rule`). Kept in `channel_values`, brought up to date as a drive's series are stored |
 | `GET /logger/health` | the Health tab: a heatmap of every drive's health scores (channels by group down the side, drives along the bottom; filters by group, dates and flagged channels), and for a channel and drive its value across drives with the normal band and the other bank's (or matching cylinder's) beside it, the drive's RPM x load cells against the baseline, and the drive's raw values at its longest time in a cell; a drive can be left out of the baselines |
 | `GET /api/health` | the scores: `groups` (with `watch` and `alert`), `channels`, `drives` (oldest first: `start`, `warm_min`, `overall`, `level` 0-2, `excluded`), `scores` (`{channel: [[score, cells, value, low, high] or null per drive]}`) and `settings`; `?from=`, `?to=` (dates) narrow the drives |
 | `GET /api/health/cell?drive=&channel=` | one drive and channel: each RPM x load cell's seconds, revolutions, longest visits (UTC), value, baseline median, spread, z and samples (and the cell's mean, median, p95, min and max) |

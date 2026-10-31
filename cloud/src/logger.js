@@ -25,6 +25,8 @@
  * first drive they're due), off.
  */
 
+import { ODOMETERS_ANY } from "./drive.js";
+import { NEEDED as HEALTH_NEEDS } from "./health.js";
 import { getValues } from "./values.js";
 
 export const CATALOG_KEY = "config/logger-catalog.json";
@@ -52,16 +54,25 @@ const MAX_VERSIONS = 50;                // kept a preset
 export class ConfigError extends Error {}
 
 // `values`: channels by what their stored drives show (values.js): "same",
-// never changed (two values or more, min = max), or "rises", only ever up
-// (an odometer, a counter). A test of a channel name, and its stats.
+// never changed (in two drives or more, min = max), or "rises", only ever up
+// (an odometer, a counter). Never a channel something else depends on
+// (valueKept): an odometer only goes up and a misfire counter can sit at 0,
+// but a slower tier for one would quietly cost the tanks, the fault dates or
+// Health their data. A test of a channel name, and its stats.
 const VALUE_KINDS = ["same", "rises"];
 async function valueTest(env, kind) {
   if (!VALUE_KINDS.includes(kind)) {
     throw new ConfigError('values: "same" (never changed) or "rises" (only goes up)');
   }
   const v = (await getValues(env)).values;
-  const ok = kind === "same" ? (s) => s[2] >= 2 && s[3] === s[4] : (s) => !!s[6];
-  return { test: (name) => !!v[name] && ok(v[name]), stats: (name) => v[name] };
+  const ok = kind === "same" ? neverChanged : (s) => !!s[6];
+  return { test: (name) => !!v[name] && ok(v[name]) && !valueKept(name),
+    stats: (name) => v[name] };
+}
+
+/** A values row ([t, value, n, lo, hi, drives, rises]) that never changed. */
+export function neverChanged(s) {
+  return s[2] >= 2 && s[5] >= 2 && s[3] === s[4];
 }
 const selects = (a) => a.names || a.module || a.did_from || a.did_to || a.match;
 
@@ -346,6 +357,16 @@ const faster = (a, b) => (TIERS.indexOf(a) <= TIERS.indexOf(b) ? a : b);
 
 export function perDrive(name) {
   return PER_DRIVE_RE.test(name) || PER_DRIVE.includes(name);
+}
+
+/** The channels a value filter ("same", "rises") leaves out, besides
+ * PER_DRIVE's: the board's own (BOARD_NEEDS), Health's (health.js NEEDED,
+ * the misfire counters among them) and the odometers the drive rows and
+ * fault dates come from (drive.js). */
+export const VALUE_KEEP = [...new Set([...Object.keys(BOARD_NEEDS), ...HEALTH_NEEDS,
+  ...ODOMETERS_ANY])];
+export function valueKept(name) {
+  return perDrive(name) || VALUE_KEEP.includes(name);
 }
 
 /** Each catalog row's tier under a preset: named, else `rest` where the

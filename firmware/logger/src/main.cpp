@@ -124,6 +124,7 @@ static const char* DRIVES = "/drives";
 static const uint32_t REQUEST_MS = 1500;     // a reply takes 3-60 ms; more is a dead read
 static const uint32_t CAR_GONE_MS = 10000;   // nothing answered this long: the drive is over
 static const uint32_t SEARCH_MS = 1000;      // between tries (the car is usually there at once)
+static const uint32_t SD_RETRY_MS = 10000;   // mounting a card that wasn't there at boot
 static const uint32_t FLUSH_MS = 2000;       // a power cut loses at most this much
 static const uint32_t MIN_CYCLE_MS = 50;     // at most 20 fast rows a second
 static const uint32_t UPLOAD_EVERY_MS = 15000;
@@ -225,8 +226,9 @@ static Console out;
 static NetworkServer terminal(TERMINAL_PORT);
 static SPIClass sdSpi(HSPI);
 static std::recursive_mutex sdLock;          // directory changes: logging vs uploads
-static bool sdOk = false;
+static std::atomic<bool> sdOk{false};        // mounted (mountCard), read by every task
 static volatile bool linkUp = false;
+static volatile uint32_t loopBeatMs = 0;     // loop() came round (loopWatch)
 static uint32_t bootCount = 0;
 
 // ---- settings (lib/logger/settings.h) ------------------------------------------
@@ -647,7 +649,10 @@ static std::atomic<uint32_t> cardErrors{0};   // this boot: in the check-ins
 // worked, so two drives logged 15 minutes into nothing and the board didn't
 // know. A flush that didn't land closes the file, opens it again, takes what
 // the card has (its hash read back) and writes the rest again; while the card
-// won't open it, the rows wait in memory (up to PENDING_MAX).
+// won't open it, the rows wait in memory (up to PENDING_MAX). That goes for
+// a file the card wouldn't open at the drive's start too: it's tried again
+// at each flush, and each try counts in the check-ins' card_errors, rather
+// than the drive logging into nothing.
 static const size_t PENDING_MAX = 1024 * 1024;
 struct DriveFile {
   File f;
@@ -668,8 +673,8 @@ struct DriveFile {
       std::lock_guard<std::recursive_mutex> g(sdLock);
       f = SD.open(path, FILE_WRITE);
     }
-    open = (bool)f;
-    return open && flush();
+    open = true;                    // the drive's file, on the card or not yet
+    return flush();
   }
   void add(const std::string& text) {
     if (!open) return;
@@ -708,7 +713,9 @@ struct DriveFile {
       if (probe) probe.close();
       if (have > size && truncate((String(SD_MOUNT) + path).c_str(), size) != 0) return false;
     }
-    f = SD.open(path, "r+");
+    // Not there (never opened, or the card lost it): made anew, and anything
+    // checked before is then what the card lost, below.
+    f = SD.open(path, SD.exists(path) ? "r+" : FILE_WRITE);
     if (!f) return false;
     if (f.size() < size) {
       static uint8_t buf[4096];
@@ -751,8 +758,12 @@ struct DriveFile {
   void finish() {
     if (!open) return;
     flush();
-    f.close();
     open = false;
+    if (!f) {                       // the card never took it: no .done for a file that isn't there
+      out.printf("[sd] %s never reached the card\n", path.c_str());
+      return;
+    }
+    f.close();
     char hex[65];
     sha.finishHex(hex);
     std::lock_guard<std::recursive_mutex> g(sdLock);
@@ -803,7 +814,14 @@ static void addNote(const std::string& text) {
   note += text;
 }
 
+// A restart by loopWatch, kept through it (RTC memory survives a software
+// restart) so the next boot says so rather than "software reset".
+static const uint32_t RESTART_HUNG = 0x48554e47;
+static RTC_NOINIT_ATTR uint32_t restartWhy;
+static bool restartedHung = false;           // this boot's, read once in setup()
+
 static const char* resetReason() {
+  if (restartedHung) return "logging loop stuck";
   switch (esp_reset_reason()) {
     case ESP_RST_POWERON: return "power on";
     case ESP_RST_BROWNOUT: return "brownout";
@@ -834,6 +852,20 @@ static void listLeftovers() {
     }
   }
   dir.close();
+}
+
+// Mount the card: at boot, and again while looking for the car if it
+// wouldn't then (a card that failed for a moment at power-on lost the whole
+// ignition cycle's drives). The files left open are listed before sdOk says
+// so, which the upload task waits for to close them.
+static bool mountCard() {
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  SD.end();
+  if (!SD.begin(SD_CS, sdSpi, 20000000)) return false;
+  out.printf("[sd] %.1f GB card, %.1f MB used\n", SD.cardSize() / 1e9, SD.usedBytes() / 1e6);
+  listLeftovers();
+  sdOk = true;
+  return true;
 }
 
 // The lock is held only to open and to write the .done: reading under it
@@ -897,8 +929,8 @@ static void startDrive() {
   sweepLayout.setup(table, false);
   String dir = String(DRIVES) + "/";
   bool ok = fastFile.begin(dir + driveName + ".csv", fastLayout.header(table));
-  if (ok && !sweepLayout.columns.empty()) {
-    ok = sweepFile.begin(dir + driveName + ".sweep.csv", sweepLayout.header(table));
+  if (!sweepLayout.columns.empty()) {
+    ok = sweepFile.begin(dir + driveName + ".sweep.csv", sweepLayout.header(table)) && ok;
   }
   driveStartMs = lastOkMs = lastFlushMs = lastCycleMs = cycleStatsMs = lastStatsNoteMs = millis();
   fastRows = sweepRows = cycles = reconnects = 0;
@@ -924,7 +956,6 @@ static void startDrive() {
            (unsigned)table.channels.size(), from.c_str(),
            !timeKnown() ? "; clock unknown" : clockFromCar ? "; clock from the car" : "");
   addNote(start);
-  otaKeep("reached the car");
   checkStart();
   dueTiers = duePeriodic();
   // A full channel check reads every periodic tier too, due or not.
@@ -947,7 +978,7 @@ static void startDrive() {
   faultScan.start(millis());
   sweepPassStart = millis();
   out.printf("[drive] %s started%s%s\n", driveName.c_str(), timeKnown() ? "" : " (clock unknown)",
-             ok ? "" : ": FILES COULD NOT BE OPENED");
+             ok ? "" : ": the card won't take its files yet (tried again at each flush)");
 }
 
 // `keepCar`: stay connected (the drive ended parked; PARKED watches for the next).
@@ -2866,12 +2897,16 @@ static void channelsIfDue() {
 // before the car is looked for (about 10 s), or once the board has been idle
 // a minute (on the bench), and the board restarts into it.
 //
-// A new build is on trial until it checks in with the Worker or reaches the
-// car; if it does neither in OTA_TRIAL_MS on Wi-Fi or the car's link (parked
-// with neither, it waits), or crashes, hangs or restarts first, the
-// bootloader goes back to the last build, which then won't take that version
-// again. Keys in "logger": otasd/otasha (a checked image on the card), otato
-// (the version just installed), otabad (one that went back).
+// A new build is on trial until it checks in with the Worker; if it doesn't
+// in OTA_TRIAL_MS on Wi-Fi (without Wi-Fi, it waits), or crashes, hangs
+// (loopWatch) or restarts first, the bootloader goes back to the last build,
+// which then won't take that version again, unless only the power went
+// (lib/logger/ota.h otaBlame: tried again, up to OTA_TRIES). The idle install
+// waits for Wi-Fi and not for the car being parked, so a new build gets its
+// trial with the chance to check in rather than a power-off. Keys in
+// "logger": otasd/otasha (a checked image on the card), otato (the version
+// just installed), otabad (one that went back), otatry ("<version> <n>": how
+// often it went back for a power cut).
 static const char* FW_FILE = "/fw.bin";
 static const char* FW_DOWNLOAD = "/fw.dl";
 static const uint32_t OTA_CHECK_MS = 10 * 60 * 1000;
@@ -2897,6 +2932,7 @@ static void otaKeep(const char* why) {
   Preferences prefs;
   prefs.begin("logger");
   prefs.remove("otato");
+  prefs.remove("otatry");
   prefs.end();
   setOta("");
   out.printf("[ota] firmware %s kept (%s)\n", FW_VERSION, why);
@@ -2927,12 +2963,24 @@ static void otaBoot() {
   if (start == OTA_TRIAL) {
     otaTrial = true;
     setOta(std::string("trying ") + FW_VERSION);
-    out.printf("[ota] firmware %s on trial: kept once it checks in or reaches the car\n", FW_VERSION);
+    out.printf("[ota] firmware %s on trial: kept once it checks in\n", FW_VERSION);
   } else if (start == OTA_WENT_BACK) {
-    prefs.putString("otabad", to);
+    esp_reset_reason_t r = esp_reset_reason();
+    bool power = r == ESP_RST_POWERON || r == ESP_RST_BROWNOUT;
+    int tries = otaTries(prefs.getString("otatry", "").c_str(), to.c_str());
     prefs.remove("otato");
-    setOta(std::string("went back from ") + to.c_str());
-    out.printf("[ota] firmware %s didn't prove itself; back on %s\n", to.c_str(), FW_VERSION);
+    if (otaBlame(power, tries)) {
+      prefs.putString("otabad", to);
+      prefs.remove("otatry");
+      setOta(std::string("went back from ") + to.c_str());
+      out.printf("[ota] firmware %s didn't prove itself (%s); back on %s\n", to.c_str(),
+                 resetReason(), FW_VERSION);
+    } else {
+      prefs.putString("otatry", to + " " + String(tries));
+      setOta(std::string("went back from ") + to.c_str() + " (power off); trying it again");
+      out.printf("[ota] firmware %s went back when the power went before it checked in; "
+                 "trying it again (%d of %d)\n", to.c_str(), tries, OTA_TRIES);
+    }
   }
   String sd = prefs.getString("otasd", ""), bad = prefs.getString("otabad", "");
   prefs.end();
@@ -2999,13 +3047,13 @@ static void otaInstall() {
 }
 
 // Back to the last build if this one hasn't proved itself in time: time
-// with Wi-Fi or the car's link up (lib/logger/ota.h).
+// with Wi-Fi up (lib/logger/ota.h).
 static void otaTrialCheck() {
   static TrialClock clock;
   if (!otaTrial) return;
-  if (!trialOver(true, clock.tick(millis(), WiFi.isConnected() || linkUp))) return;
-  out.printf("[ota] firmware %s didn't check in or reach the car in %u min on Wi-Fi or the car; "
-             "going back\n", FW_VERSION, (unsigned)(OTA_TRIAL_MS / 60000));
+  if (!trialOver(true, clock.tick(millis(), WiFi.isConnected()))) return;
+  out.printf("[ota] firmware %s didn't check in in %u min on Wi-Fi; going back\n", FW_VERSION,
+             (unsigned)(OTA_TRIAL_MS / 60000));
   delay(300);
   esp_ota_mark_app_invalid_rollback_and_reboot();
 }
@@ -3151,8 +3199,25 @@ static void checkListIfDue() {
 // Wi-Fi and the check-ins (core 0), on a task of their own so an upload,
 // a channel file or a firmware download never holds a check-in up (they
 // came 17 s apart under load on 27 Oct).
+// The logging loop (core 1) stuck for LOOP_STUCK_MS, in a card or socket
+// call that never returns: check-ins (this core) would go on saying
+// "logging" while nothing is, until the power went. Restart, or go back
+// from a build on trial (its fault, so it's then bad).
+static const uint32_t LOOP_STUCK_MS = 120000;
+static void loopWatch() {
+  uint32_t last = loopBeatMs;
+  if (!last || (int32_t)(millis() - last) < (int32_t)LOOP_STUCK_MS) return;
+  out.printf("[boot] the logging loop has been stuck %u s; restarting\n",
+             (unsigned)((millis() - last) / 1000));
+  restartWhy = RESTART_HUNG;
+  delay(300);
+  if (otaTrial) esp_ota_mark_app_invalid_rollback_and_reboot();
+  ESP.restart();
+}
+
 static void beatTask(void*) {
   for (;;) {
+    loopWatch();
     keepWifi();
     beatIfDue();
     if (setupPageOn) setupPage.handleClient();
@@ -3219,8 +3284,10 @@ static void stressTask(void*) {
 static void uploadTask(void*) {
   uint32_t last = 0;
   bool first = true;                       // the backlog at power-on, as soon as Wi-Fi is up
-  if (sdOk) recoverDrives();               // the last drive's files, if the power cut it
+  bool recovered = false;
   for (;;) {
+    // The last drive's files, if the power cut it: once the card is in.
+    if (!recovered && sdOk) { recoverDrives(); recovered = true; }
     vTaskDelay(pdMS_TO_TICKS(500));
     channelsIfDue();
     otaCheckIfDue();
@@ -3492,6 +3559,7 @@ static void receiveChannels() {
   while (!done && millis() - last < 15000) {
     size_t n = out.readSome(buf, sizeof(buf));
     if (!n) { delay(1); continue; }
+    loopBeatMs = millis();                   // a long file isn't a stuck loop
     last = millis();
     for (size_t i = 0; i < n && !done; i++) {
       char k = (char)buf[i];
@@ -3680,6 +3748,8 @@ void setup() {
   // No waiting for a USB host either: in the car there isn't one, and every
   // second of boot is a second not logged after an engine restart.
   Serial.setTxTimeoutMs(0);
+  restartedHung = esp_reset_reason() == ESP_RST_SW && restartWhy == RESTART_HUNG;
+  restartWhy = 0;
   Preferences prefs;
   prefs.begin("logger");
   bootCount = prefs.getUInt("boots", 0) + 1;
@@ -3700,13 +3770,7 @@ void setup() {
   }
 
   sdSpi.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
-  sdOk = SD.begin(SD_CS, sdSpi, 20000000);
-  if (sdOk) {
-    out.printf("[sd] %.1f GB card, %.1f MB used\n", SD.cardSize() / 1e9, SD.usedBytes() / 1e6);
-    listLeftovers();
-  } else {
-    out.println("[sd] NO CARD (or not FAT): logging needs one");
-  }
+  if (!mountCard()) out.println("[sd] NO CARD (or not FAT): logging needs one; tried again while looking for the car");
   otaBoot();
   if (otaReady) otaInstall();                // a new build on the card: in before the car
   checkBoot();
@@ -3857,12 +3921,15 @@ static void pollGear() {
 }
 
 void loop() {
+  loopBeatMs = millis();                     // loopWatch: this loop isn't stuck
   serviceTerminal();
   // Firmware: a build on trial goes back if it hasn't proved itself in time;
-  // one waiting on the card goes in once the board has been idle a minute.
+  // one waiting on the card goes in once the board has been idle a minute
+  // away from the car (not parked in it: the power may go before the new
+  // build checks in) with Wi-Fi up to check in on.
   static uint32_t idleSince = 0;
   otaTrialCheck();
-  if (state == LOGGING) idleSince = millis();
+  if (state == LOGGING || state == PARKED || !WiFi.isConnected()) idleSince = millis();
   // Not while files wait to go up, which may be the last minute of power
   // after a drive (OTA_IDLE_MAX_MS: unless that's gone on and on).
   else if (otaReady && millis() - idleSince >= OTA_IDLE_MS &&
@@ -3878,7 +3945,19 @@ void loop() {
       static uint32_t lastTry = 0;
       static bool tried = false;
       if (!linkUp) { state = WAIT_LINK; break; }
-      if (!sdOk || (tried && millis() - lastTry < SEARCH_MS)) { delay(50); break; }
+      if (!sdOk) {
+        static uint32_t lastMount = 0;
+        if (millis() - lastMount >= SD_RETRY_MS) {
+          lastMount = millis();
+          if (mountCard()) {
+            out.println("[sd] the card is in now");
+            channelsFromCard = false;
+            loadChannels();                // its channels.csv, not the built-in table
+          }
+        }
+        if (!sdOk) { delay(50); break; }
+      }
+      if (tried && millis() - lastTry < SEARCH_MS) { delay(50); break; }
       lastTry = millis();
       tried = true;
       // The gateway keeps its link-local address from drive to drive: try the

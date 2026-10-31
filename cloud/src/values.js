@@ -15,18 +15,32 @@ export const VALUES_SCHEMA = [
      n INTEGER, lo REAL, hi REAL, drives INTEGER, rises INTEGER)`,
 ];
 
-/** The table from before `rises` goes (it's all derived; getValues builds it again). */
+// Which rule the rows were worked out by (logger_settings "values_rule"):
+// raised when `refresh` changes, so the table is built again under it.
+const RULE = "2";
+
+/** The table from before `rises`, or from an older rule, goes (it's all
+ * derived; getValues builds it again). */
 export async function migrateValues(env) {
   const cols = await env.DB.prepare("SELECT name FROM pragma_table_info('channel_values')").all();
-  if ((cols.results || []).some((c) => c.name === "rises")) return;
+  const rule = (await env.DB.prepare(
+    "SELECT value FROM logger_settings WHERE key = 'values_rule'").all()).results;
+  if ((cols.results || []).some((c) => c.name === "rises") && rule && rule.length &&
+      rule[0].value === RULE) return;
   await env.DB.batch([env.DB.prepare("DROP TABLE IF EXISTS channel_values"),
-    env.DB.prepare(VALUES_SCHEMA[0])]);
+    env.DB.prepare(VALUES_SCHEMA[0]),
+    env.DB.prepare("INSERT OR REPLACE INTO logger_settings (key, value) VALUES ('values_rule', ?)")
+      .bind(RULE)]);
 }
 
 // The newest value is the last point of the channel's newest piece. A
-// channel rises if it's in two drives or more, went up, and each piece (in
-// time order) starts at its lowest, ends at its highest, and starts no lower
-// than the one before ended.
+// channel rises if it's in three drives or more (two that happen to read
+// higher prove nothing), went up, each piece (in time order) starts at its
+// lowest, ends at its highest and starts no lower than the one before
+// ended, and no point in a piece is below the one before it (1, 5, 2, 5
+// starts lowest and ends highest, but isn't a counter). That last walks
+// every point, so only for a channel that passed the rest (CASE: SQLite
+// doesn't evaluate the branch not taken).
 const refresh = (where) => `WITH p AS (SELECT s.channel, s.drive, s.t1, s.n, s.min, s.max,
     json_extract(s.data, '$[0][1]') AS a, json_extract(s.data, '$[#-1][1]') AS b,
     LAG(json_extract(s.data, '$[#-1][1]')) OVER (PARTITION BY s.channel ORDER BY s.t0) AS prev
@@ -34,8 +48,12 @@ const refresh = (where) => `WITH p AS (SELECT s.channel, s.drive, s.t1, s.n, s.m
   INSERT OR REPLACE INTO channel_values (channel, t, value, n, lo, hi, drives, rises)
   SELECT p.channel, MAX(p.t1), (SELECT json_extract(x.data, '$[#-1][1]') FROM series x
     WHERE x.channel = p.channel ORDER BY x.t1 DESC LIMIT 1), SUM(p.n), MIN(p.min), MAX(p.max),
-    COUNT(DISTINCT p.drive), COUNT(DISTINCT p.drive) > 1 AND MAX(p.max) > MIN(p.min) AND
-    COALESCE(MIN(p.a <= p.min AND p.b >= p.max AND (p.prev IS NULL OR p.a >= p.prev)), 0)
+    COUNT(DISTINCT p.drive), CASE WHEN COUNT(DISTINCT p.drive) > 2 AND MAX(p.max) > MIN(p.min)
+    AND COALESCE(MIN(p.a <= p.min AND p.b >= p.max AND (p.prev IS NULL OR p.a >= p.prev)), 0)
+    THEN NOT EXISTS (SELECT 1 FROM series x WHERE x.channel = p.channel AND EXISTS (
+      SELECT 1 FROM (SELECT json_extract(j.value, '$[1]') - LAG(json_extract(j.value, '$[1]'))
+        OVER (ORDER BY j.key) AS d FROM json_each(x.data) j) WHERE d < 0))
+    ELSE 0 END
   FROM p GROUP BY p.channel`;
 
 /** Bring these channels' rows up to date (a channel with no series left loses its row). */

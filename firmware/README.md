@@ -107,7 +107,17 @@ drives logged minutes into nothing), so a flush that didn't land opens the
 file again and writes the rest from what the card has, noted in the drive
 ("card: ... write failed so opened again"); the check-ins count them
 (`card_errors`, this boot). While the card won't open it, the rows wait in
-memory (up to 1 MB).
+memory (up to 1 MB). A file the card wouldn't open at the drive's start is
+the same: tried again at each flush and counted in `card_errors`, rather
+than the drive logging into nothing; one the card never took gets no
+`.done`. A card that didn't mount at power-on is tried again every 10 s
+while the board looks for the car (`[sd] the card is in now`), with its
+channels and the files a power cut left open.
+
+If the logging loop stops coming round for 2 minutes (a card or socket call
+that never returns), the check-in task restarts the board, and the next
+boot's check-ins give `reset` as "logging loop stuck"; a build on trial goes
+back instead.
 
 Each boot it closes a drive a power cut left open, then looks for the car
 (the address it had last time first, then discovery) and logs while it
@@ -364,9 +374,11 @@ builds the logger with a version (the UTC time and the commit, e.g.
 with the Access token from `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`,
 else the n63read app's (Settings > Cloud); the host from `--host`,
 `N63_WORKER_HOST`, the app's, or `WORKER_HOST` in `logger_secrets.h`). The
-Worker refuses firmware from the board's own token (the one that checks in),
-so a token taken from a board can't put code on it, and refuses writes to
-the firmware's R2 keys through `/api/files/`. The build never includes
+Worker takes firmware only from a person's login or a token in its
+`FIRMWARE_PUBLISHERS` (the app's), and the board's own token may only check
+in, upload its files and fetch its channels, check list and firmware
+(cloud/README.md), so a token taken from a board can't put code on it; it
+refuses writes to the firmware's R2 keys through `/api/files/`. The build never includes
 `logger_secrets.h` (`LOGGER_NO_SECRETS`). The Worker keeps one build.
 
 The board asks for it soon after Wi-Fi comes up and every 10 minutes. For a
@@ -374,16 +386,19 @@ version other than its own (an older one too: publishing the old build is
 how to go back), it downloads the image to the card, during a drive as well,
 and checks its size and SHA-256. It installs it into the other app slot at
 the next power-on, before it looks for the car (about 10 s, once), or after
-a minute idle on the bench, and restarts into it.
+a minute idle with Wi-Fi up and away from the car (on the bench: not while
+parked in the car, where the power may go before the new build checks in),
+and restarts into it.
 
-A new build is on trial until it checks in with the Worker or reaches the
-car. If it does neither in 5 minutes with Wi-Fi or the car's link up, or
-crashes, hangs or restarts before that, the bootloader goes back to the
-build before (parked with neither, the trial waits: a good build isn't
-thrown away for want of a network, and a broken one goes back at the next
-power-off), which then won't take that
-version again (publish another). An image that won't install is refused the
-same way. The check-ins carry `fw` (the version) and `ota` (what the updater
+A new build is on trial until it checks in with the Worker (reaching the car
+isn't enough: a build that logs but can't check in could never be updated
+again). If it doesn't in 5 minutes with Wi-Fi up, or crashes, hangs or
+restarts before that, the bootloader goes back to the build before (without
+Wi-Fi, the trial waits: a good build isn't thrown away on a drive away from
+it), which then won't take that version again (publish another). Going back
+because the power went (the car switched off before the build checked in)
+isn't held against it: it's taken again, up to 3 times (`otatry`). An image
+that won't install is refused the same way. The check-ins carry `fw` (the version) and `ota` (what the updater
 is doing: downloading, downloaded, trying, went back, failed), and the
 logger page shows them with the published version. A "dev" build (from the
 IDE) takes no updates, so bench work isn't replaced under you.
