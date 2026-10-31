@@ -17,7 +17,8 @@
  */
 
 import { estimateRates } from "./estimate.js";
-import { BOARD_NEEDS, PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE } from "./logger.js";
+import { BOARD_NEEDS, neverChanged, PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE, VALUE_KEEP,
+  valueKept } from "./logger.js";
 import { FILL_MIN_L } from "./tanks.js";
 import { oddValue } from "./values.js";
 
@@ -221,13 +222,13 @@ td.when small { display: block; color: var(--muted); font-size: 11px; }
       <option value="no">Doesn't answer / unknown</option>
     </select>
     <select id="tierf"><option value="">Any tier</option><option value="set">Set in this preset</option></select>
-    <select id="valf">
+    <select id="valf" title="Never changed and Only goes up leave out what the board, the tanks, fault dates and Health read (the odometers, misfire counters, tank level, tires), so a slower tier for what they show costs nothing">
       <option value="">Any value</option>
       <option value="odd">Looks wrong</option>
       <option value="has">Has a stored value</option>
       <option value="none">No stored value</option>
-      <option value="same">Never changed (every stored drive)</option>
-      <option value="rises">Only goes up (odometer, counters)</option>
+      <option value="same">Never changed (2+ stored drives)</option>
+      <option value="rises">Only goes up (counters; 3+ drives)</option>
     </select>
   </section>
 
@@ -291,6 +292,9 @@ ${estimateRates.toString()}
 var PER_DRIVE = ${JSON.stringify(PER_DRIVE)}, PER_DRIVE_RE = ${PER_DRIVE_RE.toString()};
 var UNDECODABLE = ${JSON.stringify([...UNDECODABLE])}, BOARD_NEEDS = ${JSON.stringify(BOARD_NEEDS)};
 ${perDrive.toString()}
+var VALUE_KEEP = ${JSON.stringify(VALUE_KEEP)};
+${valueKept.toString()}
+${neverChanged.toString()}
 ${oddValue.toString()}
 </script>
 <script>
@@ -449,8 +453,9 @@ ${oddValue.toString()}
       if (vf === "has" && !(values && values[it.name])) return false;
       if (vf === "none" && values && values[it.name]) return false;
       var sv = values && values[it.name];
-      if (vf === "same" && !(sv && sv[2] >= 2 && sv[3] === sv[4])) return false;
-      if (vf === "rises" && !(sv && sv[6])) return false;
+      if ((vf === "same" || vf === "rises") && (!sv || valueKept(it.name))) return false;
+      if (vf === "same" && !neverChanged(sv)) return false;
+      if (vf === "rises" && !sv[6]) return false;
       if (ans === "yes" && !it.ok && !edit.tiers[it.name]) return false;
       if (ans === "no" && it.ok) return false;
       if (tf === "set" && !edit.tiers[it.name]) return false;

@@ -852,7 +852,19 @@ static void test_ota_start() {
   CHECK(!trialOver(false, 0xFFFFFFFF));
   CHECK(!trialOver(true, OTA_TRIAL_MS - 1));
   CHECK(trialOver(true, OTA_TRIAL_MS));
-  // Parked without Wi-Fi or the car the trial waits; only time with a chance counts.
+  // A build that went back for a power cut is tried again, up to OTA_TRIES;
+  // after a crash, a hang or its trial running out, it's bad at once.
+  CHECK(otaTries("", "v2") == 1);
+  CHECK(otaTries("v2 1", "v2") == 2);
+  CHECK(otaTries("v2 2", "v2") == 3);
+  CHECK(otaTries("v1 2", "v2") == 1);                        // another version's count
+  CHECK(otaTries("v22 2", "v2") == 1);
+  CHECK(otaTries("v2", "v2") == 1);
+  CHECK(!otaBlame(true, 1));
+  CHECK(!otaBlame(true, OTA_TRIES - 1));
+  CHECK(otaBlame(true, OTA_TRIES));
+  CHECK(otaBlame(false, 1));
+  // Without Wi-Fi the trial waits; only time with the chance to check in counts.
   TrialClock tc;
   CHECK(tc.tick(1000, false) == 0);
   CHECK(tc.tick(OTA_TRIAL_MS * 3, false) == 0);

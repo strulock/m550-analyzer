@@ -41,8 +41,8 @@
  * No dependencies: plain JavaScript, deployed with `wrangler deploy`.
  */
 
-import { beatSettings, BOARD_SETTINGS_SCHEMA, cancelBoardSettings, getBoardSettings, isBoard,
-  noteBoard, putBoardSettings, SettingsError } from "./boardsettings.js";
+import { beatSettings, BOARD_SETTINGS_SCHEMA, boardRole, cancelBoardSettings, getBoardSettings,
+  putBoardSettings, SettingsError } from "./boardsettings.js";
 import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerExtras, readLog,
   summarizeDrive } from "./drive.js";
 import { channelFile, ConfigError, getCatalog, getPresets, listTiers, LOGGER_SCHEMA, presetVersions,
@@ -1292,8 +1292,10 @@ export const TOOLS = [
       "preset (the active one by default): fast (every cycle), medium (a few times a second), " +
       "slow (in rotation), drive (once a drive), daily, weekly, monthly, off. Filter by " +
       "module (0x12), an identifier range (did_from, did_to), part of a name (match), exact " +
-      "names, tier, or values: \"same\" (never changed across the stored drives) or " +
-      "\"rises\" (only ever goes up: an odometer, a counter). Each: name, module, did, tier, " +
+      "names, tier, or values: \"same\" (never changed, in two stored drives or more) or " +
+      "\"rises\" (only ever goes up, in three or more: a counter); values never picks what " +
+      "the board, the tanks, fault dates or Health read (odometers, misfire counters, tank " +
+      "level, tires). Each: name, module, did, tier, " +
       "whether the preset names it (else its rest applies), what the car answered, unit, " +
       "description; with values, also lo, hi and drives.",
     inputSchema: { type: "object", properties: {
@@ -1307,7 +1309,8 @@ export const TOOLS = [
     name: "logger_set_tiers",
     description: "Set a tier for channels in a preset (the active one by default), one at a " +
       "time (names) or in bulk (module, did_from/did_to, match, values: \"same\" never " +
-      "changed, \"rises\" only goes up; all that are given). tier: " +
+      "changed, \"rises\" only goes up, never what the board, tanks or Health read; all that " +
+      "are given). tier: " +
       "fast, medium, slow, drive, daily, weekly, monthly, off, or default (back to the " +
       "preset's rest). The preset's previous state is kept as a version (logger_rollback). " +
       "If it's the active preset, the board takes the new channel file within 10 minutes " +
@@ -1703,7 +1706,7 @@ async function healthApi(request, env, url, who) {
     return d ? json(d) : json({ error: "no health for that drive and channel" }, 404);
   }
   if (request.method !== "POST") return null;
-  if (await isBoard(env, who)) return json({ error: "a person's login only" }, 403);
+  if (!who.includes("@")) return json({ error: "a person's login only" }, 403);
   if (url.pathname === "/api/health/rebuild") return json(await rebuildHealth(env, q.after));
   if (url.pathname === "/api/health/exclude") {
     let body;
@@ -1719,6 +1722,23 @@ async function healthApi(request, env, url, who) {
   }
   return null;
 }
+
+// The board's token may only do the board's work: check in, upload its
+// files, and fetch its channels, check list and firmware. So one taken from
+// the board can't read the drives, change presets, write the app's files or
+// publish code.
+const CHECK_INS = ["/api/logger/heartbeat", "/api/logger/heartbeats"];
+const BOARD_ROUTES = [
+  ["POST", /^\/api\/logger\/heartbeats?$/],
+  ["PUT", /^\/api\/files\/logger\/[^/]+$/],
+  ["GET", /^\/api\/logger\/(channels|check-list|firmware|firmware\.bin)$/],
+];
+const boardRoute = (method, path) => BOARD_ROUTES.some(([m, p]) => m === method && p.test(path));
+
+/** Service tokens that may publish firmware besides a person's login: the
+ * app's, which publish_firmware.py uses (comma-separated client ids). */
+const publishers = (env) => (env.FIRMWARE_PUBLISHERS || "").split(",").map((s) => s.trim())
+  .filter(Boolean);
 
 export async function handle(request, env, fetcher = fetch) {
   const url = new URL(request.url);
@@ -1736,6 +1756,19 @@ export async function handle(request, env, fetcher = fetch) {
     }
     return json({ error: "forbidden", reason: auth.reason }, 403);
   }
+
+  // The board's token, or the new one it's trying, only on the board's
+  // routes; one it had before nowhere. Only the board checks in.
+  const checkIn = request.method === "POST" && CHECK_INS.includes(url.pathname);
+  let role = null;
+  if (!auth.who.includes("@")) {
+    await ensureSchema(env);
+    role = await boardRole(env, auth.who, checkIn);
+  }
+  if (role && (role === "old" || !boardRoute(request.method, url.pathname))) {
+    return json({ error: "not for the board's token" }, 403);
+  }
+  if (checkIn && !role) return json({ error: "only the board checks in" }, 403);
 
   if (url.pathname === "/mcp") {
     if (request.method === "GET") return new Response(null, { status: 405 });  // no SSE stream
@@ -1827,11 +1860,9 @@ export async function handle(request, env, fetcher = fetch) {
       return json({ error: "body: JSON {boot, event, ...}" }, 400);
     }
     try {
-      await ensureSchema(env);
-      await noteBoard(env, auth.who);
       const stored = await putBeat(env, body);
       return json({ ok: true, ...stored, ...(await beatSweep(env, body)),
-        ...(await beatSettings(env, body)) });
+        ...(await beatSettings(env, body, role, auth.who)) });
     } catch (e) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
@@ -1879,9 +1910,9 @@ export async function handle(request, env, fetcher = fetch) {
       return m ? json(m) : json({ error: "no firmware published" }, 404);
     }
     if (request.method === "PUT") {
-      await ensureSchema(env);
-      if (await isBoard(env, auth.who)) {
-        return json({ error: "the board's own token can't publish firmware" }, 403);
+      if (!auth.who.includes("@") && !publishers(env).includes(auth.who)) {
+        return json({ error: "firmware is published by a person's login or a token in " +
+          "FIRMWARE_PUBLISHERS" }, 403);
       }
       const len = Number(request.headers.get("content-length") || 0);
       if (len > MAX_FIRMWARE) return json({ error: "too large" }, 413);

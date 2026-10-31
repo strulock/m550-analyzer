@@ -529,7 +529,33 @@ after the first week of drives, and what's left.
 - [x] The page's "Never changed" and "Only goes up" filters for the MCP too:
       `logger_channels` and `logger_set_tiers` take `values` ("same",
       "rises"), so a chat can list them or move them all to a slower tier.
-- [ ] Still open from that review: an Ed25519 signature on the firmware
+- [x] From the repo review of 31 Oct:
+      - The board's token is pinned (the first to check in; a new one from
+        the page only once the board checks in with it, the old one then
+        refused) and may only check in, upload its files and fetch its
+        channels, check list and firmware. Firmware comes only from a
+        person's login or `FIRMWARE_PUBLISHERS` (the app's token); the
+        Health actions only from a person's login.
+      - "Never changed" and "Only goes up" leave out what the board, the
+        tanks, fault dates and Health read (the odometers, misfire
+        counters, tank level, tires); "only goes up" needs three drives and
+        no fall point to point, "never changed" two drives.
+      - A drive file the card wouldn't open at the start is tried again at
+        each flush (it logged into nothing before); a card that didn't
+        mount at power-on is tried again while looking for the car.
+      - A new build is kept only once it checks in (not on reaching the
+        car), its trial counts only time on Wi-Fi, it isn't installed
+        while parked in the car, and going back for a power cut is tried
+        again (3 times) rather than refused for good. A logging loop stuck
+        2 minutes restarts the board ("logging loop stuck").
+- [ ] Next from that review: `drive_health` replies past ~17 drives are cut
+      off as broken JSON (newest dropped); the batched DME reads in the app
+      stop for good after one timeout; cloud sync and History die without
+      a message on a bad saved secret or CSV; values and Health rescoring
+      read all history on each upload; the logger page's poll scans every
+      check-in; `.done`/`channels.csv` swaps not atomic; a check-in reply
+      can change `host`; the PlatformIO platform isn't pinned.
+- [ ] Still open from the review of 29 Oct: an Ed25519 signature on the firmware
       image, checked by the board; provision.py and C escapes;
       `logs/logger/` names; the Wi-Fi terminal without a password.
 - [ ] On 29 Oct the board lost power three times while driving (power-on

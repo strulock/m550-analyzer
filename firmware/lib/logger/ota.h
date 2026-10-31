@@ -67,12 +67,30 @@ inline bool wantUpdate(const std::string& own, const std::string& offered,
   return own != "dev" && !offered.empty() && offered != own && offered != bad;
 }
 
-// A new build is on trial until it checks in with the Worker or reaches the
-// car; one that does neither in this long with the chance to (Wi-Fi up or the
-// car's link up) goes back. Parked with neither it waits: a restart on trial
-// goes back anyway (the bootloader's rule), so a build that broke both goes
-// back at the next power-off.
+// A new build is on trial until it checks in with the Worker: what a later
+// update needs to reach it (reaching the car isn't enough: a build that can
+// log but not check in could never be updated again). One that doesn't in
+// this long on Wi-Fi goes back; without Wi-Fi (a drive away from it) it
+// waits.
 static const uint32_t OTA_TRIAL_MS = 5 * 60 * 1000;
+
+// A restart on trial goes back (the bootloader's rule), the power going off
+// too: the car switched off before the build could check in. That isn't the
+// build's fault, so it's tried again, up to OTA_TRIES times; one that went
+// back after a crash, a hang or its trial running out is bad and isn't taken
+// again. `powerLost`: the board's reset reason says the power went.
+static const int OTA_TRIES = 3;
+inline bool otaBlame(bool powerLost, int tries) { return !powerLost || tries >= OTA_TRIES; }
+
+// "<version> <tries>" as kept between power-ons: how many times `version`
+// has gone back for a power cut, counting this one.
+inline int otaTries(const std::string& kept, const std::string& version) {
+  if (kept.size() <= version.size() + 1 || kept.compare(0, version.size(), version) != 0 ||
+      kept[version.size()] != ' ') {
+    return 1;
+  }
+  return atoi(kept.c_str() + version.size() + 1) + 1;
+}
 
 enum OtaStart {
   OTA_NORMAL,

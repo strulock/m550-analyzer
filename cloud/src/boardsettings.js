@@ -22,25 +22,33 @@ export const BOARD_SETTINGS_SCHEMA = [
      version INTEGER NOT NULL, pending TEXT, requested TEXT, by TEXT, result TEXT, done TEXT)`,
   // The board's own Access identity (its token's client id): what checks in.
   `CREATE TABLE IF NOT EXISTS board_identity (id INTEGER PRIMARY KEY CHECK (id = 1), who TEXT)`,
+  // Tokens the board had before a new one from the page: refused everywhere.
+  `CREATE TABLE IF NOT EXISTS board_tokens (who TEXT PRIMARY KEY, until TEXT)`,
 ];
 
-// The board is whatever service token checks in (only the board does); a
-// person's login (an email) never counts. Written when it changes, so not on
-// every check-in.
-const boardSeen = new WeakMap();             // per D1 binding
-export async function noteBoard(env, who) {
-  if (!who || who.includes("@") || boardSeen.get(env.DB) === who) return;
-  await env.DB.prepare("INSERT OR REPLACE INTO board_identity (id, who) VALUES (1, ?)").bind(who).run();
-  boardSeen.set(env.DB, who);
-}
-
-/** True for the board's own token: it may check in and upload its drives,
- * never publish firmware (an extracted token mustn't be able to put code on
- * the board). */
-export async function isBoard(env, who) {
-  if (!who || who.includes("@")) return false;
-  const r = (await env.DB.prepare("SELECT who FROM board_identity WHERE id = 1").all()).results;
-  return !!(r && r.length && r[0].who === who);
+/** What a token is to the board: "board", the one it checks in with; "next",
+ * the new token a waiting change gives it (the board tries a check-in with
+ * it before it keeps it); "old", one it had; or null (a person, the app).
+ * The board is pinned: only the first service token to check in, when none
+ * is known, becomes it (`claim`), and then only a token change the board
+ * took, checking in with the new token, moves it. A token taken from the
+ * board can't make another one the board's, or itself not the board's. */
+export async function boardRole(env, who, claim = false) {
+  if (!who || who.includes("@")) return null;
+  const id = (await env.DB.prepare("SELECT who FROM board_identity WHERE id = 1").all()).results;
+  const board = id && id.length ? id[0].who : null;
+  if (board === who) return "board";
+  if (!board) {
+    if (!claim) return null;
+    await env.DB.prepare("INSERT OR IGNORE INTO board_identity (id, who) VALUES (1, ?)")
+      .bind(who).run();
+    return boardRole(env, who);              // whoever claimed it first
+  }
+  const r = await row(env);
+  if (r && r.pending && JSON.parse(r.pending).access_id === who) return "next";
+  const old = (await env.DB.prepare("SELECT 1 FROM board_tokens WHERE who = ?").bind(who).all())
+    .results;
+  return old && old.length ? "old" : null;
 }
 
 // The board's keys (settings.h SETTING_FIELDS), with its rules for a value.
@@ -135,21 +143,32 @@ export async function cancelBoardSettings(env, who, now = new Date()) {
 }
 
 /** For a check-in's reply: the change waiting, if the board hasn't it yet;
- * done with it (dropped) once the board says it has it or refused it. */
-export async function beatSettings(env, beat, now = new Date()) {
+ * done with it (dropped) once the board says it has it or refused it.
+ * `role` is the token's (boardRole): only the board's gets a change, and a
+ * new token counts as taken only from a check-in with that token, which
+ * then becomes the board's (the old one is refused from then on). */
+export async function beatSettings(env, beat, role, who, now = new Date()) {
   const r = await row(env);
   if (!r || !r.pending) return {};
+  const token = "access_id" in JSON.parse(r.pending);
   const has = Number(beat.settings_version) || 0;
   const failed = Number(beat.settings_failed) || 0;
-  if (has >= r.version || failed >= r.version) {
-    const result = has >= r.version ? "taken"
-      : `refused: ${String(beat.settings_error || "").slice(0, 200)}`;
+  const taken = has >= r.version && (token ? role === "next" : role === "board");
+  const refused = failed >= r.version && role === "board";
+  if (taken || refused) {
+    const result = taken ? "taken" : `refused: ${String(beat.settings_error || "").slice(0, 200)}`;
     // Only the change this check-in answered: one saved meanwhile stays.
-    await env.DB.prepare(`UPDATE board_settings SET pending = NULL, result = ?, done = ?
-      WHERE id = 1 AND version = ?`).bind(result, now.toISOString(), r.version).run();
+    const done = [env.DB.prepare(`UPDATE board_settings SET pending = NULL, result = ?, done = ?
+      WHERE id = 1 AND version = ?`).bind(result, now.toISOString(), r.version)];
+    if (taken && token) {
+      done.push(env.DB.prepare(`INSERT OR REPLACE INTO board_tokens (who, until)
+        SELECT who, ? FROM board_identity WHERE id = 1`).bind(now.toISOString()),
+      env.DB.prepare("UPDATE board_identity SET who = ? WHERE id = 1").bind(who));
+    }
+    await env.DB.batch(done);
     return {};
   }
-  if (beat.settings_version === undefined) return {};   // a firmware from before settings
+  if (role !== "board" || beat.settings_version === undefined) return {};   // or a firmware from before settings
   const out = { settings_version: r.version };
   for (const [k, v] of Object.entries(JSON.parse(r.pending))) out[`set_${k}`] = hex(v);
   return out;

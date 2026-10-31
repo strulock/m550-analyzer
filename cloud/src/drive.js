@@ -616,7 +616,7 @@ export function localStamp(seconds, timeZone = DEFAULT_TIME_ZONE) {
 }
 
 // The odometers the board reads, any one will do (loggerExtras).
-const ODOMETERS_ANY = ODOMETERS.concat(["EGS_KILOMETERSTAND", "PMA_BUS_IN_KILOMETERSTAND_WERT"]);
+export const ODOMETERS_ANY = ODOMETERS.concat(["EGS_KILOMETERSTAND", "PMA_BUS_IN_KILOMETERSTAND_WERT"]);
 
 /** The first channel of `names` the logs have: the median of its values in
  * the first and in the last `window` seconds ([null, null] if none). */

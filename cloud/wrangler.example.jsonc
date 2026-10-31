@@ -20,7 +20,10 @@
     { "binding": "DB", "database_name": "n63read", "database_id": "<your D1 database id>" }
   ],
   // The car's time zone: a drive log without a clock is dated in it, as the
-  // logs' own clocks are (default America/Chicago).
-  "vars": { "TIME_ZONE": "America/Chicago" },
+  // logs' own clocks are (default America/Chicago). FIRMWARE_PUBLISHERS: the
+  // service tokens (client IDs, comma-separated) that may publish the logger's
+  // firmware besides your login: the app's, for publish_firmware.py.
+  "vars": { "TIME_ZONE": "America/Chicago",
+            "FIRMWARE_PUBLISHERS": "<app client ID>.access" },
   "observability": { "enabled": true }
 }

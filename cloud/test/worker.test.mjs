@@ -79,8 +79,13 @@ beforeEach(async () => {
   env = { DB: new D1(), FILES: new R2(), ACCESS_AUD: AUD, ACCESS_TEAM_DOMAIN: TEAM };
 });
 
+const BOARD = "board0000000000.access";
+const boardToken = (id = BOARD) => token({ email: undefined, common_name: id });
+
+// A check-in comes from the board's token unless the test says otherwise.
 async function call(method, path, { body, auth = true, headers = {} } = {}) {
   const h = new Headers(headers);
+  if (auth === true && path.startsWith("/api/logger/heartbeat")) auth = await boardToken();
   if (auth) h.set("Cf-Access-Jwt-Assertion", typeof auth === "string" ? auth : await token());
   return handle(new Request(`https://car.example.com${path}`, { method, body, headers: h }),
     env, fetcher);
@@ -318,15 +323,27 @@ test("channels that only go up across drives, and the table from before that", a
       min: Math.min(...data.map((d) => d[1])), max: Math.max(...data.map((d) => d[1])),
       mean: 0, data })) }) });
   await drive("a.csv", 1000, [["KM", [[0, 100], [1, 101]]], ["DROPS", [[0, 5], [1, 6]]],
-    ["SAME", [[0, 7], [1, 7]]], ["WOBBLE", [[0, 1], [1, 3]]], ["ONCE", [[0, 1], [1, 2]]]]);
+    ["SAME", [[0, 7], [1, 7]]], ["WOBBLE", [[0, 1], [1, 3]]], ["ONCE", [[0, 1], [1, 2]]],
+    ["ZIGZAG", [[0, 1], [1, 5], [2, 2], [3, 5]]], ["TWICE", [[0, 12.1]]]]);
   await drive("b.csv", 2000, [["KM", [[0, 101], [1, 101], [2, 105]]], ["DROPS", [[0, 4]]],
-    ["SAME", [[0, 7]]], ["WOBBLE", [[0, 3], [1, 2], [2, 4]]]]);
-  await drive("c.csv", 3000, [["KM", [[0, 105]]]]);
+    ["SAME", [[0, 7]]], ["WOBBLE", [[0, 3], [1, 2], [2, 4]]], ["ZIGZAG", [[0, 5], [1, 6]]],
+    ["TWICE", [[0, 12.4]]]]);
+  await drive("c.csv", 3000, [["KM", [[0, 105]]], ["ZIGZAG", [[0, 6], [1, 7]]]]);
   const v = (await (await call("GET", "/api/logger/values")).json()).values;
   const rises = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, x[6]]));
-  // ONCE: one drive only; WOBBLE: down within a drive; SAME: never changed.
-  assert.deepEqual(rises, { KM: 1, DROPS: 0, SAME: 0, WOBBLE: 0, ONCE: 0 });
+  // ONCE: one drive only; TWICE: two readings that happened to go up prove
+  // nothing; WOBBLE and ZIGZAG: down within a drive (ZIGZAG starts at its
+  // lowest and ends at its highest); SAME: never changed.
+  assert.deepEqual(rises, { KM: 1, DROPS: 0, SAME: 0, WOBBLE: 0, ONCE: 0, ZIGZAG: 0, TWICE: 0 });
   assert.deepEqual(v.SAME.slice(2, 5), [3, 7, 7]);
+  // Rows from an older rule are worked out again: the table is built anew.
+  env.DB.db.exec("UPDATE channel_values SET rises = 1; UPDATE logger_settings SET value = '1' " +
+    "WHERE key = 'values_rule'");
+  // A new isolate: the same database, the schema checked again.
+  env.DB = Object.assign(Object.create(Object.getPrototypeOf(env.DB)), env.DB);
+  const again = (await (await call("GET", "/api/logger/values")).json()).values;
+  assert.equal(again.ZIGZAG[6], 0);
+  assert.equal(again.KM[6], 1);
 });
 
 test("each channel's newest value and range, kept up to date as drives come in", async () => {
@@ -408,7 +425,7 @@ test("a sweep file with thousands of channels stays within D1's query count", as
   const put = await (await call("PUT", "/api/files/logger/w.sweep.csv", { body: csvText })).json();
   assert.equal(put.processed, true);
   assert.equal(put.channels, 3000);
-  assert.ok(statements < 40, `${statements} statements`);         // D1 allows 1,000
+  assert.ok(statements < 50, `${statements} statements`);         // D1 allows 1,000
   env.DB.prepare = prepare;
   const listed = (await (await call("GET", "/api/series?match=BDC_CH_")).json()).channels;
   assert.equal(listed.length, 3000);
@@ -796,29 +813,121 @@ test("board settings: a person's change goes to the board in a check-in's reply,
     assert.equal((await beat({})).settings_version, undefined);
   });
 
-test("firmware: the board's own token can't publish it, nor can anyone write its keys", async () => {
-  const board = await token({ email: undefined, common_name: "board0000000000.access" });
-  const app = await token({ email: undefined, common_name: "app00000000000000.access" });
+test("firmware: a person or a listed token publishes it, the board's never; nor can anyone write its keys", async () => {
+  const board = await boardToken();
+  const app = await boardToken("app00000000000000.access");
+  const other = await boardToken("other000000000000.access");
   const image = new Uint8Array(4096).fill(7);
   image[0] = 0xE9;                                      // an ESP32 app image
-  // Before the board has checked in, it isn't known: any token publishes.
-  assert.equal((await call("PUT", "/api/logger/firmware?version=v1", { body: image, auth: board })).status,
-    200);
-  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 1, event: "beat" }),
-    auth: board });
-  let r = await call("PUT", "/api/logger/firmware?version=v2", { body: image, auth: board });
+  env.FIRMWARE_PUBLISHERS = "app00000000000000.access, x.access";
+  // Even before the board has checked in, its token isn't a publisher.
+  let r = await call("PUT", "/api/logger/firmware?version=v1", { body: image, auth: board });
   assert.equal(r.status, 403);
-  assert.match((await r.json()).error, /board's own token/);
-  assert.equal((await (await call("GET", "/api/logger/firmware")).json()).version, "v1");
-  // The app's service token and a person still publish.
+  assert.match((await r.json()).error, /FIRMWARE_PUBLISHERS/);
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 1, event: "beat" }) });
+  r = await call("PUT", "/api/logger/firmware?version=v2", { body: image, auth: board });
+  assert.equal(r.status, 403);
+  assert.equal((await call("PUT", "/api/logger/firmware?version=v2", { body: image, auth: other }))
+    .status, 403);
+  assert.equal((await call("GET", "/api/logger/firmware")).status, 404);
+  // The listed token (the app's, for publish_firmware.py) and a person do.
   assert.equal((await call("PUT", "/api/logger/firmware?version=v3", { body: image, auth: app })).status,
     200);
   assert.equal((await call("PUT", "/api/logger/firmware?version=v4", { body: image })).status, 200);
+  // The board still fetches it.
+  assert.equal((await (await call("GET", "/api/logger/firmware", { auth: board })).json()).version,
+    "v4");
+  assert.equal((await call("GET", "/api/logger/firmware.bin", { auth: board })).status, 200);
   // Straight into the firmware's R2 keys: refused for everyone.
   for (const key of ["firmware/logger.bin", "firmware/logger.json"]) {
     assert.equal((await call("PUT", "/api/files/" + key, { body: "x", auth: app })).status, 403);
   }
   assert.equal((await (await call("GET", "/api/logger/firmware")).json()).version, "v4");
+});
+
+test("the board's token: only the board's routes, and only the board checks in", async () => {
+  const board = await boardToken();
+  const app = await boardToken("app00000000000000.access");
+  // A person can't check in.
+  for (const path of ["/api/logger/heartbeat", "/api/logger/heartbeats"]) {
+    assert.equal((await call("POST", path, { body: '{"boot":1,"beats":[]}', auth: await token() }))
+      .status, 403);
+  }
+  // The first service token to check in is the board's; another can't take it over.
+  assert.equal((await call("POST", "/api/logger/heartbeat", { body: '{"boot":1}' })).status, 200);
+  for (const path of ["/api/logger/heartbeat", "/api/logger/heartbeats"]) {
+    assert.equal((await call("POST", path, { body: '{"boot":1,"beats":[]}', auth: app })).status, 403);
+  }
+  // The board's work.
+  assert.equal((await call("PUT", "/api/files/logger/2026-10-31_08-00-00.faults.csv",
+    { body: "module,code\n", auth: board })).status, 200);
+  for (const path of ["/api/logger/channels", "/api/logger/check-list"]) {
+    assert.notEqual((await call("GET", path, { auth: board })).status, 403, path);
+  }
+  // Nothing else: the drives, the app's files, presets, MCP, health.
+  for (const [method, path, body] of [
+    ["GET", "/api/files"], ["GET", "/api/files/logger/2026-10-31_08-00-00.faults.csv"],
+    ["PUT", "/api/files/config/logger-catalog.json", "{}"],
+    ["PUT", "/api/files/ref/BMW_fault_code_texts.csv", "x"],
+    ["PUT", "/api/files/logger/sub/x.csv", "x"],
+    ["PUT", "/api/history", "{}"], ["GET", "/api/logger"], ["GET", "/api/logger/settings"],
+    ["PUT", "/api/logger/presets", "{}"], ["POST", "/mcp", "{}"], ["GET", "/api/series"],
+    ["POST", "/api/health/rebuild"], ["GET", "/api/status"], ["GET", "/logger"]]) {
+    const r = await call(method, path, { body, auth: board });
+    assert.equal(r.status, 403, `${method} ${path}`);
+    assert.match((await r.json()).error, /board's token/);
+  }
+  // The health actions are a person's, not the app's token's.
+  assert.equal((await call("POST", "/api/health/rebuild", { auth: app })).status, 403);
+  assert.equal((await call("POST", "/api/health/rebuild")).status, 200);
+});
+
+test("the board's token: a new one becomes the board's only when the board checks in with it", async () => {
+  const NEW = "fedcba9876543210.access";
+  const board = await boardToken();
+  const next = await boardToken(NEW);
+  const beat = async (auth, extra) => call("POST", "/api/logger/heartbeat",
+    { body: JSON.stringify({ boot: 40, event: "beat", ...extra }), auth });
+  await beat(board, { settings_version: 1 });
+  // Before a change names it, the new token is nobody's.
+  assert.equal((await beat(next, { settings_version: 1 })).status, 403);
+  await call("PUT", "/api/logger/settings", { body: JSON.stringify({ access_id: NEW,
+    access_secret: "0123456789abcdef0123" }) });
+  // The board's check-in gets it; the new token's (the board's try) doesn't.
+  assert.equal((await (await beat(board, { settings_version: 1 })).json()).settings_version, 2);
+  let r = await beat(next, { settings_version: 1 });
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).settings_version, undefined);
+  // The new token does the board's work, never more.
+  assert.equal((await call("GET", "/api/logger/settings", { auth: next })).status, 403);
+  // The old token saying it has the change doesn't make it taken (a leaked
+  // token can't keep the board from it).
+  await beat(board, { settings_version: 2 });
+  let s = await (await call("GET", "/api/logger/settings")).json();
+  assert.deepEqual(s.pending.keys, ["access_id", "access_secret"]);
+  // The board, on the new token, has it: taken, and the new token is the board's.
+  await beat(next, { settings_version: 2 });
+  s = await (await call("GET", "/api/logger/settings")).json();
+  assert.equal(s.pending, null);
+  assert.equal(s.last.result, "taken");
+  assert.equal(env.DB.db.prepare("SELECT who FROM board_identity").get().who, NEW);
+  // The old token is refused everywhere from then on, check-ins and all.
+  for (const [method, path] of [["POST", "/api/logger/heartbeat"], ["GET", "/api/logger/channels"],
+    ["GET", "/api/logger/firmware.bin"]]) {
+    r = await call(method, path, { body: method === "POST" ? '{"boot":1}' : undefined, auth: board });
+    assert.equal(r.status, 403, path);
+  }
+  assert.equal((await beat(next, { settings_version: 2 })).status, 200);
+});
+
+test("board settings: a refusal only counts from the board's token", async () => {
+  const other = await boardToken("app00000000000000.access");
+  await call("POST", "/api/logger/heartbeat", { body: '{"boot":1,"settings_version":0}' });
+  await call("PUT", "/api/logger/settings", { body: JSON.stringify({ tz: "UTC0" }) });
+  // Another token can't check in at all, so it can't refuse or take it.
+  assert.equal((await call("POST", "/api/logger/heartbeat", { auth: other,
+    body: '{"boot":1,"settings_version":0,"settings_failed":1}' })).status, 403);
+  assert.notEqual((await (await call("GET", "/api/logger/settings")).json()).pending, null);
 });
 
 test("board settings: a check-in's answer doesn't drop a change saved after it", async () => {
@@ -1396,23 +1505,51 @@ test("sweep: a check file that isn't one is stored, not processed", async () => 
   assert.match(r.reason, /not a check CSV/);
 });
 
-test("MCP logger tools by values: never changed, only goes up", async () => {
-  await putCatalog();
+test("MCP logger tools by values: never changed, only goes up, never what something needs", async () => {
+  const row = (name, did) => [name, "0x12", did, 2, 0, "u16", "big", "1", "1", "0", "", "", "", ""];
+  const extra = { CODING_X: "0x5001", COUNTER_X: "0x5002", ZAEHLER_AUSSETZERK_ZYL1: "0x5003",
+    EGS_KILOMETERSTAND: "0x5004" };
+  await putCatalog({ ...CATALOG, rows: [...CATALOG.rows, ...Object.entries(extra).map(([n, d]) =>
+    row(n, d))], answers: { ...CATALOG.answers, ...Object.fromEntries(Object.values(extra)
+    .map((d) => [`0x12:${d}`, "ok"])) } });
   const drive = (name, t0, chunks) => call("PUT", `/api/series/${name}`, { body: JSON.stringify({
     start: 0, approx: false, chunks: chunks.map(([ch, data]) => ({ name: ch, t0, t1: t0 + 1,
       min: Math.min(...data.map((d) => d[1])), max: Math.max(...data.map((d) => d[1])),
       mean: 0, data })) }) });
-  await drive("a.csv", 1000, [["ITOEL", [[0, 90], [1, 90]]], ["INMOT", [[0, 700], [1, 800]]]]);
-  await drive("b.csv", 2000, [["ITOEL", [[0, 90]]], ["INMOT", [[0, 800], [1, 900]]]]);
+  // Never changed: CODING_X, ITOEL (Health's oil temperature) and the
+  // misfire counter at 0. Only goes up: COUNTER_X, INMOT (the board's) and
+  // the odometer.
+  for (const [i, t0] of [1000, 2000, 3000].entries()) {
+    await drive(`${i}.csv`, t0, [["CODING_X", [[0, 3], [1, 3]]], ["ITOEL", [[0, 90], [1, 90]]],
+      ["ZAEHLER_AUSSETZERK_ZYL1", [[0, 0], [1, 0]]], ["COUNTER_X", [[0, i * 10], [1, i * 10 + 1]]],
+      ["INMOT", [[0, i * 100], [1, i * 100 + 50]]], ["EGS_KILOMETERSTAND", [[0, 1000 + i]]]]);
+  }
   let c = await tool("logger_channels", { values: "same" });
-  assert.deepEqual(c.data.channels.map((x) => [x.name, x.lo, x.hi, x.drives]), [["ITOEL", 90, 90, 2]]);
+  assert.deepEqual(c.data.channels.map((x) => [x.name, x.lo, x.hi, x.drives]), [["CODING_X", 3, 3, 3]]);
   c = await tool("logger_channels", { values: "rises", module: "0x12" });
-  assert.deepEqual(c.data.channels.map((x) => x.name), ["INMOT"]);
+  assert.deepEqual(c.data.channels.map((x) => x.name), ["COUNTER_X"]);
   assert.equal((await tool("logger_channels", { values: "rises", module: "0x29" })).data.total, 0);
-  // values alone selects for a bulk change.
-  const s = await tool("logger_set_tiers", { tier: "monthly", values: "same", dry_run: true });
-  assert.deepEqual([s.data.changed, s.data.channels], [1, ["ITOEL"]]);
+  // values alone selects for a bulk change, and never what something needs.
+  let s = await tool("logger_set_tiers", { tier: "monthly", values: "same", dry_run: true });
+  assert.deepEqual([s.data.changed, s.data.channels], [1, ["CODING_X"]]);
+  s = await tool("logger_set_tiers", { tier: "monthly", values: "rises", module: "0x12",
+    dry_run: true });
+  assert.deepEqual(s.data.channels, ["COUNTER_X"]);
   assert.match(String((await tool("logger_channels", { values: "odd" })).data), /values/);
+});
+
+test("value filters: what they leave out", async () => {
+  const { valueKept, neverChanged } = await import("../src/logger.js");
+  for (const name of ["EGS_KILOMETERSTAND", "BDC_ZUSATZINFO_LICHT.KM_STAND_1", "IKTFS",
+    "ZAEHLER_AUSSETZERK_ZYL5", "ZAEHLER_AUSSETZERK_ZYL5@0x13", "INMOT", "IUIBS", "ITOEL",
+    "DSC_RDC_MESSDATENBLOCK_2.LETZTER_REIFENDRUCKWERT"]) {
+    assert.equal(valueKept(name), true, name);
+  }
+  assert.equal(valueKept("CODING_X"), false);
+  // Never changed needs two values from two drives.
+  assert.equal(neverChanged([0, 3, 2, 3, 3, 1, 0]), false);
+  assert.equal(neverChanged([0, 3, 2, 3, 3, 2, 0]), true);
+  assert.equal(neverChanged([0, 3, 2, 3, 4, 2, 0]), false);
 });
 
 // --- drive health

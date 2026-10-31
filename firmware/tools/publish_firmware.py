@@ -17,8 +17,9 @@ image in R2 has no secrets and a PC without the file can build one.
 
 Publishing uses an Access service token: CF_ACCESS_CLIENT_ID and
 CF_ACCESS_CLIENT_SECRET, else the n63read app's (Settings > Cloud), never the
-board's own: the Worker refuses firmware from the token that checks in, so a
-token taken from a board can't put code on it. The Worker is --host, else
+board's own: the Worker takes firmware only from a person's login or a token
+in its FIRMWARE_PUBLISHERS (the app's), and the board's token only does the
+board's work, so one taken from a board can't put code on it. The Worker is --host, else
 N63_WORKER_HOST, else the app's, else WORKER_HOST in logger_secrets.h. Test
 builds: --flag OTA_TEST_SILENT (never checks in, so the board must go back
 to the build before), --version to pick the name. Standard library and the
