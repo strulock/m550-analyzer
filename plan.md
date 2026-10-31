@@ -2,19 +2,25 @@
 
 Work plan for `n63read` / BMW Analyzer after 0.3.8. It comes from a full review
 of the repo (performance, security and vehicle safety, features, code quality,
-tests and docs) on 2026-10-16. Phases are in priority order. Each item names
-the file and line it starts from, as of 0.3.8.
+tests and docs) on 2026-10-16. Phases are in priority order. The file and
+line references in Phases 1-9 are as of 0.3.8 and have moved since; later
+items name functions or say when they were written.
 
 ## Where things stand
 
-- **Vehicle safety holds.** The only write to the diagnostic socket is
-  `Hsfz._send`, reached only through `Hsfz.request`, which refuses any service
-  outside `ALLOWED_SERVICES = {0x19, 0x22, 0x3E}` (`core.py:64`). Every route
-  (CLI, GUI, MCP, share host, diag) ends there, and `test_protocol.py` checks
-  that writes, resets, DTC clears and routines are refused. Nothing in this plan
-  widens that set.
-- **Tests:** 372 pass in about 65 s. Coverage is 85% (core 92%, gui 84%,
-  mcp 83%, cli 78%, update 75%, diag 73%). pyflakes is clean.
+- **Vehicle safety holds** (checked again in the review of 31 Oct). The only
+  write to the diagnostic socket is `Hsfz._send`, reached only through
+  `Hsfz.request`, which refuses any service outside
+  `ALLOWED_SERVICES = {0x19, 0x22, 0x3E}` (`core.py`). Every route (CLI, GUI,
+  MCP, share host, diag) ends there, and `test_protocol.py` checks that
+  writes, resets, DTC clears and routines are refused. The logger board's
+  `hsfz::Client::start()` refuses the same way (`firmware/test/host_test.cpp`).
+  Nothing in this plan widens that set.
+- **Tests (31 Oct):** the app 647, the Worker 103 (`cloud/test`), the
+  firmware's host tests 30 (logger) and 16 (HSFZ). Coverage was last measured
+  at 0.3.8 (85%).
+- **Live (31 Oct):** Worker version `ef1e4768` on m550.trulock.com; firmware
+  `20261031-1900-9b969d7` published for the board.
 - **On the car:** only the DME catalog has been checked. The other 11 module
   catalogs, the head-unit GPS layout, and the logging rate with module channels
   added are still unverified (`docs/in-car-checklist.md`).
@@ -529,32 +535,145 @@ after the first week of drives, and what's left.
 - [x] The page's "Never changed" and "Only goes up" filters for the MCP too:
       `logger_channels` and `logger_set_tiers` take `values` ("same",
       "rises"), so a chat can list them or move them all to a slower tier.
-- [x] From the repo review of 31 Oct:
-      - The board's token is pinned (the first to check in; a new one from
-        the page only once the board checks in with it, the old one then
-        refused) and may only check in, upload its files and fetch its
-        channels, check list and firmware. Firmware comes only from a
-        person's login or `FIRMWARE_PUBLISHERS` (the app's token); the
-        Health actions only from a person's login.
-      - "Never changed" and "Only goes up" leave out what the board, the
-        tanks, fault dates and Health read (the odometers, misfire
-        counters, tank level, tires); "only goes up" needs three drives and
-        no fall point to point, "never changed" two drives.
-      - A drive file the card wouldn't open at the start is tried again at
-        each flush (it logged into nothing before); a card that didn't
-        mount at power-on is tried again while looking for the car.
-      - A new build is kept only once it checks in (not on reaching the
-        car), its trial counts only time on Wi-Fi, it isn't installed
-        while parked in the car, and going back for a power cut is tried
-        again (3 times) rather than refused for good. A logging loop stuck
-        2 minutes restarts the board ("logging loop stuck").
-- [ ] Next from that review: `drive_health` replies past ~17 drives are cut
-      off as broken JSON (newest dropped); the batched DME reads in the app
-      stop for good after one timeout; cloud sync and History die without
-      a message on a bad saved secret or CSV; values and Health rescoring
-      read all history on each upload; the logger page's poll scans every
-      check-in; `.done`/`channels.csv` swaps not atomic; a check-in reply
-      can change `host`; the PlatformIO platform isn't pinned.
+- [x] **Repo sync, 31 Oct.** Main pulled 12 commits merged on GitHub (#132-
+      #136: the Health tab and `health.js`, fault details, the logger page);
+      34 stale remote branches pruned and 7 merged local branches deleted
+      (`logger-async`, `-empty-upload`, `-followups`, `-ota`, `-ota-fixes`,
+      `-recover-overlap`, `-tiers`).
+- [x] **Repo review, 31 Oct.** Three reviews side by side (the app, the
+      Worker, the firmware), the main findings checked in the code. Clean:
+      vehicle safety on every path (app, share host, board); every Worker
+      route behind Access, failing closed; SQL parameterized; the pages
+      escape what they show (the board's `wifi_note`, fault texts, settings
+      errors). The findings, most serious first, with what became of them
+      below and in the open items after.
+- [x] **Fixed from that review (#137), deployed and published 31 Oct:**
+      - The board's token was "whichever service token checked in last", so
+        one taken from the board could check in, take a new token meant for
+        the board and publish firmware with it, and it could otherwise do
+        anything but three things (overwrite `config/logger-catalog.json`
+        and the fault texts, call MCP, read every drive). Now pinned (the
+        first to check in; a new one from the page only once the board
+        checks in with it saying it has the change, the old one then
+        refused everywhere, `board_tokens`) and limited to checking in,
+        `PUT /api/files/logger/<name>` and its channels, check list and
+        firmware. Firmware comes only from a person's login or a token in
+        `FIRMWARE_PUBLISHERS` (the app's, `0c419ed5….access`, set in the
+        local `wrangler.jsonc`); the Health actions only from a person's
+        login (the app's token got through). Still: a token change reaches
+        the board over the old token, so revoke a leaked one in Access too.
+      - "Never changed" and "Only goes up" (page and MCP) picked the
+        odometer, the misfire counters and counters stuck at 0, so the
+        README's own example (all never-changing channels to monthly)
+        would have cost the tanks, fault dates and Health their data. They
+        now leave out what those read (`valueKept`: `PER_DRIVE`,
+        `BOARD_NEEDS`, health.js `NEEDED`, the odometers). "Only goes up"
+        needs three drives and no fall point to point (1, 5, 2, 5 passed,
+        and two battery readings that happened to rise); "never changed"
+        two drives. `channel_values` is built again when the rule changes
+        (`values_rule`).
+      - Firmware: a drive file the card wouldn't open at the start logged
+        into nothing, the check-ins saying "logging"; now tried again at
+        each flush and counted in `card_errors`. A card that didn't mount at
+        power-on is tried again every 10 s while looking for the car.
+      - Firmware updates: a build was kept on reaching the car, so one whose
+        check-ins broke could never be updated again; now only a check-in
+        keeps it, its trial counts only time on Wi-Fi, it isn't installed
+        while parked in the car, and going back because the power went is
+        tried again up to 3 times (`otatry`) rather than refused for good.
+        A logging loop stuck 2 minutes restarts the board ("logging loop
+        stuck"; a build on trial goes back).
+      - **Results:** Worker `ef1e4768`, deployed after checking D1
+        `board_identity` held the board's token (`6abc3244…`). Live: the
+        app's token passes the publisher check and is refused on Health
+        rebuild and check-ins; the board's token gets its channels and
+        firmware manifest and is refused on `/api/logger`, `/api/files` and
+        publishing. `channel_values` rebuilt in 4.3 s: 9,379 channels, 190
+        only going up (193 before). The car's cycles that afternoon (old
+        firmware): seven power-ons 18:31-18:57 UTC all checked in and 26
+        files went up, so the board's routes work under the new rules. One
+        upload (`13-46-04.faults.csv`) failed twice with "TLS: SSL - Memory
+        allocation failed" before going up on a retry. Firmware
+        `20261031-1900-9b969d7` published with the app's token.
+- [ ] **On the car, the new firmware:** see it download, install and be
+      kept on its first check-in (`ota` in the check-ins); a drive's files
+      as before; nothing in `card_errors` from the retry; a power-off before
+      a check-in gives "trying it again", not a refusal.
+- [ ] **Open from the review of 31 Oct: the Worker.**
+      - `drive_health` replies are cut at 60,000 characters (`MAX_TEXT`),
+        about 3.4 KB a drive, so past about 17 warm drives (14 now) the
+        reply is broken JSON, the newest drives dropped (oldest first).
+        Newest first with a limit, or the last N by default.
+      - Each upload works out `channel_values` over every stored chunk of
+        the file's channels (`refreshValues`), and `rescore` reads every
+        summary and rewrites every score; both grow with history and will
+        reach D1's limits (Health then goes stale without a word, as
+        `healthAfter` swallows the error). Two rescores at once can leave a
+        drive unscored. Store each piece's first and last value; rescore
+        from the changed drive on, writing only what changed.
+      - The logger page's 10 s poll: `loggerStatus` looks up `boot = ?` with
+        `json_extract` over every heartbeat (no index, 30 days kept), and
+        `withDetails` parses every drive and runs the O(n²)
+        `plausibleOdometers` each time. An index on `(boot, received)`, a
+        `fault_codes` column, the odometers cached per drive change.
+      - `list_files` sorts only R2's first 1,000 keys, so the newest
+        `logger/` files drop out first; use D1 `uploads`.
+      - `channel_series` with no start or end reads every chunk of the
+        channel; cap it or require a range.
+      - Health's date filters work in UTC days (evening drives in Chicago
+        fall on the next day); misfire increments go to whichever cell the
+        slow counter read landed in.
+      - No cross-site check on the POST routes (suspected: it matters only
+        if the Access cookie isn't SameSite); `/api/files` replies have no
+        `X-Content-Type-Options: nosniff`.
+      - Tests: the fake D1's `batch` isn't transactional; nothing on MCP
+        truncation.
+- [ ] **Open from the review of 31 Oct: the firmware.**
+      - `uploadOne` deletes the file before its `.done`: a power cut between
+        leaves a `.done` that fails as missing forever; a `.done` torn while
+        written fails as bad forever and its file is never sent. Delete the
+        `.done` first; send a bad one back through recovery.
+      - `channels.csv` and `check.csv` are swapped by remove then rename: a
+        power cut between leaves the board on the built-in table while
+        `cltag` says it has the preset (every later fetch a 304). Finish a
+        leftover `.dl` at boot, or clear `cltag` first.
+      - A check-in reply can set `host` (`settingsChange`), which the page
+        never sends and which is saved untried; refuse it there as the
+        setup page does.
+      - Up to 90 held check-ins (clock unknown) in internal RAM, about
+        100 KB, can leave TLS short; put them in PSRAM or cap by bytes. The
+        TLS "Memory allocation failed" of 31 Oct may be the same shortage.
+      - The PlatformIO platform is `stable`, not a pinned release, so each
+        publish may take a different core; pin it.
+      - The watchdog covers the logging loop only, not the check-in or
+        upload tasks.
+      - Tests: `DriveFile`, `recoverDrives`, the upload's delete order and
+        the update trial's wiring live in `main.cpp` with no host tests; a
+        small file interface in `lib/logger` would let them in.
+- [ ] **Open from the review of 31 Oct: the app.**
+      - One timeout from a DME turns its batched reads off for the session
+        (`_prefetch`'s `batch_off`, never cleared), from about 6 to 1.2
+        cycles a second. Off for good only on a misaligned reply or a
+        refusal; back off and try again after a timeout.
+      - A saved cloud secret from another PC or Windows user makes
+        `cloud.unprotect` raise: Settings won't open and `AutoSync` dies;
+        `run_once` catches only `CloudError`/`OSError`, so a `csv.Error`
+        from `series.build` ends the sync thread at "syncing..."; History's
+        scan catches only `OSError` and stays at "reading the logs
+        folder...". Catch broadly and record it; `unprotect` returns "".
+      - `_read_record` doesn't catch an HSFZ NACK (0x0045 "not ready" after
+        ignition-on), so a module read ends the session or reconnects.
+      - Two scans at once share one `.tmp` (`history.scan` runs from sync,
+        History, MCP and the CLI); one `write_atomic` with `mkstemp`.
+      - While logging, any exception counts as a lost connection, so a bug
+        in a cycle reconnects every 2 s for good; reconnect only on
+        connection errors.
+      - Smaller: Start logging after the connection dropped in the save
+        dialog; the share host's lend thread dies on an empty payload; the
+        MCP server stops on `params` that isn't an object; queued map tiles
+        still tried one by one offline; `cloud.protect` falls back to plain
+        text silently; `tester.json` world-readable on Linux.
+      - Tests: a forbidden service sent through the share host's lend path.
 - [ ] Still open from the review of 29 Oct: an Ed25519 signature on the firmware
       image, checked by the board; provision.py and C escapes;
       `logs/logger/` names; the Wi-Fi terminal without a password.
