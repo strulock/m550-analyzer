@@ -7,7 +7,7 @@ import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 
-import worker, { handle, logWindow, parseCsv, resetJwksCache, rpc, safeKey, TOOLS }
+import worker, { handle, healthTool, logWindow, parseCsv, resetJwksCache, rpc, safeKey, TOOLS }
   from "../src/worker.js";
 
 const TEAM = "https://example-team.cloudflareaccess.com";
@@ -1554,6 +1554,30 @@ test("value filters: what they leave out", async () => {
 
 // --- drive health
 
+test("drive health in MCP: never more than the reply holds, the newest kept", async () => {
+  // 40 drives of 40 channels, about 4 KB a drive: 50 asked, as many as fit.
+  const channels = Array.from({ length: 40 }, (_, k) => ({ key: `C${k}`, label: `Channel ${k}`,
+    group: "temps", unit: "°C" }));
+  const drives = Array.from({ length: 40 }, (_, i) => ({ drive: `d${String(i).padStart(2, "0")}.csv`,
+    start: new Date(Date.UTC(2026, 8, 1 + i)).toISOString(), warm_min: 12.5, overall: 1.234,
+    level: 0, excluded: false }));
+  const scores = Object.fromEntries(channels.map((c) => [c.key,
+    drives.map(() => [1.23456, 12, 95.4321, 90.1234, 99.8765])]));
+  const o = { settings: {}, groups: [], channels, drives, scores };
+  const t = healthTool(o, { limit: 50 });
+  const text = JSON.stringify(t);
+  assert.ok(text.length <= 60000, `${text.length}`);
+  assert.ok(t.shown > 5 && t.shown < 40, `${t.shown}`);
+  assert.equal(t.total, 40);
+  assert.equal(t.drives[0].drive, "d39.csv");                 // the newest kept
+  assert.equal(t.drives.length, t.shown);
+  assert.match(t.older, new RegExp(`^${40 - t.shown} older`));
+  // The default: ten.
+  assert.equal(healthTool(o, {}).shown, 10);
+  assert.equal(healthTool(o, { limit: 0 }).shown, 10);
+  assert.equal(healthTool(o, { limit: -3 }).shown, 1);
+});
+
 test("drive health: scored as series arrive, a cell's detail, left out by hand, rebuilt", async () => {
   // Five warm drives at 1,500 rpm and ~40 % load, the fifth's bank 1 trim 8 % rich.
   const put = (name, t0, trim) => {
@@ -1589,10 +1613,19 @@ test("drive health: scored as series arrive, a cell's detail, left out by hand, 
   assert.equal(c.visits.length, 1);
   assert.equal((await call("GET", "/api/health/cell?drive=h4.csv&channel=NOPE")).status, 404);
 
-  // The MCP's view: flagged channels only.
-  const t = await toolData("drive_health", { flagged_only: true });
+  // The MCP's view: flagged channels only, the newest drive first.
+  let t = await toolData("drive_health", { flagged_only: true });
   assert.deepEqual(t.channels.map((x) => x.key), ["IMUL1"]);
-  assert.equal(t.drives[4].channels.IMUL1.level, 2);
+  assert.deepEqual(t.drives.map((d) => d.drive), ["h4.csv", "h3.csv", "h2.csv", "h1.csv", "h0.csv"]);
+  assert.equal(t.drives[0].channels.IMUL1.level, 2);
+  assert.deepEqual([t.total, t.shown, t.older], [5, 5, undefined]);
+  // A limit: the newest drives; flagged among those shown.
+  t = await toolData("drive_health", { limit: 2 });
+  assert.deepEqual(t.drives.map((d) => d.drive), ["h4.csv", "h3.csv"]);
+  assert.deepEqual([t.total, t.shown], [5, 2]);
+  assert.match(t.older, /^3 older drives/);
+  assert.deepEqual((await toolData("drive_health", { limit: 1, to: "2026-10-03",
+    flagged_only: true })).channels, []);
   assert.equal((await toolData("drive_health", { drive: "h4.csv", channel: "IMUL1" }))
     .cells["2.2"].z > 3, true);
 

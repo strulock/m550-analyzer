@@ -599,11 +599,15 @@ after the first week of drives, and what's left.
       kept on its first check-in (`ota` in the check-ins); a drive's files
       as before; nothing in `card_errors` from the retry; a power-off before
       a check-in gives "trying it again", not a refusal.
+- [x] `drive_health` replies were cut at 60,000 characters (`MAX_TEXT`),
+      about 3.4 KB a drive, so past about 17 warm drives (14 on 31 Oct) the
+      reply would have been broken JSON with the newest drives lost (they
+      were listed oldest first). Now newest first, the last `limit` (10 by
+      default, up to 50), the oldest shown dropped until the reply fits, with
+      `total`, `shown` and how to reach older ones (`to`).
 - [ ] **Open from the review of 31 Oct: the Worker.**
-      - `drive_health` replies are cut at 60,000 characters (`MAX_TEXT`),
-        about 3.4 KB a drive, so past about 17 warm drives (14 now) the
-        reply is broken JSON, the newest drives dropped (oldest first).
-        Newest first with a limit, or the last N by default.
+      - Other tools' replies over `MAX_TEXT` are still cut mid-JSON
+        (`rpc`); a valid "cut" reply, or limits like `drive_health`'s.
       - Each upload works out `channel_values` over every stored chunk of
         the file's channels (`refreshValues`), and `rescore` reads every
         summary and rewrites every score; both grow with history and will
