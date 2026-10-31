@@ -619,8 +619,11 @@ after the first week of drives, and what's left.
       poll: an index on `heartbeats (boot, received)` for the power-on's
       fault codes and Wi-Fi note (it scanned every check-in), and the
       odometers behind the fault dates kept until the drives change.
-- [ ] After deploying that: run `POST /api/logger/values/backfill` until
-      `next` is null (about 60 requests).
+- [x] Deployed 31 Oct (Worker `327f9690`) and backfilled: 245,747 pieces
+      in 62 requests (34 s), none left without v0, v1 and falls. After it:
+      the logger page's status about 1 s, values 0.4 s, Health 0.2 s; 202
+      channels only going up, every one in 3 drives or more with no fall
+      (190 that morning; today's drives gave more of them a third).
 - [ ] **Open from the review of 31 Oct: the Worker.**
       - Other tools' replies over `MAX_TEXT` are still cut mid-JSON
         (`rpc`); a valid "cut" reply, or limits like `drive_health`'s.
