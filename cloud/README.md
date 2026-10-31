@@ -11,8 +11,10 @@ serves it to Claude from anywhere:
   `find_events` (over one stored log), `list_channels`, `channel_series`,
   `list_templates`, `logger_status`, `tank_history`, `drive_faults` (one
   logger drive's fault reads with their texts), `channel_check` (the full
-  channel check, and what each module answers) and `drive_health` (each
-  drive's health scores, or one drive and channel's RPM x load cells). The
+  channel check, and what each module answers) and `drive_health` (the
+  drives' health scores, newest first: the last `limit`, 10 by default and
+  up to 50, as many as fit in a reply, with `total`; or one drive and
+  channel's RPM x load cells). The
   `logger_*` tools read
   and change the logger's channel presets: `logger_channels` (each channel's
   tier, filtered by module, identifier range, name, tier, or `values`:

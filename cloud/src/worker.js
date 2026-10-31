@@ -1252,7 +1252,9 @@ export const TOOLS = [
       "RPM x load cells against the same channel's last 10 healthy drives: a robust " +
       "z-score per channel (0 normal; |score| >= 2 watch, >= 3 alert), the drive's value " +
       "and the normal band (both sample-weighted over the cells scored). Without drive: " +
-      "every drive's scores (newest last; narrow with from, to, group, flagged_only). With " +
+      "the drives' scores, newest first: the last `limit` (default 10, up to 50, as many " +
+      "as fit), `total` saying how many there are (narrow with from, to, group, " +
+      "flagged_only; to reaches older ones). With " +
       "drive and channel: that drive's RPM x load cells (value, baseline median, spread, " +
       "z, samples, and the longest time in each cell, for the raw log).",
     inputSchema: { type: "object", properties: {
@@ -1263,7 +1265,8 @@ export const TOOLS = [
       from: { type: "string", description: "ISO date: drives from" },
       to: { type: "string", description: "ISO date: drives up to" },
       flagged_only: { type: "boolean", description: "Only channels at watch or alert in " +
-        "some drive shown" } } },
+        "some drive shown" },
+      limit: { type: "integer", description: "Drives, newest first: default 10, up to 50" } } },
   },
   {
     name: "drive_faults",
@@ -1532,21 +1535,45 @@ export async function rpc(env, msg) {
   }
 }
 
+const HEALTH_DRIVES = 10, HEALTH_DRIVES_MAX = 50;
+
 /** The overview as drive_health gives it: per drive, each channel's score
- * and level with its value and band, narrowed as asked. */
-function healthTool(o, a) {
+ * and level with its value and band, narrowed as asked. The newest drives
+ * first, `limit` of them (HEALTH_DRIVES unless asked), and never more than
+ * the reply holds: a drive is about 3.4 KB, and a reply cut at MAX_TEXT was
+ * broken JSON past 17 drives, the newest the ones lost. `total` says how
+ * many there are; from and to reach older ones. */
+export function healthTool(o, a) {
+  const limit = Math.max(1, Math.min(HEALTH_DRIVES_MAX, Math.floor(Number(a.limit)) ||
+    HEALTH_DRIVES));
+  const idx = o.drives.map((_, i) => i).reverse().slice(0, limit);
   const keep = o.channels.filter((c) => !a.group || c.group === a.group).filter((c) =>
-    !a.flagged_only || o.scores[c.key].some((s) => s && levelOf(c.group, s[0]) >= 1));
-  return {
+    !a.flagged_only || idx.some((i) => {
+      const s = o.scores[c.key][i];
+      return s && levelOf(c.group, s[0]) >= 1;
+    }));
+  const out = {
     settings: o.settings, groups: o.groups,
     channels: keep.map(({ key, label, group, unit }) => ({ key, label, group, unit })),
-    drives: o.drives.map((d, i) => ({ ...d, channels: Object.fromEntries(keep
+    total: o.drives.length,
+    drives: idx.map((i) => ({ ...o.drives[i], channels: Object.fromEntries(keep
       .filter((c) => o.scores[c.key][i])
       .map((c) => {
         const [score, cells, value, low, high] = o.scores[c.key][i];
         return [c.key, { score, level: levelOf(c.group, score), cells, value, low, high }];
       })) })),
   };
+  // The oldest shown go until it fits (with room for what's added below).
+  let size = JSON.stringify(out).length + 200;
+  while (out.drives.length > 1 && size > MAX_TEXT) {
+    size -= JSON.stringify(out.drives.pop()).length + 1;
+  }
+  out.shown = out.drives.length;
+  if (out.shown < out.total) {
+    out.older = `${out.total - out.shown} older drives not shown: ask with to (a date) for ` +
+      "them, or a group to fit more";
+  }
+  return out;
 }
 
 /** One logger drive's fault reads (its .faults.csv), each module's read
