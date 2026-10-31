@@ -672,19 +672,22 @@ after the first week of drives, and what's left.
       and the thread goes on. A log CSV that can't be read (`csv.Error`) is
       noted and the rest still go up. History's scan shows any error
       instead of staying at "reading the logs folder...".
+- [x] **More of the app, from the review of 31 Oct.** A module read the
+      gateway turned away (an HSFZ refusal, 0x0045 "not ready" just after
+      ignition-on) got out of `read()` and ended a watch or made a log
+      reconnect; now that module rests as a silent one does. Every save used
+      `path + ".tmp"`, so two History scans at once (sync, the window, MCP,
+      the CLI) shared it; now `core.atomic_write` gives each writer its own
+      (mkstemp: this user's only on Linux, `tester.json` too) and removes it
+      if the write fails. While logging, only a connection error (OSError,
+      HsfzError) reconnects; anything else is a fault in the cycle, said and
+      the log stopped, not reconnected for every 2 s for good.
 - [ ] **Open from the review of 31 Oct: the app.**
-      - `_read_record` doesn't catch an HSFZ NACK (0x0045 "not ready" after
-        ignition-on), so a module read ends the session or reconnects.
-      - Two scans at once share one `.tmp` (`history.scan` runs from sync,
-        History, MCP and the CLI); one `write_atomic` with `mkstemp`.
-      - While logging, any exception counts as a lost connection, so a bug
-        in a cycle reconnects every 2 s for good; reconnect only on
-        connection errors.
       - Smaller: Start logging after the connection dropped in the save
         dialog; the share host's lend thread dies on an empty payload; the
         MCP server stops on `params` that isn't an object; queued map tiles
         still tried one by one offline; `cloud.protect` falls back to plain
-        text silently; `tester.json` world-readable on Linux.
+        text silently.
       - Tests: a forbidden service sent through the share host's lend path.
 - [ ] Still open from the review of 29 Oct: an Ed25519 signature on the firmware
       image, checked by the board; provision.py and C escapes;

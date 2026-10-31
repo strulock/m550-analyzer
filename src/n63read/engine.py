@@ -300,6 +300,13 @@ class Session(threading.Thread):
                 except Exception as e:                              # noqa: BLE001
                     if self._stop_event.is_set() or not connected:
                         raise
+                    # Only the connection going (a socket error, the car or
+                    # the shared tester gone or silent) is worth reconnecting
+                    # for; anything else is a fault in the cycle itself, which
+                    # reconnecting would only repeat every 2 s for good: said
+                    # and the log stopped, as before it was connected.
+                    if not isinstance(e, (OSError, core.HsfzError)):
+                        raise
                     # The process we borrowed from has stopped: carry on by
                     # taking the car over, at once. Ours dropped (a cable
                     # bump, the car dozing off): while logging, mark the gap,

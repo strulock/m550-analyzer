@@ -156,3 +156,25 @@ def test_a_save_is_tried_again_while_windows_holds_the_file(tmp_path, monkeypatc
     monkeypatch.setattr(core.os, "replace", lambda s, d: (_ for _ in ()).throw(PermissionError()))
     with pytest.raises(PermissionError):
         core.save_settings({"lang": "en"}, path)
+    # A save that fails leaves no temporary file behind, and the old one stands.
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["settings.json"]
+    assert core.load_settings(path)["lang"] == "de"
+
+
+def test_two_writers_at_once_each_have_their_own_temporary_file(tmp_path):
+    # Every save used path + ".tmp": two History scans at once (the sync, the
+    # window, MCP) wrote the same one, and one's replace failed or the file
+    # came out of both.
+    path = str(tmp_path / "drives.csv")
+    with core.atomic_write(path) as a, core.atomic_write(path) as b:
+        assert a.name != b.name
+        a.write("first\n")
+        b.write("second\n")
+    assert open(path).read() == "first\n"                   # whole: the last in (a, closed after b)
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["drives.csv"]
+    with pytest.raises(ValueError):
+        with core.atomic_write(path) as f:
+            f.write("half")
+            raise ValueError("stopped")
+    assert open(path).read() == "first\n"
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["drives.csv"]

@@ -31,6 +31,7 @@ import re
 import socket
 import struct
 import sys
+import tempfile
 import threading
 import time
 
@@ -119,6 +120,27 @@ def replace_file(tmp, path, tries=10):
             if i == tries - 1:
                 raise
             time.sleep(0.05)
+
+
+@contextlib.contextmanager
+def atomic_write(path, mode="w", **kwargs):
+    """A file to write `path` through: a temporary one beside it, put in its
+    place (replace_file) once the block ends, or removed if it raised. Each
+    writer gets its own: they all used `path + ".tmp"`, so two at once (a
+    History scan from the sync, the window, MCP and the CLI) shared it, and
+    one's replace failed or the file came out of both. Readable by this
+    user only on Linux and macOS (mkstemp)."""
+    folder = os.path.dirname(path) or "."
+    fd, tmp = tempfile.mkstemp(dir=folder, prefix=os.path.basename(path) + ".",
+                               suffix=".tmp")
+    try:
+        with os.fdopen(fd, mode, **kwargs) as f:
+            yield f
+        replace_file(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(tmp)
+        raise
 
 
 def resource_path(name):
@@ -2082,6 +2104,16 @@ class ChannelReader:
             self.quiet_until[module] = now + NO_ANSWER_BACKOFF
             self.cache.pop(key, None)
             return
+        except (ConnectionLost, ConnectionError):
+            raise
+        except HsfzError:
+            # The gateway turning the request away (0x0045 "diagnostic
+            # application not ready" just after ignition-on) or a frame it
+            # couldn't take: that module rests as a silent one does. It got
+            # out of read() and ended the session, or a log reconnected.
+            self.quiet_until[module] = now + NO_ANSWER_BACKOFF
+            self.cache.pop(key, None)
+            return
         self.heard.add(module)
         self.cache[key] = decode_record(raw, self.layouts[key])
 
@@ -2297,10 +2329,8 @@ def load_settings(path=None):
 def save_settings(settings, path=None):
     path = path or settings_path()
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with atomic_write(path, encoding="utf-8") as f:
         json.dump(settings, f, indent=1)
-    replace_file(tmp, path)
 
 
 # ---------------------------------------------------------------- templates
@@ -2366,10 +2396,8 @@ def save_availability(avail, path=None):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     data = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
             "identifiers": {_avail_key(m, d): s for (m, d), s in sorted(avail.items())}}
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with atomic_write(path, encoding="utf-8") as f:
         json.dump(data, f, indent=0)
-    replace_file(tmp, path)
 
 
 # A check's results, as `n63read check --out` and the app's Check car now

@@ -57,11 +57,9 @@ class Host:
         threading.Thread(target=self._accept, daemon=True).start()
         path = state_path()
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        tmp = path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
+        with core.atomic_write(path, encoding="utf-8") as f:   # this user's only
             json.dump({"port": port, "token": self.token, "ip": self.ip,
                        "pid": os.getpid()}, f)
-        core.replace_file(tmp, path)
         return self
 
     def stop(self):
