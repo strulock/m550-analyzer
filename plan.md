@@ -639,23 +639,28 @@ after the first week of drives, and what's left.
         `X-Content-Type-Options: nosniff`.
       - Tests: the fake D1's `batch` isn't transactional; nothing on MCP
         truncation.
+- [x] **The firmware, from the review of 31 Oct (built, not yet
+      published: after `20261031-1900-9b969d7` proves itself in the car).**
+      - An upload deleted the file before its `.done`, so a power cut
+        between left a `.done` that failed as missing for good; now the
+        `.done` goes first. A `.done` torn as it was written failed as bad
+        for good and its file was never sent; now the file is hashed again
+        (`closeLeftover`, as a power cut's leftovers are) and sent next
+        round, and a `.done` with no file is removed.
+      - `channels.csv` went in by remove then rename, so a power cut between
+        left no file while `cltag` named the preset, and every check got a
+        304 (the built-in table, without a word). A board with no
+        `channels.csv` at power-on now forgets `cltag` and downloads it
+        again. (`check.csv` already heals: the board fetches it again when
+        it's missing.)
+      - A check-in reply can't set `host` (refused whole, "the Worker's host
+        changes over USB or the setup page only"): it was saved untried.
+      - Held check-ins (clock unknown, up to 90) live in PSRAM, not the
+        internal RAM a TLS handshake needs (the "Memory allocation failed"
+        of 31 Oct).
+      - `platformio.ini` names pioarduino `55.03.312-1` (what `stable` gave
+        this PC), not `stable`.
 - [ ] **Open from the review of 31 Oct: the firmware.**
-      - `uploadOne` deletes the file before its `.done`: a power cut between
-        leaves a `.done` that fails as missing forever; a `.done` torn while
-        written fails as bad forever and its file is never sent. Delete the
-        `.done` first; send a bad one back through recovery.
-      - `channels.csv` and `check.csv` are swapped by remove then rename: a
-        power cut between leaves the board on the built-in table while
-        `cltag` says it has the preset (every later fetch a 304). Finish a
-        leftover `.dl` at boot, or clear `cltag` first.
-      - A check-in reply can set `host` (`settingsChange`), which the page
-        never sends and which is saved untried; refuse it there as the
-        setup page does.
-      - Up to 90 held check-ins (clock unknown) in internal RAM, about
-        100 KB, can leave TLS short; put them in PSRAM or cap by bytes. The
-        TLS "Memory allocation failed" of 31 Oct may be the same shortage.
-      - The PlatformIO platform is `stable`, not a pinned release, so each
-        publish may take a different core; pin it.
       - The watchdog covers the logging loop only, not the check-in or
         upload tasks.
       - Tests: `DriveFile`, `recoverDrives`, the upload's delete order and

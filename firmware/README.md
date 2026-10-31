@@ -64,7 +64,8 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
 
    After that, the logger page's **Board settings** changes the networks,
    the token, the access point's password and the time zone (not the
-   host): the Worker hands the change to the board in its next check-in's
+   host, which the board refuses from a check-in's reply: it would be saved
+   untried): the Worker hands the change to the board in its next check-in's
    reply and drops it once the board says it has it. A new token is tried
    with a check-in before the board keeps it, so a wrong one can't lock it
    out; make the new one, wait for "taken", then revoke the old. A change
@@ -95,7 +96,10 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    (fast, medium and slow only) to copy to the card's root or send over Wi-Fi:
    `python firmware/tools/send_channels.py <address> channels.csv`. A file sent
    that way stays until the active preset changes. Without a file the board
-   reads its built-in fast and medium tiers.
+   reads its built-in fast and medium tiers; a board that finds none at
+   power-on (a power cut as a new one replaced the old) forgets the
+   preset's ETag, so the next check downloads it again rather than being
+   told it's unchanged.
 3. **Flash.** `python firmware/tools/publish_firmware.py --usb COM4` (the
    board's port) builds it with a version and flashes it by USB; from then
    on, updates come over the air (below). Uploading from the PlatformIO IDE
@@ -175,10 +179,13 @@ and whatever a preset says, it reads the selector, engine speed, speed,
 `ITKUM` and `IUIBS` at least medium (`logger.js` `BOARD_NEEDS`). The
 check-ins report the selector (`gear`: P R N D M). Whenever Wi-Fi is up, the other core uploads
 finished files to `logger/` on the Worker, compares the SHA-256 the Worker
-reports with the board's own, and only then deletes them. The board's own
+reports with the board's own, and only then deletes them, the `.done`
+first (a power cut between leaves a file the next boot closes and sends
+again, not a `.done` with no file). The board's own hash
 is the `.done`'s, written as the file closed, or else that of the bytes it
 just sent, all of the file (a `.done` from the power-cut recovery was once
-wrong where the file wasn't). A file that fails (a 200 with another hash, or the
+wrong where the file wasn't). A `.done` torn as it was written has its file
+hashed again and sent at the next round; one without its file is removed. A file that fails (a 200 with another hash, or the
 Worker refusing or failing on it: 400, 413, 5xx) is tried again at the next
 round, and the files after it still go; after three failures it's tried
 every eighth round (about 2 minutes). A failure on the way there (no memory
@@ -338,8 +345,9 @@ tasks can't both see room for one session and both start. A
 failed one is skipped. Each is a new TLS connection,
 about 2 MB an hour on a phone hotspot. With no Wi-Fi, each check-in goes to
 `beats.jsonl` on the card instead (made before the board knows the time,
-from the internet or the car, they're held in memory, up to 15 minutes'
-worth, and dated and written once it does), up to about 12
+from the internet or the car, they're held in PSRAM, up to 15 minutes'
+worth, out of the internal RAM a TLS handshake needs, and dated and written
+once it does), up to about 12
 hours' worth, and at the next connection they're sent 48 KB at a time
 (`POST /api/logger/heartbeats`), filed under the time each was made, and
 the file deleted. `logger_status` (MCP), `GET /api/logger` and the logger
@@ -380,6 +388,9 @@ in, upload its files and fetch its channels, check list and firmware
 (cloud/README.md), so a token taken from a board can't put code on it; it
 refuses writes to the firmware's R2 keys through `/api/files/`. The build never includes
 `logger_secrets.h` (`LOGGER_NO_SECRETS`). The Worker keeps one build.
+`platformio.ini` names a pioarduino release (55.03.312-1, Arduino-ESP32
+3.3), not "stable", so two publishes build on the same core and its update
+and rollback code; move it on purpose and bench-test an update after.
 
 The board asks for it soon after Wi-Fi comes up and every 10 minutes. For a
 version other than its own (an older one too: publishing the old build is

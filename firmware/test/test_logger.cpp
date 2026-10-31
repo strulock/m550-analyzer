@@ -1066,6 +1066,10 @@ static void test_settings() {
   CHECK(settingsChange(reply, s, c) && c.bad == "wifi_pass");
   reply = "{\"settings_version\":6,\"set_wifi_pass\":\"zz\"}";
   CHECK(settingsChange(reply, s, c) && c.bad == "wifi_pass");
+  // Never the host from a reply, however good it looks: the whole change refused.
+  reply = "{\"settings_version\":7,\"set_tz\":\"" + hex("UTC0") + "\",\"set_host\":\"" +
+          hex("elsewhere.example.com") + "\"}";
+  CHECK(settingsChange(reply, s, c) && c.bad == "host" && c.next.host == s.host);
 }
 
 // Why the board isn't on Wi-Fi: not in the scan, or seen and refused.
