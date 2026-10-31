@@ -495,10 +495,8 @@ def scan(logs=None, progress=None):
         new[rel] = entry
         if progress:
             progress(i, len(files))
-    tmp = index_path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with core.atomic_write(index_path, encoding="utf-8") as f:
         json.dump({"version": INDEX_VERSION, "files": new}, f)
-    core.replace_file(tmp, index_path)
 
     drives = sorted((e["drive"] for e in new.values() if e.get("drive")),
                     key=lambda d: d["start"])
@@ -509,13 +507,11 @@ def scan(logs=None, progress=None):
 
 
 def _write(path, fields, rows):
-    tmp = path + ".tmp"
-    with open(tmp, "w", newline="", encoding="utf-8") as f:
+    with core.atomic_write(path, newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         w.writeheader()
         for row in rows:
             w.writerow({k: "" if row.get(k) is None else row.get(k) for k in fields})
-    core.replace_file(tmp, path)
 
 
 def label(key):

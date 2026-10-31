@@ -80,6 +80,19 @@ def test_a_module_that_answered_is_not_reported_silent_later():
     assert 0x63 in r.quiet_until and 0x63 in r.heard
 
 
+def test_a_gateway_refusal_rests_the_module_instead_of_ending_the_read():
+    # 0x0045 "diagnostic application not ready" just after ignition-on got
+    # out of read(): a watch ended, a log reconnected, MCP read_channels failed.
+    h = FakeH({GPS: core.HsfzError("the car refused the request: not ready")})
+    r = core.ChannelReader(LAYOUTS, 0x12)
+    got = r.read(h, [LAT], now=100.0)
+    assert got[LAT[0]] == (None, "", "module not answering")
+    assert r.quiet_until[0x63] > 100.0
+    h.answers[GPS] = core.ConnectionLost("closed")      # the connection itself: passed on
+    with pytest.raises(core.ConnectionLost):
+        r.read(h, [LAT], now=200.0)
+
+
 def test_decode_record_unsized_strings_and_unknown_types():
     fields = [{"ARG": "a", "DATENTYP": "unsigned char"},
               {"ARG": "b", "DATENTYP": "string"},

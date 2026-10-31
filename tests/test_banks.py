@@ -193,6 +193,36 @@ def test_the_app_log_carries_on_after_a_dropped_connection(tmp_path, car):
     assert not [m for m in msgs if m[0] == "error"]       # not treated as a failure
 
 
+def test_a_fault_in_the_cycle_while_logging_is_said_not_reconnected_for(tmp_path, car,
+                                                                         monkeypatch):
+    # Anything that went wrong while logging counted as a lost connection, so
+    # a bug in a cycle reconnected every 2 s for good, the journal saying only
+    # "connection_lost".
+    gui = pytest.importorskip("n63read.gui")
+    real, calls = core.ChannelReader.read, []
+
+    def broken(self, h, chans, now=None):
+        calls.append(1)
+        if len(calls) > 3:
+            raise KeyError("a bug")
+        return real(self, h, chans, now)
+    monkeypatch.setattr(core.ChannelReader, "read", broken)
+    q = queue.Queue()
+    p = gui.Poller("127.0.0.1", 0x12, 0xF4, 1.0, q)
+    p.interval = 0.02
+    p.set_channels([("ILAG2", int(DME["ILAG2"]["ID"], 16), DME["ILAG2"])])
+    p.start_log(str(tmp_path / "drive.csv"))
+    p.start()
+    p.join(10)
+    p.stop()
+    msgs = []
+    while not q.empty():
+        msgs.append(q.get())
+    assert [m for m in msgs if m[0] == "error" and "a bug" in m[1]]
+    assert ("status", "reconnecting", p) not in msgs
+    assert car.connections == 1
+
+
 def test_without_a_log_a_dropped_connection_is_an_error(car):
     gui = pytest.importorskip("n63read.gui")
     q = queue.Queue()

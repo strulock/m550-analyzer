@@ -144,10 +144,8 @@ def load_state(path=None):
 def save_state(state, path=None):
     path = path or state_path()
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with core.atomic_write(path, encoding="utf-8") as f:
         json.dump(state, f)
-    core.replace_file(tmp, path)
 
 
 # ------------------------------------------------------------ requests
