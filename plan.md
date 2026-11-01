@@ -735,3 +735,20 @@ after the first week of drives, and what's left.
       bins (RPM 400-900-1,500-2,000-2,500-3,000-4,000-8,000; load 0-20-35-
       50-70-100 %) suit the drives logged; misfire rates need longer drives
       (1,000 revolutions a cell) before they score. Then more channels.
+- [x] **The Board tab (1 Nov):** a tab beside Health with the board's
+      firmware (running, published, where an update is; publish a build from
+      the page, its version read from the image) and its card (free space,
+      errors, files waiting), and commands sent in the check-ins' replies:
+      list a folder (a file browser), delete a file or folder, format the
+      card, upload now, update now, restart; `board_command` and
+      `board_commands` in MCP. Deletes, formats and restarts wait for the
+      board to be between drives; a command is kept done in the flash before
+      its work, so none runs twice. The Worker now refuses an image that
+      doesn't hold its version (the board would take it again and again).
+      The card in the car showed 807 MB free and 7 errors on 1 Nov: an old
+      phone's card, still full of its data.
+- [ ] **On the car, the Board tab:** list `/`, and see what fills the card;
+      delete the old phone's folders (or format it, once nothing waits to
+      upload) and watch `card_errors`; Update now with nothing new
+      published says so; a format between drives, the channel file back
+      within a minute.

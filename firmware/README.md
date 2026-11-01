@@ -386,7 +386,9 @@ Worker takes firmware only from a person's login or a token in its
 `FIRMWARE_PUBLISHERS` (the app's), and the board's own token may only check
 in, upload its files and fetch its channels, check list and firmware
 (cloud/README.md), so a token taken from a board can't put code on it; it
-refuses writes to the firmware's R2 keys through `/api/files/`. The build never includes
+refuses writes to the firmware's R2 keys through `/api/files/`, and an
+image that doesn't hold its version (built as another, which the board
+would install again and again). The Board tab publishes a build too. The build never includes
 `logger_secrets.h` (`LOGGER_NO_SECRETS`). The Worker keeps one build.
 `platformio.ini` names a pioarduino release (55.03.312-1, Arduino-ESP32
 3.3), not "stable", so two publishes build on the same core and its update
@@ -419,6 +421,38 @@ the new build); publish with `--flag OTA_TEST_SILENT` (a build that never
 checks in: after 5 minutes it goes back); publish a build with bytes changed
 in its middle (it downloads, its hash being the one published, but the
 install's image check refuses it and it stays on its build).
+
+### Commands from the Board tab
+
+The logger page's Board tab (and MCP's `board_command`) sends the board
+commands in its check-ins' replies (`cmd_id`, `cmd`, `cmd_arg` in hex;
+`lib/logger/command.h`), one at a time, the oldest first:
+
+- `list`: a folder on the card, its first 200 entries (name, size, folder)
+  and how many there are, with the card's type, size and use, sent to
+  `POST /api/logger/card` by the upload task (tried again every 30 s, five
+  times). Any time, a drive too.
+- `upload`: the waiting files now. `update`: look for firmware at once
+  rather than in up to 10 minutes, and install it as soon as the board isn't
+  logging or parked (not after the idle minute, nor waiting for uploads). A
+  "dev" build refuses it.
+- `delete`: a file, or a folder and everything in it. `format`: the whole
+  card (FAT, FatFs's `f_mkfs` with a 32 KB buffer in PSRAM; a card that
+  wouldn't mount is mounted with `format_if_empty` first), refused while
+  files wait to upload unless the argument is `discard`. `restart`. These
+  wait until the board is between drives (waiting for the link or looking
+  for the car: core 1's loop, so no drive starts meanwhile); a delete or
+  format then waits for the upload task to let go of the card (`cardHold`;
+  2 minutes at most). After either, `drives/` is made again and a missing
+  firmware image, check list or channel file is forgotten, the channel
+  file downloaded again at once.
+
+The board keeps the last command done in its flash (`cmddone`, `cmdok`,
+`cmdres`; a format or restart before its work), so none runs twice, and
+its check-ins say which and how (`cmd_done`, `cmd_ok`, `cmd_result`) and
+why the next waits (`cmd_next`, `cmd_next_why`). One not started yet is
+dropped once a reply no longer carries it (taken back on the page). A
+malformed one fails at once with why.
 
 ### Full channel sweep
 

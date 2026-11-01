@@ -1,7 +1,8 @@
 // Host test of lib/logger: SHA-256, the channel file, decoding, the read
 // plan, bursts, the fall-back to one request at a time, the CSV layout, the
 // fault reads, the car's clock, the firmware manifest and update start-up,
-// the upload rules and kept check-ins, and the full channel check.
+// the upload rules and kept check-ins, the full channel check, and the
+// Board tab's commands.
 //   cd firmware && g++ -std=c++17 -Ilib/logger test/test_logger.cpp -o test_logger && ./test_logger
 // Run one case by name: ./test_logger decode
 #include <cmath>
@@ -12,6 +13,7 @@
 
 #include "carcheck.h"
 #include "carclock.h"
+#include "command.h"
 #include "channels.h"
 #include "csvlog.h"
 #include "faults.h"
@@ -1095,7 +1097,64 @@ static void test_wifi_note() {
   CHECK(wifiNote(-1, {home, none}) == "Home: join failed: no answer (the scan failed)");
 }
 
+static void test_commands() {
+  // Paths as the Worker allows them.
+  CHECK(cardPath("/"));
+  CHECK(cardPath("/drives"));
+  CHECK(cardPath("/DCIM/Camera/IMG 0001.jpg"));
+  CHECK(!cardPath(""));
+  CHECK(!cardPath("drives"));
+  CHECK(!cardPath("/drives/"));
+  CHECK(!cardPath("/a//b"));
+  CHECK(!cardPath("/a/../b"));
+  CHECK(!cardPath("/.."));
+  CHECK(cardPath("/..x"));                        // a name that starts with dots is a name
+  CHECK(!cardPath("/a\\b"));
+  CHECK(!cardPath(std::string("/a\x01")));
+  CHECK(!cardPath("/" + std::string(200, 'a')));
+  // From a check-in's reply: only one newer than the last done.
+  Command c;
+  CHECK(!commandIn("{\"ok\":true}", 0, c));
+  CHECK(commandIn("{\"ok\":true,\"cmd_id\":7,\"cmd\":\"list\",\"cmd_arg\":\"2f6472697665730a\"}", 0, c));
+  CHECK(c.id == 7 && c.kind == CMD_LIST && c.bad == "not a path on the card");   // "/drives\n"
+  CHECK(commandIn("{\"cmd_id\":7,\"cmd\":\"list\",\"cmd_arg\":\"2f647269766573\"}", 6, c));
+  CHECK(c.kind == CMD_LIST && c.arg == "/drives" && c.bad.empty());
+  CHECK(!commandIn("{\"cmd_id\":7,\"cmd\":\"list\",\"cmd_arg\":\"2f\"}", 7, c));   // done already
+  CHECK(commandIn("{\"cmd_id\":8,\"cmd\":\"format\",\"cmd_arg\":\"64697363617264\"}", 7, c));
+  CHECK(c.kind == CMD_FORMAT && c.arg == "discard" && c.bad.empty());
+  CHECK(commandIn("{\"cmd_id\":9,\"cmd\":\"upload\",\"cmd_arg\":\"\"}", 7, c));
+  CHECK(c.kind == CMD_UPLOAD && c.arg.empty() && c.bad.empty());
+  CHECK(commandIn("{\"cmd_id\":10,\"cmd\":\"delete\",\"cmd_arg\":\"2f\"}", 7, c));
+  CHECK(c.kind == CMD_DELETE && !c.bad.empty());
+  CHECK(commandIn("{\"cmd_id\":11,\"cmd\":\"erase\",\"cmd_arg\":\"\"}", 7, c));
+  CHECK(c.kind == CMD_NONE && c.bad == "unknown command erase");
+  CHECK(commandIn("{\"cmd_id\":12,\"cmd\":\"list\",\"cmd_arg\":\"2g\"}", 7, c));
+  CHECK(c.bad == "bad argument");
+  // What waits for the board to be between drives.
+  CHECK(commandBetweenDrives(CMD_FORMAT) && commandBetweenDrives(CMD_DELETE) &&
+        commandBetweenDrives(CMD_RESTART));
+  CHECK(!commandBetweenDrives(CMD_LIST) && !commandBetweenDrives(CMD_UPLOAD) &&
+        !commandBetweenDrives(CMD_UPDATE));
+  // A format with files waiting needs discard.
+  CHECK(formatRefusal(0, "") == "");
+  CHECK(formatRefusal(2, "") == "2 files wait to upload; format with discard to lose them");
+  CHECK(formatRefusal(2, "discard") == "");
+  // A listing: names escaped, at most LISTING_MAX entries, the count of all.
+  std::vector<CardEntry> e = {{"drives", 0, true}, {"say \"hi\"\\\x01.txt", 12, false}};
+  std::string j = listingJson(7, "/", e, 2, "SDHC", 31900, 31100);
+  CHECK(j == "{\"id\":7,\"path\":\"/\",\"count\":2,\"entries\":[[\"drives\",0,true],"
+             "[\"say \\\"hi\\\"\\\\\\u0001.txt\",12,false]],"
+             "\"card\":{\"type\":\"SDHC\",\"size_mb\":31900,\"used_mb\":31100}}");
+  std::vector<CardEntry> many(LISTING_MAX + 5, CardEntry{"f", 1, false});
+  std::string m = listingJson(1, "/DCIM", many, 5000, "SDXC", 0, 0);
+  size_t n = 0;
+  for (size_t p = 0; (p = m.find("[\"f\"", p)) != std::string::npos; p++) n++;
+  CHECK(n == LISTING_MAX);
+  CHECK(m.find("\"count\":5000") != std::string::npos);
+}
+
 static const struct { const char* name; void (*fn)(); } tests[] = {
+  {"commands", test_commands},
   {"wifi_note", test_wifi_note},
   {"settings", test_settings},
   {"car_check", test_car_check},

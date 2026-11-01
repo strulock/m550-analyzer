@@ -23,11 +23,16 @@
  *   channel and RPM x load cell, scored against each channel's recent past
  *   whenever a drive's series arrive; the Health tab (/logger/health,
  *   healthpage.js) and the drive_health tool show them.
+ * - The Board tab (/logger/board, boardpage.js) shows the board's firmware
+ *   and card, and sends it commands (boardcmd.js) in its check-ins'
+ *   replies: list, delete or format the card, upload now, update now,
+ *   restart; the board_command tool too.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with tools over that copy: drive_history, fault_history,
  *   trend, list_files, read_log, a drive's fault list (drive_faults), the
  *   full channel check's results (channel_check) and drive health
- *   (drive_health), all read-only; and
+ *   (drive_health), all read-only; the board's commands (board_command,
+ *   board_commands); and
  *   the logger's channel presets, which the logger_* tools list and change
  *   (tiers, presets, the one published to the board, versions and
  *   rollback). Nothing here writes to the car.
@@ -41,6 +46,9 @@
  * No dependencies: plain JavaScript, deployed with `wrangler deploy`.
  */
 
+import { beatCommand, BOARD_COMMANDS_SCHEMA, cancelCommand, CommandError, getCommand, KINDS,
+  listCommands, MAX_CARD_BODY, putCommand, putListing } from "./boardcmd.js";
+import { BOARD_PAGE } from "./boardpage.js";
 import { beatSettings, BOARD_SETTINGS_SCHEMA, boardRole, cancelBoardSettings, getBoardSettings,
   putBoardSettings, SettingsError } from "./boardsettings.js";
 import { BANK2, buildSeries, clockEpoch, DEFAULT_TIME_ZONE, isDriveLog, loggerExtras, readLog,
@@ -382,6 +390,8 @@ export const SCHEMA = [
   ...DETAILS_SCHEMA,
   // A change to the board's settings from the logger page (boardsettings.js).
   ...BOARD_SETTINGS_SCHEMA,
+  // Commands for the board from the Board tab (boardcmd.js).
+  ...BOARD_COMMANDS_SCHEMA,
   // Each drive's health summary and scores (health.js).
   ...HEALTH_SCHEMA,
 ];
@@ -1120,8 +1130,20 @@ async function firmwareManifest(env) {
   return obj ? JSON.parse(await obj.text()) : null;
 }
 
+/** Whether `bytes` holds `want` anywhere. */
+function holds(bytes, want) {
+  outer: for (let i = bytes.indexOf(want[0]); i >= 0 && i <= bytes.length - want.length;
+    i = bytes.indexOf(want[0], i + 1)) {
+    for (let k = 1; k < want.length; k++) if (bytes[i + k] !== want[k]) continue outer;
+    return true;
+  }
+  return false;
+}
+
 /** Publish a build: the image (an ESP32 app image starts 0xE9) and its
- * version, which mustn't be "dev" (the board's unversioned builds). */
+ * version, which mustn't be "dev" (the board's unversioned builds) and must
+ * be the one built into it (FW_VERSION): the board installs whatever version
+ * isn't its own, so one built as another would be installed for good. */
 async function putFirmware(env, version, data, now = new Date()) {
   if (!VERSION_RE.test(version || "") || version === "dev") {
     throw new ToolError("version: letters, digits, dot, dash or underscore, not \"dev\"");
@@ -1129,6 +1151,10 @@ async function putFirmware(env, version, data, now = new Date()) {
   const bytes = new Uint8Array(data);
   if (!bytes.length || bytes[0] !== 0xE9) throw new ToolError("not an ESP32 app image");
   if (bytes.length > MAX_FIRMWARE) throw new ToolError("too large for the app partition");
+  if (!holds(bytes, new TextEncoder().encode(version))) {
+    throw new ToolError(`the image doesn't say it's ${version}: built as another version, the ` +
+      "board would take it again and again");
+  }
   const manifest = { version, sha256: await sha256Hex(data), size: bytes.length,
     uploaded: now.toISOString() };
   await env.FILES.put(FIRMWARE_BIN, data, {
@@ -1377,15 +1403,56 @@ export const TOOLS = [
     inputSchema: { type: "object", properties: {
       name: { type: "string" }, version: { type: "integer" } }, required: ["name", "version"] },
   },
+  {
+    name: "board_commands",
+    description: "The commands sent to the logger board from the Board tab or board_command, " +
+      "newest first: kind, path, state (waiting for its next check-in, sent, done, failed, " +
+      "cancelled), the board's result and, for a list, the folder's entries ([name, bytes, " +
+      "is folder]) and the card's size and use. Pass id for one.",
+    inputSchema: { type: "object", properties: {
+      id: { type: "integer" }, limit: { type: "integer", description: "Default 10, up to 50" } } },
+  },
+  {
+    name: "board_command",
+    description: "Send the logger board a command; it gets it at its next check-in (every " +
+      "10 s on Wi-Fi) and does the card's work between drives. kind: list (a folder on the " +
+      "card, path default /), upload (its waiting files now), update (check for firmware " +
+      "now and install it once it isn't logging), restart, delete (a file or folder, path), " +
+      "format (the whole card; refused while files wait to upload unless discard). delete " +
+      "and format erase for good: ask the user to confirm first, and pass confirm: true. " +
+      "Read the outcome with board_commands.",
+    inputSchema: { type: "object", properties: {
+      kind: { type: "string", enum: Object.keys(KINDS) }, path: { type: "string" },
+      discard: { type: "boolean" }, confirm: { type: "boolean" } }, required: ["kind"] },
+  },
 ];
 
 class ToolError extends Error {}
 
-async function callTool(env, name, a) {
+async function callTool(env, name, a, who) {
   a = a || {};
   // The tables first: the first request to a fresh isolate can be a tool
   // (seen: the first preset change after a deploy, before the versions table).
   await ensureSchema(env);
+  if (name === "board_commands") {
+    if (a.id !== undefined) {
+      const c = await getCommand(env, Number(a.id));
+      if (!c) throw new ToolError("no such command");
+      return c;
+    }
+    return { commands: await listCommands(env, Math.min(50, Number(a.limit) || 10)) };
+  }
+  if (name === "board_command") {
+    if (KINDS[a.kind] && ["delete", "format"].includes(a.kind) && a.confirm !== true) {
+      throw new ToolError(`${a.kind} erases for good: confirm with the user, then pass confirm: true`);
+    }
+    try {
+      return await putCommand(env, a, who);
+    } catch (e) {
+      if (e instanceof CommandError) throw new ToolError(e.message);
+      throw e;
+    }
+  }
   if (name === "drive_history") {
     const limit = Math.max(1, Math.min(500, Number(a.limit) || 30));
     return { drives: await drives(env, limit) };
@@ -1515,10 +1582,12 @@ const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault 
   "The logger_* tools read and change what the logger board reads: logger_channels and " +
   "logger_presets look, logger_set_tiers, logger_save_preset, logger_publish and " +
   "logger_rollback change the presets in the cloud (every change kept as a version). " +
+  "board_command sends the board a command (list, delete or format its card, upload now, " +
+  "update its firmware now, restart) and board_commands reads how they went. " +
   "Everything else is read-only, and nothing writes to the car.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
-export async function rpc(env, msg) {
+export async function rpc(env, msg, who) {
   const reply = (result) => ({ jsonrpc: "2.0", id: msg.id, result });
   const error = (code, message) => ({ jsonrpc: "2.0", id: msg.id ?? null,
     error: { code, message } });
@@ -1539,7 +1608,7 @@ export async function rpc(env, msg) {
     case "tools/call": {
       const p = msg.params || {};
       try {
-        let text = JSON.stringify(await callTool(env, p.name, p.arguments));
+        let text = JSON.stringify(await callTool(env, p.name, p.arguments, who));
         if (text.length > MAX_TEXT) text = text.slice(0, MAX_TEXT) + " ...(cut)";
         return reply({ content: [{ type: "text", text }], isError: false });
       } catch (e) {
@@ -1768,12 +1837,13 @@ async function healthApi(request, env, url, who) {
 }
 
 // The board's token may only do the board's work: check in, upload its
-// files, and fetch its channels, check list and firmware. So one taken from
+// files and its card's listings, and fetch its channels, check list and firmware. So one taken from
 // the board can't read the drives, change presets, write the app's files or
 // publish code.
 const CHECK_INS = ["/api/logger/heartbeat", "/api/logger/heartbeats"];
 const BOARD_ROUTES = [
   ["POST", /^\/api\/logger\/heartbeats?$/],
+  ["POST", /^\/api\/logger\/card$/],
   ["PUT", /^\/api\/files\/logger\/[^/]+$/],
   ["GET", /^\/api\/logger\/(channels|check-list|firmware|firmware\.bin)$/],
 ];
@@ -1825,10 +1895,10 @@ export async function handle(request, env, fetcher = fetch) {
         400);
     }
     if (Array.isArray(body)) {
-      const replies = (await Promise.all(body.map((m) => rpc(env, m)))).filter(Boolean);
+      const replies = (await Promise.all(body.map((m) => rpc(env, m, auth.who)))).filter(Boolean);
       return replies.length ? json(replies) : new Response(null, { status: 202 });
     }
-    const one = await rpc(env, body);
+    const one = await rpc(env, body, auth.who);
     return one ? json(one) : new Response(null, { status: 202 });
   }
 
@@ -1906,7 +1976,7 @@ export async function handle(request, env, fetcher = fetch) {
     try {
       const stored = await putBeat(env, body);
       return json({ ok: true, ...stored, ...(await beatSweep(env, body)),
-        ...(await beatSettings(env, body, role, auth.who)) });
+        ...(await beatSettings(env, body, role, auth.who)), ...(await beatCommand(env, body, role)) });
     } catch (e) {
       if (e instanceof ToolError) return json({ error: e.message }, 400);
       throw e;
@@ -1931,6 +2001,44 @@ export async function handle(request, env, fetcher = fetch) {
       throw e;
     }
     return new Response(null, { status: 405 });
+  }
+  if (url.pathname === "/api/logger/commands") {
+    await ensureSchema(env);
+    try {
+      if (request.method === "GET") {
+        return json({ kinds: KINDS, commands: await listCommands(env, url.searchParams.get("limit")) });
+      }
+      if (request.method === "POST") {
+        let body;
+        try {
+          body = await request.json();
+        } catch {
+          return json({ error: "body: JSON {kind, path}" }, 400);
+        }
+        return json(await putCommand(env, body, auth.who));
+      }
+      if (request.method === "DELETE") {
+        return json(await cancelCommand(env, url.searchParams.get("id"), auth.who));
+      }
+    } catch (e) {
+      if (e instanceof CommandError) return json({ error: e.message }, 400);
+      throw e;
+    }
+    return new Response(null, { status: 405 });
+  }
+  if (url.pathname === "/api/logger/card" && request.method === "POST") {
+    if (role !== "board") return json({ error: "only the board sends its card's listing" }, 403);
+    const text = await request.text();
+    if (text.length > MAX_CARD_BODY) return json({ error: "too large" }, 413);
+    await ensureSchema(env);
+    try {
+      return json({ ok: true, ...(await putListing(env, JSON.parse(text))) });
+    } catch (e) {
+      if (e instanceof CommandError || e instanceof SyntaxError) {
+        return json({ error: e.message }, 400);
+      }
+      throw e;
+    }
   }
   if (url.pathname === "/api/logger/heartbeats" && request.method === "POST") {
     const text = await request.text();
@@ -1986,6 +2094,10 @@ export async function handle(request, env, fetcher = fetch) {
   if (url.pathname === "/api/logger/values/backfill" && request.method === "POST") {
     await ensureSchema(env);
     return json(await backfillPieces(env, url.searchParams.get("after")));
+  }
+  if (url.pathname === "/logger/board" && request.method === "GET") {
+    return new Response(BOARD_PAGE, { headers: { "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store" } });
   }
   if (url.pathname === "/logger/health" && request.method === "GET") {
     return new Response(HEALTH_PAGE, { headers: { "content-type": "text/html; charset=utf-8",

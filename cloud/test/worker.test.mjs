@@ -817,8 +817,10 @@ test("firmware: a person or a listed token publishes it, the board's never; nor 
   const board = await boardToken();
   const app = await boardToken("app00000000000000.access");
   const other = await boardToken("other000000000000.access");
+  // An ESP32 app image with its version built in (each one tried below).
   const image = new Uint8Array(4096).fill(7);
-  image[0] = 0xE9;                                      // an ESP32 app image
+  image[0] = 0xE9;
+  image.set(new TextEncoder().encode("v1\0v2\0v3\0v4"), 100);
   env.FIRMWARE_PUBLISHERS = "app00000000000000.access, x.access";
   // Even before the board has checked in, its token isn't a publisher.
   let r = await call("PUT", "/api/logger/firmware?version=v1", { body: image, auth: board });
@@ -1119,21 +1121,26 @@ test("stored logger drives can be worked out again from their files", async () =
 
 test("firmware: publish a build, the board reads the manifest and the image", async () => {
   assert.equal((await call("GET", "/api/logger/firmware")).status, 404);
-  const image = new Uint8Array([0xE9, 1, 2, 3, 4, 5]);
+  const image = new Uint8Array([0xE9, 1, 2, 3, 4, 5,
+    ...new TextEncoder().encode("20261027-0200-abc1234")]);
   const put = (version, body = image) => call("PUT",
     `/api/logger/firmware${version === undefined ? "" : "?version=" + version}`, { body });
   assert.equal((await put(undefined)).status, 400);                  // no version
   assert.equal((await put("dev")).status, 400);                      // the unversioned builds' name
   assert.equal((await put("a b")).status, 400);
   assert.equal((await put("v1", new Uint8Array([0x00, 1]))).status, 400);   // not an app image
+  // Built as another version: the board would install it again and again.
+  const other = await put("20261027-0300-def5678");
+  assert.equal(other.status, 400);
+  assert.match((await other.json()).error, /doesn't say it's 20261027-0300-def5678/);
   const r = await (await put("20261027-0200-abc1234")).json();
   assert.equal(r.version, "20261027-0200-abc1234");
-  assert.equal(r.size, 6);
+  assert.equal(r.size, image.length);
   assert.match(r.sha256, /^[0-9a-f]{64}$/);
   const m = await (await call("GET", "/api/logger/firmware")).json();
-  assert.deepEqual([m.version, m.sha256, m.size], [r.version, r.sha256, 6]);
+  assert.deepEqual([m.version, m.sha256, m.size], [r.version, r.sha256, image.length]);
   const bin = await call("GET", "/api/logger/firmware.bin");
-  assert.equal(bin.headers.get("content-length"), "6");
+  assert.equal(bin.headers.get("content-length"), String(image.length));
   assert.deepEqual(new Uint8Array(await bin.arrayBuffer()), image);
   // The status the page and logger_status read says what's published.
   assert.equal((await (await call("GET", "/api/logger")).json()).firmware.version, r.version);
@@ -1769,4 +1776,94 @@ test("fault dates: the odometers made again when the drives change, not on every
     FROM heartbeats WHERE boot = 3 AND json_extract(data, '$.fault_codes') IS NOT NULL
     ORDER BY received DESC, rowid DESC LIMIT 1`).all().map((x) => x.detail).join(" ");
   assert.match(plan, /heartbeats_boot/);
+});
+
+// --- the board's commands (boardcmd.js)
+
+test("board commands: a person asks, the board gets one a check-in, says how it went and sends a listing", async () => {
+  const cmd = (body, auth) => call("POST", "/api/logger/commands", { body: JSON.stringify(body), auth });
+  const beat = async (extra) => (await call("POST", "/api/logger/heartbeat",
+    { body: JSON.stringify({ boot: 1, event: "beat", ...extra }) })).json();
+  await beat({});                                       // the board's token is the board's now
+  // Refused: unknown kind, a bad path, the whole card, a service token, the board's own.
+  for (const bad of [{ kind: "erase" }, { kind: "list", path: "drives" },
+    { kind: "list", path: "/a/../b" }, { kind: "delete", path: "/" }, { kind: "delete" }]) {
+    assert.equal((await cmd(bad)).status, 400, JSON.stringify(bad));
+  }
+  assert.match((await (await cmd({ kind: "upload" },
+    await boardToken("app00000000000000.access"))).json()).error, /only a person/);
+  assert.equal((await cmd({ kind: "upload" }, await boardToken())).status, 403);
+  const list = await (await cmd({ kind: "list" })).json();
+  assert.deepEqual([list.kind, list.arg, list.state], ["list", "/", "waiting"]);
+  // Asked again while it waits: the same one.
+  assert.equal((await (await cmd({ kind: "list", path: "/" })).json()).id, list.id);
+  const fmt = await (await cmd({ kind: "format", discard: true })).json();
+  const del = await (await cmd({ kind: "delete", path: "/DCIM" })).json();
+  assert.equal(fmt.arg, "discard");
+  // A firmware from before commands (no cmd_done) gets none.
+  assert.equal((await beat({})).cmd_id, undefined);
+  let r = await beat({ cmd_done: 0 });
+  assert.deepEqual([r.cmd_id, r.cmd, r.cmd_arg], [list.id, "list", "2f"]);
+  // The listing: only from the board, kept with its command, folders first.
+  const listing = { id: list.id, path: "/", count: 3,
+    entries: [["fw.bin", 1500000, false], ["drives", 0, true], ["DCIM", 0, true]],
+    card: { type: "SDHC", size_mb: 31900, used_mb: 31100 } };
+  assert.equal((await call("POST", "/api/logger/card", { body: JSON.stringify(listing) })).status, 403);
+  assert.equal((await call("POST", "/api/logger/card", { body: JSON.stringify(listing),
+    auth: await boardToken() })).status, 200);
+  assert.equal((await call("POST", "/api/logger/card", { body: JSON.stringify({ ...listing, id: fmt.id }),
+    auth: await boardToken() })).status, 400);         // not a listing it was asked for
+  r = await beat({ cmd_done: list.id, cmd_ok: true, cmd_result: "3 entries" });
+  assert.deepEqual([r.cmd_id, r.cmd, r.cmd_arg], [fmt.id, "format", "64697363617264"]);
+  // Cancelled before the board says it's done: it goes on to the next.
+  assert.equal((await call("DELETE", `/api/logger/commands?id=${fmt.id}`)).status, 200);
+  r = await beat({ cmd_done: list.id, cmd_ok: true, cmd_result: "3 entries" });
+  assert.equal(r.cmd_id, del.id);
+  r = await beat({ cmd_done: del.id, cmd_ok: false, cmd_result: "no such file or folder" });
+  assert.equal(r.cmd_id, undefined);
+  const all = (await (await call("GET", "/api/logger/commands")).json()).commands;
+  const by = Object.fromEntries(all.map((c) => [c.id, c]));
+  assert.deepEqual([by[list.id].state, by[list.id].result], ["done", "3 entries"]);
+  assert.deepEqual(by[list.id].listing.entries.map((e) => e[0]), ["DCIM", "drives", "fw.bin"]);
+  assert.equal(by[list.id].listing.card.type, "SDHC");
+  assert.equal(by[fmt.id].state, "cancelled");
+  assert.deepEqual([by[del.id].state, by[del.id].result], ["failed", "no such file or folder"]);
+  // One the board went past (it never saw it) isn't left waiting.
+  const up = await (await cmd({ kind: "upload" })).json();
+  const rs = await (await cmd({ kind: "restart" })).json();
+  await beat({ cmd_done: rs.id, cmd_ok: true, cmd_result: "restarting" });
+  const after = Object.fromEntries((await (await call("GET", "/api/logger/commands")).json())
+    .commands.map((c) => [c.id, c]));
+  assert.equal(after[up.id].state, "failed");
+  assert.match(after[up.id].result, /went past/);
+  assert.equal(after[rs.id].state, "done");
+  // Cancelled once the board had started it: what the board did, not "cancelled".
+  const f2 = await (await cmd({ kind: "format" })).json();
+  assert.equal((await beat({ cmd_done: rs.id, cmd_ok: true })).cmd_id, f2.id);
+  await call("DELETE", `/api/logger/commands?id=${f2.id}`);
+  assert.equal((await beat({ cmd_done: rs.id, cmd_ok: true })).cmd_id, undefined);
+  await beat({ cmd_done: f2.id, cmd_ok: true, cmd_result: "formatted" });
+  const f2now = (await (await call("GET", "/api/logger/commands")).json()).commands
+    .find((c) => c.id === f2.id);
+  assert.deepEqual([f2now.state, f2now.result], ["done", "formatted"]);
+  // The tab itself.
+  const page = await call("GET", "/logger/board");
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /<title>M550 Logger Board<\/title>/);
+});
+
+test("board_command over MCP: delete and format only once confirmed, and only for a person", async () => {
+  const tool = async (args, who = "owner@example.com") => (await rpc(env, { jsonrpc: "2.0", id: 1,
+    method: "tools/call", params: { name: "board_command", arguments: args } }, who)).result;
+  let r = await tool({ kind: "format" });
+  assert.equal(r.isError, true);
+  assert.match(r.content[0].text, /confirm/);
+  r = await tool({ kind: "format", confirm: true });
+  assert.equal(r.isError, false);
+  assert.equal(JSON.parse(r.content[0].text).state, "waiting");
+  r = await tool({ kind: "list", path: "/drives" }, "app00000000000000.access");
+  assert.equal(r.isError, true);
+  const read = (await rpc(env, { jsonrpc: "2.0", id: 2, method: "tools/call",
+    params: { name: "board_commands", arguments: {} } })).result;
+  assert.equal(JSON.parse(read.content[0].text).commands[0].kind, "format");
 });
