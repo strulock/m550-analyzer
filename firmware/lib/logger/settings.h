@@ -115,7 +115,10 @@ inline bool fromHex(const std::string& h, std::string& out) {
 // may hold anything JSON would escape). `next` is the settings with it
 // applied; `token` when it brings a new Access token, which the board tries
 // before it keeps it. False when the reply has none newer than `now`, or a
-// value is bad (the whole change is refused then).
+// value is bad (the whole change is refused then). Never the host: the page
+// doesn't send one, and one in a reply would be saved untried (the token's
+// try goes to the old host), so a wrong one cut the board off for good; it
+// changes over USB or the setup page only.
 struct SettingsChange {
   uint32_t version = 0;
   Settings next;
@@ -134,7 +137,7 @@ inline bool settingsChange(const std::string& reply, const Settings& now, Settin
   for (const SettingField& f : SETTING_FIELDS) {
     std::string hex, value;
     if (!jsonField(reply, (std::string("set_") + f.key).c_str(), hex)) continue;
-    if (!fromHex(hex, value) || !settingValid(f.key, value)) {
+    if (f.member == &Settings::host || !fromHex(hex, value) || !settingValid(f.key, value)) {
       c.bad = f.key;
       return true;
     }

@@ -29,7 +29,7 @@ inline bool parseDone(const std::string& line, Done& d) {
 }
 
 enum UploadStep {
-  UPLOAD_BAD_DONE,   // no .done line worth the name: left for a look
+  UPLOAD_BAD_DONE,   // no .done line worth the name: the file hashed again
   UPLOAD_MISSING,    // the .done without its file
   UPLOAD_EMPTY,      // nothing reached the card (a power cut): removed, not sent
   UPLOAD_SEND,

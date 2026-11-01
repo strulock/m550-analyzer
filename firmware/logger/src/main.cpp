@@ -871,32 +871,39 @@ static bool mountCard() {
 // The lock is held only to open and to write the .done: reading under it
 // would keep the new drive from opening its files for the second or two a
 // megabyte takes (FatFS itself is reentrant).
+// Hash a drive file as the card has it and write its .done: one a power cut
+// left open, or one whose .done is torn. False if it can't be read.
+static bool closeLeftover(const String& name) {
+  static uint8_t buf[4096];                  // the upload task's only
+  String path = String(DRIVES) + "/" + name;
+  File f;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    f = SD.open(path);
+  }
+  if (!f) return false;
+  Sha256 sha;
+  uint32_t size = 0;
+  for (int n; (n = f.read(buf, sizeof(buf))) > 0;) { sha.update(buf, n); size += n; }
+  f.close();
+  char hex[65];
+  sha.finishHex(hex);
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  File d = SD.open(path + ".done", FILE_WRITE);
+  if (!d) return false;
+  d.printf("%s %u\n", hex, (unsigned)size);
+  d.close();
+  out.printf("[sd] %s closed at %u bytes\n", name.c_str(), (unsigned)size);
+  return true;
+}
+
 static void recoverDrives() {
-  static uint8_t buf[4096];
   std::vector<String> open;
   open.swap(leftovers);
   for (const String& name : open) {
-    String path = String(DRIVES) + "/" + name;
-    File f;
-    {
-      std::lock_guard<std::recursive_mutex> g(sdLock);
-      f = SD.open(path);
-    }
-    if (!f) {                                // no .done from a file not read: next boot
-      out.printf("[sd] %s was left open; can't open it to close it\n", name.c_str());
-      continue;
-    }
-    Sha256 sha;
-    uint32_t size = 0;
-    for (int n; (n = f.read(buf, sizeof(buf))) > 0;) { sha.update(buf, n); size += n; }
-    f.close();
-    char hex[65];
-    sha.finishHex(hex);
-    std::lock_guard<std::recursive_mutex> g(sdLock);
-    File d = SD.open(path + ".done", FILE_WRITE);
-    if (d) { d.printf("%s %u\n", hex, (unsigned)size); d.close(); }
-    out.printf("[sd] %s was left open (power cut); closed at %u bytes\n", name.c_str(),
-               (unsigned)size);
+    // No .done from a file not read: next boot.
+    out.printf("[sd] %s was left open (power cut)%s\n", name.c_str(),
+               closeLeftover(name) ? "" : "; can't open it to close it");
   }
 }
 
@@ -2058,19 +2065,33 @@ static UpResult uploadOne(const String& name) {
     if (doneOk) f = SD.open(path);
   }
   switch (uploadStep(doneOk, (bool)f, f ? f.size() : 0)) {   // lib/logger/upload.h
+  // A .done torn by a power cut as it was written: the file hashed again, as
+  // one left open is, and sent next round. One whose file is gone (deleted
+  // after a sent upload, before its .done, by builds before 1 Nov): nothing
+  // to send, so it goes. Both failed every round before, for good.
   case UPLOAD_BAD_DONE:
-    out.printf("[up] %s: bad .done file\n", name.c_str());
-    uploadFailed(name, "bad .done file");
-    return UP_SKIP;
-  case UPLOAD_MISSING:
-    out.printf("[up] %s: missing\n", name.c_str());
-    uploadFailed(name, "missing");
-    return UP_SKIP;
+    if (f) f.close();
+    if (closeLeftover(name)) {
+      out.printf("[up] %s: bad .done file, hashed again\n", name.c_str());
+      return UP_SKIP;
+    }
+    {
+      std::lock_guard<std::recursive_mutex> g(sdLock);
+      SD.remove(path + ".done");
+    }
+    out.printf("[up] %s: bad .done file and no file; removed\n", name.c_str());
+    return UP_SENT;
+  case UPLOAD_MISSING: {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    SD.remove(path + ".done");
+    out.printf("[up] %s: its .done without the file; removed\n", name.c_str());
+    return UP_SENT;
+  }
   case UPLOAD_EMPTY: {
     f.close();
     std::lock_guard<std::recursive_mutex> g(sdLock);
-    SD.remove(path);
     SD.remove(path + ".done");
+    SD.remove(path);
     out.printf("[up] %s: empty, removed\n", name.c_str());
     return UP_SENT;
   }
@@ -2138,9 +2159,12 @@ static UpResult uploadOne(const String& name) {
   }
   f.close();
   if (ok) {
+    // The .done first: a power cut between leaves the file without one,
+    // which the next boot closes and sends again (the Worker replaces it),
+    // not a .done without its file.
     std::lock_guard<std::recursive_mutex> g(sdLock);
-    SD.remove(path);
     SD.remove(path + ".done");
+    SD.remove(path);
     uploadedFiles++;
     lastUpload = name;
   }
@@ -2572,12 +2596,34 @@ static int postBeat(const std::string& body, const char* path = "/api/logger/hea
 // Check-ins made before the board knows the time (no Wi-Fi yet, and no car
 // to take the clock from): held here with when they were made, then dated
 // and kept on the card once the clock is known, so a power-on's first
-// minutes aren't lost. The oldest go first past MAX_HELD_BEATS.
+// minutes aren't lost. The oldest go first past MAX_HELD_BEATS. Held in
+// PSRAM: up to 90 of a KB or two each sat in internal RAM (strings under
+// 4 KB go there), about 100 KB of the room a TLS handshake needs once Wi-Fi
+// came ("Memory allocation failed" on an upload, 31 Oct).
+template <class T>
+struct PsramAlloc {
+  using value_type = T;
+  PsramAlloc() = default;
+  template <class U>
+  PsramAlloc(const PsramAlloc<U>&) {}
+  T* allocate(size_t n) {
+    void* p = heap_caps_malloc(n * sizeof(T), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (!p) p = heap_caps_malloc(n * sizeof(T), MALLOC_CAP_8BIT);   // no PSRAM: internal
+    return static_cast<T*>(p);
+  }
+  void deallocate(T* p, size_t) { heap_caps_free(p); }
+};
+template <class T, class U>
+bool operator==(const PsramAlloc<T>&, const PsramAlloc<U>&) { return true; }
+template <class T, class U>
+bool operator!=(const PsramAlloc<T>&, const PsramAlloc<U>&) { return false; }
+using PsString = std::basic_string<char, std::char_traits<char>, PsramAlloc<char>>;
+
 struct HeldBeat {
   uint32_t ms;
-  std::string json;
+  PsString json;
 };
-static std::vector<HeldBeat> heldBeats;
+static std::vector<HeldBeat, PsramAlloc<HeldBeat>> heldBeats;
 static const size_t MAX_HELD_BEATS = 90;            // 15 minutes
 
 static void appendBeat(const std::string& line) {
@@ -2597,7 +2643,8 @@ static void keepHeldBeats() {
   for (const HeldBeat& h : heldBeats) {
     int64_t ms = nowEpochMs() - (int64_t)(millis() - h.ms);
     std::string clock = clockText(ms, offsetMinutes((time_t)(ms / 1000)));
-    std::string line = h.json.substr(0, h.json.size() - 1) + ",\"clock\":\"" + clock + "\"}\n";
+    std::string line = std::string(h.json.data(), h.json.size() - 1) + ",\"clock\":\"" + clock +
+                       "\"}\n";
     appendBeat(line);
   }
   out.printf("[beat] %u check-ins from before the clock was known kept\n",
@@ -2611,7 +2658,8 @@ static void keepBeat() {
   if (!sdOk) return;
   if (!timeKnown()) {
     if (heldBeats.size() >= MAX_HELD_BEATS) heldBeats.erase(heldBeats.begin());
-    heldBeats.push_back({millis(), beatJson(false, true)});
+    std::string j = beatJson(false, true);
+    heldBeats.push_back({millis(), PsString(j.data(), j.size())});
     return;
   }
   keepHeldBeats();
@@ -2710,7 +2758,8 @@ static void applySettings(const std::string& reply) {
     if (c.version <= settingsFailed) return;   // refused already
   }
   std::string why;
-  if (!c.bad.empty()) why = "not a usable " + c.bad;
+  if (c.bad == "host") why = "the Worker's host changes over USB or the setup page only";
+  else if (!c.bad.empty()) why = "not a usable " + c.bad;
   if (why.empty() && c.token) {
     int code = postBeat(beatJson(false), "/api/logger/heartbeat", nullptr, &c.next);
     if (code != 200) why = "the new Access token was refused (" + std::to_string(code) + ")";
@@ -2875,6 +2924,25 @@ static void fetchChannels() {
   channelsDownloaded = true;
   out.printf("[chan] downloaded preset %s (%s, %d bytes); used from the next drive\n",
              preset.c_str(), etag.c_str(), got);
+}
+
+// A new channels.csv goes in by remove, then rename: a power cut between left
+// no file while cltag still named the preset, so every check got a 304 and
+// the board logged the built-in table without a word. With no file on the
+// card, the ETag goes (and anything half swapped), so the next check
+// downloads it again. At boot, once the card is in.
+static void channelsWithoutFile() {
+  std::lock_guard<std::recursive_mutex> g(sdLock);
+  if (SD.exists(CHANNELS_FILE)) return;
+  SD.remove(CHANNELS_DOWNLOAD);
+  SD.remove("/channels.tmp");
+  Preferences prefs;
+  prefs.begin("logger");
+  if (prefs.isKey("cltag")) {
+    prefs.remove("cltag");
+    out.println("[chan] no channels.csv on the card: it's downloaded again");
+  }
+  prefs.end();
 }
 
 static void channelsIfDue() {
@@ -3771,6 +3839,7 @@ void setup() {
 
   sdSpi.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
   if (!mountCard()) out.println("[sd] NO CARD (or not FAT): logging needs one; tried again while looking for the car");
+  else channelsWithoutFile();
   otaBoot();
   if (otaReady) otaInstall();                // a new build on the card: in before the car
   checkBoot();
@@ -3951,6 +4020,7 @@ void loop() {
           lastMount = millis();
           if (mountCard()) {
             out.println("[sd] the card is in now");
+            channelsWithoutFile();
             channelsFromCard = false;
             loadChannels();                // its channels.csv, not the built-in table
           }
