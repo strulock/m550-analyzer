@@ -19,8 +19,9 @@ items name functions or say when they were written.
 - **Tests (31 Oct):** the app 647, the Worker 103 (`cloud/test`), the
   firmware's host tests 30 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
-- **Live (31 Oct):** Worker version `ef1e4768` on m550.trulock.com; firmware
-  `20261031-1900-9b969d7` published for the board.
+- **Live (1 Nov):** Worker version `1b07e51c` on m550.trulock.com; firmware
+  `20261101-0553-31194c6` (#142) published for the board, which runs
+  `20261031-1900-9b969d7` until it takes it.
 - **On the car:** only the DME catalog has been checked. The other 11 module
   catalogs, the head-unit GPS layout, and the logging rate with module channels
   added are still unverified (`docs/in-car-checklist.md`).
@@ -601,6 +602,11 @@ after the first week of drives, and what's left.
       a check-in gives "trying it again", not a refusal. On the board and
       working by the evening of 31 Oct, so the firmware below was merged
       (#142) and the Worker deployed again (`03e2b215`). App 0.10.9.
+- [ ] **On the car, `20261101-0553-31194c6` (#142):** published 1 Nov; see
+      it download, install and be kept as above. Publishing first got a 403:
+      the deploy `03e2b215` went out without `FIRMWARE_PUBLISHERS` (from a
+      `wrangler.jsonc` without it), so the Worker was deployed again with it
+      (`1b07e51c`). After a deploy, `wrangler versions view` should list it.
 - [x] `drive_health` replies were cut at 60,000 characters (`MAX_TEXT`),
       about 3.4 KB a drive, so past about 17 warm drives (14 on 31 Oct) the
       reply would have been broken JSON with the newest drives lost (they
@@ -641,8 +647,8 @@ after the first week of drives, and what's left.
         `X-Content-Type-Options: nosniff`.
       - Tests: the fake D1's `batch` isn't transactional; nothing on MCP
         truncation.
-- [x] **The firmware, from the review of 31 Oct (built, not yet
-      published: after `20261031-1900-9b969d7` proves itself in the car).**
+- [x] **The firmware, from the review of 31 Oct (#142, published 1 Nov as
+      `20261101-0553-31194c6` after `20261031-1900-9b969d7` proved itself).**
       - An upload deleted the file before its `.done`, so a power cut
         between left a `.done` that failed as missing for good; now the
         `.done` goes first. A `.done` torn as it was written failed as bad
