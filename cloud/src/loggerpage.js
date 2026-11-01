@@ -1,5 +1,6 @@
 /**
- * The logger page (GET /logger; its Health tab is healthpage.js): the
+ * The logger page (GET /logger; its Health and Board tabs are healthpage.js
+ * and boardpage.js): the
  * board's last check-in (state, speed, coolant and oil temperature with an
  * overheating warning, the car on a map), each tank of fuel since its
  * fill-up (/api/logger/tanks), the full channel sweep (/api/logger/sweep,
@@ -142,7 +143,7 @@ td.when small { display: block; color: var(--muted); font-size: 11px; }
     </div>
     <div class="muted" id="logger"></div>
   </header>
-  <nav class="tabs"><a href="/logger" aria-current="page">Logger</a><a href="/logger/health">Health</a></nav>
+  <nav class="tabs"><a href="/logger" aria-current="page">Logger</a><a href="/logger/health">Health</a><a href="/logger/board">Board</a></nav>
 
   <div id="alarm" class="alarm hide" role="alert"></div>
 

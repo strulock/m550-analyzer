@@ -100,7 +100,7 @@ a { color: var(--accent); }
     <h1>Drive health</h1>
     <div class="muted" id="info">Loading…</div>
   </header>
-  <nav class="tabs"><a href="/logger">Logger</a><a href="/logger/health" aria-current="page">Health</a></nav>
+  <nav class="tabs"><a href="/logger">Logger</a><a href="/logger/health" aria-current="page">Health</a><a href="/logger/board">Board</a></nav>
 
   <div id="err" class="msg hide" role="alert"></div>
 

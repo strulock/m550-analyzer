@@ -14,7 +14,10 @@ serves it to Claude from anywhere:
   channel check, and what each module answers) and `drive_health` (the
   drives' health scores, newest first: the last `limit`, 10 by default and
   up to 50, as many as fit in a reply, with `total`; or one drive and
-  channel's RPM x load cells). The
+  channel's RPM x load cells). `board_command` sends the logger board a
+  command (list, delete or format its card, upload now, update now,
+  restart; delete and format only with `confirm`) and `board_commands`
+  reads how they went. The
   `logger_*` tools read
   and change the logger's channel presets: `logger_channels` (each channel's
   tier, filtered by module, identifier range, name, tier, or `values`:
@@ -110,6 +113,21 @@ serves it to Claude from anywhere:
   upload): that drive's summary, then the scores from it on, the 50 drives
   before it seeding the baselines at their stored levels;
   `POST /api/health/rebuild` does every stored drive again.
+- **Board** (`boardcmd.js`, the logger page's Board tab at `/logger/board`,
+  `boardpage.js`): the board's firmware (running, published, where an
+  update is; a build can be published from the page, its version read from
+  the image), its card (free space, errors, files waiting, a folder's
+  files) and commands for it: list a folder, delete a file or folder,
+  format the card (refused while files wait to upload unless told to
+  discard them), upload now, update now (look for firmware at once and
+  install it as soon as the board isn't logging), restart. A command waits
+  in `board_commands` until the board's next check-in; every reply carries
+  the oldest one it hasn't done (`cmd_id`, `cmd`, `cmd_arg` in hex), and
+  the board says the last one it finished and how (`cmd_done`, `cmd_ok`,
+  `cmd_result`) and why the next waits (`cmd_next`, `cmd_next_why`). It
+  keeps the last one done in its flash, so none runs twice, and deletes,
+  formats and restarts only between drives. A command can be taken back
+  until the board starts it. Only a person's login sends one.
 - **Cloudflare Access** guards the whole hostname, and the Worker checks the
   Access token itself on every request, so it fails closed if Access is
   missing or misconfigured. The app signs in with an Access service token;
@@ -225,12 +243,15 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/series` | channels; `?channel=X` its series (`start`, `end`, `points`), `&by_drive=1` per-drive stats |
 | `GET /api/templates` | the templates, deleted ones marked |
 | `PUT /api/templates` | apply changes: `{"changes": [{"name": ..., "channels": [...] or null}]}` |
-| `POST /api/logger/heartbeat` | the logger board's check-in (its token only), at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes` (when they change), `pending`, `oldest_pending_min`, `up_tries`, `up_failed`, `up_error`, `card_errors`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null |
+| `POST /api/logger/heartbeat` | the logger board's check-in (its token only; `cmd_done`, `cmd_ok`, `cmd_result`, `cmd_next`, `cmd_next_why`: its commands, above), at power-on (`"event": "boot"`) and every 10 s while it has Wi-Fi: a JSON object (`boot`, `reset`, `state`: waiting for link, searching, logging or parked; `speed_kmh`, `rpm`, `gear`, `battery_v`, `coolant_c`, `oil_c`, `lat`, `lon`, `faults`, `fault_codes` (when they change), `pending`, `oldest_pending_min`, `up_tries`, `up_failed`, `up_error`, `card_errors`, ...) of at most 4 KB, kept 30 days. Replies `sweep`: the full channel sweep the board should run (its id), or null; a settings change; and the next command (`cmd_id`, `cmd`, `cmd_arg`) |
 | `POST /api/logger/heartbeats` | check-ins the board kept while it had no Wi-Fi: `{"beats": [...]}`, at most 200 and 64 KB. Each is filed under its own `clock`; one without a clock, older than 30 days or already stored is skipped. Replies `stored`, `skipped` |
 | `GET`, `PUT`, `DELETE /api/logger/settings` | the logger board's settings (boardsettings.js): GET what its last check-in says it has (networks, the start of its token's id, `settings_version`), the change waiting or how the last went; PUT `{key: value}` (`wifi_ssid`, `wifi_pass`, `wifi2_ssid`, `wifi2_pass`, `ap_pass`, `access_id` with `access_secret`, `tz`; "" clears) for its next check-in, a person's Access login only; DELETE takes it back. The check-in's reply carries it (`settings_version`, `set_<key>` in hex) until the board says it has it (`settings_version`) or refused it (`settings_failed`, `settings_error`); then the values are dropped. None is ever returned |
 | `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes`, or its power-on's newest, with each code's module and text, and where known `first_km`, `last_km`, `occurrences`, `first_date`, `last_date`), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline, and `wifi_note`, the board's last word on why Wi-Fi wouldn't join (the logger page shows the last check-in's); and `last_drive`: the last logger drive's rate per tier |
 | `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
-| `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`): an ESP32 app image of at most 6 MB, `V` not "dev"; a person's login or a token in `FIRMWARE_PUBLISHERS` only. One build is kept; replies with its manifest |
+| `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`, or the Board tab): an ESP32 app image of at most 6 MB holding `V` (the version built into it: the board installs any version not its own, so one built as another would be installed again and again), `V` not "dev"; a person's login or a token in `FIRMWARE_PUBLISHERS` only. One build is kept; replies with its manifest |
+| `GET /logger/board` | the Board tab: the board's firmware and card, a folder browser on the card, and its commands |
+| `GET`, `POST`, `DELETE /api/logger/commands` | the board's commands (`boardcmd.js`): GET `{"kinds", "commands"}`, newest first (`?limit=`, default 20, up to 50; each with `state`: waiting, sent, done, failed or cancelled; `result`; a list's `listing`); POST `{"kind", "path"}` (`list`, `delete`), `{"kind": "format", "discard"}`, or `upload`, `update`, `restart`, a person's login only (the same one still waiting is returned); DELETE `?id=` takes one back |
+| `POST /api/logger/card` | a folder's listing from the board (its token only): `{"id", "path", "count", "entries": [[name, bytes, is folder]], "card": {"type", "size_mb", "used_mb"}}`, at most 200 entries, kept with its list command |
 | `GET /api/logger/firmware` | the manifest: `{"version", "sha256", "size", "uploaded"}` (404 when nothing is published); also in `GET /api/logger` as `firmware` |
 | `GET /api/logger/firmware.bin` | the published image |
 | `POST /api/logger/sweep` | ask for a full channel sweep on the next drive (`sweep.js`): the board asks every catalog identifier once, as the app's Check car now does. Replies `{"pending": {"id", "requested", ...}, "created"}`; one already waiting is kept |

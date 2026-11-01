@@ -22,6 +22,9 @@
 //      newer firmware the Worker offers to the card, installed at the next
 //      power-on (or after a minute idle), kept only once it checks in or
 //      reaches the car.
+//   4. Commands from the logger page's Board tab, in the check-ins' replies:
+//      list a folder on the card, upload now, update now; and between
+//      drives, delete from the card, format it, restart.
 //
 // What to read comes from channels.csv on the card (n63read logger-channels),
 // else the built-in fast tier. Read-only: the HSFZ client refuses anything
@@ -60,6 +63,7 @@
 #include <errno.h>
 #include <esp_heap_caps.h>
 #include <esp_ota_ops.h>
+#include <ff.h>
 #include <esp_sntp.h>
 #include <lwip/sockets.h>
 #include <sys/time.h>
@@ -77,6 +81,7 @@
 #include "carcheck.h"
 #include "carclock.h"
 #include "channels.h"
+#include "command.h"
 #include "csvlog.h"
 #include "faults.h"
 #include "default_channels.h"
@@ -801,6 +806,21 @@ static LogFile fastLayout, sweepLayout;
 // updater doesn't restart under.
 static volatile bool uploadNow = false;
 static std::atomic<uint32_t> uploadsWaiting{0};
+
+// The Board tab's commands (below): the one received and not done yet, and
+// the last one done and how (kept in the flash: cmddone, cmdok, cmdres).
+static std::mutex cmdLock;
+static Command cmdNext;                        // id 0: none
+static bool cmdStarted = false;                // cmdNext is under way: it can't be taken back
+static std::string cmdWhy;                     // why cmdNext waits, for the check-ins
+static uint32_t cmdDone = 0;
+static bool cmdOk = false;
+static std::string cmdResult;
+static std::atomic<bool> cardHold{false};      // a delete or format wants the card
+static std::atomic<bool> uploadParked{false};  // and the upload task has let go of it
+static std::atomic<bool> otaSoon{false};       // look for firmware now, not in 10 minutes
+static std::atomic<bool> otaHurry{false};      // and install it as soon as the board is idle
+static std::atomic<bool> channelsSoon{false};  // the channel file: the card was formatted
 
 // Notes for the next fast row's Event column: the board's own story (boot,
 // rates, plan changes, the end) kept in the log, since its terminal output
@@ -2534,6 +2554,18 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
       jsonText(j, "settings_error", settingsError.c_str());
     }
   }
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    jsonNumber(j, "cmd_done", cmdDone, 0);
+    if (cmdDone) {
+      j += cmdOk ? ",\"cmd_ok\":true" : ",\"cmd_ok\":false";
+      jsonText(j, "cmd_result", cmdResult.c_str());
+    }
+    if (cmdNext.id) {
+      jsonNumber(j, "cmd_next", cmdNext.id, 0);
+      if (!cmdWhy.empty()) jsonText(j, "cmd_next_why", cmdWhy.c_str());
+    }
+  }
   if (timeKnown()) jsonText(j, "clock", clockNow().c_str());
   jsonText(j, "wifi", WiFi.SSID().c_str());
   jsonNumber(j, "rssi", WiFi.RSSI(), 0);
@@ -2801,6 +2833,8 @@ static void applySettings(const std::string& reply) {
   if (wifi) wifiKnown = !c.next.ssid1.empty() || !c.next.ssid2.empty();
 }
 
+static void commandReply(const std::string& reply);   // below
+
 // Every BEAT_MS by the clock: a check-in that takes a second or two (a TLS
 // handshake each) doesn't push the next one back, and one that took longer
 // than BEAT_MS isn't made up with a burst.
@@ -2828,6 +2862,7 @@ static void beatIfDue() {
       beatsSinceCodes++;
     }
     checkReply(reply);
+    commandReply(reply);
     otaKeep("checked in");
     if (!booted) out.printf("[beat] checked in (boot %u)\n", (unsigned)bootCount);
     else if (failing) out.println("[beat] checking in again");
@@ -2949,7 +2984,7 @@ static void channelsIfDue() {
   static uint32_t last = 0;
   static bool tried = false;
   if (!sdOk || !WiFi.isConnected() || !hasWorker()) return;
-  if (tried && millis() - last < CHANNELS_CHECK_MS) return;
+  if (tried && millis() - last < CHANNELS_CHECK_MS && !channelsSoon.exchange(false)) return;
   tried = true;
   last = millis();
   fetchChannels();
@@ -3192,7 +3227,7 @@ static void otaCheckIfDue() {
       !hasWorker()) {
     return;
   }
-  if (tried && millis() - last < OTA_CHECK_MS) return;
+  if (tried && millis() - last < OTA_CHECK_MS && !otaSoon.exchange(false)) return;
   tried = true;
   last = millis();
   NetworkClientSecure tls;
@@ -3206,7 +3241,10 @@ static void otaCheckIfDue() {
   prefs.begin("logger", true);
   std::string bad = prefs.getString("otabad", "").c_str();
   prefs.end();
-  if (!wantUpdate(FW_VERSION, m.version, bad)) return;
+  if (!wantUpdate(FW_VERSION, m.version, bad)) {
+    otaHurry = false;                        // nothing to hurry
+    return;
+  }
   out.printf("[ota] firmware %s offered (running %s); downloading\n", m.version.c_str(), FW_VERSION);
   setOta("downloading " + m.version);
   if (!otaDownload(m)) { setOta("download of " + m.version + " failed"); return; }
@@ -3262,6 +3300,281 @@ static void checkListIfDue() {
   prefs.end();
   checkListReady = true;
   out.printf("[check] list for %s on the card (%d bytes)\n", want.c_str(), got);
+}
+
+// ---- commands from the Board tab ------------------------------------------------
+// The Worker sends the oldest command the board hasn't done in every
+// check-in's reply (lib/logger/command.h). Listing a folder, uploading now
+// and updating now are done at once (core 0); deleting, formatting and
+// restarting wait until the board is between drives (core 1's loop, so no
+// drive starts meanwhile), and the card's go only once the upload task has
+// let go of it. A command is kept in the flash as done before its work, so
+// a restart part way (or the restart asked for) never does it twice. One
+// not started is dropped when a reply no longer carries it (taken back on
+// the page).
+
+// FatFs's drive number for the card (SD keeps it to itself): f_mkfs needs it.
+struct SdDrive : fs::SDFS {
+  static uint8_t of(fs::SDFS& sd) { return sd.*(&SdDrive::_pdrv); }
+};
+
+static void commandBoot() {
+  Preferences prefs;
+  prefs.begin("logger", true);
+  std::lock_guard<std::mutex> g(cmdLock);
+  cmdDone = prefs.getUInt("cmddone", 0);
+  cmdOk = prefs.getBool("cmdok", false);
+  cmdResult = prefs.getString("cmdres", "").c_str();
+  prefs.end();
+}
+
+static void commandKeep(uint32_t id, bool ok, const std::string& result) {
+  Preferences prefs;
+  prefs.begin("logger");
+  prefs.putUInt("cmddone", id);
+  prefs.putBool("cmdok", ok);
+  prefs.putString("cmdres", result.c_str());
+  prefs.end();
+}
+
+static void commandDone(uint32_t id, bool ok, const std::string& result) {
+  std::string r = result.substr(0, 160);
+  commandKeep(id, ok, r);
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    cmdDone = id;
+    cmdOk = ok;
+    cmdResult = r;
+    if (cmdNext.id == id) {
+      cmdNext = Command();
+      cmdStarted = false;
+      cmdWhy.clear();
+    }
+  }
+  out.printf("[cmd] %u %s: %s\n", (unsigned)id, ok ? "done" : "failed", r.c_str());
+}
+
+static void commandReply(const std::string& reply) {
+  Command c;
+  bool has;
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    has = commandIn(reply, cmdDone, c);
+    if (cmdNext.id && !cmdStarted && (!has || c.id != cmdNext.id)) {
+      out.printf("[cmd] %u taken back\n", (unsigned)cmdNext.id);
+      cmdNext = Command();
+      cmdWhy.clear();
+    }
+    if (!has || cmdNext.id) return;          // one at a time
+    if (c.bad.empty() && c.kind != CMD_UPLOAD && c.kind != CMD_UPDATE) {
+      cmdNext = c;
+      cmdStarted = false;
+      cmdWhy.clear();
+      out.printf("[cmd] %u received\n", (unsigned)c.id);
+      return;
+    }
+  }
+  if (!c.bad.empty()) {
+    commandDone(c.id, false, c.bad);
+  } else if (c.kind == CMD_UPLOAD) {
+    uploadNow = true;
+    commandDone(c.id, sdOk, sdOk ? "uploading the waiting files now" : "no card");
+  } else if (!strcmp(FW_VERSION, "dev")) {
+    commandDone(c.id, false, "a USB build (dev) takes no updates; flash a published one");
+  } else {
+    otaSoon = true;
+    otaHurry = true;
+    commandDone(c.id, true, otaReady ? "installs the downloaded build as soon as it isn't logging"
+                                     : "looking for new firmware now; installs it as soon as it isn't logging");
+  }
+}
+
+static const char* cardTypeName() {
+  switch (SD.cardType()) {
+    case CARD_MMC: return "MMC";
+    case CARD_SD: return "SDSC";
+    case CARD_SDHC: return "SDHC";
+    default: return "";
+  }
+}
+
+// A folder's listing to the Worker (the upload task: it has the network).
+static void commandList() {
+  static uint32_t lastTry = 0;
+  static unsigned tries = 0;
+  Command c;
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    if (cmdNext.kind != CMD_LIST) return;
+    c = cmdNext;
+  }
+  if (!sdOk) { commandDone(c.id, false, "no card"); return; }
+  if (!WiFi.isConnected() || (tries && millis() - lastTry < 30000)) return;
+  std::vector<CardEntry> entries;
+  size_t count = 0;
+  bool folder = false;
+  double sizeMb, usedMb;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    File d = SD.open(c.arg.c_str());
+    if (d && d.isDirectory()) {
+      folder = true;
+      for (File f = d.openNextFile(); f; f = d.openNextFile()) {
+        count++;
+        entries.push_back({f.name(), f.isDirectory() ? 0 : (uint64_t)f.size(), f.isDirectory()});
+        f.close();
+        if (entries.size() >= LISTING_MAX) break;
+      }
+      while (d.getNextFileName().length()) count++;   // the rest, counted only
+    }
+    if (d) d.close();
+    sizeMb = SD.cardSize() / 1e6;
+    usedMb = SD.usedBytes() / 1e6;
+  }
+  if (!folder) { commandDone(c.id, false, "no such folder"); return; }
+  std::string body = listingJson(c.id, c.arg, entries, count, cardTypeName(), sizeMb, usedMb);
+  lastTry = millis();
+  int code = postBeat(body, "/api/logger/card");
+  if (code != 200 && ++tries < 5) return;    // again in 30 s
+  tries = 0;
+  if (code != 200) { commandDone(c.id, false, "couldn't send the listing (" + std::to_string(code) + ")"); return; }
+  commandDone(c.id, true, std::to_string(count) + (count == 1 ? " entry" : " entries"));
+}
+
+// A file, or a folder and everything in it, under the card's lock.
+static bool removeTree(const String& path, unsigned& files) {
+  File f = SD.open(path);
+  if (!f) return false;
+  bool dir = f.isDirectory();
+  if (!dir) { f.close(); files++; return SD.remove(path); }
+  std::vector<String> inside;
+  for (bool isDir = false;;) {
+    String name = f.getNextFileName(&isDir);
+    if (!name.length()) break;
+    inside.push_back(name);
+  }
+  f.close();
+  for (const String& p : inside) {
+    loopBeatMs = millis();                   // loopWatch: a big folder takes a while
+    removeTree(p, files);
+  }
+  return SD.rmdir(path);
+}
+
+// After the card lost files: what the board keeps on it, put right.
+static void cardChanged() {
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    if (!SD.exists(DRIVES)) SD.mkdir(DRIVES);
+    if (otaReady && !SD.exists(FW_FILE)) otaForget();
+    if (!SD.exists(CHECK_LIST)) checkListReady = false;
+  }
+  channelsWithoutFile();
+  channelsSoon = true;
+}
+
+static bool deletePath(const std::string& path, std::string& result) {
+  unsigned files = 0;
+  bool ok;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    if (!sdOk) { result = "no card"; return false; }
+    if (!SD.exists(path.c_str())) { result = "no such file or folder"; return false; }
+    ok = removeTree(path.c_str(), files);
+  }
+  cardChanged();
+  result = (ok ? "deleted " : "deleted part of it: ") + std::to_string(files) +
+           (files == 1 ? " file" : " files");
+  return ok;
+}
+
+static bool formatCard(uint32_t id, const std::string& arg, std::string& result) {
+  result = formatRefusal(sdOk ? pending().size() : 0, arg);
+  if (!result.empty()) return false;
+  commandKeep(id, false, "formatting; the board restarted before it finished");
+  bool ok = false;
+  {
+    std::lock_guard<std::recursive_mutex> g(sdLock);
+    sdOk = false;
+    uint8_t drive = SdDrive::of(SD);
+    // A card that wouldn't mount may have no FAT at all: mounting it with
+    // format_if_empty formats just that case.
+    if (drive == 0xFF && SD.begin(SD_CS, sdSpi, 20000000, SD_MOUNT, 5, true)) drive = SdDrive::of(SD);
+    if (drive == 0xFF) {
+      result = "no card to format";
+    } else {
+      const size_t WORK = 32 * 1024;           // f_mkfs's buffer: bigger is faster
+      void* work = heap_caps_malloc(WORK, MALLOC_CAP_SPIRAM);
+      if (!work) {
+        result = "no memory to format with";
+      } else {
+        out.println("[sd] formatting the card");
+        loopBeatMs = millis();
+        char drv[3] = {(char)('0' + drive), ':', 0};
+        MKFS_PARM opt = {FM_ANY, 0, 0, 0, 0};
+        FRESULT r = f_mkfs(drv, &opt, work, WORK);
+        heap_caps_free(work);
+        loopBeatMs = millis();
+        ok = r == FR_OK;
+        if (!ok) result = "format failed (FatFs error " + std::to_string((int)r) + ")";
+      }
+    }
+    if (!mountCard()) {
+      ok = false;
+      if (result.empty()) result = "formatted, but the card won't mount";
+    }
+  }
+  if (ok) {
+    cardChanged();
+    char text[80];
+    snprintf(text, sizeof(text), "formatted: %.1f GB free", (SD.totalBytes() - SD.usedBytes()) / 1e9);
+    result = text;
+  }
+  return ok;
+}
+
+// Between drives (core 1): what touches the card's files, or restarts.
+static void commandsBetweenDrives() {
+  static uint32_t holdSince = 0;
+  Command c;
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    if (!cmdNext.id || !commandBetweenDrives(cmdNext.kind)) return;
+    if (state != WAIT_LINK && state != SEARCH) {
+      cmdWhy = state == LOGGING ? "waits for the drive to end" : "waits for the car to be left";
+      return;
+    }
+    c = cmdNext;
+  }
+  if (c.kind == CMD_RESTART) {
+    commandDone(c.id, true, "restarted");
+    delay(300);
+    ESP.restart();
+  }
+  if (!cardHold) {                           // the upload task lets go of the card first
+    uploadParked = false;
+    cardHold = true;
+    holdSince = millis();
+  }
+  if (!uploadParked) {
+    if (millis() - holdSince < 120000) {
+      std::lock_guard<std::mutex> g(cmdLock);
+      cmdWhy = "waits for an upload to finish";
+      return;
+    }
+    cardHold = false;
+    commandDone(c.id, false, "the card stayed busy with an upload");
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    cmdStarted = true;
+    cmdWhy = c.kind == CMD_FORMAT ? "formatting" : "deleting";
+  }
+  std::string result;
+  bool ok = c.kind == CMD_FORMAT ? formatCard(c.id, c.arg, result) : deletePath(c.arg, result);
+  cardHold = false;
+  commandDone(c.id, ok, result);
 }
 
 // Wi-Fi and the check-ins (core 0), on a task of their own so an upload,
@@ -3354,9 +3667,16 @@ static void uploadTask(void*) {
   bool first = true;                       // the backlog at power-on, as soon as Wi-Fi is up
   bool recovered = false;
   for (;;) {
+    // A delete or format wants the card: hands off until it's done.
+    if (cardHold) {
+      uploadParked = true;
+      vTaskDelay(pdMS_TO_TICKS(200));
+      continue;
+    }
     // The last drive's files, if the power cut it: once the card is in.
     if (!recovered && sdOk) { recoverDrives(); recovered = true; }
     vTaskDelay(pdMS_TO_TICKS(500));
+    commandList();
     channelsIfDue();
     otaCheckIfDue();
     checkListIfDue();
@@ -3370,7 +3690,7 @@ static void uploadTask(void*) {
     round++;
     unsigned serverErrors = 0;
     for (const String& name : names) {   // a file that fails doesn't hold up the rest
-      if (!WiFi.isConnected()) break;
+      if (!WiFi.isConnected() || cardHold) break;
       if (!uploadTryNow(uploadFailures[name], round)) continue;
       lastUploadCode = 0;
       UpResult r = uploadOne(name);
@@ -3843,6 +4163,7 @@ void setup() {
   otaBoot();
   if (otaReady) otaInstall();                // a new build on the card: in before the car
   checkBoot();
+  commandBoot();
   loadChannels();
   loadSettings();
   startWifi();
@@ -4001,10 +4322,11 @@ void loop() {
   if (state == LOGGING || state == PARKED || !WiFi.isConnected()) idleSince = millis();
   // Not while files wait to go up, which may be the last minute of power
   // after a drive (OTA_IDLE_MAX_MS: unless that's gone on and on).
-  else if (otaReady && millis() - idleSince >= OTA_IDLE_MS &&
-           (!uploadsWaiting || millis() - idleSince >= OTA_IDLE_MAX_MS)) {
+  else if (otaReady && (otaHurry || (millis() - idleSince >= OTA_IDLE_MS &&
+                        (!uploadsWaiting || millis() - idleSince >= OTA_IDLE_MAX_MS)))) {
     otaInstall();
   }
+  commandsBetweenDrives();
   switch (state) {
     case WAIT_LINK:
       if (linkUp) state = SEARCH;
