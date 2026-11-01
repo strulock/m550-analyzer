@@ -595,10 +595,12 @@ after the first week of drives, and what's left.
         upload (`13-46-04.faults.csv`) failed twice with "TLS: SSL - Memory
         allocation failed" before going up on a retry. Firmware
         `20261031-1900-9b969d7` published with the app's token.
-- [ ] **On the car, the new firmware:** see it download, install and be
+- [x] **On the car, the new firmware:** see it download, install and be
       kept on its first check-in (`ota` in the check-ins); a drive's files
       as before; nothing in `card_errors` from the retry; a power-off before
-      a check-in gives "trying it again", not a refusal.
+      a check-in gives "trying it again", not a refusal. On the board and
+      working by the evening of 31 Oct, so the firmware below was merged
+      (#142) and the Worker deployed again (`03e2b215`). App 0.10.9.
 - [x] `drive_health` replies were cut at 60,000 characters (`MAX_TEXT`),
       about 3.4 KB a drive, so past about 17 warm drives (14 on 31 Oct) the
       reply would have been broken JSON with the newest drives lost (they
