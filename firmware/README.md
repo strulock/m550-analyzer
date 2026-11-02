@@ -59,10 +59,10 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
      answers only over the access point, and once the board is set up it
      no longer offers the host or the token (a page that could change the
      host would hand the token to whatever host it named): those change
-     over USB, or the token from the logger page. The fixed `m550-setup`
+     over USB, or the token from the Board tab. The fixed `m550-setup`
      opens only a board with no settings, which has nothing to give away.
 
-   After that, the logger page's **Board settings** changes the networks,
+   After that, the Board tab's **Settings** changes the networks,
    the token, the access point's password and the time zone (not the
    host, which the board refuses from a check-in's reply: it would be saved
    untried): the Worker hands the change to the board in its next check-in's

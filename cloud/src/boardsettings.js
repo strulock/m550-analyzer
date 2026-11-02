@@ -1,5 +1,5 @@
 /**
- * The logger board's settings from the logger page: its Wi-Fi networks, the
+ * The logger board's settings from the Board tab: its Wi-Fi networks, the
  * setup access point's password, its Access token and its time zone (the
  * board keeps them in its flash: firmware/lib/logger/settings.h).
  *

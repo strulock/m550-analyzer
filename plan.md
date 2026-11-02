@@ -708,7 +708,7 @@ after the first week of drives, and what's left.
 - [ ] On 29 Oct the board lost power three times while driving (power-on
       resets at 37 and 50 km/h, 8:41-8:49 pm): the USB cable or the car's
       port, if it wasn't unplugged by hand.
-- [ ] Try a change from the logger page's Board settings (a person's login
+- [ ] Try a change from the Board tab's Settings (a person's login
       only): a backup network, then a new Access token (make it, wait for
       "taken", then revoke the old).
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
