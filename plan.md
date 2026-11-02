@@ -714,6 +714,15 @@ after the first week of drives, and what's left.
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
       one in 4 minutes would point at the card or its power (a new card, or
       the supply) rather than the firmware.
+- [ ] Card errors on two cards in the car (31 Oct, 1 Nov: one or two a
+      minute while logging, none idle; up to 1.1 MB of a drive's file lost
+      when FatFS mounted the card afresh): the card at 10 MHz, its sector
+      reads and writes tried again below FatFS, `disk_*` in the check-ins,
+      `reset_where` after a watchdog. On the next drives: does
+      `card_errors` stay at 0, and what do `disk_last` and the drive's
+      "disk:" notes say (an answer the card didn't give: the signal; a long
+      wait: a busy card)? After a watchdog, `reset_where`. Still failing at
+      10 MHz: try 4 MHz, then the card's supply (a capacitor at the slot).
 - [x] 38 of the app's logs from 14-20 Oct are in R2 twice: under `logs/`
       (an upload on 21 Oct, 02:38 UTC) and at the top, where the app's
       sync puts them (16:35 the same day), byte for byte the same size. MCP
