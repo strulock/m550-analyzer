@@ -64,6 +64,8 @@
 #include <esp_heap_caps.h>
 #include <esp_ota_ops.h>
 #include <ff.h>
+#include <diskio.h>
+#include <diskio_impl.h>
 #include <esp_sntp.h>
 #include <lwip/sockets.h>
 #include <sys/time.h>
@@ -91,6 +93,7 @@
 #include "settings.h"
 #include "sha256.h"
 #include "upload.h"
+#include "where.h"
 #include "wifinote.h"
 
 // What a board whose flash has no settings starts from: logger_secrets.h's,
@@ -116,6 +119,10 @@ static const int ETH_MISO = 12, ETH_MOSI = 11, ETH_SCLK = 13;
 static const int ETH_CS = 14, ETH_INT = 10, ETH_RST = 9;
 static const int SD_CS = 4, SD_MOSI = 6, SD_MISO = 5, SD_SCK = 7;   // Waveshare wiki
 static const char* SD_MOUNT = "/sd";         // SD.begin's mount point, for POSIX calls
+// The card's SPI clock. 20 MHz had writes failing every minute or two of a
+// drive in the car on 31 Oct and 1 Nov, on two cards, and none on the bench
+// or idle: half that, for margin (a drive writes a few KB a second).
+static const uint32_t SD_HZ = 10000000;
 
 static const IPAddress MY_IP(169, 254, 100, 100);
 static const IPAddress MASK(255, 255, 0, 0);
@@ -235,6 +242,129 @@ static std::atomic<bool> sdOk{false};        // mounted (mountCard), read by eve
 static volatile bool linkUp = false;
 static volatile uint32_t loopBeatMs = 0;     // loop() came round (loopWatch)
 static uint32_t bootCount = 0;
+
+// ---- where each task is, kept through a reset (lib/logger/where.h) -----------
+static RTC_NOINIT_ATTR Where where;
+static std::string resetWhere;               // where they were when a watchdog or crash ended the last boot
+#define WHERE(slot, text) whereSet(where.slot, text)
+
+// ---- the card's sectors ------------------------------------------------------
+// FatFS reads and writes the card through the SD library's sd_diskio.cpp,
+// wrapped here. In the car on 31 Oct and 1 Nov a write failed every minute
+// or two of a drive, on two cards, and the driver made it worse: a status
+// check the card didn't answer at once told FatFS the card was gone, so it
+// mounted the card afresh, which shuts every open file (two or three drive
+// files failed together), and a drive then found up to 1.1 MB missing when
+// it opened its file again: FatFS's copy of the directory had said the
+// card had it. So a failed read or write is tried again (the card set up
+// again first if the driver gave up on it), a status check too, and FatFS
+// mounts the card afresh only when it's really gone or when a file asks
+// (diskRemount: after a write that failed every try, so it then reads what
+// the card has). Each one that took another try, or failed, is counted and
+// the last described, for the check-ins and the drive's notes.
+DSTATUS ff_sd_initialize(uint8_t pdrv);       // sd_diskio.cpp's own, not in its header
+DSTATUS ff_sd_status(uint8_t pdrv);
+DRESULT ff_sd_read(uint8_t pdrv, uint8_t* buffer, DWORD sector, UINT count);
+DRESULT ff_sd_write(uint8_t pdrv, const uint8_t* buffer, DWORD sector, UINT count);
+DRESULT ff_sd_ioctl(uint8_t pdrv, uint8_t cmd, void* buff);
+
+// FatFS's drive number for the card, which the SD library keeps to itself
+// (diskWrap, and f_mkfs to format).
+struct SdDrive : fs::SDFS {
+  static uint8_t of(fs::SDFS& sd) { return sd.*(&SdDrive::_pdrv); }
+};
+
+static const int DISK_TRIES = 4;
+static std::atomic<uint32_t> diskRetried{0};      // this boot: done on another try
+static std::atomic<uint32_t> diskFailed{0};       // failed every try
+static std::atomic<uint32_t> diskWriteFailed{0};  // of those, writes
+static std::atomic<uint32_t> diskRemounts{0};     // FatFS mounted the card afresh
+static std::atomic<bool> diskRemount{false};      // asked for: FatFS's next call does it
+static std::mutex diskLock;                       // diskLast, diskLastMs
+static std::string diskLast;
+static uint32_t diskLastMs = 0;
+
+static void diskTally(const std::string& text, bool ok) {
+  (ok ? diskRetried : diskFailed)++;
+  std::lock_guard<std::mutex> g(diskLock);
+  diskLast = text;
+  diskLastMs = millis();
+}
+
+// The last one, if it was in the last 10 s: for a drive file's note.
+static std::string diskRecent() {
+  std::lock_guard<std::mutex> g(diskLock);
+  return diskLastMs && millis() - diskLastMs < 10000 ? diskLast : "";
+}
+
+static DSTATUS diskInit(uint8_t pdrv) {
+  diskRemount = false;
+  diskRemounts++;
+  return ff_sd_initialize(pdrv);               // a card the driver gave up on: set up again
+}
+
+static DSTATUS diskStatus(uint8_t pdrv) {
+  if (diskRemount) return STA_NOINIT;          // FatFS then mounts it afresh (diskInit)
+  uint32_t t0 = millis();
+  DSTATUS s = ff_sd_status(pdrv);
+  int tries = 1;
+  for (; (s & STA_NOINIT) && tries < DISK_TRIES; tries++) {
+    delay(10 << tries);
+    ff_sd_initialize(pdrv);                    // nothing unless the driver gave up on it
+    s = ff_sd_status(pdrv);
+  }
+  if (tries > 1) {
+    char t[80];
+    snprintf(t, sizeof(t), "status: %s %d (%lu ms)", s & STA_NOINIT ? "failed after try" : "ok on try",
+             tries, (unsigned long)(millis() - t0));
+    diskTally(t, !(s & STA_NOINIT));
+  }
+  return s;
+}
+
+template <typename Op>
+static DRESULT diskTry(bool write, uint8_t pdrv, DWORD sector, UINT count, Op op) {
+  char what[WHERE_LEN];
+  snprintf(what, sizeof(what), "%s %u at %lu", write ? "write" : "read", (unsigned)count,
+           (unsigned long)sector);
+  WHERE(disk, what);
+  uint32_t t0 = millis();
+  DRESULT r = op();
+  int tries = 1;
+  bool reset = false;
+  for (; r != RES_OK && r != RES_WRPRT && r != RES_PARERR && tries < DISK_TRIES; tries++) {
+    delay(10 << tries);
+    if (r == RES_NOTRDY) {                     // the driver gave up on the card
+      reset = true;
+      ff_sd_initialize(pdrv);
+    }
+    r = op();                                  // the same sectors again: no harm if they landed
+  }
+  if (tries > 1) {
+    diskTally(diskText(write, sector, count, tries, r == RES_OK, millis() - t0, reset), r == RES_OK);
+    if (r != RES_OK && write) diskWriteFailed++;
+  }
+  WHERE(disk, "");
+  return r;
+}
+
+static DRESULT diskRead(uint8_t pdrv, uint8_t* buffer, DWORD sector, UINT count) {
+  return diskTry(false, pdrv, sector, count, [&] { return ff_sd_read(pdrv, buffer, sector, count); });
+}
+
+static DRESULT diskWrite(uint8_t pdrv, const uint8_t* buffer, DWORD sector, UINT count) {
+  return diskTry(true, pdrv, sector, count, [&] { return ff_sd_write(pdrv, buffer, sector, count); });
+}
+
+// After each SD.begin, which registers the driver's own.
+static void diskWrap() {
+  uint8_t drive = SdDrive::of(SD);
+  if (drive == 0xFF) return;
+  static const ff_diskio_impl_t impl = {
+    .init = &diskInit, .status = &diskStatus, .read = &diskRead, .write = &diskWrite,
+    .ioctl = &ff_sd_ioctl};
+  ff_diskio_register(drive, &impl);
+}
 
 // ---- settings (lib/logger/settings.h) ------------------------------------------
 // In the flash's "settings" namespace, a key a field. The check-in task changes
@@ -693,12 +823,17 @@ struct DriveFile {
   }
   size_t lastWrote = 0, lastOnCard = 0;      // the last write's, for the terminal
   bool write() {
+    // A sector write that failed every try (diskTry) fails this one, even if
+    // the size checks out: that's FatFS's copy of the directory, which a
+    // sector that never reached the card can leave ahead of the card.
+    uint32_t failed = diskWriteFailed;
     // From the end of what's checked, wherever a failed write left the
     // position.
     if (!f.seek(size)) { lastWrote = 0; lastOnCard = f.size(); return false; }
     lastWrote = f.write((const uint8_t*)pending.data(), pending.size());
     f.flush();
     lastOnCard = f.size();
+    if (diskWriteFailed != failed) return false;
     if (lastWrote != pending.size() || lastOnCard != size + lastWrote) return false;
     sha.update(pending.data(), lastWrote);
     size += lastWrote;
@@ -712,6 +847,15 @@ struct DriveFile {
   bool reopen() {
     if (f) f.close();
     std::lock_guard<std::recursive_mutex> g(sdLock);
+    // After a write that failed every try, FatFS reads the card afresh
+    // (diskStatus) before the probe below, so it sees what the card has
+    // rather than its own copy. Once per such failure: the drive's other
+    // files reopen after it on the same fresh look.
+    static uint32_t remountedAt = 0;
+    if (diskWriteFailed != remountedAt) {
+      remountedAt = diskWriteFailed;
+      diskRemount = true;
+    }
     {
       File probe = SD.open(path);
       size_t have = probe ? probe.size() : 0;
@@ -751,11 +895,12 @@ struct DriveFile {
                (unsigned)lastWrote, (unsigned)pending.size(), (unsigned)lastOnCard,
                (unsigned)(size + lastWrote));
     bool ok = reopen() && write();
-    char text[96];
-    snprintf(text, sizeof(text), "card: %s %s; ", path.substring(path.lastIndexOf('/') + 1).c_str(),
-             ok ? "write failed so opened again" : "write failed so rows held");
-    if (failures <= 20) cardNote += text;
-    out.printf("[sd] %s\n", text);
+    std::string text = std::string("card: ") + path.substring(path.lastIndexOf('/') + 1).c_str() +
+                       (ok ? " write failed so opened again" : " write failed so rows held");
+    std::string disk = diskRecent();           // what the card itself did (diskTry)
+    if (!disk.empty()) text += " (" + disk + ")";
+    if (failures <= 20) cardNote += text + "; ";
+    out.printf("[sd] %s\n", text.c_str());
     return ok;
   }
   // Close and mark finished: <file>.done holds "<sha256> <bytes>", which is
@@ -847,7 +992,9 @@ static const char* resetReason() {
     case ESP_RST_BROWNOUT: return "brownout";
     case ESP_RST_SW: return "software reset";
     case ESP_RST_PANIC: return "crash";
-    case ESP_RST_INT_WDT: case ESP_RST_TASK_WDT: case ESP_RST_WDT: return "watchdog";
+    case ESP_RST_TASK_WDT: return "task watchdog";    // core 0's idle task starved 5 s
+    case ESP_RST_INT_WDT: return "interrupt watchdog";
+    case ESP_RST_WDT: return "watchdog";
     case ESP_RST_EXT: return "reset pin";
     case ESP_RST_USB: return "usb reset";
     case ESP_RST_DEEPSLEEP: return "wake";
@@ -881,7 +1028,8 @@ static void listLeftovers() {
 static bool mountCard() {
   std::lock_guard<std::recursive_mutex> g(sdLock);
   SD.end();
-  if (!SD.begin(SD_CS, sdSpi, 20000000)) return false;
+  if (!SD.begin(SD_CS, sdSpi, SD_HZ)) return false;
+  diskWrap();
   out.printf("[sd] %.1f GB card, %.1f MB used\n", SD.cardSize() / 1e9, SD.usedBytes() / 1e6);
   listLeftovers();
   sdOk = true;
@@ -904,7 +1052,13 @@ static bool closeLeftover(const String& name) {
   if (!f) return false;
   Sha256 sha;
   uint32_t size = 0;
-  for (int n; (n = f.read(buf, sizeof(buf))) > 0;) { sha.update(buf, n); size += n; }
+  // A tick's rest each 64 KB: a few MB read without one starved core 0's
+  // idle task past the 5 s watchdog, the more so at the slower clock.
+  for (int n; (n = f.read(buf, sizeof(buf))) > 0;) {
+    sha.update(buf, n);
+    size += n;
+    if (size % (64 * 1024) < (uint32_t)n) vTaskDelay(1);
+  }
   f.close();
   char hex[65];
   sha.finishHex(hex);
@@ -983,6 +1137,13 @@ static void startDrive() {
            (unsigned)table.channels.size(), from.c_str(),
            !timeKnown() ? "; clock unknown" : clockFromCar ? "; clock from the car" : "");
   addNote(start);
+  static bool whereNoted = false;            // the boot's first drive only
+  if (!resetWhere.empty() && !whereNoted) {
+    std::string w = resetWhere;
+    std::replace(w.begin(), w.end(), ',', ' ');
+    addNote("the last boot ended at " + w);
+    whereNoted = true;
+  }
   checkStart();
   dueTiers = duePeriodic();
   // A full channel check reads every periodic tier too, due or not.
@@ -1601,9 +1762,18 @@ static void cycle() {
     sweepRow(secs);
   }
   if (millis() - lastFlushMs >= FLUSH_MS) {
+    WHERE(loop, "drive files flush");
     fastFile.flush();
     sweepFile.flush();
     lastFlushMs = millis();
+    // A read or write the card took another try for (diskTry), noted, at
+    // most once a flush: it's what tells a bad signal from a busy card.
+    static uint32_t retriedSeen = 0;
+    if (diskRetried != retriedSeen) {
+      retriedSeen = diskRetried;
+      std::string d = diskRecent();
+      if (!d.empty()) cardNote += "disk: " + d + "; ";
+    }
   }
   if (!cardNote.empty()) {
     cardNote.pop_back();                     // "; " between them, not after the last
@@ -2037,6 +2207,9 @@ struct PacedFile : Stream {
     if (state == LOGGING && sinceRest >= PACE_BYTES) {
       vTaskDelay(pdMS_TO_TICKS(PACE_MS));
       sinceRest = 0;
+    } else if (sinceRest >= 64 * 1024) {       // not logging: a tick for core 0's idle task
+      vTaskDelay(1);
+      sinceRest = 0;
     }
     size_t got = f.read((uint8_t*)b, n);
     sha.update(b, got);
@@ -2119,6 +2292,7 @@ static UpResult uploadOne(const String& name) {
     break;
   }
   NetworkClientSecure tls;
+  WHERE(upload, ("tls for " + std::string(name.c_str())).c_str());
   TlsOpen open = tlsConnect(tls, 10000, 10000, 30000);
   if (open != TLS_OK) {
     f.close();
@@ -2138,6 +2312,7 @@ static UpResult uploadOne(const String& name) {
     http.addHeader("Content-Type", "text/csv");
     uint32_t t0 = millis();
     PacedFile paced(f);
+    WHERE(upload, ("send " + std::string(name.c_str())).c_str());
     int code = http.sendRequest("PUT", &paced, f.size());
     String body = code > 0 ? http.getString() : String();
     http.end();
@@ -2476,6 +2651,7 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
   jsonText(j, "event", boot ? "boot" : "beat");
   if (buffered) j += ",\"buffered\":true";
   jsonText(j, "reset", resetReason());
+  if (!resetWhere.empty()) jsonText(j, "reset_where", resetWhere.c_str());
   jsonNumber(j, "up_s", millis() / 1000.0, 0);
   State s = state;
   jsonText(j, "state", states[s]);
@@ -2587,6 +2763,16 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
   }
   jsonNumber(j, "sd_free_mb", sdOk ? (SD.totalBytes() - SD.usedBytes()) / 1e6 : NAN, 0);
   jsonNumber(j, "card_errors", cardErrors, 0);
+  jsonNumber(j, "disk_retried", diskRetried, 0);
+  jsonNumber(j, "disk_failed", diskFailed, 0);
+  jsonNumber(j, "disk_remounts", diskRemounts, 0);
+  {
+    std::lock_guard<std::mutex> g(diskLock);
+    if (diskLastMs) {
+      jsonText(j, "disk_last", diskLast.c_str());
+      jsonNumber(j, "disk_last_min", (millis() - diskLastMs) / 60000.0, 1);
+    }
+  }
   jsonNumber(j, "heap_kb", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024, 0);
   jsonNumber(j, "largest_kb", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024, 0);
   {
@@ -2848,10 +3034,15 @@ static void beatIfDue() {
   if (tried && (int32_t)(millis() - next) < 0) return;
   next = tried && millis() - next < BEAT_MS ? next + BEAT_MS : millis() + BEAT_MS;
   tried = true;
+  WHERE(beat, "check-in kept on the card");
   if (!WiFi.isConnected()) { keepBeat(); return; }
   keepHeldBeats();                         // sent with the kept ones below
   std::string reply;
-  int code = postBeat(beatJson(!booted), "/api/logger/heartbeat", &reply);
+  WHERE(beat, "check-in made");
+  const std::string& body = beatJson(!booted);
+  WHERE(beat, "check-in sent");
+  int code = postBeat(body, "/api/logger/heartbeat", &reply);
+  WHERE(beat, "check-in reply");
   if (code == 200) {
     beatsSent++;
     applySettings(reply);
@@ -2868,6 +3059,7 @@ static void beatIfDue() {
     else if (failing) out.println("[beat] checking in again");
     booted = true;
     failing = false;
+    WHERE(beat, "kept check-ins sent");
     if (sdOk) sendKeptBeats();
   } else if (!failing) {
     out.printf("[beat] check-in failed: %d %s\n", code,
@@ -3313,11 +3505,6 @@ static void checkListIfDue() {
 // not started is dropped when a reply no longer carries it (taken back on
 // the page).
 
-// FatFs's drive number for the card (SD keeps it to itself): f_mkfs needs it.
-struct SdDrive : fs::SDFS {
-  static uint8_t of(fs::SDFS& sd) { return sd.*(&SdDrive::_pdrv); }
-};
-
 static void commandBoot() {
   Preferences prefs;
   prefs.begin("logger", true);
@@ -3499,7 +3686,10 @@ static bool formatCard(uint32_t id, const std::string& arg, std::string& result)
     uint8_t drive = SdDrive::of(SD);
     // A card that wouldn't mount may have no FAT at all: mounting it with
     // format_if_empty formats just that case.
-    if (drive == 0xFF && SD.begin(SD_CS, sdSpi, 20000000, SD_MOUNT, 5, true)) drive = SdDrive::of(SD);
+    if (drive == 0xFF && SD.begin(SD_CS, sdSpi, SD_HZ, SD_MOUNT, 5, true)) {
+      diskWrap();
+      drive = SdDrive::of(SD);
+    }
     if (drive == 0xFF) {
       result = "no card to format";
     } else {
@@ -3598,10 +3788,14 @@ static void loopWatch() {
 
 static void beatTask(void*) {
   for (;;) {
+    WHERE(beat, "loop watch");
     loopWatch();
+    WHERE(beat, "wifi");
     keepWifi();
     beatIfDue();
+    WHERE(beat, "setup page");
     if (setupPageOn) setupPage.handleClient();
+    WHERE(beat, "resting");
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -3670,16 +3864,24 @@ static void uploadTask(void*) {
     // A delete or format wants the card: hands off until it's done.
     if (cardHold) {
       uploadParked = true;
+      WHERE(upload, "card held");
       vTaskDelay(pdMS_TO_TICKS(200));
       continue;
     }
     // The last drive's files, if the power cut it: once the card is in.
+    WHERE(upload, "recovering drives");
     if (!recovered && sdOk) { recoverDrives(); recovered = true; }
+    WHERE(upload, "resting");
     vTaskDelay(pdMS_TO_TICKS(500));
+    WHERE(upload, "listing a folder");
     commandList();
+    WHERE(upload, "channels check");
     channelsIfDue();
+    WHERE(upload, "firmware check");
     otaCheckIfDue();
+    WHERE(upload, "check list");
     checkListIfDue();
+    WHERE(upload, "resting");
     if (!first && !uploadNow && millis() - last < UPLOAD_EVERY_MS) continue;
     last = millis();
     if (!sdOk || !WiFi.isConnected() || !hasWorker()) continue;
@@ -3693,7 +3895,9 @@ static void uploadTask(void*) {
       if (!WiFi.isConnected() || cardHold) break;
       if (!uploadTryNow(uploadFailures[name], round)) continue;
       lastUploadCode = 0;
+      WHERE(upload, ("upload " + std::string(name.c_str())).c_str());
       UpResult r = uploadOne(name);
+      WHERE(upload, "resting");
       if (r == UP_SENT) {
         uploadsWaiting = uploadsWaiting - 1;
         uploadFailures.erase(name);
@@ -4138,6 +4342,15 @@ void setup() {
   Serial.setTxTimeoutMs(0);
   restartedHung = esp_reset_reason() == ESP_RST_SW && restartWhy == RESTART_HUNG;
   restartWhy = 0;
+  // Where the tasks were, when a watchdog or a crash ended the last boot.
+  {
+    esp_reset_reason_t r = esp_reset_reason();
+    if (restartedHung || r == ESP_RST_PANIC || r == ESP_RST_INT_WDT || r == ESP_RST_TASK_WDT ||
+        r == ESP_RST_WDT || r == ESP_RST_BROWNOUT) {
+      resetWhere = whereText(where);
+    }
+    whereClear(where);
+  }
   Preferences prefs;
   prefs.begin("logger");
   bootCount = prefs.getUInt("boots", 0) + 1;
@@ -4145,6 +4358,7 @@ void setup() {
   prefs.end();
   out.printf("\nm550 logger (read-only), firmware %s, boot %u after %s, PSRAM %u KB\n", FW_VERSION,
              (unsigned)bootCount, resetReason(), (unsigned)(ESP.getPsramSize() / 1024));
+  if (!resetWhere.empty()) out.printf("[boot] the last boot ended at: %s\n", resetWhere.c_str());
 
   sntp_set_time_sync_notification_cb([](struct timeval*) { clockFromCar = false; });
 
@@ -4312,7 +4526,9 @@ static void pollGear() {
 
 void loop() {
   loopBeatMs = millis();                     // loopWatch: this loop isn't stuck
+  WHERE(loop, "terminal");
   serviceTerminal();
+  WHERE(loop, "firmware");
   // Firmware: a build on trial goes back if it hasn't proved itself in time;
   // one waiting on the card goes in once the board has been idle a minute
   // away from the car (not parked in it: the power may go before the new
@@ -4326,9 +4542,11 @@ void loop() {
                         (!uploadsWaiting || millis() - idleSince >= OTA_IDLE_MAX_MS)))) {
     otaInstall();
   }
+  WHERE(loop, "commands");
   commandsBetweenDrives();
   switch (state) {
     case WAIT_LINK:
+      WHERE(loop, "waiting for link");
       if (linkUp) state = SEARCH;
       else delay(50);
       break;
@@ -4340,6 +4558,7 @@ void loop() {
         static uint32_t lastMount = 0;
         if (millis() - lastMount >= SD_RETRY_MS) {
           lastMount = millis();
+          WHERE(loop, "mounting the card");
           if (mountCard()) {
             out.println("[sd] the card is in now");
             channelsWithoutFile();
@@ -4352,6 +4571,7 @@ void loop() {
       if (tried && millis() - lastTry < SEARCH_MS) { delay(50); break; }
       lastTry = millis();
       tried = true;
+      WHERE(loop, "finding the car");
       // The gateway keeps its link-local address from drive to drive: try the
       // last one first, then ask (discovery reaches it by the subnet broadcast).
       bool connected = rememberCar(false) && connectOne(tMain, mainClient, hsfz::TESTER, 1000);
@@ -4374,11 +4594,17 @@ void loop() {
       break;
     }
     case LOGGING:
+      WHERE(loop, "car reads");
       cycle();
+      WHERE(loop, "fault reads");
       readFaults();
+      WHERE(loop, "sweep reads");
       readCheck();
+      WHERE(loop, "gear");
       pollGear();
+      WHERE(loop, "fault details");
       readDetails(false);
+      WHERE(loop, "drive end");
       if (endRequested) { endDrive("ended from the terminal"); state = SEARCH; }
       else if (connectionLost && !reconnect()) { endDrive("connection closed"); state = SEARCH; }
       else if (millis() - lastOkMs > CAR_GONE_MS) { endDrive("the car stopped answering"); state = SEARCH; }
@@ -4390,6 +4616,7 @@ void loop() {
       }
       break;
     case PARKED:
+      WHERE(loop, "parked");
       pollParked();
       collect();
       readDetails(true);

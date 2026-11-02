@@ -258,7 +258,9 @@ td.when { white-space: nowrap; }
     $("fwStats").innerHTML =
       stat("Running", running, status && status.last ? "as of " + local(status.last.received) : "") +
       stat("Published", pub ? pub.version : "none", pub ? local(pub.uploaded) + ", " + bytes(pub.size) : "") +
-      stat("Update", state, "", cls);
+      stat("Update", state, "", cls) +
+      stat("Started after", b.reset || "–", b.reset_where ? "it was at: " + b.reset_where : "",
+        /watchdog|crash|stuck|brownout/.test(b.reset || "") ? "warn" : "");
     $("fwFold").textContent = running + (cls === "ok" ? ", up to date" : pub && pub.version !== b.fw ? ", " + pub.version + " published" : "");
     $("fwFold").className = "foldstate" + (cls === "warn" || cls === "bad" ? " warn" : "");
   }
@@ -305,6 +307,10 @@ td.when { white-space: nowrap; }
       stat("Free", free == null ? "no card" : bytes(free * 1e6), size ? "of " + bytes(size * 1e6) + (listing.card.type ? ", " + listing.card.type : "") : "",
         free == null ? "bad" : free < 1000 ? "warn" : "") +
       stat("Card errors", errs == null ? "–" : errs, "this power-on", errs > 0 ? "warn" : "") +
+      (b.disk_retried == null ? "" : stat("Card retries", b.disk_retried,
+        (b.disk_failed || 0) + " failed every try, " + (b.disk_remounts || 0) + (b.disk_remounts === 1 ? " remount" : " remounts") +
+        (b.disk_last ? "; last: " + b.disk_last + ", " + Math.round(b.disk_last_min || 0) + " min before" : ""),
+        b.disk_failed > 0 ? "warn" : "")) +
       stat("Waiting to upload", pend == null ? "–" : pend,
         b.oldest_pending_min != null ? "oldest " + Math.round(b.oldest_pending_min) + " min" : "", pend > 0 ? "warn" : "") +
       stat("Uploaded", b.uploaded == null ? "–" : b.uploaded, "this power-on" + (b.up_failed ? ", " + b.up_failed + " failed" : "")) +

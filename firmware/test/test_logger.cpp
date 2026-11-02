@@ -23,6 +23,7 @@
 #include "settings.h"
 #include "sha256.h"
 #include "upload.h"
+#include "where.h"
 
 using namespace logger;
 
@@ -1097,6 +1098,28 @@ static void test_wifi_note() {
   CHECK(wifiNote(-1, {home, none}) == "Home: join failed: no answer (the scan failed)");
 }
 
+static void test_where() {
+  using namespace logger;
+  Where w;
+  memset(&w, 0xA5, sizeof(w));                 // a power-on: whatever the RTC memory holds
+  CHECK(whereText(w) == "");
+  whereClear(w);
+  CHECK(whereText(w) == "");
+  whereSet(w.loop, "car reads");
+  whereSet(w.disk, "write 8 at 123456");
+  CHECK(whereText(w) == "loop: car reads; disk: write 8 at 123456");
+  whereSet(w.beat, "a very long description that is cut to fit the slot");
+  CHECK(strlen(w.beat) == WHERE_LEN - 1);
+  whereSet(w.upload, nullptr);
+  CHECK(w.upload[0] == 0);
+  w.loop[3] = 1;                               // torn: shown as far as it's printable
+  CHECK(whereText(w).rfind("loop: car; beat: a very long", 0) == 0);
+  memset(w.upload, 'x', WHERE_LEN);            // no terminator: no further than the slot
+  CHECK(whereText(w).find("upload: " + std::string(WHERE_LEN, 'x') + "; disk") != std::string::npos);
+  CHECK(diskText(true, 123456, 8, 3, true, 140, true) == "write 8 at 123456: ok on try 3 (140 ms; card reset)");
+  CHECK(diskText(false, 7, 1, 4, false, 2010, false) == "read 1 at 7: failed after try 4 (2010 ms)");
+}
+
 static void test_commands() {
   // Paths as the Worker allows them.
   CHECK(cardPath("/"));
@@ -1155,6 +1178,7 @@ static void test_commands() {
 
 static const struct { const char* name; void (*fn)(); } tests[] = {
   {"commands", test_commands},
+  {"where", test_where},
   {"wifi_note", test_wifi_note},
   {"settings", test_settings},
   {"car_check", test_car_check},

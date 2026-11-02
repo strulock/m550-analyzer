@@ -118,6 +118,31 @@ than the drive logging into nothing; one the card never took gets no
 while the board looks for the car (`[sd] the card is in now`), with its
 channels and the files a power cut left open.
 
+Below FatFS, the card's sector reads and writes go through main.cpp's
+`diskTry`, wrapping the SD library's driver: in the car on 31 Oct and 1
+Nov a write failed every minute or two of a drive, on two cards, and a
+status check the card didn't answer at once made FatFS mount the card
+afresh, shutting every open file, after which a drive could find a
+megabyte missing from its file. Now a failed read, write or status check
+is tried again, up to 4 times (the card set up again first if the driver
+gave up on it), and FatFS mounts the card afresh only when it's really
+gone, or once after a write that failed every try, so the file is opened
+again on what the card has. The check-ins count them (`disk_retried`,
+`disk_failed`, `disk_remounts`) and describe the last (`disk_last`,
+"write 8 at 123456: ok on try 2 (40 ms)", and `disk_last_min`), and a
+drive notes each ("disk: ..."). The card runs at 10 MHz (`SD_HZ`; 20 MHz
+before 2 Nov).
+
+What each task was doing (the logging loop, the check-ins, the uploads, and
+a sector read or write in progress) is kept in RTC memory, which a
+watchdog or a crash leaves alone (lib/logger/where.h): the next boot's
+check-ins say where it was (`reset_where`: "loop: car reads; beat: check-in
+sent; disk: write 8 at 123456"), the Board tab shows it beside the reset,
+and the first drive notes it. `reset` tells the task watchdog (core 0's
+idle task starved 5 s) from the interrupt watchdog. Long card reads on core
+0 (hashing a drive the power cut left open, an upload while not logging)
+rest a tick each 64 KB, which they didn't, for the task watchdog.
+
 If the logging loop stops coming round for 2 minutes (a card or socket call
 that never returns), the check-in task restarts the board, and the next
 boot's check-ins give `reset` as "logging loop stuck"; a build on trial goes
@@ -327,7 +352,9 @@ DME's `IUADW`), files
 waiting and the oldest's age (`oldest_pending_min`, from its name), the
 uploads tried and failed this boot and the last failure with how long ago
 (`up_tries`, `up_failed`, `up_error`, `up_error_min`), card write failures
-(`card_errors`), Wi-Fi and memory, why it last couldn't join Wi-Fi while
+(`card_errors`) and the card's sector retries (`disk_retried`, `disk_failed`,
+`disk_remounts`, `disk_last`, `disk_last_min`; above), where the last boot
+ended if a watchdog or crash ended it (`reset_where`), Wi-Fi and memory, why it last couldn't join Wi-Fi while
 it's off and for 10 minutes after (`wifi_note`, `wifi_note_min`; below), and which channel
 file it's running (`channels`: the active preset's ETag, `manual` for one
 sent over the terminal, `card` or `built-in`), which the logger channel page
