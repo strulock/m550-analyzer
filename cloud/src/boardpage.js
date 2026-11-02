@@ -4,8 +4,11 @@
  * files waiting) and the commands sent to it (boardcmd.js): list a folder
  * on the card and delete from it, format it, upload now, update now,
  * restart. A build can be published from here too (PUT /api/logger/firmware,
- * its version read from the image). Talks to /api/logger and
- * /api/logger/commands with the visitor's Access login. No dependencies;
+ * its version read from the image), and its settings changed (its Wi-Fi,
+ * Access token, access point and time zone: /api/logger/settings,
+ * boardsettings.js; sent to it, never shown back). Talks to /api/logger,
+ * /api/logger/commands and /api/logger/settings with the visitor's Access
+ * login. No dependencies;
  * the script avoids backticks and template placeholders so it can sit in
  * this template.
  */
@@ -84,6 +87,8 @@ td.when { white-space: nowrap; }
 .box { border: 1px solid var(--rule); border-radius: 6px; padding: 10px; margin-top: 10px; display: grid; gap: 8px; }
 .box.danger { border-color: var(--bad); }
 .note { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+.setgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px 14px; margin: 10px 0; }
+.setgrid label { display: flex; flex-direction: column; align-items: stretch; gap: 3px; font-size: 13px; }
 @media (max-width: 640px) {
   .card { padding: 10px; }
   td, th { padding: 6px 4px; }
@@ -151,6 +156,32 @@ td.when { white-space: nowrap; }
     </div>
   </details>
 
+  <details class="card" id="foldSet">
+    <summary><h2>Settings</h2><span class="foldstate" id="setFold"></span></summary>
+    <div id="setState" class="muted">Loading…</div>
+    <div class="setgrid">
+      <label>Wi-Fi network <input id="set_wifi_ssid" autocomplete="off"></label>
+      <label>Its password <input id="set_wifi_pass" type="password" autocomplete="new-password"></label>
+      <label>Backup network <input id="set_wifi2_ssid" autocomplete="off"></label>
+      <label>Its password <input id="set_wifi2_pass" type="password" autocomplete="new-password"></label>
+      <label>Access token's client ID <input id="set_access_id" autocomplete="off" placeholder="….access"></label>
+      <label>Its client secret <input id="set_access_secret" type="password" autocomplete="new-password"></label>
+      <label>Setup access point's password <input id="set_ap_pass" type="password" autocomplete="new-password"></label>
+      <label>Time zone (POSIX) <input id="set_tz" autocomplete="off" placeholder="CST6CDT,M3.2.0,M11.1.0"></label>
+    </div>
+    <div class="row">
+      <button id="setSave">Send to the board…</button>
+      <button id="setCancel" class="hide">Take the change back</button>
+      <label><input type="checkbox" id="setClear2"> Remove the backup network</label>
+    </div>
+    <p class="note">Blank fields keep what the board has.
+    The board takes a change at its next check-in, and then the passwords are dropped here; none is
+    ever shown. A new token is tried before the board keeps it, so make the new one in Zero Trust
+    (Access &gt; Service credentials, added to the application's Service Auth policy), wait for
+    "taken", and only then revoke the old. A board that can't check in is set up over USB
+    (firmware/tools/provision.py) or from its access point's page.</p>
+  </details>
+
   <details class="card" id="foldCmds" open>
     <summary><h2>Commands</h2><span class="foldstate" id="cmdFold"></span></summary>
     <div class="scroll"><table id="cmds"></table></div>
@@ -191,7 +222,7 @@ td.when { white-space: nowrap; }
       (sub ? "<small>" + esc(sub) + "</small>" : "") + "</div>";
   }
   // The folds stay as they were left (this browser only).
-  ["foldFw", "foldCard", "foldCmds"].forEach(function (id) {
+  ["foldFw", "foldCard", "foldSet", "foldCmds"].forEach(function (id) {
     try { var v = localStorage.getItem("board." + id); if (v) $(id).open = v === "1"; } catch (e) {}
     $(id).addEventListener("toggle", function () {
       try { localStorage.setItem("board." + id, $(id).open ? "1" : "0"); } catch (e) {}
@@ -354,6 +385,58 @@ td.when { white-space: nowrap; }
     send("format", { discard: $("discard").checked }, function () { $("formatClose").onclick(); });
   };
 
+  // ---- settings: what its last check-in says it has, the change waiting
+  // for it, or how the last one went. Never a value.
+  var SET_KEYS = ["wifi_ssid", "wifi_pass", "wifi2_ssid", "wifi2_pass", "access_id", "access_secret",
+    "ap_pass", "tz"];
+  var settings = null;
+  function renderSettings(j) {
+    settings = j;
+    var b = j.board, parts = [];
+    if (!b) parts.push("The board hasn't checked in yet.");
+    else if (b.settings_version === null) parts.push("The board's firmware (" + esc(b.fw || "?") + ") keeps its settings built in; update it to change them here.");
+    else {
+      parts.push("The board has networks <b>" + esc(b.networks || "none") + "</b>, token " +
+        esc(b.token_id ? b.token_id + "…" : "none") + ", settings change " + esc(String(b.settings_version)) +
+        " (checked in " + esc(local(b.received)) + ").");
+    }
+    if (j.pending) {
+      parts.push("Waiting for its next check-in: " + esc(j.pending.keys.join(", ")) + " (asked by " +
+        esc(j.pending.by) + ", " + esc(local(j.pending.requested)) + ").");
+    } else if (j.last) {
+      parts.push("Last change: " + esc(j.last.result) + ", " + esc(local(j.last.done)) + ".");
+    }
+    $("setState").innerHTML = parts.join(" ");
+    var refused = j.last && /^refused/.test(j.last.result);
+    $("setFold").textContent = j.pending ? "A change is waiting for the board" :
+      refused ? "Last change refused" : b && b.networks ? b.networks.replace(",", ", ") : "";
+    $("setFold").className = "foldstate" + (j.pending || refused ? " warn" : "");
+    $("setCancel").className = j.pending ? "" : "hide";
+  }
+  function loadSettings() {
+    return api("GET", "/api/logger/settings").then(renderSettings).catch(function (e) {
+      $("setState").textContent = "Couldn't load the board's settings: " + e.message; });
+  }
+  $("setSave").onclick = function () {
+    var change = {};
+    SET_KEYS.forEach(function (k) { var v = $("set_" + k).value; if (v !== "") change[k] = v; });
+    if ($("setClear2").checked) { change.wifi2_ssid = ""; change.wifi2_pass = ""; }
+    var keys = Object.keys(change);
+    if (!keys.length) { say("Nothing to send: fill in what should change."); return; }
+    if (!confirm("Send to the board at its next check-in: " + keys.join(", ") + "?")) return;
+    api("PUT", "/api/logger/settings", change).then(function (j) {
+      SET_KEYS.forEach(function (k) { $("set_" + k).value = ""; });
+      $("setClear2").checked = false;
+      renderSettings(j);
+      say("Sent: the board takes it at its next check-in (every 10 s while it has Wi-Fi).", true);
+    }).catch(function (e) { say(e.message); });
+  };
+  $("setCancel").onclick = function () {
+    if (!confirm("Take back the change the board hasn't had yet?")) return;
+    api("DELETE", "/api/logger/settings").then(function (j) { renderSettings(j); say("Taken back.", true); })
+      .catch(function (e) { say(e.message); });
+  };
+
   // ---- commands
   function renderCmds() {
     var b = (status && status.last) || {};
@@ -392,7 +475,12 @@ td.when { white-space: nowrap; }
       }).catch(function (e) { say(e.message); });
   }
   refresh();
-  setInterval(function () { if (!document.hidden) refresh(); }, 5000);
+  loadSettings();
+  setInterval(function () {
+    if (document.hidden) return;
+    refresh();
+    if (settings && settings.pending) loadSettings();
+  }, 5000);
 })();
 </script>
 </body>

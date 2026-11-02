@@ -4,9 +4,7 @@
  * board's last check-in (state, speed, coolant and oil temperature with an
  * overheating warning, the car on a map), each tank of fuel since its
  * fill-up (/api/logger/tanks), the full channel sweep (/api/logger/sweep,
- * sweep.js), the board's settings (its
- * Wi-Fi, Access token, access point and time zone: /api/logger/settings,
- * boardsettings.js; sent to it, never shown back), and every
+ * sweep.js), and every
  * channel the board can read, filtered to what the car answers, a tier for
  * each, saved as presets, with each channel's newest stored value and a flag
  * when it looks wrong (/api/logger/values; values.js, oddValue's source
@@ -86,8 +84,6 @@ td.id small { display: block; color: var(--muted); font-size: 11px; }
 .dot.ok { background: var(--ok); } .dot.no { background: transparent; border: 1.5px solid var(--muted); }
 select.t { min-width: 140px; border-left: 4px solid var(--c); }
 select.t.inherited { color: var(--muted); }
-.setgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px 14px; margin: 10px 0; }
-.setgrid label { display: flex; flex-direction: column; align-items: stretch; gap: 3px; font-size: 13px; }
 tr.sel td { background: var(--accent-bg); }
 .more { justify-self: center; }
 .msg { padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
@@ -256,31 +252,6 @@ td.when small { display: block; color: var(--muted); font-size: 11px; }
   each pass. Once a drive, daily, weekly, monthly: read once, in the first drive they're due, into that
   drive's sweep file. Channels of one identifier are read together, at the fastest tier any of them has.
   The logger downloads the active preset on its next Wi-Fi check and uses it from its next drive.</p>
-  <details class="card fold" id="foldSettings">
-    <summary><h2>Board settings</h2><span class="foldstate" id="setFold"></span></summary>
-    <div id="setState" class="muted">Loading…</div>
-    <div class="setgrid">
-      <label>Wi-Fi network <input id="set_wifi_ssid" autocomplete="off"></label>
-      <label>Its password <input id="set_wifi_pass" type="password" autocomplete="new-password"></label>
-      <label>Backup network <input id="set_wifi2_ssid" autocomplete="off"></label>
-      <label>Its password <input id="set_wifi2_pass" type="password" autocomplete="new-password"></label>
-      <label>Access token's client ID <input id="set_access_id" autocomplete="off" placeholder="….access"></label>
-      <label>Its client secret <input id="set_access_secret" type="password" autocomplete="new-password"></label>
-      <label>Setup access point's password <input id="set_ap_pass" type="password" autocomplete="new-password"></label>
-      <label>Time zone (POSIX) <input id="set_tz" autocomplete="off" placeholder="CST6CDT,M3.2.0,M11.1.0"></label>
-    </div>
-    <div class="row">
-      <button id="setSave">Send to the board…</button>
-      <button id="setCancel" class="hide">Take the change back</button>
-      <label><input type="checkbox" id="setClear2"> Remove the backup network</label>
-    </div>
-    <p class="muted" style="font-size:12.5px;margin:8px 0 0">Blank fields keep what the board has.
-    The board takes a change at its next check-in, and then the passwords are dropped here; none is
-    ever shown. A new token is tried before the board keeps it, so make the new one in Zero Trust
-    (Access &gt; Service credentials, added to the application's Service Auth policy), wait for
-    "taken", and only then revoke the old. A board that can't check in is set up over USB
-    (firmware/tools/provision.py) or from its access point's page.</p>
-  </details>
 </div>
 
 <script>
@@ -608,38 +579,6 @@ ${oddValue.toString()}
     if (c["no answer"]) parts.push(c["no answer"].toLocaleString() + " no answer");
     return parts.join(", ");
   }
-  // The board's settings: what its last check-in says it has, the change
-  // waiting for it, or how the last one went. Never a value.
-  var SET_KEYS = ["wifi_ssid", "wifi_pass", "wifi2_ssid", "wifi2_pass", "access_id", "access_secret",
-    "ap_pass", "tz"];
-  var settingsState = null;
-  function renderSettings(j) {
-    settingsState = j;
-    var b = j.board, parts = [];
-    if (!b) parts.push("The board hasn't checked in yet.");
-    else if (b.settings_version === null) parts.push("The board's firmware (" + esc(b.fw || "?") + ") keeps its settings built in; update it to change them here.");
-    else {
-      parts.push("The board has networks <b>" + esc(b.networks || "none") + "</b>, token " +
-        esc(b.token_id ? b.token_id + "…" : "none") + ", settings change " + esc(String(b.settings_version)) +
-        " (checked in " + esc(new Date(b.received).toLocaleString()) + ").");
-    }
-    if (j.pending) {
-      parts.push("Waiting for its next check-in: " + esc(j.pending.keys.join(", ")) + " (asked by " +
-        esc(j.pending.by) + ", " + esc(new Date(j.pending.requested).toLocaleString()) + ").");
-    } else if (j.last) {
-      parts.push("Last change: " + esc(j.last.result) + ", " + esc(new Date(j.last.done).toLocaleString()) + ".");
-    }
-    $("setState").innerHTML = parts.join(" ");
-    var refused = j.last && /^refused/.test(j.last.result);
-    foldState("setFold", j.pending ? "A change is waiting for the board" :
-      refused ? "Last change refused" : b && b.networks ? b.networks.replace(",", ", ") : "", !!(j.pending || refused));
-    $("setCancel").className = j.pending ? "" : "hide";
-  }
-  function loadSettings() {
-    api("GET", "/api/logger/settings").then(renderSettings).catch(function (e) {
-      $("setState").textContent = "Couldn't load the board's settings: " + e.message; });
-  }
-
   function renderSweep(sw) {
     if (!sw) return;
     sweep = sw;
@@ -759,7 +698,7 @@ ${oddValue.toString()}
   // The folding cards: collapsed unless opened here before (this browser
   // remembers each), the state beside each heading meanwhile.
   function folds() {
-    ["foldFaults", "foldTanks", "foldSweep", "foldSettings"].forEach(function (id) {
+    ["foldFaults", "foldTanks", "foldSweep"].forEach(function (id) {
       var d = $(id), key = "logger.fold." + id;
       try { d.open = window.localStorage.getItem(key) === "open"; } catch (e) { d.open = false; }
       d.addEventListener("toggle", function () {
@@ -903,25 +842,6 @@ ${oddValue.toString()}
         say("Full channel sweep cancelled: the logger stops at its next check-in.", true);
       }).catch(function (e) { say(e.message); });
     });
-    $("setSave").addEventListener("click", function () {
-      var change = {};
-      SET_KEYS.forEach(function (k) { var v = $("set_" + k).value; if (v !== "") change[k] = v; });
-      if ($("setClear2").checked) { change.wifi2_ssid = ""; change.wifi2_pass = ""; }
-      var keys = Object.keys(change);
-      if (!keys.length) { say("Nothing to send: fill in what should change."); return; }
-      if (!window.confirm("Send to the board at its next check-in: " + keys.join(", ") + "?")) return;
-      api("PUT", "/api/logger/settings", change).then(function (j) {
-        SET_KEYS.forEach(function (k) { $("set_" + k).value = ""; });
-        $("setClear2").checked = false;
-        renderSettings(j);
-        say("Sent: the board takes it at its next check-in (every 10 s while it has Wi-Fi).", true);
-      }).catch(function (e) { say(e.message); });
-    });
-    $("setCancel").addEventListener("click", function () {
-      if (!window.confirm("Take back the change the board hasn't had yet?")) return;
-      api("DELETE", "/api/logger/settings").then(function (j) { renderSettings(j); say("Taken back.", true); })
-        .catch(function (e) { say(e.message); });
-    });
     window.addEventListener("beforeunload", function (e) { if (isDirty()) { e.preventDefault(); e.returnValue = ""; } });
   }
 
@@ -930,12 +850,10 @@ ${oddValue.toString()}
     wire();
     renderTanks();
     renderLogger();
-    loadSettings();
     // The car while the page is open: the board checks in every 10 s.
     setInterval(function () {
       if (document.hidden) return;
       renderLogger();
-      if (settingsState && settingsState.pending) loadSettings();
     }, 10000);
     Promise.all([api("GET", "/api/logger/catalog"), api("GET", "/api/logger/presets")]).then(function (r) {
       cat = r[0];

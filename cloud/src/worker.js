@@ -388,7 +388,7 @@ export const SCHEMA = [
   // Each channel's newest value and range, for the logger page (values.js).
   ...VALUES_SCHEMA,
   ...DETAILS_SCHEMA,
-  // A change to the board's settings from the logger page (boardsettings.js).
+  // A change to the board's settings from the Board tab (boardsettings.js).
   ...BOARD_SETTINGS_SCHEMA,
   // Commands for the board from the Board tab (boardcmd.js).
   ...BOARD_COMMANDS_SCHEMA,

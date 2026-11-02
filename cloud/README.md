@@ -117,7 +117,8 @@ serves it to Claude from anywhere:
   `boardpage.js`): the board's firmware (running, published, where an
   update is; a build can be published from the page, its version read from
   the image), its card (free space, errors, files waiting, a folder's
-  files) and commands for it: list a folder, delete a file or folder,
+  files), its settings (Wi-Fi, Access token, access point, time zone;
+  sent to it, never shown back) and commands for it: list a folder, delete a file or folder,
   format the card (refused while files wait to upload unless told to
   discard them), upload now, update now (look for firmware at once and
   install it as soon as the board isn't logging), restart. A command waits
