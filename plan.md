@@ -16,12 +16,13 @@ items name functions or say when they were written.
   writes, resets, DTC clears and routines are refused. The logger board's
   `hsfz::Client::start()` refuses the same way (`firmware/test/host_test.cpp`).
   Nothing in this plan widens that set.
-- **Tests (31 Oct):** the app 647, the Worker 103 (`cloud/test`), the
-  firmware's host tests 30 (logger) and 16 (HSFZ). Coverage was last measured
+- **Tests (2 Nov):** the app 647 (31 Oct), the Worker 111 (`cloud/test`), the
+  firmware's host tests 32 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
-- **Live (1 Nov):** Worker version `1b07e51c` on m550.trulock.com; firmware
-  `20261101-0553-31194c6` (#142) published for the board, which runs
-  `20261031-1900-9b969d7` until it takes it.
+- **Live (2 Nov):** Worker version `64424a68` on m550.trulock.com; firmware
+  `20261102-0613-d966807` (#148, the card's retries) published for the
+  board, which runs `20261101-2250-ffacb51` (#146, the Board tab) until it
+  takes it.
 - **On the car:** only the DME catalog has been checked. The other 11 module
   catalogs, the head-unit GPS layout, and the logging rate with module channels
   added are still unverified (`docs/in-car-checklist.md`).
@@ -602,8 +603,9 @@ after the first week of drives, and what's left.
       a check-in gives "trying it again", not a refusal. On the board and
       working by the evening of 31 Oct, so the firmware below was merged
       (#142) and the Worker deployed again (`03e2b215`). App 0.10.9.
-- [ ] **On the car, `20261101-0553-31194c6` (#142):** published 1 Nov; see
-      it download, install and be kept as above. Publishing first got a 403:
+- [x] **On the car, `20261101-0553-31194c6` (#142):** published 1 Nov;
+      downloaded, installed and kept (check-ins from 1 Nov, 12:53 pm), then
+      `20261101-2250-ffacb51` (#146) the same way at 4:58 pm. Publishing first got a 403:
       the deploy `03e2b215` went out without `FIRMWARE_PUBLISHERS` (from a
       `wrangler.jsonc` without it), so the Worker was deployed again with it
       (`1b07e51c`). After a deploy, `wrangler versions view` should list it.

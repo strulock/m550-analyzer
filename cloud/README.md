@@ -115,9 +115,11 @@ serves it to Claude from anywhere:
   `POST /api/health/rebuild` does every stored drive again.
 - **Board** (`boardcmd.js`, the logger page's Board tab at `/logger/board`,
   `boardpage.js`): the board's firmware (running, published, where an
-  update is; a build can be published from the page, its version read from
-  the image), its card (free space, errors, files waiting, a folder's
-  files), its settings (Wi-Fi, Access token, access point, time zone;
+  update is, and what it started after: the reset, and where its tasks
+  were when a watchdog or crash caused it, `reset_where`; a build can be
+  published from the page, its version read from the image), its card
+  (free space, errors, the card's sector retries `disk_*`, files waiting,
+  a folder's files), its settings (Wi-Fi, Access token, access point, time zone;
   sent to it, never shown back) and commands for it: list a folder, delete a file or folder,
   format the card (refused while files wait to upload unless told to
   discard them), upload now, update now (look for firmware at once and
