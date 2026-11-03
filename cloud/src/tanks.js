@@ -14,6 +14,10 @@
  * have one, else the drives' km added up. Fuel is the fuel flow added up
  * where every drive has it (the meter the economy figures use), else the
  * level's fall.
+ *
+ * A level of 0 is no reading: the DME gives 0 until it has the sender's
+ * (a log of a few seconds as the car wakes, as on 2 Nov), and the car never
+ * runs with the tank at 0, so a 0 would make the next drive look filled.
  */
 
 export const FILL_MIN_L = 8;                 // a rise this big between drives is a fill-up
@@ -22,6 +26,7 @@ const L_PER_GALLON = 3.785411784;
 
 const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const round = (v, n) => (v === null ? null : Number(v.toFixed(n)));
+const level = (v) => (num(v) > 0 ? v : null);    // 0: not read yet
 
 /** [{start, end, drives, filled_l, level_start_l, level_end_l, km, miles,
  * fuel_l, gallons, fuel_from, mpg, l_per_100km, partial, open}], oldest
@@ -29,7 +34,7 @@ const round = (v, n) => (v === null ? null : Number(v.toFixed(n)));
  * fill-up came before the logs; `open`: the tank in the car now. */
 export function tanks(drives) {
   const rows = drives.filter((d) => d && typeof d.start === "string" &&
-    (num(d.tank_start_l) !== null || num(d.tank_end_l) !== null))
+    (level(d.tank_start_l) !== null || level(d.tank_end_l) !== null))
     .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
   const out = [];
   let cur = null, lastLevel = null;
@@ -39,8 +44,8 @@ export function tanks(drives) {
     out.push(cur);
   };
   for (const d of rows) {
-    const startLevel = num(d.tank_start_l) ?? num(d.tank_end_l);
-    const endLevel = num(d.tank_end_l) ?? startLevel;
+    const startLevel = level(d.tank_start_l) ?? level(d.tank_end_l);
+    const endLevel = level(d.tank_end_l) ?? startLevel;
     const rise = lastLevel === null ? 0 : startLevel - lastLevel;
     if (!cur) open(null, startLevel, d.start);
     else if (rise >= FILL_MIN_L && !cur.drives.length) cur.filled_l += rise;   // the sender catching up
@@ -68,8 +73,8 @@ function summary(t, open) {
   const first = ds[0], last = ds[ds.length - 1];
   const levelStart = t.level;
   // A drive in which it was filled ends this tank at the level before the fill.
-  const levelEnd = t.fillDrive === last ? num(last.tank_start_l)
-    : num(last.tank_end_l) ?? num(last.tank_start_l);
+  const levelEnd = t.fillDrive === last ? level(last.tank_start_l)
+    : level(last.tank_end_l) ?? level(last.tank_start_l);
   const odoStart = num(first.odometer_start_km) ?? num(first.odometer_end_km);
   const odoEnd = num(last.odometer_end_km) ?? num(last.odometer_start_km);
   let km = odoStart !== null && odoEnd !== null && odoEnd >= odoStart ? odoEnd - odoStart : null;

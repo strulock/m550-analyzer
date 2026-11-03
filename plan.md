@@ -16,7 +16,7 @@ items name functions or say when they were written.
   writes, resets, DTC clears and routines are refused. The logger board's
   `hsfz::Client::start()` refuses the same way (`firmware/test/host_test.cpp`).
   Nothing in this plan widens that set.
-- **Tests (2 Nov):** the app 647 (31 Oct), the Worker 111 (`cloud/test`), the
+- **Tests (3 Nov):** the app 647 (31 Oct), the Worker 112 (`cloud/test`), the
   firmware's host tests 32 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
 - **Live (2 Nov):** Worker version `64424a68` on m550.trulock.com; firmware

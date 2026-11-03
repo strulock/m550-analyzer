@@ -55,6 +55,19 @@ test("no fuel flow: the level's fall; no odometer: the drives' km", () => {
   assert.equal(t.mpg, Number(((162 / 1.609344) / (20 / 3.785411784)).toFixed(1)));
 });
 
+test("a level of 0 is no reading, not an empty tank", () => {
+  // 2 Nov: a few seconds' log as the car woke, the DME's level 0, then 31 l.
+  const t = tanks([
+    drive("2026-11-01 20:07:47", 34, 31.5, 111869, 111880, 10.98, 1.989),
+    drive("2026-11-02 08:02:06", 0, 0, 111880, 111880, 0, 0),
+    drive("2026-11-02 08:06:08", 31, 31, 111885, 111885, 3.19, 0.778),
+    drive("2026-11-02 16:46:05", 0, 0, null, null, 0, 0),
+    drive("2026-11-02 16:46:14", 31, 30, 111885, 111885, 5.79, 1.215),
+  ]);
+  assert.equal(t.length, 1);
+  assert.deepEqual([t[0].drives, t[0].level_start_l, t[0].level_end_l, t[0].open], [3, 34, 30, true]);
+});
+
 test("drives without the level are left out; none gives no tanks", () => {
   assert.deepEqual(tanks([drive("2026-10-25 08:00:00", null, null, 1, 2, 1, 0.1)]), []);
   assert.deepEqual(tanks([]), []);
