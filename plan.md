@@ -19,7 +19,7 @@ items name functions or say when they were written.
 - **Tests (3 Nov):** the app 647 (31 Oct), the Worker 112 (`cloud/test`), the
   firmware's host tests 32 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
-- **Live (2 Nov):** Worker version `64424a68` on m550.trulock.com; firmware
+- **Live (3 Nov):** Worker version `06bce624` (#150) on m550.trulock.com; firmware
   `20261102-0613-d966807` (#148, the card's retries) published for the
   board, which runs `20261101-2250-ffacb51` (#146, the Board tab) until it
   takes it.
