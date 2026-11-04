@@ -2366,12 +2366,12 @@ static UpResult uploadOne(const String& name) {
   return result;
 }
 
-// The networks the board knows (its settings): the first, and the second as a
-// backup (a phone hotspot uses mobile data, so home wins whenever it's in
-// range).
+// The networks the board knows (its settings, up to WIFI_SLOTS), tried in
+// their order: home and the office before a phone's hotspot, which uses
+// mobile data, so a higher one wins whenever it's in range.
 static bool wifiKnown = false;
-static const uint32_t WIFI_RETRY_MS = 10000;       // off both: look again
-static const uint32_t WIFI_HOME_CHECK_MS = 120000; // on the backup: look for home
+static const uint32_t WIFI_RETRY_MS = 10000;       // off them all: look again
+static const uint32_t WIFI_HOME_CHECK_MS = 120000; // on a lower one: look for a higher
 
 // The last failed try's wifi_note (lib/logger/wifinote.h) and when, under
 // tagLock: check-ins carry it while Wi-Fi is down and WIFI_NOTE_MS after.
@@ -2401,36 +2401,40 @@ static bool join(const char* ssid, const char* pass, uint32_t ms, std::string* w
   return false;
 }
 
-// One scan (about 2 s) says which known network is in range, and only that
-// one is joined: waiting 8 s on each in turn held the first check-in back
-// minutes at a power-on away from home. A scan that fails tries both.
+// One scan (about 2 s) says which known networks are in range, and only
+// those are joined, in the settings' order (wifiSlots): waiting 8 s on each
+// in turn held the first check-in back minutes at a power-on away from home.
+// A scan that fails tries them all.
 static bool joinWith(const Settings& s);
 static bool joinPreferred() { return joinWith(settingsNow()); }
 
 static bool joinWith(const Settings& s) {
-  if (s.ssid1.empty() && s.ssid2.empty()) return false;
+  std::vector<int> slots = wifiSlots(s);
+  if (slots.empty()) return false;
   int n = WiFi.scanNetworks();
-  WifiTry home, backup;                      // lib/logger/wifinote.h
-  home.ssid = s.ssid1;
-  backup.ssid = s.ssid2;
+  std::vector<WifiTry> tries(slots.size());  // lib/logger/wifinote.h
+  for (size_t t = 0; t < slots.size(); t++) tries[t].ssid = s.*WIFI_SSIDS[slots[t]];
   for (int i = 0; i < n; i++) {
-    for (WifiTry* t : {&home, &backup}) {    // the strongest of each name
-      if (t->ssid.empty() || WiFi.SSID(i) != t->ssid.c_str()) continue;
-      if (t->seen && WiFi.RSSI(i) <= t->rssi) continue;
-      t->seen = true;
-      t->rssi = WiFi.RSSI(i);
-      t->channel = WiFi.channel(i);
+    for (WifiTry& t : tries) {               // the strongest of each name
+      if (WiFi.SSID(i) != t.ssid.c_str()) continue;
+      if (t.seen && WiFi.RSSI(i) <= t.rssi) continue;
+      t.seen = true;
+      t.rssi = WiFi.RSSI(i);
+      t.channel = WiFi.channel(i);
     }
   }
   WiFi.scanDelete();
-  home.tried = !home.ssid.empty() && (home.seen || n < 0);
-  backup.tried = !backup.ssid.empty() && (backup.seen || n < 0);
-  if (home.tried && join(s.ssid1.c_str(), s.pass1.c_str(), 10000, &home.why)) return true;
-  if (backup.tried) {
-    WiFi.disconnect();
-    if (join(s.ssid2.c_str(), s.pass2.c_str(), 10000, &backup.why)) return true;
+  bool first = true;
+  for (size_t t = 0; t < slots.size(); t++) {
+    tries[t].tried = tries[t].seen || n < 0;
+    if (!tries[t].tried) continue;
+    if (!first) WiFi.disconnect();
+    first = false;
+    if (join(tries[t].ssid.c_str(), (s.*WIFI_PASSES[slots[t]]).c_str(), 10000, &tries[t].why)) {
+      return true;
+    }
   }
-  std::string note = wifiNote(n, {home, backup});
+  std::string note = wifiNote(n, tries);
   // Printed when it says something new, not each time the count in range moves.
   auto gist = [](const std::string& s) { return s.substr(0, s.rfind(" (")); };
   bool changed;
@@ -2547,10 +2551,26 @@ static void startAccessPoint(bool alone) {
              WiFi.softAPIP().toString().c_str());
 }
 
-// Keep a network up, home first (from this task, between uploads, so the
-// logging on the other core never waits for a scan or a join).
+// Where `ssid` comes in the order the networks are tried; the count if it
+// isn't one of them.
+static size_t wifiRank(const Settings& s, const String& ssid) {
+  std::vector<int> slots = wifiSlots(s);
+  for (size_t r = 0; r < slots.size(); r++) {
+    if (ssid == (s.*WIFI_SSIDS[slots[r]]).c_str()) return r;
+  }
+  return slots.size();
+}
+
+// Keep a network up, the first in the order that's in range (from this task,
+// between check-ins, so the logging on the other core never waits for a scan
+// or a join). On a lower one, look for a higher one every WIFI_HOME_CHECK_MS;
+// one seen but not joined (a wrong password, a weak signal) waits
+// WIFI_UPGRADE_FAILED_MS before the next look, so the board isn't knocked off
+// a working network every two minutes.
+static const uint32_t WIFI_UPGRADE_FAILED_MS = 15 * 60000;
+
 static void keepWifi() {
-  static uint32_t lastTry = 0, lastHomeCheck = 0;
+  static uint32_t lastTry = 0, lastHomeCheck = 0, upgradeWait = WIFI_HOME_CHECK_MS;
   static bool mdns = false, tried = false;
   if (!wifiKnown) return;
   if (!WiFi.isConnected()) {
@@ -2566,19 +2586,27 @@ static void keepWifi() {
     return;
   }
   Settings s = settingsNow();
-  if (s.ssid1.empty() || s.ssid2.empty() || WiFi.SSID() != s.ssid2.c_str() ||
-      millis() - lastHomeCheck < WIFI_HOME_CHECK_MS) {
-    return;
-  }
+  String on = WiFi.SSID();
+  size_t rank = wifiRank(s, on);
+  if (rank == 0 || millis() - lastHomeCheck < upgradeWait) return;
   lastHomeCheck = millis();
+  upgradeWait = WIFI_HOME_CHECK_MS;
   int n = WiFi.scanNetworks();             // the connection stays up meanwhile
-  bool home = false;
-  for (int i = 0; i < n; i++) home = home || WiFi.SSID(i) == s.ssid1.c_str();
+  size_t best = rank;
+  String better;
+  for (int i = 0; i < n; i++) {
+    size_t r = wifiRank(s, WiFi.SSID(i));
+    if (r < best) { best = r; better = WiFi.SSID(i); }
+  }
   WiFi.scanDelete();
-  if (home) {
-    out.printf("[wifi] %s in range again; moving off the backup\n", s.ssid1.c_str());
-    WiFi.disconnect();
-    joinPreferred();
+  if (best >= rank) return;
+  out.printf("[wifi] %s in range; moving off %s\n", better.c_str(), on.c_str());
+  WiFi.disconnect();
+  joinPreferred();
+  if (!WiFi.isConnected() || wifiRank(s, WiFi.SSID()) >= rank) {
+    out.printf("[wifi] couldn't join %s; looking again in %u min\n", better.c_str(),
+               (unsigned)(WIFI_UPGRADE_FAILED_MS / 60000));
+    upgradeWait = WIFI_UPGRADE_FAILED_MS;
   }
 }
 
@@ -2721,8 +2749,17 @@ static const std::string& beatJson(bool boot, bool buffered = false) {
   {
     Settings s = settingsNow();
     jsonNumber(j, "settings_version", s.version, 0);
-    std::string nets = s.ssid1 + (s.ssid2.empty() ? "" : "," + s.ssid2);
-    jsonText(j, "networks", nets.c_str());
+    jsonText(j, "networks", wifiNames(s, ",").c_str());
+    // [[slot, name], ...] in the order they're tried, for the Board tab.
+    j += ",\"wifi_slots\":[";
+    std::vector<int> slots = wifiSlots(s);
+    for (size_t i = 0; i < slots.size(); i++) {
+      j += i ? ",[" : "[";
+      j += std::to_string(slots[i] + 1) + ",";
+      jsonString(j, s.*WIFI_SSIDS[slots[i]]);
+      j += "]";
+    }
+    j += "]";
     jsonText(j, "token_id", s.clientId.substr(0, 8).c_str());
     std::lock_guard<std::mutex> g(cfgLock);
     if (settingsFailed) {
@@ -2990,16 +3027,13 @@ static void applySettings(const std::string& reply) {
     settingsError = why;
     return;
   }
-  bool wifi = c.next.ssid1 != now.ssid1 || c.next.pass1 != now.pass1 ||
-              c.next.ssid2 != now.ssid2 || c.next.pass2 != now.pass2;
+  bool wifi = wifiChanged(now, c.next);
   // A change to the network the board is on is tried now, the old one back
   // if it fails: a wrong password would otherwise strand a board whose only
   // way back is USB. (One for a network out of range can't be tried; the
-  // board keeps the network it's on meanwhile.)
-  String on = WiFi.SSID();
-  bool first = c.next.ssid1 != now.ssid1 || c.next.pass1 != now.pass1;
-  bool second = c.next.ssid2 != now.ssid2 || c.next.pass2 != now.pass2;
-  bool onChanged = (on == now.ssid1.c_str() && first) || (on == now.ssid2.c_str() && second);
+  // board keeps the network it's on meanwhile. A new order alone isn't
+  // tried: keepWifi moves to a higher network once it sees one.)
+  bool onChanged = WiFi.isConnected() && wifiNetworkChanged(now, c.next, WiFi.SSID().c_str());
   if (onChanged) {
     WiFi.disconnect();
     bool joined = joinWith(c.next);
@@ -3016,7 +3050,7 @@ static void applySettings(const std::string& reply) {
   saveSettings(c.next);
   out.printf("[set] change %u from the logger page saved%s\n", (unsigned)c.version,
              wifi ? "; Wi-Fi takes it at its next join" : "");
-  if (wifi) wifiKnown = !c.next.ssid1.empty() || !c.next.ssid2.empty();
+  if (wifi) wifiKnown = hasWifi(c.next);
 }
 
 static void commandReply(const std::string& reply);   // below
@@ -3496,8 +3530,8 @@ static void checkListIfDue() {
 
 // ---- commands from the Board tab ------------------------------------------------
 // The Worker sends the oldest command the board hasn't done in every
-// check-in's reply (lib/logger/command.h). Listing a folder, uploading now
-// and updating now are done at once (core 0); deleting, formatting and
+// check-in's reply (lib/logger/command.h). Listing a folder, scanning for
+// Wi-Fi, uploading now and updating now are done at once (core 0); deleting, formatting and
 // restarting wait until the board is between drives (core 1's loop, so no
 // drive starts meanwhile), and the card's go only once the upload task has
 // let go of it. A command is kept in the flash as done before its work, so
@@ -3626,6 +3660,42 @@ static void commandList() {
   tries = 0;
   if (code != 200) { commandDone(c.id, false, "couldn't send the listing (" + std::to_string(code) + ")"); return; }
   commandDone(c.id, true, std::to_string(count) + (count == 1 ? " entry" : " entries"));
+}
+
+// The Wi-Fi networks in range, to the Worker, for the Board tab to add one
+// from (the check-in task: keepWifi scans there too, and two scans at once
+// fail). The connection stays up meanwhile. 2.4 GHz only, as the board is.
+static void commandScan() {
+  static uint32_t lastTry = 0;
+  static unsigned tries = 0;
+  Command c;
+  {
+    std::lock_guard<std::mutex> g(cmdLock);
+    if (cmdNext.kind != CMD_SCAN) return;
+    c = cmdNext;
+  }
+  if (!WiFi.isConnected() || (tries && millis() - lastTry < 30000)) return;
+  lastTry = millis();
+  int n = WiFi.scanNetworks();
+  std::vector<ScanEntry> seen;
+  for (int i = 0; i < n; i++) {
+    seen.push_back({WiFi.SSID(i).c_str(), (int)WiFi.RSSI(i), (int)WiFi.channel(i),
+                    WiFi.encryptionType(i) == WIFI_AUTH_OPEN});
+  }
+  WiFi.scanDelete();
+  if (n < 0) {
+    if (++tries < 5) return;
+    tries = 0;
+    commandDone(c.id, false, "the scan failed");
+    return;
+  }
+  std::vector<ScanEntry> nets = scanBest(seen);
+  int code = postBeat(scanJson(c.id, nets), "/api/logger/wifi-scan");
+  if (code != 200 && ++tries < 5) return;    // again in 30 s
+  tries = 0;
+  if (code != 200) { commandDone(c.id, false, "couldn't send the scan (" + std::to_string(code) + ")"); return; }
+  commandDone(c.id, true, std::to_string(nets.size()) + (nets.size() == 1 ? " network" : " networks") +
+                              " in range");
 }
 
 // A file, or a folder and everything in it, under the card's lock.
@@ -3793,6 +3863,8 @@ static void beatTask(void*) {
     WHERE(beat, "wifi");
     keepWifi();
     beatIfDue();
+    WHERE(beat, "wifi scan");
+    commandScan();
     WHERE(beat, "setup page");
     if (setupPageOn) setupPage.handleClient();
     WHERE(beat, "resting");
@@ -3947,7 +4019,7 @@ static void startWifi() {
   terminal.begin();                          // answers on whichever network comes up
   terminal.setNoDelay(true);
   Settings s = settingsNow();
-  if (s.ssid1.empty() && s.ssid2.empty()) {
+  if (!hasWifi(s)) {
     startAccessPoint(true);                  // no network to join: set up from a phone
     return;
   }
@@ -4010,9 +4082,9 @@ static void status() {
              last.c_str(), (unsigned)beatsSent);
   {
     Settings s = settingsNow();              // never a password or the token's secret
-    out.printf("[status] settings: networks %s%s%s; token %s; time zone %s; change %u\n",
-               s.ssid1.empty() ? "(none)" : s.ssid1.c_str(), s.ssid2.empty() ? "" : ", ",
-               s.ssid2.c_str(), s.clientId.empty() ? "(none)" : (s.clientId.substr(0, 8) + "...").c_str(),
+    out.printf("[status] settings: networks %s; token %s; time zone %s; change %u\n",
+               hasWifi(s) ? wifiNames(s).c_str() : "(none)",
+               s.clientId.empty() ? "(none)" : (s.clientId.substr(0, 8) + "...").c_str(),
                s.tz.c_str(), (unsigned)s.version);
   }
   out.printf("[status] SD %s, %.1f of %.1f MB used; PSRAM %u KB free; internal %u KB free, "

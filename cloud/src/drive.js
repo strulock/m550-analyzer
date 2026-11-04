@@ -690,12 +690,65 @@ function tierRates(logs) {
 const TANK_LEFT = ["FUELLST_TANKH_L", "BDC_TANK_FUELLSTAND_LINKS"];
 const TANK_RIGHT = ["FUELLST_TANKH_R", "BDC_TANK_FUELLSTAND_RECHTS"];
 
+// The outside air: the DME's (filtered; its raw reading climbs with the
+// engine bay's heat), else the climate control's or the head unit's, else
+// the DME's intake-side one.
+const AMBIENT = ["TEMP_UMG", "IHKA_BUS_IN_SIGNALE_KLIMA.BUS_IN_TEMP_AUSSEN",
+  "PMA_BUS_IN_TEMP_AUSSEN_WERT", "ITUMG"];
+const AMBIENT_WINDOW = 120.0;              // s from its first reading
+// The battery sensor's (IBS) own view of the battery: the charge it can
+// still deliver (Ah) and its internal resistance (mΩ), each read about once
+// a drive. A tiring battery holds less and its resistance climbs, long before
+// it fails to start the car. (The board's logs begin with the engine
+// running and end as it stops, so a resting voltage isn't in them.)
+const BATTERY_AH = "BATTU2ECU_QAVLCAPE", BATTERY_MOHM = "BATTU2ECU_RIAVLINTRRESI";
+// The radiator fan: the speed the DME asks for (%), the speed the fan says
+// it turns (rpm) and its current (A), the last two from the fan itself (LIN).
+const FAN_PCT = "S_DREH_ELUEFTER_VORG_WM", FAN_RPM = "ELUEFTER_LIN_DREHZ_TESTER",
+  FAN_AMPS = "ELUEFTER_LIN_STROM";
+
+/** A drive's outside temperature, battery and radiator fan, for trends the
+ * warm-only Health scores leave out: the outside temperature as it began
+ * (ambient_c, the median of the first AMBIENT_WINDOW s of readings), the
+ * battery sensor's capacity and internal resistance (battery_ah,
+ * battery_mohm; medians), and the fan's mean and highest asked-for speed
+ * (%), highest speed (rpm) and highest current (A). Null where not read. */
+export function startAndFan(logs) {
+  logs = [].concat(logs);
+  const out = { ambient_c: null, battery_ah: null, battery_mohm: null, fan_pct_mean: null,
+    fan_pct_max: null, fan_rpm_max: null, fan_amps_max: null };
+  for (const name of AMBIENT) {
+    const [t, v] = seriesOf(logs, name);
+    if (!v.length) continue;
+    out.ambient_c = pyRound(median(v.filter((_, k) => t[k] <= t[0] + AMBIENT_WINDOW)), 1);
+    break;
+  }
+  // 0 is the sensor not ready (or the second DME, which has no battery).
+  const [, ah] = seriesOf(logs, BATTERY_AH);
+  const ahs = ah.filter((x) => x > 0);
+  if (ahs.length) out.battery_ah = pyRound(median(ahs), 1);
+  const [, mohm] = seriesOf(logs, BATTERY_MOHM);
+  const mohms = mohm.filter((x) => x > 0);
+  if (mohms.length) out.battery_mohm = pyRound(median(mohms), 3);
+  const [, pct] = seriesOf(logs, FAN_PCT);
+  if (pct.length) {
+    out.fan_pct_mean = pyRound(sum(pct) / pct.length, 1);
+    out.fan_pct_max = pyRound(maxOf(pct), 1);
+  }
+  const [, rpm] = seriesOf(logs, FAN_RPM);
+  if (rpm.length) out.fan_rpm_max = maxOf(rpm);
+  const [, amps] = seriesOf(logs, FAN_AMPS);
+  if (amps.length) out.fan_amps_max = maxOf(amps);
+  return out;
+}
+
 /** What the logger's drive rows carry beyond the app's (not in history.py):
  * whether the start is only the upload time less the drive's length (no
  * Clock), and for fill-ups (tanks.js) the tank level and the odometer as
  * the drive started and ended, with each half of the tank (in its
  * channel's unit). The board reads them together at the start, at Park and
- * at engine-off (its snapshots). And the rates each tier got (tierRates). */
+ * at engine-off (its snapshots). The rates each tier got (tierRates), and
+ * the outside temperature, battery and fan (startAndFan). */
 export function loggerExtras(logs) {
   logs = [].concat(logs);
   const [tankStart, tankEnd] = ends(logs, [FUEL_TANK], TANK_WINDOW);
@@ -705,7 +758,7 @@ export function loggerExtras(logs) {
   return { start_approx: !logs[0].firstClock, tank_start_l: tankStart, tank_end_l: tankEnd,
     tank_left_start: leftStart, tank_left_end: leftEnd, tank_right_start: rightStart,
     tank_right_end: rightEnd, odometer_start_km: odoStart, odometer_end_km: odoEnd,
-    ...tierRates(logs) };
+    ...tierRates(logs), ...startAndFan(logs) };
 }
 
 /** One drive log on its own: {series, drive}. */

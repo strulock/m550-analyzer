@@ -16,8 +16,8 @@ items name functions or say when they were written.
   writes, resets, DTC clears and routines are refused. The logger board's
   `hsfz::Client::start()` refuses the same way (`firmware/test/host_test.cpp`).
   Nothing in this plan widens that set.
-- **Tests (3 Nov):** the app 647 (31 Oct), the Worker 112 (`cloud/test`), the
-  firmware's host tests 32 (logger) and 16 (HSFZ). Coverage was last measured
+- **Tests (4 Nov):** the app 647 (31 Oct), the Worker 115 (`cloud/test`), the
+  firmware's host tests 33 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
 - **Live (3 Nov):** Worker version `06bce624` (#150) on m550.trulock.com; firmware
   `20261102-0613-d966807` (#148, the card's retries) published for the
@@ -711,8 +711,24 @@ after the first week of drives, and what's left.
       resets at 37 and 50 km/h, 8:41-8:49 pm): the USB cable or the car's
       port, if it wasn't unplugged by hand.
 - [ ] Try a change from the Board tab's Settings (a person's login
-      only): a backup network, then a new Access token (make it, wait for
-      "taken", then revoke the old).
+      only): a new Access token (make it, wait for "taken", then revoke
+      the old).
+- [ ] **Wi-Fi, up to six networks in order (4 Nov):** once the board runs
+      the build with them (its check-ins carry `wifi_slots`), scan from the
+      Board tab's Wi-Fi card, add the office and the wine cellar, and put
+      home and the office above the hotspot. Then see it move off the
+      hotspot within about 2 minutes of pulling in at home, and the waiting
+      files go up on home Wi-Fi.
+- [ ] **Outside temperature, battery and fan per drive (4 Nov):**
+      `ambient_c`, `battery_ah`, `battery_mohm`, `fan_*` in the logger's
+      drive rows (stored drives done again with `POST
+      /api/logger/resummarize`). After a week or two of cooler mornings:
+      cylinder 5's misfires against `ambient_c` (the outside air, or just
+      cold starts?); `battery_mohm` climbing or `battery_ah` falling; the fan
+      at a high asked-for speed with `coolant_max` still climbing. A resting
+      voltage isn't in the logs (they begin with the engine running and end
+      as it stops); it would need the board to read the battery while it
+      waits for the car.
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
       one in 4 minutes would point at the card or its power (a new card, or
       the supply) rather than the firmware.

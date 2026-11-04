@@ -52,17 +52,37 @@ export async function boardRole(env, who, claim = false) {
 }
 
 // The board's keys (settings.h SETTING_FIELDS), with its rules for a value.
+// Its Wi-Fi networks are slots, wifi_ssid and wifi_pass the first, wifi2_ssid
+// ... wifi6_ssid the rest, and wifi_order the slots in the order it tries
+// them ("3,1,2"), so the page reorders them without a password. "" clears
+// a slot; the board refuses a change that leaves it none.
+export const WIFI_SLOTS = 6;
 const PASS = (v) => v === "" || (v.length >= 8 && v.length <= 63);
-export const FIELDS = {
-  wifi_ssid: (v) => v.length >= 1 && v.length <= 32,
-  wifi_pass: PASS,
-  wifi2_ssid: (v) => v.length <= 32,
-  wifi2_pass: PASS,
+const SSID = (v) => v.length <= 32;
+export const wifiKey = (n, part) => (n === 1 ? "wifi_" : `wifi${n}_`) + part;
+export function wifiOrderValid(v) {
+  if (v === "") return true;
+  const slots = v.split(",");
+  return slots.every((s) => /^[1-6]$/.test(s)) && new Set(slots).size === slots.length;
+}
+export const FIELDS = {};
+for (let n = 1; n <= WIFI_SLOTS; n++) {
+  FIELDS[wifiKey(n, "ssid")] = SSID;
+  FIELDS[wifiKey(n, "pass")] = PASS;
+}
+Object.assign(FIELDS, {
+  wifi_order: wifiOrderValid,
   ap_pass: PASS,
   access_id: (v) => v.length > 7 && v.length <= 100 && v.endsWith(".access"),
   access_secret: (v) => v.length >= 16 && v.length <= 128,
   tz: (v) => v.length >= 1 && v.length <= 60 && !v.includes('"'),
-};
+});
+// What a firmware from before 4 Nov knows: two networks, no order. It would
+// take a change with the others as done and drop them.
+const TWO_NETWORKS = ["wifi_ssid", "wifi_pass", "wifi2_ssid", "wifi2_pass"];
+// Shown back while a change waits (the networks' names and order): never a
+// password or the token.
+const SHOWN = (k) => k === "wifi_order" || k.endsWith("_ssid");
 const PRINTABLE = /^[\x20-\x7e]*$/;
 const PEOPLE_ONLY = "only a person can change the board's settings";
 
@@ -81,19 +101,23 @@ async function lastBeat(env) {
   if (!r || !r.length) return null;
   const b = JSON.parse(r[0].data);
   return { received: r[0].received, fw: b.fw, settings_version: b.settings_version ?? null,
-    networks: b.networks ?? null, token_id: b.token_id ?? null,
+    networks: b.networks ?? null, wifi_slots: Array.isArray(b.wifi_slots) ? b.wifi_slots : null,
+    wifi: b.wifi ?? null, token_id: b.token_id ?? null,
     settings_failed: b.settings_failed ?? null, settings_error: b.settings_error ?? null };
 }
 
-/** What the page shows: the board's side (from its last check-in) and the
- * change waiting or the last one's outcome, never a value. */
+/** What the page shows: the board's side (from its last check-in, with its
+ * networks as [[slot, name]] in the order it tries them) and the change
+ * waiting (which keys, and the networks' names and order it sets) or the
+ * last one's outcome, never a password. */
 export async function getBoardSettings(env) {
   const r = await row(env);
+  const pending = r && r.pending ? JSON.parse(r.pending) : null;
   return {
     board: await lastBeat(env),
     version: r ? r.version : 0,
-    pending: r && r.pending ? { keys: Object.keys(JSON.parse(r.pending)), requested: r.requested,
-      by: r.by } : null,
+    pending: pending ? { keys: Object.keys(pending), requested: r.requested, by: r.by,
+      wifi: Object.fromEntries(Object.entries(pending).filter(([k]) => SHOWN(k))) } : null,
     last: r && r.done ? { result: r.result, done: r.done, by: r.by } : null,
   };
 }
@@ -119,6 +143,13 @@ export async function putBoardSettings(env, body, who, now = new Date()) {
   }
   const r = await row(env);
   const beat = await lastBeat(env);
+  // Or the first cleared, which the old firmware takes even with no network left.
+  const more = Object.keys(change).filter((k) => k.startsWith("wifi") &&
+    (!TWO_NETWORKS.includes(k) || (k === "wifi_ssid" && change[k] === "")));
+  if (more.length && !(beat && beat.wifi_slots)) {
+    throw new SettingsError("the board's firmware knows two networks and no order; " +
+      "update it first (Firmware > Update now)");
+  }
   const pending = r && r.pending ? { ...JSON.parse(r.pending), ...change } : change;
   // Past the board's, and past one it refused (it ignores that number again
   // until it restarts).

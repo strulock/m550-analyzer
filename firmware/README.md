@@ -36,8 +36,8 @@ One function per case; `./host_test busy_retry` runs just that one.
 Waveshare ESP32-S3-ETH (16 MB flash, 8 MB PSRAM), a FAT-formatted microSD
 card, the car's ENET cable, and USB power that comes on with the ignition.
 
-1. **Settings.** The board keeps its Wi-Fi networks (a second as a backup),
-   the setup access point's password, the Worker's host
+1. **Settings.** The board keeps its Wi-Fi networks (up to six, in the
+   order it tries them), the setup access point's password, the Worker's host
    (`m550.trulock.com`), an Access service token made for the board, and the
    time zone in its flash (`lib/logger/settings.h`), not in the firmware: a
    release builds without them, the image in R2 holds none, and updates
@@ -62,8 +62,9 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
      over USB, or the token from the Board tab. The fixed `m550-setup`
      opens only a board with no settings, which has nothing to give away.
 
-   After that, the Board tab's **Settings** changes the networks,
-   the token, the access point's password and the time zone (not the
+   After that, the Board tab's **Wi-Fi** keeps the networks (a scan the
+   board makes lists what's in range to add from; up, down and remove),
+   and its **Settings** the token, the access point's password and the time zone (not the
    host, which the board refuses from a check-in's reply: it would be saved
    untried): the Worker hands the change to the board in its next check-in's
    reply and drops it once the board says it has it. A new token is tried
@@ -71,9 +72,22 @@ card, the car's ENET cable, and USB power that comes on with the ignition.
    out; make the new one, wait for "taken", then revoke the old. A change
    to the network the board is on is tried at once, and the old settings
    kept if no network joins with the new (a change to one out of range
-   can't be tried; the board stays on the one it has). A build
+   can't be tried; the board stays on the one it has), and one that would
+   leave it no network at all is refused. A build
    made on a PC with `logger_secrets.h` (the IDE's, or a bench build) starts
    a board with empty settings from it.
+
+   Each network is a slot, `wifi_ssid` and `wifi_pass` the first,
+   `wifi2_ssid` ... `wifi6_ssid` the rest, and `wifi_order` the slots in the
+   order the board tries them (`3,1,2`; slots it leaves out come after, in
+   slot order), so the page reorders them without sending a password again.
+   At a power-on, or with Wi-Fi lost, one scan says which are in range and
+   the board joins the first of those in the order. On a lower one it scans
+   every 2 minutes for a higher one and moves to it; one it sees but can't
+   join (a wrong password, a weak signal) waits 15 minutes before the next
+   look, so it isn't knocked off a working network every 2 minutes. Its
+   check-ins name them in order (`networks`, and `wifi_slots`:
+   `[[slot, name], ...]`).
 2. **Channels.** Pick them on the logger channel page, `https://<worker>/logger`
    (the app opens it: Answers > Logger channels, or Settings > Cloud): every
    channel the board can decode, filtered to what the car answers, a tier for
@@ -459,6 +473,11 @@ commands in its check-ins' replies (`cmd_id`, `cmd`, `cmd_arg` in hex;
   and how many there are, with the card's type, size and use, sent to
   `POST /api/logger/card` by the upload task (tried again every 30 s, five
   times). Any time, a drive too.
+- `scan`: the Wi-Fi networks in range (2.4 GHz), each name once at its
+  strongest, strongest first, at most 40, with signal, channel and whether
+  it's open, sent to `POST /api/logger/wifi-scan` by the check-in task
+  (which keeps Wi-Fi: two scans at once fail), the connection staying up.
+  The Board tab adds one from it. Any time, a drive too.
 - `upload`: the waiting files now. `update`: look for firmware at once
   rather than in up to 10 minutes, and install it as soon as the board isn't
   logging or parked (not after the idle minute, nor waiting for uploads). A

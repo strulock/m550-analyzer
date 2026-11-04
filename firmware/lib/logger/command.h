@@ -1,6 +1,7 @@
 // Commands from the logger page's Board tab (the Worker's boardcmd.js): list
 // a folder on the card, delete a file or folder, format the card, upload
-// now, update the firmware now, restart. Every check-in's reply carries the
+// now, update the firmware now, restart, scan for Wi-Fi networks. Every
+// check-in's reply carries the
 // oldest one the board hasn't done ("cmd_id", "cmd", and "cmd_arg" in hex);
 // the board keeps the last one it finished in its flash (so none runs
 // twice, a format above all) and says in its check-ins which and how
@@ -19,7 +20,8 @@
 
 namespace logger {
 
-enum CommandKind { CMD_NONE, CMD_LIST, CMD_DELETE, CMD_FORMAT, CMD_UPLOAD, CMD_UPDATE, CMD_RESTART };
+enum CommandKind { CMD_NONE, CMD_LIST, CMD_DELETE, CMD_FORMAT, CMD_UPLOAD, CMD_UPDATE, CMD_RESTART,
+                   CMD_SCAN };
 
 struct Command {
   uint32_t id = 0;        // 0: none
@@ -35,6 +37,7 @@ inline CommandKind commandKind(const std::string& k) {
   if (k == "upload") return CMD_UPLOAD;
   if (k == "update") return CMD_UPDATE;
   if (k == "restart") return CMD_RESTART;
+  if (k == "scan") return CMD_SCAN;
   return CMD_NONE;
 }
 
@@ -133,6 +136,50 @@ inline std::string listingJson(uint32_t id, const std::string& path,
   snprintf(card, sizeof(card), "],\"card\":{\"type\":\"%s\",\"size_mb\":%.0f,\"used_mb\":%.0f}}",
            type, sizeMb, usedMb);
   j += card;
+  return j;
+}
+
+struct ScanEntry {
+  std::string ssid;
+  int rssi = 0, channel = 0;
+  bool open = false;        // no password
+};
+
+// A Wi-Fi scan for POST /api/logger/wifi-scan: each name once (its
+// strongest), strongest first, at most SCAN_MAX; hidden networks (no name)
+// left out.
+static const size_t SCAN_MAX = 40;
+
+inline std::vector<ScanEntry> scanBest(const std::vector<ScanEntry>& seen) {
+  std::vector<ScanEntry> out;
+  for (const ScanEntry& e : seen) {
+    if (e.ssid.empty()) continue;
+    bool merged = false;
+    for (ScanEntry& o : out) {
+      if (o.ssid != e.ssid) continue;
+      if (e.rssi > o.rssi) o = e;
+      merged = true;
+      break;
+    }
+    if (!merged) out.push_back(e);
+  }
+  for (size_t i = 1; i < out.size(); i++) {   // a handful: insertion sort, strongest first
+    for (size_t k = i; k > 0 && out[k].rssi > out[k - 1].rssi; k--) std::swap(out[k], out[k - 1]);
+  }
+  if (out.size() > SCAN_MAX) out.resize(SCAN_MAX);
+  return out;
+}
+
+inline std::string scanJson(uint32_t id, const std::vector<ScanEntry>& nets) {
+  std::string j = "{\"id\":" + std::to_string(id) + ",\"networks\":[";
+  for (size_t i = 0; i < nets.size(); i++) {
+    if (i) j += ',';
+    j += '[';
+    jsonString(j, nets[i].ssid);
+    j += ',' + std::to_string(nets[i].rssi) + ',' + std::to_string(nets[i].channel) +
+         (nets[i].open ? ",true]" : ",false]");
+  }
+  j += "]}";
   return j;
 }
 
