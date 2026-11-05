@@ -72,7 +72,8 @@ def main():
                     help="a logger_secrets.h to take them from (default: the project's)")
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
                     help="a setting by its key (wifi_ssid, wifi_pass, wifi2_ssid, wifi2_pass, "
-                         "ap_pass, host, access_id, access_secret, tz); only these if given")
+                         "... wifi6_ssid, wifi6_pass, wifi_order, ap_pass, host, access_id, "
+                         "access_secret, tz); only these if given")
     a = ap.parse_args()
     if a.set:
         settings = dict(x.split("=", 1) for x in a.set)

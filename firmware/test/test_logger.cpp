@@ -1075,6 +1075,59 @@ static void test_settings() {
   CHECK(settingsChange(reply, s, c) && c.bad == "host" && c.next.host == s.host);
 }
 
+// Up to six networks, tried in wifi_order's order; a reorder sends no password.
+static void test_wifi_slots() {
+  CHECK(wifiSlotKey("wifi_ssid", "ssid") == 1 && wifiSlotKey("wifi_pass", "pass") == 1);
+  CHECK(wifiSlotKey("wifi6_ssid", "ssid") == 6 && wifiSlotKey("wifi3_pass", "pass") == 3);
+  CHECK(!wifiSlotKey("wifi7_ssid", "ssid") && !wifiSlotKey("wifi1_ssid", "ssid") &&
+        !wifiSlotKey("wifi3_pass", "ssid"));
+  CHECK(wifiOrderValid("") && wifiOrderValid("3,1,2") && wifiOrderValid("6"));
+  CHECK(!wifiOrderValid("3,1,3") && !wifiOrderValid("7") && !wifiOrderValid("3,") &&
+        !wifiOrderValid("12") && !wifiOrderValid(",1") && !wifiOrderValid("0"));
+  Settings s;
+  std::string key;
+  CHECK(!hasWifi(s));
+  CHECK(settingLine(s, "wifi_ssid=Home", key) && settingLine(s, "wifi2_ssid=Phone", key));
+  CHECK(settingLine(s, "wifi4_ssid=Office", key) && settingLine(s, "wifi4_pass=office-pass", key));
+  CHECK(!settingLine(s, "wifi_order=4,4", key));
+  CHECK(wifiNames(s) == "Home, Phone, Office");                  // no order: the slots'
+  CHECK(settingLine(s, "wifi_order=4,1", key));
+  CHECK(wifiNames(s, ",") == "Office,Home,Phone");               // left out: after, in slot order
+  s.wifiOrder = "3,4,1,2";                                       // an empty slot is skipped
+  CHECK((wifiSlots(s) == std::vector<int>{3, 0, 1}));
+
+  // From the logger page: a new network in slot 3, first; then a reorder alone.
+  s.version = 1;
+  s.wifiOrder.clear();
+  SettingsChange c;
+  std::string reply = "{\"settings_version\":2,\"set_wifi3_ssid\":\"" + hex("Cellar") +
+                      "\",\"set_wifi3_pass\":\"" + hex("cellar-pass") + "\",\"set_wifi_order\":\"" +
+                      hex("3,1,4,2") + "\"}";
+  CHECK(settingsChange(reply, s, c) && c.bad.empty());
+  CHECK(wifiNames(c.next) == "Cellar, Home, Office, Phone");
+  CHECK(wifiChanged(s, c.next) && !wifiNetworkChanged(s, c.next, "Home"));
+  Settings was = c.next;
+  reply = "{\"settings_version\":3,\"set_wifi_order\":\"" + hex("1,3,4,2") + "\"}";
+  CHECK(settingsChange(reply, was, c) && c.bad.empty() && c.next.pass3 == "cellar-pass");
+  CHECK(wifiNames(c.next) == "Home, Cellar, Office, Phone" && wifiChanged(was, c.next));
+  CHECK(!wifiNetworkChanged(was, c.next, "Cellar"));
+  // A network removed, or its password changed: the one the board is on is tried.
+  reply = "{\"settings_version\":4,\"set_wifi4_ssid\":\"\",\"set_wifi4_pass\":\"\"}";
+  CHECK(settingsChange(reply, was, c) && c.bad.empty());
+  CHECK(wifiNetworkChanged(was, c.next, "Office") && !wifiNetworkChanged(was, c.next, "Home"));
+  CHECK(wifiNames(c.next) == "Cellar, Home, Phone");
+  reply = "{\"settings_version\":4,\"set_wifi_pass\":\"" + hex("new-home-pass") + "\"}";
+  CHECK(settingsChange(reply, was, c) && wifiNetworkChanged(was, c.next, "Home"));
+  // Never all of them: the board couldn't check in again.
+  Settings one;
+  one.ssid2 = "Phone";
+  one.version = 1;
+  reply = "{\"settings_version\":2,\"set_wifi2_ssid\":\"\"}";
+  CHECK(settingsChange(reply, one, c) && c.bad == "wifi_ssid");
+  reply = "{\"settings_version\":2,\"set_wifi_order\":\"" + hex("1,2,1") + "\"}";
+  CHECK(settingsChange(reply, one, c) && c.bad == "wifi_order");
+}
+
 // Why the board isn't on Wi-Fi: not in the scan, or seen and refused.
 static void test_wifi_note() {
   CHECK(wifiJoinWhy(0, "") == "no answer");
@@ -1174,6 +1227,19 @@ static void test_commands() {
   for (size_t p = 0; (p = m.find("[\"f\"", p)) != std::string::npos; p++) n++;
   CHECK(n == LISTING_MAX);
   CHECK(m.find("\"count\":5000") != std::string::npos);
+  // A Wi-Fi scan: each name once at its strongest, strongest first, no hidden ones.
+  CHECK(commandIn("{\"cmd_id\":13,\"cmd\":\"scan\",\"cmd_arg\":\"\"}", 7, c));
+  CHECK(c.kind == CMD_SCAN && c.bad.empty() && !commandBetweenDrives(CMD_SCAN));
+  std::vector<ScanEntry> seen = {{"Home", -70, 6, false}, {"", -40, 1, false},
+                                 {"Cafe \"Wi-Fi\"", -60, 11, true}, {"Home", -55, 1, false}};
+  std::vector<ScanEntry> best = scanBest(seen);
+  CHECK(best.size() == 2 && best[0].ssid == "Home" && best[0].rssi == -55 && best[0].channel == 1);
+  CHECK(scanJson(13, best) ==
+        "{\"id\":13,\"networks\":[[\"Home\",-55,1,false],[\"Cafe \\\"Wi-Fi\\\"\",-60,11,true]]}");
+  std::vector<ScanEntry> lots;
+  for (int i = 0; i < 50; i++) lots.push_back({"n" + std::to_string(i), -90 + i, 1, true});
+  best = scanBest(lots);
+  CHECK(best.size() == SCAN_MAX && best[0].ssid == "n49");
 }
 
 static const struct { const char* name; void (*fn)(); } tests[] = {
@@ -1181,6 +1247,7 @@ static const struct { const char* name; void (*fn)(); } tests[] = {
   {"where", test_where},
   {"wifi_note", test_wifi_note},
   {"settings", test_settings},
+  {"wifi_slots", test_wifi_slots},
   {"car_check", test_car_check},
   {"ota", test_ota},
   {"ota_start", test_ota_start},

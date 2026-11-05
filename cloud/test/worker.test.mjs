@@ -949,6 +949,67 @@ test("board settings: a check-in's answer doesn't drop a change saved after it",
   assert.equal((await beat({ settings_version: 1 })).settings_version, 2);
 });
 
+test("board settings: up to six networks in an order, only for a firmware that keeps them", async () => {
+  const beat = async (extra) => (await call("POST", "/api/logger/heartbeat",
+    { body: JSON.stringify({ boot: 50, event: "beat", settings_version: 1, ...extra }) })).json();
+  // A firmware from before: two networks, no order, and the first can't be cleared.
+  await beat({ networks: "Home,Phone" });
+  for (const change of [{ wifi3_ssid: "Office" }, { wifi_order: "2,1" }, { wifi_ssid: "" }]) {
+    const r = await call("PUT", "/api/logger/settings", { body: JSON.stringify(change) });
+    assert.equal(r.status, 400);
+    assert.match((await r.json()).error, /update it first/);
+  }
+  // One that says its networks in order takes the others.
+  await beat({ networks: "Home,Phone", wifi_slots: [[1, "Home"], [2, "Phone"]] });
+  for (const bad of [{ wifi7_ssid: "x" }, { wifi_order: "1,1" }, { wifi_order: "7" },
+    { wifi3_ssid: "x".repeat(33) }, { wifi3_pass: "short" }]) {
+    assert.equal((await call("PUT", "/api/logger/settings", { body: JSON.stringify(bad) })).status,
+      400, JSON.stringify(bad));
+  }
+  let s = await (await call("PUT", "/api/logger/settings", { body: JSON.stringify({
+    wifi3_ssid: "Office", wifi3_pass: "office-pass", wifi_order: "1,3,2" }) })).json();
+  assert.deepEqual(s.board.wifi_slots, [[1, "Home"], [2, "Phone"]]);
+  // The waiting change's names and order are shown back, never its password.
+  assert.deepEqual(s.pending.wifi, { wifi3_ssid: "Office", wifi_order: "1,3,2" });
+  assert.equal(JSON.stringify(s).includes("office-pass"), false);
+  // A reorder on top: no password sent.
+  s = await (await call("PUT", "/api/logger/settings", { body: JSON.stringify({ wifi_order: "3,1,2" }) }))
+    .json();
+  assert.deepEqual(s.pending.wifi, { wifi3_ssid: "Office", wifi_order: "3,1,2" });
+  const reply = await beat({ networks: "Home,Phone", wifi_slots: [[1, "Home"], [2, "Phone"]] });
+  assert.equal(Buffer.from(reply.set_wifi_order, "hex").toString(), "3,1,2");
+  assert.equal(Buffer.from(reply.set_wifi3_pass, "hex").toString(), "office-pass");
+  // The first one cleared is fine now (the board refuses a change that leaves none).
+  assert.equal((await call("PUT", "/api/logger/settings",
+    { body: JSON.stringify({ wifi_ssid: "", wifi_pass: "" }) })).status, 200);
+});
+
+test("board commands: a Wi-Fi scan, its networks kept with it", async () => {
+  const board = await boardToken();
+  await call("POST", "/api/logger/heartbeat", { body: JSON.stringify({ boot: 60, cmd_done: 0 }) });
+  const c = await (await call("POST", "/api/logger/commands", { body: JSON.stringify({ kind: "scan" }) }))
+    .json();
+  assert.equal(c.kind, "scan");
+  const reply = await (await call("POST", "/api/logger/heartbeat",
+    { body: JSON.stringify({ boot: 60, cmd_done: 0 }), auth: board })).json();
+  assert.equal(reply.cmd, "scan");
+  const scan = { id: c.id, networks: [["Cafe", -80, 11, true], ["Home \"5\"", -52, 6, false]] };
+  // Only the board sends one, and only for a scan asked for.
+  assert.equal((await call("POST", "/api/logger/wifi-scan", { body: JSON.stringify(scan) })).status, 403);
+  assert.equal((await call("POST", "/api/logger/wifi-scan", { auth: board,
+    body: JSON.stringify({ ...scan, id: c.id + 1 }) })).status, 400);
+  assert.equal((await call("POST", "/api/logger/wifi-scan", { auth: board,
+    body: JSON.stringify({ id: c.id, networks: [["", -1, 1, true]] }) })).status, 400);
+  assert.equal((await call("POST", "/api/logger/wifi-scan", { body: JSON.stringify(scan), auth: board }))
+    .status, 200);
+  await call("POST", "/api/logger/heartbeat", { auth: board, body: JSON.stringify({ boot: 60,
+    cmd_done: c.id, cmd_ok: true, cmd_result: "2 networks in range" }) });
+  const [done] = (await (await call("GET", "/api/logger/commands")).json()).commands;
+  assert.equal(done.state, "done");
+  assert.deepEqual(done.scan.networks, [["Home \"5\"", -52, 6, false], ["Cafe", -80, 11, true]]);
+  assert.equal(done.listing, undefined);
+});
+
 const DETAIL_HEAD = "read_at,module,module_name,code,first_km,last_km,occurrences,snapshots," +
   "extended,time_s\n";
 

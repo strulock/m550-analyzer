@@ -97,12 +97,30 @@ test("logger extras: the tank level and odometer at each end, and whether the st
   assert.deepEqual(x, { start_approx: false, tank_start_l: 40, tank_end_l: 30,
     tank_left_start: 20, tank_left_end: 15, tank_right_start: 21, tank_right_end: 16,
     odometer_start_km: 111650, odometer_end_km: 111660,
-    rate_fast: null, rate_medium: null, slow_pass_s: null });
+    rate_fast: null, rate_medium: null, slow_pass_s: null, ...NO_HEALTH });
   const none = loggerExtras(readLog("Time,INMOT\n0,700\n1,710\n"));
   assert.deepEqual(none, { start_approx: true, tank_start_l: null, tank_end_l: null,
     tank_left_start: null, tank_left_end: null, tank_right_start: null, tank_right_end: null,
     odometer_start_km: null, odometer_end_km: null,
-    rate_fast: null, rate_medium: null, slow_pass_s: null });
+    rate_fast: null, rate_medium: null, slow_pass_s: null, ...NO_HEALTH });
+});
+
+const NO_HEALTH = { ambient_c: null, battery_ah: null, battery_mohm: null, fan_pct_mean: null,
+  fan_pct_max: null, fan_rpm_max: null, fan_amps_max: null };
+
+test("logger extras: the outside temperature as it began, the battery sensor's view, the fan", () => {
+  // The outside air from its first two minutes (later readings climb with the
+  // engine bay's heat); the battery's capacity and resistance, a 0 being the
+  // sensor not ready; the fan from the drive's whole length.
+  const fast = "Time,TEMP_UMG,S_DREH_ELUEFTER_VORG_WM,ELUEFTER_LIN_DREHZ_TESTER,ELUEFTER_LIN_STROM\n" +
+    "0,,0,0,0\n30,18.5,10,800,5\n60,19,40,1500,12\n100,19.5,,,\n300,26,90,2600,60\n";
+  const sweep = "Time,BATTU2ECU_QAVLCAPE,BATTU2ECU_RIAVLINTRRESI,IHKA_BUS_IN_SIGNALE_KLIMA.BUS_IN_TEMP_AUSSEN\n" +
+    "0,0,0,12\n200,29,5.684,13\n400,30,5.7,13\n";
+  const x = loggerExtras([readLog(fast), readLog(sweep)]);
+  assert.deepEqual([x.ambient_c, x.battery_ah, x.battery_mohm], [19, 29.5, 5.692]);
+  assert.deepEqual([x.fan_pct_mean, x.fan_pct_max, x.fan_rpm_max, x.fan_amps_max], [35, 90, 2600, 60]);
+  // No DME reading: the climate control's.
+  assert.equal(loggerExtras(readLog(sweep)).ambient_c, 12);
 });
 
 test("logger extras: the rate each tier got, from the board's notes", () => {

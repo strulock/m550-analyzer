@@ -1,14 +1,16 @@
 /**
  * Commands for the logger board from the Board tab (and MCP): list a folder
  * on its card, delete a file or folder, format the card, upload its waiting
- * files now, check for (and install) new firmware now, or restart.
+ * files now, check for (and install) new firmware now, restart, or scan for
+ * Wi-Fi networks (the Board tab adds one from what it found).
  *
  * A command waits here until the board's next check-in. Every reply carries
  * the oldest one it hasn't done ("cmd_id", "cmd" and "cmd_arg", the argument
  * in hex: a card path may hold anything JSON would escape). The board says
  * in its check-ins the last one it finished and how (cmd_done, cmd_ok,
- * cmd_result: firmware/lib/logger/command.h); a folder's listing comes
- * separately (POST /api/logger/card). It keeps the last one done in its
+ * cmd_result: firmware/lib/logger/command.h); a folder's listing and a
+ * scan's networks come separately (POST /api/logger/card and
+ * /api/logger/wifi-scan). It keeps the last one done in its
  * flash, so a command never runs twice, and it does the card's work only
  * between drives. Only a person (an Access login, not a service token) can
  * ask for one.
@@ -33,10 +35,12 @@ export const KINDS = {
   upload: { about: "upload the card's waiting files now" },
   update: { about: "check for new firmware now and install it as soon as the board isn't logging" },
   restart: { card: true, about: "restart the board (between drives)" },
+  scan: { about: "scan for the Wi-Fi networks in the board's range (2.4 GHz)" },
 };
 
 const KEEP = 50;                             // commands kept, newest
 const MAX_LISTING = 200;                     // entries the board sends
+const MAX_SCAN = 40;                         // networks the board sends (command.h SCAN_MAX)
 export const MAX_CARD_BODY = 65536;
 const PEOPLE_ONLY = "only a person can send the board a command";
 
@@ -55,11 +59,11 @@ function shape(r) {
     sent: r.sent, done: r.done, ok: r.ok === null ? null : !!r.ok, result: r.result };
   c.state = r.done ? (r.result === "cancelled" ? "cancelled" : r.ok ? "done" : "failed")
     : r.sent ? "sent" : "waiting";
-  if (r.data) c.listing = JSON.parse(r.data);
+  if (r.data) c[r.kind === "scan" ? "scan" : "listing"] = JSON.parse(r.data);
   return c;
 }
 
-/** The newest commands first, each with its listing if it has one. */
+/** The newest commands first, each with its listing or scan if it has one. */
 export async function listCommands(env, limit = 20) {
   const n = Math.max(1, Math.min(KEEP, Number(limit) || 20));
   const r = (await env.DB.prepare("SELECT * FROM board_commands ORDER BY id DESC LIMIT ?")
@@ -170,4 +174,27 @@ export async function putListing(env, body) {
   await env.DB.prepare("UPDATE board_commands SET data = ? WHERE id = ?")
     .bind(JSON.stringify(listing), body.id).run();
   return { kept: entries.length };
+}
+
+/** A scan's networks from the board: {id, networks: [[ssid, rssi, channel,
+ * open]]}, strongest first. Kept with its command. */
+export async function putScan(env, body) {
+  if (!body || typeof body !== "object" || !Number.isInteger(body.id) ||
+    !Array.isArray(body.networks) || body.networks.length > MAX_SCAN) {
+    throw new CommandError(`body: JSON {id, networks: [[ssid, rssi, channel, open]]}, ` +
+      `at most ${MAX_SCAN}`);
+  }
+  const networks = [];
+  for (const n of body.networks) {
+    if (!Array.isArray(n) || typeof n[0] !== "string" || !n[0] || n[0].length > 32) {
+      throw new CommandError("networks: [ssid, rssi, channel, open]");
+    }
+    networks.push([n[0], Number(n[1]) || 0, Number(n[2]) || 0, !!n[3]]);
+  }
+  networks.sort((a, b) => b[1] - a[1]);
+  const c = await getCommand(env, body.id);
+  if (!c || c.kind !== "scan") throw new CommandError("no such scan asked for");
+  await env.DB.prepare("UPDATE board_commands SET data = ? WHERE id = ?")
+    .bind(JSON.stringify({ networks }), body.id).run();
+  return { kept: networks.length };
 }

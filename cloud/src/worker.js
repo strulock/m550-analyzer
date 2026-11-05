@@ -26,7 +26,7 @@
  * - The Board tab (/logger/board, boardpage.js) shows the board's firmware
  *   and card, and sends it commands (boardcmd.js) in its check-ins'
  *   replies: list, delete or format the card, upload now, update now,
- *   restart; the board_command tool too.
+ *   restart, scan for Wi-Fi networks; the board_command tool too.
  * - /mcp is a remote MCP server (JSON-RPC over streamable HTTP, JSON
  *   replies) with tools over that copy: drive_history, fault_history,
  *   trend, list_files, read_log, a drive's fault list (drive_faults), the
@@ -47,7 +47,7 @@
  */
 
 import { beatCommand, BOARD_COMMANDS_SCHEMA, cancelCommand, CommandError, getCommand, KINDS,
-  listCommands, MAX_CARD_BODY, putCommand, putListing } from "./boardcmd.js";
+  listCommands, MAX_CARD_BODY, putCommand, putListing, putScan } from "./boardcmd.js";
 import { BOARD_PAGE } from "./boardpage.js";
 import { beatSettings, BOARD_SETTINGS_SCHEMA, boardRole, cancelBoardSettings, getBoardSettings,
   putBoardSettings, SettingsError } from "./boardsettings.js";
@@ -1176,7 +1176,10 @@ export const TOOLS = [
       "l_per_100km, mpg, tank_used_l). From the logs the BMW Analyzer app " +
       "uploaded (2018 BMW M550i, N63TU2 V8). The logger board's drives add the rate each " +
       "channel tier got (rate_fast, rate_medium: reads a second per identifier; slow_pass_s), " +
-      "the tank (whole and each half) and odometer at each end.",
+      "the tank (whole and each half) and odometer at each end, the outside temperature as " +
+      "the drive began (ambient_c), the battery sensor's capacity (battery_ah) and internal " +
+      "resistance (battery_mohm), and the radiator fan's asked-for speed (fan_pct_mean, " +
+      "fan_pct_max), its highest speed (fan_rpm_max) and current (fan_amps_max).",
     inputSchema: { type: "object", properties: {
       limit: { type: "integer", description: "Drives, newest; default 30" } } },
   },
@@ -1197,7 +1200,8 @@ export const TOOLS = [
   {
     name: "trend",
     description: "One statistic across drives, e.g. misfires_5, uneven_5, spark_5, knock_b1, " +
-      "trim_b2, tire_2, battery_min, coolant_max, km, mpg, l_per_100km, fuel_l. " +
+      "trim_b2, tire_2, battery_min, coolant_max, km, mpg, l_per_100km, fuel_l, and the " +
+      "logger's ambient_c, battery_ah, battery_mohm, fan_pct_max, fan_amps_max. " +
       "Returns [start, value] pairs.",
     inputSchema: { type: "object", properties: {
       key: { type: "string" }, limit: { type: "integer", description: "Drives; default 100" } },
@@ -1408,7 +1412,8 @@ export const TOOLS = [
     description: "The commands sent to the logger board from the Board tab or board_command, " +
       "newest first: kind, path, state (waiting for its next check-in, sent, done, failed, " +
       "cancelled), the board's result and, for a list, the folder's entries ([name, bytes, " +
-      "is folder]) and the card's size and use. Pass id for one.",
+      "is folder]) and the card's size and use; for a scan, the Wi-Fi networks in range " +
+      "([ssid, dBm, channel, open]). Pass id for one.",
     inputSchema: { type: "object", properties: {
       id: { type: "integer" }, limit: { type: "integer", description: "Default 10, up to 50" } } },
   },
@@ -1417,7 +1422,8 @@ export const TOOLS = [
     description: "Send the logger board a command; it gets it at its next check-in (every " +
       "10 s on Wi-Fi) and does the card's work between drives. kind: list (a folder on the " +
       "card, path default /), upload (its waiting files now), update (check for firmware " +
-      "now and install it once it isn't logging), restart, delete (a file or folder, path), " +
+      "now and install it once it isn't logging), restart, scan (the Wi-Fi networks in range; " +
+      "adding one is the Board tab's), delete (a file or folder, path), " +
       "format (the whole card; refused while files wait to upload unless discard). delete " +
       "and format erase for good: ask the user to confirm first, and pass confirm: true. " +
       "Read the outcome with board_commands.",
@@ -1583,7 +1589,7 @@ const INSTRUCTIONS = "The cloud copy of a 2018 BMW M550i's drive logs and fault 
   "logger_presets look, logger_set_tiers, logger_save_preset, logger_publish and " +
   "logger_rollback change the presets in the cloud (every change kept as a version). " +
   "board_command sends the board a command (list, delete or format its card, upload now, " +
-  "update its firmware now, restart) and board_commands reads how they went. " +
+  "update its firmware now, restart, scan for Wi-Fi) and board_commands reads how they went. " +
   "Everything else is read-only, and nothing writes to the car.";
 
 /** One JSON-RPC message in, its reply out (null for a notification). */
@@ -1837,13 +1843,13 @@ async function healthApi(request, env, url, who) {
 }
 
 // The board's token may only do the board's work: check in, upload its
-// files and its card's listings, and fetch its channels, check list and firmware. So one taken from
+// files, its card's listings and Wi-Fi scans, and fetch its channels, check list and firmware. So one taken from
 // the board can't read the drives, change presets, write the app's files or
 // publish code.
 const CHECK_INS = ["/api/logger/heartbeat", "/api/logger/heartbeats"];
 const BOARD_ROUTES = [
   ["POST", /^\/api\/logger\/heartbeats?$/],
-  ["POST", /^\/api\/logger\/card$/],
+  ["POST", /^\/api\/logger\/(card|wifi-scan)$/],
   ["PUT", /^\/api\/files\/logger\/[^/]+$/],
   ["GET", /^\/api\/logger\/(channels|check-list|firmware|firmware\.bin)$/],
 ];
@@ -2033,6 +2039,20 @@ export async function handle(request, env, fetcher = fetch) {
     await ensureSchema(env);
     try {
       return json({ ok: true, ...(await putListing(env, JSON.parse(text))) });
+    } catch (e) {
+      if (e instanceof CommandError || e instanceof SyntaxError) {
+        return json({ error: e.message }, 400);
+      }
+      throw e;
+    }
+  }
+  if (url.pathname === "/api/logger/wifi-scan" && request.method === "POST") {
+    if (role !== "board") return json({ error: "only the board sends its Wi-Fi scan" }, 403);
+    const text = await request.text();
+    if (text.length > MAX_CARD_BODY) return json({ error: "too large" }, 413);
+    await ensureSchema(env);
+    try {
+      return json({ ok: true, ...(await putScan(env, JSON.parse(text))) });
     } catch (e) {
       if (e instanceof CommandError || e instanceof SyntaxError) {
         return json({ error: e.message }, 400);

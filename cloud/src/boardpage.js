@@ -4,9 +4,11 @@
  * files waiting) and the commands sent to it (boardcmd.js): list a folder
  * on the card and delete from it, format it, upload now, update now,
  * restart. A build can be published from here too (PUT /api/logger/firmware,
- * its version read from the image), and its settings changed (its Wi-Fi,
- * Access token, access point and time zone: /api/logger/settings,
- * boardsettings.js; sent to it, never shown back). Talks to /api/logger,
+ * its version read from the image), its Wi-Fi networks kept in the order it
+ * tries them (added from a scan the board makes, moved up or down, removed),
+ * and its other settings changed (Access token, access point and time zone:
+ * /api/logger/settings, boardsettings.js; sent to it, a password never shown
+ * back). Talks to /api/logger,
  * /api/logger/commands and /api/logger/settings with the visitor's Access
  * login. No dependencies;
  * the script avoids backticks and template placeholders so it can sit in
@@ -89,10 +91,16 @@ td.when { white-space: nowrap; }
 .note { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
 .setgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px 14px; margin: 10px 0; }
 .setgrid label { display: flex; flex-direction: column; align-items: stretch; gap: 3px; font-size: 13px; }
+td.acts { white-space: nowrap; text-align: right; }
+td.acts button { padding: 2px 8px; margin-left: 4px; }
+.tag { font-size: 12px; color: var(--warn); margin-left: 6px; }
+.tag.on { color: var(--ok); }
 @media (max-width: 640px) {
   .card { padding: 10px; }
   td, th { padding: 6px 4px; }
   td.by, th.by { display: none; }
+  td.acts { white-space: normal; }
+  td.acts button { margin: 2px 0 2px 4px; }
 }
 </style>
 </head>
@@ -156,14 +164,41 @@ td.when { white-space: nowrap; }
     </div>
   </details>
 
+  <details class="card" id="foldWifi" open>
+    <summary><h2>Wi-Fi</h2><span class="foldstate" id="wifiFold"></span></summary>
+    <div id="wifiState" class="muted">Loading…</div>
+    <div class="scroll"><table id="nets"></table></div>
+    <div class="row" style="margin-top:10px">
+      <button id="scan">Scan for networks</button>
+      <button id="addByName" class="link">Add one by name</button>
+      <button id="wifiCancel" class="hide">Take the change back</button>
+    </div>
+    <div id="scanBox" class="hide">
+      <h3>In range of the board</h3>
+      <div id="scanState" class="muted"></div>
+      <div class="scroll"><table id="scanned"></table></div>
+    </div>
+    <div class="box hide" id="addBox">
+      <b id="addTitle">Add a network</b>
+      <div class="setgrid">
+        <label>Network <input id="addSsid" autocomplete="off" maxlength="32"></label>
+        <label>Its password <input id="addPass" type="password" autocomplete="new-password" maxlength="63"></label>
+      </div>
+      <div class="row">
+        <button id="addGo" class="primary">Add</button>
+        <button id="addClose">Cancel</button>
+      </div>
+    </div>
+    <p class="note">The board joins the first network in this list that's in range, and on a lower one looks
+    for a higher one every 2 minutes, so put home and the office above a phone's hotspot. A new network goes
+    to the bottom; move it up. Changes reach the board at its next check-in, and a password is never shown
+    again. The board sees 2.4 GHz networks only (on an iPhone hotspot, turn on Maximize Compatibility).</p>
+  </details>
+
   <details class="card" id="foldSet">
     <summary><h2>Settings</h2><span class="foldstate" id="setFold"></span></summary>
     <div id="setState" class="muted">Loading…</div>
     <div class="setgrid">
-      <label>Wi-Fi network <input id="set_wifi_ssid" autocomplete="off"></label>
-      <label>Its password <input id="set_wifi_pass" type="password" autocomplete="new-password"></label>
-      <label>Backup network <input id="set_wifi2_ssid" autocomplete="off"></label>
-      <label>Its password <input id="set_wifi2_pass" type="password" autocomplete="new-password"></label>
       <label>Access token's client ID <input id="set_access_id" autocomplete="off" placeholder="….access"></label>
       <label>Its client secret <input id="set_access_secret" type="password" autocomplete="new-password"></label>
       <label>Setup access point's password <input id="set_ap_pass" type="password" autocomplete="new-password"></label>
@@ -172,7 +207,6 @@ td.when { white-space: nowrap; }
     <div class="row">
       <button id="setSave">Send to the board…</button>
       <button id="setCancel" class="hide">Take the change back</button>
-      <label><input type="checkbox" id="setClear2"> Remove the backup network</label>
     </div>
     <p class="note">Blank fields keep what the board has.
     The board takes a change at its next check-in, and then the passwords are dropped here; none is
@@ -222,7 +256,7 @@ td.when { white-space: nowrap; }
       (sub ? "<small>" + esc(sub) + "</small>" : "") + "</div>";
   }
   // The folds stay as they were left (this browser only).
-  ["foldFw", "foldCard", "foldSet", "foldCmds"].forEach(function (id) {
+  ["foldFw", "foldCard", "foldWifi", "foldSet", "foldCmds"].forEach(function (id) {
     try { var v = localStorage.getItem("board." + id); if (v) $(id).open = v === "1"; } catch (e) {}
     $(id).addEventListener("toggle", function () {
       try { localStorage.setItem("board." + id, $(id).open ? "1" : "0"); } catch (e) {}
@@ -242,7 +276,7 @@ td.when { white-space: nowrap; }
     if (c.kind === "list") return "list " + c.arg;
     if (c.kind === "delete") return "delete " + c.arg;
     if (c.kind === "format") return "format the card" + (c.arg === "discard" ? ", waiting files and all" : "");
-    return { upload: "upload now", update: "update now", restart: "restart" }[c.kind] || c.kind;
+    return { upload: "upload now", update: "update now", restart: "restart", scan: "scan for Wi-Fi networks" }[c.kind] || c.kind;
   }
 
   // ---- firmware
@@ -393,8 +427,7 @@ td.when { white-space: nowrap; }
 
   // ---- settings: what its last check-in says it has, the change waiting
   // for it, or how the last one went. Never a value.
-  var SET_KEYS = ["wifi_ssid", "wifi_pass", "wifi2_ssid", "wifi2_pass", "access_id", "access_secret",
-    "ap_pass", "tz"];
+  var SET_KEYS = ["access_id", "access_secret", "ap_pass", "tz"];
   var settings = null;
   function renderSettings(j) {
     settings = j;
@@ -402,9 +435,8 @@ td.when { white-space: nowrap; }
     if (!b) parts.push("The board hasn't checked in yet.");
     else if (b.settings_version === null) parts.push("The board's firmware (" + esc(b.fw || "?") + ") keeps its settings built in; update it to change them here.");
     else {
-      parts.push("The board has networks <b>" + esc(b.networks || "none") + "</b>, token " +
-        esc(b.token_id ? b.token_id + "…" : "none") + ", settings change " + esc(String(b.settings_version)) +
-        " (checked in " + esc(local(b.received)) + ").");
+      parts.push("The board has token " + esc(b.token_id ? b.token_id + "…" : "none") + ", settings change " +
+        esc(String(b.settings_version)) + " (checked in " + esc(local(b.received)) + ").");
     }
     if (j.pending) {
       parts.push("Waiting for its next check-in: " + esc(j.pending.keys.join(", ")) + " (asked by " +
@@ -414,11 +446,165 @@ td.when { white-space: nowrap; }
     }
     $("setState").innerHTML = parts.join(" ");
     var refused = j.last && /^refused/.test(j.last.result);
-    $("setFold").textContent = j.pending ? "A change is waiting for the board" :
-      refused ? "Last change refused" : b && b.networks ? b.networks.replace(",", ", ") : "";
+    $("setFold").textContent = j.pending ? "A change is waiting for the board" : refused ? "Last change refused" : "";
     $("setFold").className = "foldstate" + (j.pending || refused ? " warn" : "");
     $("setCancel").className = j.pending ? "" : "hide";
+    renderWifi();
   }
+
+  // ---- Wi-Fi: the board's networks in the order it tries them, with any
+  // change still waiting for it laid over (its names and order; never a
+  // password). Each network is a slot (1-6) on the board; the order is
+  // wifi_order, so moving one sends no password.
+  var SLOTS = 6;
+  function slotKey(n, part) { return (n === 1 ? "wifi_" : "wifi" + n + "_") + part; }
+  function wifiList() {
+    var b = settings && settings.board;
+    if (!b || !b.wifi_slots) return null;
+    var p = (settings.pending && settings.pending.wifi) || {}, names = {}, order = [], out = [], seen = {};
+    b.wifi_slots.forEach(function (s) { names[s[0]] = s[1]; order.push(s[0]); });
+    for (var n = 1; n <= SLOTS; n++) if (slotKey(n, "ssid") in p) names[n] = p[slotKey(n, "ssid")];
+    if ("wifi_order" in p) order = p.wifi_order ? p.wifi_order.split(",").map(Number) : [];
+    order.forEach(function (k) { if (names[k] && !seen[k]) out.push({ slot: k, ssid: names[k] }); seen[k] = true; });
+    for (var m = 1; m <= SLOTS; m++) if (!seen[m] && names[m]) out.push({ slot: m, ssid: names[m] });
+    return out;
+  }
+  function changing(slot) {
+    var keys = (settings && settings.pending && settings.pending.keys) || [];
+    return keys.indexOf(slotKey(slot, "ssid")) >= 0 || keys.indexOf(slotKey(slot, "pass")) >= 0;
+  }
+  function renderWifi() {
+    var b = settings && settings.board, list = wifiList(), on = status && status.last && status.last.wifi;
+    var old = !list;
+    $("scan").disabled = $("addByName").disabled = old;
+    $("wifiCancel").className = settings && settings.pending ? "" : "hide";
+    if (old) {
+      $("nets").innerHTML = "";
+      $("wifiState").innerHTML = !b ? "The board hasn't checked in yet." :
+        "The board has " + esc(b.networks ? b.networks.replace(",", ", ") : "no network") + ". Its firmware (" +
+        esc(b.fw || "?") + ") knows two networks; update it (Firmware &gt; Update now) to keep more here, in order.";
+      $("wifiFold").textContent = b && b.networks ? b.networks.replace(",", ", ") : "";
+      return;
+    }
+    var rows = '<tr><th class="n">#</th><th>Network</th><th></th></tr>';
+    list.forEach(function (w, i) {
+      rows += '<tr><td class="n">' + (i + 1) + "</td><td>" + esc(w.ssid) +
+        (w.ssid === on ? '<span class="tag on">on it now</span>' : "") +
+        (changing(w.slot) ? '<span class="tag">waiting for the board</span>' : "") + '</td><td class="acts">' +
+        '<button data-up="' + i + '"' + (i ? "" : " disabled") + ' title="Try it sooner">&#9650;</button>' +
+        '<button data-down="' + i + '"' + (i < list.length - 1 ? "" : " disabled") + ' title="Try it later">&#9660;</button>' +
+        '<button data-pass="' + i + '">Password…</button>' +
+        '<button class="danger" data-rm="' + i + '"' + (list.length > 1 ? "" : " disabled title=\"The board needs one\"") + ">Remove</button></td></tr>";
+    });
+    $("nets").innerHTML = list.length ? rows : '<tr><td class="muted">No networks.</td></tr>';
+    var p = settings.pending;
+    $("wifiState").innerHTML = p ? "Waiting for the board's next check-in (asked " + esc(local(p.requested)) + ")." :
+      settings.last ? "Last change: " + esc(settings.last.result) + ", " + esc(local(settings.last.done)) + "." : "";
+    $("wifiFold").textContent = p ? "A change is waiting for the board" :
+      list.map(function (w) { return w.ssid; }).join(", ");
+    $("wifiFold").className = "foldstate" + (p ? " warn" : "");
+    renderScan();                             // which of the scan's it knows
+  }
+  function sendWifi(change, what) {
+    return api("PUT", "/api/logger/settings", change).then(function (j) {
+      renderSettings(j);
+      say(what + ": the board takes it at its next check-in.", true);
+    }).catch(function (e) { say(e.message); });
+  }
+  function orderOf(list) { return list.map(function (w) { return w.slot; }).join(","); }
+  $("nets").onclick = function (e) {
+    var t = e.target, list = wifiList();
+    if (!list || t.disabled) return;
+    var up = t.getAttribute("data-up"), down = t.getAttribute("data-down"), rm = t.getAttribute("data-rm"),
+      pass = t.getAttribute("data-pass");
+    if (up !== null || down !== null) {
+      var i = Number(up !== null ? up : down), k = up !== null ? i - 1 : i + 1, w = list[i];
+      list[i] = list[k];
+      list[k] = w;
+      sendWifi({ wifi_order: orderOf(list) }, "Moved " + w.ssid + (up !== null ? " up" : " down"));
+    } else if (rm !== null) {
+      var gone = list[Number(rm)], change = {};
+      if (!confirm("Remove " + gone.ssid + " from the board's networks?")) return;
+      change[slotKey(gone.slot, "ssid")] = "";
+      change[slotKey(gone.slot, "pass")] = "";
+      change.wifi_order = orderOf(list.filter(function (x) { return x !== gone; }));
+      sendWifi(change, "Removing " + gone.ssid);
+    } else if (pass !== null) {
+      openAdd(list[Number(pass)].ssid, true);
+    }
+  };
+  function openAdd(ssid, known) {
+    $("addBox").classList.remove("hide");
+    $("addTitle").textContent = known ? "A new password for " + ssid : ssid ? "Add " + ssid : "Add a network by name";
+    $("addSsid").value = ssid || "";
+    $("addSsid").disabled = !!ssid;
+    $("addPass").value = "";
+    $("addPass").placeholder = "8 to 63 characters; empty for an open network";
+    (ssid ? $("addPass") : $("addSsid")).focus();
+  }
+  $("addByName").onclick = function () { openAdd("", false); };
+  $("addClose").onclick = function () { $("addBox").classList.add("hide"); $("addPass").value = ""; };
+  $("addGo").onclick = function () {
+    var list = wifiList(), ssid = $("addSsid").value, pass = $("addPass").value, change = {};
+    if (!list) return;
+    if (!ssid || ssid.length > 32) { say("A network's name is 1 to 32 characters."); return; }
+    if (pass && (pass.length < 8 || pass.length > 63)) { say("A Wi-Fi password is 8 to 63 characters (or none, for an open network)."); return; }
+    var have = list.filter(function (w) { return w.ssid === ssid; })[0];
+    if (have) {
+      change[slotKey(have.slot, "pass")] = pass;
+    } else {
+      var used = {}, free = 0;
+      list.forEach(function (w) { used[w.slot] = true; });
+      for (var n = 1; n <= SLOTS && !free; n++) if (!used[n]) free = n;
+      if (!free) { say("The board keeps " + SLOTS + " networks; remove one first."); return; }
+      if (!pass && !confirm(ssid + " with no password: is it an open network?")) return;
+      change[slotKey(free, "ssid")] = ssid;
+      change[slotKey(free, "pass")] = pass;
+      change.wifi_order = orderOf(list) + (list.length ? "," : "") + free;
+    }
+    sendWifi(change, have ? "New password for " + ssid : "Adding " + ssid).then(function () { $("addClose").onclick(); });
+  };
+  $("wifiCancel").onclick = function () { $("setCancel").onclick(); };
+
+  // The board's scan: the newest one asked for, and what it found.
+  function latestScan() {
+    for (var i = 0; i < cmds.length; i++) if (cmds[i].kind === "scan") return cmds[i];
+    return null;
+  }
+  function signal(dbm) { return dbm >= -60 ? "strong" : dbm >= -70 ? "good" : dbm >= -80 ? "fair" : "weak"; }
+  function renderScan() {
+    var c = latestScan();
+    if (!c) { $("scanBox").classList.add("hide"); return; }
+    $("scanBox").classList.remove("hide");
+    var list = wifiList() || [], known = {};
+    list.forEach(function (w) { known[w.ssid] = true; });
+    if (c.state === "waiting" || c.state === "sent") {
+      $("scanState").textContent = "Asked " + local(c.requested) + "; " + (c.state === "sent" ? "the board is scanning…" : "waiting for its next check-in…");
+      $("scanned").innerHTML = "";
+      return;
+    }
+    if (!c.scan) {
+      $("scanState").textContent = "The scan " + (c.state === "cancelled" ? "was cancelled" : "failed" + (c.result ? ": " + c.result : "")) + ".";
+      $("scanned").innerHTML = "";
+      return;
+    }
+    $("scanState").textContent = c.scan.networks.length + " networks, as of " + local(c.done) + ".";
+    var rows = '<tr><th>Network</th><th>Signal</th><th class="n">Channel</th><th></th></tr>';
+    c.scan.networks.forEach(function (n, i) {
+      rows += "<tr><td>" + esc(n[0]) + (n[3] ? ' <span class="muted">(open)</span>' : "") + "</td><td>" + signal(n[1]) +
+        ' <span class="muted">' + n[1] + ' dBm</span></td><td class="n">' + n[2] + '</td><td class="acts">' +
+        (known[n[0]] ? '<span class="muted">known</span>' : '<button data-add="' + i + '">Add…</button>') + "</td></tr>";
+    });
+    $("scanned").innerHTML = c.scan.networks.length ? rows : '<tr><td class="muted">None in range.</td></tr>';
+  }
+  $("scanned").onclick = function (e) {
+    var i = e.target.getAttribute("data-add"), c = latestScan();
+    if (i === null || !c || !c.scan) return;
+    var n = c.scan.networks[Number(i)];
+    openAdd(n[0], false);
+    if (n[3]) $("addPass").placeholder = "an open network: leave it empty";
+  };
+  $("scan").onclick = function () { $("scanBox").classList.remove("hide"); send("scan"); };
   function loadSettings() {
     return api("GET", "/api/logger/settings").then(renderSettings).catch(function (e) {
       $("setState").textContent = "Couldn't load the board's settings: " + e.message; });
@@ -426,13 +612,11 @@ td.when { white-space: nowrap; }
   $("setSave").onclick = function () {
     var change = {};
     SET_KEYS.forEach(function (k) { var v = $("set_" + k).value; if (v !== "") change[k] = v; });
-    if ($("setClear2").checked) { change.wifi2_ssid = ""; change.wifi2_pass = ""; }
     var keys = Object.keys(change);
     if (!keys.length) { say("Nothing to send: fill in what should change."); return; }
     if (!confirm("Send to the board at its next check-in: " + keys.join(", ") + "?")) return;
     api("PUT", "/api/logger/settings", change).then(function (j) {
       SET_KEYS.forEach(function (k) { $("set_" + k).value = ""; });
-      $("setClear2").checked = false;
       renderSettings(j);
       say("Sent: the board takes it at its next check-in (every 10 s while it has Wi-Fi).", true);
     }).catch(function (e) { say(e.message); });
@@ -478,6 +662,8 @@ td.when { white-space: nowrap; }
         renderCard();
         renderFiles();
         renderCmds();
+        renderScan();
+        if (settings) renderWifi();
       }).catch(function (e) { say(e.message); });
   }
   refresh();
