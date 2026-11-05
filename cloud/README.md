@@ -65,7 +65,11 @@ serves it to Claude from anywhere:
   (`ambient_c`: the DME's `TEMP_UMG`, else the climate control's or the
   head unit's, the median of its first 2 minutes), the battery sensor's
   capacity and internal resistance (`battery_ah`, `battery_mohm`; a tiring
-  battery holds less and its resistance climbs), and the radiator fan
+  battery holds less and its resistance climbs), the battery before the
+  engine started (`battery_rest_v`, V: the IBS's `IUIBS` while the DME read
+  0 rpm, before its first turn; only in a log that began with the ignition
+  on and the engine still, which the board writes as its own short file
+  just before the drive), and the radiator fan
   (`fan_pct_mean` and `fan_pct_max`, the speed the DME asks for;
   `fan_rpm_max` and `fan_amps_max` from the fan), for trends the warm-only
   Health scores leave out. `POST /api/logger/resummarize` works stored
@@ -117,6 +121,15 @@ serves it to Claude from anywhere:
   1,000 revolutions) and 3 baseline drives, and a drive a minute of warm
   running. Channels and groups (fueling, ignition and knock, temperatures
   and oil, boost, misfires, electrical) are `CHANNELS` in `health.js`.
+  Intake air (`RTANS`) is scored as its rise over the outside air (the
+  nearest `TEMP_UMG`, else the climate control's or the head unit's; no
+  outside reading, no score), so a cool night doesn't alert. Two rows are
+  one value a drive (`kind: "drive"`): `AMBIENT`, the outside air's average
+  over the whole drive, scored against the last 10 drives for its colour but
+  context only (never in a drive's level or worst channel), and
+  `BATT_REST`, the battery before the start (the drive row's
+  `battery_rest_v`, else the log just before it that caught it and ended
+  within 5 minutes of the drive's start).
   Worked out as each drive's series arrive (a failure there never fails the
   upload): that drive's summary, then the scores from it on, the 50 drives
   before it seeding the baselines at their stored levels;

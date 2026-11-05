@@ -105,8 +105,8 @@ test("logger extras: the tank level and odometer at each end, and whether the st
     rate_fast: null, rate_medium: null, slow_pass_s: null, ...NO_HEALTH });
 });
 
-const NO_HEALTH = { ambient_c: null, battery_ah: null, battery_mohm: null, fan_pct_mean: null,
-  fan_pct_max: null, fan_rpm_max: null, fan_amps_max: null };
+const NO_HEALTH = { ambient_c: null, battery_ah: null, battery_mohm: null, battery_rest_v: null,
+  fan_pct_mean: null, fan_pct_max: null, fan_rpm_max: null, fan_amps_max: null };
 
 test("logger extras: the outside temperature as it began, the battery sensor's view, the fan", () => {
   // The outside air from its first two minutes (later readings climb with the
@@ -121,6 +121,19 @@ test("logger extras: the outside temperature as it began, the battery sensor's v
   assert.deepEqual([x.fan_pct_mean, x.fan_pct_max, x.fan_rpm_max, x.fan_amps_max], [35, 90, 2600, 60]);
   // No DME reading: the climate control's.
   assert.equal(loggerExtras(readLog(sweep)).ambient_c, 12);
+});
+
+test("logger extras: the battery before the engine's first turn", () => {
+  // The ignition on and the engine still: the IBS's readings until the DME
+  // reads more than 0 rpm (the crank and after are left out).
+  const waited = "Time,INMOT,IUIBS\n0,0,11920\n0.5,0,11900\n1,0,11860\n1.5,620,9800\n2,700,14200\n";
+  assert.equal(loggerExtras(readLog(waited)).battery_rest_v, 11.9);
+  // The engine already running as the log began: none.
+  assert.equal(loggerExtras(readLog("Time,INMOT,IUIBS\n0,1350,11760\n1,1360,14400\n"))
+    .battery_rest_v, null);
+  // Never turned (the ignition only): the whole log.
+  assert.equal(loggerExtras(readLog("Time,INMOT,IUIBS\n0,0,12000\n1,0,11980\n"))
+    .battery_rest_v, 11.99);
 });
 
 test("logger extras: the rate each tier got, from the board's notes", () => {

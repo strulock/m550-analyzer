@@ -1294,9 +1294,12 @@ export const TOOLS = [
     name: "drive_health",
     description: "Drive health: each drive's channels (fuel trims and lambda per bank, knock " +
       "retard, spark burn time and misfires per cylinder, coolant, oil temperature and " +
-      "pressure, intake air, gearbox oil, after-catalyst temperatures, boost, battery) " +
-      "with the engine fully warm (coolant ITKUM >= 95 °C, oil >= 90 °C), compared in " +
-      "RPM x load cells against the same channel's last 10 healthy drives: a robust " +
+      "pressure, intake air over the outside air, gearbox oil, after-catalyst " +
+      "temperatures, boost, battery) with the engine fully warm (coolant ITKUM >= 95 °C, " +
+      "oil >= 90 °C), compared in RPM x load cells against the same channel's last 10 " +
+      "healthy drives, and two values a drive: AMBIENT, the outside air's average (context " +
+      "only, never in a drive's level) and BATT_REST, the battery before the engine started " +
+      "(V; only where a log caught it with the ignition on before the start): a robust " +
       "z-score per channel (0 normal; |score| >= 2 watch, >= 3 alert), the drive's value " +
       "and the normal band (both sample-weighted over the cells scored). Without drive: " +
       "the drives' scores, newest first: the last `limit` (default 10, up to 50, as many " +

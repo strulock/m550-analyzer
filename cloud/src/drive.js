@@ -693,15 +693,20 @@ const TANK_RIGHT = ["FUELLST_TANKH_R", "BDC_TANK_FUELLSTAND_RECHTS"];
 // The outside air: the DME's (filtered; its raw reading climbs with the
 // engine bay's heat), else the climate control's or the head unit's, else
 // the DME's intake-side one.
-const AMBIENT = ["TEMP_UMG", "IHKA_BUS_IN_SIGNALE_KLIMA.BUS_IN_TEMP_AUSSEN",
+export const AMBIENT = ["TEMP_UMG", "IHKA_BUS_IN_SIGNALE_KLIMA.BUS_IN_TEMP_AUSSEN",
   "PMA_BUS_IN_TEMP_AUSSEN_WERT", "ITUMG"];
 const AMBIENT_WINDOW = 120.0;              // s from its first reading
 // The battery sensor's (IBS) own view of the battery: the charge it can
 // still deliver (Ah) and its internal resistance (mΩ), each read about once
 // a drive. A tiring battery holds less and its resistance climbs, long before
-// it fails to start the car. (The board's logs begin with the engine
-// running and end as it stops, so a resting voltage isn't in them.)
+// it fails to start the car.
 const BATTERY_AH = "BATTU2ECU_QAVLCAPE", BATTERY_MOHM = "BATTU2ECU_RIAVLINTRRESI";
+// The battery before the engine starts: the IBS's voltage (mV) while the
+// DME says 0 rpm, before its first turn. Most logs begin with the engine
+// already running (the board comes up after it); when the ignition was on
+// first, the board logs the wait as its own short file, and Health takes
+// the value from that file for the drive after it (health.js).
+const BATTERY_V = "IUIBS", RPM = "INMOT";
 // The radiator fan: the speed the DME asks for (%), the speed the fan says
 // it turns (rpm) and its current (A), the last two from the fan itself (LIN).
 const FAN_PCT = "S_DREH_ELUEFTER_VORG_WM", FAN_RPM = "ELUEFTER_LIN_DREHZ_TESTER",
@@ -711,12 +716,13 @@ const FAN_PCT = "S_DREH_ELUEFTER_VORG_WM", FAN_RPM = "ELUEFTER_LIN_DREHZ_TESTER"
  * warm-only Health scores leave out: the outside temperature as it began
  * (ambient_c, the median of the first AMBIENT_WINDOW s of readings), the
  * battery sensor's capacity and internal resistance (battery_ah,
- * battery_mohm; medians), and the fan's mean and highest asked-for speed
+ * battery_mohm; medians), the battery before the engine's first turn
+ * (battery_rest_v, restingVoltage), and the fan's mean and highest asked-for speed
  * (%), highest speed (rpm) and highest current (A). Null where not read. */
 export function startAndFan(logs) {
   logs = [].concat(logs);
-  const out = { ambient_c: null, battery_ah: null, battery_mohm: null, fan_pct_mean: null,
-    fan_pct_max: null, fan_rpm_max: null, fan_amps_max: null };
+  const out = { ambient_c: null, battery_ah: null, battery_mohm: null, battery_rest_v: null,
+    fan_pct_mean: null, fan_pct_max: null, fan_rpm_max: null, fan_amps_max: null };
   for (const name of AMBIENT) {
     const [t, v] = seriesOf(logs, name);
     if (!v.length) continue;
@@ -730,6 +736,7 @@ export function startAndFan(logs) {
   const [, mohm] = seriesOf(logs, BATTERY_MOHM);
   const mohms = mohm.filter((x) => x > 0);
   if (mohms.length) out.battery_mohm = pyRound(median(mohms), 3);
+  out.battery_rest_v = restingVoltage(logs);
   const [, pct] = seriesOf(logs, FAN_PCT);
   if (pct.length) {
     out.fan_pct_mean = pyRound(sum(pct) / pct.length, 1);
@@ -742,13 +749,28 @@ export function startAndFan(logs) {
   return out;
 }
 
+/** The battery's voltage (V) before the engine's first turn: the median of
+ * the IBS's readings while the DME read 0 rpm and before it read more, or
+ * null (the engine already running when the log began, or no readings). */
+export function restingVoltage(logs) {
+  logs = [].concat(logs);
+  const [rt, rv] = seriesOf(logs, RPM);
+  if (!rt.length || rv[0] !== 0) return null;
+  const turned = rv.findIndex((x) => x > 0);
+  const until = turned < 0 ? Infinity : rt[turned];
+  const [t, v] = seriesOf(logs, BATTERY_V);
+  const rest = v.filter((x, k) => t[k] >= rt[0] && t[k] < until && x > 0);
+  return rest.length ? pyRound(median(rest) / 1000, 2) : null;
+}
+
 /** What the logger's drive rows carry beyond the app's (not in history.py):
  * whether the start is only the upload time less the drive's length (no
  * Clock), and for fill-ups (tanks.js) the tank level and the odometer as
  * the drive started and ended, with each half of the tank (in its
  * channel's unit). The board reads them together at the start, at Park and
  * at engine-off (its snapshots). The rates each tier got (tierRates), and
- * the outside temperature, battery and fan (startAndFan). */
+ * the outside temperature, battery and fan (startAndFan), with the battery
+ * before the engine started where the log began before it (restingVoltage). */
 export function loggerExtras(logs) {
   logs = [].concat(logs);
   const [tankStart, tankEnd] = ends(logs, [FUEL_TANK], TANK_WINDOW);
