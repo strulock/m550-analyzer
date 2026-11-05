@@ -16,13 +16,14 @@ items name functions or say when they were written.
   writes, resets, DTC clears and routines are refused. The logger board's
   `hsfz::Client::start()` refuses the same way (`firmware/test/host_test.cpp`).
   Nothing in this plan widens that set.
-- **Tests (4 Nov):** the app 647 (31 Oct), the Worker 115 (`cloud/test`), the
+- **Tests (4 Nov):** the app 647 (31 Oct), the Worker 120 (`cloud/test`), the
   firmware's host tests 33 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
-- **Live (4 Nov):** Worker version `06bce624` (#150) on m550.trulock.com; firmware
-  `20261105-0408-48b755d` (#153, a failed download says why) published for
-  the board, which runs `20261105-0157-2efecb6` (#152, six Wi-Fi networks)
-  until it takes it.
+- **Live (4 Nov):** Worker version `b3e9c873` (#155, Health's intake air
+  over the outside air, outside-air and battery-before-start rows) on
+  m550.trulock.com; firmware `20261105-0408-48b755d` (#153, a failed
+  download says why), published and running on the board since 10:11 pm
+  CST (installed idle on Wi-Fi, kept on its first check-in).
 - **On the car:** only the DME catalog has been checked. The other 11 module
   catalogs, the head-unit GPS layout, and the logging rate with module channels
   added are still unverified (`docs/in-car-checklist.md`).
@@ -740,7 +741,7 @@ after the first week of drives, and what's left.
       voltage isn't in the logs (they begin with the engine running and end
       as it stops); it would need the board to read the battery while it
       waits for the car.
-- [ ] **Health: the weather and the battery before the start (4 Nov).**
+- [x] **Health: the weather and the battery before the start (4 Nov, #155).**
       Intake air alerted on cool nights (3 Nov: −4.3 to −5.1 at 20-22 °C
       outside, +3.1 on a warm one): it's now scored as its rise over the
       outside air. An "Outside air (average)" row in Temperatures, one value
@@ -750,8 +751,13 @@ after the first week of drives, and what's left.
       on first, which the board writes as its own short log (2 Nov: 11.86,
       11.92, 11.90 V); the drive after it takes that value (within 5
       minutes). Most drives won't have it (the board comes up after the
-      start). After deploying: `POST /api/logger/resummarize` (the rows'
-      `battery_rest_v`), then the Health tab's Rebuild (summaries v2).
+      start). Deployed 4 Nov (`b3e9c873`); `POST /api/logger/resummarize`
+      ran over the 75 logger drives with the app's token: four caught it
+      (2 Nov 11.92, 11.86, 11.88 V; 4 Nov 8:13 pm 11.54 V after 4 minutes
+      with the ignition on), so two scored drives (2 Nov, 4:46 and 6:20 pm)
+      carry it and it stays grey until a third. The Health tab's Rebuild
+      (summaries v2) takes a person's login (the app's token gets a 403), so
+      it's run from the page.
       Still open: a true resting voltage needs the board awake before the
       ignition (it's powered with it), or the DME's stored start dips
       (`BZEDIAG_MOTORSTART_SPANNUNGSEINBRUCH`, 0x40C4, layout unknown; not
