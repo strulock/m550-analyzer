@@ -874,6 +874,7 @@ test("the board's token: only the board's routes, and only the board checks in",
     ["PUT", "/api/files/logger/sub/x.csv", "x"],
     ["PUT", "/api/history", "{}"], ["GET", "/api/logger"], ["GET", "/api/logger/settings"],
     ["PUT", "/api/logger/presets", "{}"], ["POST", "/mcp", "{}"], ["GET", "/api/series"],
+    ["PUT", "/api/logger/display", '{"units":"metric"}'],
     ["POST", "/api/health/rebuild"], ["GET", "/api/status"], ["GET", "/logger"]]) {
     const r = await call(method, path, { body, auth: board });
     assert.equal(r.status, 403, `${method} ${path}`);
@@ -1911,6 +1912,25 @@ test("board commands: a person asks, the board gets one a check-in, says how it 
   const page = await call("GET", "/logger/board");
   assert.equal(page.status, 200);
   assert.match(await page.text(), /<title>M550 Logger Board<\/title>/);
+});
+
+test("display units: imperial until changed, one choice for every page", async () => {
+  const units = async () => (await (await call("GET", "/api/logger/display")).json()).units;
+  const filled = async (path) => (await (await call("GET", path)).text()).match(/var UNITS = "(\w+)";/)[1];
+  assert.equal(await units(), "imperial");
+  for (const path of ["/logger", "/logger/health", "/logger/board"]) {
+    assert.equal(await filled(path), "imperial", path);
+  }
+  let r = await call("PUT", "/api/logger/display", { body: JSON.stringify({ units: "furlongs" }) });
+  assert.equal(r.status, 400);
+  assert.match((await r.json()).error, /imperial or metric/);
+  r = await call("PUT", "/api/logger/display", { body: JSON.stringify({ units: "metric" }) });
+  assert.deepEqual(await r.json(), { units: "metric" });
+  assert.equal(await units(), "metric");
+  for (const path of ["/logger", "/logger/health", "/logger/board"]) {
+    assert.equal(await filled(path), "metric", path);
+  }
+  assert.equal((await call("DELETE", "/api/logger/display")).status, 405);
 });
 
 test("board_command over MCP: delete and format only once confirmed, and only for a person", async () => {

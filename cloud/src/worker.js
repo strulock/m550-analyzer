@@ -65,6 +65,7 @@ import { DETAILS, DETAILS_SCHEMA, ingestDetails, withDetails } from "./faultdeta
 import { excludeDrive, HEALTH_SCHEMA, healthDetail, healthOverview, levelOf, rebuildHealth,
   updateHealth } from "./health.js";
 import { HEALTH_PAGE } from "./healthpage.js";
+import { getUnits, PREFS_SCHEMA, putUnits, UnitsError, withUnits } from "./units.js";
 
 export const SERVER = { name: "n63read-cloud", version: "1.0.0" };
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -394,6 +395,8 @@ export const SCHEMA = [
   ...BOARD_COMMANDS_SCHEMA,
   // Each drive's health summary and scores (health.js).
   ...HEALTH_SCHEMA,
+  // The units the pages show (units.js).
+  ...PREFS_SCHEMA,
 ];
 
 const MAX_POINTS = 2000;
@@ -2011,6 +2014,19 @@ export async function handle(request, env, fetcher = fetch) {
     }
     return new Response(null, { status: 405 });
   }
+  if (url.pathname === "/api/logger/display") {
+    await ensureSchema(env);
+    if (request.method === "GET") return json({ units: await getUnits(env) });
+    if (request.method === "PUT") {
+      try {
+        return json(await putUnits(env, await request.json().catch(() => null), auth.who));
+      } catch (e) {
+        if (e instanceof UnitsError) return json({ error: e.message }, 400);
+        throw e;
+      }
+    }
+    return new Response(null, { status: 405 });
+  }
   if (url.pathname === "/api/logger/commands") {
     await ensureSchema(env);
     try {
@@ -2119,20 +2135,23 @@ export async function handle(request, env, fetcher = fetch) {
     return json(await backfillPieces(env, url.searchParams.get("after")));
   }
   if (url.pathname === "/logger/board" && request.method === "GET") {
-    return new Response(BOARD_PAGE, { headers: { "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store" } });
+    await ensureSchema(env);
+    return new Response(withUnits(BOARD_PAGE, await getUnits(env)), {
+      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
   }
   if (url.pathname === "/logger/health" && request.method === "GET") {
-    return new Response(HEALTH_PAGE, { headers: { "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store" } });
+    await ensureSchema(env);
+    return new Response(withUnits(HEALTH_PAGE, await getUnits(env)), {
+      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
   }
   if (url.pathname.startsWith("/api/health")) {
     const reply = await healthApi(request, env, url, auth.who);
     if (reply) return reply;
   }
   if (url.pathname === "/logger" && request.method === "GET") {
-    return new Response(LOGGER_PAGE, { headers: { "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store" } });
+    await ensureSchema(env);
+    return new Response(withUnits(LOGGER_PAGE, await getUnits(env)), {
+      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
   }
   if (url.pathname.startsWith("/api/logger/")) {
     const reply = await loggerConfig(request, env, url);

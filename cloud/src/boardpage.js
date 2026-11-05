@@ -8,7 +8,8 @@
  * tries them (added from a scan the board makes, moved up or down, removed),
  * and its other settings changed (Access token, access point and time zone:
  * /api/logger/settings, boardsettings.js; sent to it, a password never shown
- * back). Talks to /api/logger,
+ * back). The units every logger page shows are picked here too
+ * (/api/logger/display, units.js; never sent to the board). Talks to /api/logger,
  * /api/logger/commands and /api/logger/settings with the visitor's Access
  * login. No dependencies;
  * the script avoids backticks and template placeholders so it can sit in
@@ -214,6 +215,16 @@ td.acts button { padding: 2px 8px; margin-left: 4px; }
     (Access &gt; Service credentials, added to the application's Service Auth policy), wait for
     "taken", and only then revoke the old. A board that can't check in is set up over USB
     (firmware/tools/provision.py) or from its access point's page.</p>
+  </details>
+
+  <details class="card" id="foldUnits">
+    <summary><h2>Display units</h2><span class="foldstate" id="unitsFold"></span></summary>
+    <div class="row">
+      <label><input type="radio" name="units" value="imperial"> Imperial: °F, mph, miles, psi, gallons, MPG</label>
+      <label><input type="radio" name="units" value="metric"> Metric: the car's own (°C, km/h, km, hPa, litres)</label>
+    </div>
+    <p class="note">What the Logger, Health and Board pages show, for everyone who opens them; it isn't
+    sent to the board. The logs, the health scores and the MCP tools keep the car's own units.</p>
   </details>
 
   <details class="card" id="foldCmds" open>
@@ -626,6 +637,22 @@ td.acts button { padding: 2px 8px; margin-left: 4px; }
     api("DELETE", "/api/logger/settings").then(function (j) { renderSettings(j); say("Taken back.", true); })
       .catch(function (e) { say(e.message); });
   };
+
+  // ---- display units (units.js): every page's, not the board's
+  var UNITS = "__UNITS__";
+  function showUnits() {
+    document.querySelectorAll('input[name="units"]').forEach(function (r) { r.checked = r.value === UNITS; });
+    $("unitsFold").textContent = UNITS === "metric" ? "Metric" : "Imperial";
+  }
+  $("foldUnits").onchange = function (e) {
+    if (e.target.name !== "units") return;
+    api("PUT", "/api/logger/display", { units: e.target.value }).then(function (j) {
+      UNITS = j.units;
+      showUnits();
+      say("Every page shows " + UNITS + " units now (a page already open: reload it).", true);
+    }).catch(function (err) { showUnits(); say(err.message); });
+  };
+  showUnits();
 
   // ---- commands
   function renderCmds() {

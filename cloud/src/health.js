@@ -87,7 +87,8 @@ const ch = (key, group, label, names, unit, floor, extra = {}) =>
  * one), and `floor`, the least spread a
  * baseline is given (so a channel that never moves doesn't alert on a
  * hair's change; `rel` adds a share of the baseline's median). `pair`: the
- * other bank's (or matching cylinder's) key. */
+ * other bank's (or matching cylinder's) key. `delta`: a difference, so a page
+ * showing other units scales it without the offset (°C over °C). */
 export const CHANNELS = [
   ch("IMUL1", "fueling", "Fuel trim, bank 1", ["IMUL1"], "factor", 0.01, { pair: "IMUL1" + B2 }),
   ch("IMUL1" + B2, "fueling", "Fuel trim, bank 2", ["IMUL1" + B2], "factor", 0.01,
@@ -111,7 +112,8 @@ CHANNELS.push(
   ch("ITKUM", "temps", "Coolant", ["ITKUM"], "°C", 1),
   ch("TEMP_OEL", "temps", "Oil temperature", OILS, "°C", 1),
   ch("OELDRUCK", "temps", "Oil pressure", ["OELDRUCK"], "hPa", 100, { rel: 0.03 }),
-  ch("RTANS", "temps", "Intake air over outside", ["RTANS"], "°C", 2, { over: AMBIENT }),
+  ch("RTANS", "temps", "Intake air over outside", ["RTANS"], "°C", 2,
+    { over: AMBIENT, delta: true }),
   ch("AMBIENT", "temps", "Outside air (average)", AMBIENT, "°C", 2,
     { kind: "drive", context: true }),
   ch("EGS_GETRIEBEOELTMEPERATUR", "temps", "Gearbox oil", ["EGS_GETRIEBEOELTMEPERATUR"], "°C", 1),
@@ -579,7 +581,7 @@ export async function healthOverview(env, { from = null, to = null } = {}) {
     groups: GROUPS,
     channels: CHANNELS.filter((c) => scores[c.key]).map((c) => ({ key: c.key, label: c.label,
       group: c.group, kind: c.kind, pair: c.pair || null, context: !!c.context,
-      unit: c.unit || units[c.names[0]] || "" })),
+      delta: !!c.delta, unit: c.unit || units[c.names[0]] || "" })),
     drives: rows.map((x) => ({ drive: x.drive, start: iso(x.start),
       warm_min: +(x.warm_s / 60).toFixed(1), overall: x.overall, level: x.level,
       excluded: !!x.excluded })),

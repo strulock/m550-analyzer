@@ -11,7 +11,8 @@
  * embedded). It talks to /api/logger, /api/logger/catalog and
  * /api/logger/presets (logger.js) with the visitor's Access login, and
  * estimates the rates the selection gets (estimate.js, its source
- * embedded). No dependencies; the map is OpenStreetMap's embed. The script
+ * embedded). Values show in the units chosen on the Board tab (units.js,
+ * displayUnit embedded; the Worker fills in UNITS). No dependencies; the map is OpenStreetMap's embed. The script
  * avoids backticks and template placeholders so it can sit in this template.
  */
 
@@ -19,6 +20,7 @@ import { estimateRates } from "./estimate.js";
 import { BOARD_NEEDS, neverChanged, PER_DRIVE, PER_DRIVE_RE, perDrive, UNDECODABLE, VALUE_KEEP,
   valueKept } from "./logger.js";
 import { FILL_MIN_L } from "./tanks.js";
+import { displayUnit } from "./units.js";
 import { oddValue } from "./values.js";
 
 const FILL_NOTE = `${FILL_MIN_L} litres (${(FILL_MIN_L / 3.785411784).toFixed(1)} gallons)`;
@@ -165,13 +167,13 @@ td.when small { display: block; color: var(--muted); font-size: 11px; }
   <details class="card fold" id="foldTanks">
     <summary><h2>Tanks</h2><span class="foldstate" id="tanksState"></span></summary>
     <div class="scroll"><table>
-      <thead><tr><th>Filled</th><th class="n">Drives</th><th class="n">Added</th><th class="n">Miles</th>
-        <th class="n">Gallons</th><th class="n">MPG</th><th class="n">Level</th></tr></thead>
+      <thead><tr><th>Filled</th><th class="n">Drives</th><th class="n">Added</th><th class="n" id="thDist">Miles</th>
+        <th class="n" id="thFuel">Gallons</th><th class="n" id="thEcon">MPG</th><th class="n">Level</th></tr></thead>
       <tbody id="tanks"><tr><td colspan="7" class="muted">Loading…</td></tr></tbody>
     </table></div>
     <p class="muted" style="font-size:12.5px;margin:8px 0 0">A tank starts when the level is up
-    ${FILL_NOTE} between drives, as the trip meter is reset at a fill-up. Miles from the odometer;
-    gallons from the engine's fuel flow (else the level's fall).</p>
+    ${FILL_NOTE} between drives, as the trip meter is reset at a fill-up. Distance from the odometer;
+    fuel from the engine's fuel flow (else the level's fall).</p>
   </details>
 
   <details class="card fold" id="foldSweep">
@@ -268,6 +270,8 @@ var VALUE_KEEP = ${JSON.stringify(VALUE_KEEP)};
 ${valueKept.toString()}
 ${neverChanged.toString()}
 ${oddValue.toString()}
+${displayUnit.toString()}
+var UNITS = "__UNITS__";
 </script>
 <script>
 (function () {
@@ -463,17 +467,21 @@ ${oddValue.toString()}
       it.odd = oddValue(s[1], it) || (past ? "at times: " + past : null);
     });
   }
+  // A stored value as shown (the units picked on the Board tab); the checks
+  // for a wrong-looking one (oddValue) read the car's own.
+  function shown(v, unit) { return displayUnit(v, unit, UNITS)[0]; }
   function valueCell(it) {
-    var unit = esc(it.unit);
+    var u = displayUnit(0, it.unit, UNITS)[1], unit = esc(u);
     var s = values && values[it.name];
     if (!s) return '<td class="val"><span class="muted">' + (values ? "– " : "") + unit + "</span></td>";
+    var lo = fmt(shown(s[3], it.unit)), hi = fmt(shown(s[4], it.unit));
     var tip = "Recorded " + new Date(s[0] * 1000).toLocaleString() + ". " + s[2].toLocaleString() +
-      " values in " + s[5] + " drive" + (s[5] === 1 ? "" : "s") + ", " + fmt(s[3]) + " to " + fmt(s[4]) +
-      (it.unit ? " " + it.unit : "") + ".";
+      " values in " + s[5] + " drive" + (s[5] === 1 ? "" : "s") + ", " + lo + " to " + hi +
+      (u ? " " + u : "") + ".";
     var note = it.odd ? '<small class="odd">' + esc(it.odd) + "</small>"
       : s[2] >= 20 && s[5] >= 2 && s[3] === s[4] ? "<small>the same in all " + s[5] + " drives</small>"
-      : "<small>" + ago(s[0]) + (s[3] !== s[4] ? "; " + fmt(s[3]) + " to " + fmt(s[4]) : "") + "</small>";
-    return '<td class="val' + (it.odd ? " odd" : "") + '" title="' + esc(tip) + '"><b>' + fmt(s[1]) +
+      : "<small>" + ago(s[0]) + (s[3] !== s[4] ? "; " + lo + " to " + hi : "") + "</small>";
+    return '<td class="val' + (it.odd ? " odd" : "") + '" title="' + esc(tip) + '"><b>' + fmt(shown(s[1], it.unit)) +
       "</b> " + unit + note + "</td>";
   }
 
@@ -632,25 +640,30 @@ ${oddValue.toString()}
   }
   function num(v) { return typeof v === "number" && isFinite(v) ? v : null; }
   function whole(v) { return v == null ? null : Math.round(v); }
-  function fahrenheit(v) { return v == null ? "" : Math.round(v * 9 / 5 + 32) + " °F"; }
+  // A temperature in the units picked, and in the other ones (beside it).
+  function temp(v) { var t = displayUnit(v, "°C", UNITS); return [whole(t[0]), t[1]]; }
+  function otherTemp(v) {
+    var t = displayUnit(v, "°C", UNITS === "metric" ? "imperial" : "metric");
+    return v == null ? "" : Math.round(t[0]) + " " + t[1];
+  }
   function renderLive(s, when) {
     var b = s.last, cool = num(b.coolant_c), oil = num(b.oil_c), kmh = num(b.speed_kmh),
-      volts = num(b.battery_v), rate = num(b.rows_per_s);
+      volts = num(b.battery_v), rate = num(b.rows_per_s), speed = displayUnit(kmh, "km/h", UNITS);
     $("liveTitle").textContent = s.online ? "The car now" : "The car, last seen " + when + " ago";
     $("liveStats").innerHTML = [
       stat("State", b.state || "–"),
       b.state === "logging" ? stat("Drive", num(b.drive_min), "min", "", rate == null ? "" : rate + " rows/s") : "",
-      stat("Speed", kmh == null ? null : Math.round(kmh / 1.609344), "mph"),
+      stat("Speed", whole(speed[0]), speed[1]),
       stat("RPM", whole(num(b.rpm))),
-      stat("Coolant", whole(cool), "°C", level("coolant_c", cool), fahrenheit(cool)),
-      stat("Oil", whole(oil), "°C", level("oil_c", oil), fahrenheit(oil)),
+      stat("Coolant", temp(cool)[0], temp(cool)[1], level("coolant_c", cool), otherTemp(cool)),
+      stat("Oil", temp(oil)[0], temp(oil)[1], level("oil_c", oil), otherTemp(oil)),
       stat("Battery", volts == null ? null : volts.toFixed(1), "V"),
       stat("Faults", num(b.faults)),
     ].join("");
     renderFaults(b);
     var hot = s.online && (level("coolant_c", cool) === "bad" || level("oil_c", oil) === "bad");
-    $("alarm").textContent = hot ? "Running hot: coolant " + whole(cool) + " °C, oil " + whole(oil) +
-      " °C (limits " + LIMITS.coolant_c[1] + " and " + LIMITS.oil_c[1] + " °C)." : "";
+    $("alarm").textContent = hot ? "Running hot: coolant " + temp(cool).join(" ") + ", oil " + temp(oil).join(" ") +
+      " (limits " + temp(LIMITS.coolant_c[1]).join(" ") + " and " + temp(LIMITS.oil_c[1]).join(" ") + ")." : "";
     $("alarm").classList.toggle("hide", !hot);
     document.title = (hot ? "⚠ " : "") + "M550 Logger";
     var has = num(b.lat) !== null && num(b.lon) !== null;
@@ -680,7 +693,8 @@ ${oddValue.toString()}
   }
   function setAt(km, d) {
     if (km == null) return '<td class="when muted">–</td>';
-    return '<td class="when">' + Math.round(km / 1.609344).toLocaleString() + " mi" +
+    var d2 = displayUnit(km, "km", UNITS);
+    return '<td class="when">' + Math.round(d2[0]).toLocaleString() + " " + d2[1] +
       (d ? "<small>" + esc(when(d)) + "</small>" : "") + "</td>";
   }
   function renderFaults(b) {
@@ -711,23 +725,35 @@ ${oddValue.toString()}
     $(id).className = "foldstate" + (warn ? " warn" : "");
   }
 
+  // A tank's distance, fuel and economy in the units picked: miles, gallons
+  // and MPG as /api/logger/tanks gives them, or km, litres and L/100 km.
+  function tankUnits(k) {
+    if (UNITS !== "metric") return { dist: k.miles, fuel: k.gallons, econ: k.mpg };
+    return { dist: k.miles == null ? null : k.miles * 1.609344, fuel: k.gallons == null ? null : k.gallons * 3.785411784,
+      econ: k.mpg ? 235.214583 / k.mpg : null };
+  }
   function renderTanks() {
+    var metric = UNITS === "metric", vol = metric ? "L" : "gal";
+    $("thDist").textContent = metric ? "Km" : "Miles";
+    $("thFuel").textContent = metric ? "Litres" : "Gallons";
+    $("thEcon").textContent = metric ? "L/100 km" : "MPG";
     api("GET", "/api/logger/tanks").then(function (j) {
       var t = (j.tanks || []).slice().reverse();
-      var gal = function (l) { return l == null ? "–" : (l / 3.785411784).toFixed(1); };
+      var gal = function (l) { return l == null ? "–" : (metric ? l : l / 3.785411784).toFixed(1); };
       $("tanks").innerHTML = t.length ? t.map(function (k) {
+        var u = tankUnits(k);
         return "<tr><td>" + esc(k.start.slice(0, 16)) + (k.open ? ' <span class="badge">now</span>' : "") +
           (k.partial ? ' <span class="badge warn" title="Filled before the logs began">partial</span>' : "") + "</td>" +
-          '<td class="n">' + k.drives + '</td><td class="n">' + (k.filled_l == null ? "–" : gal(k.filled_l) + " gal") + "</td>" +
-          '<td class="n">' + (k.miles == null ? "–" : Math.round(k.miles)) + "</td>" +
-          '<td class="n">' + (k.gallons == null ? "–" : k.gallons.toFixed(1)) + (k.fuel_from === "level" ? " <small>level</small>" : "") + "</td>" +
-          '<td class="n"><b>' + (k.mpg == null ? "–" : k.mpg.toFixed(1)) + "</b></td>" +
-          '<td class="n">' + gal(k.level_end_l) + " gal</td></tr>";
+          '<td class="n">' + k.drives + '</td><td class="n">' + (k.filled_l == null ? "–" : gal(k.filled_l) + " " + vol) + "</td>" +
+          '<td class="n">' + (u.dist == null ? "–" : Math.round(u.dist)) + "</td>" +
+          '<td class="n">' + (u.fuel == null ? "–" : u.fuel.toFixed(1)) + (k.fuel_from === "level" ? " <small>level</small>" : "") + "</td>" +
+          '<td class="n"><b>' + (u.econ == null ? "–" : u.econ.toFixed(1)) + "</b></td>" +
+          '<td class="n">' + gal(k.level_end_l) + " " + vol + "</td></tr>";
       }).join("") : '<tr><td colspan="7" class="muted">No logger drives with the tank level yet.</td></tr>';
-      var now = t[0];
+      var now = t[0], n = now && tankUnits(now);
       foldState("tanksState", !now ? "None yet" : (now.open ? "This tank" : "Last tank") + ": " +
-        (now.mpg == null ? "–" : now.mpg.toFixed(1)) + " MPG over " +
-        (now.miles == null ? "–" : Math.round(now.miles)) + " miles, " + gal(now.level_end_l) + " gal left");
+        (n.econ == null ? "–" : n.econ.toFixed(1)) + (metric ? " L/100 km over " : " MPG over ") +
+        (n.dist == null ? "–" : Math.round(n.dist)) + (metric ? " km, " : " miles, ") + gal(now.level_end_l) + " " + vol + " left");
     }).catch(function (e) { $("tanks").innerHTML = '<tr><td colspan="7" class="muted">' + esc(e.message) + "</td></tr>"; });
   }
 
