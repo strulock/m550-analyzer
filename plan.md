@@ -19,11 +19,11 @@ items name functions or say when they were written.
 - **Tests (5 Nov):** the app 647 (31 Oct), the Worker 126 (`cloud/test`), the
   firmware's host tests 33 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
-- **Live (4 Nov):** Worker version `b3e9c873` (#155, Health's intake air
-  over the outside air, outside-air and battery-before-start rows) on
-  m550.trulock.com; firmware `20261105-0408-48b755d` (#153, a failed
-  download says why), published and running on the board since 10:11 pm
-  CST (installed idle on Wi-Fi, kept on its first check-in).
+- **Live (5 Nov):** Worker version `e05930a9` (#157, imperial or metric
+  units on the logger pages) on m550.trulock.com; firmware
+  `20261105-0408-48b755d` (#153, a failed download says why; it carries
+  #152's Wi-Fi list), published and running on the board since 4 Nov,
+  10:11 pm CST (installed idle on Wi-Fi, kept on its first check-in).
 - **On the car:** only the DME catalog has been checked. The other 11 module
   catalogs, the head-unit GPS layout, and the logging rate with module channels
   added are still unverified (`docs/in-car-checklist.md`).
@@ -714,9 +714,9 @@ after the first week of drives, and what's left.
 - [ ] Try a change from the Board tab's Settings (a person's login
       only): a new Access token (make it, wait for "taken", then revoke
       the old).
-- [ ] **Wi-Fi, up to six networks in order (4 Nov):** once the board runs
-      the build with them (its check-ins carry `wifi_slots`), scan from the
-      Board tab's Wi-Fi card, add the office and the wine cellar, and put
+- [ ] **Wi-Fi, up to six networks in order (4 Nov):** the board runs the
+      build with them (its check-ins carry `wifi_slots`, two so far, 5 Nov).
+      Scan from the Board tab's Wi-Fi card, add the office and the wine cellar, and put
       home and the office above the hotspot. Then see it move off the
       hotspot within about 2 minutes of pulling in at home, and the waiting
       files go up on home Wi-Fi.
@@ -762,6 +762,12 @@ after the first week of drives, and what's left.
       ignition (it's powered with it), or the DME's stored start dips
       (`BZEDIAG_MOTORSTART_SPANNUNGSEINBRUCH`, 0x40C4, layout unknown; not
       in the channel check's catalog).
+- [x] **Display units (5 Nov, #157):** imperial (the default: °F, mph,
+      miles, psi, gallons, MPG) or metric (the car's own), picked on the
+      Board tab and kept in D1 (`prefs`); one choice for every logger page
+      and visitor. Display only: the logs, summaries, health scores and MCP
+      tools keep the car's units. Intake air over the outside air converts
+      as a difference (×1.8, no +32). Deployed 5 Nov (`e05930a9`).
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
       one in 4 minutes would point at the card or its power (a new card, or
       the supply) rather than the firmware.
