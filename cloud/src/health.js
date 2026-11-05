@@ -26,7 +26,18 @@
  * baseline drives; otherwise it has no score. Summaries are kept per drive
  * (health_summaries) and the scores worked out again, oldest drive first,
  * whenever one changes (health_scores).
+ *
+ * Intake air is scored as its rise over the outside air (the drive.js
+ * AMBIENT reading nearest in time), so a cool evening doesn't read as a
+ * fault. Two rows are one value a drive rather than cells ("drive"
+ * channels): the outside air's average over the drive, scored like the
+ * others for its colour but only context (never in a drive's level or
+ * worst channel), and the battery before the engine started, where a log
+ * caught it (drive.js restingVoltage: this drive's own log, or the short
+ * one the board wrote while the ignition was on just before it).
  */
+
+import { AMBIENT } from "./drive.js";
 
 export const WARM_COOLANT_C = 95;
 export const WARM_OIL_C = 90;
@@ -37,7 +48,7 @@ export const MIN_SAMPLES = 10;
 export const MIN_REVS = 1000;
 export const RPM_EDGES = [400, 900, 1500, 2000, 2500, 3000, 4000, 8000];
 export const LOAD_EDGES = [0, 20, 35, 50, 70, 100, 400];
-export const SUMMARY_VERSION = 1;
+export const SUMMARY_VERSION = 2;
 
 const RPM = "INMOT";
 const COOLANT = "ITKUM";
@@ -47,6 +58,8 @@ const ILMAR = "ILMAR";
 const LAMBDAS = ["ILAG1", "ILAG1@0x13"];
 const FUEL_CUT_LAMBDA = 1.5;
 const TEMP_FRESH_S = 60;                   // a temperature this old still stands
+const AMBIENT_FRESH_S = 600;               // the outside air changes slowly; read every few s
+const REST_GAP_S = 300;                    // the ignition-on log ends this close before the drive
 const FAST_GAP_S = 1.5;                    // RPM and load: the nearest within this
 const RUN_GAP_S = 3;                       // a cell's visit ends after a gap this long
 const RUNS_KEPT = 3;                       // each cell's longest visits, for the raw log
@@ -98,7 +111,9 @@ CHANNELS.push(
   ch("ITKUM", "temps", "Coolant", ["ITKUM"], "°C", 1),
   ch("TEMP_OEL", "temps", "Oil temperature", OILS, "°C", 1),
   ch("OELDRUCK", "temps", "Oil pressure", ["OELDRUCK"], "hPa", 100, { rel: 0.03 }),
-  ch("RTANS", "temps", "Intake air", ["RTANS"], "°C", 2),
+  ch("RTANS", "temps", "Intake air over outside", ["RTANS"], "°C", 2, { over: AMBIENT }),
+  ch("AMBIENT", "temps", "Outside air (average)", AMBIENT, "°C", 2,
+    { kind: "drive", context: true }),
   ch("EGS_GETRIEBEOELTMEPERATUR", "temps", "Gearbox oil", ["EGS_GETRIEBEOELTMEPERATUR"], "°C", 1),
   ch("TEMP_NACH_KAT_MODELL", "temps", "After cat, bank 1", ["TEMP_NACH_KAT_MODELL"],
     "°C", 10, { pair: "TEMP_NACH_KAT_MODELL" + B2 }),
@@ -112,7 +127,11 @@ for (let n = 1; n <= 8; n++) {
     [misfire(n)].concat(n > 4 ? [misfire(n) + B2] : []), "per 1,000 rev", 0.5,
     { kind: "count", pair: misfire(n <= 4 ? n + 4 : n - 4) }));
 }
-CHANNELS.push(ch("IUIBS", "electrical", "Battery voltage", ["IUIBS"], "mV", 100));
+CHANNELS.push(
+  ch("IUIBS", "electrical", "Battery voltage", ["IUIBS"], "mV", 100),
+  ch("BATT_REST", "electrical", "Battery before start", ["IUIBS"], "V", 0.1,
+    { kind: "drive", rest: true }),
+);
 
 const BY_KEY = new Map(CHANNELS.map((c) => [c.key, c]));
 const GROUP = new Map(GROUPS.map((g) => [g.key, g]));
@@ -206,8 +225,9 @@ function stats(values) {
 const r6 = (x) => (x === null || !Number.isFinite(x) ? null : +x.toFixed(6));
 
 /** One drive's summary from its samples: tracks = Map(name -> {t, v}), or
- * {name: [[t, v], ...]}; units = {name: unit}. Null with no warm time. */
-export function summarize(input, units = {}) {
+ * {name: [[t, v], ...]}; units = {name: unit}. Null with no warm time.
+ * `restV`: the battery before the engine started (V), or null. */
+export function summarize(input, units = {}, { restV = null } = {}) {
   const tracks = input instanceof Map ? input
     : new Map(Object.entries(input).map(([k, pts]) => [k, track(pts.slice())]));
   const rpm = tracks.get(RPM);
@@ -240,9 +260,32 @@ export function summarize(input, units = {}) {
     out.cells[k] = [+c[0].toFixed(1), Math.round(c[1]), longest];
   }
   for (const spec of CHANNELS) {
+    if (spec.rest) {
+      if (Number.isFinite(restV)) {
+        out.channels[spec.key] = { name: spec.names[0], unit: spec.unit,
+          cells: { drive: stats([restV]) } };
+      }
+      continue;
+    }
     const name = spec.names.find((n) => tracks.get(n) && tracks.get(n).t.length);
     if (!name) continue;
     const tr = tracks.get(name), per = {};
+    if (spec.kind === "drive") {          // the whole drive's readings, warm or not
+      const vs = tr.v.filter(Number.isFinite);
+      if (vs.length) {
+        out.channels[spec.key] = { name, unit: units[name] || spec.unit, cells: { drive: stats(vs) } };
+      }
+      continue;
+    }
+    // Over the outside air: each reading less the outside air's nearest,
+    // else the drive's median of it; none at all, no score.
+    let base = null;
+    if (spec.over) {
+      const an = spec.over.find((n) => tracks.get(n) && tracks.get(n).v.some(Number.isFinite));
+      if (!an) continue;
+      const at = tracks.get(an), mid = median(at.v.filter(Number.isFinite));
+      base = (t) => nearest(at, t, AMBIENT_FRESH_S) ?? mid;
+    }
     if (spec.kind === "count") {
       // Only the cells the counter was read in: no reading isn't no misfire.
       let prev = null;
@@ -263,7 +306,7 @@ export function summarize(input, units = {}) {
       const v = tr.v[i];
       if (!Number.isFinite(v)) continue;
       const k = cellAt(tr.t[i]);
-      if (k !== null) (per[k] = per[k] || []).push(v);
+      if (k !== null) (per[k] = per[k] || []).push(base ? r6(v - base(tr.t[i])) : v);
     }
     const c = {};
     for (const [k, vs] of Object.entries(per)) c[k] = stats(vs);
@@ -278,6 +321,7 @@ export function summarize(input, units = {}) {
 
 /** A cell's value for comparing, and its weight, or null when too thin. */
 function cellValue(spec, cell) {
+  if (spec.kind === "drive") return [cell[1], 1];        // one value a drive: its mean
   if (spec.kind === "count") {
     const [inc, revs] = cell;
     return revs >= MIN_REVS ? [inc / revs * 1000, Math.min(WEIGHT_MAX, revs / 100)] : null;
@@ -318,7 +362,8 @@ export function scoreDrives(rows, excluded = new Set(), seed = []) {
         if (cv) mine[k] = cv[0];
       }
       const s = row.scores[spec.key];
-      if (!Object.keys(mine).length || levelOf(spec.group, s ? s[0] : null) === 2) continue;
+      if (!Object.keys(mine).length ||
+          (!spec.context && levelOf(spec.group, s ? s[0] : null) === 2)) continue;
       if (!history.has(spec.key)) history.set(spec.key, []);
       history.get(spec.key).push(mine);
     }
@@ -362,11 +407,11 @@ export function scoreDrives(rows, excluded = new Set(), seed = []) {
         ? [r6(score), n, r6(xsum / wsum), r6(losum / wsum), r6(hisum / wsum)]
         : [null, 0, r6(allX / allW), null, null];
       const lv = levelOf(spec.group, score);
-      if (lv !== null) {
+      if (lv !== null && !spec.context) {   // context (the weather) never flags a drive
         level = Math.max(level ?? 0, lv);
         if (overall === null || Math.abs(score) > Math.abs(overall)) overall = r6(score);
       }
-      if (!excluded.has(row.drive) && lv !== 2) {
+      if (!excluded.has(row.drive) && (spec.context || lv !== 2)) {
         if (!history.has(spec.key)) history.set(spec.key, []);
         history.get(spec.key).push(mine);
       }
@@ -399,7 +444,7 @@ export async function summarizeStored(env, drive) {
     pts.set(row.channel, list);
   }
   const tracks = new Map([...pts].map(([k, list]) => [k, track(list)]));
-  const s = summarize(tracks, units);
+  const s = summarize(tracks, units, { restV: await restingBefore(env, drive) });
   const earliest = (a, b) => (a === null || a === undefined ? b ?? null
     : b === null || b === undefined ? a : Math.min(a, b));
   if (!s || s.warm_s < WARM_MIN_S) {
@@ -413,6 +458,33 @@ export async function summarizeStored(env, drive) {
     .bind(drive, s.start, s.warm_s, SUMMARY_VERSION, JSON.stringify(s)).run();
   return { drive, warm_s: s.warm_s, kept: true, channels: Object.keys(s.channels).length,
     from: earliest(was && was.start, s.start) };
+}
+
+const localSeconds = (text) =>
+  Date.parse(String(text || "").slice(0, 19).replace(" ", "T") + "Z") / 1000;
+
+/** The battery before `drive`'s engine started (V): its own log's
+ * (battery_rest_v in its drive row), else the log just before it, if that
+ * one caught it and ended within REST_GAP_S of this one's start (the board
+ * writes the wait with the ignition on as its own short log). Or null. */
+export async function restingBefore(env, drive) {
+  let rows;
+  try {
+    rows = (await env.DB.prepare(`SELECT file, start, data FROM drives WHERE source = 'logger'
+      AND file <= ? ORDER BY file DESC LIMIT 2`).bind(drive).all()).results || [];
+  } catch {
+    return null;                        // no drive rows (a store without History)
+  }
+  const mine = rows.find((x) => x.file === drive);
+  if (!mine) return null;
+  const d = JSON.parse(mine.data);
+  if (Number.isFinite(d.battery_rest_v)) return d.battery_rest_v;
+  const prev = rows.find((x) => x.file !== drive);
+  if (!prev) return null;
+  const p = JSON.parse(prev.data);
+  if (!Number.isFinite(p.battery_rest_v)) return null;
+  const gap = localSeconds(mine.start) - (localSeconds(prev.start) + (p.minutes || 0) * 60);
+  return gap >= -5 && gap <= REST_GAP_S ? p.battery_rest_v : null;
 }
 
 // A drive's scores need the BASELINE_DRIVES healthy drives before it, per
@@ -506,7 +578,7 @@ export async function healthOverview(env, { from = null, to = null } = {}) {
   return {
     groups: GROUPS,
     channels: CHANNELS.filter((c) => scores[c.key]).map((c) => ({ key: c.key, label: c.label,
-      group: c.group, kind: c.kind, pair: c.pair || null,
+      group: c.group, kind: c.kind, pair: c.pair || null, context: !!c.context,
       unit: c.unit || units[c.names[0]] || "" })),
     drives: rows.map((x) => ({ drive: x.drive, start: iso(x.start),
       warm_min: +(x.warm_s / 60).toFixed(1), overall: x.overall, level: x.level,

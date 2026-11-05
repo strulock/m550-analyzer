@@ -283,7 +283,7 @@ a { color: var(--accent); }
       var d = +i, worst = null;
       data.channels.forEach(function (c) {
         var s = data.scores[c.key][d];
-        if (s && s[0] != null && (!worst || Math.abs(s[0]) > Math.abs(data.scores[worst.key][d][0]))) worst = c;
+        if (!c.context && s && s[0] != null && (!worst || Math.abs(s[0]) > Math.abs(data.scores[worst.key][d][0]))) worst = c;
       });
       if (!worst) return;
       sel.key = worst.key;
@@ -465,7 +465,11 @@ a { color: var(--accent); }
       }
       h.push("</tr>");
     }
-    $("grid").innerHTML = h.join("");
+    $("grid").innerHTML = c.kind === "drive"
+      ? '<tr><td class="e muted" style="width:auto">One value a drive, not by RPM × load' +
+        (c.key === "AMBIENT" ? "; the weather, shown for context and never counted against a drive" : "") +
+        ".</td></tr>"
+      : h.join("");
     var dr = driveOf(sel.drive), s = data.scores[c.key][data.drives.indexOf(dr)];
     $("dFacts").innerHTML = [
       ["Score", s && s[0] != null ? fmt(s[0]) : "no baseline yet"],

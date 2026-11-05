@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { BASELINE_DRIVES, loadFromFlow, scoreDrives, summarize } from "../src/health.js";
+import { BASELINE_DRIVES, loadFromFlow, restingBefore, scoreDrives, summarize } from "../src/health.js";
 
 // A drive of `seconds` at a steady 1,500 rpm and 40 % load, sampled every
 // half second; `at(t)` overrides any channel's value.
@@ -116,4 +116,60 @@ test("alerting drives and drives left out by hand stay out of later baselines", 
   // Thin cells (under 10 samples) don't count.
   const thin = scoreDrives(rows([1, 1, 1, 1], { 3: { "2.2": [5, 9, 9, 9, 9, 9] } }));
   assert.equal(thin[3].scores.IMUL1[1], 1);
+});
+
+test("intake air is scored over the outside air; without an outside reading it isn't scored", () => {
+  // Intake 15 °C over the outside air on a 30 °C day and a 15 °C night: the same.
+  const hot = summarize(drive(0, { at: { RTANS: () => 45, TEMP_UMG: () => 30 } }));
+  const cool = summarize(drive(0, { at: { RTANS: () => 30, TEMP_UMG: () => 15 } }));
+  assert.equal(hot.channels.RTANS.cells["2.2"][2], 15);
+  assert.equal(cool.channels.RTANS.cells["2.2"][2], 15);
+  // The climate control's outside air when the DME's isn't read.
+  const ihka = summarize(drive(0, { at: { RTANS: () => 40,
+    "IHKA_BUS_IN_SIGNALE_KLIMA.BUS_IN_TEMP_AUSSEN": () => 22 } }));
+  assert.equal(ihka.channels.RTANS.cells["2.2"][2], 18);
+  assert.equal(summarize(drive(0, { at: { RTANS: () => 40 } })).channels.RTANS, undefined);
+});
+
+test("the outside air is one value a drive: coloured by its score, never a drive's level", () => {
+  // Its average over the whole drive, cold start included.
+  const s = summarize(drive(0, { at: { TEMP_UMG: (t) => (t < 150 ? 10 : 20) } }));
+  assert.equal(s.channels.AMBIENT.cells.drive[1], 15);
+  const temps = [20, 21, 19, 20, 20, 5];
+  const out = scoreDrives(temps.map((v, i) => ({ drive: `d${i}`, start: i * 1000, summary: {
+    channels: { AMBIENT: { name: "TEMP_UMG", unit: "°C", cells: { drive: [50, v, v, v, v, v] } },
+      IMUL1: { name: "IMUL1", unit: "", cells: { "1.2": [100, 1, 1, 1, 1, 1] } } } } })));
+  assert.ok(out[5].scores.AMBIENT[0] < -3);           // a cold night stands out on its row
+  assert.equal(out[5].level, 0);                     // but the drive isn't flagged for it
+  assert.equal(out[5].overall, 0);
+});
+
+test("the battery before the start: one value a drive, scored like a channel", () => {
+  const s = summarize(drive(0), {}, { restV: 11.9 });
+  assert.deepEqual(s.channels.BATT_REST.cells.drive.slice(0, 3), [1, 11.9, 11.9]);
+  assert.equal(summarize(drive(0)).channels.BATT_REST, undefined);
+  const volts = [12.4, 12.4, 12.4, 12.4, 11.6];
+  const out = scoreDrives(volts.map((v, i) => ({ drive: `d${i}`, start: i * 1000, summary: {
+    channels: { BATT_REST: { name: "IUIBS", unit: "V", cells: { drive: [1, v, v, v, v, v] } } } } })));
+  assert.equal(out[4].level, 2);                     // 0.8 V down on a 0.1 V floor
+});
+
+test("the battery before the start comes from the drive's log, or the ignition-on log just before", async () => {
+  const rows = [
+    ["logger/2026-11-02_16-46-05.csv", "2026-11-02 16:46:05", { minutes: 0.07, battery_rest_v: 11.86 }],
+    ["logger/2026-11-02_16-46-14.csv", "2026-11-02 16:46:14", { minutes: 9.78, battery_rest_v: null }],
+    ["logger/2026-11-02_18-20-03.csv", "2026-11-02 18:20:03", { minutes: 5.1, battery_rest_v: null }],
+    ["logger/2026-11-03_08-00-00.csv", "2026-11-03 08:00:00", { minutes: 0.1, battery_rest_v: 12.1 }],
+    ["logger/2026-11-03_08-30-00.csv", "2026-11-03 08:30:00", { minutes: 5, battery_rest_v: null }],
+    ["logger/2026-11-03_09-00-00.csv", "2026-11-03 09:00:00", { minutes: 5, battery_rest_v: 12.3 }],
+  ];
+  const env = { DB: { prepare: () => ({ bind: (drive) => ({ all: async () => ({ results: rows
+    .filter(([f]) => f <= drive).reverse().slice(0, 2)
+    .map(([file, start, data]) => ({ file, start, data: JSON.stringify(data) })) }) }) }) } };
+  assert.equal(await restingBefore(env, "logger/2026-11-02_16-46-14.csv"), 11.86);  // 5 s after it
+  assert.equal(await restingBefore(env, "logger/2026-11-02_18-20-03.csv"), null);   // the one before has none
+  assert.equal(await restingBefore(env, "logger/2026-11-03_08-30-00.csv"), null);   // 30 min later
+  assert.equal(await restingBefore(env, "logger/2026-11-03_09-00-00.csv"), 12.3);   // its own
+  const none = { DB: { prepare: () => { throw new Error("no such table: drives"); } } };
+  assert.equal(await restingBefore(none, "logger/x.csv"), null);
 });

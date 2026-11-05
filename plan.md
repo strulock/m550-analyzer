@@ -740,6 +740,22 @@ after the first week of drives, and what's left.
       voltage isn't in the logs (they begin with the engine running and end
       as it stops); it would need the board to read the battery while it
       waits for the car.
+- [ ] **Health: the weather and the battery before the start (4 Nov).**
+      Intake air alerted on cool nights (3 Nov: −4.3 to −5.1 at 20-22 °C
+      outside, +3.1 on a warm one): it's now scored as its rise over the
+      outside air. An "Outside air (average)" row in Temperatures, one value
+      a drive, coloured by its score against the last 10 drives but never a
+      drive's level. "Battery before start" (`BATT_REST`, V) in Electrical:
+      the logs begin with the engine running, except when the ignition was
+      on first, which the board writes as its own short log (2 Nov: 11.86,
+      11.92, 11.90 V); the drive after it takes that value (within 5
+      minutes). Most drives won't have it (the board comes up after the
+      start). After deploying: `POST /api/logger/resummarize` (the rows'
+      `battery_rest_v`), then the Health tab's Rebuild (summaries v2).
+      Still open: a true resting voltage needs the board awake before the
+      ignition (it's powered with it), or the DME's stored start dips
+      (`BZEDIAG_MOTORSTART_SPANNUNGSEINBRUCH`, 0x40C4, layout unknown; not
+      in the channel check's catalog).
 - [ ] Watch `card_errors` in the car's check-ins: many more than the bench's
       one in 4 minutes would point at the card or its power (a new card, or
       the supply) rather than the firmware.
