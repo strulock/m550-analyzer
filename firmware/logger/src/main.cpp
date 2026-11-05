@@ -3387,32 +3387,60 @@ static void otaTrialCheck() {
   esp_ota_mark_app_invalid_rollback_and_reboot();
 }
 
-static int workerGet(HTTPClient& http, NetworkClientSecure& tls, const char* path) {
-  if (tlsConnect(tls, 10000, 10000, 30000) != TLS_OK) return -1;
+// A GET to the Worker. On a failure before a reply (-1, or HTTPClient's
+// negative codes), `why` (when given) says what went wrong.
+static int workerGet(HTTPClient& http, NetworkClientSecure& tls, const char* path,
+                     String* why = nullptr) {
+  TlsOpen open = tlsConnect(tls, 10000, 10000, 30000);
+  if (open != TLS_OK) {
+    if (why) {
+      *why = tlsWhy(tls, open);
+      if (open == TLS_NO_ROOM) {
+        *why += " (" + String((unsigned)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024)) +
+                " KB free, largest block " +
+                String((unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024)) +
+                " KB)";
+      }
+    }
+    return -1;
+  }
   http.setTimeout(30000);
   http.setConnectTimeout(10000);
-  if (!http.begin(tls, String("https://") + workerHost() + path)) return -1;
+  if (!http.begin(tls, String("https://") + workerHost() + path)) {
+    if (why) *why = "can't start the request";
+    return -1;
+  }
   addAccess(http);
-  return http.GET();
+  int code = http.GET();
+  if (code < 0 && why) *why = HTTPClient::errorToString(code);
+  return code;
 }
 
-// The image to the card, hashed as it comes; kept only if size and hash match.
-static bool otaDownload(const Manifest& m) {
+// The image to the card, hashed as it comes; kept only if size and hash
+// match. On a failure, `why` says what went wrong (for the check-ins' `ota`).
+static bool otaDownload(const Manifest& m, std::string& why) {
   NetworkClientSecure tls;
   HTTPClient http;
-  int code = workerGet(http, tls, "/api/logger/firmware.bin");
-  if (code != 200) { http.end(); out.printf("[ota] download: %d\n", code); return false; }
+  String connWhy;
+  int code = workerGet(http, tls, "/api/logger/firmware.bin", &connWhy);
+  if (code != 200) {
+    http.end();
+    why = code < 0 ? connWhy.c_str() : "HTTP " + std::to_string(code);
+    out.printf("[ota] download: %d %s\n", code, why.c_str());
+    return false;
+  }
   File f;
   {
     std::lock_guard<std::recursive_mutex> g(sdLock);
     SD.remove(FW_DOWNLOAD);
     f = SD.open(FW_DOWNLOAD, FILE_WRITE);
   }
-  if (!f) { http.end(); return false; }
+  if (!f) { http.end(); why = "can't write the card"; return false; }
   NetworkClient* s = http.getStreamPtr();
   static uint8_t buf[4096];
   Sha256 sha;
   size_t got = 0;
+  bool writeFailed = false;
   uint32_t lastData = millis();
   while (got < m.size && (http.connected() || s->available()) && millis() - lastData < 30000) {
     size_t a = s->available();
@@ -3420,11 +3448,12 @@ static bool otaDownload(const Manifest& m) {
     size_t want = std::min(std::min(a, sizeof(buf)), m.size - got);
     int k = s->readBytes(buf, want);
     if (k <= 0) continue;
-    if (f.write(buf, k) != (size_t)k) break;
+    if (f.write(buf, k) != (size_t)k) { writeFailed = true; break; }
     sha.update(buf, k);
     got += k;
     lastData = millis();
   }
+  bool stalled = got < m.size && millis() - lastData >= 30000;
   f.close();
   http.end();
   char hex[65];
@@ -3432,8 +3461,12 @@ static bool otaDownload(const Manifest& m) {
   std::lock_guard<std::recursive_mutex> g(sdLock);
   if (got != m.size || m.sha256 != hex) {
     SD.remove(FW_DOWNLOAD);
-    out.printf("[ota] download of %s: %u of %u bytes, hash %s\n", m.version.c_str(), (unsigned)got,
-               (unsigned)m.size, m.sha256 == hex ? "ok" : "differs");
+    std::string of = std::to_string(got / 1024) + " of " + std::to_string(m.size / 1024) + " KB";
+    if (writeFailed) why = "card write failed at " + of;
+    else if (got != m.size) why = (stalled ? "no data for 30 s at " : "connection closed at ") + of;
+    else why = "hash differs";
+    out.printf("[ota] download of %s: %u of %u bytes, hash %s (%s)\n", m.version.c_str(),
+               (unsigned)got, (unsigned)m.size, m.sha256 == hex ? "ok" : "differs", why.c_str());
     return false;
   }
   SD.remove(FW_FILE);
@@ -3473,7 +3506,11 @@ static void otaCheckIfDue() {
   }
   out.printf("[ota] firmware %s offered (running %s); downloading\n", m.version.c_str(), FW_VERSION);
   setOta("downloading " + m.version);
-  if (!otaDownload(m)) { setOta("download of " + m.version + " failed"); return; }
+  std::string why;
+  if (!otaDownload(m, why)) {
+    setOta("download of " + m.version + " failed: " + why);
+    return;
+  }
   otaReady = true;
   setOta("downloaded " + m.version + "; installs at the next power-on");
   out.printf("[ota] %s on the card; installs at the next power-on or after a minute idle\n",

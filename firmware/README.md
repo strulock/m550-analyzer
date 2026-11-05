@@ -453,7 +453,10 @@ it), which then won't take that version again (publish another). Going back
 because the power went (the car switched off before the build checked in)
 isn't held against it: it's taken again, up to 3 times (`otatry`). An image
 that won't install is refused the same way. The check-ins carry `fw` (the version) and `ota` (what the updater
-is doing: downloading, downloaded, trying, went back, failed), and the
+is doing: downloading, downloaded, trying, went back, failed; a failed
+download says why: not enough memory for TLS (with the free memory and
+largest block), the TLS or HTTP error, the HTTP status, how far it got when
+the connection closed or stalled, a card write, or the hash), and the
 logger page shows them with the published version. A "dev" build (from the
 IDE) takes no updates, so bench work isn't replaced under you.
 
