@@ -19,10 +19,10 @@ items name functions or say when they were written.
 - **Tests (4 Nov):** the app 647 (31 Oct), the Worker 115 (`cloud/test`), the
   firmware's host tests 33 (logger) and 16 (HSFZ). Coverage was last measured
   at 0.3.8 (85%).
-- **Live (3 Nov):** Worker version `06bce624` (#150) on m550.trulock.com; firmware
-  `20261102-0613-d966807` (#148, the card's retries) published for the
-  board, which runs `20261101-2250-ffacb51` (#146, the Board tab) until it
-  takes it.
+- **Live (4 Nov):** Worker version `06bce624` (#150) on m550.trulock.com; firmware
+  `20261105-0408-48b755d` (#153, a failed download says why) published for
+  the board, which runs `20261105-0157-2efecb6` (#152, six Wi-Fi networks)
+  until it takes it.
 - **On the car:** only the DME catalog has been checked. The other 11 module
   catalogs, the head-unit GPS layout, and the logging rate with module channels
   added are still unverified (`docs/in-car-checklist.md`).
@@ -719,6 +719,17 @@ after the first week of drives, and what's left.
       home and the office above the hotspot. Then see it move off the
       hotspot within about 2 minutes of pulling in at home, and the waiting
       files go up on home Wi-Fi.
+- [x] **On the car, `20261105-0157-2efecb6` (#152, 4 Nov):** published
+      7:58 pm CST. The first download, on the iPhone hotspot during a drive
+      (8:05 pm), failed with 68 KB free and the largest block 30 KB; the
+      check-ins said only "failed" (the reason went to the serial console),
+      and the hotspot dropped before the next try 10 minutes on. The next
+      drive (8:18 pm) downloaded it in about 10 s; it installed at the
+      9:48 pm power-on and was kept on its first check-in (TrulockIOT). The
+      Board tab's Restart and Update, asked while it was logging, ran only
+      after. Now `ota` says why a download failed (#153): memory for TLS
+      (free and largest block), the TLS or HTTP error, how far it got, the
+      card or the hash. Published as `20261105-0408-48b755d`. App 0.10.10.
 - [ ] **Outside temperature, battery and fan per drive (4 Nov):**
       `ambient_c`, `battery_ah`, `battery_mohm`, `fan_*` in the logger's
       drive rows (stored drives done again with `POST
