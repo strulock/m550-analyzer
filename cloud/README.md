@@ -143,7 +143,10 @@ serves it to Claude from anywhere:
   a folder's files), its Wi-Fi networks (up to six, in the order it tries
   them: added from a scan the board makes or by name, moved up or down,
   removed; a password never shown back), its other settings (Access
-  token, access point, time zone) and commands for it: list a folder, delete a file or folder,
+  token, access point, time zone), the units every logger page shows
+  (imperial, the default: °F, mph, miles, psi, gallons, MPG; or metric, the
+  car's own; `units.js`, display only and never sent to the board) and
+  commands for it: list a folder, delete a file or folder,
   format the card (refused while files wait to upload unless told to
   discard them), upload now, update now (look for firmware at once and
   install it as soon as the board isn't logging), restart, scan for Wi-Fi
@@ -276,7 +279,8 @@ All requests need an Access token (a login, or the service token headers
 | `GET /api/logger` | whether the board is on (a check-in in the last 30 s), its last check-in (with `fault_list`: its `fault_codes`, or its power-on's newest, with each code's module and text, and where known `first_km`, `last_km`, `occurrences`, `first_date`, `last_date`), each power-on in the last `?hours=` (default 24): first and last check-in, why it booted, top speed, hottest coolant and oil, check-ins kept offline, and `wifi_note`, the board's last word on why Wi-Fi wouldn't join (the logger page shows the last check-in's); and `last_drive`: the last logger drive's rate per tier |
 | `GET /api/logger/tanks` | `{"tanks": [...]}`, oldest first: each tank's first and last drive, drives, litres added, level at its start and now, km and miles, litres and gallons (`fuel_from`: the fuel flow, else the level's fall), mpg and l/100 km; the last is `open`, the first may be `partial` |
 | `PUT /api/logger/firmware?version=V` | publish the logger's firmware for updates over the air (`firmware/tools/publish_firmware.py`, or the Board tab): an ESP32 app image of at most 6 MB holding `V` (the version built into it: the board installs any version not its own, so one built as another would be installed again and again), `V` not "dev"; a person's login or a token in `FIRMWARE_PUBLISHERS` only. One build is kept; replies with its manifest |
-| `GET /logger/board` | the Board tab: the board's firmware and card, a folder browser on the card, and its commands |
+| `GET /logger/board` | the Board tab: the board's firmware and card, a folder browser on the card, its Wi-Fi and settings, the display units, and its commands |
+| `GET`, `PUT /api/logger/display` | the units the logger pages show (units.js): `{units}`, `imperial` (the default) or `metric`; PUT `{units}`, a person's Access login only. One choice for every page and visitor, filled into each page as it's served; the logs, scores and MCP tools keep the car's units |
 | `GET`, `POST`, `DELETE /api/logger/commands` | the board's commands (`boardcmd.js`): GET `{"kinds", "commands"}`, newest first (`?limit=`, default 20, up to 50; each with `state`: waiting, sent, done, failed or cancelled; `result`; a list's `listing`); POST `{"kind", "path"}` (`list`, `delete`), `{"kind": "format", "discard"}`, or `upload`, `update`, `restart`, a person's login only (the same one still waiting is returned); DELETE `?id=` takes one back |
 | `POST /api/logger/card` | a folder's listing from the board (its token only): `{"id", "path", "count", "entries": [[name, bytes, is folder]], "card": {"type", "size_mb", "used_mb"}}`, at most 200 entries, kept with its list command |
 | `POST /api/logger/wifi-scan` | a Wi-Fi scan from the board (its token only): `{"id", "networks": [[ssid, dBm, channel, open]]}`, at most 40, kept with its scan command (`scan` in `GET /api/logger/commands`) |

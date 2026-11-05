@@ -5,10 +5,13 @@
  * row opens the channel: its value across drives with the normal band, the
  * other bank (or matching cylinder) beside it, the drive's RPM x load cells
  * against the baseline, and the drive's raw log at the longest time in a
- * cell. Talks to /api/health with the visitor's Access login. No
- * dependencies; the script avoids backticks and template placeholders so it
- * can sit in this template.
+ * cell. Values show in the units chosen on the Board tab (units.js; the
+ * Worker fills in UNITS). Talks to /api/health with the visitor's Access
+ * login. No dependencies; the script avoids backticks and template
+ * placeholders so it can sit in this template.
  */
+
+import { displayUnit } from "./units.js";
 
 export const HEALTH_PAGE = String.raw`<!doctype html>
 <html lang="en">
@@ -155,6 +158,12 @@ a { color: var(--accent); }
   </section>
 </div>
 <script>
+// units.js's displayUnit, as text (the __name stub as on the logger page).
+var __name = function (fn) { return fn; };
+var UNITS = "__UNITS__";
+${displayUnit.toString()}
+</script>
+<script>
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
@@ -200,6 +209,10 @@ a { color: var(--accent); }
     for (var i = 0; i < data.channels.length; i++) if (data.channels[i].key === key) return data.channels[i];
     return null;
   }
+  // A channel's value and unit as shown (the units picked on the Board tab).
+  // absolute: a raw reading of a channel scored as a difference.
+  function dv(c, v, absolute) { return displayUnit(v, c.unit, UNITS, c.delta && !absolute)[0]; }
+  function un(c) { return displayUnit(0, c.unit, UNITS)[1]; }
   // The class for a score: no baseline, under 1, 1 to watch, watch, alert.
   function cls(c, s) {
     if (!s) return "x";
@@ -258,8 +271,8 @@ a { color: var(--accent); }
       view.idx.forEach(function (i) {
         var s = data.scores[c.key][i], k = cls(c, s), d = data.drives[i];
         var t = s ? (c.label + ", " + when(d.start) + ": " + (s[0] == null ? "no baseline yet" :
-          "score " + fmt(s[0]) + " · value " + fmt(s[2], c.unit) +
-          (s[3] != null ? " (normal " + fmt(s[3]) + " to " + fmt(s[4]) + ")" : "")) +
+          "score " + fmt(s[0]) + " · value " + fmt(dv(c, s[2]), un(c)) +
+          (s[3] != null ? " (normal " + fmt(dv(c, s[3])) + " to " + fmt(dv(c, s[4])) + ")" : "")) +
           " · " + s[1] + " cells") : "";
         h.push('<td class="' + k + (sel.key === c.key && sel.drive === d.drive ? " sel" : "") +
           '" data-k="' + esc(c.key) + '" data-i="' + i + '" title="' + esc(t) + '"></td>');
@@ -304,7 +317,7 @@ a { color: var(--accent); }
     if (!c) return;
     $("drill").classList.remove("hide");
     $("dTitle").textContent = c.label;
-    $("dKey").textContent = c.key + (c.unit ? " · " + c.unit : "");
+    $("dKey").textContent = c.key + (un(c) ? " · " + un(c) : "");
     drawTrend(c);
     cellSel = null;
     $("raw").textContent = "Pick a cell above.";
@@ -337,20 +350,21 @@ a { color: var(--accent); }
     idx.forEach(function (i) {
       [data.scores[c.key][i], pair ? data.scores[pair.key][i] : null].forEach(function (s) {
         if (!s) return;
-        [s[2], s[3], s[4]].forEach(function (v) { if (v != null) vals.push(v); });
+        [s[2], s[3], s[4]].forEach(function (v) { if (v != null) vals.push(dv(c, v)); });
       });
     });
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if (hi === lo) { hi += 1; lo -= 1; }
     var pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
     var x = function (j) { return L + (idx.length === 1 ? (W - L - R) / 2 : j * (W - L - R) / (idx.length - 1)); };
-    var y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
+    var y = function (v) { return T + (hi - dv(c, v)) / (hi - lo) * (H - T - B); };   // v in the car's unit
+    var yd = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };          // v as shown
     var o = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(c.label) + ' across drives">'];
-    o.push(yUnit(c.unit, T, H - B));
+    o.push(yUnit(un(c), T, H - B));
     for (var g = 0; g <= 4; g++) {
       var v = lo + (hi - lo) * g / 4;
-      o.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--rule)"/>');
-      o.push('<text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + esc(fmt(v)) + "</text>");
+      o.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yd(v) + '" y2="' + yd(v) + '" stroke="var(--rule)"/>');
+      o.push('<text x="' + (L - 6) + '" y="' + (yd(v) + 4) + '" text-anchor="end">' + esc(fmt(v)) + "</text>");
     }
     // The band: one polygon per run of drives that have one.
     var run = [];
@@ -385,7 +399,8 @@ a { color: var(--accent); }
         var picked = data.drives[p[3]].drive === sel.drive;
         o.push('<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (picked ? 5.5 : 3) + '" fill="' + fill + '"' +
           (picked ? ' stroke="var(--fg)" stroke-width="1.5"' : "") + '><title>' +
-          esc(chan(key).label + ", " + when(data.drives[p[3]].start) + ": " + fmt(p[2][2], chan(key).unit) +
+          esc(chan(key).label + ", " + when(data.drives[p[3]].start) + ": " +
+          fmt(dv(chan(key), p[2][2]), un(chan(key))) +
           (p[2][0] != null ? " · score " + fmt(p[2][0]) : "")) + "</title></circle>");
       });
     };
@@ -418,7 +433,7 @@ a { color: var(--accent); }
     });
     o.push("</svg>");
     $("trend").innerHTML = o.join("");
-    $("trendNote").innerHTML = "Each drive's value" + (c.unit ? " (" + esc(c.unit) + ")" : "") +
+    $("trendNote").innerHTML = "Each drive's value" + (un(c) ? " (" + esc(un(c)) + ")" : "") +
       " over the cells it shares with the baseline (sample-weighted), and the shaded normal band: " +
       "the baseline ± " + group(c.group).watch + " spreads. Drives are evenly spaced; a tick each, " +
       "and a dashed line where a new day starts." + (pair ? ' <span style="color:var(--line)">━ ' + esc(c.label) +
@@ -460,8 +475,8 @@ a { color: var(--accent); }
         var k2 = lv == null ? "c-none" : lv >= g.alert ? "c-a" : lv >= g.watch ? "c-w" : lv >= 1 ? "c-1" : "c-0";
         h.push('<td class="' + k2 + (cellSel === k ? " sel" : "") + '" data-c="' + k + '" title="' + esc(
           Math.round(cell.seconds) + " s · " + cell.n + (c.kind === "count" ? " counter reads" : " samples") +
-          (cell.z != null ? " · z " + fmt(cell.z) : " · no baseline")) + '">' + esc(fmt(cell.value)) +
-          "<small>" + (cell.baseline != null ? esc(fmt(cell.baseline)) : "–") + "</small></td>");
+          (cell.z != null ? " · z " + fmt(cell.z) : " · no baseline")) + '">' + esc(fmt(dv(c, cell.value))) +
+          "<small>" + (cell.baseline != null ? esc(fmt(dv(c, cell.baseline))) : "–") + "</small></td>");
       }
       h.push("</tr>");
     }
@@ -473,8 +488,8 @@ a { color: var(--accent); }
     var dr = driveOf(sel.drive), s = data.scores[c.key][data.drives.indexOf(dr)];
     $("dFacts").innerHTML = [
       ["Score", s && s[0] != null ? fmt(s[0]) : "no baseline yet"],
-      ["Value", s ? fmt(s[2], c.unit) : "–"],
-      ["Normal", s && s[3] != null ? fmt(s[3]) + " to " + fmt(s[4]) : "–"],
+      ["Value", s ? fmt(dv(c, s[2]), un(c)) : "–"],
+      ["Normal", s && s[3] != null ? fmt(dv(c, s[3])) + " to " + fmt(dv(c, s[4])) : "–"],
       ["Cells scored", s ? s[1] : 0],
       ["Warm", d.warm_min + " min"],
     ].map(function (f) { return "<div><span>" + esc(f[0]) + "</span><b>" + esc(f[1]) + "</b></div>"; }).join("");
@@ -510,7 +525,7 @@ a { color: var(--accent); }
   }
 
   function drawRaw(s, cell, c) {
-    var pts = (s.points || []).map(function (p) { return [new Date(p[0]).getTime(), p[1]]; });
+    var pts = (s.points || []).map(function (p) { return [new Date(p[0]).getTime(), dv(c, p[1], true)]; });
     if (pts.length < 2) { $("rawChart").innerHTML = ""; return; }
     var W = width("rawChart"), H = 170, L = 72, R = 30, T = 10, B = 26;
     var t0 = pts[0][0], t1 = pts[pts.length - 1][0];
@@ -520,7 +535,7 @@ a { color: var(--accent); }
     var x = function (t) { return L + (t - t0) / (t1 - t0 || 1) * (W - L - R); };
     var y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
     var o = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(c.label) + ' through the drive">'];
-    o.push(yUnit(c.unit, T, H - B));
+    o.push(yUnit(un(c), T, H - B));
     cell.visits.forEach(function (v) {
       var a = x(new Date(v[0]).getTime()), b = x(new Date(v[1]).getTime());
       o.push('<rect x="' + a + '" y="' + T + '" width="' + Math.max(2, b - a) + '" height="' + (H - T - B) +
@@ -592,9 +607,10 @@ a { color: var(--accent); }
         "Watch from " + d.groups[0].watch + ", alert from " + d.groups[0].alert +
         ". A cell needs " + st.min_samples + " samples (a counter " + st.min_revs.toLocaleString() +
         " revolutions) and " + st.min_baseline + " baseline drives. Click a cell or a channel to open it.";
+      var temp = function (v) { var t = displayUnit(v, "°C", UNITS); return Math.round(t[0]) + " " + t[1]; };
       $("how").textContent = "Only samples with the engine fully warm count: coolant (ITKUM) at least " +
-        st.warm_coolant_c + " °C and, where it was read, oil at least " + st.warm_oil_c +
-        " °C. Load is the calculated load from the throttle air flow and RPM (as ILMAR reports it). " +
+        temp(st.warm_coolant_c) + " and, where it was read, oil at least " + temp(st.warm_oil_c) +
+        ". Load is the calculated load from the throttle air flow and RPM (as ILMAR reports it). " +
         "Drives are worked out as they upload; this button does every stored drive again, " +
         "for after the method changes.";
       render();
