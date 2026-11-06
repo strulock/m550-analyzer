@@ -458,12 +458,12 @@ ${displayUnit.toString()}
   }
 
   function drawGrid(c, d) {
-    var rpm = d.rpm_edges, load = d.load_edges;
+    var rpm = d.rpm_edges, loads = d.load_edges;
     var h = ['<tr><th>Load · RPM</th>'];
     for (var r = 0; r < rpm.length - 1; r++) h.push("<th>" + rpm[r] + "–" + rpm[r + 1] + "</th>");
     h.push("</tr>");
-    for (var l = load.length - 2; l >= 0; l--) {
-      h.push("<tr><th>" + load[l] + "–" + load[l + 1] + " %</th>");
+    for (var l = loads.length - 2; l >= 0; l--) {
+      h.push("<tr><th>" + loads[l] + "–" + loads[l + 1] + " %</th>");
       for (var r2 = 0; r2 < rpm.length - 1; r2++) {
         var k = r2 + "." + l, cell = d.cells[k];
         if (!cell || cell.value == null) {
@@ -507,8 +507,8 @@ ${displayUnit.toString()}
   // channel through the drive with them shaded.
   function showRaw() {
     var d = detail, cell = d.cells[cellSel], c = chan(sel.key);
-    var rpm = d.rpm_edges, load = d.load_edges, p = cellSel.split(".");
-    var where = rpm[+p[0]] + "–" + rpm[+p[0] + 1] + " rpm, " + load[+p[1]] + "–" + load[+p[1] + 1] + " % load";
+    var rpm = d.rpm_edges, loads = d.load_edges, p = cellSel.split(".");
+    var where = rpm[+p[0]] + "–" + rpm[+p[0] + 1] + " rpm, " + loads[+p[1]] + "–" + loads[+p[1] + 1] + " % load";
     var file = "/api/files/" + d.drive.split("/").map(encodeURIComponent).join("/");
     var links = cell.visits.map(function (v) {
       var a = new Date(v[0]).getTime() / 1000 - 30, b = new Date(v[1]).getTime() / 1000 + 30;
