@@ -469,19 +469,19 @@ var UNITS = "__UNITS__";
   }
   // A stored value as shown (the units picked on the Board tab); the checks
   // for a wrong-looking one (oddValue) read the car's own.
-  function shown(v, unit) { return displayUnit(v, unit, UNITS)[0]; }
+  function inUnits(v, unit) { return displayUnit(v, unit, UNITS)[0]; }
   function valueCell(it) {
     var u = displayUnit(0, it.unit, UNITS)[1], unit = esc(u);
     var s = values && values[it.name];
     if (!s) return '<td class="val"><span class="muted">' + (values ? "– " : "") + unit + "</span></td>";
-    var lo = fmt(shown(s[3], it.unit)), hi = fmt(shown(s[4], it.unit));
+    var lo = fmt(inUnits(s[3], it.unit)), hi = fmt(inUnits(s[4], it.unit));
     var tip = "Recorded " + new Date(s[0] * 1000).toLocaleString() + ". " + s[2].toLocaleString() +
       " values in " + s[5] + " drive" + (s[5] === 1 ? "" : "s") + ", " + lo + " to " + hi +
       (u ? " " + u : "") + ".";
     var note = it.odd ? '<small class="odd">' + esc(it.odd) + "</small>"
       : s[2] >= 20 && s[5] >= 2 && s[3] === s[4] ? "<small>the same in all " + s[5] + " drives</small>"
       : "<small>" + ago(s[0]) + (s[3] !== s[4] ? "; " + lo + " to " + hi : "") + "</small>";
-    return '<td class="val' + (it.odd ? " odd" : "") + '" title="' + esc(tip) + '"><b>' + fmt(shown(s[1], it.unit)) +
+    return '<td class="val' + (it.odd ? " odd" : "") + '" title="' + esc(tip) + '"><b>' + fmt(inUnits(s[1], it.unit)) +
       "</b> " + unit + note + "</td>";
   }
 
@@ -527,8 +527,8 @@ var UNITS = "__UNITS__";
     api("GET", "/api/logger?hours=1").then(function (s) {
       var last = s.last;
       if (!last) { $("logger").textContent = "The logger hasn't checked in yet."; return; }
-      var ago = s.seen_s_ago, when = ago < 90 ? ago + " s" : ago < 5400 ? Math.round(ago / 60) + " min" :
-        ago < 172800 ? Math.round(ago / 3600) + " h" : Math.round(ago / 86400) + " days";
+      var secs = s.seen_s_ago, since = secs < 90 ? secs + " s" : secs < 5400 ? Math.round(secs / 60) + " min" :
+        secs < 172800 ? Math.round(secs / 3600) + " h" : Math.round(secs / 86400) + " days";
       // What the board measured: request sizes it's down to, answer times.
       var pairs = function (text) {
         var out = {};
@@ -547,7 +547,7 @@ var UNITS = "__UNITS__";
           from: new Date(last.received).toLocaleString() };
         render(false);
       }
-      var has = last.channels || "", text = "Logger " + (s.online ? "online" : "last seen " + when + " ago");
+      var has = last.channels || "", text = "Logger " + (s.online ? "online" : "last seen " + since + " ago");
       if (!has) text += "; running a channel file from before downloads (needs the new firmware)";
       else if (file && has === file.etag) text += "; running the active preset ✓";
       else text += "; running " + has.slice(0, 8) + ", gets the active preset on its next Wi-Fi check";
@@ -565,7 +565,7 @@ var UNITS = "__UNITS__";
           mins + " min before this check-in") + ": " + last.wifi_note;
       }
       $("logger").textContent = text;
-      renderLive(s, when);
+      renderLive(s, since);
       renderSweep(s.sweep);
     }).catch(function () { $("logger").textContent = ""; });
   }
@@ -648,11 +648,11 @@ var UNITS = "__UNITS__";
   }
   function renderLive(s, when) {
     var b = s.last, cool = num(b.coolant_c), oil = num(b.oil_c), kmh = num(b.speed_kmh),
-      volts = num(b.battery_v), rate = num(b.rows_per_s), speed = displayUnit(kmh, "km/h", UNITS);
+      volts = num(b.battery_v), perSec = num(b.rows_per_s), speed = displayUnit(kmh, "km/h", UNITS);
     $("liveTitle").textContent = s.online ? "The car now" : "The car, last seen " + when + " ago";
     $("liveStats").innerHTML = [
       stat("State", b.state || "–"),
-      b.state === "logging" ? stat("Drive", num(b.drive_min), "min", "", rate == null ? "" : rate + " rows/s") : "",
+      b.state === "logging" ? stat("Drive", num(b.drive_min), "min", "", perSec == null ? "" : perSec + " rows/s") : "",
       stat("Speed", whole(speed[0]), speed[1]),
       stat("RPM", whole(num(b.rpm))),
       stat("Coolant", temp(cool)[0], temp(cool)[1], level("coolant_c", cool), otherTemp(cool)),
